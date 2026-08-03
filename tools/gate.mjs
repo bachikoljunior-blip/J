@@ -16,9 +16,14 @@
 //  met. The streak survives across invocations in docs/GATE.md, so a fix made
 //  between runs correctly resets it.
 //
-//    node tools/gate.mjs             # run until two consecutive passes
-//    node tools/gate.mjs --once      # a single audit, then report
-//    node tools/gate.mjs --max 6     # give up after 6 attempts
+//    node tools/gate.mjs                    # run until two consecutive passes
+//    node tools/gate.mjs --once             # a single audit, then report
+//    node tools/gate.mjs --max 6            # give up after 6 attempts
+//    node tools/gate.mjs --on-fail "<cmd>"  # run <cmd> between failed attempts
+//
+//  Without --on-fail the loop measures repeatedly and nothing changes between
+//  iterations, which is only useful for checking stability. With it, the loop
+//  is closed: measure, repair, measure again, and stop when the bar is met.
 // ============================================================================
 
 import { spawn } from 'node:child_process';
@@ -31,6 +36,24 @@ const MAX_ATTEMPTS = (() => {
   const i = process.argv.indexOf('--max');
   return i >= 0 ? Number(process.argv[i + 1]) : 12;
 })();
+
+/**
+ * The command that repairs whatever the last audit found, run between attempts.
+ *
+ * The gate can measure but it cannot code, so closing the loop needs something
+ * that can. Passing it in rather than hard-wiring it keeps this file a
+ * measurement harness: `--on-fail "<shell command>"` is enough of an interface
+ * for a human, a script, or an agent runner.
+ */
+const ON_FAIL = (() => {
+  const i = process.argv.indexOf('--on-fail');
+  return i >= 0 ? process.argv[i + 1] : null;
+})();
+
+const runFixer = (cmd) => new Promise((resolve) => {
+  const child = spawn(cmd, { cwd: ROOT, shell: true, stdio: 'inherit' });
+  child.on('close', (code) => resolve(code));
+});
 
 const runAudit = () => new Promise((resolve) => {
   const child = spawn('node', ['tools/audit.mjs'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -68,11 +91,25 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
 
   if (streak >= REQUIRED_STREAK) break;
   if (!pass) {
-    // Development is not finished. The backlog says what to do next; a human or
-    // an agent fixes it and re-runs. Bailing here rather than looping blindly
-    // keeps the loop honest: nothing improves on its own between two runs.
-    console.log('\n未達項目が残っている。docs/BACKLOG.md の上位から修正して再実行すること。');
-    break;
+    // Not finished. docs/BACKLOG.md now holds the ranked work list; whoever
+    // drives this loop — a person or an agent — fixes the top of it and the
+    // next iteration measures again.
+    //
+    // This used to `break` here, on the reasoning that nothing improves on its
+    // own between two runs. That was true and it was still the wrong call: a
+    // gate whose job is "do not stop until the bar is met" must not be the
+    // thing that stops. Now it reports and keeps going, so the only ways out
+    // are the bar being met or the attempt budget running out — and the
+    // attempt budget exists solely so an unattended run cannot spin forever.
+    console.log(`\n未達 ${history[history.length - 1].failures.length} 件。`
+      + 'docs/BACKLOG.md の上位から修正すること。次の試行まで待機する。');
+    if (!ON_FAIL) {
+      console.log('（--on-fail が指定されていないため、修正は自動では行われない）');
+    } else {
+      console.log(`修正コマンドを実行: ${ON_FAIL}`);
+      const r = await runFixer(ON_FAIL);
+      if (r !== 0) console.log(`修正コマンドが非ゼロ終了 (${r})。それでも計測は続ける。`);
+    }
   }
 }
 
