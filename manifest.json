@@ -1,0 +1,19 @@
+{
+  "name": "黒鉄の刻印 — KUROGANE",
+  "short_name": "黒鉄の刻印",
+  "description": "スマートフォンのブラウザで動く、フル3Dのオープンワールド・アクションRPG。全てが手続き生成。",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#080706",
+  "theme_color": "#0a0908",
+  "categories": ["games"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
