@@ -171,8 +171,8 @@ export class ParticleSystem {
     set('aExtra', 2, 8);
 
     this.glw.drawArraysInstancedFn(gl.TRIANGLES, 0, 6, count);
-    this.glw.drawCalls++;
-    this.glw.triangles += count * 2;
+    this.glw.countDraw();
+    this.glw.countTris(count * 2);
   }
 
   clear() { this.count = 0; }

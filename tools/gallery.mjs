@@ -54,9 +54,7 @@ const SETUP = (cfg) => {
   }
   if (!target) return { ok: false };
 
-  p.x = target.x + (cfg.dx || 0);
-  p.z = target.z + (cfg.dz || 14);
-  p.y = g.world.heightAt(p.x, p.z);
+  p.teleport(target.x + (cfg.dx || 0), undefined, target.z + (cfg.dz || 14));
   p.camera.yaw = Math.atan2(target.x - p.x, target.z - p.z);
   p.camera.pitch = cfg.pitch !== undefined ? cfg.pitch : -0.14;
   p.lockTarget = null;

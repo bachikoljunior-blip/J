@@ -60,6 +60,9 @@ export const WEAPONS = [
   W('sword_oath', '誓約の剣', 'sword', 48, { str: 'C', dex: 'C', fth: 'C' }, { str: 16, dex: 16, fth: 14 }, 5.0,
     { desc: '鉄嶺の誓約者が佩く剣。折れることを知らない。', element: DAMAGE_TYPE.HOLY, elementBase: 14, rarity: 3, shape: { len: 1.00, w: 0.108, t: 0.034, blade: [0.76, 0.78, 0.85], hilt: [0.36, 0.30, 0.14], glow: 0.15 } }),
 
+  W('sword_curved', '流水の曲刀', 'sword', 36, { dex: 'A' }, { str: 9, dex: 18 }, 3.4,
+    { desc: '斬るのではなく、滑らせて裂く。技量が全て。', crit: 1.15, rarity: 2, shape: { len: 0.96, w: 0.088, t: 0.024, blade: [0.66, 0.68, 0.72], hilt: [0.22, 0.20, 0.24] } }),
+
   // --- greatswords ---------------------------------------------------------
   W('great_iron', '鉄大剣', 'greatsword', 58, { str: 'C', dex: 'E' }, { str: 20, dex: 10 }, 9.0,
     { desc: '鍛え上げただけの鉄塊。重さがそのまま威力になる。', shape: { len: 1.32, w: 0.145, t: 0.042, blade: [0.58, 0.58, 0.60], hilt: [0.26, 0.20, 0.15] } }),
@@ -86,17 +89,26 @@ export const WEAPONS = [
   W('axe_stone', '石喰いの大斧', 'axe', 68, { str: 'A' }, { str: 32, dex: 10 }, 14.0,
     { desc: '岩ごと砕く。当たれば、の話だが。', shape: { len: 1.05, w: 0.34, t: 0.075, blade: [0.46, 0.44, 0.42], hilt: [0.24, 0.20, 0.16], axe: true }, rarity: 3 }),
 
+  W('hammer_iron', '鉄槌', 'axe', 62, { str: 'A' }, { str: 26, dex: 8 }, 11.0,
+    { desc: '刃はない。だから刃こぼれもしない。鎧ごと潰す。', rarity: 2, shape: { len: 0.92, w: 0.26, t: 0.24, blade: [0.42, 0.42, 0.44], hilt: [0.28, 0.22, 0.15], axe: true } }),
+
   // --- daggers -------------------------------------------------------------
   W('dagger_thief', '盗人の短刀', 'dagger', 20, { dex: 'B' }, { str: 6, dex: 14 }, 1.5,
     { desc: '速さと、背後を取る度胸があれば。', crit: 1.45, shape: { len: 0.44, w: 0.060, t: 0.020, blade: [0.60, 0.62, 0.65], hilt: [0.22, 0.18, 0.14] } }),
   W('dagger_ritual', '儀式短刀', 'dagger', 24, { dex: 'A', int: 'D' }, { str: 6, dex: 18, int: 12 }, 1.8,
     { desc: '刻印を刻むための刃。人にも効く。', crit: 1.55, element: DAMAGE_TYPE.MAGIC, elementBase: 12, rarity: 2, shape: { len: 0.48, w: 0.058, t: 0.019, blade: [0.62, 0.58, 0.82], hilt: [0.20, 0.18, 0.26], glow: 0.3 } }),
 
+  W('dagger_frost', '霜の小刀', 'dagger', 22, { dex: 'A', int: 'C' }, { str: 6, dex: 16, int: 14 }, 1.6,
+    { desc: '柄まで凍っている。握る側も無事では済まない。', crit: 1.50, element: DAMAGE_TYPE.MAGIC, elementBase: 14, effect: { type: 'frost', build: 24 }, rarity: 3, shape: { len: 0.46, w: 0.058, t: 0.018, blade: [0.72, 0.84, 0.92], hilt: [0.26, 0.30, 0.36], glow: 0.28 } }),
+
   // --- bows ----------------------------------------------------------------
   W('bow_short', '短弓', 'bow', 26, { dex: 'C' }, { str: 8, dex: 14 }, 2.5,
     { desc: '射程は短いが、素早く引ける。', ranged: true, shape: { len: 1.05, w: 0.04, t: 0.03, blade: [0.34, 0.26, 0.18], hilt: [0.28, 0.22, 0.15], bow: true } }),
   W('bow_long', '長弓', 'bow', 38, { dex: 'B' }, { str: 12, dex: 20 }, 4.0,
     { desc: '遠くの敵を、静かに減らす。', ranged: true, shape: { len: 1.45, w: 0.045, t: 0.032, blade: [0.30, 0.24, 0.17], hilt: [0.26, 0.20, 0.14], bow: true }, rarity: 2 }),
+
+  W('spear_mire', '沼守の三叉', 'spear', 46, { str: 'C', dex: 'B' }, { str: 16, dex: 19 }, 6.2,
+    { desc: '沼の底から引き上げられた漁具。返しが深い。', effect: { type: 'bleed', build: 28 }, rarity: 2, shape: { len: 1.95, w: 0.052, t: 0.034, blade: [0.58, 0.62, 0.56], hilt: [0.26, 0.24, 0.18], haft: true } }),
 
   // --- catalysts -----------------------------------------------------------
   W('staff_apprentice', '徒弟の杖', 'staff', 14, { int: 'B' }, { str: 6, dex: 8, int: 14 }, 2.5,

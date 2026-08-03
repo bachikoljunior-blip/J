@@ -233,7 +233,7 @@ void main() {
   // Strata: horizontal banding by world height reads as sedimentary rock.
   rock *= 0.88 + 0.22 * sin(vWorld.y * 1.35 + n1 * 3.0);
   vec3 sand = uSandColor * (0.88 + 0.24 * n2);
-  vec3 snow = uSnowColor * (0.94 + 0.12 * n1);
+  vec3 snow = uSnowColor * (0.80 + 0.40 * (n1 * 0.6 + n2 * 0.4)) * (0.94 + 0.14 * n3);
 
   vec4 w = vSplat;
   float total = max(w.r + w.g + w.b + w.a, 0.0001);
@@ -794,6 +794,7 @@ uniform float uBloomStrength;
 uniform float uExposure;
 uniform float uVignette;
 uniform float uSaturation;
+uniform float uContrast;      // S-curve strength around a mid-grey pivot
 uniform vec3 uTint;
 uniform float uAberration;
 uniform float uTime;
@@ -830,10 +831,25 @@ void main() {
   color *= uExposure;
   color = aces(color);
 
-  // Grade: saturation, then tint.
+  // Grade: saturation, then tint, then a contrast curve.
   float lum = dot(color, vec3(0.2126, 0.7152, 0.0722));
   color = mix(vec3(lum), color, uSaturation);
   color *= uTint;
+
+  // Contrast about a mid-grey pivot. ACES alone leaves flat subjects — a noon
+  // meadow, a snowfield — sitting in a narrow band; this is the print curve
+  // that pulls the shadows down and the highlights up.
+  //
+  // Applied to luminance and fed back as a gain so every channel scales
+  // together: an RGB-space contrast would drag saturation along with it and
+  // turn a strong curve into an oversaturated one.
+  const float PIVOT = 0.30;
+  float l0 = max(dot(color, vec3(0.2126, 0.7152, 0.0722)), 1e-4);
+  float l1 = (l0 - PIVOT) * uContrast + PIVOT;
+  // Soft toe: shadows keep a fraction of their original level instead of
+  // clamping flat to black, which is what a hard curve does to a night scene.
+  l1 = max(l1, l0 * 0.35);
+  color = clamp(color * (l1 / l0), 0.0, 1.0);
 
   // Damage / death overlays.
   color = mix(color, vec3(0.55, 0.03, 0.03), uDamage * 0.55);

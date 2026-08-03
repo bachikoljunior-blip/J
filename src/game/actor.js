@@ -333,6 +333,39 @@ export class Actor {
     this.velX = 0; this.velZ = 0;
   }
 
+  /**
+   * Move an actor somewhere instantly. Not just an assignment: carrying a fall
+   * velocity across a teleport makes the very next ground check report a
+   * hundred-metre landing, which is fatal — respawning after a long fall would
+   * kill the player again the moment they arrived.
+   */
+  teleport(x, y, z) {
+    this.x = x;
+    this.z = z;
+    this.y = y !== undefined ? y : this.world.heightAt(x, z);
+    this.velX = 0; this.velY = 0; this.velZ = 0;
+    this.grounded = true;
+  }
+
+  /**
+   * Bring a dead actor back. `setState` deliberately latches DEATH so nothing
+   * can interrupt a death animation, which means it cannot be used to leave
+   * that state — clearing the latch here is the only way out, and without it a
+   * respawned player stays permanently `busy` and can never act again.
+   */
+  revive(hp) {
+    this.dead = false;
+    this.deathTimer = 0;
+    this.hp = hp !== undefined ? hp : this.maxHp;
+    this.poise = this.maxPoise;
+    this.blocking = false;
+    this.hyperArmor = 0;
+    this.velX = 0; this.velY = 0; this.velZ = 0;
+    this.grounded = true;
+    this.state = STATE.IDLE;
+    this.setState(STATE.IDLE);
+  }
+
   die(killer) {
     if (this.dead) return;
     this.dead = true;
@@ -615,6 +648,9 @@ export class Actor {
     nx = clamp(nx, -lim, lim);
     nz = clamp(nz, -lim, lim);
 
+    // A degenerate collision (zero-length separation, NaN velocity) must never
+    // escape into the world sampler, which would corrupt terrain generation.
+    if (!Number.isFinite(nx) || !Number.isFinite(nz)) { nx = startX; nz = startZ; }
     this.x = nx;
     this.z = nz;
     this.actualSpeed = Math.hypot(this.x - startX, this.z - startZ);

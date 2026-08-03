@@ -69,7 +69,7 @@ export class TerrainChunk {
 
       let snow = 0;
       if (biome === BIOME.SNOW) snow = saturate((h - 96) / 34) * (1 - rock * 0.55) + 0.35;
-      snow = saturate(snow * (1 - saturate((slope - 0.45) / 0.4)));
+      snow = saturate(snow * (1 - saturate((slope - 0.26) / 0.30)));
 
       let sand = 0;
       if (biome === BIOME.BEACH || biome === BIOME.OCEAN) {
@@ -90,7 +90,8 @@ export class TerrainChunk {
       for (let dz = -1; dz <= 1; dz++) {
         for (let dx = -1; dx <= 1; dx++) {
           const b = world.biome[world.gridIndex(gx + dx * 2, gz + dz * 2)];
-          const c = BIOME_INFO[b].ground;
+          const info = BIOME_INFO[b] || BIOME_INFO[BIOME.MEADOW];
+          const c = info.ground;
           const w = (dx === 0 && dz === 0) ? 3 : 1;
           tr += c[0] * w; tg += c[1] * w; tb += c[2] * w; tw += w;
         }
@@ -248,8 +249,10 @@ export class Terrain {
   keyFor(cx, cz, lod) { return cx * 100000 + cz * 10 + lod; }
 
   lodFor(dist, viewDistance) {
-    if (dist < viewDistance * 0.28) return 0;
-    if (dist < viewDistance * 0.62) return 1;
+    // Full detail only where the player can resolve it; the second and third
+    // tiers quarter and sixteenth the triangle count respectively.
+    if (dist < viewDistance * 0.20) return 0;
+    if (dist < viewDistance * 0.48) return 1;
     return 2;
   }
 
@@ -259,14 +262,18 @@ export class Terrain {
    * stalls the frame.
    */
   update(camX, camZ, viewDistance, frustum, cameraY) {
+    if (!Number.isFinite(camX) || !Number.isFinite(camZ)) return this.visible;
     this.frame++;
     this.visible.length = 0;
     this.buildQueue.length = 0;
+    const candidates = this._candidates || (this._candidates = []);
+    candidates.length = 0;
 
     const range = Math.ceil(viewDistance / CHUNK_SIZE) + 1;
     const pcx = Math.floor((camX + WORLD_HALF) / CHUNK_SIZE);
     const pcz = Math.floor((camZ + WORLD_HALF) / CHUNK_SIZE);
 
+    // --- pass 1: which cell wants which LOD ---------------------------------
     for (let dz = -range; dz <= range; dz++) {
       for (let dx = -range; dx <= range; dx++) {
         const cx = pcx + dx, cz = pcz + dz;
@@ -284,37 +291,38 @@ export class Terrain {
           this.chunks.set(key, chunk);
         }
         chunk.lastUsed = this.frame;
-
-        if (!chunk.built) {
-          this.buildQueue.push({ chunk, dist });
-          // Fall back to a coarser LOD that is already resident so there is no
-          // hole in the world while the finer mesh is being built.
-          let fallback = null;
-          for (let l = lod + 1; l < LOD_STEPS.length; l++) {
-            const f = this.chunks.get(this.keyFor(cx, cz, l));
-            if (f && f.built) { fallback = f; break; }
-          }
-          for (let l = lod - 1; l >= 0 && !fallback; l--) {
-            const f = this.chunks.get(this.keyFor(cx, cz, l));
-            if (f && f.built) { fallback = f; break; }
-          }
-          if (fallback) {
-            fallback.lastUsed = this.frame;
-            if (this._cull(fallback, frustum)) this.visible.push(fallback);
-          }
-          continue;
-        }
-        if (this._cull(chunk, frustum)) this.visible.push(chunk);
+        candidates.push({ cx, cz, lod, chunk, dist });
+        if (!chunk.built) this.buildQueue.push({ chunk, dist });
       }
     }
 
-    // Build nearest-first, within budget.
+    // --- pass 2: build nearest-first, within budget -------------------------
     this.buildQueue.sort((a, b) => a.dist - b.dist);
     const budget = this.buildQueue.length > 24 ? this.chunkBudgetPerFrame + 2 : this.chunkBudgetPerFrame;
     for (let i = 0; i < Math.min(budget, this.buildQueue.length); i++) {
-      const c = this.buildQueue[i].chunk;
-      c.build(this.glw);
-      if (this._cull(c, frustum)) this.visible.push(c);
+      this.buildQueue[i].chunk.build(this.glw);
+    }
+
+    // --- pass 3: draw exactly one chunk per cell ----------------------------
+    // Selecting after building is what keeps a coarse stand-in from being drawn
+    // on top of the fine mesh that replaced it in the same frame.
+    for (let i = 0; i < candidates.length; i++) {
+      const c = candidates[i];
+      let chunk = c.chunk;
+      if (!chunk.built) {
+        chunk = null;
+        for (let l = c.lod + 1; l < LOD_STEPS.length && !chunk; l++) {
+          const f = this.chunks.get(this.keyFor(c.cx, c.cz, l));
+          if (f && f.built) chunk = f;
+        }
+        for (let l = c.lod - 1; l >= 0 && !chunk; l--) {
+          const f = this.chunks.get(this.keyFor(c.cx, c.cz, l));
+          if (f && f.built) chunk = f;
+        }
+        if (!chunk) continue;
+        chunk.lastUsed = this.frame;
+      }
+      if (this._cull(chunk, frustum)) this.visible.push(chunk);
     }
 
     this._evict();
@@ -342,6 +350,7 @@ export class Terrain {
   /** Force-build every chunk near a point — used once at spawn so the first
    *  frame the player sees is complete rather than popping in. */
   primeAround(x, z, radius = 320) {
+    if (!Number.isFinite(x) || !Number.isFinite(z)) return 0;
     const range = Math.ceil(radius / CHUNK_SIZE);
     const pcx = Math.floor((x + WORLD_HALF) / CHUNK_SIZE);
     const pcz = Math.floor((z + WORLD_HALF) / CHUNK_SIZE);
@@ -366,33 +375,47 @@ export class Terrain {
     return built;
   }
 
-  draw(prog, shadowPass = false) {
+  /**
+   * @param shadowPass  when set, `focus` and `range` describe the shadow
+   *   frustum. The shadow map only covers a few dozen metres around the
+   *   player, so drawing every visible chunk into it was costing more draw
+   *   calls than the entire main pass.
+   */
+  draw(prog, shadowPass = false, focus = null, range = 0) {
     const glw = this.glw;
     const gl = glw.gl;
     for (const c of this.visible) {
+      if (shadowPass && focus) {
+        const reach = range + CHUNK_SIZE * 0.75;
+        if (Math.abs(c.centerX - focus.x) > reach || Math.abs(c.centerZ - focus.z) > reach) continue;
+      }
       c.bind(glw, prog, !shadowPass);
       glw.u3f(prog, 'uChunkOffset', c.originX, 0, c.originZ);
       gl.drawElements(gl.TRIANGLES, c.indexCount, c.indexType, 0);
-      glw.drawCalls++;
-      glw.triangles += c.triangleCount;
+      glw.countDraw();
+      glw.countTris(c.triangleCount);
     }
   }
 
   /** Water quads near the camera, drawn after opaque geometry. */
-  drawWater(prog, camX, camZ, viewDistance) {
+  drawWater(prog, camX, camZ, viewDistance, frustum) {
     const glw = this.glw;
     const gl = glw.gl;
     this.waterMesh.bindGeometry(prog);
     let drawn = 0;
+    // Water is flat and far tiles contribute almost nothing but draw calls.
+    const waterRange = viewDistance * 0.72;
+    const tileRadius = CHUNK_SIZE * 0.72;
     for (const t of this.waterTiles) {
       const d = Math.hypot(t.x - camX, t.z - camZ);
-      if (d > viewDistance) continue;
+      if (d > waterRange) continue;
+      if (frustum && !sphereInFrustum(frustum, t.x, WATER_LEVEL, t.z, tileRadius)) continue;
       glw.u3f(prog, 'uOffset', t.x, WATER_LEVEL, t.z);
       gl.drawElements(gl.TRIANGLES, this.waterMesh.indexCount, this.waterMesh.indexType, 0);
       drawn++;
     }
-    glw.drawCalls += drawn;
-    glw.triangles += this.waterMesh.triangleCount * drawn;
+    glw.countDraw(drawn);
+    glw.countTris(this.waterMesh.triangleCount * drawn);
   }
 
   get waterTileScale() { return CHUNK_SIZE; }

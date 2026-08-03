@@ -114,8 +114,8 @@ export class InstanceBatch {
     this.mesh.bindGeometry(prog);
     this.bindInstanceAttribs(prog);
     this.glw.drawInstanced(gl.TRIANGLES, this.mesh.indexCount, this.mesh.indexType, 0, this.count);
-    this.glw.drawCalls++;
-    this.glw.triangles += this.mesh.triangleCount * this.count;
+    this.glw.countDraw();
+    this.glw.countTris(this.mesh.triangleCount * this.count);
   }
 
   dispose() { this.glw.gl.deleteBuffer(this.buffer); }

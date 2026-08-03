@@ -41,11 +41,21 @@ const RESET = () => {
   window.__ui.closeAll();
   g.dialogue = null;
   g.paused = false;
-  if (p.dead) { p.dead = false; p.deathTimer = 0; p.setState('idle'); }
-  p.hp = p.maxHp; p.fp = p.maxFp; p.stamina = p.maxStamina;
+  // Pending timers outlive a reset and run even while paused — the death
+  // sequence schedules a fade chain and a showDeath() 0.1s out, so a phase
+  // that ended with the player dying would re-open the death screen in the
+  // middle of the next phase.
+  g.timers.length = 0;
+  // Not `if (p.dead)`: a phase can end mid-death-sequence, and DEATH is a
+  // latched state, so anything short of revive() leaves canAct false for the
+  // whole next phase.
+  p.revive();
+  p.fp = p.maxFp; p.stamina = p.maxStamina;
   p.poise = p.maxPoise; p.invuln = 0; p.buffs.length = 0;
+  for (const k in p.status) { p.status[k].build = 0; p.status[k].active = 0; p.status[k].tick = 0; }
   p.deathDrop = null;
   g.renderer.deathFade = 0;
+  g.renderer.damageFlash = 0;
   for (const e of g.enemies.slice()) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
   g.projectiles.length = 0;
   g.areaEffects.length = 0;
@@ -107,8 +117,7 @@ try {
     const p = g.player;
     // Drop the player into a bandit camp and let the AI run.
     const camp = g.world.pois.find((q) => q.kind === 'camp' && q.region === 'meadow');
-    p.x = camp.x; p.z = camp.z + 8;
-    p.y = g.world.heightAt(p.x, p.z);
+    p.teleport(camp.x, undefined, camp.z + 8);
     g.terrain.primeAround(p.x, p.z, 200);
     const frames = () => new Promise((r) => requestAnimationFrame(r));
 
@@ -150,27 +159,42 @@ try {
     const before = p.souls;
     const e = g.spawnEnemy('bandit', p.x + 1.6, p.z, { level: 1 });
     const frames = () => new Promise((r) => requestAnimationFrame(r));
-    let swings = 0;
+    let swings = 0, framesInRange = 0, framesCanAct = 0, minDist = 1e9, revivals = 0;
+    const states = {};
     for (let i = 0; i < 600 && !e.dead; i++) {
-      // Chase as well as swing: the bandit AI strafes to its preferred range,
-      // so a stationary tester mostly whiffs and the result becomes a coin flip.
-      const d = Math.hypot(e.x - p.x, e.z - p.z);
+      // This probe measures whether a swing lands, not whether the player can
+      // survive a bandit, so keep them on their feet.
+      if (p.dead || p.state === 'death') {
+        p.revive();
+        window.__ui.closeAll(); g.paused = false; g.timers.length = 0;
+        g.renderer.deathFade = 0;
+        revivals++;
+      }
+      p.stamina = p.maxStamina;
+      // Hold station at swing range and face the target. The bandit AI strafes
+      // faster than any fixed step could close, and this probe is about whether
+      // a swing lands damage, not about pursuit.
       const yaw = Math.atan2(e.x - p.x, e.z - p.z);
       p.yaw = yaw;
-      if (d > 1.7) {
-        const step = Math.min(0.12, d - 1.5);
-        p.x += Math.sin(yaw) * step;
-        p.z += Math.cos(yaw) * step;
-        p.y = g.world.heightAt(p.x, p.z);
-      } else if (p.canAct) {
-        p._buffer('light');
-        swings++;
-      }
+      p.teleport(e.x - Math.sin(yaw) * 1.5, undefined, e.z - Math.cos(yaw) * 1.5);
+      const d = Math.hypot(e.x - p.x, e.z - p.z);
+      minDist = Math.min(minDist, d);
+      if (d <= 1.9) framesInRange++;
+      if (p.canAct) framesCanAct++;
+      states[p.state] = (states[p.state] || 0) + 1;
+      if (d <= 1.9 && p.canAct) { p._buffer('light'); swings++; }
       await frames();
     }
-    return { killed: e.dead, swings, soulsGained: p.souls - before, streak: p.hitStreak };
+    return {
+      killed: e.dead, swings, soulsGained: p.souls - before, streak: p.hitStreak,
+      framesInRange, framesCanAct, minDist: Math.round(minDist * 100) / 100,
+      enemyHp: Math.round(e.hp), enemyMaxHp: Math.round(e.maxHp), states, revivals,
+    };
   });
-  check('player can kill an enemy', kill.killed, `${kill.swings} swing attempts`);
+  check('player can kill an enemy', kill.killed,
+    `${kill.swings} swings, hp ${kill.enemyHp}/${kill.enemyMaxHp}, ` +
+    `inRange ${kill.framesInRange}f, canAct ${kill.framesCanAct}f, ` +
+    `minDist ${kill.minDist}, revivals ${kill.revivals}, states ${JSON.stringify(kill.states)}`);
   check('kill awards embers', kill.soulsGained > 0, `+${kill.soulsGained}`);
 
   // -------------------------------------------------------------------------
@@ -225,8 +249,7 @@ try {
     const g = window.__g;
     const p = g.player;
     const arena = g.world.pois.find((q) => q.kind === 'boss' && q.boss === 'warden');
-    p.x = arena.x + 6; p.z = arena.z + 6;
-    p.y = g.world.heightAt(p.x, p.z);
+    p.teleport(arena.x + 6, undefined, arena.z + 6);
     g.terrain.primeAround(p.x, p.z, 200);
     const frames = () => new Promise((r) => requestAnimationFrame(r));
     for (let i = 0; i < 40; i++) await frames();
@@ -282,8 +305,7 @@ try {
     const main1 = g.quests.get('main_1');
     const npc = g.npcs.find((n) => n.npcId === 'harum');
     if (!npc) return { npc: false };
-    p.x = npc.x + 1.5; p.z = npc.z;
-    p.y = g.world.heightAt(p.x, p.z);
+    p.teleport(npc.x + 1.5, undefined, npc.z);
     g.talkTo(npc);
     const opened = window.__ui.screen === 'dialogue';
     const optionCount = document.querySelectorAll('.dopt').length;
@@ -336,12 +358,35 @@ try {
     // Walk back to the bloodstain and reclaim.
     p.x = dropX; p.z = dropZ;
     const reclaimed = g.collectDeathDrop();
-    return { dropped, screenShown, alive, reclaimed, souls: p.souls };
+    const soulsAfterReclaim = p.souls;
+
+    // Dying to a fall used to be a death loop: respawn kept the fall velocity,
+    // so the very next ground check reported a fatal landing and killed the
+    // player again the instant they arrived.
+    p.y += 120;
+    p.grounded = false;
+    p.velY = -80;
+    for (let i = 0; i < 90 && !p.dead; i++) await frames();
+    const diedFromFall = p.dead;
+    g.respawnPlayer();
+    for (let i = 0; i < 90; i++) await frames();
+    const survivedRespawn = !p.dead && p.hp > 0;
+
+    // A revived player must be able to act again — DEATH latches in the state
+    // machine, so "not dead" is not the same as "playable".
+    const canActAfterRespawn = p.canAct;
+    return {
+      dropped, screenShown, alive, reclaimed, souls: soulsAfterReclaim,
+      diedFromFall, survivedRespawn, canActAfterRespawn,
+    };
   });
   check('death drops embers', death.dropped);
   check('death screen shown', death.screenShown);
   check('respawn restores the player', death.alive);
   check('embers can be reclaimed', death.reclaimed && death.souls === 5000, `${death.souls}`);
+  check('a fatal fall kills', death.diedFromFall);
+  check('respawn after a fall is not a death loop', death.survivedRespawn);
+  check('a respawned player can act again', death.canActAfterRespawn);
 
   // -------------------------------------------------------------------------
   console.log('\n[grace & travel]');

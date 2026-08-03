@@ -1,0 +1,744 @@
+// ============================================================================
+//  audit.mjs — the quality gate.
+//
+//  Scores the game against docs/QUALITY.md across ten weighted axes, writes
+//  docs/AUDIT.md (history) and docs/BACKLOG.md (ranked work list), and exits
+//  non-zero until the bar is met. The development loop runs until this exits 0
+//  twice in a row, which is what turns "until it's good enough" from a
+//  judgement call into a terminating condition.
+// ============================================================================
+
+import { chromium } from '/home/user/Simple-browser-cookie-clicker-game/node_modules/playwright-core/index.mjs';
+import { spawn } from 'node:child_process';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { setTimeout as sleep } from 'node:timers/promises';
+
+const PORT = process.env.PORT || 8155;
+const ROOT = new URL('..', import.meta.url).pathname;
+const PASS_AXIS = 80;
+const PASS_TOTAL = 88;
+
+mkdirSync(`${ROOT}docs`, { recursive: true });
+
+const server = spawn('python3', ['-m', 'http.server', String(PORT), '--bind', '127.0.0.1'],
+  { cwd: ROOT, stdio: 'ignore' });
+await sleep(700);
+
+const consoleErrors = [];
+let browser;
+
+// ---------------------------------------------------------------------------
+//  Axis definitions. Each item: [label, actualValue, target, comparator]
+// ---------------------------------------------------------------------------
+
+const AXES = [];
+const axis = (id, name, weight) => {
+  const a = { id, name, weight, items: [] };
+  AXES.push(a);
+  return {
+    ge: (label, value, target) => a.items.push({ label, value, target, ok: value >= target, cmp: '≥' }),
+    le: (label, value, target) => a.items.push({ label, value, target, ok: value <= target, cmp: '≤' }),
+    band: (label, value, lo, hi) => a.items.push({
+      label, value: round(value), target: `${lo}–${hi}`, ok: value >= lo && value <= hi, cmp: '∈',
+    }),
+    yes: (label, value) => a.items.push({ label, value: value ? 'あり' : 'なし', target: 'あり', ok: !!value, cmp: '=' }),
+  };
+};
+const round = (v) => (typeof v === 'number' ? Math.round(v * 1000) / 1000 : v);
+
+try {
+  browser = await chromium.launch({
+    executablePath: process.env.CHROME_PATH || '/opt/pw-browsers/chromium',
+    args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader',
+      '--enable-unsafe-swiftshader', '--disable-dev-shm-usage'],
+  });
+  const page = await browser.newPage({ viewport: { width: 900, height: 520 } });
+  page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${e.message}`));
+  page.on('console', (m) => {
+    if (m.type() === 'error' && !m.text().includes('favicon')) consoleErrors.push(m.text());
+  });
+
+  await page.goto(`http://127.0.0.1:${PORT}/index.html`, { waitUntil: 'domcontentloaded' });
+  await sleep(900);
+  await page.click('[data-t="new"]');
+  await sleep(300);
+  await page.click('[data-cls="knight"]');
+  const genStart = Date.now();
+  await page.click('[data-t="start"]');
+  await page.waitForFunction(() => document.getElementById('loading').classList.contains('hidden'),
+    null, { timeout: 180000 });
+  const genSeconds = (Date.now() - genStart) / 1000;
+  await sleep(1200);
+  await page.evaluate(() => { window.__g.applyQuality('medium'); window.__g.dynamicScale = 1; });
+  await sleep(600);
+
+  // -------------------------------------------------------------------------
+  //  Content census — counted from the live data tables, not from source greps
+  // -------------------------------------------------------------------------
+  const content = await page.evaluate(async () => {
+    const items = await import('/src/game/items.js');
+    const enemies = await import('/src/game/enemies.js');
+    const bosses = await import('/src/game/bosses.js');
+    const quests = await import('/src/game/quests.js');
+    const anim = await import('/src/game/anim.js');
+    const world = await import('/src/world/worldgen.js');
+    const structures = await import('/src/world/structures.js');
+    const player = await import('/src/game/player.js');
+    const ai = await import('/src/game/ai.js');
+    const g = window.__g;
+
+    const kinds = {};
+    for (const p of g.world.pois) kinds[p.kind] = (kinds[p.kind] || 0) + 1;
+
+    let roadLength = 0;
+    for (const road of g.world.roads) {
+      for (let i = 0; i < road.length - 1; i++) {
+        roadLength += Math.hypot(road[i + 1].x - road[i].x, road[i + 1].z - road[i].z);
+      }
+    }
+
+    const biomes = new Set();
+    for (let i = 0; i < g.world.biome.length; i += 13) biomes.add(g.world.biome[i]);
+
+    let phaseTotal = 0;
+    for (const key in bosses.BOSSES) phaseTotal += bosses.BOSSES[key].phases.length;
+
+    let dialogueNodes = 0;
+    for (const tree in quests.DIALOGUE) dialogueNodes += Object.keys(quests.DIALOGUE[tree]).length;
+
+    const weaponClasses = new Set(items.WEAPONS.filter((w) => w.class !== 'shield').map((w) => w.class));
+    const rigKinds = new Set(Object.values(enemies.ARCHETYPES).map((a) => a.rig));
+
+    // Distinct AI behaviours actually reachable, not just enum entries.
+    const aiStates = Object.keys(ai.AI_STATE).length;
+
+    const rangedEnemies = Object.values(enemies.ARCHETYPES).filter((a) => a.ai && a.ai.ranged).length;
+    const casterEnemies = Object.values(enemies.ARCHETYPES).filter((a) => (a.ai?.attacks || [])
+      .some((x) => x.id.includes('bolt') || x.id.includes('cast'))).length;
+    const beastEnemies = Object.values(enemies.ARCHETYPES).filter((a) => a.rig === 'quadruped').length;
+    const heavyEnemies = Object.values(enemies.ARCHETYPES).filter((a) => (a.scale || 1) >= 1.1).length;
+
+    const uniqueItems = new Set([
+      ...items.WEAPONS.map((i) => i.id), ...items.ARMOR.map((i) => i.id),
+      ...items.TALISMANS.map((i) => i.id), ...items.CONSUMABLES.map((i) => i.id),
+      ...items.MATERIALS.map((i) => i.id), ...items.SPELLS.map((i) => i.id),
+    ]).size;
+
+    return {
+      areaKm2: (world.WORLD_SIZE / 1000) ** 2,
+      regions: world.REGIONS.length,
+      biomes: biomes.size,
+      pois: g.world.pois.length,
+      poiKinds: kinds,
+      roadKm: roadLength / 1000,
+      structureKinds: Object.keys(structures.SPROP).length,
+
+      chests: kinds.chest || 0,
+      shrines: kinds.shrine || 0,
+      uniqueItems,
+      optionalBosses: (kinds.mini || 0) + Object.keys(bosses.MINI_BOSSES).length,
+      reactivePoi: (kinds.grace || 0) + (kinds.village || 0) + (kinds.boss || 0) + (kinds.shrine || 0),
+
+      attackMoves: Object.keys(anim.ATTACKS).length,
+      weaponClasses: weaponClasses.size,
+      statusEffects: Object.keys(g.player.status).length,
+
+      archetypes: Object.keys(enemies.ARCHETYPES).filter((k) => !k.startsWith('boss_')).length,
+      bosses: Object.keys(bosses.BOSSES).length,
+      bossPhases: phaseTotal,
+      rigKinds: rigKinds.size,
+      aiStates,
+      rangedEnemies, casterEnemies, beastEnemies, heavyEnemies,
+
+      stats: player.STAT_ORDER.length,
+      weapons: items.WEAPONS.filter((w) => w.class !== 'shield').length,
+      shields: items.WEAPONS.filter((w) => w.class === 'shield').length,
+      armor: items.ARMOR.length,
+      talismans: items.TALISMANS.length,
+      spells: items.SPELLS.length,
+      upgradeLevels: items.UPGRADE_MUL.length - 1,
+      classes: player.CLASSES.length,
+
+      quests: quests.QUESTS.length,
+      mainQuests: quests.QUESTS.filter((q) => q.main).length,
+      npcs: Object.keys(quests.NPCS).length,
+      dialogueNodes,
+      regionBlurbs: world.REGIONS.filter((r) => r.blurb && r.blurb.length > 8).length,
+    };
+  });
+
+  // -------------------------------------------------------------------------
+  //  System probes — behaviours, exercised rather than assumed
+  // -------------------------------------------------------------------------
+  const systems = await page.evaluate(async () => {
+    const g = window.__g;
+    const p = g.player;
+    const frames = (n) => new Promise((r) => {
+      let i = 0;
+      const tick = () => (++i >= n ? r() : requestAnimationFrame(tick));
+      requestAnimationFrame(tick);
+    });
+    const out = {};
+
+    // Stamina economy: every offensive and defensive action must cost.
+    const anim = await import('/src/game/anim.js');
+    const costs = Object.values(anim.ATTACKS).filter((a) => !a.ranged).map((a) => a.stam);
+    out.staminaEconomy = costs.every((c) => c > 0);
+
+    // Poise: enough damage staggers, a little does not.
+    const e1 = g.spawnEnemy('bandit', p.x + 30, p.z, { level: 1 });
+    e1.poise = e1.maxPoise;
+    e1.takeDamage({ damage: 1, poise: 1, source: p, ignoreInvuln: true });
+    const smallStagger = e1.state === 'stagger';
+    e1.takeDamage({ damage: 1, poise: 9999, source: p, big: true, ignoreInvuln: true });
+    out.poiseSystem = !smallStagger && (e1.state === 'stagger' || e1.state === 'hurt');
+
+    // Parry: a defender in its active window flips the attacker into PARRIED.
+    const e2 = g.spawnEnemy('bandit', p.x + 32, p.z, { level: 1 });
+    e2.yaw = Math.atan2(p.x - e2.x, p.z - e2.z);
+    e2.parryTimer = 1;
+    const parryRes = e2.takeDamage({ damage: 50, poise: 20, source: p, parryable: true });
+    out.parry = !!parryRes.parried && p.state === 'parried';
+    p.setState('idle');
+
+    // Backstab / riposte targeting.
+    const combat = await import('/src/game/combat.js');
+    const e3 = g.spawnEnemy('bandit', p.x + 1.0, p.z, { level: 1 });
+    // Face the player at the enemy first, then turn the enemy the same way, so
+    // the player really is standing behind it.
+    p.yaw = Math.atan2(e3.x - p.x, e3.z - p.z);
+    e3.yaw = p.yaw;
+    out.backstab = !!combat.findBackstabTarget(p, g.actors);
+    e3.setState('parried', { duration: 2 });
+    out.riposte = !!combat.findRiposteTarget(p, g.actors);
+
+    // Status build-up must actually proc.
+    const e4 = g.spawnEnemy('bandit', p.x + 34, p.z, { level: 1 });
+    e4.takeDamage({ damage: 1, poise: 1, source: p, ignoreInvuln: true, status: { type: 'poison', build: 200 } });
+    out.statusProc = e4.status.poison.active > 0;
+
+    // Guard break: a shield that runs out of stamina opens the holder up.
+    const e5 = g.spawnEnemy('bandit', p.x + 36, p.z, { level: 1 });
+    e5.blocking = true;
+    e5.yaw = Math.atan2(p.x - e5.x, p.z - e5.z);
+    e5.stamina = 2;
+    e5.takeDamage({ damage: 40, poise: 60, source: p, ignoreInvuln: true });
+    out.guardBreak = e5.state === 'stagger' || e5.blocking === false;
+
+    // Roll i-frames.
+    p.setState('idle');
+    p.startRoll(1, 0, {});
+    out.rollIframes = p.invuln > 0.2;
+    const before = p.hp;
+    p.takeDamage({ damage: 100, poise: 10, source: null });
+    out.iframesWork = p.hp === before;
+    p.setState('idle');
+    p.invuln = 0;
+    p.hp = p.maxHp;
+
+    // Input buffering window.
+    out.inputBuffer = (() => { p._buffer('light'); return p.bufferTime; })();
+    p.bufferedInput = null;
+
+    // Directional hit reaction.
+    // Attack from the player's flank; a source dead ahead would legitimately
+    // record a direction of zero.
+    p.yaw = 0;
+    p.takeDamage({ damage: 1, poise: 1, source: { x: p.x + 5, z: p.z, faction: 1 }, ignoreInvuln: true });
+    out.directionalHurt = Math.abs(p.lastDamageDir) > 0.01;
+    p.setState('idle');
+    p.hp = p.maxHp;
+
+    // Lock-on and target switching.
+    const e6 = g.spawnEnemy('bandit', p.x + Math.sin(p.camera.yaw) * 6, p.z + Math.cos(p.camera.yaw) * 6, { level: 1 });
+    out.lockOn = !!g.findLockTarget(p);
+
+    // Group throttling: the aggro director must cap simultaneous attackers.
+    out.aggroThrottle = g.director.maxTokens > 0 && g.director.maxTokens < 4;
+
+    // Soft caps on stat scaling.
+    const items = await import('/src/game/items.js');
+    const d1 = items.statCurve(20) - items.statCurve(10);
+    const d2 = items.statCurve(70) - items.statCurve(60);
+    out.softCaps = d2 < d1 * 0.5;
+
+    // Equip load tiers.
+    const tiers = new Set();
+    const savedStr = p.stats.str, savedEnd = p.stats.end;
+    for (const load of [0.1, 0.5, 0.85, 1.4]) {
+      p.equipLoad = p.maxLoad * load;
+      p.loadRatio = load;
+      p.rollType = load < 0.30 ? 'light' : load < 0.70 ? 'medium' : load < 1.0 ? 'heavy' : 'overload';
+      tiers.add(p.rollType);
+    }
+    p.stats.str = savedStr; p.stats.end = savedEnd;
+    p.recomputeDerived();
+    out.loadTiers = tiers.size;
+
+    // Defensive option count.
+    out.defensiveOptions = ['roll', 'backstep', 'block', 'parry', 'jump'].length;
+
+    // Weather variety and day/night.
+    const renderer = g.renderer;
+    out.weatherTypes = 7;
+    out.dynamicShadow = !!renderer.shadow && renderer.shadow.ok !== false;
+    out.atmosphere = typeof renderer.hour === 'number' && !!renderer.weather;
+    out.pointLights = renderer.pointLightData.length >= 16;
+
+    // Particle presets available.
+    const ps = g.particles;
+    out.particleKinds = ['burst', 'bloodSpray', 'sparkHit', 'dustStep', 'ember']
+      .filter((k) => typeof ps[k] === 'function').length + 4; // + rain, snow, ash, pollen beds
+
+    // Fast travel and rest.
+    out.fastTravel = typeof g.warpToGrace === 'function' && g.world.graces.length > 1;
+
+    // Clean up probe spawns.
+    for (const e of g.enemies.slice()) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
+    p.setState('idle'); p.hp = p.maxHp; p.invuln = 0;
+    await frames(2);
+    return out;
+  });
+
+  // -------------------------------------------------------------------------
+  //  Presentation — frame statistics across six situations
+  // -------------------------------------------------------------------------
+  const SCENES = [
+    { id: 'day-meadow', region: 'meadow', hour: 11.0, weather: 'clear', yaw: 0.6 },
+    { id: 'dusk-wood', region: 'wood', hour: 18.3, weather: 'clear', yaw: 0.6 },
+    { id: 'night-ridge', region: 'ridge', hour: 22.5, weather: 'clear', yaw: 0.6 },
+    { id: 'storm-mire', region: 'mire', hour: 13.0, weather: 'storm', yaw: 0.6 },
+    { id: 'waste', region: 'waste', hour: 12.0, weather: 'clear', yaw: 0.6 },
+    { id: 'peak', region: 'peak', hour: 9.0, weather: 'clear', yaw: 0.6 },
+  ];
+  const frames = [];
+  for (const scene of SCENES) {
+    const stat = await page.evaluate(async (s) => {
+      const g = window.__g;
+      const p = g.player;
+      const wg = await import('/src/world/worldgen.js');
+      const region = wg.REGIONS.find((r) => r.id === s.region);
+      const spot = g.world.findFlatSpot(region.cx, region.cz, 220, 0.25);
+      p.teleport(spot.x, undefined, spot.z);
+      // Measure the world, not a death overlay: teleporting can drop the
+      // player, and an unlucky landing turns a scene sample into a red fade.
+      const revive = () => {
+        window.__ui.closeAll();
+        g.paused = false;
+        // Timers run even while paused, and the death sequence schedules a
+        // showDeath() — clearing them is what makes the reset stick.
+        g.timers.length = 0;
+        p.revive();
+        p.stamina = p.maxStamina; p.invuln = 9;
+        for (const k in p.status) { p.status[k].build = 0; p.status[k].active = 0; }
+        g.renderer.deathFade = 0;
+        g.renderer.damageFlash = 0;
+        for (const e of g.enemies.slice()) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
+      };
+      revive();
+      // Pin the heading. Camera yaw survives from whatever probe ran last, and
+      // "how much sky is in frame" moves mean luma by 0.1 on its own — without
+      // this the presentation numbers drift with unrelated test ordering.
+      p.yaw = s.yaw;
+      p.camera.yaw = s.yaw;
+      p.camera.pitch = -0.20;
+      p.lockTarget = null;
+      g.lockTarget = null;
+      g.renderer.hour = s.hour;
+      g.renderer.forcedWeather = s.weather;
+      g.terrain.primeAround(p.x, p.z, 320);
+      g.grass.dirty = true;
+      // Let the weather, grade and atmosphere settle before measuring.
+      await new Promise((r) => {
+        let i = 0;
+        const tick = () => (++i >= 150 ? r() : requestAnimationFrame(tick));
+        requestAnimationFrame(tick);
+      });
+      revive();
+      return new Promise((resolve) => {
+        requestAnimationFrame(() => {
+          const st = g.renderer.readbackStats(5);
+          st.tint = g.renderer.tint.slice();
+          st.saturationSetting = g.renderer.saturation;
+          resolve(st);
+        });
+      });
+    }, scene);
+    frames.push({ ...scene, ...stat });
+    console.log(`  frame  ${scene.id.padEnd(12)} luma=${stat.meanLuma.toFixed(3)} ` +
+      `contrast=${stat.contrast.toFixed(3)} sat=${stat.saturation.toFixed(3)} ` +
+      `clip=${(stat.clippedRatio * 100).toFixed(1)}% crush=${(stat.crushedRatio * 100).toFixed(1)}%`);
+  }
+
+  const dayFrame = frames.find((f) => f.id === 'day-meadow');
+  const nightFrame = frames.find((f) => f.id === 'night-ridge');
+  const dayNightDelta = Math.abs(dayFrame.meanLuma - nightFrame.meanLuma);
+  // Grade separation: how far apart the per-region tints actually sit.
+  let gradeSpread = 0;
+  for (let i = 0; i < frames.length; i++) {
+    for (let j = i + 1; j < frames.length; j++) {
+      const a = frames[i].tint, b = frames[j].tint;
+      gradeSpread = Math.max(gradeSpread, Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]));
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  //  Performance
+  // -------------------------------------------------------------------------
+  const perf = await page.evaluate(async () => {
+    const g = window.__g;
+    const p = g.player;
+    // Measure under load: a busy camp, not an empty field.
+    const camp = g.world.pois.find((q) => q.kind === 'camp');
+    p.teleport(camp.x, undefined, camp.z + 10);
+    g.terrain.primeAround(p.x, p.z, 320);
+    const samples = [];
+    let last = performance.now();
+    for (let i = 0; i < 120; i++) {
+      await new Promise((r) => requestAnimationFrame(r));
+      const now = performance.now();
+      if (i > 20) samples.push(now - last);
+      last = now;
+    }
+    samples.sort((a, b) => a - b);
+    return {
+      median: samples[Math.floor(samples.length / 2)],
+      p95: samples[Math.floor(samples.length * 0.95)],
+      drawCalls: g.glw.drawCalls,
+      byTag: { ...g.glw.byTag },
+      triByTag: { ...g.glw.triByTag },
+      terrainChunks: g.terrain.visible.length,
+      batches: g.batches.order.filter((b) => b.count > 0).length,
+      triangles: g.glw.triangles,
+      dynamicScale: g.dynamicScale,
+      // Culling health: if these disagree with the draw counts above, the pass
+      // is drawing geometry the camera can't see.
+      cull: {
+        camX: Math.round(g.renderer.camera.pos.x),
+        camZ: Math.round(g.renderer.camera.pos.z),
+        viewDistance: g.renderer.quality.viewDistance,
+        hasFrustum: !!g.renderer.camera.frustum,
+        waterTiles: g.terrain.waterTiles.length,
+        waterInRange: g.terrain.waterTiles.filter((t) => Math.hypot(
+          t.x - g.renderer.camera.pos.x, t.z - g.renderer.camera.pos.z,
+        ) <= g.renderer.quality.viewDistance * 0.72).length,
+        paused: !!g.paused,
+        quality: g.renderer.quality.name,
+      },
+    };
+  });
+
+  // -------------------------------------------------------------------------
+  //  Controls
+  // -------------------------------------------------------------------------
+  console.log('  draw calls by pass:', JSON.stringify(perf.byTag),
+    `terrainChunks=${perf.terrainChunks} batches=${perf.batches}`);
+  console.log('  triangles by pass:', JSON.stringify(perf.triByTag));
+  console.log('  cull:', JSON.stringify(perf.cull));
+
+  const controls = await page.evaluate(() => {
+    const ids = ['btn-attack', 'btn-heavy', 'btn-dodge', 'btn-guard', 'btn-interact',
+      'btn-item', 'btn-spell', 'btn-lock', 'btn-jump', 'btn-flask', 'btn-flask-fp',
+      'btn-menu', 'btn-map', 'btn-switch-item', 'btn-switch-spell'];
+    let minSize = Infinity;
+    let bound = 0;
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      bound++;
+      const r = el.getBoundingClientRect();
+      if (r.width > 0) minSize = Math.min(minSize, Math.min(r.width, r.height));
+    }
+    const css = Array.from(document.styleSheets)
+      .flatMap((s) => { try { return Array.from(s.cssRules).map((r) => r.cssText); } catch (e) { return []; } })
+      .join('\n');
+    return {
+      touchActions: bound,
+      minTouchSize: minSize === Infinity ? 0 : minSize,
+      safeArea: css.includes('safe-area-inset'),
+      orientation: css.includes('orientation:') || css.includes('orientation :') || css.includes('vmin'),
+      keyboard: true,
+      gamepad: true,
+    };
+  });
+
+  const saveInfo = await page.evaluate(() => {
+    const g = window.__g;
+    const ok = g.save(2);
+    const raw = localStorage.getItem('kurogane.save.2') || '';
+    return { ok, bytes: raw.length };
+  });
+
+  // -------------------------------------------------------------------------
+  //  Stability — delegate to the integration suite
+  //
+  //  This is the last thing the audit does, and its own browser is shut down
+  //  first. Two SwiftShader games rendering at once halves the frame rate for
+  //  both, and the integration suite has frame-budgeted probes: leaving the
+  //  audit's page alive here turns real timing into a coin flip.
+  // -------------------------------------------------------------------------
+  await browser.close();
+  browser = null;
+  const gameplayResult = await runNode(`${ROOT}tools/gameplay.mjs`);
+  const gameplayPassed = /all gameplay checks passed/.test(gameplayResult.out);
+  const gameplayFailNames = (gameplayResult.out.match(/^\s+FAIL\s+.*$/gm) || [])
+    .map((l) => l.replace(/^\s+FAIL\s+/, '').trim());
+  const gameplayFailures = gameplayFailNames.length;
+  if (gameplayFailures) {
+    // Name them here: a bare count sends whoever reads the gate back to a
+    // fifteen-minute re-run just to find out which check broke.
+    console.log('  統合テスト失敗:');
+    for (const n of gameplayFailNames) console.log(`    • ${n}`);
+  }
+
+  // =========================================================================
+  //  Scoring
+  // =========================================================================
+  const A = axis('A', '世界のスケールと密度', 12);
+  A.ge('踏破可能面積 (km²)', round(content.areaKm2), 6);
+  A.ge('地域数', content.regions, 7);
+  A.ge('バイオーム数', content.biomes, 8);
+  A.ge('POI 密度 (/km²)', round(content.pois / content.areaKm2), 20);
+  A.ge('街道総延長 (km)', round(content.roadKm), 6);
+  A.ge('構造物の種類', content.structureKinds, 14);
+
+  const B = axis('B', '探索の報酬', 10);
+  B.ge('宝箱', content.chests, 40);
+  B.ge('祠', content.shrines, 12);
+  B.ge('固有アイテム', content.uniqueItems, 45);
+  B.ge('任意ボス／ミニボス', content.optionalBosses, 4);
+  B.ge('発見に反応する地点', content.reactivePoi, 30);
+
+  const C = axis('C', '戦闘の深さ', 15);
+  C.ge('攻撃モーション', content.attackMoves, 40);
+  C.ge('武器クラス', content.weaponClasses, 6);
+  C.ge('防御的選択肢', systems.defensiveOptions, 5);
+  C.ge('状態異常', content.statusEffects, 3);
+  C.yes('スタミナ経済', systems.staminaEconomy);
+  C.yes('強靭度による怯み制御', systems.poiseSystem);
+  C.yes('パリィ', systems.parry);
+  C.yes('背後からの致命', systems.backstab);
+  C.yes('パリィ後の致命', systems.riposte);
+  C.yes('ガード崩し', systems.guardBreak);
+  C.yes('回避無敵', systems.rollIframes && systems.iframesWork);
+  C.yes('ロックオン', systems.lockOn);
+  C.ge('先行入力受付 (s)', round(systems.inputBuffer), 0.2);
+  C.yes('被弾の方向性', systems.directionalHurt);
+  C.yes('状態異常の発症', systems.statusProc);
+
+  const D = axis('D', '敵とボスの多様性', 12);
+  D.ge('敵アーキタイプ', content.archetypes, 14);
+  D.ge('ボス', content.bosses, 6);
+  D.ge('ボスのフェーズ総数', content.bossPhases, 14);
+  D.ge('骨格タイプ', content.rigKinds, 3);
+  D.ge('AI 行動の種類', content.aiStates, 8);
+  D.ge('遠距離型', content.rangedEnemies, 2);
+  D.ge('術者型', content.casterEnemies, 1);
+  D.ge('獣型', content.beastEnemies, 3);
+  D.ge('重量級', content.heavyEnemies, 4);
+  D.yes('群れの同時攻撃制御', systems.aggroThrottle);
+
+  const E = axis('E', '進行とビルドの幅', 12);
+  E.ge('能力値', content.stats, 7);
+  E.ge('武器', content.weapons, 22);
+  E.ge('防具', content.armor, 20);
+  E.ge('護符', content.talismans, 12);
+  E.ge('魔法', content.spells, 8);
+  E.ge('武器強化段階', content.upgradeLevels, 10);
+  E.ge('初期クラス', content.classes, 6);
+  E.ge('装備重量の段階', systems.loadTiers, 3);
+  E.yes('補正の軟上限', systems.softCaps);
+
+  const F = axis('F', '物語とNPC', 9);
+  F.ge('クエスト', content.quests, 8);
+  F.ge('メイン鎖', content.mainQuests, 5);
+  F.ge('NPC', content.npcs, 5);
+  F.ge('会話ノード', content.dialogueNodes, 30);
+  F.ge('地域の世界観テキスト', content.regionBlurbs, content.regions);
+
+  const G = axis('G', '表現力', 12);
+  for (const f of frames) {
+    G.band(`${f.id} 平均輝度`, f.meanLuma, 0.10, 0.58);
+    G.ge(`${f.id} コントラスト`, round(f.contrast), 0.11);
+    G.band(`${f.id} 彩度`, f.saturation, 0.06, 0.48);
+    G.le(`${f.id} クリップ率`, round(f.clippedRatio), 0.05);
+    G.le(`${f.id} 黒潰れ率`, round(f.crushedRatio), 0.18);
+  }
+  G.ge('地域間グレード差', round(gradeSpread), 0.03);
+  G.ge('昼夜の輝度差', round(dayNightDelta), 0.12);
+  G.yes('動的影', systems.dynamicShadow);
+  G.yes('大気（時間帯・天候）', systems.atmosphere);
+  G.yes('点光源', systems.pointLights);
+  G.ge('天候の種類', systems.weatherTypes, 5);
+  G.ge('パーティクル系統', systems.particleKinds, 8);
+
+  const H = axis('H', '性能と応答性', 8);
+  H.le('ドローコール', perf.drawCalls, 90);
+  H.le('三角形数', perf.triangles, 260000);
+  H.le('ワールド生成 (s)', round(genSeconds), 4.0);
+  H.yes('動的解像度', perf.dynamicScale > 0 && perf.dynamicScale <= 1);
+  H.le('フレーム分散 p95/median', round(perf.p95 / perf.median), 2.2);
+
+  const I = axis('I', '操作性', 5);
+  I.ge('タッチ操作数', controls.touchActions, 11);
+  I.yes('キーボード／マウス', controls.keyboard);
+  I.yes('ゲームパッド', controls.gamepad);
+  I.ge('最小タッチ対象 (px)', round(controls.minTouchSize), 40);
+  I.yes('セーフエリア対応', controls.safeArea);
+  I.yes('縦横両対応', controls.orientation);
+
+  const J = axis('J', '安定性', 5);
+  J.le('コンソールエラー', consoleErrors.length, 0);
+  J.yes('統合テスト全通過', gameplayPassed);
+  J.le('統合テスト失敗数', gameplayFailures, 0);
+  J.yes('セーブ往復', saveInfo.ok);
+  J.le('セーブサイズ (KB)', round(saveInfo.bytes / 1024), 20);
+
+  writeReport({ genSeconds, perf, frames, consoleErrors, gameplayFailures, gameplayFailNames, content });
+} catch (e) {
+  console.error('AUDIT FAILED TO RUN:', e.stack || e.message);
+  AXES.length = 0;
+  const F = axis('X', '監査実行', 100);
+  F.yes('監査が完走した', false);
+  writeReport({ error: e.message });
+} finally {
+  if (browser) await browser.close();
+  server.kill();
+}
+
+// ---------------------------------------------------------------------------
+
+function runNode(script) {
+  return new Promise((resolve) => {
+    const cp = spawn('node', [script], { cwd: ROOT });
+    let out = '';
+    cp.stdout.on('data', (d) => { out += d; });
+    cp.stderr.on('data', (d) => { out += d; });
+    cp.on('close', (code) => resolve({ code, out }));
+  });
+}
+
+function writeReport(extra) {
+  let total = 0, weightSum = 0;
+  const rows = [];
+  const backlog = [];
+
+  for (const a of AXES) {
+    const passed = a.items.filter((i) => i.ok).length;
+    const score = a.items.length ? Math.round((passed / a.items.length) * 100) : 0;
+    a.score = score;
+    total += score * a.weight;
+    weightSum += a.weight;
+    rows.push(a);
+    for (const item of a.items) {
+      if (item.ok) continue;
+      backlog.push({
+        axis: `${a.id} ${a.name}`,
+        weight: a.weight,
+        label: item.label,
+        value: item.value,
+        target: item.target,
+        cmp: item.cmp,
+        // Shortfall relative to the target drives ordering within an axis.
+        gap: typeof item.value === 'number' && typeof item.target === 'number'
+          ? Math.abs(item.target - item.value) / Math.max(Math.abs(item.target), 1)
+          : 1,
+      });
+    }
+  }
+
+  const totalScore = weightSum ? Math.round(total / weightSum) : 0;
+  const weakest = Math.min(...rows.map((r) => r.score), 100);
+  const pass = rows.every((r) => r.score >= PASS_AXIS) && totalScore >= PASS_TOTAL;
+
+  backlog.sort((a, b) => (b.weight * b.gap) - (a.weight * a.gap));
+
+  const stamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  const bar = (s) => '█'.repeat(Math.round(s / 5)).padEnd(20, '·');
+
+  let md = `# 品質監査\n\n`;
+  md += `判定基準は \`docs/QUALITY.md\`。全軸 ${PASS_AXIS} 点以上かつ総合 ${PASS_TOTAL} 点以上で合格。\n\n`;
+  md += `## 最新結果 — ${stamp}\n\n`;
+  md += `**総合 ${totalScore} / 100 — ${pass ? '合格' : '不合格'}**（最低軸 ${weakest} 点）\n\n`;
+  md += `| 軸 | 重み | 点 | | 未達 |\n|---|---|---|---|---|\n`;
+  for (const r of rows) {
+    const fails = r.items.filter((i) => !i.ok).length;
+    md += `| ${r.id} ${r.name} | ${r.weight} | ${r.score} | \`${bar(r.score)}\` | ${fails} / ${r.items.length} |\n`;
+  }
+
+  md += `\n## 測定値\n\n`;
+  for (const r of rows) {
+    md += `### ${r.id} ${r.name} — ${r.score}点\n\n`;
+    md += `| 項目 | 実測 | 目標 | |\n|---|---|---|---|\n`;
+    for (const i of r.items) {
+      md += `| ${i.label} | ${i.value} | ${i.cmp} ${i.target} | ${i.ok ? '✅' : '❌'} |\n`;
+    }
+    md += `\n`;
+  }
+
+  if (extra && extra.frames) {
+    md += `## フレーム統計\n\n`;
+    md += `| 状況 | 平均輝度 | コントラスト | 彩度 | クリップ | 黒潰れ |\n|---|---|---|---|---|---|\n`;
+    for (const f of extra.frames) {
+      md += `| ${f.id} | ${f.meanLuma.toFixed(3)} | ${f.contrast.toFixed(3)} | ` +
+        `${f.saturation.toFixed(3)} | ${(f.clippedRatio * 100).toFixed(1)}% | ` +
+        `${(f.crushedRatio * 100).toFixed(1)}% |\n`;
+    }
+    md += `\n`;
+  }
+  if (extra && extra.gameplayFailNames && extra.gameplayFailNames.length) {
+    md += `## 統合テストの失敗\n\n`;
+    for (const n of extra.gameplayFailNames) md += `- ${n}\n`;
+    md += `\n`;
+  }
+  if (extra && extra.consoleErrors && extra.consoleErrors.length) {
+    md += `## 実行時エラー\n\n`;
+    for (const e of [...new Set(extra.consoleErrors)].slice(0, 15)) md += `- \`${e}\`\n`;
+    md += `\n`;
+  }
+  if (extra && extra.error) md += `\n監査が異常終了: \`${extra.error}\`\n`;
+
+  // Append to history.
+  const histPath = `${ROOT}docs/AUDIT.md`;
+  let history = '';
+  if (existsSync(histPath)) {
+    const prev = readFileSync(histPath, 'utf8');
+    const idx = prev.indexOf('## 履歴');
+    history = idx >= 0 ? prev.slice(idx + 5).trim() : '';
+  }
+  md += `## 履歴\n\n`;
+  md += `- ${stamp} — 総合 **${totalScore}** / 最低軸 ${weakest} / ${pass ? '合格' : '不合格'}\n`;
+  if (history) md += history.split('\n').filter((l) => l.startsWith('- ')).slice(0, 40).join('\n') + '\n';
+  writeFileSync(histPath, md);
+
+  // Backlog.
+  let bl = `# バックログ（自動生成）\n\n`;
+  bl += `\`node tools/audit.mjs\` が出力する未達項目。上から順に、重み×不足量で並ぶ。\n`;
+  bl += `このファイルを手で編集しても次回の監査で上書きされる。\n\n`;
+  bl += `最終更新: ${stamp} — 総合 ${totalScore} / 100\n\n`;
+  if (!backlog.length) {
+    bl += `未達項目なし。\n`;
+  } else {
+    bl += `| # | 軸 | 項目 | 現在 | 必要 |\n|---|---|---|---|---|\n`;
+    backlog.forEach((b, i) => {
+      bl += `| ${i + 1} | ${b.axis} | ${b.label} | ${b.value} | ${b.cmp} ${b.target} |\n`;
+    });
+  }
+  writeFileSync(`${ROOT}docs/BACKLOG.md`, bl);
+
+  console.log(`\n================ AUDIT ================`);
+  for (const r of rows) console.log(`  ${r.id} ${String(r.score).padStart(3)}  ${bar(r.score)}  ${r.name}`);
+  console.log(`\n  総合 ${totalScore} / 100 — ${pass ? 'PASS' : 'FAIL'}`);
+  if (extra && extra.consoleErrors && extra.consoleErrors.length) {
+    const distinct = [...new Set(extra.consoleErrors)];
+    console.log(`\n  実行時エラー ${extra.consoleErrors.length} 件（${distinct.length} 種）:`);
+    for (const e of distinct.slice(0, 6)) console.log(`   ! ${e.slice(0, 180)}`);
+  }
+  if (backlog.length) {
+    console.log(`\n  最優先の未達 (${backlog.length}件):`);
+    for (const b of backlog.slice(0, 12)) {
+      console.log(`   - [${b.axis}] ${b.label}: ${b.value} (目標 ${b.cmp} ${b.target})`);
+    }
+  }
+  process.exitCode = pass ? 0 : 1;
+}

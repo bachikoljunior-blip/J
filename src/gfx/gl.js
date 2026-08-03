@@ -72,9 +72,29 @@ export class GL {
     this._program = null;
     this.drawCalls = 0;
     this.triangles = 0;
+    this.tag = 'other';
+    this.byTag = Object.create(null);
+    this.triByTag = Object.create(null);
   }
 
-  resetStats() { this.drawCalls = 0; this.triangles = 0; }
+  resetStats() {
+    this.drawCalls = 0;
+    this.triangles = 0;
+    for (const k in this.byTag) this.byTag[k] = 0;
+    for (const k in this.triByTag) this.triByTag[k] = 0;
+  }
+
+  /** Label subsequent draws so the frame cost can be attributed. */
+  setTag(tag) { this.tag = tag; }
+  countDraw(n = 1) {
+    this.drawCalls += n;
+    this.byTag[this.tag] = (this.byTag[this.tag] || 0) + n;
+  }
+
+  countTris(n) {
+    this.triangles += n;
+    this.triByTag[this.tag] = (this.triByTag[this.tag] || 0) + n;
+  }
 
   // -------------------------------------------------------------------------
   //  Shaders

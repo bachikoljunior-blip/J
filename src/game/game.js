@@ -36,7 +36,7 @@ import { getItem, getSpell, ITEM_BY_ID, UPGRADE_COST, UPGRADE_MATERIAL, UPGRADE_
 import { Input, ACTION, haptic } from '../core/input.js';
 import { AudioEngine } from '../core/audio.js';
 import { makeRng, hash2 } from '../core/rng.js';
-import { clamp, lerp, saturate, damp, v3distXZ, angleDelta, TAU } from '../core/math.js';
+import { clamp, lerp, saturate, damp, v3distXZ, angleDelta, TAU, sphereInFrustum } from '../core/math.js';
 import { saveGame, loadGameData, saveSettings, loadSettings } from '../core/save.js';
 
 /**
@@ -44,14 +44,17 @@ import { saveGame, loadGameData, saveSettings, loadSettings } from '../core/save
  * final image, saturation drains or lifts it, and vignette tightens the frame
  * where a place should feel oppressive.
  */
+// `contrast` is the print curve for the region: open meadows and snowfields
+// are inherently low-contrast subjects and need pulling apart, while the mire
+// and the woods already carry their own tonal separation.
 const REGION_GRADE = {
-  meadow: { tint: [1.00, 1.00, 1.00], sat: 1.06, vignette: 0.38 },
-  wood: { tint: [0.95, 1.03, 0.95], sat: 1.02, vignette: 0.46 },
-  mire: { tint: [0.92, 1.02, 0.90], sat: 0.86, vignette: 0.52 },
-  ridge: { tint: [0.97, 0.99, 1.05], sat: 0.98, vignette: 0.42 },
-  crag: { tint: [0.95, 0.98, 1.07], sat: 0.86, vignette: 0.44 },
-  waste: { tint: [1.07, 0.93, 0.84], sat: 0.68, vignette: 0.56 },
-  peak: { tint: [0.93, 0.98, 1.10], sat: 0.76, vignette: 0.48 },
+  meadow: { tint: [1.00, 1.00, 1.00], sat: 1.06, vignette: 0.38, contrast: 1.38 },
+  wood: { tint: [0.95, 1.03, 0.95], sat: 1.02, vignette: 0.46, contrast: 1.14 },
+  mire: { tint: [0.92, 1.02, 0.90], sat: 0.86, vignette: 0.52, contrast: 1.12 },
+  ridge: { tint: [0.97, 0.99, 1.05], sat: 0.98, vignette: 0.42, contrast: 1.20 },
+  crag: { tint: [0.95, 0.98, 1.07], sat: 0.86, vignette: 0.44, contrast: 1.42 },
+  waste: { tint: [1.07, 0.93, 0.84], sat: 0.68, vignette: 0.56, contrast: 1.18 },
+  peak: { tint: [0.93, 0.98, 1.10], sat: 0.76, vignette: 0.48, contrast: 1.34 },
 };
 
 const SPAWN_ACTIVATE = 130;
@@ -813,7 +816,7 @@ export class Game {
    */
   _updateGrade(dt) {
     const p = this.player;
-    let tr = 0, tg = 0, tb = 0, sat = 0, vig = 0, wSum = 0;
+    let tr = 0, tg = 0, tb = 0, sat = 0, vig = 0, con = 0, wSum = 0;
     for (const r of REGIONS) {
       const d = Math.hypot(p.x - r.cx, p.z - r.cz);
       const t = saturate(1 - d / (r.radius * 1.5));
@@ -822,9 +825,10 @@ export class Game {
       tr += grade.tint[0] * w; tg += grade.tint[1] * w; tb += grade.tint[2] * w;
       sat += grade.sat * w;
       vig += grade.vignette * w;
+      con += grade.contrast * w;
       wSum += w;
     }
-    tr /= wSum; tg /= wSum; tb /= wSum; sat /= wSum; vig /= wSum;
+    tr /= wSum; tg /= wSum; tb /= wSum; sat /= wSum; vig /= wSum; con /= wSum;
 
     const k = 1 - Math.exp(-1.2 * dt);
     const rend = this.renderer;
@@ -833,6 +837,7 @@ export class Game {
     rend.tint[2] += (tb - rend.tint[2]) * k;
     rend.saturation += (sat - rend.saturation) * k;
     rend.vignette += (vig - rend.vignette) * k;
+    rend.contrast += (con - rend.contrast) * k;
   }
 
   _updateAmbientEffects(dt) {
@@ -1049,11 +1054,8 @@ export class Game {
 
   warpToGrace(poi) {
     const p = this.player;
-    p.x = poi.x + 3;
-    p.z = poi.z + 3;
-    p.y = this.world.heightAt(p.x, p.z);
+    p.teleport(poi.x + 3, undefined, poi.z + 3);
     p.lastGraceId = poi.id;
-    p.velX = 0; p.velZ = 0; p.velY = 0;
     this.terrain.primeAround(p.x, p.z, 220);
     this.grass.dirty = true;
     this.respawnWorld();
@@ -1384,20 +1386,14 @@ export class Game {
     const p = this.player;
     const poi = this.world.pois.find((q) => q.id === p.lastGraceId)
       || this.world.graces.find((g) => g.isStart) || this.world.graces[0];
-    p.dead = false;
-    p.hp = p.maxHp;
+    p.revive();
     p.fp = p.maxFp;
     p.stamina = p.maxStamina;
-    p.poise = p.maxPoise;
     p.buffs.length = 0;
     for (const k in p.status) { p.status[k].active = 0; p.status[k].build = 0; }
-    p.setState(STATE.IDLE);
     p.lockTarget = null;
     p.invuln = 1.5;
-    if (poi) {
-      p.x = poi.x + 3; p.z = poi.z + 3;
-      p.y = this.world.heightAt(p.x, p.z);
-    }
+    if (poi) p.teleport(poi.x + 3, undefined, poi.z + 3);
     p.refillFlasks();
     this.renderer.deathFade = 0;
     this.respawnWorld();
@@ -1488,11 +1484,20 @@ export class Game {
   _gatherProps(px, pz) {
     const B = this.batches;
     const propDist = this.renderer.quality.propDistance;
-    const lodLine = Math.min(120, propDist * 0.42);
+    const lodLine = Math.min(95, propDist * 0.34);
     const cam = this.renderer.camera;
     const range = Math.ceil(propDist / CHUNK_SIZE);
     const pcx = Math.floor((px + WORLD_HALF) / CHUNK_SIZE);
     const pcz = Math.floor((pz + WORLD_HALF) / CHUNK_SIZE);
+    // Off-screen props still matter inside the shadow range — a tree behind the
+    // camera casts across the ground in front of it — so the frustum test only
+    // applies beyond that radius.
+    const frustum = cam.frustum;
+    const shadowKeep = this.renderer.quality.shadowRange + CHUNK_SIZE * 0.75;
+    // Per prop the radius can be tight: anything past the shadow range simply
+    // isn't in the shadow map, so off-screen props out there cost nothing but
+    // triangles. The chunk test above has to stay loose by a chunk radius.
+    const propShadowKeep = this.renderer.quality.shadowRange * 1.1;
 
     for (let dz = -range; dz <= range; dz++) {
       for (let dx = -range; dx <= range; dx++) {
@@ -1502,6 +1507,12 @@ export class Game {
         const centerZ = cz * CHUNK_SIZE - WORLD_HALF + CHUNK_SIZE / 2;
         const cd = Math.hypot(centerX - px, centerZ - pz);
         if (cd > propDist + CHUNK_SIZE) continue;
+        if (frustum && cd > shadowKeep) {
+          // Sphere is generous on Y: props sit on terrain that swings well
+          // above and below the chunk's nominal centre height.
+          const cy = this.world.heightAt(centerX, centerZ);
+          if (!sphereInFrustum(frustum, centerX, cy + 12, centerZ, CHUNK_SIZE * 0.78)) continue;
+        }
 
         const props = this.scatter.propsFor(cx, cz);
         for (let i = 0; i < props.length; i++) {
@@ -1509,6 +1520,8 @@ export class Game {
           const d = Math.hypot(p.x - px, p.z - pz);
           if (d > propDist) continue;
           const s = p.scale;
+          if (frustum && d > propShadowKeep
+            && !sphereInFrustum(frustum, p.x, p.y + s * 3, p.z, s * 5)) continue;
           // Detailed silhouettes only where the player can read them; past the
           // LOD line the simplified meshes are indistinguishable through fog.
           const far = d > lodLine;

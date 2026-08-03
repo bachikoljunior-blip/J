@@ -126,8 +126,13 @@ export class World {
   // -- coordinate helpers ---------------------------------------------------
 
   gridIndex(ix, iz) {
-    ix = ix < 0 ? 0 : ix >= GRID ? GRID - 1 : ix;
-    iz = iz < 0 ? 0 : iz >= GRID ? GRID - 1 : iz;
+    // Non-finite input must not fall through: NaN survives every comparison
+    // below and would produce NaN indices that silently read `undefined` all
+    // the way into terrain generation.
+    if (!Number.isFinite(ix)) ix = 0;
+    if (!Number.isFinite(iz)) iz = 0;
+    ix = ix < 0 ? 0 : ix >= GRID ? GRID - 1 : ix | 0;
+    iz = iz < 0 ? 0 : iz >= GRID ? GRID - 1 : iz | 0;
     return iz * GRID + ix;
   }
 
@@ -535,7 +540,10 @@ export class World {
    * result is a visible path network the player can actually navigate by.
    */
   _buildRoads() {
-    const hubs = this.pois.filter((p) => p.kind === 'grace' || p.kind === 'village');
+    // Ruins and mini-boss sites join the network too: a road that only links
+    // checkpoints tells the player nothing about where the content is.
+    const hubs = this.pois.filter((p) => p.kind === 'grace' || p.kind === 'village'
+      || p.kind === 'mini' || p.kind === 'ruin');
     // Greedy nearest-neighbour spanning tree: cheap, and produces the branching
     // topology real road networks have.
     if (hubs.length < 2) return;
@@ -621,7 +629,7 @@ export class World {
 
     // Treasure: biased toward interesting terrain (steep ground, riversides).
     let placed = 0, attempts = 0;
-    while (placed < 46 && attempts < 4000) {
+    while (placed < 62 && attempts < 6000) {
       attempts++;
       const x = (rng() - 0.5) * (WORLD_SIZE - 260);
       const z = (rng() - 0.5) * (WORLD_SIZE - 260);
@@ -660,7 +668,7 @@ export class World {
     }
 
     // Shrines: small stat-boost sites that reward exploring off the roads.
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 17; i++) {
       let x, z, ok = false;
       for (let t = 0; t < 200 && !ok; t++) {
         x = (rng() - 0.5) * (WORLD_SIZE - 300);

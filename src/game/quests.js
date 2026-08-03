@@ -180,7 +180,26 @@ export const DIALOGUE = {
     },
     land: {
       text: 'アルドラス。かつて麦の国だった。今は、死なない連中が歩き回る国だ。……お前も含めてな。',
-      options: [{ text: '戻る', goto: 'start' }],
+      options: [
+        { text: '刻印とは何だ', goto: 'mark' },
+        { text: '村のことを', goto: 'village' },
+        { text: '戻る', goto: 'start' },
+      ],
+    },
+    mark: {
+      text: '王冠が砕けたとき、近くにいた者に灰が焼き付いた。それが刻印だ。死んでも起き上がる。……起き上がるたび、何かを一つ忘れる。',
+      options: [
+        { text: '忘れると、どうなる', goto: 'mark2' },
+        { text: '戻る', goto: 'land' },
+      ],
+    },
+    mark2: {
+      text: '亡骸兵を見ただろう。あれも元は刻印者だ。名前を忘れ、顔を忘れ、最後に「なぜ歩いているか」を忘れる。……お前がまだ喋れているのは、運がいいだけだ。',
+      options: [{ text: '……', goto: 'start' }],
+    },
+    village: {
+      text: '灯火の村。名前の通り、火を絶やさんことだけが決まりだ。火が消えた夜に何が来るかは、二度ほど見た。二度とも、朝には人が減っていた。',
+      options: [{ text: '戻る', goto: 'land' }],
     },
     work: {
       text: '村の周りに灰狼が増えた。子供が外に出られん。十匹も減らせば、しばらくは静かになる。',
@@ -209,9 +228,21 @@ export const DIALOGUE = {
     work: {
       text: '街道の野盗。首魁を潰してくれたら、しばらく安全に通れる。……そうしたら、いい品も回せるわ。',
       options: [
+        { text: '奥の品とは', goto: 'goods' },
         { text: '引き受ける', action: 'accept_side_mira' },
         { text: '断る', goto: 'start' },
       ],
+    },
+    goods: {
+      text: '鍛石の塊、上等な護符、魔術の書。……焦土から拾ってきたものよ。売り物にするには、まず街道が通らないと運べないの。',
+      options: [
+        { text: '焦土まで行くのか', goto: 'waste' },
+        { text: '戻る', goto: 'work' },
+      ],
+    },
+    waste: {
+      text: '行くわけないでしょう。灰纏いから買うの。あの子たちは灰の中で生きられる。……代わりに、長くは生きられないけど。',
+      options: [{ text: '戻る', goto: 'start' }],
     },
     done: {
       text: '本当にやったの? ……いいわ、約束は約束。奥の品も見せてあげる。',
@@ -232,9 +263,21 @@ export const DIALOGUE = {
     forge: {
       text: '火が弱い。普通の炭では、あの鉄は溶けん。……焦土の残り火のかけらが三つあれば、炉はまた本気を出す。',
       options: [
+        { text: '黒鉄について', goto: 'blackiron' },
         { text: '探してくる', action: 'accept_side_smith' },
         { text: '戻る', goto: 'start' },
       ],
+    },
+    blackiron: {
+      text: '黒鉄は鉄ではない。王冠の欠片が落ちた場所の土が、勝手にそうなる。叩けば伸びる。焼けば冷める。……だが決して錆びん。死なんのだ、あれも。',
+      options: [
+        { text: '刻印と同じか', goto: 'blackiron2' },
+        { text: '戻る', goto: 'forge' },
+      ],
+    },
+    blackiron2: {
+      text: '……同じだ。お前の骨も、いずれそうなる。だから武器は選べ。長く付き合うことになる。',
+      options: [{ text: '戻る', goto: 'start' }],
     },
     forge_done: {
       text: '……ふん。よし。これで上の段階まで打てる。持ってこい、何本でも。',
@@ -255,6 +298,25 @@ export const DIALOGUE = {
     },
     oath: {
       text: '王冠が砕けたとき、我らは「断片を誰にも渡さぬ」と誓った。……誓いは守られている。守られすぎて、誰も理由を覚えていない。',
+      options: [
+        { text: '闘技場のあれは何だ', goto: 'sworn' },
+        { text: 'あなたは戦わないのか', goto: 'why' },
+        { text: '戻る', goto: 'start' },
+      ],
+    },
+    sworn: {
+      text: '初代の誓約者だ。断片を握ったまま二百年、あそこに立っている。……我らは交代で飯を運んでいた。三十年前に、食わなくなった。',
+      options: [{ text: '戻る', goto: 'oath' }],
+    },
+    why: {
+      text: '挑んだ。四度。四度とも起き上がって、四度とも同じことを思った——あれは俺を殺す気がない、と。誓いを果たさせる相手を待っているのだ。',
+      options: [
+        { text: 'それが俺だと', goto: 'why2' },
+        { text: '戻る', goto: 'oath' },
+      ],
+    },
+    why2: {
+      text: '知らん。だが門は開いている。二百年、誰の前でも開いていた。……行くなら、今日でも構わん。',
       options: [{ text: '戻る', goto: 'start' }],
     },
     refuse: {
@@ -282,6 +344,25 @@ export const DIALOGUE = {
     },
     waste: {
       text: '王冠が砕けたのはここ。火は消えず、灰は積もらず、死者は歩く。……三つとも、同じ理由なんだと思う。',
+      options: [
+        { text: 'その理由とは', goto: 'why' },
+        { text: '灰纏いとは', goto: 'clad' },
+        { text: '戻る', goto: 'start' },
+      ],
+    },
+    why: {
+      text: '終わっていないから。火は燃え尽きるまでが火で、灰は積もるまでが灰で、人は死ぬまでが人。……全部、途中で止められてる。誰かが握ったままなの。',
+      options: [{ text: '戻る', goto: 'waste' }],
+    },
+    clad: {
+      text: '灰を吸って生きる人。焦土でしか呼吸ができなくなる代わりに、灰に殺されない。……姉がそう。わたしもそう。もう外には出られないわ。',
+      options: [
+        { text: '姉は', goto: 'sister' },
+        { text: '戻る', goto: 'waste' },
+      ],
+    },
+    sister: {
+      text: '灰の輪へ行った。「火を消してくる」と言って。……止めなかったのは、わたしも同じことを考えていたから。',
       options: [{ text: '戻る', goto: 'start' }],
     },
     done: {

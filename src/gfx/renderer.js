@@ -32,16 +32,16 @@ import { Noise2D } from '../core/rng.js';
 //  Atmosphere keyframes: [hour, sunColor, skyTop, skyHorizon, ground, fog, fogSun, exposure]
 // ---------------------------------------------------------------------------
 
-const SKY_KEYS = [
-  { h: 0.0, sun: [0.10, 0.13, 0.26], top: [0.018, 0.028, 0.070], hor: [0.055, 0.070, 0.125], gnd: [0.030, 0.036, 0.055], fog: [0.055, 0.070, 0.120], fogSun: [0.10, 0.12, 0.22], amb: 0.30, exposure: 1.55 },
-  { h: 4.6, sun: [0.16, 0.17, 0.30], top: [0.035, 0.055, 0.120], hor: [0.140, 0.120, 0.150], gnd: [0.050, 0.052, 0.062], fog: [0.130, 0.120, 0.150], fogSun: [0.30, 0.20, 0.22], amb: 0.36, exposure: 1.45 },
+export const SKY_KEYS = [
+  { h: 0.0, sun: [0.20, 0.22, 0.32], top: [0.038, 0.050, 0.088], hor: [0.090, 0.100, 0.140], gnd: [0.058, 0.060, 0.072], fog: [0.090, 0.100, 0.135], fogSun: [0.16, 0.18, 0.26], amb: 0.52, exposure: 1.62 },
+  { h: 4.6, sun: [0.26, 0.27, 0.36], top: [0.055, 0.072, 0.135], hor: [0.170, 0.150, 0.175], gnd: [0.075, 0.076, 0.084], fog: [0.160, 0.150, 0.175], fogSun: [0.34, 0.26, 0.28], amb: 0.56, exposure: 1.50 },
   { h: 6.2, sun: [1.22, 0.58, 0.31], top: [0.120, 0.190, 0.360], hor: [0.720, 0.420, 0.290], gnd: [0.150, 0.130, 0.120], fog: [0.560, 0.390, 0.320], fogSun: [1.20, 0.62, 0.34], amb: 0.55, exposure: 1.10 },
   { h: 8.0, sun: [1.12, 0.90, 0.68], top: [0.180, 0.320, 0.580], hor: [0.640, 0.640, 0.640], gnd: [0.230, 0.220, 0.200], fog: [0.620, 0.660, 0.700], fogSun: [1.05, 0.88, 0.70], amb: 0.80, exposure: 0.92 },
   { h: 12.0, sun: [1.10, 1.05, 0.94], top: [0.190, 0.370, 0.700], hor: [0.660, 0.740, 0.840], gnd: [0.300, 0.300, 0.280], fog: [0.640, 0.720, 0.820], fogSun: [1.00, 0.96, 0.86], amb: 1.00, exposure: 0.86 },
   { h: 16.5, sun: [1.14, 0.95, 0.73], top: [0.180, 0.330, 0.640], hor: [0.700, 0.660, 0.620], gnd: [0.280, 0.260, 0.230], fog: [0.660, 0.660, 0.680], fogSun: [1.10, 0.90, 0.66], amb: 0.86, exposure: 0.90 },
   { h: 18.6, sun: [1.38, 0.53, 0.25], top: [0.140, 0.180, 0.340], hor: [0.860, 0.400, 0.230], gnd: [0.170, 0.130, 0.110], fog: [0.620, 0.360, 0.270], fogSun: [1.45, 0.55, 0.24], amb: 0.52, exposure: 1.10 },
-  { h: 20.2, sun: [0.42, 0.28, 0.34], top: [0.045, 0.060, 0.130], hor: [0.220, 0.140, 0.170], gnd: [0.070, 0.065, 0.075], fog: [0.200, 0.150, 0.180], fogSun: [0.50, 0.26, 0.24], amb: 0.38, exposure: 1.45 },
-  { h: 24.0, sun: [0.10, 0.13, 0.26], top: [0.018, 0.028, 0.070], hor: [0.055, 0.070, 0.125], gnd: [0.030, 0.036, 0.055], fog: [0.055, 0.070, 0.120], fogSun: [0.10, 0.12, 0.22], amb: 0.30, exposure: 1.55 },
+  { h: 20.2, sun: [0.48, 0.36, 0.40], top: [0.060, 0.075, 0.140], hor: [0.240, 0.165, 0.195], gnd: [0.090, 0.086, 0.094], fog: [0.225, 0.180, 0.205], fogSun: [0.54, 0.32, 0.30], amb: 0.55, exposure: 1.48 },
+  { h: 24.0, sun: [0.20, 0.22, 0.32], top: [0.038, 0.050, 0.088], hor: [0.090, 0.100, 0.140], gnd: [0.058, 0.060, 0.072], fog: [0.090, 0.100, 0.135], fogSun: [0.16, 0.18, 0.26], amb: 0.52, exposure: 1.62 },
 ];
 
 function lerpArr(a, b, t) {
@@ -76,13 +76,13 @@ export const QUALITY = {
     particleCap: 700, aberration: 0.0,
   },
   medium: {
-    name: '中', resScale: 0.80, shadowSize: 1024, shadowRange: 70, viewDistance: 560,
-    grassRadius: 36, grassCell: 1.05, grassBlades: 1, bloom: true, propDistance: 380,
+    name: '中', resScale: 0.80, shadowSize: 1024, shadowRange: 70, viewDistance: 450,
+    grassRadius: 36, grassCell: 1.05, grassBlades: 1, bloom: true, propDistance: 300,
     particleCap: 1400, aberration: 0.010,
   },
   high: {
-    name: '高', resScale: 1.0, shadowSize: 2048, shadowRange: 88, viewDistance: 760,
-    grassRadius: 50, grassCell: 0.85, grassBlades: 2, bloom: true, propDistance: 520,
+    name: '高', resScale: 1.0, shadowSize: 2048, shadowRange: 88, viewDistance: 620,
+    grassRadius: 50, grassCell: 0.85, grassBlades: 2, bloom: true, propDistance: 420,
     particleCap: 2600, aberration: 0.016,
   },
 };
@@ -178,6 +178,7 @@ export class Renderer {
 
     this.exposure = 1.0;
     this.saturation = 1.05;
+    this.contrast = 1.18;
     this.tint = [1, 1, 1];
     this.damageFlash = 0;
     this.deathFade = 0;
@@ -291,11 +292,26 @@ export class Renderer {
 
     this.night = 1 - saturate((this.sunDir.y + 0.16) / 0.30);
 
+    // Thin air at altitude: less atmosphere overhead means a deeper zenith and
+    // weaker haze. Above the snowline this is what stops a white peak under a
+    // white sky from collapsing into one flat tone.
+    const alt = saturate((this.camera.pos.y - 55) / 190);
+    if (alt > 0.001) {
+      const deepen = 1 - 0.52 * alt;
+      const hazeCut = 1 - 0.30 * alt;
+      sky.top = [sky.top[0] * deepen * 0.94, sky.top[1] * deepen * 0.97, sky.top[2] * deepen];
+      sky.hor = [sky.hor[0] * hazeCut, sky.hor[1] * hazeCut, sky.hor[2] * (1 - 0.18 * alt)];
+      sky.fog = [sky.fog[0] * hazeCut, sky.fog[1] * hazeCut, sky.fog[2] * hazeCut];
+      // And the eye stops down on a snowfield — without this the peaks blow
+      // out to paper white and lose every trace of form.
+      sky.exposure *= 1 - 0.26 * alt;
+    }
+
     // When the sun is below the horizon, light the world from the moon.
     if (this.sunDir.y < 0.02) {
       this.lightDir = this.moonDir;
-      this.lightColor = [0.16 * (1), 0.20, 0.34];
-      this.shadowStrength = 0.35;
+      this.lightColor = [0.42, 0.46, 0.60];
+      this.shadowStrength = 0.55;
     } else {
       this.lightDir = this.sunDir;
       this.lightColor = sky.sun;
@@ -460,6 +476,7 @@ export class Renderer {
     const fy = scene.focusY !== undefined ? scene.focusY : cam.target.y;
     this._updateLightMatrix(fx, fy, fz);
 
+    glw.setTag('shadow');
     glw.bindTarget(this.shadow);
     gl.colorMask(true, true, true, true);
     gl.clearColor(1, 1, 1, 1);
@@ -473,7 +490,7 @@ export class Renderer {
 
     let p = glw.use(this.progShadowTerr);
     glw.umat(p, 'uLightMatrix', this.lightMatrix);
-    scene.terrain.draw(p, true);
+    scene.terrain.draw(p, true, this._lightTarget, this.quality.shadowRange);
 
     p = glw.use(this.progShadowInst);
     glw.umat(p, 'uLightMatrix', this.lightMatrix);
@@ -495,6 +512,7 @@ export class Renderer {
     glw.bindTexture(2, this.shadow.texture);
     glw.bindTexture(3, this.cloudTex);
 
+    glw.setTag('terrain');
     p = glw.use(this.progTerrain);
     glw.umat(p, 'uViewProj', cam.viewProj);
     this._applyCommon(p, time);
@@ -506,6 +524,7 @@ export class Renderer {
     glw.u1f(p, 'uWetness', this.weather.wetness);
     scene.terrain.draw(p, false);
 
+    glw.setTag('instances');
     p = glw.use(this.progInstance);
     glw.umat(p, 'uViewProj', cam.viewProj);
     this._applyCommon(p, time);
@@ -513,6 +532,7 @@ export class Renderer {
 
     if (scene.grassBatch && scene.grassBatch.count > 0) {
       gl.disable(gl.CULL_FACE);
+    glw.setTag('grass');
       p = glw.use(this.progGrass);
       glw.umat(p, 'uViewProj', cam.viewProj);
       this._applyCommon(p, time);
@@ -527,6 +547,7 @@ export class Renderer {
 
     // ---- 3. sky ------------------------------------------------------------
     gl.depthMask(false);
+    glw.setTag('sky');
     p = glw.use(this.progSky);
     glw.umat(p, 'uInvViewProj', cam.invViewProj);
     glw.u3f(p, 'uSunDir', this.sunDir.x, this.sunDir.y, this.sunDir.z);
@@ -546,6 +567,7 @@ export class Renderer {
     // ---- 4. water ----------------------------------------------------------
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    glw.setTag('water');
     p = glw.use(this.progWater);
     glw.umat(p, 'uViewProj', cam.viewProj);
     this._applyCommon(p, time);
@@ -553,13 +575,14 @@ export class Renderer {
     glw.u1f(p, 'uNight', this.night);
     glw.u3f(p, 'uWaterShallow', ...(pal.waterShallow || [0.18, 0.34, 0.36]));
     glw.u3f(p, 'uWaterDeep', ...(pal.waterDeep || [0.045, 0.10, 0.14]));
-    scene.terrain.drawWater(p, cam.pos.x, cam.pos.z, this.quality.viewDistance);
+    scene.terrain.drawWater(p, cam.pos.x, cam.pos.z, this.quality.viewDistance, cam.frustum);
 
     // ---- 5. particles ------------------------------------------------------
     if (scene.particles) {
       const n = scene.particles.pack();
       if (n > 0) {
         gl.depthMask(false);
+    glw.setTag('particles');
         p = glw.use(this.progParticle);
         glw.umat(p, 'uViewProj', cam.viewProj);
         glw.u3f(p, 'uCamRight', cam.right.x, cam.right.y, cam.right.z);
@@ -578,6 +601,68 @@ export class Renderer {
     this._post(time, dt);
   }
 
+  /**
+   * Re-run the composite into a small offscreen target and describe the result
+   * statistically.
+   *
+   * Judging "does this look good" by eye does not scale and does not regress-
+   * test. Mean luminance, contrast, saturation and the fraction of pixels
+   * crushed to black or clipped to white do: a frame that is blown out, muddy,
+   * flat or desaturated shows up as a number that moved.
+   *
+   * It has to go through its own target because the default framebuffer is not
+   * readable after the compositor has presented it — reading it back gives a
+   * cleared buffer, which silently reports every frame as pure black.
+   */
+  readbackStats(stride = 1) {
+    const glw = this.glw;
+    const gl = glw.gl;
+    if (!this.captureTarget) {
+      this.captureTarget = glw.createRenderTarget(320, 180, { depth: false });
+    }
+    const rt = this.captureTarget;
+    const w = rt.width, h = rt.height;
+
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.BLEND);
+    glw.bindTarget(rt);
+    this._composite(this._lastCompositeTime || 0);
+
+    if (!this._readBuf || this._readBuf.length < w * h * 4) {
+      this._readBuf = new Uint8Array(w * h * 4);
+    }
+    const buf = this._readBuf;
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+    glw.bindTarget(null);
+    gl.enable(gl.DEPTH_TEST);
+
+    let n = 0, sum = 0, sumSq = 0, sat = 0, clipped = 0, crushed = 0;
+    let rSum = 0, gSum = 0, bSum = 0;
+    const step = stride * 4;
+    for (let i = 0; i < w * h * 4; i += step) {
+      const r = buf[i] / 255, g = buf[i + 1] / 255, b = buf[i + 2] / 255;
+      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      sum += lum;
+      sumSq += lum * lum;
+      sat += mx > 0.001 ? (mx - mn) / mx : 0;
+      if (mx > 0.995) clipped++;
+      if (mx < 0.02) crushed++;
+      rSum += r; gSum += g; bSum += b;
+      n++;
+    }
+    const mean = sum / n;
+    return {
+      pixels: n,
+      meanLuma: mean,
+      contrast: Math.sqrt(Math.max(0, sumSq / n - mean * mean)),
+      saturation: sat / n,
+      clippedRatio: clipped / n,
+      crushedRatio: crushed / n,
+      channelBalance: [rSum / n, gSum / n, bSum / n],
+    };
+  }
+
   _drawFullscreen(prog) {
     const gl = this.glw.gl;
     gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuf);
@@ -586,11 +671,12 @@ export class Renderer {
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     this.glw.vertexAttribDivisorFn(loc, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    this.glw.drawCalls++;
+    this.glw.countDraw();
   }
 
   _post(time, dt) {
     const glw = this.glw;
+    glw.setTag('post');
     const gl = glw.gl;
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.BLEND);
@@ -620,6 +706,18 @@ export class Renderer {
     }
 
     glw.bindTarget(null);
+    this._lastCompositeTime = time;
+    this._compositeBloom = useBloom;
+    this._composite(time);
+
+    gl.enable(gl.DEPTH_TEST);
+    this.damageFlash = Math.max(0, this.damageFlash - dt * 2.6);
+  }
+
+  /** The final grade pass, factored out so a capture can replay it verbatim. */
+  _composite(time) {
+    const glw = this.glw;
+    const useBloom = this._compositeBloom;
     const p = glw.use(this.progComposite);
     glw.bindTexture(0, this.scene.color);
     glw.bindTexture(1, useBloom ? this.bloomA.color : this.scene.color);
@@ -633,13 +731,13 @@ export class Renderer {
     // does more for the mood than any amount of blue tinting.
     glw.u1f(p, 'uSaturation', this.saturation * (1 - this.night * 0.45));
     glw.u3f(p, 'uTint', this.tint[0], this.tint[1], this.tint[2]);
+    // Night keeps a little extra contrast: moonlit scenes read as flat murk
+    // otherwise, and the eye expects hard silhouettes after dark.
+    glw.u1f(p, 'uContrast', this.contrast + this.night * 0.06);
     glw.u1f(p, 'uAberration', this.quality.aberration);
     glw.u1f(p, 'uTime', time);
     glw.u1f(p, 'uDamage', this.damageFlash);
     glw.u1f(p, 'uDeath', this.deathFade);
     this._drawFullscreen(p);
-
-    gl.enable(gl.DEPTH_TEST);
-    this.damageFlash = Math.max(0, this.damageFlash - dt * 2.6);
   }
 }

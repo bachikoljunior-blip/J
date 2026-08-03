@@ -6,7 +6,12 @@
   "description": "黒鉄の刻印 — browser open-world action RPG",
   "scripts": {
     "start": "python3 -m http.server 8080",
-    "test": "node tools/smoke.mjs"
+    "test": "node tools/smoke.mjs",
+    "gameplay": "node tools/gameplay.mjs",
+    "audit": "node tools/audit.mjs",
+    "gate": "node tools/gate.mjs",
+    "lab": "node tools/grade-lab.mjs",
+    "gallery": "node tools/gallery.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.61.1"
