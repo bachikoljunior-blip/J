@@ -18,7 +18,8 @@
 const COMMON_UNIFORMS = `
 uniform vec3 uSunDir;        // points *toward* the sun
 uniform vec3 uSunColor;
-uniform vec3 uSkyColor;
+uniform vec3 uSkyColor;      // zenith irradiance
+uniform vec3 uHorizonColor;  // horizon-band irradiance
 uniform vec3 uGroundColor;
 uniform vec3 uFogColor;
 uniform vec3 uFogSunColor;
@@ -169,15 +170,30 @@ vec3 applyLighting(vec3 albedo, vec3 N, vec3 worldPos, float shadow, float ao, v
   vec3 direct = uSunColor * wrapped * shadow;
   vec3 spec = specularGGX(N, V, uSunDir, F0, rough) * uSunColor * shadow;
 
-  // Hemispheric ambient irradiance.
+  // Ambient irradiance from a three-band sky: zenith, horizon, ground.
+  //
+  // A two-band zenith-to-ground lerp has no term for the horizon, and the
+  // horizon band is where most of the sky's energy sits at exactly the hours
+  // that matter. At dusk the strip above the treeline is several times
+  // brighter than the zenith and it is the *only* light a forest floor still
+  // receives once the sun is down; ignoring it is why shadowed geometry fell
+  // to near-black under a sky that was still burning orange. It also splits
+  // the ambient by hue — cool from above, warm from the side — so a trunk and
+  // the ground beside it stop being the same flat wash.
   float hemi = N.y * 0.5 + 0.5;
-  vec3 ambient = mix(uGroundColor, uSkyColor, hemi) * ao;
+  vec3 vertical = mix(uGroundColor, uSkyColor, hemi);
+  // Every surface collects some of the band; a side-on one collects most.
+  float band = 0.34 + 0.30 * (1.0 - abs(N.y));
+  vec3 ambIrr = mix(vertical, uHorizonColor, band);
+  vec3 ambient = ambIrr * ao;
 
   // Ambient specular. Without this, metal in shadow is just dark plastic — the
-  // sky is the main light source for a polished surface most of the time.
+  // sky is the main light source for a polished surface most of the time. It
+  // reflects the horizon more than the zenith at the glancing angles where it
+  // is strongest, which is what makes a low sun read on a blade.
   float ndv = max(dot(N, V), 0.0);
   vec3 ambF = F0 + (max(vec3(1.0 - rough), F0) - F0) * pow(1.0 - ndv, 5.0);
-  vec3 ambSpec = uSkyColor * ambF * (1.0 - rough * 0.82) * ao;
+  vec3 ambSpec = mix(uSkyColor, uHorizonColor, 0.55) * ambF * (1.0 - rough * 0.82) * ao;
 
   // Point lights: campfires, braziers, graces. Four is enough because we
   // upload only the nearest four to the camera each frame.
@@ -200,7 +216,10 @@ vec3 applyLighting(vec3 albedo, vec3 N, vec3 worldPos, float shadow, float ao, v
   // Rim: sky light wrapping around the silhouette.
   float rim = pow(1.0 - ndv, 3.0) * brdf.z;
 
-  return diffAlbedo * (direct + ambient + point) + spec + ambSpec + uSkyColor * rim * 0.6;
+  // The rim is sky wrapping the silhouette, so it takes the same three-band
+  // sky the ambient does — at dusk that is a warm edge, not a blue one.
+  vec3 rimCol = mix(uSkyColor, uHorizonColor, 0.6);
+  return diffAlbedo * (direct + ambient + point) + spec + ambSpec + rimCol * rim * 0.6;
 }
 
 vec3 applyFog(vec3 color, vec3 worldPos) {
@@ -220,7 +239,16 @@ vec3 applyFog(vec3 color, vec3 worldPos) {
   float f = 1.0 - exp(-max(density, 0.0));
   vec3 dir = dist > 0.001 ? toCam / dist : vec3(0.0, 0.0, 1.0);
   float sunAmount = max(dot(dir, uSunDir), 0.0);
-  vec3 fogCol = mix(uFogColor, uFogSunColor, pow(sunAmount, 6.0));
+  // Aerial perspective takes its colour from the sky standing behind it, and
+  // the sky is not one colour: the band right at the horizon carries far more
+  // scattered light than the air a few degrees above it. Flattening that into
+  // one tone is what collapses the far half of a landscape into a single
+  // value — the haze over a valley floor and the haze against the ridge above
+  // it come out identical, and every landform past the mid distance stops
+  // separating from its neighbour.
+  float upness = clamp(dir.y * 1.6 + 0.34, 0.0, 1.0);
+  vec3 fogCol = uFogColor * mix(1.12, 0.80, upness);
+  fogCol = mix(fogCol, uFogSunColor, pow(sunAmount, 6.0));
   return mix(color, fogCol, clamp(f, 0.0, 1.0));
 }
 `;
@@ -329,7 +357,7 @@ attribute vec3 aPos;
 attribute vec3 aNormal;
 attribute vec4 aSplat;      // r=ground g=rock b=sand/dirt a=snow
 attribute vec3 aTint;       // per-vertex biome ground colour
-attribute vec2 aExtra;      // x = ambient occlusion, y = road amount
+attribute vec2 aExtra;      // x = multi-scale relief (0.74 = flat), y = road
 
 uniform mat4 uViewProj;
 uniform vec3 uChunkOffset;
@@ -441,6 +469,16 @@ void main() {
   N = triplanarNormal(vWorld, N, triW, 0.030, bump * 0.85);
   N = triplanarNormal(vWorld, N, triW, 0.105, bump * 0.95 * midFade);
   N = triplanarNormal(vWorld, N, triW, 0.33, bump * detail);
+
+  // Relief response. vExtra.x is the terrain's own convexity at three scales,
+  // so it knows a ridge from a hollow, and ground is not one material laid
+  // flat: hollows collect damp soil and leaf litter and sit in their own
+  // shade, shoulders and ridges are wind-scoured, drier and paler. Tying the
+  // albedo to it as well as the ambient is what makes the shape of the land
+  // readable at midday, when the light itself has nothing to say about it.
+  float relief = clamp((vExtra.x - 0.74) * 2.6, -1.0, 1.0);
+  albedo *= 1.0 + relief * 0.15;
+  albedo = mix(albedo, albedo * vec3(0.86, 0.93, 0.98), max(-relief, 0.0) * 0.40);
 
   // Roads: packed dirt with wheel-rut noise. The blend starts late so the
   // path has soft, trodden-looking edges instead of a painted stripe.
@@ -1052,6 +1090,14 @@ void main() {
 //  Half resolution, eight taps, spiral kernel rotated per pixel by a hash. The
 //  rotation turns banding into noise, and the blur pass turns noise into
 //  softness — which is the right trade at this sample count.
+//
+//  The eight taps are split across two radii. One radius can only find one
+//  size of feature: a metre-wide kernel finds the hollow and the shaded side
+//  of a boulder and completely misses the contact line where that boulder
+//  meets the ground, the fold under a cloak hem, the gap beneath a step. Those
+//  short-range creases are what make an object sit *in* the scene rather than
+//  on top of it, and they are also the only occlusion fine enough to still
+//  vary from one patch of screen to the next.
 // ---------------------------------------------------------------------------
 
 export const AO_FS = `
@@ -1076,6 +1122,35 @@ vec3 viewPos(vec2 uv, float z) {
   return vec3(ndc * uProjScale * z, -z);
 }
 
+/**
+ * Mean horizon occlusion of four spiral taps at one scale.
+ *
+ * The world radius the kernel stands for drives the range check, which is what
+ * keeps a tight kernel from reporting a distant silhouette as a crease and
+ * drawing a halo around it.
+ */
+float occludeAt(vec2 uv0, vec3 p, vec3 N, vec2 rad, vec2 rot, float world) {
+  float occ = 0.0;
+  for (int i = 0; i < 4; i++) {
+    float fi = float(i);
+    float a = fi * 2.3999632;              // golden angle: even coverage, no lattice
+    float r = sqrt((fi + 0.5) / 4.0);
+    vec2 d = vec2(cos(a), sin(a));
+    vec2 off = vec2(d.x * rot.x - d.y * rot.y, d.x * rot.y + d.y * rot.x) * r * rad;
+    vec2 uv = uv0 + off;
+    float sz = linearDepth(uv);
+    vec3 sp = viewPos(uv, sz);
+    vec3 v = sp - p;
+    float len = length(v);
+    if (len < 1e-5) continue;
+    float ndv = dot(N, v / len);
+    // Range check: a sample far in front is a different object, not a fold.
+    float range = world / (world + max(len - world, 0.0));
+    occ += max(ndv - 0.06, 0.0) * range;
+  }
+  return occ * 0.25;
+}
+
 void main() {
   float z = linearDepth(vUV);
   // Sky pixels sit at the far plane and must not be occluded, or the horizon
@@ -1094,31 +1169,29 @@ void main() {
   vec3 N = normalize(cross(dx, dy));
 
   float ang = hash12(gl_FragCoord.xy) * 6.2831853;
-  float ca = cos(ang), sa = sin(ang);
+  vec2 rot = vec2(cos(ang), sin(ang));
   // UV radius subtended by a world-space sphere of uRadius at this depth. The
   // per-axis divide is what keeps the kernel circular on a non-square screen.
   vec2 rad = uRadius / (max(z, 0.5) * uProjScale) * 0.5;
   rad = min(rad, vec2(0.06));   // cap: a huge kernel up close is just noise
 
-  float occ = 0.0;
-  for (int i = 0; i < 8; i++) {
-    float fi = float(i);
-    float a = fi * 2.3999632;              // golden angle: even coverage, no lattice
-    float r = sqrt((fi + 0.5) / 8.0);
-    vec2 d = vec2(cos(a), sin(a));
-    vec2 off = vec2(d.x * ca - d.y * sa, d.x * sa + d.y * ca) * r * rad;
-    vec2 uv = vUV + off;
-    float sz = linearDepth(uv);
-    vec3 sp = viewPos(uv, sz);
-    vec3 v = sp - p;
-    float len = length(v);
-    if (len < 1e-4) continue;
-    float ndv = dot(N, v / len);
-    // Range check: a sample far in front is a different object, not a fold.
-    float range = uRadius / (uRadius + max(len - uRadius, 0.0));
-    occ += max(ndv - 0.06, 0.0) * range;
-  }
-  occ = clamp(1.0 - occ / 8.0 * uStrength * 2.4, 0.0, 1.0);
+  // The tight scale is a quarter of the radius, floored at roughly one texel:
+  // below that it would sample its own pixel and report nothing. Its range
+  // check shrinks with it, so it stays a crease finder and never turns into an
+  // outline around distant geometry.
+  float tightWorld = uRadius * 0.24;
+  vec2 radTight = max(rad * 0.24, uTexel * 1.2);
+
+  // The tight kernel is rotated a further quarter turn so its four taps do not
+  // land along the same directions as the wide one's.
+  vec2 rotT = vec2(-rot.y, rot.x);
+  // Weights: the wide scale keeps roughly the strength the single-scale
+  // version had on open ground, and the tight one adds to it only where there
+  // is something within a handful of centimetres to occlude. So the broad
+  // wash barely moves and contacts get half again as dark.
+  float occ = occludeAt(vUV, p, N, rad, rot, uRadius) * 1.86
+            + occludeAt(vUV, p, N, radTight, rotT, tightWorld) * 1.56;
+  occ = clamp(1.0 - occ * uStrength, 0.0, 1.0);
   gl_FragColor = vec4(occ, occ, occ, 1.0);
 }
 `;
@@ -1184,7 +1257,8 @@ uniform float uBloomStrength;
 uniform float uExposure;
 uniform float uVignette;
 uniform float uSaturation;
-uniform float uContrast;      // S-curve strength around a mid-grey pivot
+uniform float uContrast;      // S-curve strength around the scene's midtone
+uniform float uContrastPivot; // where that midtone sits for this time of day
 uniform vec3 uTint;
 uniform float uAberration;
 uniform float uTime;
@@ -1224,7 +1298,20 @@ void main() {
   // second geometry pass.
   if (uAOAmount > 0.001) {
     float ao = texture2D(uAO, uv).r;
-    scene *= mix(1.0, ao, uAOAmount);
+    // Multi-bounce lift (Jimenez et al.). Single-scattering occlusion assumes
+    // the light that enters a crease never leaves it, which is why strong AO
+    // reads as smeared dirt: it drives interiors to a colourless hole. Light
+    // actually bounces off the walls of the crease, so the darkening saturates
+    // well above black and carries the surface's own colour with it. The
+    // radiance already in the buffer stands in for albedo — a bright surface
+    // bounces, a dark one does not — which lets the occlusion be strong enough
+    // to model contact without punching holes in the shadows.
+    vec3 alb = clamp(scene / (scene + 1.0), vec3(0.04), vec3(1.0));
+    vec3 f1 = 2.0404 * alb - 0.3324;
+    vec3 f2 = -4.7951 * alb + 0.6417;
+    vec3 f3 = 2.7552 * alb + 0.6903;
+    vec3 mb = max(vec3(ao), ((ao * f1 + f2) * ao + f3) * ao);
+    scene *= mix(vec3(1.0), mb, uAOAmount);
   }
 
   vec3 bloom = texture2D(uBloom, uv).rgb;
@@ -1238,19 +1325,29 @@ void main() {
   color = mix(vec3(lum), color, uSaturation);
   color *= uTint;
 
-  // Contrast about a mid-grey pivot. ACES alone leaves flat subjects — a noon
-  // meadow, a snowfield — sitting in a narrow band; this is the print curve
-  // that pulls the shadows down and the highlights up.
+  // Contrast about the scene's midtone. ACES alone leaves flat subjects — a
+  // noon meadow, a snowfield — sitting in a narrow band; this is the print
+  // curve that pulls the shadows down and the highlights up.
   //
   // Applied to luminance and fed back as a gain so every channel scales
   // together: an RGB-space contrast would drag saturation along with it and
   // turn a strong curve into an oversaturated one.
-  const float PIVOT = 0.30;
+  //
+  // The pivot has to follow the exposure, which is why it is a uniform. A
+  // fixed 0.30 is right for daylight and wrong after dark: at night nearly
+  // every pixel sits below it, so the S-curve stops being an S and becomes a
+  // plain multiply that squeezes the whole image into a handful of 8-bit
+  // levels. That is precisely how a moonlit ridge ends up reading as paper.
+  float pivot = max(uContrastPivot, 0.02);
   float l0 = max(dot(color, vec3(0.2126, 0.7152, 0.0722)), 1e-4);
-  float l1 = (l0 - PIVOT) * uContrast + PIVOT;
-  // Soft toe: shadows keep a fraction of their original level instead of
-  // clamping flat to black, which is what a hard curve does to a night scene.
-  l1 = max(l1, l0 * 0.35);
+  float l1 = (l0 - pivot) * uContrast + pivot;
+  // Soft toe. This used to clamp to l0 * 0.35, which below the crossover is a
+  // near-3x *compression* of the shadows: the range a night or forest-interior
+  // frame actually lives in got folded into two or three output levels, and
+  // the bottom of it fell straight through the black point. A 0.72 slope still
+  // maps black to black — nothing is lifted into milk, no black-level offset —
+  // but it leaves the near-blacks separable from each other.
+  l1 = max(l1, l0 * 0.72);
   color = clamp(color * (l1 / l0), 0.0, 1.0);
 
   // Damage / death overlays.

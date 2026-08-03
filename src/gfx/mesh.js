@@ -256,46 +256,322 @@ export function buildRock(subdiv = 1, jitter = 0.22, seedFn = Math.random) {
 }
 
 /**
- * A tuft of three tapered blades fanned around the vertical axis.
+ * A tuft of five blades fanned around the vertical axis — five triangles.
  *
- * A single flat quad reads as a paper triangle from any angle the camera
- * happens to take; three crossed blades read as a clump of grass from all of
- * them, for 12 triangles instead of 4. That trade lets the scatter run at a
- * third of the instance count for a better result.
+ * This used to be three curved ribbons of five triangles each. Fifteen
+ * triangles per tuft, at fifty to a hundred thousand tufts a frame, was the
+ * single largest item in the budget, and it bought a curve nobody can see: a
+ * 30 cm blade is a couple of pixels wide past three metres.
+ *
+ * One triangle per blade is the whole blade — base pair, tip point — so five
+ * blades give *more* silhouette than the old three for a third of the cost.
+ * The grass pass draws with culling disabled and flips the normal toward the
+ * viewer, so a single-sided triangle is safe here in a way it would not be in
+ * the instanced pass. The normal is tilted 0.3 upward rather than left purely
+ * horizontal so a field does not go black under a high sun.
  */
 export function buildGrassTuft() {
   const m = new MeshData();
+  // Yaws are spread irregularly rather than evenly: an even fan reads as a
+  // rosette, and a hundred rosettes read as a pattern.
   const blades = [
-    { yaw: 0.0, lean: 0.10, h: 1.00, w: 1.00 },
-    { yaw: 1.15, lean: -0.16, h: 0.82, w: 0.85 },
-    { yaw: 2.30, lean: 0.22, h: 0.90, w: 0.78 },
+    { yaw: 0.00, w: 0.50, h: 1.00, reach: 0.06, skew: 0.10 },
+    { yaw: 1.18, w: 0.45, h: 0.86, reach: 0.22, skew: -0.14 },
+    { yaw: 2.15, w: 0.42, h: 0.94, reach: 0.14, skew: 0.16 },
+    { yaw: 3.55, w: 0.38, h: 0.74, reach: 0.30, skew: -0.08 },
+    { yaw: 4.90, w: 0.34, h: 0.88, reach: 0.18, skew: 0.12 },
   ];
-  const widths = [0.5, 0.36, 0.17, 0.0];
-  const heights = [0, 0.38, 0.74, 1.0];
-
   for (const b of blades) {
     const c = Math.cos(b.yaw), s = Math.sin(b.yaw);
-    const nx = -s, nz = c;   // blade faces perpendicular to its own axis
-    const rows = [];
-    for (let i = 0; i < 4; i++) {
-      const w = widths[i] * b.w;
-      const y = heights[i] * b.h;
-      // Lean grows with height so the blade curves rather than tilting rigidly.
-      const bend = b.lean * heights[i] * heights[i];
-      if (w === 0) {
-        rows.push([m.addVertex(c * bend, y, s * bend, nx, 0.25, nz)]);
-      } else {
-        rows.push([
-          m.addVertex(c * (bend - w), y, s * (bend - w), nx, 0.25, nz),
-          m.addVertex(c * (bend + w), y, s * (bend + w), nx, 0.25, nz),
-        ]);
-      }
-    }
-    m.addQuad(rows[0][0], rows[0][1], rows[1][1], rows[1][0]);
-    m.addQuad(rows[1][0], rows[1][1], rows[2][1], rows[2][0]);
-    m.addTri(rows[2][0], rows[2][1], rows[3][0]);
+    const px = -s, pz = c;          // across the blade
+    let nx = px, ny = 0.30, nz = pz;
+    const l = Math.hypot(nx, ny, nz);
+    nx /= l; ny /= l; nz /= l;
+    const bx = c * 0.05, bz = s * 0.05;
+    const a0 = m.addVertex(bx + px * b.w, 0, bz + pz * b.w, nx, ny, nz);
+    const a1 = m.addVertex(bx - px * b.w, 0, bz - pz * b.w, nx, ny, nz);
+    const t = m.addVertex(
+      bx + c * b.reach + px * b.skew, b.h, bz + s * b.reach + pz * b.skew,
+      nx, ny, nz);
+    m.addTri(a0, a1, t);
   }
   return m;
+}
+
+// ---------------------------------------------------------------------------
+//  Ground clutter
+//
+//  Most of every frame is ground, and bare ground is what reads as unfinished
+//  however good the terrain shading is: real plains carry rubble, drifts,
+//  deadwood and scrub the whole way to the horizon. These are the cheapest
+//  objects that still catch light at a different angle from the ground they
+//  sit on, which is what puts gradient into the mid distance — out there a
+//  ground texture is already sub-pixel and only silhouettes survive.
+//
+//  Ten to twenty-four triangles each, flat shaded so every facet is its own
+//  tone. All of them are closed and wound outward so back-face culling cannot
+//  open a hole in one, and all carry the blend attribute so a single batch can
+//  hold stone with a snow crust, or bark with a pale splintered core.
+// ---------------------------------------------------------------------------
+
+/**
+ * Flat-shaded triangle: the face normal is derived here and the vertices are
+ * duplicated rather than shared. Chipped stone and split wood are *made* of
+ * hard edges; smoothing them turns debris into clay.
+ * @param {MeshData} m
+ * @param {number[]} a [x, y, z]
+ * @param {number[]} b
+ * @param {number[]} c
+ * @param {number} [ba] blend slot for a (0 = primary colour, 1 = secondary)
+ * @param {number} [bb] blend slot for b
+ * @param {number} [bc] blend slot for c
+ */
+function flatTri(m, a, b, c, ba = 0, bb = ba, bc = ba) {
+  const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+  const vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+  let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+  const l = Math.hypot(nx, ny, nz) || 1;
+  nx /= l; ny /= l; nz /= l;
+  const i0 = m.useBlend(ba).addVertex(a[0], a[1], a[2], nx, ny, nz);
+  const i1 = m.useBlend(bb).addVertex(b[0], b[1], b[2], nx, ny, nz);
+  const i2 = m.useBlend(bc).addVertex(c[0], c[1], c[2], nx, ny, nz);
+  m.useBlend(0);
+  m.addTri(i0, i1, i2);
+}
+
+/** Flat quad; `bLow` applies to a and b, `bHigh` to c and d. */
+function flatQuad(m, a, b, c, d, bLow = 0, bHigh = bLow) {
+  flatTri(m, a, b, c, bLow, bLow, bHigh);
+  flatTri(m, a, c, d, bLow, bHigh, bHigh);
+}
+
+/**
+ * Horizontal ring of jittered points. Rings run *clockwise* seen from +Y: that
+ * is the convention under which (ring[i], ring[i+1], apexAbove) faces outward
+ * and (centre, ring[i], ring[i+1]) faces up, which is what every builder below
+ * relies on.
+ */
+function groundRing(n, cx, cz, radius, y, a0, rng, jitter = 0.3) {
+  const ring = [];
+  for (let i = 0; i < n; i++) {
+    const a = a0 - (i / n) * Math.PI * 2;
+    const r = radius * (1 - jitter + rng() * jitter * 2);
+    ring.push([cx + Math.cos(a) * r, y, cz + Math.sin(a) * r]);
+  }
+  return ring;
+}
+
+/**
+ * Closed rod from a to b, capped with a point at each end: a fallen branch, a
+ * long bone, a splintered stake. `4 * sides` triangles.
+ */
+function addRod(m, a, b, r0, r1, sides, blend = 0, tipBlend = blend) {
+  let dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
+  const len = Math.hypot(dx, dy, dz) || 1;
+  dx /= len; dy /= len; dz /= len;
+  // Any reference not parallel to the axis gives a usable ring basis.
+  const rx = Math.abs(dy) > 0.9 ? 1 : 0, ry = Math.abs(dy) > 0.9 ? 0 : 1;
+  // u = normalize(ref x d), v = d x u, so that cross(u, v) === d — the sense
+  // under which an increasing ring angle winds outward.
+  let ux = ry * dz - 0 * dy, uy = 0 * dx - rx * dz, uz = rx * dy - ry * dx;
+  const ul = Math.hypot(ux, uy, uz) || 1;
+  ux /= ul; uy /= ul; uz /= ul;
+  const vx = dy * uz - dz * uy, vy = dz * ux - dx * uz, vz = dx * uy - dy * ux;
+  const inset = len * 0.12;
+  const ringAt = (t, r) => {
+    const cxp = a[0] + dx * t, cyp = a[1] + dy * t, czp = a[2] + dz * t;
+    const out = [];
+    for (let i = 0; i < sides; i++) {
+      const ang = (i / sides) * Math.PI * 2;
+      const ca = Math.cos(ang) * r, sa = Math.sin(ang) * r;
+      out.push([cxp + ux * ca + vx * sa, cyp + uy * ca + vy * sa, czp + uz * ca + vz * sa]);
+    }
+    return out;
+  };
+  const A = ringAt(inset, r0);
+  const B = ringAt(len - inset, r1);
+  for (let i = 0; i < sides; i++) {
+    const j = (i + 1) % sides;
+    flatQuad(m, A[i], A[j], B[j], B[i], blend, blend);
+  }
+  for (let i = 0; i < sides; i++) {
+    const j = (i + 1) % sides;
+    flatTri(m, B[i], B[j], b, blend, blend, tipBlend);
+    flatTri(m, A[j], A[i], a, blend, blend, tipBlend);
+  }
+}
+
+/**
+ * Shattered rock: three angular chips sharing one footprint. Scree at the foot
+ * of a cliff, pebble drifts on a path, snow-crusted stone on the peak — the
+ * apex of each chip takes the secondary colour, which is where a crust would
+ * sit. 15 triangles.
+ */
+export function buildClutterRock(rng) {
+  const m = new MeshData();
+  const n = 5;
+  for (let s = 0; s < 3; s++) {
+    const cx = (rng() - 0.5) * 0.62, cz = (rng() - 0.5) * 0.62;
+    const rad = 0.12 + rng() * 0.17;
+    const h = 0.30 + rng() * 0.68;
+    const ring = groundRing(n, cx, cz, rad, 0, rng() * 6.283, rng, 0.45);
+    // Off-centre apex: a split stone leans, a ball does not.
+    const apex = [cx + (rng() - 0.5) * rad, h, cz + (rng() - 0.5) * rad];
+    for (let i = 0; i < n; i++) flatTri(m, ring[i], ring[(i + 1) % n], apex, 0, 0, 1);
+  }
+  return m;
+}
+
+/**
+ * Fallen branch, one end propped off the ground the way deadwood actually
+ * lands. The tip takes the secondary colour for pale broken wood. 16 triangles.
+ */
+export function buildClutterWood(rng) {
+  const m = new MeshData();
+  const lift = 0.10 + rng() * 0.22;
+  addRod(m,
+    [-0.5, 0.42, (rng() - 0.5) * 0.3],
+    [0.5, 0.42 + lift, (rng() - 0.5) * 0.3],
+    0.42, 0.26, 4, 0, 1);
+  return m;
+}
+
+/**
+ * Dry scrub / tussock: five splayed blades, each drawn from both sides because
+ * the instanced pass culls back faces and a tussock the player walks behind
+ * must not blink out. 10 triangles.
+ */
+export function buildClutterScrub(rng) {
+  const m = new MeshData();
+  const blades = 5;
+  for (let i = 0; i < blades; i++) {
+    const a = (i / blades) * Math.PI * 2 + rng() * 0.6;
+    const c = Math.cos(a), s = Math.sin(a);
+    const px = -s, pz = c;
+    const w = 0.10 + rng() * 0.13;
+    const h = 0.55 + rng() * 0.45;
+    const reach = 0.10 + rng() * 0.36;
+    const bx = c * 0.06, bz = s * 0.06;
+    const A = [bx + px * w, 0, bz + pz * w];
+    const B = [bx - px * w, 0, bz - pz * w];
+    const T = [bx + c * reach, h, bz + s * reach];
+    flatTri(m, A, B, T, 0, 0, 1);
+    flatTri(m, B, A, T, 0, 0, 1);
+  }
+  return m;
+}
+
+/** Two weathered long bones lying where the carcass fell. 24 triangles. */
+export function buildClutterBone(rng) {
+  const m = new MeshData();
+  addRod(m,
+    [-0.46, 0.16, -0.24 + rng() * 0.1],
+    [0.42, 0.14, -0.02 + rng() * 0.1],
+    0.15, 0.12, 3, 0, 1);
+  addRod(m,
+    [-0.30 - rng() * 0.15, 0.13, 0.30],
+    [0.44, 0.19, 0.08 - rng() * 0.12],
+    0.12, 0.15, 3, 0, 1);
+  return m;
+}
+
+/**
+ * Wind-built drift — ash, snow, blown sand, silt against a bank. Smooth-shaded
+ * on purpose: it is the one piece of clutter that should read as a soft mass,
+ * and a smooth curved mound is what turns a single directional light into a
+ * whole tonal ramp across the ground. The crest carries the secondary colour,
+ * which is where sun catches the fresh material. 14 triangles.
+ */
+export function buildClutterDrift(rng) {
+  const m = new MeshData();
+  const N = 4;
+  const ridge = [], skirtA = [], skirtB = [];
+  for (let i = 0; i < N; i++) {
+    const t = i / (N - 1);
+    // Crest nearer one end and tailing off: wind piles asymmetrically, and a
+    // symmetric pillow reads as a bag of sand.
+    const prof = Math.sin(Math.PI * Math.pow(t, 0.78));
+    const h = (0.55 + rng() * 0.45) * prof + 0.02;
+    const wA = 0.5 * (0.35 + 0.65 * prof) * (0.8 + rng() * 0.4);   // windward, long
+    const wB = 0.5 * (0.22 + 0.5 * prof) * (0.8 + rng() * 0.4);    // lee, steep
+    const zc = (rng() - 0.5) * 0.08;
+    ridge.push(m.useBlend(1).addVertex(t - 0.5, h, zc - wB * 0.3, 0, 1, 0));
+    skirtA.push(m.useBlend(0).addVertex(t - 0.5, 0, zc + wA, 0, 1, 0));
+    skirtB.push(m.useBlend(0).addVertex(t - 0.5, 0, zc - wB, 0, 1, 0));
+  }
+  m.useBlend(0);
+  for (let i = 0; i < N - 1; i++) {
+    m.addQuad(skirtA[i], skirtA[i + 1], ridge[i + 1], ridge[i]);
+    m.addQuad(ridge[i], ridge[i + 1], skirtB[i + 1], skirtB[i]);
+  }
+  m.addTri(ridge[0], skirtB[0], skirtA[0]);
+  m.addTri(ridge[N - 1], skirtA[N - 1], skirtB[N - 1]);
+  m.computeSmoothNormals();
+  return m;
+}
+
+/**
+ * Cracked ground plate: a heaved slab of bedrock or baked mud, tilted so one
+ * edge stands proud. The top face takes the secondary colour — sun-bleached
+ * against the raw broken edge. 15 triangles.
+ */
+export function buildClutterSlab(rng) {
+  const m = new MeshData();
+  const n = 5;
+  const tilt = (rng() - 0.5) * 0.5;
+  const top = groundRing(n, 0, 0, 0.5, 1, rng() * 6.283, rng, 0.28);
+  let mid = 0;
+  for (const p of top) { p[1] = 1 + p[0] * tilt; mid += p[1]; }
+  mid /= n;
+  const bot = top.map((p) => [p[0] * 0.94, 0, p[2] * 0.94]);
+  for (let i = 0; i < n; i++) {
+    flatQuad(m, bot[i], bot[(i + 1) % n], top[(i + 1) % n], top[i], 0, 1);
+  }
+  const c = [0, mid, 0];
+  for (let i = 0; i < n; i++) flatTri(m, c, top[i], top[(i + 1) % n], 1, 1, 1);
+  return m;
+}
+
+/**
+ * Broken stump. Scaled tall it is a standing scorched snag, which is the
+ * silhouette the Cinderwaste is missing. The splintered core takes the
+ * secondary colour. 18 triangles.
+ */
+export function buildClutterStump(rng) {
+  const m = new MeshData();
+  const n = 6;
+  const base = groundRing(n, 0, 0, 0.5, 0, rng() * 6.283, rng, 0.18);
+  const top = [];
+  for (let i = 0; i < n; i++) {
+    const b = base[i];
+    const k = 0.60 + rng() * 0.16;
+    top.push([b[0] * k, 0.70 + rng() * 0.30, b[2] * k]);   // uneven, snapped rim
+  }
+  for (let i = 0; i < n; i++) {
+    flatQuad(m, base[i], base[(i + 1) % n], top[(i + 1) % n], top[i], 0, 0);
+  }
+  // The rim falls away to a low core, the way a trunk actually breaks.
+  const core = [(rng() - 0.5) * 0.16, 0.52 + rng() * 0.18, (rng() - 0.5) * 0.16];
+  for (let i = 0; i < n; i++) flatTri(m, core, top[i], top[(i + 1) % n], 1, 1, 1);
+  return m;
+}
+
+/**
+ * Every clutter mesh, keyed by the CLUTTER id foliage.js scatters. Kept here so
+ * the geometry and the id table cannot drift apart.
+ * @param {function(): number} rng
+ * @returns {Array<MeshData>}
+ */
+export function buildClutterMeshes(rng) {
+  return [
+    buildClutterRock(rng),
+    buildClutterWood(rng),
+    buildClutterScrub(rng),
+    buildClutterBone(rng),
+    buildClutterDrift(rng),
+    buildClutterSlab(rng),
+    buildClutterStump(rng),
+  ];
 }
 
 // ---------------------------------------------------------------------------

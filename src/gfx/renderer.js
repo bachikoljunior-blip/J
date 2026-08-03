@@ -81,13 +81,13 @@ export const QUALITY = {
     name: '中', resScale: 0.80, shadowSize: 1024, shadowRange: 70, viewDistance: 450,
     grassRadius: 38, grassCell: 0.90, grassBlades: 1, bloom: true, propDistance: 300,
     particleCap: 1400, aberration: 0.010, detailFade: 95, cheapSurface: false,
-    ao: 0.62, aoRadius: 0.85,
+    ao: 0.70, aoRadius: 0.85,
   },
   high: {
     name: '高', resScale: 1.0, shadowSize: 2048, shadowRange: 88, viewDistance: 620,
     grassRadius: 52, grassCell: 0.72, grassBlades: 2, bloom: true, propDistance: 420,
     particleCap: 2600, aberration: 0.016, detailFade: 150, cheapSurface: false,
-    ao: 0.72, aoRadius: 1.0,
+    ao: 0.82, aoRadius: 1.0,
   },
 };
 
@@ -322,15 +322,27 @@ export class Renderer {
     const sky = sampleSky(this.hour);
     this.sky = sky;
 
-    // Sun path: tilted circle so it rises in the east and sets in the west
-    // rather than passing straight overhead.
-    const ang = ((this.hour - 6) / 24) * TAU;
-    const tilt = 0.35;
-    const sx = Math.cos(ang);
-    const sy = Math.sin(ang);
-    this.sunDir.x = sx * Math.cos(tilt) - 0;
-    this.sunDir.y = sy;
-    this.sunDir.z = -sx * Math.sin(tilt) + 0.22;
+    // Sun path: solar geometry at a temperate latitude, not a circle through
+    // the zenith.
+    //
+    // The old path put the noon sun 78 degrees up, which is close to the worst
+    // possible key light for an open world. When the sun is nearly overhead the
+    // ground's own normal *is* the light vector, d(N·L)/d(tilt) goes to zero,
+    // and every bank, hollow, rut and normal map on the ground stops shading —
+    // the land turns into a painted plane between noon and mid-afternoon.
+    // Landing the sun at 52 degrees instead makes the same geometry model
+    // itself all day: slopes facing different ways separate in value, shadows
+    // have length, and a low-frequency landform reads as form rather than as
+    // colour. No open-world game lights its world from the zenith.
+    //
+    // hour angle, zero at solar noon; sunrise and sunset stay at 6 and 18 so
+    // the atmosphere keyframes still line up with the horizon crossings.
+    const hourAngle = ((this.hour - 12) / 24) * TAU;
+    const cosH = Math.cos(hourAngle), sinH = Math.sin(hourAngle);
+    const LAT = 0.66;   // ~38 degrees, so the noon sun tops out near 52
+    this.sunDir.x = -sinH;                  // rises toward +x, sets toward -x
+    this.sunDir.y = cosH * Math.cos(LAT);
+    this.sunDir.z = cosH * Math.sin(LAT);   // and leans to +z, the pole side
     v3norm(this.sunDir);
     this.moonDir.x = -this.sunDir.x;
     this.moonDir.y = -this.sunDir.y;
@@ -354,10 +366,24 @@ export class Renderer {
     }
 
     // When the sun is below the horizon, light the world from the moon.
+    //
+    // A dim, near-omnidirectional wash is not what a clear night looks like,
+    // and it is what a weak key plus a soft shadow adds up to: the moon stops
+    // being a light and becomes a uniform grey, geometry and normal maps have
+    // nothing to shade against, and a rock ridge at midnight comes out flatter
+    // than the same ridge at noon. There is no lit atmosphere at night to
+    // scatter moonlight into a fill, so the moon is in fact a *harder* key than
+    // the sun despite being far weaker — a lit side, a dark side and a crisp
+    // terminator are the whole of what gives a moonlit landscape its form.
+    //
+    // Ramping both with the depth of night also keeps the handover at dusk from
+    // stepping: the moon is at its weakest exactly where it takes over.
     if (this.sunDir.y < 0.02) {
+      const deep = saturate((-this.sunDir.y - 0.02) / 0.26);
+      const k = lerp(0.98, 1.46, deep);
       this.lightDir = this.moonDir;
-      this.lightColor = [0.42, 0.46, 0.60];
-      this.shadowStrength = 0.55;
+      this.lightColor = [0.36 * k, 0.44 * k, 0.68 * k];
+      this.shadowStrength = lerp(0.62, 0.90, deep);
     } else {
       this.lightDir = this.sunDir;
       this.lightColor = sky.sun;
@@ -424,6 +450,14 @@ export class Renderer {
     // now balanced against a stronger ground bounce so materials keep their hue.
     glw.u3f(prog, 'uSkyColor',
       sky.top[0] * 0.86 * amb + 0.030, sky.top[1] * 0.86 * amb + 0.035, sky.top[2] * 0.86 * amb + 0.048);
+    // The horizon band as irradiance rather than as sky radiance. The ~0.6 is
+    // roughly the share of a surface's cosine-weighted hemisphere that band
+    // covers; the slight per-channel tilt is the extra air a horizon ray goes
+    // through, which reddens it. The ambient model had no term for this band at
+    // all, which meant the brightest part of the sky at dawn and dusk lit
+    // nothing in the world below it.
+    glw.u3f(prog, 'uHorizonColor',
+      sky.hor[0] * 0.62 * amb, sky.hor[1] * 0.60 * amb, sky.hor[2] * 0.58 * amb);
     glw.u3f(prog, 'uGroundColor',
       sky.gnd[0] * 1.55 * amb, sky.gnd[1] * 1.50 * amb, sky.gnd[2] * 1.38 * amb);
     glw.u3f(prog, 'uFogColor', sky.fog[0], sky.fog[1], sky.fog[2]);
@@ -946,6 +980,11 @@ export class Renderer {
     // Night keeps a little extra contrast: moonlit scenes read as flat murk
     // otherwise, and the eye expects hard silhouettes after dark.
     glw.u1f(p, 'uContrast', this.contrast + this.night * 0.12);
+    // ...and the curve has to pivot on where this scene's midtone actually
+    // sits. A daylight frame is built around 0.30; a moonlit one is built two
+    // and a half stops below that, and pivoting a night frame on a daylight
+    // midtone turns the whole S-curve into a shadow crush.
+    glw.u1f(p, 'uContrastPivot', lerp(0.30, 0.15, this.night));
     glw.u1f(p, 'uAberration', this.quality.aberration);
     glw.u1f(p, 'uTime', time);
     glw.u1f(p, 'uDamage', this.damageFlash);

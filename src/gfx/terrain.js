@@ -19,6 +19,32 @@ const FLOATS_PER_VERT = 15; // pos3 + normal3 + splat4 + tint3 + extra2
 
 const LOD_STEPS = [4, 8, 16];   // world units between vertices
 
+// Radii, in metres, of the three convexity scales baked into every terrain
+// vertex. They are deliberately the same at every LOD: a chunk shares its
+// border vertices with its neighbour, so an LOD-independent field lands on
+// identical values there and the transition stays continuous. Radii that
+// tracked the vertex spacing would step at every LOD ring instead, and a
+// shading step along a chunk edge is one of the most obvious artefacts a
+// terrain can have.
+//
+// 7 m is the finest scale worth asking for: the height field is stored on a
+// 4 m grid, so anything below about twice that is not information the world
+// has — it would have to be invented, and invented ground relief disagrees
+// with what the player collides against.
+const RELIEF_RADII = [7, 17, 34];
+const RELIEF_WEIGHTS = [0.40, 0.32, 0.28];
+
+/**
+ * Signed convexity of the height field at one radius, in [-1, 1].
+ * Positive on a ridge or shoulder, negative in a hollow, zero on a plane or an
+ * even slope. Normalised by the radius so the three scales are comparable.
+ */
+function relief(world, x, z, h, r) {
+  const avg = (world.heightAt(x - r, z) + world.heightAt(x + r, z)
+    + world.heightAt(x, z - r) + world.heightAt(x, z + r)) * 0.25;
+  return clamp((h - avg) / (r * 0.55), -1, 1);
+}
+
 export class TerrainChunk {
   constructor(terrain, cx, cz, lod) {
     this.terrain = terrain;
@@ -103,13 +129,21 @@ export class TerrainChunk {
       verts[o + 11] = (tg / tw) * lerp(1.06, 0.9, moist);
       verts[o + 12] = (tb / tw) * lerp(1.1, 0.86, moist);
 
-      // --- ao + road -------------------------------------------------------
-      // Compare against a wide neighbourhood: hollows darken, ridges brighten.
-      const r = 14;
-      const avg = (world.heightAt(wx - r, wz) + world.heightAt(wx + r, wz)
-        + world.heightAt(wx, wz - r) + world.heightAt(wx, wz + r)) * 0.25;
-      const rel = clamp((h - avg) / 12, -1, 1);
-      verts[o + 13] = clamp(0.72 + rel * 0.30, 0.42, 1.05);
+      // --- relief + road ---------------------------------------------------
+      // Convexity, measured at three scales instead of one.
+      //
+      // The single 14 m radius this replaces only knew about landforms — a
+      // whole valley sat one shade darker than the hill above it and nothing
+      // between those two samples had any shading of its own, which at eye
+      // height is most of what is in frame. Adding a 7 m and a 17 m scale
+      // picks up the roll of the ground itself: the lip of a bank, the dish of
+      // a hollow, the shoulder either side of a gully. That is form the world
+      // genuinely has and the light was simply not being told about.
+      let rel = 0;
+      for (let s = 0; s < 3; s++) {
+        rel += relief(world, wx, wz, h, RELIEF_RADII[s]) * RELIEF_WEIGHTS[s];
+      }
+      verts[o + 13] = clamp(0.74 + rel * 0.34, 0.38, 1.10);
       verts[o + 14] = world.roadMask[world.gridIndex(gx, gz)];
 
       if (skirtDrop === 0) {

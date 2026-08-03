@@ -15,6 +15,12 @@ export const SPROP = {
   GRACE: 'grace', CHEST: 'chest', TOWER: 'tower', CRATE: 'crate',
   FENCE: 'fence', BANNER: 'banner', STATUE: 'statue', RUBBLE: 'rubble',
   TENT: 'tent', BARREL: 'barrel', TORCH: 'torch', ALTAR: 'altar',
+  // Dressing, drawn from the ground-clutter batches. A place is not just its
+  // silhouette: a camp has firewood and chips of stone around the fire, an
+  // arena has what is left of everyone who came before. These cost 15 to 24
+  // triangles each and are what stop the ground inside a POI reading as a
+  // cleared lawn with objects standing on it.
+  DEBRIS: 'debris', DEADWOOD: 'deadwood', BONES: 'bones', SCRUB: 'scrub',
 };
 
 const COLOR = {
@@ -27,7 +33,24 @@ const COLOR = {
   metal: [0.52, 0.53, 0.56],
   gold: [0.72, 0.58, 0.24],
   ash: [0.30, 0.28, 0.27],
+  bone: [0.56, 0.54, 0.46],
+  scrub: [0.30, 0.33, 0.18],
 };
+
+/**
+ * Scatter `n` dressing props in an annulus around a point. Deterministic like
+ * everything else here — same seed, same litter.
+ */
+function litter(add, type, cx, cz, n, r0, r1, rng, opts = {}) {
+  for (let i = 0; i < n; i++) {
+    const a = rng() * TAU;
+    const r = r0 + (r1 - r0) * Math.sqrt(rng());
+    add(type, cx + Math.cos(a) * r, cz + Math.sin(a) * r, {
+      scale: (opts.scale || 1) * (0.7 + rng() * 0.7),
+      color: opts.color || COLOR.oldStone,
+    });
+  }
+}
 
 /**
  * @returns {{props: Array, colliders: Array, lights: Array, spawns: Array}}
@@ -82,6 +105,7 @@ function buildGrace(poi, add, out, rng) {
       scale: 0.5 + rng() * 0.5, color: COLOR.oldStone,
     });
   }
+  litter(add, SPROP.SCRUB, poi.x, poi.z, 6, 2.0, 6.5, rng, { color: COLOR.scrub, scale: 1.1 });
   out.lights.push({ x: poi.x, y: 1.2, z: poi.z, color: [1.0, 0.72, 0.34], radius: 9, kind: 'grace' });
   out.interacts.push({ x: poi.x, z: poi.z, r: 3.0, kind: 'grace', poi });
 }
@@ -128,6 +152,14 @@ function buildCamp(poi, add, out, rng, world) {
     });
     add(SPROP.CHEST, fx + Math.cos(a) * 6, fz + Math.sin(a) * 6, { color: COLOR.darkWood, collide: 0.7 });
   }
+
+  // Dressing last, always: it draws from the same rng stream, and placing it
+  // earlier would shift every spawn in the camp.
+  // Firewood by the fire, stone chips trodden into the ground around it, and
+  // the leavings of whatever they last ate.
+  litter(add, SPROP.DEADWOOD, fx, fz, 5, 1.4, 5.0, rng, { color: COLOR.darkWood, scale: 0.9 });
+  litter(add, SPROP.DEBRIS, fx, fz, 7, 1.2, 9.0, rng, { color: COLOR.oldStone, scale: 0.8 });
+  litter(add, SPROP.BONES, fx, fz, 3, 2.5, 8.0, rng, { color: COLOR.bone, scale: 0.85 });
 }
 
 function buildRuin(poi, add, out, rng, world) {
@@ -169,6 +201,10 @@ function buildRuin(poi, add, out, rng, world) {
       poi: { id: `${poi.id}_chest`, kind: 'chest', tier: rng() < 0.4 ? 1 : 0, opened: false },
     });
   }
+  // What fell off the pillars, and what has grown back through it since.
+  litter(add, SPROP.DEBRIS, cx, cz, 14, 2.0, 16, rng, { color: COLOR.oldStone, scale: 1.1 });
+  litter(add, SPROP.SCRUB, cx, cz, 10, 3.0, 17, rng, { color: COLOR.scrub, scale: 1.0 });
+  litter(add, SPROP.DEADWOOD, cx, cz, 3, 4.0, 15, rng, { color: COLOR.darkWood });
 }
 
 function buildVillage(poi, add, out, rng, world) {
@@ -210,6 +246,9 @@ function buildVillage(poi, add, out, rng, world) {
       scale: 0.8 + rng() * 0.3, color: COLOR.wood, collide: 0.5,
     });
   }
+  // Cut wood stacked where it was split, and the gravel of a worked yard.
+  litter(add, SPROP.DEADWOOD, cx, cz, 8, 5, 20, rng, { color: COLOR.wood, scale: 0.95 });
+  litter(add, SPROP.DEBRIS, cx, cz, 10, 4, 22, rng, { color: COLOR.stone, scale: 0.75 });
 }
 
 function buildArena(poi, add, out, rng, world) {
@@ -240,6 +279,10 @@ function buildArena(poi, add, out, rng, world) {
     out.lights.push({ x, y: 2.4, z, color: [1.0, 0.52, 0.20], radius: 16, kind: 'fire' });
   }
   add(SPROP.ALTAR, cx, cz, { scale: 1, color: COLOR.oldStone, collide: 0 });
+  // Everyone who came before. The bone field is the arena's whole warning, and
+  // it costs less than one more pillar.
+  litter(add, SPROP.BONES, cx, cz, 12, R * 0.15, R * 0.85, rng, { color: COLOR.bone, scale: 1.15 });
+  litter(add, SPROP.DEBRIS, cx, cz, 16, R * 0.2, R * 0.95, rng, { color: COLOR.oldStone, scale: 1.2 });
 
   // The fog gate sits between the approach and the arena.
   const toCentre = Math.atan2(-cz, -cx);
@@ -274,6 +317,8 @@ function buildMiniSite(poi, add, out, rng, world) {
     x, z, r: 1.6, kind: 'chest',
     poi: { id: `${poi.id}_chest`, kind: 'chest', tier: 2, opened: false },
   });
+  litter(add, SPROP.BONES, cx, cz, 6, 2.5, 11, rng, { color: COLOR.bone });
+  litter(add, SPROP.DEBRIS, cx, cz, 9, 2.0, 13, rng, { color: COLOR.oldStone });
 }
 
 function buildChestSite(poi, add, out, rng) {
@@ -286,6 +331,7 @@ function buildChestSite(poi, add, out, rng) {
       scale: 0.4 + rng() * 0.6, color: COLOR.oldStone,
     });
   }
+  litter(add, SPROP.DEBRIS, poi.x, poi.z, 5, 1.2, 5.0, rng, { color: COLOR.oldStone, scale: 0.8 });
   out.interacts.push({ x: poi.x, z: poi.z, r: 1.7, kind: 'chest', poi });
 }
 
@@ -297,6 +343,8 @@ function buildShrine(poi, add, out, rng) {
       scale: 0.7, color: COLOR.oldStone, collide: 0.45,
     });
   }
+  litter(add, SPROP.SCRUB, poi.x, poi.z, 8, 1.8, 7.0, rng, { color: COLOR.scrub });
+  litter(add, SPROP.DEBRIS, poi.x, poi.z, 6, 1.5, 7.5, rng, { color: COLOR.oldStone, scale: 0.8 });
   out.lights.push({ x: poi.x, y: 1.4, z: poi.z, color: [0.55, 0.72, 1.0], radius: 8, kind: 'shrine' });
   out.interacts.push({ x: poi.x, z: poi.z, r: 2.4, kind: 'shrine', poi });
 }

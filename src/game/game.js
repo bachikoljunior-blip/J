@@ -15,13 +15,13 @@ import { ParticleSystem, BLEND } from '../gfx/particles.js';
 import {
   GpuMesh, MeshData, buildBox, buildBevelBox, buildCylinder, buildCone, buildRock,
   buildGrassTuft, buildBroadleafTree, buildConiferTree, buildDeadTree, buildBush,
-  buildTreeFar, buildConiferFar, buildCharacterParts,
+  buildTreeFar, buildConiferFar, buildCharacterParts, buildClutterMeshes,
   buildPillar, buildCampfire, buildGrace, buildChest, buildHut, buildWatchtower, buildArch,
 } from '../gfx/mesh.js';
 import { MATERIAL } from '../gfx/textures.js';
 
 import { World, WORLD_HALF, CHUNK_SIZE, CHUNKS, WATER_LEVEL, BIOME, BIOME_INFO, REGIONS } from '../world/worldgen.js';
-import { Scatter, GrassField, PROP } from '../world/foliage.js';
+import { Scatter, GrassField, PROP, CLUTTER_STRIDE } from '../world/foliage.js';
 import { buildStructure, SPROP, pickEnemy } from '../world/structures.js';
 
 import { Actor, STATE, FACTION, defaultPalette } from './actor.js';
@@ -61,6 +61,26 @@ const REGION_GRADE = {
 const SPAWN_ACTIVATE = 130;
 const SPAWN_DEACTIVATE = 170;
 const STRUCTURE_RANGE = 480;
+
+/**
+ * Batch name and draw range per CLUTTER id, in the order foliage.js scatters
+ * them. The ranges are the distance at which each kind stops being worth a
+ * triangle: a 40 cm stone is under a pixel past ninety metres, while a drift
+ * or a standing snag still reads as a shape at two hundred. Every item is
+ * additionally capped by its own size, so the same batch can hold a knee-high
+ * stump drawn to 120 m and a five-metre snag drawn to 150.
+ */
+const CLUTTER_BATCH = ['clutRock', 'clutWood', 'clutScrub', 'clutBone', 'clutDrift', 'clutSlab', 'clutStump'];
+const CLUTTER_RANGE = [105, 100, 95, 110, 200, 160, 170];
+const CLUTTER_RANGE_MAX = 200;
+/** Only scrub bends in the wind; stone and bone conspicuously should not. */
+const CLUTTER_SWAY = [0, 0, 1.1, 0, 0, 0, 0.12];
+/**
+ * New clutter chunks built per frame. One chunk is a few thousand candidates
+ * and several milliseconds; building the whole ring at once on a warp would be
+ * a visible stall, while one a frame fills a 300 m view inside a second.
+ */
+const CLUTTER_BUILD_BUDGET = 1;
 
 export class Game {
   constructor(canvas, ui) {
@@ -218,6 +238,26 @@ export class Game {
       .material(M.STONE, M.STONE, 1, 0.6);
     this.batches.add('reed', new GpuMesh(glw, buildCone(4)), 512, { castsShadow: false })
       .material(M.FOLIAGE);
+
+    // Ground clutter. None of it casts a shadow: a stump's shadow is one pixel
+    // at the distance most of them are seen, and the shadow pass draws a whole
+    // batch regardless of range, so including them would double the cost of the
+    // densest thing in the world for almost nothing. Their own facet shading
+    // and the SSAO pass are what make them read.
+    const clutter = buildClutterMeshes(rng);
+    const CLUTTER_MAT = [
+      [M.STONE, M.STONE, 1, 1.0],     // rock: crusted top in the secondary slot
+      [M.BARK, M.WOOD, 1, 1.6],       // deadwood: fibre along the branch
+      [M.FOLIAGE, M.FOLIAGE, 1, 3.0], // scrub
+      [M.BONE, M.BONE, 0.9, 2.2],     // bone
+      [M.DEFAULT, M.DEFAULT, 1.1, 0.5], // drift: broad soft blotching
+      [M.STONE, M.STONE, 1, 0.55],    // slab: big cracks, not gravel
+      [M.BARK, M.WOOD, 1, 1.2],       // stump / snag
+    ];
+    const CLUTTER_CAPACITY = [1024, 768, 1536, 512, 1024, 768, 1024];
+    this.clutterBatches = CLUTTER_BATCH.map((name, i) => this.batches
+      .add(name, new GpuMesh(glw, clutter[i]), CLUTTER_CAPACITY[i], { castsShadow: false })
+      .material(...CLUTTER_MAT[i]));
 
     // Structures.
     this.batches.add('hut', new GpuMesh(glw, buildHut(rng)), 96).material(M.WOOD, M.THATCH);
@@ -482,9 +522,26 @@ export class Game {
 
   _renderStructure(st, dist) {
     const B = this.batches;
+    // Dressing is small: past this it is sub-pixel, and a POI four hundred
+    // metres away must not pay for its firewood.
+    const dressing = dist < 150;
     for (const p of st.props) {
       const c = p.color;
       switch (p.type) {
+        case SPROP.DEBRIS: case SPROP.DEADWOOD: case SPROP.BONES: case SPROP.SCRUB: {
+          if (!dressing) break;
+          const s = p.scale;
+          const batch = p.type === SPROP.DEBRIS ? 'clutRock'
+            : p.type === SPROP.DEADWOOD ? 'clutWood'
+              : p.type === SPROP.BONES ? 'clutBone' : 'clutScrub';
+          // Long things lie along their own axis; the rest stay roughly square.
+          const long = p.type === SPROP.DEADWOOD;
+          B.get(batch).push(p.x, p.y, p.z,
+            (long ? 1.5 : 0.9) * s, (long ? 0.16 : 0.6) * s, (long ? 0.16 : 0.9) * s, p.yaw,
+            c[0], c[1], c[2], 0, p.type === SPROP.SCRUB ? 1.1 : 0, p.x * 0.7 + p.z, 1, 1,
+            c[0] * 1.3 + 0.05, c[1] * 1.3 + 0.05, c[2] * 1.25 + 0.05);
+          break;
+        }
         case SPROP.HUT:
           B.get('hut').push(p.x, p.y, p.z, p.scale, p.scale, p.scale, p.yaw,
             c[0], c[1], c[2], 0, 0, 0, 1, 1, 0.30, 0.22, 0.17);
@@ -1525,6 +1582,10 @@ export class Game {
     // isn't in the shadow map, so off-screen props out there cost nothing but
     // triangles. The chunk test above has to stay loose by a chunk radius.
     const propShadowKeep = this.renderer.quality.shadowRange * 1.1;
+    // Clutter casts no shadow, so unlike the props above it can be frustum
+    // culled at any distance — nothing off-screen contributes to the frame.
+    const clutterScale = propDist / 300;
+    let clutterBudget = CLUTTER_BUILD_BUDGET;
 
     for (let dz = -range; dz <= range; dz++) {
       for (let dx = -range; dx <= range; dx++) {
@@ -1587,6 +1648,40 @@ export class Game {
               break;
             default: break;
           }
+        }
+
+        // --- ground clutter -------------------------------------------------
+        if (cd > CLUTTER_RANGE_MAX * clutterScale + CHUNK_SIZE) continue;
+        const fresh = !this.scatter.clutterCache.has(this.scatter.chunkKey(cx, cz));
+        const cl = this.scatter.clutterFor(cx, cz, clutterBudget > 0);
+        if (!cl) continue;              // over budget: it arrives next frame
+        if (fresh) clutterBudget--;
+        // Squared distances throughout: this loop runs over every cached item
+        // in a fifteen-chunk ring every frame, and a square root per item is
+        // the one avoidable cost in it.
+        for (let i = 0; i < cl.length; i += CLUTTER_STRIDE) {
+          const t = cl[i];
+          const x = cl[i + 1], y = cl[i + 2], z = cl[i + 3];
+          const ddx = x - px, ddz = z - pz;
+          const d2 = ddx * ddx + ddz * ddz;
+          let sx = cl[i + 5], sy = cl[i + 6], sz = cl[i + 7];
+          // An object earns its draw distance by its size: below roughly one
+          // pixel it is only cost. 150x the largest dimension is that pixel at
+          // the resolutions this runs at, capped by the kind's own limit.
+          const size = sx > sy ? (sx > sz ? sx : sz) : (sy > sz ? sy : sz);
+          const lim = Math.min(CLUTTER_RANGE[t], Math.max(40, size * 150)) * clutterScale;
+          if (d2 > lim * lim) continue;
+          if (frustum && d2 > 196
+            && !sphereInFrustum(frustum, x, y + sy * 0.5, z, size * 0.9)) continue;
+          // Shrink into the ground over the last stretch rather than popping.
+          const fadeAt = lim * 0.86;
+          if (d2 > fadeAt * fadeAt) {
+            const f = (lim - Math.sqrt(d2)) / (lim * 0.14);
+            sx *= f; sy *= f; sz *= f;
+          }
+          this.clutterBatches[t].push(x, y, z, sx, sy, sz, cl[i + 4],
+            cl[i + 8], cl[i + 9], cl[i + 10], 0, CLUTTER_SWAY[t], cl[i + 14], 1, 1,
+            cl[i + 11], cl[i + 12], cl[i + 13]);
         }
       }
     }
