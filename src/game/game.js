@@ -39,6 +39,21 @@ import { makeRng, hash2 } from '../core/rng.js';
 import { clamp, lerp, saturate, damp, v3distXZ, angleDelta, TAU } from '../core/math.js';
 import { saveGame, loadGameData, saveSettings, loadSettings } from '../core/save.js';
 
+/**
+ * Per-region colour grade, blended by region influence. Tint multiplies the
+ * final image, saturation drains or lifts it, and vignette tightens the frame
+ * where a place should feel oppressive.
+ */
+const REGION_GRADE = {
+  meadow: { tint: [1.00, 1.00, 1.00], sat: 1.06, vignette: 0.38 },
+  wood: { tint: [0.95, 1.03, 0.95], sat: 1.02, vignette: 0.46 },
+  mire: { tint: [0.92, 1.02, 0.90], sat: 0.86, vignette: 0.52 },
+  ridge: { tint: [0.97, 0.99, 1.05], sat: 0.98, vignette: 0.42 },
+  crag: { tint: [0.95, 0.98, 1.07], sat: 0.86, vignette: 0.44 },
+  waste: { tint: [1.07, 0.93, 0.84], sat: 0.68, vignette: 0.56 },
+  peak: { tint: [0.93, 0.98, 1.10], sat: 0.76, vignette: 0.48 },
+};
+
 const SPAWN_ACTIVATE = 130;
 const SPAWN_DEACTIVATE = 170;
 const STRUCTURE_RANGE = 480;
@@ -727,6 +742,8 @@ export class Game {
     p.camera.update(dt, this.input, this.world, p.lockTarget);
     this.renderer.updateAtmosphere(dt);
 
+    this._updateGrade(dt);
+
     const region = this.world.regionAt(p.x, p.z).region;
     if (region.name !== this.currentRegionName) {
       const first = this.currentRegionName !== '';
@@ -786,6 +803,36 @@ export class Game {
       rain: this.renderer.weather.rainIntensity,
       night: this.renderer.night,
     });
+  }
+
+  /**
+   * Per-region colour grade. The lighting model is shared across the whole
+   * island, so this is what actually makes the Cinderwaste feel like ash and
+   * the peak feel like cold — a grade blended by region influence rather than
+   * switched at a boundary.
+   */
+  _updateGrade(dt) {
+    const p = this.player;
+    let tr = 0, tg = 0, tb = 0, sat = 0, vig = 0, wSum = 0;
+    for (const r of REGIONS) {
+      const d = Math.hypot(p.x - r.cx, p.z - r.cz);
+      const t = saturate(1 - d / (r.radius * 1.5));
+      const w = t * t + 0.0001;
+      const grade = REGION_GRADE[r.id] || REGION_GRADE.meadow;
+      tr += grade.tint[0] * w; tg += grade.tint[1] * w; tb += grade.tint[2] * w;
+      sat += grade.sat * w;
+      vig += grade.vignette * w;
+      wSum += w;
+    }
+    tr /= wSum; tg /= wSum; tb /= wSum; sat /= wSum; vig /= wSum;
+
+    const k = 1 - Math.exp(-1.2 * dt);
+    const rend = this.renderer;
+    rend.tint[0] += (tr - rend.tint[0]) * k;
+    rend.tint[1] += (tg - rend.tint[1]) * k;
+    rend.tint[2] += (tb - rend.tint[2]) * k;
+    rend.saturation += (sat - rend.saturation) * k;
+    rend.vignette += (vig - rend.vignette) * k;
   }
 
   _updateAmbientEffects(dt) {
@@ -1513,7 +1560,7 @@ export class Game {
     return {
       rock,
       sand: region.biome === BIOME.ASH ? [0.34, 0.30, 0.28] : [0.70, 0.64, 0.48],
-      snow: [0.86, 0.90, 0.95],
+      snow: [0.70, 0.75, 0.82],
       road: region.biome === BIOME.ASH ? [0.30, 0.26, 0.24] : [0.40, 0.34, 0.26],
       waterShallow: region.biome === BIOME.MARSH ? [0.20, 0.26, 0.16] : [0.18, 0.34, 0.36],
       waterDeep: region.biome === BIOME.MARSH ? [0.08, 0.12, 0.07] : [0.045, 0.10, 0.14],

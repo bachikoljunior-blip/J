@@ -35,7 +35,7 @@ const check = (name, ok, detail) => {
  * the player, which pauses the simulation and would fail everything after it
  * for reasons that have nothing to do with what those checks are testing.
  */
-const RESET = `() => {
+const RESET = () => {
   const g = window.__g;
   const p = g.player;
   window.__ui.closeAll();
@@ -49,7 +49,7 @@ const RESET = `() => {
   for (const e of g.enemies.slice()) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
   g.projectiles.length = 0;
   g.areaEffects.length = 0;
-}`;
+};
 
 try {
   browser = await chromium.launch({
@@ -151,8 +151,21 @@ try {
     const e = g.spawnEnemy('bandit', p.x + 1.6, p.z, { level: 1 });
     const frames = () => new Promise((r) => requestAnimationFrame(r));
     let swings = 0;
-    for (let i = 0; i < 500 && !e.dead; i++) {
-      if (p.canAct) { p.yaw = Math.atan2(e.x - p.x, e.z - p.z); p._buffer('light'); swings++; }
+    for (let i = 0; i < 600 && !e.dead; i++) {
+      // Chase as well as swing: the bandit AI strafes to its preferred range,
+      // so a stationary tester mostly whiffs and the result becomes a coin flip.
+      const d = Math.hypot(e.x - p.x, e.z - p.z);
+      const yaw = Math.atan2(e.x - p.x, e.z - p.z);
+      p.yaw = yaw;
+      if (d > 1.7) {
+        const step = Math.min(0.12, d - 1.5);
+        p.x += Math.sin(yaw) * step;
+        p.z += Math.cos(yaw) * step;
+        p.y = g.world.heightAt(p.x, p.z);
+      } else if (p.canAct) {
+        p._buffer('light');
+        swings++;
+      }
       await frames();
     }
     return { killed: e.dead, swings, soulsGained: p.souls - before, streak: p.hitStreak };
@@ -308,9 +321,15 @@ try {
     p.hp = 1;
     p.takeDamage({ damage: 9999, poise: 9999, source: null, ignoreInvuln: true });
     const frames = () => new Promise((r) => requestAnimationFrame(r));
-    for (let i = 0; i < 30; i++) await frames();
+    // The death screen is scheduled a beat after the killing blow; poll for it
+    // rather than assuming a fixed number of frames, which is unreliable under
+    // a software rasteriser.
+    let screenShown = false;
+    for (let i = 0; i < 180 && !screenShown; i++) {
+      await frames();
+      screenShown = window.__ui.screen === 'death';
+    }
     const dropped = p.deathDrop && p.deathDrop.souls === 5000 && p.souls === 0;
-    const screenShown = window.__ui.screen === 'death';
     g.respawnPlayer();
     for (let i = 0; i < 10; i++) await frames();
     const alive = !p.dead && p.hp === p.maxHp;

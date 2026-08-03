@@ -37,7 +37,7 @@ export const BIOME_INFO = {
   [BIOME.HIGHLAND]: { name: '高地', ground: [0.29, 0.38, 0.24], rock: [0.38, 0.38, 0.38] },
   [BIOME.CRAG]: { name: '岩場', ground: [0.36, 0.34, 0.30], rock: [0.44, 0.43, 0.42] },
   [BIOME.SNOW]: { name: '雪嶺', ground: [0.78, 0.82, 0.88], rock: [0.46, 0.48, 0.52] },
-  [BIOME.ASH]: { name: '焦土', ground: [0.28, 0.24, 0.23], rock: [0.30, 0.26, 0.25] },
+  [BIOME.ASH]: { name: '焦土', ground: [0.21, 0.18, 0.18], rock: [0.24, 0.21, 0.20] },
 };
 
 /**

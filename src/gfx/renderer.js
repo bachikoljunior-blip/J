@@ -35,11 +35,11 @@ import { Noise2D } from '../core/rng.js';
 const SKY_KEYS = [
   { h: 0.0, sun: [0.10, 0.13, 0.26], top: [0.018, 0.028, 0.070], hor: [0.055, 0.070, 0.125], gnd: [0.030, 0.036, 0.055], fog: [0.055, 0.070, 0.120], fogSun: [0.10, 0.12, 0.22], amb: 0.30, exposure: 1.55 },
   { h: 4.6, sun: [0.16, 0.17, 0.30], top: [0.035, 0.055, 0.120], hor: [0.140, 0.120, 0.150], gnd: [0.050, 0.052, 0.062], fog: [0.130, 0.120, 0.150], fogSun: [0.30, 0.20, 0.22], amb: 0.36, exposure: 1.45 },
-  { h: 6.2, sun: [1.55, 0.72, 0.38], top: [0.120, 0.190, 0.360], hor: [0.720, 0.420, 0.290], gnd: [0.150, 0.130, 0.120], fog: [0.560, 0.390, 0.320], fogSun: [1.20, 0.62, 0.34], amb: 0.55, exposure: 1.18 },
-  { h: 8.0, sun: [1.45, 1.15, 0.86], top: [0.180, 0.320, 0.580], hor: [0.640, 0.640, 0.640], gnd: [0.230, 0.220, 0.200], fog: [0.620, 0.660, 0.700], fogSun: [1.05, 0.88, 0.70], amb: 0.80, exposure: 1.02 },
-  { h: 12.0, sun: [1.42, 1.36, 1.20], top: [0.190, 0.370, 0.700], hor: [0.660, 0.740, 0.840], gnd: [0.300, 0.300, 0.280], fog: [0.640, 0.720, 0.820], fogSun: [1.00, 0.96, 0.86], amb: 1.00, exposure: 0.95 },
-  { h: 16.5, sun: [1.48, 1.22, 0.92], top: [0.180, 0.330, 0.640], hor: [0.700, 0.660, 0.620], gnd: [0.280, 0.260, 0.230], fog: [0.660, 0.660, 0.680], fogSun: [1.10, 0.90, 0.66], amb: 0.86, exposure: 1.00 },
-  { h: 18.6, sun: [1.75, 0.66, 0.30], top: [0.140, 0.180, 0.340], hor: [0.860, 0.400, 0.230], gnd: [0.170, 0.130, 0.110], fog: [0.620, 0.360, 0.270], fogSun: [1.45, 0.55, 0.24], amb: 0.52, exposure: 1.20 },
+  { h: 6.2, sun: [1.22, 0.58, 0.31], top: [0.120, 0.190, 0.360], hor: [0.720, 0.420, 0.290], gnd: [0.150, 0.130, 0.120], fog: [0.560, 0.390, 0.320], fogSun: [1.20, 0.62, 0.34], amb: 0.55, exposure: 1.10 },
+  { h: 8.0, sun: [1.12, 0.90, 0.68], top: [0.180, 0.320, 0.580], hor: [0.640, 0.640, 0.640], gnd: [0.230, 0.220, 0.200], fog: [0.620, 0.660, 0.700], fogSun: [1.05, 0.88, 0.70], amb: 0.80, exposure: 0.92 },
+  { h: 12.0, sun: [1.10, 1.05, 0.94], top: [0.190, 0.370, 0.700], hor: [0.660, 0.740, 0.840], gnd: [0.300, 0.300, 0.280], fog: [0.640, 0.720, 0.820], fogSun: [1.00, 0.96, 0.86], amb: 1.00, exposure: 0.86 },
+  { h: 16.5, sun: [1.14, 0.95, 0.73], top: [0.180, 0.330, 0.640], hor: [0.700, 0.660, 0.620], gnd: [0.280, 0.260, 0.230], fog: [0.660, 0.660, 0.680], fogSun: [1.10, 0.90, 0.66], amb: 0.86, exposure: 0.90 },
+  { h: 18.6, sun: [1.38, 0.53, 0.25], top: [0.140, 0.180, 0.340], hor: [0.860, 0.400, 0.230], gnd: [0.170, 0.130, 0.110], fog: [0.620, 0.360, 0.270], fogSun: [1.45, 0.55, 0.24], amb: 0.52, exposure: 1.10 },
   { h: 20.2, sun: [0.42, 0.28, 0.34], top: [0.045, 0.060, 0.130], hor: [0.220, 0.140, 0.170], gnd: [0.070, 0.065, 0.075], fog: [0.200, 0.150, 0.180], fogSun: [0.50, 0.26, 0.24], amb: 0.38, exposure: 1.45 },
   { h: 24.0, sun: [0.10, 0.13, 0.26], top: [0.018, 0.028, 0.070], hor: [0.055, 0.070, 0.125], gnd: [0.030, 0.036, 0.055], fog: [0.055, 0.070, 0.120], fogSun: [0.10, 0.12, 0.22], amb: 0.30, exposure: 1.55 },
 ];
@@ -78,12 +78,12 @@ export const QUALITY = {
   medium: {
     name: '中', resScale: 0.80, shadowSize: 1024, shadowRange: 70, viewDistance: 560,
     grassRadius: 36, grassCell: 1.05, grassBlades: 1, bloom: true, propDistance: 380,
-    particleCap: 1400, aberration: 0.14,
+    particleCap: 1400, aberration: 0.010,
   },
   high: {
     name: '高', resScale: 1.0, shadowSize: 2048, shadowRange: 88, viewDistance: 760,
     grassRadius: 50, grassCell: 0.85, grassBlades: 2, bloom: true, propDistance: 520,
-    particleCap: 2600, aberration: 0.22,
+    particleCap: 2600, aberration: 0.016,
   },
 };
 
@@ -361,7 +361,7 @@ export class Renderer {
     // Sky ambient used to be strong enough to tint brown bark blue-grey. It is
     // now balanced against a stronger ground bounce so materials keep their hue.
     glw.u3f(prog, 'uSkyColor',
-      sky.top[0] * 0.95 * amb + 0.03, sky.top[1] * 0.95 * amb + 0.035, sky.top[2] * 0.95 * amb + 0.05);
+      sky.top[0] * 0.72 * amb + 0.022, sky.top[1] * 0.72 * amb + 0.026, sky.top[2] * 0.72 * amb + 0.038);
     glw.u3f(prog, 'uGroundColor',
       sky.gnd[0] * 1.35 * amb, sky.gnd[1] * 1.30 * amb, sky.gnd[2] * 1.20 * amb);
     glw.u3f(prog, 'uFogColor', sky.fog[0], sky.fog[1], sky.fog[2]);
@@ -501,7 +501,7 @@ export class Renderer {
     const pal = scene.palette || {};
     glw.u3f(p, 'uRockColor', ...(pal.rock || [0.40, 0.39, 0.37]));
     glw.u3f(p, 'uSandColor', ...(pal.sand || [0.70, 0.64, 0.48]));
-    glw.u3f(p, 'uSnowColor', ...(pal.snow || [0.86, 0.90, 0.95]));
+    glw.u3f(p, 'uSnowColor', ...(pal.snow || [0.70, 0.75, 0.82]));
     glw.u3f(p, 'uRoadColor', ...(pal.road || [0.40, 0.34, 0.26]));
     glw.u1f(p, 'uWetness', this.weather.wetness);
     scene.terrain.draw(p, false);

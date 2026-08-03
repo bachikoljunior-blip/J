@@ -261,7 +261,7 @@ body.menu-open #controls { opacity: 0.15; pointer-events: none; }
 #region-title, #boss-intro, #boss-victory {
   position: absolute;
   left: 50%;
-  top: 26%;
+  top: 22%;
   transform: translate(-50%, -10px);
   text-align: center;
   opacity: 0;
@@ -270,6 +270,7 @@ body.menu-open #controls { opacity: 0.15; pointer-events: none; }
   width: min(88vw, 560px);
 }
 #region-title.show, #boss-intro.show, #boss-victory.show { opacity: 1; transform: translate(-50%, 0); }
+#boss-intro, #boss-victory { top: 38%; }
 #region-title h2 { margin: 0; font-size: 1.5rem; letter-spacing: .3em; color: #f0e4cc; }
 #region-title p { margin: 6px 0 0; font-size: 0.72rem; color: #b8ae9c; letter-spacing: .08em; }
 #boss-intro h2 { margin: 0; font-size: 1.7rem; letter-spacing: .26em; color: #f2d9a8; }
