@@ -674,7 +674,13 @@ function writeReport(extra) {
 
   const totalScore = weightSum ? Math.round(total / weightSum) : 0;
   const weakest = Math.min(...rows.map((r) => r.score), 100);
-  const pass = rows.every((r) => r.score >= PASS_AXIS) && totalScore >= PASS_TOTAL;
+  // The axis rule alone is too soft to be a finish line: an axis scores 85 with
+  // nine failing checks, so "all axes above 80" can be true while ten measured
+  // targets are unmet. Both conditions have to hold, and the unmet count is
+  // printed next to the verdict so a soft pass cannot be read as done.
+  const unmet = backlog.length;
+  const pass = rows.every((r) => r.score >= PASS_AXIS)
+    && totalScore >= PASS_TOTAL && unmet === 0;
 
   backlog.sort((a, b) => (b.weight * b.gap) - (a.weight * a.gap));
 
@@ -684,7 +690,8 @@ function writeReport(extra) {
   let md = `# 品質監査\n\n`;
   md += `判定基準は \`docs/QUALITY.md\`。全軸 ${PASS_AXIS} 点以上かつ総合 ${PASS_TOTAL} 点以上で合格。\n\n`;
   md += `## 最新結果 — ${stamp}\n\n`;
-  md += `**総合 ${totalScore} / 100 — ${pass ? '合格' : '不合格'}**（最低軸 ${weakest} 点）\n\n`;
+  md += `**総合 ${totalScore} / 100 — ${pass ? '合格' : '不合格'}**`
+    + `（最低軸 ${weakest} 点、未達 ${unmet} 件）\n\n`;
   md += `| 軸 | 重み | 点 | | 未達 |\n|---|---|---|---|---|\n`;
   for (const r of rows) {
     const fails = r.items.filter((i) => !i.ok).length;
@@ -753,7 +760,8 @@ function writeReport(extra) {
 
   console.log(`\n================ AUDIT ================`);
   for (const r of rows) console.log(`  ${r.id} ${String(r.score).padStart(3)}  ${bar(r.score)}  ${r.name}`);
-  console.log(`\n  総合 ${totalScore} / 100 — ${pass ? 'PASS' : 'FAIL'}`);
+  console.log(`\n  総合 ${totalScore} / 100 — ${pass ? 'PASS' : 'FAIL'}`
+    + `  (未達 ${unmet} 件, 最低軸 ${weakest})`);
   if (extra && extra.consoleErrors && extra.consoleErrors.length) {
     const distinct = [...new Set(extra.consoleErrors)];
     console.log(`\n  実行時エラー ${extra.consoleErrors.length} 件（${distinct.length} 種）:`);

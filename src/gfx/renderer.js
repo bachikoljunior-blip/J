@@ -79,13 +79,13 @@ export const QUALITY = {
   },
   medium: {
     name: '中', resScale: 0.80, shadowSize: 1024, shadowRange: 70, viewDistance: 450,
-    grassRadius: 38, grassCell: 0.78, grassBlades: 1, bloom: true, propDistance: 300,
+    grassRadius: 38, grassCell: 0.90, grassBlades: 1, bloom: true, propDistance: 300,
     particleCap: 1400, aberration: 0.010, detailFade: 95, cheapSurface: false,
     ao: 0.62, aoRadius: 0.85,
   },
   high: {
     name: '高', resScale: 1.0, shadowSize: 2048, shadowRange: 88, viewDistance: 620,
-    grassRadius: 52, grassCell: 0.62, grassBlades: 2, bloom: true, propDistance: 420,
+    grassRadius: 52, grassCell: 0.72, grassBlades: 2, bloom: true, propDistance: 420,
     particleCap: 2600, aberration: 0.016, detailFade: 150, cheapSurface: false,
     ao: 0.72, aoRadius: 1.0,
   },
@@ -423,9 +423,9 @@ export class Renderer {
     // Sky ambient used to be strong enough to tint brown bark blue-grey. It is
     // now balanced against a stronger ground bounce so materials keep their hue.
     glw.u3f(prog, 'uSkyColor',
-      sky.top[0] * 0.72 * amb + 0.022, sky.top[1] * 0.72 * amb + 0.026, sky.top[2] * 0.72 * amb + 0.038);
+      sky.top[0] * 0.86 * amb + 0.030, sky.top[1] * 0.86 * amb + 0.035, sky.top[2] * 0.86 * amb + 0.048);
     glw.u3f(prog, 'uGroundColor',
-      sky.gnd[0] * 1.35 * amb, sky.gnd[1] * 1.30 * amb, sky.gnd[2] * 1.20 * amb);
+      sky.gnd[0] * 1.55 * amb, sky.gnd[1] * 1.50 * amb, sky.gnd[2] * 1.38 * amb);
     glw.u3f(prog, 'uFogColor', sky.fog[0], sky.fog[1], sky.fog[2]);
     glw.u3f(prog, 'uFogSunColor', sky.fogSun[0], sky.fogSun[1], sky.fogSun[2]);
     glw.u2f(prog, 'uFogParams', this.fogDensity, 0.012);
@@ -945,7 +945,7 @@ export class Renderer {
     glw.u3f(p, 'uTint', this.tint[0], this.tint[1], this.tint[2]);
     // Night keeps a little extra contrast: moonlit scenes read as flat murk
     // otherwise, and the eye expects hard silhouettes after dark.
-    glw.u1f(p, 'uContrast', this.contrast + this.night * 0.06);
+    glw.u1f(p, 'uContrast', this.contrast + this.night * 0.12);
     glw.u1f(p, 'uAberration', this.quality.aberration);
     glw.u1f(p, 'uTime', time);
     glw.u1f(p, 'uDamage', this.damageFlash);

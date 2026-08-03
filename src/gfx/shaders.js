@@ -159,7 +159,13 @@ vec3 applyLighting(vec3 albedo, vec3 N, vec3 worldPos, float shadow, float ao, v
   vec3 diffAlbedo = albedo * (1.0 - metal);
 
   float ndl = dot(N, uSunDir);
-  float wrapped = max(0.0, (ndl + 0.35) / 1.35);
+  // The wrap used to be 0.35, which was the right call when every surface was
+  // an untextured facet and the softness was hiding the polygon count. It is
+  // the wrong call now: a wrap that wide flattens the diffuse response to
+  // d(shading)/d(ndl) = 0.74, so a 20-degree normal-map tilt moved the shading
+  // by four percent and every bump map in the game was invisible. Narrowing it
+  // is what makes the normal maps actually do something.
+  float wrapped = max(0.0, (ndl + 0.22) / 1.22);
   vec3 direct = uSunColor * wrapped * shadow;
   vec3 spec = specularGGX(N, V, uSunDir, F0, rough) * uSunColor * shadow;
 
@@ -382,14 +388,20 @@ void main() {
   float n2 = vnoise(vWorld.xz * 0.9);
   float n3 = vnoise(vWorld.xz * 3.7);
 
-  // Two texture frequencies: a macro pass that survives to the horizon and
-  // stops the ground reading as one flat colour, and a close-range detail pass.
+  // Three texture frequencies with staggered fade distances.
+  //
+  // Two was not enough, and the reason is geometric: the ground is seen at a
+  // grazing angle, so the band of the frame between "at your feet" and "the
+  // horizon" is most of the visible ground and almost all of it sits past the
+  // close-range fade. With only a macro and a fine pass that whole band goes
+  // smooth. The mid pass is sized to still be a few pixels across at a hundred
+  // metres, which is exactly where the other two have nothing left to say.
   vec4 macro = triplanar(uSurfTex, vWorld, triW, 0.030);
+  vec4 mid = triplanar(uSurfTex, vWorld, triW, 0.105);
   vec4 fine = triplanar(uSurfTex, vWorld, triW, 0.33);
-  // Weighted toward macro: see the note on grazing angles below. Mixing
-  // half-and-half looks right in a screenshot taken from head height and
-  // washes out completely in the frame the player actually sees.
-  vec4 surf = mix(macro, fine, 0.45 * detail);
+  float midFade = 1.0 - smoothstep(uDetailFade * 1.6, uDetailFade * 4.2, camDist);
+  vec4 surf = mix(macro, mid, 0.62 * midFade);
+  surf = mix(surf, fine, 0.45 * detail);
 
   // The biome tint arrives per vertex, so a chunk spanning meadow and forest
   // blends across the seam instead of switching abruptly.
@@ -427,6 +439,7 @@ void main() {
   // fine pass only earns its cost within a few metres of the camera.
   float bump = (1.30 * w.r + 1.90 * w.g + 1.05 * w.b + 0.70 * w.a);
   N = triplanarNormal(vWorld, N, triW, 0.030, bump * 0.85);
+  N = triplanarNormal(vWorld, N, triW, 0.105, bump * 0.95 * midFade);
   N = triplanarNormal(vWorld, N, triW, 0.33, bump * detail);
 
   // Roads: packed dirt with wheel-rut noise. The blend starts late so the
