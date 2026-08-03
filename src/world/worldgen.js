@@ -183,6 +183,21 @@ export class World {
     return this.roadMask[this.gridIndex(ix, iz)];
   }
 
+  /**
+   * Grass clumping, 0..1, at metre scale.
+   *
+   * Deliberately not stored in the grid: it is needed at a finer resolution
+   * than GRID_STEP and only while the grass patch rebuilds, so evaluating the
+   * noise twice per blade is cheaper than another 640k-entry array. Two octaves
+   * give both the patch (~6 m) and the thinning at its edge (~1.5 m).
+   */
+  grassClump(x, z) {
+    if (!this._clumpNoise) this._clumpNoise = new Noise2D(this.seed ^ 0x51ab7);
+    const a = this._clumpNoise.noise(x * 0.17, z * 0.17) * 0.5 + 0.5;
+    const b = this._clumpNoise.noise(x * 0.63, z * 0.63) * 0.5 + 0.5;
+    return saturate((a * 0.72 + b * 0.28 - 0.28) * 1.9);
+  }
+
   /** Blended region influence at a point — used for palettes and difficulty. */
   regionAt(x, z) {
     let best = REGIONS[0], bestW = -1;

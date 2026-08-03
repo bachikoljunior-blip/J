@@ -316,15 +316,30 @@ export class GrassField {
           const py = world.heightAt(px, pz);
           if (py < WATER_LEVEL + 0.2) continue;
 
-          const height = (0.22 + r3 * 0.26) * (0.75 + moist * 0.6);
-          const width = 0.085 + r0 * 0.07;
+          // Clumping. Uniformly scattered blades read as a green fuzz; real
+          // grass grows in patches with bare ground between them, and it is
+          // that alternation — not the blade count — that makes a field look
+          // like a field. One low-frequency noise lookup buys it.
+          const clump = world.grassClump(px, pz);
+          const height = (0.20 + r3 * 0.30) * (0.75 + moist * 0.6) * (0.55 + clump * 0.85);
+          const width = (0.080 + r0 * 0.075) * (0.7 + clump * 0.5);
           const yaw = r1 * Math.PI * 2;
 
           // Tint follows the biome ground colour, shifted greener and varied.
+          // The per-blade spread is wide on purpose: a patch of one flat green
+          // is the single most synthetic thing a meadow can do.
           const dry = biome === BIOME.ASH || biome === BIOME.SNOW || biome === BIOME.CRAG;
-          const cr = dry ? 0.34 + r3 * 0.10 : lerp(0.30, 0.20, moist) + r3 * 0.10;
-          const cg = dry ? 0.30 + r3 * 0.08 : lerp(0.44, 0.52, moist) + r2 * 0.10;
-          const cb = dry ? 0.22 + r3 * 0.06 : 0.16 + r1 * 0.10;
+          // Sparse blades sit in the dry gaps and go straw-coloured, which is
+          // what ties the grass to the bleached patches in the terrain shader.
+          const parch = (1 - clump) * 0.55 + r3 * 0.25;
+          let cr, cg, cb;
+          if (dry) {
+            cr = 0.32 + r3 * 0.14; cg = 0.28 + r3 * 0.11; cb = 0.20 + r3 * 0.08;
+          } else {
+            cr = lerp(0.28, 0.19, moist) + r3 * 0.16 + parch * 0.30;
+            cg = lerp(0.46, 0.55, moist) + r2 * 0.14 + parch * 0.14;
+            cb = 0.14 + r1 * 0.13;
+          }
 
           batch.push(px, py - 0.03, pz, width, height, width, yaw,
             cr, cg, cb, 0, 1, r2 * 6.283, 1, 1);

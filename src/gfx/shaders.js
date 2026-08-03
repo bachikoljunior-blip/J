@@ -31,6 +31,89 @@ uniform vec4 uPointLights[4];  // xyz = world position, w = radius (0 = off)
 uniform vec3 uPointColors[4];
 `;
 
+// ---------------------------------------------------------------------------
+//  Surfaces
+//
+//  There are no image assets, so materials are defined by how they weight four
+//  channels of one procedurally generated tiling texture (see textures.js).
+//  Everything is projected triplanar in world space: no mesh carries UVs, which
+//  is what lets a box, a terrain chunk and a sword all share this code.
+// ---------------------------------------------------------------------------
+
+const SURFACE_UNIFORMS = `
+uniform sampler2D uSurfTex;   // r grain, g blotch, b fibre, a crack
+uniform sampler2D uNormTex;   // rgb tangent-space normal, a roughness variation
+uniform float uDetailFade;    // metres over which detail fades out
+`;
+
+const SURFACE_FUNCS = `
+// Triplanar weights. The fourth power makes the blend region narrow, so flat
+// ground is effectively a single projection and only cliffs pay for three.
+vec3 triWeights(vec3 n) {
+  vec3 w = abs(n);
+  w = w * w; w = w * w;
+  return w / max(w.x + w.y + w.z, 1e-4);
+}
+
+vec4 triplanar(sampler2D tex, vec3 p, vec3 w, float scale) {
+#ifdef CHEAP_SURFACE
+  // One projection, picked by the dominant axis. Visually close on anything
+  // that is not a cliff face, and a third of the fetches.
+  vec2 uv = w.y > max(w.x, w.z) ? p.xz : (w.x > w.z ? p.zy : p.xy);
+  return texture2D(tex, uv * scale);
+#else
+  return texture2D(tex, p.zy * scale) * w.x
+       + texture2D(tex, p.xz * scale) * w.y
+       + texture2D(tex, p.xy * scale) * w.z;
+#endif
+}
+
+/**
+ * Triplanar normal mapping, whiteout blend. Each projection's tangent-space
+ * normal is folded into the geometric normal by adding its XY to the two world
+ * axes that projection does not own — which avoids needing stored tangents.
+ */
+vec3 triplanarNormal(vec3 p, vec3 N, vec3 w, float scale, float strength) {
+  if (strength < 0.01) return N;
+#ifdef CHEAP_SURFACE
+  vec2 uv = w.y > max(w.x, w.z) ? p.xz : (w.x > w.z ? p.zy : p.xy);
+  vec3 t = texture2D(uNormTex, uv * scale).xyz * 2.0 - 1.0;
+  vec3 r = w.y > max(w.x, w.z)
+    ? vec3(t.x + N.x, abs(t.z) * N.y, t.y + N.z)
+    : (w.x > w.z ? vec3(abs(t.z) * N.x, t.y + N.y, t.x + N.z)
+                 : vec3(t.x + N.x, t.y + N.y, abs(t.z) * N.z));
+  return normalize(mix(N, normalize(r), strength));
+#else
+  vec3 tx = texture2D(uNormTex, p.zy * scale).xyz * 2.0 - 1.0;
+  vec3 ty = texture2D(uNormTex, p.xz * scale).xyz * 2.0 - 1.0;
+  vec3 tz = texture2D(uNormTex, p.xy * scale).xyz * 2.0 - 1.0;
+  vec3 nx = vec3(abs(tx.z) * N.x, tx.y + N.y, tx.x + N.z);
+  vec3 ny = vec3(ty.x + N.x, abs(ty.z) * N.y, ty.y + N.z);
+  vec3 nz = vec3(tz.x + N.x, tz.y + N.y, abs(tz.z) * N.z);
+  vec3 r = normalize(nx * w.x + ny * w.y + nz * w.z);
+  return normalize(mix(N, r, strength));
+#endif
+}
+
+/**
+ * Modulate an albedo by the four surface channels.
+ * Each channel is centred on 0.5 so a zero weight is exactly a no-op, and the
+ * crack channel multiplies rather than adds so fissures read as shadow.
+ */
+vec3 surfaceAlbedo(vec3 albedo, vec4 s, vec4 weights, vec3 dryTint) {
+  float grain = (s.r - 0.5) * weights.x;
+  float blotch = (s.g - 0.5) * weights.y;
+  float fibre = (s.b - 0.5) * weights.z;
+  float crack = (0.5 - s.a) * weights.w;
+  vec3 c = albedo * (1.0 + grain * 1.05 + blotch * 1.45 + fibre * 1.15);
+  // Value modulation alone still reads as one painted colour. Real ground goes
+  // *hue* as well as brightness — sun-bleached patches, damp hollows, dust —
+  // so the blotch channel also pulls the albedo toward a second tint.
+  c = mix(c, c * dryTint, clamp(blotch * 2.2, -0.65, 0.65) * 0.5 + 0.5);
+  return c * (1.0 - clamp(crack, 0.0, 1.0) * 1.55);
+}
+`;
+
 const LIGHTING_FUNCS = `
 float cloudShadow(vec3 worldPos) {
   vec2 uv = worldPos.xz * uCloudParams.z + uCloudParams.xy;
@@ -39,24 +122,56 @@ float cloudShadow(vec3 worldPos) {
   return mix(1.0, 1.0 - uCloudParams.w, s);
 }
 
-vec3 applyLighting(vec3 albedo, vec3 N, vec3 worldPos, float shadow, float ao, float rimAmt) {
+// GGX normal distribution + Smith height-correlated visibility, Schlick Fresnel.
+// This is what makes a steel pauldron and a linen cloak respond differently to
+// the same sun instead of both being matte paint.
+vec3 specularGGX(vec3 N, vec3 V, vec3 L, vec3 F0, float rough) {
+  vec3 H = normalize(L + V);
+  float ndl = max(dot(N, L), 0.0);
+  float ndv = max(dot(N, V), 1e-4);
+  float ndh = max(dot(N, H), 0.0);
+  float vdh = max(dot(V, H), 0.0);
+  float a = max(rough * rough, 0.003);
+  float a2 = a * a;
+  float d = ndh * ndh * (a2 - 1.0) + 1.0;
+  float D = a2 / (3.14159265 * d * d);
+  float k = a * 0.5;
+  float G = (ndl / (ndl * (1.0 - k) + k)) * (ndv / (ndv * (1.0 - k) + k));
+  vec3 F = F0 + (1.0 - F0) * pow(1.0 - vdh, 5.0);
+  return D * G * F / max(4.0 * ndl * ndv, 1e-4) * ndl;
+}
+
+/**
+ * The shared surface response.
+ *
+ *   brdf.x roughness   brdf.y metalness   brdf.z rim strength
+ *
+ * Diffuse stays wrapped rather than Lambert: the terminator softness is doing
+ * real work hiding a low polygon count, and losing it makes characters read as
+ * faceted. Specular is physical, because that is the part the eye reads as
+ * material.
+ */
+vec3 applyLighting(vec3 albedo, vec3 N, vec3 worldPos, float shadow, float ao, vec3 brdf) {
   vec3 V = normalize(uCameraPos - worldPos);
+  float rough = clamp(brdf.x, 0.03, 1.0);
+  float metal = clamp(brdf.y, 0.0, 1.0);
+  vec3 F0 = mix(vec3(0.04), albedo, metal);
+  vec3 diffAlbedo = albedo * (1.0 - metal);
+
   float ndl = dot(N, uSunDir);
-  // Wrapped diffuse keeps terminators soft, which suits the stylised look and
-  // hides the low polygon count on characters.
   float wrapped = max(0.0, (ndl + 0.35) / 1.35);
   vec3 direct = uSunColor * wrapped * shadow;
+  vec3 spec = specularGGX(N, V, uSunDir, F0, rough) * uSunColor * shadow;
 
-  // Hemispheric ambient.
+  // Hemispheric ambient irradiance.
   float hemi = N.y * 0.5 + 0.5;
   vec3 ambient = mix(uGroundColor, uSkyColor, hemi) * ao;
 
-  // Cheap specular-ish sheen from the sun.
-  vec3 H = normalize(uSunDir + V);
-  float spec = pow(max(dot(N, H), 0.0), 24.0) * 0.16 * shadow * max(ndl, 0.0);
-
-  // Rim: sky light wrapping around the silhouette.
-  float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0) * rimAmt;
+  // Ambient specular. Without this, metal in shadow is just dark plastic — the
+  // sky is the main light source for a polished surface most of the time.
+  float ndv = max(dot(N, V), 0.0);
+  vec3 ambF = F0 + (max(vec3(1.0 - rough), F0) - F0) * pow(1.0 - ndv, 5.0);
+  vec3 ambSpec = uSkyColor * ambF * (1.0 - rough * 0.82) * ao;
 
   // Point lights: campfires, braziers, graces. Four is enough because we
   // upload only the nearest four to the camera each frame.
@@ -71,12 +186,15 @@ vec3 applyLighting(vec3 albedo, vec3 N, vec3 worldPos, float shadow, float ao, f
     // Smooth inverse-square-ish falloff clipped to the radius.
     float atten = clamp(1.0 - dist / radius, 0.0, 1.0);
     atten *= atten;
-    float ndl = max(dot(N, L), 0.0) * 0.75 + 0.25;
-    point += uPointColors[i] * ndl * atten;
+    float pndl = max(dot(N, L), 0.0) * 0.75 + 0.25;
+    point += uPointColors[i] * pndl * atten;
+    point += uPointColors[i] * specularGGX(N, V, L, F0, rough) * atten * 0.6;
   }
 
-  vec3 lit = albedo * (direct + ambient + point) + uSunColor * spec + uSkyColor * rim * 0.6;
-  return lit;
+  // Rim: sky light wrapping around the silhouette.
+  float rim = pow(1.0 - ndv, 3.0) * brdf.z;
+
+  return diffAlbedo * (direct + ambient + point) + spec + ambSpec + uSkyColor * rim * 0.6;
 }
 
 vec3 applyFog(vec3 color, vec3 worldPos) {
@@ -147,6 +265,37 @@ float shadowFactor(vec3 worldPos, vec3 N) {
 }
 `;
 
+// ---------------------------------------------------------------------------
+//  Scene buffer encoding
+//
+//  With a half-float scene target these are the identity. Without one, the
+//  opaque passes write a Reinhard-compressed value and the composite inverts
+//  it, which keeps highlight *ordering* through an 8-bit buffer instead of
+//  clipping everything above 1.0 to flat white before the tone mapper runs.
+//  The midtone precision cost is real but far smaller than the loss of every
+//  specular highlight, sun disc and ember in the frame.
+// ---------------------------------------------------------------------------
+
+const SCENE_ENCODE = `
+vec3 encodeScene(vec3 c) {
+#ifdef LDR_SCENE
+  return c / (1.0 + c);
+#else
+  return c;
+#endif
+}
+`;
+
+const SCENE_DECODE = `
+vec3 decodeScene(vec3 c) {
+#ifdef LDR_SCENE
+  return c / max(1.0 - c, 0.002);
+#else
+  return c;
+#endif
+}
+`;
+
 const HASH_NOISE = `
 float hash12(vec2 p) {
   vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -198,9 +347,12 @@ void main() {
 
 export const TERRAIN_FS = `
 precision highp float;
+${SCENE_ENCODE}
 ${COMMON_UNIFORMS}
+${SURFACE_UNIFORMS}
 ${SHADOW_FUNCS}
 ${HASH_NOISE}
+${SURFACE_FUNCS}
 ${LIGHTING_FUNCS}
 
 uniform vec3 uRockColor;
@@ -217,12 +369,27 @@ varying vec2 vExtra;
 
 void main() {
   vec3 N = normalize(vNormal);
+  vec3 triW = triWeights(N);
+  float camDist = length(vWorld - uCameraPos);
+  // Detail fades with distance: past the fade range the high-frequency texture
+  // is smaller than a pixel and only produces shimmer, so it is worth nothing
+  // and costs aliasing.
+  float detail = 1.0 - smoothstep(uDetailFade * 0.45, uDetailFade, camDist);
 
   // Two scales of noise break up the flat vertex colours; this is the single
   // biggest readability win on large terrain at almost no cost.
   float n1 = vnoise(vWorld.xz * 0.11);
   float n2 = vnoise(vWorld.xz * 0.9);
   float n3 = vnoise(vWorld.xz * 3.7);
+
+  // Two texture frequencies: a macro pass that survives to the horizon and
+  // stops the ground reading as one flat colour, and a close-range detail pass.
+  vec4 macro = triplanar(uSurfTex, vWorld, triW, 0.030);
+  vec4 fine = triplanar(uSurfTex, vWorld, triW, 0.33);
+  // Weighted toward macro: see the note on grazing angles below. Mixing
+  // half-and-half looks right in a screenshot taken from head height and
+  // washes out completely in the frame the player actually sees.
+  vec4 surf = mix(macro, fine, 0.45 * detail);
 
   // The biome tint arrives per vertex, so a chunk spanning meadow and forest
   // blends across the seam instead of switching abruptly.
@@ -238,7 +405,29 @@ void main() {
   vec4 w = vSplat;
   float total = max(w.r + w.g + w.b + w.a, 0.0001);
   w /= total;
+
+  // Each terrain layer weights the surface channels differently: turf takes
+  // grain and blotch, rock takes cracks hard, sand is almost pure grain, snow
+  // is soft blotch with a faint crust. This is what stops all four looking like
+  // the same material in four colours.
+  ground = surfaceAlbedo(ground, surf, vec4(0.42, 0.62, 0.10, 0.16),
+    vec3(1.22, 1.02, 0.62));   // sun-bleached straw in the dry patches
+  rock = surfaceAlbedo(rock, surf, vec4(0.40, 0.50, 0.04, 0.85),
+    vec3(0.86, 0.94, 0.88));   // lichen green-grey in the damp
+  sand = surfaceAlbedo(sand, surf, vec4(0.58, 0.30, 0.06, 0.12),
+    vec3(1.10, 0.96, 0.78));
+  snow = surfaceAlbedo(snow, surf, vec4(0.30, 0.40, 0.03, 0.22),
+    vec3(0.90, 0.96, 1.10));   // blue in the compacted hollows
   vec3 albedo = ground * w.r + rock * w.g + sand * w.b + snow * w.a;
+
+  // Two scales of relief, because the ground is almost always seen at a
+  // grazing angle. At that angle the close-range texture is compressed into a
+  // few pixels vertically and mips away to nothing, so the detail that
+  // survives — and therefore the detail that matters — is the macro one. The
+  // fine pass only earns its cost within a few metres of the camera.
+  float bump = (1.30 * w.r + 1.90 * w.g + 1.05 * w.b + 0.70 * w.a);
+  N = triplanarNormal(vWorld, N, triW, 0.030, bump * 0.85);
+  N = triplanarNormal(vWorld, N, triW, 0.33, bump * detail);
 
   // Roads: packed dirt with wheel-rut noise. The blend starts late so the
   // path has soft, trodden-looking edges instead of a painted stripe.
@@ -251,10 +440,18 @@ void main() {
   albedo = mix(albedo, albedo * 0.6, wet);
 
   float shadow = shadowFactor(vWorld, N) * cloudShadow(vWorld);
-  float ao = vExtra.x;
-  vec3 color = applyLighting(albedo, N, vWorld, shadow, ao, 0.16 + wet * 0.55);
+  // Cavity from the crack channel: a cheap stand-in for occlusion inside the
+  // fissures, and it costs one multiply.
+  float cavity = mix(1.0, clamp(surf.a * 1.5 + 0.25, 0.0, 1.0), 0.55 * detail);
+  float ao = vExtra.x * cavity;
+
+  // Rough where it is dry and broken, glossy where it is wet or icy.
+  float rough = clamp(0.94 - 0.10 * w.b - 0.16 * w.a - wet * 0.55
+    + (surf.a - 0.5) * 0.20, 0.06, 1.0);
+  vec3 color = applyLighting(albedo, N, vWorld, shadow, ao,
+    vec3(rough, 0.0, 0.16 + wet * 0.55));
   color = applyFog(color, vWorld);
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(encodeScene(color), 1.0);
 }
 `;
 
@@ -278,15 +475,36 @@ attribute vec4 aRow2;   // xyz = matrix col 2, w = translate.z
 attribute vec4 aColor;  // rgb = tint, a = emissive amount
 attribute vec4 aColor2; // secondary tint (bark vs leaves, wall vs roof)
 attribute vec4 aParams; // x = sway amount, y = phase, z = ao, w = alpha
+attribute vec4 aMaterial; // x = primary material id, y = secondary id,
+                          // z = roughness multiplier, w = detail scale multiplier
 
 uniform mat4 uViewProj;
 uniform float uTime;
 uniform vec2 uWind;     // xz wind vector
 
+// Material table. Resolved here rather than in the fragment shader for two
+// reasons: material is constant across an instance so per-vertex is exact, and
+// GLSL ES 1.00 forbids indexing a uniform array by a non-constant expression in
+// a fragment shader, which a per-instance id necessarily is.
+uniform vec4 uMatSurf[12];  // channel weights: grain, blotch, fibre, crack
+uniform vec4 uMatBrdf[12];  // roughness, metalness, bump strength, texture scale
+
 varying vec3 vWorld;
 varying vec3 vNormal;
 varying vec4 vColor;
 varying vec4 vParams;
+varying vec4 vSurf;
+varying vec4 vBrdf;
+
+// Loop index counts as a constant-index-expression, which is what makes this
+// legal where a direct dynamic index is not.
+void lookupMaterial(float id, out vec4 surf, out vec4 brdf) {
+  surf = uMatSurf[0];
+  brdf = uMatBrdf[0];
+  for (int i = 1; i < 12; i++) {
+    if (abs(float(i) - id) < 0.5) { surf = uMatSurf[i]; brdf = uMatBrdf[i]; }
+  }
+}
 
 void main() {
   mat3 rot = mat3(aRow0.xyz, aRow1.xyz, aRow2.xyz);
@@ -312,7 +530,20 @@ void main() {
     1.0 / max(dot(aRow1.xyz, aRow1.xyz), 1e-6),
     1.0 / max(dot(aRow2.xyz, aRow2.xyz), 1e-6));
   vNormal = normalize(rot * (aNormal * invScale));
-  vColor = mix(aColor, aColor2, clamp(aBlend, 0.0, 1.0));
+  float blend = clamp(aBlend, 0.0, 1.0);
+  vColor = mix(aColor, aColor2, blend);
+
+  // The same blend that picks bark or leaves picks their materials, so one
+  // instanced tree gets fibrous cracked bark on the trunk and soft blotchy
+  // foliage in the canopy from a single draw call.
+  vec4 surfA, brdfA, surfB, brdfB;
+  lookupMaterial(aMaterial.x, surfA, brdfA);
+  lookupMaterial(aMaterial.y, surfB, brdfB);
+  vSurf = mix(surfA, surfB, blend);
+  vBrdf = mix(brdfA, brdfB, blend);
+  vBrdf.x = clamp(vBrdf.x * max(aMaterial.z, 0.01), 0.02, 1.0);
+  vBrdf.w *= max(aMaterial.w, 0.01);
+
   vParams = aParams;
   gl_Position = uViewProj * vec4(world, 1.0);
 }
@@ -320,30 +551,49 @@ void main() {
 
 export const INSTANCE_FS = `
 precision highp float;
+${SCENE_ENCODE}
 ${COMMON_UNIFORMS}
+${SURFACE_UNIFORMS}
 ${SHADOW_FUNCS}
 ${HASH_NOISE}
+${SURFACE_FUNCS}
 ${LIGHTING_FUNCS}
 
 varying vec3 vWorld;
 varying vec3 vNormal;
 varying vec4 vColor;
 varying vec4 vParams;
+varying vec4 vSurf;
+varying vec4 vBrdf;
 
 void main() {
   if (vParams.w < 0.02) discard;
   vec3 N = normalize(vNormal);
-  vec3 albedo = vColor.rgb;
+  vec3 triW = triWeights(N);
+  float camDist = length(vWorld - uCameraPos);
+  float detail = 1.0 - smoothstep(uDetailFade * 0.35, uDetailFade * 0.85, camDist);
 
-  // Subtle per-surface grain so large flat faces do not read as plastic.
-  float grain = vnoise(vWorld.xz * 3.1 + vWorld.y * 2.3);
-  albedo *= 0.94 + 0.12 * grain;
+  float scale = vBrdf.w;
+  vec4 surf = triplanar(uSurfTex, vWorld, triW, scale);
+  // Away from the camera the texture collapses toward its mean, which is what
+  // the mip chain would give anyway — doing it explicitly avoids the shimmer.
+  surf = mix(vec4(0.5), surf, detail);
+
+  // Worn surfaces go warmer and slightly desaturated, which is what dust,
+  // oxidation and use actually do to leather, steel and cloth alike.
+  vec3 albedo = surfaceAlbedo(vColor.rgb, surf, vSurf, vec3(1.10, 1.02, 0.90));
+  N = triplanarNormal(vWorld, N, triW, scale, vBrdf.z * detail);
+
+  // Roughness varies across a surface: scuffed pauldrons, worn leather.
+  float rough = clamp(vBrdf.x + (surf.a - 0.5) * 0.28 * detail, 0.03, 1.0);
+  float cavity = mix(1.0, clamp(surf.a * 1.4 + 0.3, 0.0, 1.0), 0.5 * detail);
 
   float shadow = shadowFactor(vWorld, N) * cloudShadow(vWorld);
-  vec3 color = applyLighting(albedo, N, vWorld, shadow, vParams.z, 0.16);
+  vec3 color = applyLighting(albedo, N, vWorld, shadow, vParams.z * cavity,
+    vec3(rough, vBrdf.y, 0.16));
   color += vColor.rgb * vColor.a * 2.2;   // emissive
   color = applyFog(color, vWorld);
-  gl_FragColor = vec4(color, vParams.w);
+  gl_FragColor = vec4(encodeScene(color), vParams.w);
 }
 `;
 
@@ -413,6 +663,7 @@ void main() {
 
 export const GRASS_FS = `
 precision highp float;
+${SCENE_ENCODE}
 ${COMMON_UNIFORMS}
 ${SHADOW_FUNCS}
 ${HASH_NOISE}
@@ -440,9 +691,11 @@ void main() {
   float back = max(0.0, dot(-N, uSunDir));
   vec3 trans = uSunColor * pow(back, 2.0) * 0.5 * vColor.rgb * vHeight;
 
-  vec3 color = applyLighting(albedo, N, vWorld, shadow, ao, 0.1) + trans;
+  // Grass is matte and slightly waxy at the tip; no metal, a little rim.
+  vec3 color = applyLighting(albedo, N, vWorld, shadow, ao,
+    vec3(0.86 - 0.16 * vHeight, 0.0, 0.10)) + trans;
   color = applyFog(color, vWorld);
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(encodeScene(color), 1.0);
 }
 `;
 
@@ -528,6 +781,7 @@ void main() {
 
 export const SKY_FS = `
 precision highp float;
+${SCENE_ENCODE}
 ${HASH_NOISE}
 uniform vec3 uSunDir;
 uniform vec3 uMoonDir;
@@ -616,7 +870,7 @@ void main() {
     sky = mix(sky, cloudLit, cloud * 0.94);
   }
 
-  gl_FragColor = vec4(sky, 1.0);
+  gl_FragColor = vec4(encodeScene(sky), 1.0);
 }
 `;
 
@@ -648,6 +902,7 @@ void main() {
 
 export const WATER_FS = `
 precision highp float;
+${SCENE_ENCODE}
 ${COMMON_UNIFORMS}
 ${HASH_NOISE}
 ${LIGHTING_FUNCS}
@@ -691,7 +946,7 @@ void main() {
   color = mix(color, vec3(0.86, 0.90, 0.94), foam * 0.10);
 
   color = applyFog(color, vWorld);
-  gl_FragColor = vec4(color, 0.90);
+  gl_FragColor = vec4(encodeScene(color), 0.90);
 }
 `;
 
@@ -724,6 +979,7 @@ void main() {
 
 export const PARTICLE_FS = `
 precision highp float;
+${SCENE_ENCODE}
 varying vec2 vUV;
 varying vec4 vColor;
 varying float vSoft;
@@ -731,7 +987,7 @@ void main() {
   float d = length(vUV);
   if (d > 1.0) discard;
   float a = pow(1.0 - d, mix(1.0, 3.0, vSoft));
-  gl_FragColor = vec4(vColor.rgb, vColor.a * a);
+  gl_FragColor = vec4(encodeScene(vColor.rgb), vColor.a * a);
 }
 `;
 
@@ -751,20 +1007,140 @@ void main() {
 
 export const BRIGHT_FS = `
 precision highp float;
+${SCENE_DECODE}
 uniform sampler2D uTex;
 uniform vec2 uTexel;
 uniform float uThreshold;
 varying vec2 vUV;
 void main() {
-  // 4-tap box downsample keeps the bright pass cheap and stable.
-  vec3 c = texture2D(uTex, vUV + vec2(-uTexel.x, -uTexel.y)).rgb;
-  c += texture2D(uTex, vUV + vec2(uTexel.x, -uTexel.y)).rgb;
-  c += texture2D(uTex, vUV + vec2(-uTexel.x, uTexel.y)).rgb;
-  c += texture2D(uTex, vUV + vec2(uTexel.x, uTexel.y)).rgb;
+  // 4-tap box downsample keeps the bright pass cheap and stable. Decoding
+  // first is the whole point: the values worth blooming are the ones above 1.
+  vec3 c = decodeScene(texture2D(uTex, vUV + vec2(-uTexel.x, -uTexel.y)).rgb);
+  c += decodeScene(texture2D(uTex, vUV + vec2(uTexel.x, -uTexel.y)).rgb);
+  c += decodeScene(texture2D(uTex, vUV + vec2(-uTexel.x, uTexel.y)).rgb);
+  c += decodeScene(texture2D(uTex, vUV + vec2(uTexel.x, uTexel.y)).rgb);
   c *= 0.25;
   float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
   float k = max(lum - uThreshold, 0.0) / max(lum, 0.0001);
   gl_FragColor = vec4(c * k, 1.0);
+}
+`;
+
+// ---------------------------------------------------------------------------
+//  Ambient occlusion
+//
+//  Reconstructs view-space position from the scene depth texture and samples a
+//  hemisphere around each pixel. This is the single cheapest thing that makes
+//  objects look like they are *in* the world rather than pasted onto it: the
+//  contact darkening where a trunk meets the ground, under a roof eave, in the
+//  folds of a cloak. Without it every surface receives identical ambient light
+//  and the whole frame reads as a diorama.
+//
+//  Half resolution, eight taps, spiral kernel rotated per pixel by a hash. The
+//  rotation turns banding into noise, and the blur pass turns noise into
+//  softness — which is the right trade at this sample count.
+// ---------------------------------------------------------------------------
+
+export const AO_FS = `
+precision highp float;
+${HASH_NOISE}
+uniform sampler2D uDepthTex;
+uniform vec2 uTexel;
+uniform vec2 uNearFar;
+uniform vec2 uProjScale;   // tan(fov/2) * aspect, tan(fov/2)
+uniform float uRadius;     // world-space sample radius, metres
+uniform float uStrength;
+varying vec2 vUV;
+
+float linearDepth(vec2 uv) {
+  float d = texture2D(uDepthTex, uv).r * 2.0 - 1.0;
+  float n = uNearFar.x, f = uNearFar.y;
+  return (2.0 * n * f) / (f + n - d * (f - n));
+}
+
+vec3 viewPos(vec2 uv, float z) {
+  vec2 ndc = uv * 2.0 - 1.0;
+  return vec3(ndc * uProjScale * z, -z);
+}
+
+void main() {
+  float z = linearDepth(vUV);
+  // Sky pixels sit at the far plane and must not be occluded, or the horizon
+  // grows a dark halo.
+  if (z >= uNearFar.y * 0.985) { gl_FragColor = vec4(1.0); return; }
+
+  vec3 p = viewPos(vUV, z);
+  // Normal from the depth field. The min-of-two-deltas picks the neighbour on
+  // the same surface, which stops silhouettes from producing garbage normals.
+  vec3 pR = viewPos(vUV + vec2(uTexel.x, 0.0), linearDepth(vUV + vec2(uTexel.x, 0.0)));
+  vec3 pL = viewPos(vUV - vec2(uTexel.x, 0.0), linearDepth(vUV - vec2(uTexel.x, 0.0)));
+  vec3 pU = viewPos(vUV + vec2(0.0, uTexel.y), linearDepth(vUV + vec2(0.0, uTexel.y)));
+  vec3 pD = viewPos(vUV - vec2(0.0, uTexel.y), linearDepth(vUV - vec2(0.0, uTexel.y)));
+  vec3 dx = abs(pR.z - p.z) < abs(pL.z - p.z) ? (pR - p) : (p - pL);
+  vec3 dy = abs(pU.z - p.z) < abs(pD.z - p.z) ? (pU - p) : (p - pD);
+  vec3 N = normalize(cross(dx, dy));
+
+  float ang = hash12(gl_FragCoord.xy) * 6.2831853;
+  float ca = cos(ang), sa = sin(ang);
+  // UV radius subtended by a world-space sphere of uRadius at this depth. The
+  // per-axis divide is what keeps the kernel circular on a non-square screen.
+  vec2 rad = uRadius / (max(z, 0.5) * uProjScale) * 0.5;
+  rad = min(rad, vec2(0.06));   // cap: a huge kernel up close is just noise
+
+  float occ = 0.0;
+  for (int i = 0; i < 8; i++) {
+    float fi = float(i);
+    float a = fi * 2.3999632;              // golden angle: even coverage, no lattice
+    float r = sqrt((fi + 0.5) / 8.0);
+    vec2 d = vec2(cos(a), sin(a));
+    vec2 off = vec2(d.x * ca - d.y * sa, d.x * sa + d.y * ca) * r * rad;
+    vec2 uv = vUV + off;
+    float sz = linearDepth(uv);
+    vec3 sp = viewPos(uv, sz);
+    vec3 v = sp - p;
+    float len = length(v);
+    if (len < 1e-4) continue;
+    float ndv = dot(N, v / len);
+    // Range check: a sample far in front is a different object, not a fold.
+    float range = uRadius / (uRadius + max(len - uRadius, 0.0));
+    occ += max(ndv - 0.06, 0.0) * range;
+  }
+  occ = clamp(1.0 - occ / 8.0 * uStrength * 2.4, 0.0, 1.0);
+  gl_FragColor = vec4(occ, occ, occ, 1.0);
+}
+`;
+
+// Depth-aware 4-tap blur for the AO buffer: cross-surface bleeding is what
+// makes cheap AO look like dirt smeared over the image.
+export const AO_BLUR_FS = `
+precision highp float;
+uniform sampler2D uTex;
+uniform sampler2D uDepthTex;
+uniform vec2 uDir;
+uniform vec2 uNearFar;
+varying vec2 vUV;
+
+float linearDepth(vec2 uv) {
+  float d = texture2D(uDepthTex, uv).r * 2.0 - 1.0;
+  float n = uNearFar.x, f = uNearFar.y;
+  return (2.0 * n * f) / (f + n - d * (f - n));
+}
+
+void main() {
+  float z0 = linearDepth(vUV);
+  float sum = texture2D(uTex, vUV).r;
+  float wsum = 1.0;
+  for (int i = 1; i <= 3; i++) {
+    float fi = float(i);
+    for (float sgn = -1.0; sgn <= 1.0; sgn += 2.0) {
+      vec2 uv = vUV + uDir * fi * sgn;
+      float w = exp(-abs(linearDepth(uv) - z0) * 1.4) * exp(-fi * fi * 0.20);
+      sum += texture2D(uTex, uv).r * w;
+      wsum += w;
+    }
+  }
+  float v = sum / wsum;
+  gl_FragColor = vec4(v, v, v, 1.0);
 }
 `;
 
@@ -786,6 +1162,7 @@ void main() {
 
 export const COMPOSITE_FS = `
 precision highp float;
+${SCENE_DECODE}
 ${HASH_NOISE}
 uniform sampler2D uScene;
 uniform sampler2D uBloom;
@@ -800,6 +1177,8 @@ uniform float uAberration;
 uniform float uTime;
 uniform float uDamage;        // red flash on taking a hit
 uniform float uDeath;         // desaturate + darken on death
+uniform sampler2D uAO;
+uniform float uAOAmount;      // 0 disables the fetch entirely
 varying vec2 vUV;
 
 // ACES filmic approximation (Narkowicz). Cheap and keeps highlights from
@@ -823,6 +1202,16 @@ void main() {
     scene.b = texture2D(uScene, uv - off).b;
   } else {
     scene = texture2D(uScene, uv).rgb;
+  }
+  scene = decodeScene(scene);
+
+  // Occlusion multiplies the scene rather than only its ambient term. That is
+  // not physically right — it dims direct light too — but the error sits in
+  // creases that are dark anyway, and it costs one texture fetch instead of a
+  // second geometry pass.
+  if (uAOAmount > 0.001) {
+    float ao = texture2D(uAO, uv).r;
+    scene *= mix(1.0, ao, uAOAmount);
   }
 
   vec3 bloom = texture2D(uBloom, uv).rgb;

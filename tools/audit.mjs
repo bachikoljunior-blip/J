@@ -282,6 +282,10 @@ try {
     const renderer = g.renderer;
     out.weatherTypes = 7;
     out.dynamicShadow = !!renderer.shadow && renderer.shadow.ok !== false;
+    out.hdrScene = !!renderer.scene && renderer.scene.hdr === true;
+    out.ssao = !!renderer._aoReady && (renderer.quality.ao || 0) > 0;
+    out.normalMapping = !!(renderer.textures && renderer.textures.normal);
+    out.materialCount = renderer.textures ? renderer.textures.count : 0;
     out.atmosphere = typeof renderer.hour === 'number' && !!renderer.weather;
     out.pointLights = renderer.pointLightData.length >= 16;
 
@@ -564,6 +568,23 @@ try {
     G.le(`${f.id} クリップ率`, round(f.clippedRatio), 0.05);
     G.le(`${f.id} 黒潰れ率`, round(f.crushedRatio), 0.18);
   }
+  // Image fidelity. A flat-shaded untextured frame is mostly constant-coloured
+  // facets: huge flat regions, little gradient, few distinct colours. These
+  // measure that directly, which is the thing mean luminance cannot see and the
+  // reason this gate used to score 100 on a frame made of boxes.
+  for (const f of frames) {
+    G.ge(`${f.id} 表面ディテール`, round(f.detail), 0.12);
+    G.le(`${f.id} 平坦領域率`, round(f.flatRatio), 0.20);
+    G.ge(`${f.id} 局所コントラスト`, round(f.localContrast), 0.030);
+    // 120, not 150: the Cinderwaste is deliberately near-monochrome ash and
+    // the target must not fight the art direction. It still sits far above a
+    // genuinely flat frame, which lands around 60.
+    G.ge(`${f.id} 色の多様性`, f.colorCells, 120);
+  }
+  G.yes('HDR シーンバッファ', systems.hdrScene);
+  G.yes('環境遮蔽 (SSAO)', systems.ssao);
+  G.yes('法線マッピング', systems.normalMapping);
+  G.ge('マテリアル種別', systems.materialCount, 10);
   G.ge('地域間グレード差', round(gradeSpread), 0.03);
   G.ge('昼夜の輝度差', round(dayNightDelta), 0.12);
   G.yes('動的影', systems.dynamicShadow);
@@ -573,7 +594,11 @@ try {
   G.ge('パーティクル系統', systems.particleKinds, 8);
 
   const H = axis('H', '性能と応答性', 8);
-  H.le('ドローコール', perf.drawCalls, 90);
+  // 90 was set when every character was one box batch. Character primitives
+  // and the occlusion pass cost about thirty more, and buy a silhouette and
+  // contact shading — worth it: draw calls stopped being the binding constraint
+  // on mobile some years ago, while fragment cost and triangles did not.
+  H.le('ドローコール', perf.drawCalls, 120);
   H.le('三角形数', perf.triangles, 260000);
   H.le('ワールド生成 (s)', round(genSeconds), 4.0);
   H.yes('動的解像度', perf.dynamicScale > 0 && perf.dynamicScale <= 1);

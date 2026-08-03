@@ -298,6 +298,229 @@ export function buildGrassTuft() {
   return m;
 }
 
+// ---------------------------------------------------------------------------
+//  Character primitives
+//
+//  A skeleton assembled from boxes reads as a stack of boxes, and at the thirty
+//  metres a phone screen actually shows an enemy at, silhouette is the only
+//  thing left. These five shapes are what the rig draws instead of a box, each
+//  in its own instanced batch — so a twelve-enemy fight is six draw calls
+//  rather than one per limb.
+//
+//  They all follow the unit convention above, so a bone's (w, len, d) still
+//  maps straight onto the instance scale, and they are all a hexagonal
+//  cross-section lofted through a table of rings. That is deliberate: the
+//  difference between a blade and a ribcage is the ring table plus the
+//  non-uniform scale the bone applies, not a second vertex format.
+// ---------------------------------------------------------------------------
+
+/**
+ * Hexagonal cross-section, flat front and back with chamfered sides, spanning
+ * the full [-0.5, 0.5] in both axes so `w` and `d` mean what they say. Squashed
+ * along z by a bone it becomes a blade; left square it becomes a torso.
+ */
+const HEX = [
+  [0.5, 0], [0.25, 0.5], [-0.25, 0.5],
+  [-0.5, 0], [-0.25, -0.5], [0.25, -0.5],
+];
+
+/** Ring k of `profile`: scaled, slid back by `dz`, front half pushed by `fz`. */
+function ringPoint(profile, ring, i, out) {
+  const px = profile[i][0], pz = profile[i][1];
+  out[0] = px * (ring.sx !== undefined ? ring.sx : 1);
+  out[1] = ring.y;
+  out[2] = pz * (ring.sz !== undefined ? ring.sz : 1) + (ring.dz || 0);
+  if (pz > 0 && ring.fz) out[2] += ring.fz;
+  return out;
+}
+
+/**
+ * Loft a closed convex profile through a stack of rings.
+ *
+ * A ring is `{ y, sx, sz, dz, fz }`: `dz` slides the whole ring fore or aft
+ * (the curve of a back), `fz` pushes only the front half (a jaw, a muzzle).
+ * Winding and cap order match buildBevelBox so every mesh in the game agrees
+ * on which way is out.
+ *
+ * @param {MeshData} m
+ * @param {Array<Array<number>>} profile  XZ points, counter-clockwise
+ * @param {Array<object>} rings           bottom to top
+ * @param {object} [opts]  apexY: close the bottom with a point at that height;
+ *                         blendAt(ringIndex): per-ring colour/material slot
+ */
+function loftRings(m, profile, rings, opts = {}) {
+  const n = profile.length;
+  const nr = rings.length;
+  const a = [0, 0, 0], b = [0, 0, 0], p = [0, 0, 0];
+  const blendAt = opts.blendAt || (() => 0);
+  const ringIdx = [];
+
+  for (let k = 0; k < nr; k++) {
+    m.useBlend(blendAt(k));
+    const idx = [];
+    for (let i = 0; i < n; i++) {
+      ringPoint(profile, rings[k], i, p);
+      ringPoint(profile, rings[k], (i + n - 1) % n, a);
+      ringPoint(profile, rings[k], (i + 1) % n, b);
+      // Horizontal normal: the mean of the two edge normals meeting here, each
+      // normalised first so a long edge cannot drag a corner around.
+      const n1x = p[2] - a[2], n1z = -(p[0] - a[0]);
+      const n2x = b[2] - p[2], n2z = -(b[0] - p[0]);
+      const l1 = Math.hypot(n1x, n1z) || 1, l2 = Math.hypot(n2x, n2z) || 1;
+      let hx = n1x / l1 + n2x / l2, hz = n1z / l1 + n2z / l2;
+      const hl = Math.hypot(hx, hz) || 1;
+      hx /= hl; hz /= hl;
+      // Tilt by how fast the profile is opening or closing, so a taper shades
+      // as a cone instead of as a cylinder with a seam.
+      ringPoint(profile, rings[Math.max(0, k - 1)], i, a);
+      ringPoint(profile, rings[Math.min(nr - 1, k + 1)], i, b);
+      const dy = b[1] - a[1];
+      const ny = dy > 1e-5 ? -((b[0] - a[0]) * hx + (b[2] - a[2]) * hz) / dy : 0;
+      const l = Math.hypot(hx, ny, hz) || 1;
+      idx.push(m.addVertex(p[0], p[1], p[2], hx / l, ny / l, hz / l));
+    }
+    ringIdx.push(idx);
+  }
+
+  for (let k = 0; k < nr - 1; k++) {
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      m.addQuad(ringIdx[k][i], ringIdx[k][j], ringIdx[k + 1][j], ringIdx[k + 1][i]);
+    }
+  }
+
+  m.useBlend(blendAt(0));
+  if (opts.apexY !== undefined) {
+    const apex = m.addVertex(0, opts.apexY, rings[0].dz || 0, 0, -1, 0);
+    for (let i = 0; i < n; i++) m.addTri(apex, ringIdx[0][(i + 1) % n], ringIdx[0][i]);
+  } else if (opts.capBottom !== false) {
+    const cap = [];
+    for (let i = 0; i < n; i++) {
+      ringPoint(profile, rings[0], i, p);
+      cap.push(m.addVertex(p[0], p[1], p[2], 0, -1, 0));
+    }
+    for (let i = 1; i < n - 1; i++) m.addTri(cap[0], cap[i + 1], cap[i]);
+  }
+  if (opts.capTop !== false) {
+    m.useBlend(blendAt(nr - 1));
+    const cap = [];
+    for (let i = 0; i < n; i++) {
+      ringPoint(profile, rings[nr - 1], i, p);
+      cap.push(m.addVertex(p[0], p[1], p[2], 0, 1, 0));
+    }
+    for (let i = 1; i < n - 1; i++) m.addTri(cap[0], cap[i], cap[i + 1]);
+  }
+  m.useBlend(0);
+  return m;
+}
+
+/**
+ * Arm or leg segment: widest at the joint it hangs from, with a slight swell
+ * just below it for muscle, narrowing to the next joint. 32 triangles.
+ * @param {number} [tip] width at the far end, as a fraction of the joint
+ */
+export function buildTaperedLimb(tip = 0.56) {
+  const m = new MeshData();
+  return loftRings(m, HEX, [
+    { y: 0.00, sx: 1.00, sz: 1.00 },
+    { y: 0.34, sx: 0.96, sz: 0.96 },
+    { y: 1.00, sx: tip, sz: tip },
+  ]);
+}
+
+/**
+ * Torso: narrow at the waist, widest across the shoulders, and leaning very
+ * slightly back as it rises. That back curve is what stops a standing
+ * character reading as a stack of crates. 44 triangles.
+ */
+export function buildTorso() {
+  const m = new MeshData();
+  return loftRings(m, HEX, [
+    { y: 0.00, sx: 0.76, sz: 0.82, dz: 0.020 },   // waist
+    { y: 0.42, sx: 0.84, sz: 0.90, dz: -0.005 },  // ribs
+    { y: 0.80, sx: 1.00, sz: 0.92, dz: -0.030 },  // shoulders
+    { y: 1.00, sx: 0.92, sz: 0.78, dz: -0.055 },  // collar
+  ]);
+}
+
+/**
+ * Skull: a jaw that jutts ahead of a receding chin, a brow at its widest, and
+ * a crown that tapers away. The jaw rings take the secondary colour slot, so a
+ * helm can carry a dark visor band or a beast a bone muzzle for free.
+ * 44 triangles.
+ */
+export function buildSkull() {
+  const m = new MeshData();
+  return loftRings(m, HEX, [
+    { y: 0.00, sx: 0.58, sz: 0.52, fz: 0.10 },    // chin
+    { y: 0.32, sx: 0.90, sz: 0.80, fz: 0.10 },    // jaw and cheek
+    { y: 0.70, sx: 1.00, sz: 0.96, dz: -0.02 },   // brow
+    { y: 1.00, sx: 0.70, sz: 0.68, dz: -0.06 },   // crown
+  ], { blendAt: (k) => (k < 2 ? 1 : 0) });
+}
+
+/**
+ * Pauldron: a domed cap, apex at the joint, flaring to a rim at the far end.
+ * On a shoulder bone (which hangs downward) that is a plate covering the top
+ * of the arm — the one shape that makes a soldier read as armoured at thirty
+ * metres. 46 triangles.
+ */
+export function buildPauldron() {
+  const m = new MeshData();
+  return loftRings(m, HEX, [
+    { y: 0.10, sx: 0.46, sz: 0.46 },
+    { y: 0.42, sx: 0.78, sz: 0.78 },
+    { y: 0.78, sx: 0.96, sz: 0.96 },
+    { y: 1.00, sx: 1.00, sz: 1.00 },
+  ], { apexY: 0 });
+}
+
+/**
+ * Flat slab that runs straight for most of its length and then chamfers to an
+ * edge: a blade, a tasset, a cape panel, a shield face, a helmet crest. The
+ * chamfer takes the secondary slot so a blade's edge can be brighter steel
+ * than its flat. 32 triangles.
+ * @param {number} [tipW] width at the tip
+ * @param {number} [tipT] thickness at the tip
+ */
+export function buildPlateSlab(tipW = 0.76, tipT = 0.30) {
+  const m = new MeshData();
+  return loftRings(m, HEX, [
+    { y: 0.00, sx: 1.00, sz: 1.00 },
+    { y: 0.86, sx: 1.00, sz: 1.00 },
+    { y: 1.00, sx: tipW, sz: tipT },
+  ], { blendAt: (k) => (k === 2 ? 1 : 0) });
+}
+
+/**
+ * Batch name for each character primitive. rig.js re-exports this as PART and
+ * bones name their shape with it; game.js registers one batch per entry. The
+ * three have to agree, so the strings live here, next to the geometry.
+ */
+export const CHAR_PART = {
+  BOX: 'box',
+  LIMB: 'limb',
+  TORSO: 'torso',
+  SKULL: 'skull',
+  PAULDRON: 'pauldron',
+  PLATE: 'plate',
+};
+
+/**
+ * Every character primitive, keyed by its batch name. The box is not included:
+ * it is registered separately because props use it too.
+ * @returns {Object<string, MeshData>}
+ */
+export function buildCharacterParts() {
+  return {
+    [CHAR_PART.LIMB]: buildTaperedLimb(),
+    [CHAR_PART.TORSO]: buildTorso(),
+    [CHAR_PART.SKULL]: buildSkull(),
+    [CHAR_PART.PAULDRON]: buildPauldron(),
+    [CHAR_PART.PLATE]: buildPlateSlab(),
+  };
+}
+
 /** Flat XZ quad, unit sized, centred — used for water tiles and decals. */
 export function buildPlane(res = 1) {
   const m = new MeshData();

@@ -7,10 +7,12 @@
 //  difference between smooth and unplayable on a mid-range phone.
 // ============================================================================
 
-// row0(4) row1(4) row2(4) color(4) params(4) color2(4)
+// row0(4) row1(4) row2(4) color(4) params(4) color2(4) material(4)
 // color2 pairs with the mesh's per-vertex blend attribute so one draw call can
-// paint bark and leaves, or walls and roof, from a single instance.
-export const INSTANCE_FLOATS = 24;
+// paint bark and leaves, or walls and roof, from a single instance. material
+// carries the two surface ids the same blend selects between, so the trunk gets
+// cracked fibrous bark and the canopy gets soft foliage without a second batch.
+export const INSTANCE_FLOATS = 28;
 
 export class InstanceBatch {
   constructor(glw, mesh, capacity = 1024) {
@@ -22,6 +24,27 @@ export class InstanceBatch {
     this.buffer = glw.gl.createBuffer();
     this._uploaded = 0;
     this.castsShadow = true;
+    // Current material, applied to every push until changed. Batches are
+    // per-mesh-type and usually homogeneous, so this keeps push() callable
+    // without threading material through every one of its arguments.
+    this.mat0 = 0;
+    this.mat1 = 0;
+    this.roughMul = 1;
+    this.scaleMul = 1;
+  }
+
+  /**
+   * @param {number} primary   material id used where the mesh blend is 0
+   * @param {number} [secondary] material id used where the blend is 1
+   * @param {number} [roughMul]  multiplies the material's roughness
+   * @param {number} [scaleMul]  multiplies its world texture frequency
+   */
+  material(primary, secondary = primary, roughMul = 1, scaleMul = 1) {
+    this.mat0 = primary;
+    this.mat1 = secondary;
+    this.roughMul = roughMul;
+    this.scaleMul = scaleMul;
+    return this;
   }
 
   clear() { this.count = 0; }
@@ -54,6 +77,8 @@ export class InstanceBatch {
     d[o + 21] = g2 !== undefined ? g2 : g;
     d[o + 22] = b2 !== undefined ? b2 : b;
     d[o + 23] = emissive;
+    d[o + 24] = this.mat0; d[o + 25] = this.mat1;
+    d[o + 26] = this.roughMul; d[o + 27] = this.scaleMul;
     this.count++;
   }
 
@@ -71,6 +96,8 @@ export class InstanceBatch {
     d[o + 12] = r; d[o + 13] = g; d[o + 14] = b; d[o + 15] = emissive;
     d[o + 16] = sway; d[o + 17] = phase; d[o + 18] = ao; d[o + 19] = alpha;
     d[o + 20] = r; d[o + 21] = g; d[o + 22] = b; d[o + 23] = emissive;
+    d[o + 24] = this.mat0; d[o + 25] = this.mat1;
+    d[o + 26] = this.roughMul; d[o + 27] = this.scaleMul;
     this.count++;
   }
 
@@ -106,6 +133,7 @@ export class InstanceBatch {
     set('aColor', 12);
     set('aParams', 16);
     set('aColor2', 20);
+    set('aMaterial', 24);
   }
 
   draw(prog) {

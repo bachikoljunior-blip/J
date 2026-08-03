@@ -59,6 +59,28 @@ export class GL {
       this.bindVAO = vaoExt ? (v) => vaoExt.bindVertexArrayOES(v) : () => {};
     }
 
+    // Half-float colour. This is what buys the scene an HDR buffer, and with
+    // it a tone curve that has something to roll off and a bloom pass that has
+    // something to find. Renderable-ness is not implied by the texture format
+    // being available, so both extensions have to be there.
+    if (this.isWebGL2) {
+      const cbf = gl.getExtension('EXT_color_buffer_half_float') || gl.getExtension('EXT_color_buffer_float');
+      this.halfFloatColor = !!cbf;
+      this.halfFloatType = gl.HALF_FLOAT;
+      this.halfFloatInternal = gl.RGBA16F;
+    } else {
+      const tex = gl.getExtension('OES_texture_half_float');
+      const buf = gl.getExtension('EXT_color_buffer_half_float');
+      this.halfFloatColor = !!(tex && buf);
+      this.halfFloatType = tex ? tex.HALF_FLOAT_OES : gl.UNSIGNED_BYTE;
+      this.halfFloatInternal = undefined;   // WebGL1 takes format, not sized internal
+      // Linear filtering of half-float is a separate extension; without it the
+      // bloom downsample would be point-sampled and crawl.
+      if (this.halfFloatColor && !gl.getExtension('OES_texture_half_float_linear')) {
+        this.halfFloatColor = false;
+      }
+    }
+
     this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
     const dbgInfo = gl.getExtension('WEBGL_debug_renderer_info');
     this.rendererName = dbgInfo ? gl.getParameter(dbgInfo.UNMASKED_RENDERER_WEBGL) : 'unknown';
@@ -197,7 +219,7 @@ export class GL {
   //  Textures & framebuffers
   // -------------------------------------------------------------------------
 
-  texture2D({ width, height, data = null, format, type, filter, wrap, mip = false }) {
+  texture2D({ width, height, data = null, format, type, filter, wrap, mip = false, internalFormat }) {
     const gl = this.gl;
     format = format || gl.RGBA;
     type = type || gl.UNSIGNED_BYTE;
@@ -205,7 +227,9 @@ export class GL {
     wrap = wrap || gl.CLAMP_TO_EDGE;
     const t = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, t);
-    gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, type, data);
+    // WebGL2 wants a sized internal format for float targets; WebGL1 only
+    // accepts the unsized one, which is why this is passed rather than derived.
+    gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat || format, width, height, 0, format, type, data);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, mip ? gl.LINEAR_MIPMAP_LINEAR : filter);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
@@ -235,16 +259,48 @@ export class GL {
     return t;
   }
 
-  /** Colour target with optional depth. Used for the main scene pass. */
-  createRenderTarget(width, height, { depth = true, filter } = {}) {
+  /**
+   * Colour target with optional depth.
+   *
+   * `hdr` asks for a half-float colour buffer. This matters more than it
+   * sounds: with an 8-bit scene target every value above 1.0 — the sun disc,
+   * a specular highlight, an ember — is clamped to white *before* the tone
+   * mapper ever sees it, so the tone curve has nothing to roll off and bloom
+   * has nothing bright to extract. Everything comes out flat and chalky.
+   *
+   * Where half-float is unavailable the caller falls back to writing a
+   * compressed range into 8 bits (see LDR_SCENE in the shaders), which keeps
+   * highlight information at the cost of some precision in the midtones.
+   *
+   * `sampleDepth` attaches a depth *texture* rather than a renderbuffer, so
+   * later passes can read scene depth for occlusion and fog.
+   */
+  createRenderTarget(width, height, { depth = true, filter, hdr = false, sampleDepth = false } = {}) {
     const gl = this.gl;
     filter = filter || gl.LINEAR;
-    const color = this.texture2D({ width, height, filter });
+    const wantHdr = hdr && this.halfFloatColor;
+    const color = this.texture2D({
+      width, height, filter,
+      type: wantHdr ? this.halfFloatType : gl.UNSIGNED_BYTE,
+      internalFormat: wantHdr ? this.halfFloatInternal : undefined,
+    });
     const fbo = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, color, 0);
-    let depthBuf = null;
-    if (depth) {
+    let depthBuf = null, depthTex = null;
+    if (depth && sampleDepth && this.depthTexture) {
+      depthTex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, depthTex);
+      const internal = this.isWebGL2 ? gl.DEPTH_COMPONENT24 : gl.DEPTH_COMPONENT;
+      const type = this.isWebGL2 ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+      if (this.isWebGL2) gl.texStorage2D(gl.TEXTURE_2D, 1, internal, width, height);
+      else gl.texImage2D(gl.TEXTURE_2D, 0, internal, width, height, 0, gl.DEPTH_COMPONENT, type, null);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTex, 0);
+    } else if (depth) {
       depthBuf = gl.createRenderbuffer();
       gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuf);
       gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
@@ -252,7 +308,7 @@ export class GL {
     }
     const ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    return { fbo, color, depthBuf, width, height, ok };
+    return { fbo, color, depthBuf, depthTex, width, height, ok, hdr: wantHdr && ok };
   }
 
   /**

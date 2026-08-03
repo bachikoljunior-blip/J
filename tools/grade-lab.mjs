@@ -100,9 +100,11 @@ for (const s of SCENES) {
     }));
   }, s);
   rows.push({ ...s, ...st });
-  console.log(`${s.id.padEnd(12)} luma=${st.meanLuma.toFixed(3)} contrast=${st.contrast.toFixed(3)} ` +
-    `sat=${st.saturation.toFixed(3)} clip=${(st.clippedRatio * 100).toFixed(1)}% ` +
-    `crush=${(st.crushedRatio * 100).toFixed(1)}% tris=${st.triangles} draws=${st.drawCalls}`);
+  console.log(`${s.id.padEnd(12)} luma=${st.meanLuma.toFixed(3)} con=${st.contrast.toFixed(3)} ` +
+    `sat=${st.saturation.toFixed(3)} | detail=${st.detail.toFixed(4)} ` +
+    `flat=${(st.flatRatio * 100).toFixed(1)}% edge=${(st.edgeRatio * 100).toFixed(1)}% ` +
+    `loc=${st.localContrast.toFixed(4)} col=${st.colorCells} ` +
+    `| tris=${st.triangles} draws=${st.drawCalls}`);
   if (SHOTS) await page.screenshot({ path: `${ROOT}tools/shots/lab-${s.id}.png` });
 }
 
@@ -111,6 +113,10 @@ const night = rows.find((r) => r.id === 'night-ridge');
 console.log(`\n昼夜輝度差 ${Math.abs(day.meanLuma - night.meanLuma).toFixed(3)} (目標 ≥ 0.12)`);
 const worst = rows.slice().sort((a, b) => a.contrast - b.contrast)[0];
 console.log(`最低コントラスト ${worst.id} ${worst.contrast.toFixed(3)} (目標 ≥ 0.11)`);
+const wd = rows.slice().sort((a, b) => a.detail - b.detail)[0];
+const wf = rows.slice().sort((a, b) => b.flatRatio - a.flatRatio)[0];
+console.log(`最低ディテール ${wd.id} ${wd.detail.toFixed(4)}`);
+console.log(`最悪の平坦率 ${wf.id} ${(wf.flatRatio * 100).toFixed(1)}%`);
 console.log('三角形内訳:', JSON.stringify(rows[0].triByTag));
 console.log('ドロー内訳:', JSON.stringify(rows[0].byTag));
 

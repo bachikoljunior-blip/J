@@ -19,7 +19,7 @@ import {
   TERRAIN_VS, TERRAIN_FS, INSTANCE_VS, INSTANCE_FS, GRASS_VS, GRASS_FS,
   SHADOW_INSTANCE_VS, SHADOW_TERRAIN_VS, SHADOW_FS, SKY_VS, SKY_FS,
   WATER_VS, WATER_FS, PARTICLE_VS, PARTICLE_FS,
-  FULLSCREEN_VS, BRIGHT_FS, BLUR_FS, COMPOSITE_FS,
+  FULLSCREEN_VS, BRIGHT_FS, BLUR_FS, COMPOSITE_FS, AO_FS, AO_BLUR_FS,
 } from './shaders.js';
 import {
   m4, m4perspective, m4lookAt, m4ortho, m4mul, m4invert,
@@ -27,6 +27,7 @@ import {
   clamp, lerp, saturate, TAU,
 } from '../core/math.js';
 import { Noise2D } from '../core/rng.js';
+import { buildTextures } from './textures.js';
 
 // ---------------------------------------------------------------------------
 //  Atmosphere keyframes: [hour, sunColor, skyTop, skyHorizon, ground, fog, fogSun, exposure]
@@ -72,18 +73,21 @@ export function sampleSky(hour) {
 export const QUALITY = {
   low: {
     name: '低', resScale: 0.62, shadowSize: 1024, shadowRange: 55, viewDistance: 380,
-    grassRadius: 24, grassCell: 1.35, grassBlades: 1, bloom: false, propDistance: 260,
-    particleCap: 700, aberration: 0.0,
+    grassRadius: 26, grassCell: 1.05, grassBlades: 1, bloom: false, propDistance: 260,
+    particleCap: 700, aberration: 0.0, detailFade: 55, cheapSurface: true,
+    ao: 0, aoRadius: 0.7,
   },
   medium: {
     name: '中', resScale: 0.80, shadowSize: 1024, shadowRange: 70, viewDistance: 450,
-    grassRadius: 36, grassCell: 1.05, grassBlades: 1, bloom: true, propDistance: 300,
-    particleCap: 1400, aberration: 0.010,
+    grassRadius: 38, grassCell: 0.78, grassBlades: 1, bloom: true, propDistance: 300,
+    particleCap: 1400, aberration: 0.010, detailFade: 95, cheapSurface: false,
+    ao: 0.62, aoRadius: 0.85,
   },
   high: {
     name: '高', resScale: 1.0, shadowSize: 2048, shadowRange: 88, viewDistance: 620,
-    grassRadius: 50, grassCell: 0.85, grassBlades: 2, bloom: true, propDistance: 420,
-    particleCap: 2600, aberration: 0.016,
+    grassRadius: 52, grassCell: 0.62, grassBlades: 2, bloom: true, propDistance: 420,
+    particleCap: 2600, aberration: 0.016, detailFade: 150, cheapSurface: false,
+    ao: 0.72, aoRadius: 1.0,
   },
 };
 
@@ -124,24 +128,34 @@ export class Renderer {
     this.glw = glw;
     const gl = glw.gl;
 
-    const defines = glw.depthTexture ? '' : '#define SHADOW_PACKED 1\n';
-    const D = (src) => (defines ? src.replace('precision highp float;', 'precision highp float;\n' + defines) : src);
+    this._shadowDefine = glw.depthTexture ? '' : '#define SHADOW_PACKED 1\n';
+    // Without a renderable half-float target the opaque passes have to
+    // compress their output into 8 bits and post has to expand it again.
+    this._sceneDefine = glw.halfFloatColor ? '' : '#define LDR_SCENE 1\n';
+    this._cheapSurface = !!(QUALITY[quality] || QUALITY.medium).cheapSurface;
+    const D = (src) => this._define(src);
 
     this.progTerrain = glw.program(TERRAIN_VS, D(TERRAIN_FS), 'terrain');
     this.progInstance = glw.program(INSTANCE_VS, D(INSTANCE_FS), 'instance');
     this.progGrass = glw.program(GRASS_VS, D(GRASS_FS), 'grass');
     this.progShadowInst = glw.program(SHADOW_INSTANCE_VS, D(SHADOW_FS), 'shadowInst');
     this.progShadowTerr = glw.program(SHADOW_TERRAIN_VS, D(SHADOW_FS), 'shadowTerr');
-    this.progSky = glw.program(SKY_VS, SKY_FS, 'sky');
-    this.progWater = glw.program(WATER_VS, WATER_FS, 'water');
-    this.progParticle = glw.program(PARTICLE_VS, PARTICLE_FS, 'particle');
-    this.progBright = glw.program(FULLSCREEN_VS, BRIGHT_FS, 'bright');
+    const S = (src) => this._define(src, { shadow: false });
+    this.progSky = glw.program(SKY_VS, S(SKY_FS), 'sky');
+    this.progWater = glw.program(WATER_VS, S(WATER_FS), 'water');
+    this.progParticle = glw.program(PARTICLE_VS, S(PARTICLE_FS), 'particle');
+    this.progBright = glw.program(FULLSCREEN_VS, S(BRIGHT_FS), 'bright');
     this.progBlur = glw.program(FULLSCREEN_VS, BLUR_FS, 'blur');
-    this.progComposite = glw.program(FULLSCREEN_VS, COMPOSITE_FS, 'composite');
+    this.progAO = glw.program(FULLSCREEN_VS, AO_FS, 'ao');
+    this.progAOBlur = glw.program(FULLSCREEN_VS, AO_BLUR_FS, 'aoBlur');
+    this.progComposite = glw.program(FULLSCREEN_VS, S(COMPOSITE_FS), 'composite');
 
     this.quadBuf = glw.vbo(new Float32Array([-1, -1, 3, -1, -1, 3]));
 
     this.cloudTex = this._makeCloudTexture();
+    // Surfaces. Built once here rather than lazily: it costs ~150ms and the
+    // loading screen is the only place in the game where that is free.
+    this.textures = buildTextures(glw, { quality: quality === 'low' ? 'low' : 'medium' });
 
     this.camera = new Camera();
     this.lightMatrix = m4();
@@ -193,6 +207,15 @@ export class Renderer {
     gl.cullFace(gl.BACK);
   }
 
+  /** Prefix a fragment shader with the compile-time switches it needs. */
+  _define(src, { shadow = true, scene = true } = {}) {
+    let d = '';
+    if (shadow) d += this._shadowDefine;
+    if (scene) d += this._sceneDefine;
+    if (this._cheapSurface) d += '#define CHEAP_SURFACE 1\n';
+    return d ? src.replace('precision highp float;', `precision highp float;\n${d}`) : src;
+  }
+
   setQuality(name) {
     const q = QUALITY[name] || QUALITY.medium;
     this.qualityName = QUALITY[name] ? name : 'medium';
@@ -201,6 +224,15 @@ export class Renderer {
       this.shadow = null;
     }
     if (!this.shadow) this.shadow = this.glw.createShadowTarget(q.shadowSize);
+    // Triplanar sampling is a compile-time switch, so dropping to the cheap
+    // path means relinking. Only happens when the player changes the setting.
+    const cheap = !!q.cheapSurface;
+    if (this.progTerrain && cheap !== this._cheapSurface) {
+      this._cheapSurface = cheap;
+      this.progTerrain = this.glw.program(TERRAIN_VS, this._define(TERRAIN_FS), 'terrain');
+      this.progInstance = this.glw.program(INSTANCE_VS, this._define(INSTANCE_FS), 'instance');
+      this.progGrass = this.glw.program(GRASS_VS, this._define(GRASS_FS), 'grass');
+    }
     this._sizeDirty = true;
   }
 
@@ -253,6 +285,7 @@ export class Renderer {
       gl.deleteFramebuffer(this.scene.fbo);
       gl.deleteTexture(this.scene.color);
       if (this.scene.depthBuf) gl.deleteRenderbuffer(this.scene.depthBuf);
+      if (this.scene.depthTex) gl.deleteTexture(this.scene.depthTex);
     }
     if (this.bloomA) {
       for (const rt of [this.bloomA, this.bloomB]) {
@@ -260,10 +293,23 @@ export class Renderer {
         gl.deleteTexture(rt.color);
       }
     }
-    this.scene = glw.createRenderTarget(w, h, { depth: true });
+    if (this.aoA) {
+      for (const rt of [this.aoA, this.aoB]) {
+        gl.deleteFramebuffer(rt.fbo);
+        gl.deleteTexture(rt.color);
+      }
+    }
+    // HDR where the hardware allows it, and a sampleable depth texture so
+    // later passes can reason about scene geometry.
+    this.scene = glw.createRenderTarget(w, h, { depth: true, hdr: true, sampleDepth: true });
     const bw = Math.max(32, w >> 2), bh = Math.max(32, h >> 2);
-    this.bloomA = glw.createRenderTarget(bw, bh, { depth: false });
-    this.bloomB = glw.createRenderTarget(bw, bh, { depth: false });
+    this.bloomA = glw.createRenderTarget(bw, bh, { depth: false, hdr: true });
+    this.bloomB = glw.createRenderTarget(bw, bh, { depth: false, hdr: true });
+    // Occlusion runs at half resolution: it is a low-frequency signal and the
+    // blur that follows would throw away the extra detail anyway.
+    const aw = Math.max(64, w >> 1), ah = Math.max(64, h >> 1);
+    this.aoA = glw.createRenderTarget(aw, ah, { depth: false });
+    this.aoB = glw.createRenderTarget(aw, ah, { depth: false });
     this._sizeDirty = false;
   }
 
@@ -395,7 +441,21 @@ export class Renderer {
     glw.umat(prog, 'uLightMatrix', this.lightMatrix);
     glw.u2f(prog, 'uShadowParams', 1 / this.shadow.size, this.shadowStrength);
 
+    // Surfaces. Units 4 and 5 are reserved for these for the whole frame, so
+    // binding them once per program is only a uniform write.
+    const tex = this.textures;
+    glw.bindTexture(4, tex.surface);
+    glw.bindTexture(5, tex.normal);
+    glw.u1i(prog, 'uSurfTex', 4);
+    glw.u1i(prog, 'uNormTex', 5);
+    glw.u1f(prog, 'uDetailFade', this.quality.detailFade);
+
     const gl = glw.gl;
+    const ms = prog.uniforms.uMatSurf;
+    if (ms) gl.uniform4fv(ms, tex.surf);
+    const mb = prog.uniforms.uMatBrdf;
+    if (mb) gl.uniform4fv(mb, tex.brdf);
+
     const lp = prog.uniforms.uPointLights;
     if (lp) gl.uniform4fv(lp, this.pointLightData);
     const lc = prog.uniforms.uPointColors;
@@ -660,6 +720,108 @@ export class Renderer {
       clippedRatio: clipped / n,
       crushedRatio: crushed / n,
       channelBalance: [rSum / n, gSum / n, bSum / n],
+      ...this._spatialStats(buf, w, h),
+    };
+  }
+
+  /**
+   * Spatial statistics of the frame — how much structure is actually in the
+   * image, as opposed to how bright it is.
+   *
+   * A flat-shaded low-poly renderer produces frames that are almost entirely
+   * constant-coloured facets: large regions with zero gradient, separated by a
+   * few hard edges. Textured, normal-mapped, occluded surfaces produce gradient
+   * almost everywhere. That difference is what these numbers capture, and it is
+   * the one thing mean luminance and stdev cannot see.
+   *
+   * These must be computed over the whole buffer, not a strided sample: skipping
+   * pixels destroys exactly the spatial relationships being measured.
+   */
+  _spatialStats(buf, w, h) {
+    const lum = this._lumaBuf && this._lumaBuf.length === w * h
+      ? this._lumaBuf : (this._lumaBuf = new Float32Array(w * h));
+    for (let i = 0, p = 0; i < w * h; i++, p += 4) {
+      lum[i] = (0.2126 * buf[p] + 0.7152 * buf[p + 1] + 0.0722 * buf[p + 2]) / 255;
+    }
+
+    let gradSum = 0, gradN = 0, edges = 0, flat = 0;
+    // Structure is measured over the lower part of the frame only.
+    //
+    // A smooth sky gradient is *correct* — it is what a sky looks like — and it
+    // fills the top of every frame. Counting it as "flat" would mean a night
+    // scene fails a detail check for the crime of having a night sky, and would
+    // reward putting noise in the atmosphere. The world is what has to hold up
+    // to the test, so the test looks at the world.
+    const y0 = Math.max(1, Math.floor(h * 0.38));
+    // Sobel over the interior. The two thresholds are chosen against 8-bit
+    // output: 1/255 is the smallest representable step, so "flat" means
+    // genuinely quantised-identical, and the edge threshold sits well above
+    // dither noise.
+    for (let y = y0; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const i = y * w + x;
+        const gx = (lum[i - w + 1] + 2 * lum[i + 1] + lum[i + w + 1])
+          - (lum[i - w - 1] + 2 * lum[i - 1] + lum[i + w - 1]);
+        const gy = (lum[i + w - 1] + 2 * lum[i + w] + lum[i + w + 1])
+          - (lum[i - w - 1] + 2 * lum[i - w] + lum[i - w + 1]);
+        const g = Math.sqrt(gx * gx + gy * gy);
+        gradSum += g;
+        gradN++;
+        if (g > 0.10) edges++;
+        if (g < 0.012) flat++;
+      }
+    }
+
+    // Local RMS contrast in 8x8 tiles: micro-shading variation, which survives
+    // even where the frame has no strong edges.
+    let tileSum = 0, tiles = 0;
+    for (let ty = y0; ty + 8 <= h; ty += 8) {
+      for (let tx = 0; tx + 8 <= w; tx += 8) {
+        let s = 0, s2 = 0;
+        for (let y = 0; y < 8; y++) {
+          for (let x = 0; x < 8; x++) {
+            const v = lum[(ty + y) * w + tx + x];
+            s += v; s2 += v * v;
+          }
+        }
+        const m = s / 64;
+        tileSum += Math.sqrt(Math.max(0, s2 / 64 - m * m));
+        tiles++;
+      }
+    }
+
+    // Colour diversity: populated cells of a 12x8x8 hue/sat/value histogram.
+    // Guards against a frame that is detailed but monochrome.
+    const bins = this._colorBins || (this._colorBins = new Uint8Array(12 * 8 * 8));
+    bins.fill(0);
+    for (let p = 0; p < w * h * 4; p += 4) {
+      const r = buf[p] / 255, g = buf[p + 1] / 255, b = buf[p + 2] / 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      const d = mx - mn;
+      let hue = 0;
+      if (d > 0.0001) {
+        if (mx === r) hue = ((g - b) / d + 6) % 6;
+        else if (mx === g) hue = (b - r) / d + 2;
+        else hue = (r - g) / d + 4;
+        hue /= 6;
+      }
+      const hi = Math.min(11, (hue * 12) | 0);
+      const si = Math.min(7, ((mx > 0 ? d / mx : 0) * 8) | 0);
+      const vi = Math.min(7, (mx * 8) | 0);
+      bins[(hi * 8 + si) * 8 + vi] = 1;
+    }
+    let filled = 0;
+    for (let i = 0; i < bins.length; i++) filled += bins[i];
+
+    return {
+      // Mean gradient magnitude: the headline "is there surface detail" number.
+      detail: gradSum / Math.max(gradN, 1),
+      edgeRatio: edges / Math.max(gradN, 1),
+      // Fraction of the frame that is a dead flat facet. Falls as materials,
+      // normal maps and occlusion fill the image with shading.
+      flatRatio: flat / Math.max(gradN, 1),
+      localContrast: tileSum / Math.max(tiles, 1),
+      colorCells: filled,
     };
   }
 
@@ -680,6 +842,8 @@ export class Renderer {
     const gl = glw.gl;
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.BLEND);
+
+    this._aoReady = this._renderAO();
 
     const useBloom = this.quality.bloom;
     if (useBloom) {
@@ -714,6 +878,54 @@ export class Renderer {
     this.damageFlash = Math.max(0, this.damageFlash - dt * 2.6);
   }
 
+  /**
+   * Screen-space ambient occlusion from the scene depth texture.
+   *
+   * Returns false when it could not run — no depth texture, or the quality
+   * preset has it off — so the composite knows to skip the fetch entirely
+   * rather than sample a stale or absent buffer.
+   */
+  _renderAO() {
+    const amount = this.quality.ao || 0;
+    if (amount <= 0 || !this.scene.depthTex || !this.aoA) return false;
+    const glw = this.glw;
+    const cam = this.camera;
+    const tanHalf = Math.tan(cam.fov * Math.PI / 360);
+    const aspect = this.scene.width / Math.max(this.scene.height, 1);
+
+    glw.setTag('ao');
+    glw.bindTarget(this.aoA);
+    let p = glw.use(this.progAO);
+    glw.bindTexture(0, this.scene.depthTex);
+    glw.u1i(p, 'uDepthTex', 0);
+    glw.u2f(p, 'uTexel', 1 / this.aoA.width, 1 / this.aoA.height);
+    glw.u2f(p, 'uNearFar', cam.near, cam.far);
+    glw.u2f(p, 'uProjScale', tanHalf * aspect, tanHalf);
+    glw.u1f(p, 'uRadius', this.quality.aoRadius || 0.75);
+    glw.u1f(p, 'uStrength', 1.0);
+    this._drawFullscreen(p);
+
+    // Separable depth-aware blur. Two passes, ping-ponging, ending in aoA so
+    // the composite always reads the same target.
+    p = glw.use(this.progAOBlur);
+    glw.bindTarget(this.aoB);
+    glw.bindTexture(0, this.aoA.color);
+    glw.bindTexture(1, this.scene.depthTex);
+    glw.u1i(p, 'uTex', 0);
+    glw.u1i(p, 'uDepthTex', 1);
+    glw.u2f(p, 'uNearFar', cam.near, cam.far);
+    glw.u2f(p, 'uDir', 1 / this.aoA.width, 0);
+    this._drawFullscreen(p);
+
+    glw.bindTarget(this.aoA);
+    glw.bindTexture(0, this.aoB.color);
+    glw.u1i(p, 'uTex', 0);
+    glw.u2f(p, 'uDir', 0, 1 / this.aoA.height);
+    this._drawFullscreen(p);
+    glw.setTag('post');
+    return true;
+  }
+
   /** The final grade pass, factored out so a capture can replay it verbatim. */
   _composite(time) {
     const glw = this.glw;
@@ -738,6 +950,12 @@ export class Renderer {
     glw.u1f(p, 'uTime', time);
     glw.u1f(p, 'uDamage', this.damageFlash);
     glw.u1f(p, 'uDeath', this.deathFade);
+    const aoAmount = this._aoReady ? (this.quality.ao || 0) : 0;
+    if (aoAmount > 0) {
+      glw.bindTexture(6, this.aoA.color);
+      glw.u1i(p, 'uAO', 6);
+    }
+    glw.u1f(p, 'uAOAmount', aoAmount);
     this._drawFullscreen(p);
   }
 }

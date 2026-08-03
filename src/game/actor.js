@@ -10,13 +10,16 @@ import {
   clamp, lerp, saturate, damp, dampAngle, angleDelta, TAU,
   v3distXZ, closestOnSegmentXZ,
 } from '../core/math.js';
-import { Rig, HUMANOID, QUADRUPED, WINGED, MAT } from './rig.js';
+import {
+  Rig, HUMANOID, QUADRUPED, WINGED, MAT, deriveTemplate, PROPORTIONS,
+} from './rig.js';
 import {
   humanoidLocomotion, humanoidArmsNeutral, quadrupedAnimate, wingedAnimate,
   poseRoll, poseBackstep, poseBlock, poseParry, poseHurt, poseStagger,
   poseDeath, poseJump, poseDrink, poseRest, ATTACKS,
 } from './anim.js';
 import { mitigate } from './items.js';
+import { MATERIAL as SURFACE } from '../gfx/textures.js';
 
 export const STATE = {
   IDLE: 'idle', MOVE: 'move', ROLL: 'roll', BACKSTEP: 'backstep',
@@ -113,8 +116,15 @@ export class Actor {
     this.buffs = [];
 
     // --- rig ----------------------------------------------------------------
-    const template = opts.rig === 'quadruped' ? QUADRUPED
+    const base = opts.rig === 'quadruped' ? QUADRUPED
       : opts.rig === 'winged' ? WINGED : HUMANOID;
+    // Body shape, not just body size. A brute and a duellist at the same scale
+    // should be distinguishable in silhouette alone, because at the distance
+    // where you decide how to approach an enemy, silhouette is all you have.
+    // deriveTemplate caches by identity, so the derived skeleton is built once
+    // per (template, build) pair, not once per spawn.
+    const build = opts.build && PROPORTIONS[opts.build] ? PROPORTIONS[opts.build] : null;
+    const template = build ? deriveTemplate(base, build) : base;
     this.rigKind = opts.rig || 'humanoid';
     this.rig = new Rig(template, this.scale);
     this.palette = opts.palette || defaultPalette();
@@ -766,7 +776,6 @@ export class Actor {
 
   render(batches) {
     if (!this.visible) return;
-    const box = batches.get('box');
     const flashK = this.flash;
     // Hit flash: enough to read at a glance, not enough to turn the character
     // into a solid red silhouette mid-combo.
@@ -779,7 +788,12 @@ export class Actor {
     };
     if (this.status.frost.active > 0) { opts.tintB += 0.35; opts.tintG += 0.15; }
     if (this.status.poison.active > 0) { opts.tintG += 0.30; opts.tintR -= 0.15; }
-    this.rig.render(box, this.palette, opts);
+    // renderTo, not render: bones name the primitive they are drawn with, so a
+    // shoulder lands in the pauldron batch and a thigh in the tapered-limb
+    // batch. That is a handful of draw calls for the whole fight rather than
+    // one per character, and it is the difference between a box-man and a
+    // silhouette you can read at thirty metres.
+    this.rig.renderTo(batches, this.palette, opts);
     this._renderEquipment(batches, opts);
   }
 
@@ -817,6 +831,10 @@ const _wb = new Float32Array(9);
  * on — the whole armoury is a dozen boxes.
  */
 function renderWeapon(box, handBasis, handPos, shape, scale, opts, cls) {
+  // A bow is wood and a sword is steel, and the difference is entirely in how
+  // the sun sits on them. Bows and staves take the wood surface; everything
+  // else is metal until the grip, which is leather.
+  box.material(cls === 'bow' || cls === 'staff' ? SURFACE.WOOD : SURFACE.METAL);
   const len = (shape.len || 0.9) * scale;
   const w = (shape.w || 0.08) * scale;
   const t = (shape.t || 0.028) * scale;
@@ -826,9 +844,11 @@ function renderWeapon(box, handBasis, handPos, shape, scale, opts, cls) {
   const b = handBasis;
 
   // Grip, extending back from the hand.
+  box.material(SURFACE.LEATHER);
   setScaled(_wb, b, w * 0.55, -0.16 * scale, t * 1.6);
   box.pushMatrix(_wb, handPos.x, handPos.y, handPos.z,
     hilt[0] * opts.tintR, hilt[1] * opts.tintG, hilt[2] * opts.tintB, 0, 0.9, opts.alpha);
+  box.material(cls === 'bow' || cls === 'staff' ? SURFACE.WOOD : SURFACE.METAL);
 
   if (cls === 'bow') {
     // Bow: two limbs angled away from the grip, plus a string.
@@ -900,6 +920,7 @@ function renderWeapon(box, handBasis, handPos, shape, scale, opts, cls) {
 }
 
 function renderShield(box, basis, armPos, shape, scale, opts) {
+  box.material(shape.wooden ? SURFACE.WOOD : SURFACE.METAL);
   const w = (shape.w || 0.5) * scale;
   const h = (shape.h || 0.8) * scale;
   const t = (shape.t || 0.08) * scale;
@@ -930,6 +951,7 @@ function renderShield(box, basis, armPos, shape, scale, opts) {
     by + b[4] * h * 0.42 - b[7] * t * 0.9,
     bz + b[5] * h * 0.42 - b[8] * t * 0.9,
     rim[0] * 1.4 * opts.tintR, rim[1] * 1.4 * opts.tintG, rim[2] * 1.4 * opts.tintB, 0, 0.9, opts.alpha);
+  box.material(SURFACE.DEFAULT);
 }
 
 /** Scale the three basis columns independently. */

@@ -15,9 +15,10 @@ import { ParticleSystem, BLEND } from '../gfx/particles.js';
 import {
   GpuMesh, MeshData, buildBox, buildBevelBox, buildCylinder, buildCone, buildRock,
   buildGrassTuft, buildBroadleafTree, buildConiferTree, buildDeadTree, buildBush,
-  buildTreeFar, buildConiferFar,
+  buildTreeFar, buildConiferFar, buildCharacterParts,
   buildPillar, buildCampfire, buildGrace, buildChest, buildHut, buildWatchtower, buildArch,
 } from '../gfx/mesh.js';
+import { MATERIAL } from '../gfx/textures.js';
 
 import { World, WORLD_HALF, CHUNK_SIZE, CHUNKS, WATER_LEVEL, BIOME, BIOME_INFO, REGIONS } from '../world/worldgen.js';
 import { Scatter, GrassField, PROP } from '../world/foliage.js';
@@ -178,30 +179,56 @@ export class Game {
     const rng = makeRng(this.world.seed ^ 0xbeef);
     this.batches = new BatchSet(glw);
 
+    // Materials are per-batch by default. The box batch is the exception: it
+    // draws every character, every limb and every piece of equipment, so its
+    // material is set per push by whoever is drawing.
+    const M = MATERIAL;
+
     // Character/prop primitive — the workhorse batch.
     this.batches.add('box', new GpuMesh(glw, buildBevelBox(0.10)), 4096);
 
-    // Vegetation.
-    this.batches.add('treeBroad', new GpuMesh(glw, buildBroadleafTree(rng)), 512);
-    this.batches.add('treeConifer', new GpuMesh(glw, buildConiferTree(rng)), 512);
-    this.batches.add('treeDead', new GpuMesh(glw, buildDeadTree(rng)), 256);
-    this.batches.add('treeFar', new GpuMesh(glw, buildTreeFar(rng)), 1024, { castsShadow: false });
-    this.batches.add('coniferFar', new GpuMesh(glw, buildConiferFar()), 1024, { castsShadow: false });
-    this.batches.add('bush', new GpuMesh(glw, buildBush(rng)), 768, { castsShadow: false });
-    this.batches.add('rockS', new GpuMesh(glw, buildRock(1, 0.30, rng)), 768);
-    this.batches.add('rockL', new GpuMesh(glw, buildRock(1, 0.26, rng)), 384);
-    this.batches.add('reed', new GpuMesh(glw, buildCone(4)), 512, { castsShadow: false });
+    // Character silhouette. Every bone used to be the box above, which made a
+    // bandit and a boss the same object at two scales. One batch per primitive
+    // keeps a twelve-enemy fight at six draw calls while giving each bone a
+    // shape: tapered limbs, a shouldered torso, a jawed skull, domed pauldrons
+    // and flat plates for tassets, feet, capes and crests.
+    const CHAR_CAPACITY = { limb: 1536, torso: 512, skull: 384, pauldron: 384, plate: 768 };
+    const charParts = buildCharacterParts();
+    for (const name in charParts) {
+      // Material is set per push by rig.js, exactly as for the box batch.
+      this.batches.add(name, new GpuMesh(glw, charParts[name]), CHAR_CAPACITY[name] || 512);
+    }
+
+    // Vegetation. The second material is what the mesh's blend attribute
+    // selects: trunk bark on one side, canopy foliage on the other.
+    this.batches.add('treeBroad', new GpuMesh(glw, buildBroadleafTree(rng)), 512)
+      .material(M.BARK, M.FOLIAGE);
+    this.batches.add('treeConifer', new GpuMesh(glw, buildConiferTree(rng)), 512)
+      .material(M.BARK, M.FOLIAGE);
+    this.batches.add('treeDead', new GpuMesh(glw, buildDeadTree(rng)), 256)
+      .material(M.BARK, M.BARK);
+    this.batches.add('treeFar', new GpuMesh(glw, buildTreeFar(rng)), 1024, { castsShadow: false })
+      .material(M.BARK, M.FOLIAGE, 1, 0.4);
+    this.batches.add('coniferFar', new GpuMesh(glw, buildConiferFar()), 1024, { castsShadow: false })
+      .material(M.BARK, M.FOLIAGE, 1, 0.4);
+    this.batches.add('bush', new GpuMesh(glw, buildBush(rng)), 768, { castsShadow: false })
+      .material(M.FOLIAGE);
+    this.batches.add('rockS', new GpuMesh(glw, buildRock(1, 0.30, rng)), 768).material(M.STONE);
+    this.batches.add('rockL', new GpuMesh(glw, buildRock(1, 0.26, rng)), 384)
+      .material(M.STONE, M.STONE, 1, 0.6);
+    this.batches.add('reed', new GpuMesh(glw, buildCone(4)), 512, { castsShadow: false })
+      .material(M.FOLIAGE);
 
     // Structures.
-    this.batches.add('hut', new GpuMesh(glw, buildHut(rng)), 96);
-    this.batches.add('pillar', new GpuMesh(glw, buildPillar(rng)), 256);
-    this.batches.add('arch', new GpuMesh(glw, buildArch()), 48);
-    this.batches.add('campfire', new GpuMesh(glw, buildCampfire()), 64);
-    this.batches.add('grace', new GpuMesh(glw, buildGrace()), 48);
-    this.batches.add('chest', new GpuMesh(glw, buildChest()), 96);
-    this.batches.add('tower', new GpuMesh(glw, buildWatchtower()), 32);
-    this.batches.add('cylinder', new GpuMesh(glw, buildCylinder(8)), 512);
-    this.batches.add('cone', new GpuMesh(glw, buildCone(6)), 256);
+    this.batches.add('hut', new GpuMesh(glw, buildHut(rng)), 96).material(M.WOOD, M.THATCH);
+    this.batches.add('pillar', new GpuMesh(glw, buildPillar(rng)), 256).material(M.STONE);
+    this.batches.add('arch', new GpuMesh(glw, buildArch()), 48).material(M.STONE);
+    this.batches.add('campfire', new GpuMesh(glw, buildCampfire()), 64).material(M.WOOD);
+    this.batches.add('grace', new GpuMesh(glw, buildGrace()), 48).material(M.STONE, M.GEM);
+    this.batches.add('chest', new GpuMesh(glw, buildChest()), 96).material(M.WOOD, M.METAL);
+    this.batches.add('tower', new GpuMesh(glw, buildWatchtower()), 32).material(M.STONE, M.WOOD);
+    this.batches.add('cylinder', new GpuMesh(glw, buildCylinder(8)), 512).material(M.STONE);
+    this.batches.add('cone', new GpuMesh(glw, buildCone(6)), 256).material(M.STONE);
 
     // Grass gets its own program, so it lives outside the batch set.
     this.grassBatch = this.batches.add('grass', new GpuMesh(glw, buildGrassTuft()), 8192, { castsShadow: false });
