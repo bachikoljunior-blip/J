@@ -575,6 +575,278 @@ export function buildClutterMeshes(rng) {
 }
 
 // ---------------------------------------------------------------------------
+//  Land features
+//
+//  The tier between clutter and props: two to eight metres, tens of them in a
+//  view rather than thousands. They exist because a plain is not made legible
+//  by surface treatment. A 30 cm stone is a smudge at forty metres and gone at
+//  ninety, so on open ground the whole middle distance — which is most of the
+//  frame — falls back to bare terrain shading. What fixes that is mass: things
+//  with a lit face, a shaded face and a cast silhouette, big enough that the
+//  land around them reads as having somewhere to stand.
+//
+//  They are also where the world stops looking generated. Outcrops on the
+//  slope breaks, thickets along the hollows, reed beds at the water's edge,
+//  dunes lying across the wind, and walls and cairns left by people — each one
+//  says something about the ground it sits on.
+//
+//  A hundred triangles each is affordable at this density and buys real
+//  silhouette, which is the only thing that survives past fifty metres.
+// ---------------------------------------------------------------------------
+
+/**
+ * Rock outcrop: four angular masses shouldering out of the turf at different
+ * heights and leans, sharing one footprint. Scaled small and wide it is a
+ * boulder cluster; scaled tall it is a tor. Every base ring sits below y = 0 so
+ * the mass stays bedded whatever the ground does under it — the instance
+ * transform carries no tilt, and a flat-bottomed rock on a slope floats.
+ * The upper rings take the secondary colour: lichen, snow crust or ash fall.
+ * 60 triangles.
+ */
+export function buildOutcrop(rng) {
+  const m = new MeshData();
+  const n = 5;
+  for (let s = 0; s < 4; s++) {
+    const cx = (rng() - 0.5) * 0.66, cz = (rng() - 0.5) * 0.66;
+    const rad = 0.17 + rng() * 0.19;
+    const h = 0.30 + rng() * 0.70;
+    const lx = (rng() - 0.5) * 0.30, lz = (rng() - 0.5) * 0.30;
+    const a0 = rng() * 6.283;
+    const base = groundRing(n, cx, cz, rad, -0.35, a0, rng, 0.34);
+    const top = groundRing(n, cx + lx, cz + lz, rad * (0.42 + rng() * 0.34), h, a0, rng, 0.30);
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      flatQuad(m, base[i], base[j], top[j], top[i], 0, 1);
+    }
+    const cap = [cx + lx, h + 0.05 + rng() * 0.08, cz + lz];
+    for (let i = 0; i < n; i++) flatTri(m, cap, top[i], top[(i + 1) % n], 1, 1, 1);
+  }
+  return m;
+}
+
+/**
+ * Bramble thicket: three lumpy masses in a line with bare arching stems over
+ * them. Stretched along x it becomes a hedgerow, which is what actually divides
+ * grassland — and a hedgerow run is a horizon-crossing shape a smooth meadow
+ * has nothing else to offer. The stems take the secondary colour so the dead
+ * wood reads pale against the mass. 108 triangles.
+ */
+export function buildThicket(rng) {
+  const m = new MeshData();
+  for (let i = 0; i < 3; i++) {
+    const t = i / 2 - 0.5;
+    const s = 0.52 + rng() * 0.34;
+    m.merge(buildRock(0, 0.34, rng),
+      t * 0.54 + (rng() - 0.5) * 0.10, 0, (rng() - 0.5) * 0.18,
+      s, 0.74 + rng() * 0.42, s * 0.9, 0);
+  }
+  // Stems arch up and over: a bramble mass is defined by the canes that escape
+  // it, and without them the blob reads as a bush the size of a house.
+  for (let i = 0; i < 4; i++) {
+    const bx = (rng() - 0.5) * 0.8;
+    const a = rng() * 6.283;
+    addRod(m,
+      [bx, 0.05, (rng() - 0.5) * 0.3],
+      [bx + Math.cos(a) * 0.30, 0.78 + rng() * 0.30, Math.sin(a) * 0.30],
+      0.035, 0.018, 3, 1, 1);
+  }
+  return m;
+}
+
+/**
+ * Reed bed: a stand of tall blades with two rotting posts left in it. Reeds
+ * grow in beds at the water margin, never singly, and the posts are what turn
+ * a green patch into somewhere that was once used. Blades are double-sided
+ * because the instanced pass culls back faces. 64 triangles.
+ */
+export function buildReedBed(rng) {
+  const m = new MeshData();
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2 + rng() * 0.5;
+    const r = 0.16 + rng() * 0.34;
+    const bx = Math.cos(a) * r, bz = Math.sin(a) * r;
+    const w = 0.022 + rng() * 0.034;
+    const h = 0.62 + rng() * 0.38;
+    const lean = rng() * 0.22;
+    const A = [bx - w, 0, bz];
+    const B = [bx + w, 0, bz];
+    const T = [bx + Math.cos(a) * lean, h, bz + Math.sin(a) * lean];
+    flatTri(m, A, B, T, 0, 0, 1);
+    flatTri(m, B, A, T, 0, 0, 1);
+  }
+  for (let i = 0; i < 2; i++) {
+    const bx = (rng() - 0.5) * 0.5, bz = (rng() - 0.5) * 0.5;
+    addRod(m, [bx, 0, bz],
+      [bx + (rng() - 0.5) * 0.22, 0.5 + rng() * 0.45, bz + (rng() - 0.5) * 0.22],
+      0.055, 0.042, 4, 1, 1);
+  }
+  return m;
+}
+
+/**
+ * Wind-built dune with burnt timber standing out of its crest.
+ *
+ * The mound is smooth-shaded and the spars are faceted, so it is built in two
+ * pieces and merged: one call to computeSmoothNormals would round the timber
+ * off with it. Windward face long, lee face short and steep.
+ *
+ * The colour split is the point of this shape. Primary is charred ground and
+ * secondary is fresh pale ash, and the mesh ramps from one to the other up the
+ * flank, so a single directional light gives a dark base, a bright crest and a
+ * whole tonal range in between — which is exactly what a plain of uniform grey
+ * cannot do for itself.
+ *
+ * The spars deliberately break the unit-height convention and reach half again
+ * above the crest: on the ash plain the horizon sits low in frame, and a thing
+ * that crosses it is worth more than the same triangles spent below it.
+ * 54 triangles.
+ */
+export function buildAshDune(rng) {
+  const mound = new MeshData();
+  const N = 5;
+  const ridge = [], skirtA = [], skirtB = [];
+  for (let i = 0; i < N; i++) {
+    const t = i / (N - 1);
+    const prof = Math.sin(Math.PI * Math.pow(t, 0.72));
+    const h = (0.70 + rng() * 0.30) * prof + 0.01;
+    const wA = 0.5 * (0.30 + 0.70 * prof) * (0.85 + rng() * 0.3);
+    const wB = 0.5 * (0.16 + 0.34 * prof) * (0.85 + rng() * 0.3);
+    const zc = (rng() - 0.5) * 0.10;
+    ridge.push(mound.useBlend(1).addVertex(t - 0.5, h, zc - wB * 0.35, 0, 1, 0));
+    skirtA.push(mound.useBlend(0).addVertex(t - 0.5, 0, zc + wA, 0, 1, 0));
+    skirtB.push(mound.useBlend(0).addVertex(t - 0.5, 0, zc - wB, 0, 1, 0));
+  }
+  mound.useBlend(0);
+  for (let i = 0; i < N - 1; i++) {
+    mound.addQuad(skirtA[i], skirtA[i + 1], ridge[i + 1], ridge[i]);
+    mound.addQuad(ridge[i], ridge[i + 1], skirtB[i + 1], skirtB[i]);
+  }
+  mound.addTri(ridge[0], skirtB[0], skirtA[0]);
+  mound.addTri(ridge[N - 1], skirtA[N - 1], skirtB[N - 1]);
+  mound.computeSmoothNormals();
+
+  const m = new MeshData();
+  m.merge(mound);
+  for (let i = 0; i < 3; i++) {
+    const bx = (rng() - 0.6) * 0.7;
+    const a = rng() * 6.283;
+    const len = 0.5 + rng() * 0.7;
+    addRod(m,
+      [bx, 0.1, (rng() - 0.5) * 0.2],
+      [bx + Math.cos(a) * len * 0.45, 0.35 + len, Math.sin(a) * len * 0.45],
+      0.045, 0.022, 3, 0, 0);
+  }
+  return m;
+}
+
+/**
+ * Bone midden: a heaped mound with long bones spilling out of it. The mound
+ * takes the primary colour — bone that has been in the ash long enough to stain
+ * — and the loose bones the bleached secondary. 80 triangles.
+ */
+export function buildBoneMidden(rng) {
+  const m = new MeshData();
+  m.merge(buildRock(0, 0.30, rng), 0, 0, 0, 0.95, 0.80, 0.85, 0);
+  for (let i = 0; i < 5; i++) {
+    const a = rng() * 6.283;
+    const r = 0.18 + rng() * 0.34;
+    const bx = Math.cos(a) * r, bz = Math.sin(a) * r;
+    addRod(m,
+      [bx, 0.04 + rng() * 0.12, bz],
+      [bx + Math.cos(a) * 0.34, 0.16 + rng() * 0.80, bz + Math.sin(a) * 0.34],
+      0.05, 0.035, 3, 1, 1);
+  }
+  return m;
+}
+
+/**
+ * Cairn: five courses of flat stone, each smaller and slightly offset from the
+ * one below, leaning as a hand-stacked pile does. Courses alternate colour so
+ * the stack bands, which is what makes it read as built rather than dropped —
+ * and a cairn on a rise is the cheapest thing in the game that tells the player
+ * someone has walked here before. 65 triangles.
+ */
+export function buildCairn(rng) {
+  const m = new MeshData();
+  const n = 5;
+  const lean = (rng() - 0.5) * 0.18;
+  let y = 0;
+  for (let s = 0; s < 5; s++) {
+    const t = s / 4;
+    const rad = 0.5 * (1 - t * 0.62);
+    const h = (0.24 - t * 0.06) * (0.7 + rng() * 0.6);
+    const cx = lean * t + (rng() - 0.5) * 0.06;
+    const cz = lean * t * 0.6 + (rng() - 0.5) * 0.06;
+    const a0 = rng() * 6.283;
+    const bot = groundRing(n, cx, cz, rad, y, a0, rng, 0.20);
+    const top = bot.map((p) => [p[0] * 0.94, y + h, p[2] * 0.94]);
+    const b = s & 1;
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      flatQuad(m, bot[i], bot[j], top[j], top[i], b, b);
+    }
+    const c = [cx, y + h, cz];
+    for (let i = 0; i < n; i++) flatTri(m, c, top[i], top[(i + 1) % n], b, b, b);
+    y += h;
+  }
+  return m;
+}
+
+/**
+ * Drystone field wall, one unit long along x, meant to be chained into a run.
+ *
+ * The top line is jittered station by station and one station is dropped to
+ * near ground level, so every segment is a different broken profile and a run
+ * of them reads as a wall that has been falling down for a century rather than
+ * a fence built this morning. The top course takes the secondary colour —
+ * weathered cap stone, or turf where the wall is really a hedgebank.
+ * 50 triangles.
+ */
+export function buildFieldWall(rng) {
+  const m = new MeshData();
+  const N = 7;
+  const gap = 1 + Math.floor(rng() * (N - 2));   // the course that has collapsed
+  const top = [], loA = [], loB = [];
+  for (let i = 0; i < N; i++) {
+    const x = i / (N - 1) - 0.5;
+    const w = 0.5 * (0.72 + rng() * 0.28);
+    const h = i === gap ? 0.16 + rng() * 0.12 : 0.72 + rng() * 0.28;
+    const zc = (rng() - 0.5) * 0.12;
+    top.push([[x, h, zc + w * 0.62], [x, h, zc - w * 0.62]]);
+    loA.push([x, -0.15, zc + w]);
+    loB.push([x, -0.15, zc - w]);
+  }
+  for (let i = 0; i < N - 1; i++) {
+    flatQuad(m, loA[i], loA[i + 1], top[i + 1][0], top[i][0], 0, 1);
+    flatQuad(m, top[i][1], top[i + 1][1], loB[i + 1], loB[i], 1, 0);
+    flatQuad(m, top[i][0], top[i + 1][0], top[i + 1][1], top[i][1], 1, 1);
+  }
+  flatTri(m, loA[0], top[0][0], top[0][1], 0, 1, 1);
+  flatTri(m, loA[0], top[0][1], loB[0], 0, 1, 0);
+  flatTri(m, top[N - 1][0], loA[N - 1], loB[N - 1], 1, 0, 0);
+  flatTri(m, top[N - 1][0], loB[N - 1], top[N - 1][1], 1, 0, 1);
+  return m;
+}
+
+/**
+ * Every land-feature mesh, keyed by the FEATURE id foliage.js scatters, in the
+ * same order — kept here so geometry and id table cannot drift apart.
+ * @param {function(): number} rng
+ * @returns {Array<MeshData>}
+ */
+export function buildFeatureMeshes(rng) {
+  return [
+    buildOutcrop(rng),
+    buildThicket(rng),
+    buildReedBed(rng),
+    buildAshDune(rng),
+    buildBoneMidden(rng),
+    buildCairn(rng),
+    buildFieldWall(rng),
+  ];
+}
+
+// ---------------------------------------------------------------------------
 //  Character primitives
 //
 //  A skeleton assembled from boxes reads as a stack of boxes, and at the thirty

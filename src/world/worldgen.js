@@ -40,6 +40,68 @@ export const BIOME_INFO = {
   [BIOME.ASH]: { name: '焦土', ground: [0.21, 0.18, 0.18], rock: [0.24, 0.21, 0.20] },
 };
 
+// ---------------------------------------------------------------------------
+//  Ground-scale relief.
+//
+//  The landform passes below (warped fBm, ridged mountains, a mid-frequency
+//  octave) produce nothing shorter than about forty metres, so open country
+//  arrives as an unbroken plane and the light has nothing to model: standing in
+//  the meadow, every square metre in frame carries the same shading. Real flat
+//  country is never planar. Meadow, marsh and ash plain all undulate at the
+//  scale of a few paces, and that undulation is most of what you actually see
+//  when you stand in one.
+//
+//  All of it goes into the height field itself rather than into the mesh or
+//  the shader, because heightAt() is the single source of truth for collision,
+//  prop placement, water and the minimap: form the player can see but not
+//  stand on is worse than no form at all. It also means none of this costs a
+//  triangle — the finest LOD already samples at exactly the 4 m grid spacing.
+//
+//  That grid spacing is also the floor. A feature much narrower than three
+//  samples cannot be stored, so the shortest wavelength here is 11 m.
+//  Amplitudes are chosen against the rule that governs everything below: the
+//  steepest thing any of it produces is around one in three, which is ground
+//  you run over without noticing rather than terrain you path around.
+// ---------------------------------------------------------------------------
+
+// Three fixed wavelengths rather than an fBm, so the amplitudes stay legible.
+// The weighting is toward the short end: a metre of amplitude at 15 m turns the
+// surface normal about twice as much as a metre at 26 m does, for the same
+// slope underfoot, because the 4 m grid renders the short one as facets with a
+// real break between them. Anything under about 10 m is past the point where
+// the grid can hold it at all — the reconstruction beats against the sample
+// spacing and the mound you see is not quite the mound you walk on.
+const SWELL_LEN = 26, SWELL_AMP = 2.2;      // broad ground swells
+const MOUND_LEN = 15, MOUND_AMP = 1.3;      // hummocks — the scale underfoot
+const DIMPLE_LEN = 11, DIMPLE_AMP = 0.55;   // ankle-height, and the grid floor
+
+// Banks. Tread spacing works out near 45 m, the riser occupies under a fifth,
+// so a bank is about 2.2 m of drop over 8 m of ground — two paces of real
+// break, which is what makes one readable from across a plain.
+const BENCH_FLIGHT = 13.0;
+const BENCH_RISER_FRAC = 0.18;
+const BENCH_RISE = 2.75;
+
+// Dry watercourses, at two scales, because drainage is fractal and a single
+// scale of it reads as a canal. GULLY_BANK is a threshold on a distance-like
+// field rather than a width; it works out around twelve metres either side of
+// a wash and five either side of a rill. GULLY_BED is the inner fraction that
+// is level gravel floor — a wash is not a V, it is a flat bed between two
+// banks, and it is those two break lines that make one readable across a
+// plain.
+const GULLY_SCALE = 0.0024, GULLY_BANK = 0.075, GULLY_DEPTH = 2.4;
+const RILL_SCALE = 0.0062, RILL_BANK = 0.085, RILL_DEPTH = 1.1;
+const GULLY_BED = 0.55;
+
+// Ash dunes. The windward fraction is deliberately far from a half — that
+// asymmetry is the whole point, and it puts a ten-metre lee face under every
+// crest, which is the steepest honest thing on the whole plain.
+const DUNE_SPACING = 38;
+const DUNE_WINDWARD = 0.74;
+const DUNE_HEIGHT = 5.0;
+
+const TUSSOCK_AMP = 2.6;
+
 /**
  * Authored regions. `cx/cz` place the region centre; `radius` controls how far
  * its influence reaches; the elevation fields bias the noise underneath it.
@@ -111,6 +173,16 @@ export class World {
     this.nMoist = new Noise2D(this.seed ^ 0xc2b2ae35);
     this.nRiver = new Noise2D(this.seed ^ 0x27d4eb2d);
     this.nDetail = new Noise2D(this.seed ^ 0x165667b1);
+    this.nGround = new Noise2D(this.seed ^ 0x3b1f77c1);   // hummocks, tussocks
+    this.nBench = new Noise2D(this.seed ^ 0x6f4e2d09);    // banks and benches
+    this.nGully = new Noise2D(this.seed ^ 0x7ad39b45);    // dry watercourses
+    this.nDune = new Noise2D(this.seed ^ 0x1c9a55e3);     // ash drift
+
+    // Prevailing wind for the Cinderwaste, fixed per world. Dunes are the one
+    // landform with a direction, so it has to come from somewhere stable.
+    const wind = hash2(7, 13, this.seed) * Math.PI * 2;
+    this._windC = Math.cos(wind);
+    this._windS = Math.sin(wind);
 
     this.height = new Float32Array(GRID * GRID);
     this.biome = new Uint8Array(GRID * GRID);
@@ -212,6 +284,138 @@ export class World {
   // -- generation -----------------------------------------------------------
 
   /**
+   * Ground-scale undulation: hummocks, swells and the hollows between them.
+   *
+   * Three fixed wavelengths rather than an fBm so the amplitudes stay legible
+   * and bounded — an fBm with enough octaves to reach 12 m would also drag its
+   * long-wavelength energy in and quietly change the landform.
+   *
+   * @param {number} wx world X
+   * @param {number} wz world Z
+   * @param {number} open 0 on crags, 1 on the plains
+   * @returns {number} metres to add to the landform height
+   */
+  groundRelief(wx, wz, open) {
+    if (open <= 0.01) return 0;
+    const n = this.nGround;
+    // Ground is not uniformly hummocky: quiet stretches and busy ones, at the
+    // scale of a few hundred metres. The floor is high on purpose — a patch of
+    // genuinely planar meadow is the thing being removed, and anything that
+    // leaves one behind just relocates the problem instead of fixing it.
+    const calm = 0.72 + 0.28 * (n.noise(wx * 0.0021, wz * 0.0021) * 0.5 + 0.5);
+    // Hollows read broader and shallower than mounds are tall, because soil
+    // and water both collect in them. Softening the negative half is what
+    // keeps this from looking like a field of bubbles.
+    const shape = (v, amp) => (v > 0 ? v : v * 0.75) * amp;
+    return (shape(n.noise(wx / SWELL_LEN, wz / SWELL_LEN), SWELL_AMP)
+      + shape(n.noise(wx / MOUND_LEN + 41.3, wz / MOUND_LEN - 7.9), MOUND_AMP)
+      + shape(n.noise(wx / DIMPLE_LEN - 18.6, wz / DIMPLE_LEN + 23.1), DIMPLE_AMP))
+      * open * calm;
+  }
+
+  /**
+   * Banks and benches — the short steep breaks where a plain steps down to the
+   * next level, with the ground holding level between them.
+   *
+   * Built as a level set of a slow field taken through a hard shoulder. The
+   * field's own ramp is subtracted back out so this contributes stepping only:
+   * it must not become a second landform octave and move the coastline.
+   *
+   * @returns {number} metres to add, bounded by +/- 0.42 * BENCH_RISE
+   */
+  benchStep(wx, wz, open) {
+    if (open <= 0.01) return 0;
+    const n = this.nBench;
+    const x = wx * 0.0026, z = wz * 0.0026;
+    // Terraces come in flights with smooth country between them, so where they
+    // occur is itself a slow field — biased so that most open ground is
+    // benched somewhere in view and the unbenched stretches are the exception.
+    const mask = saturate((n.noise(x * 0.42 + 61.4, z * 0.42 - 17.2) + 0.36) * 1.7);
+    if (mask <= 0.01) return 0;
+    const f = n.fbm(x, z, 2) * BENCH_FLIGHT;
+    const k = Math.floor(f);
+    const t = f - k;
+    const riser = smoothstep(saturate((t - 0.40) / BENCH_RISER_FRAC));
+    // riser - t: a short rise onto the tread, then a long gentle fall away
+    // from it. That is a scarp with a dip slope behind it, which is what a
+    // stepped plain actually looks like from ground level.
+    return (riser - t) * BENCH_RISE * mask * open;
+  }
+
+  /**
+   * Distance-to-dry-watercourse field in [0,1]; 0 = channel line.
+   *
+   * The same construction as riverField at a fifth of the scale, so the dry
+   * courses run with the drainage they feed — following one downhill always
+   * brings you to water, which makes them navigation as well as form.
+   *
+   * @param {number} s frequency: GULLY_SCALE for washes, RILL_SCALE for the
+   *   rills that feed them
+   * @param {number} off decorrelates the two networks, which are otherwise the
+   *   same pattern at two sizes
+   */
+  gullyField(wx, wz, s = GULLY_SCALE, off = 0) {
+    const x = wx * s + off, z = wz * s - off;
+    // One warp pass. Without it the channels are smooth curves; with it they
+    // braid and rejoin the way runoff actually cuts ground.
+    const a = this.nGully.noise(x * 0.6 + 3.1, z * 0.6 - 1.7);
+    const b = this.nGully.noise(x * 0.6 - 8.3, z * 0.6 + 5.9);
+    return Math.abs(this.nGully.fbm(x + a * 0.9, z + b * 0.9, 3));
+  }
+
+  /**
+   * Channel cross-section, 0 at the bank top and 1 on the bed.
+   * @param {number} u distance from the channel line, normalised to the bank
+   */
+  channelProfile(u) {
+    return smoothstep(saturate((1 - u) / (1 - GULLY_BED)));
+  }
+
+  /**
+   * Wind-drifted ash dunes, for the Cinderwaste.
+   *
+   * Dunes are the one landform that is not symmetric: the windward side is a
+   * long ramp material is pushed up, the lee side is the short face it
+   * avalanches down. That asymmetry is what makes an ash plain read as swept
+   * rather than merely bumpy.
+   *
+   * @param {number} w blended weight of the ash region, 0..1
+   */
+  ashDunes(wx, wz, w) {
+    if (w <= 0.01) return 0;
+    const n = this.nDune;
+    const u = wx * this._windC + wz * this._windS;    // downwind
+    const v = -wx * this._windS + wz * this._windC;   // along the crest
+    // Crests wander along their length instead of ruling straight lines.
+    const meander = n.noise(u * 0.0048, v * 0.0075) * 15;
+    // Interdune flats: an erg is not wall-to-wall dune.
+    const drift = saturate(n.noise(u * 0.0032 + 12.7, v * 0.0026 - 5.1) * 1.5 + 0.72);
+    const p = (u + meander) / DUNE_SPACING;
+    const t = p - Math.floor(p);
+    const prof = t < DUNE_WINDWARD
+      ? smoothstep(t / DUNE_WINDWARD)
+      : 1 - smoothstep((t - DUNE_WINDWARD) / (1 - DUNE_WINDWARD));
+    return prof * DUNE_HEIGHT * drift * w;
+  }
+
+  /**
+   * Tussock ground, for the mire. A marsh surface is raised mounds of root mat
+   * with water lying in the creases between them, not a wet plane.
+   *
+   * @param {number} w blended weight of the marsh region, 0..1
+   * @param {number} h landform height so far, used to fade at the waterline
+   */
+  marshTussock(wx, wz, w, h) {
+    if (w <= 0.01) return 0;
+    // Fade out at the waterline so the shore of every pool stays one readable
+    // edge instead of being shredded into a hundred islands.
+    const dry = 0.3 + 0.7 * saturate((h - WATER_LEVEL) / 3.0);
+    const t = this.nGround.fbm(wx / 26 + 13.7, wz / 26 - 4.2, 2, 2.3, 0.55);
+    // |t| makes mounds; the creases where it crosses zero dish out into pools.
+    return (Math.abs(t) - 0.36) * TUSSOCK_AMP * w * dry;
+  }
+
+  /**
    * Raw elevation before rivers and roads. Kept separate so the carving passes
    * can operate on the baked grid rather than re-evaluating noise.
    */
@@ -220,7 +424,7 @@ export class World {
     const x = wx * s, z = wz * s;
 
     // Region influence: weighted blend of the authored elevation profiles.
-    let wSum = 0, elevBase = 0, elevAmp = 0, rugged = 0;
+    let wSum = 0, elevBase = 0, elevAmp = 0, rugged = 0, wAsh = 0, wMire = 0;
     for (const r of REGIONS) {
       const d = Math.hypot(wx - r.cx, wz - r.cz);
       // Smooth, wide falloff so regions blend instead of tiling.
@@ -231,9 +435,15 @@ export class World {
       elevBase += r.elevBase * w;
       elevAmp += r.elevAmp * w;
       rugged += r.rugged * w;
+      // Two regions have a signature surface of their own. Biome is not
+      // assigned until pass 3, so the region weight is what we have here.
+      if (r.biome === BIOME.ASH) wAsh += w;
+      if (r.biome === BIOME.MARSH) wMire += w;
     }
-    if (wSum > 0.0001) { elevBase /= wSum; elevAmp /= wSum; rugged /= wSum; }
-    else { elevBase = 8; elevAmp = 14; rugged = 0.2; }
+    if (wSum > 0.0001) {
+      elevBase /= wSum; elevAmp /= wSum; rugged /= wSum;
+      wAsh /= wSum; wMire /= wSum;
+    } else { elevBase = 8; elevAmp = 14; rugged = 0.2; }
 
     // Base rolling terrain, domain-warped for organic valley shapes.
     const warped = this.nBase.warped(x * 2.2, z * 2.2, 0.55, 5);
@@ -245,6 +455,31 @@ export class World {
 
     // Mid-frequency detail keeps slopes from reading as smooth blobs.
     h += this.nDetail.fbm(x * 9.0, z * 9.0, 3) * (3.0 + rugged * 8.0);
+
+    // --- ground scale -------------------------------------------------------
+    // Only the two genuinely vertical regions are held back: the crags and the
+    // peak already carry more shape per metre than a player can take in, and
+    // hummocking a cliff face is meaningless. Everything else — including the
+    // highlands, whose benches and saddles are as planar as any meadow — gets
+    // the full treatment.
+    const open = 1 - saturate((rugged - 0.55) / 0.45);
+
+    h += this.benchStep(wx, wz, open);
+    h += this.groundRelief(wx, wz, open);
+    h += this.ashDunes(wx, wz, wAsh);
+    h += this.marshTussock(wx, wz, wMire, h);
+
+    // Dry watercourses. Cut everywhere runoff would run, including the
+    // highlands where it cuts deepest — only the plains need the hummocks, but
+    // every slope sheds water.
+    let cut = 0;
+    const gf = this.gullyField(wx, wz, GULLY_SCALE, 0);
+    if (gf < GULLY_BANK) cut += this.channelProfile(gf / GULLY_BANK) * GULLY_DEPTH;
+    const rf = this.gullyField(wx, wz, RILL_SCALE, 27.3);
+    if (rf < RILL_BANK) cut += this.channelProfile(rf / RILL_BANK) * RILL_DEPTH;
+    // Above the water table only: a channel driven through the shoreline would
+    // open a canal into the sea.
+    if (cut > 0) h -= cut * (0.35 + 0.65 * open) * saturate((h - 4) / 6);
 
     // Continental falloff — the map is an island, so the border is ocean and
     // the player is never staring at an invisible wall.
@@ -393,6 +628,11 @@ export class World {
   /** Find buildable ground near a target: gentle slope, above water. */
   findFlatSpot(cx, cz, searchRadius = 140, maxSlope = 0.18, rng = this.rng) {
     let best = null, bestScore = -Infinity;
+    // Flattest dry candidate seen regardless of the limit. Open country now
+    // undulates at the scale of a few paces, so a tight maxSlope can come up
+    // empty in ground that is still perfectly buildable — and dropping back to
+    // the raw target point can drop a village on a river bank or a bench face.
+    let fallback = null, fallbackSlope = Infinity;
     for (let i = 0; i < 220; i++) {
       const a = rng() * Math.PI * 2;
       const r = Math.sqrt(rng()) * searchRadius;
@@ -402,10 +642,12 @@ export class World {
       const h = this.heightAt(x, z);
       if (h < WATER_LEVEL + 2.5) continue;
       const s = this.slopeAt(x, z);
+      if (s < fallbackSlope) { fallbackSlope = s; fallback = { x, z, y: h }; }
       if (s > maxSlope) continue;
       const score = -s * 8 - r / searchRadius;
       if (score > bestScore) { bestScore = score; best = { x, z, y: h }; }
     }
+    if (!best) best = fallback;
     if (!best) {
       const h = this.heightAt(cx, cz);
       best = { x: cx, z: cz, y: h };

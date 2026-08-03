@@ -45,6 +45,32 @@ function relief(world, x, z, h, r) {
   return clamp((h - avg) / (r * 0.55), -1, 1);
 }
 
+/**
+ * Vertex height for a chunk at `step` metres between vertices.
+ *
+ * The height field carries ground relief down to about twelve metres, and the
+ * coarse LODs sit at or below the Nyquist rate for it: a point sample at 16 m
+ * spacing lands arbitrarily on a hummock or in the hollow beside it, so the
+ * ground would visibly re-shape itself every time a chunk crossed an LOD ring.
+ * Averaging a small cross one step wide makes the coarse mesh carry the local
+ * mean, which is what a coarse mesh is for. LOD 0 is left untouched: its
+ * vertices land exactly on stored grid samples, and filtering there would
+ * throw away form the player is standing on and colliding with.
+ *
+ * Purely a function of (x, z, step), so two chunks meeting at the same LOD
+ * still agree exactly along their shared border.
+ */
+function lodHeight(world, x, z, step) {
+  if (step <= GRID_STEP) return world.heightAt(x, z);
+  const r = step * 0.5;
+  const d = r * 0.70710678;
+  return (world.heightAt(x, z) * 2
+    + world.heightAt(x - r, z) + world.heightAt(x + r, z)
+    + world.heightAt(x, z - r) + world.heightAt(x, z + r)
+    + world.heightAt(x - d, z - d) + world.heightAt(x + d, z - d)
+    + world.heightAt(x - d, z + d) + world.heightAt(x + d, z + d)) * 0.1;
+}
+
 export class TerrainChunk {
   constructor(terrain, cx, cz, lod) {
     this.terrain = terrain;
@@ -75,11 +101,17 @@ export class TerrainChunk {
     const writeVert = (lx, lz, skirtDrop) => {
       const wx = this.originX + lx;
       const wz = this.originZ + lz;
+      // Two heights: the geometry sits on the LOD-filtered surface, everything
+      // that shades it reads the true field. Splitting them is what lets a
+      // distant chunk drop triangles without also dropping detail — the normal
+      // and the relief term stay identical at every LOD, so a chunk changing
+      // LOD moves vertices and does not change how the ground looks.
       const h = world.heightAt(wx, wz);
+      const hGeom = lodHeight(world, wx, wz, step);
       const o = vi * FLOATS_PER_VERT;
 
       verts[o] = lx;
-      verts[o + 1] = h - skirtDrop;
+      verts[o + 1] = hGeom - skirtDrop;
       verts[o + 2] = lz;
 
       const nrm = world.normalAt(wx, wz, _tmpNormal);
@@ -146,9 +178,11 @@ export class TerrainChunk {
       verts[o + 13] = clamp(0.74 + rel * 0.34, 0.38, 1.10);
       verts[o + 14] = world.roadMask[world.gridIndex(gx, gz)];
 
+      // Bounds describe the mesh, so they track the geometry height, not the
+      // field it was filtered from.
       if (skirtDrop === 0) {
-        if (h < minY) minY = h;
-        if (h > maxY) maxY = h;
+        if (hGeom < minY) minY = hGeom;
+        if (hGeom > maxY) maxY = hGeom;
       }
       vi++;
     };

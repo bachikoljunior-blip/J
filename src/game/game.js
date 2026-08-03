@@ -15,13 +15,13 @@ import { ParticleSystem, BLEND } from '../gfx/particles.js';
 import {
   GpuMesh, MeshData, buildBox, buildBevelBox, buildCylinder, buildCone, buildRock,
   buildGrassTuft, buildBroadleafTree, buildConiferTree, buildDeadTree, buildBush,
-  buildTreeFar, buildConiferFar, buildCharacterParts, buildClutterMeshes,
+  buildTreeFar, buildConiferFar, buildCharacterParts, buildClutterMeshes, buildFeatureMeshes,
   buildPillar, buildCampfire, buildGrace, buildChest, buildHut, buildWatchtower, buildArch,
 } from '../gfx/mesh.js';
 import { MATERIAL } from '../gfx/textures.js';
 
 import { World, WORLD_HALF, CHUNK_SIZE, CHUNKS, WATER_LEVEL, BIOME, BIOME_INFO, REGIONS } from '../world/worldgen.js';
-import { Scatter, GrassField, PROP, CLUTTER_STRIDE } from '../world/foliage.js';
+import { Scatter, GrassField, PROP, CLUTTER_STRIDE, FEATURE_STRIDE } from '../world/foliage.js';
 import { buildStructure, SPROP, pickEnemy } from '../world/structures.js';
 
 import { Actor, STATE, FACTION, defaultPalette } from './actor.js';
@@ -72,9 +72,32 @@ const STRUCTURE_RANGE = 480;
  */
 const CLUTTER_BATCH = ['clutRock', 'clutWood', 'clutScrub', 'clutBone', 'clutDrift', 'clutSlab', 'clutStump'];
 const CLUTTER_RANGE = [105, 100, 95, 110, 200, 160, 170];
-const CLUTTER_RANGE_MAX = 200;
+/** The furthest any item can be drawn: the largest range times the largest
+ *  per-biome multiplier foliage.js packs alongside it. */
+const CLUTTER_RANGE_MAX = 240;
 /** Only scrub bends in the wind; stone and bone conspicuously should not. */
 const CLUTTER_SWAY = [0, 0, 1.1, 0, 0, 0, 0.12];
+
+/**
+ * Land features, in the order foliage.js scatters them:
+ * [OUTCROP, THICKET, REEDBED, DUNE, MIDDEN, CAIRN, WALL].
+ *
+ * These are the objects that furnish the middle distance, so their ranges are
+ * prop ranges rather than clutter ranges — a four-metre outcrop is still a
+ * shape at three hundred metres, and on open ground it is the *only* shape.
+ *
+ * Only the three stone kinds cast shadows. That is not a saving so much as a
+ * choice about where the shadow budget goes: a boulder, a wall and a cairn each
+ * throw a long hard shadow across flat ground, which is the single strongest
+ * cue that the ground is a surface in a place rather than a lit plane. A
+ * thicket's own shading already reads, and a dune's crest is lit by geometry.
+ */
+const FEATURE_BATCH = ['featOutcrop', 'featThicket', 'featReed', 'featDune',
+  'featMidden', 'featCairn', 'featWall'];
+const FEATURE_RANGE = [300, 260, 200, 320, 230, 260, 285];
+const FEATURE_SHADOW = [true, false, false, false, false, true, true];
+/** Bramble and reed move; stone, bone and ash do not. */
+const FEATURE_SWAY = [0, 0.7, 1.2, 0, 0, 0, 0];
 /**
  * New clutter chunks built per frame. One chunk is a few thousand candidates
  * and several milliseconds; building the whole ring at once on a warp would be
@@ -254,10 +277,29 @@ export class Game {
       [M.STONE, M.STONE, 1, 0.55],    // slab: big cracks, not gravel
       [M.BARK, M.WOOD, 1, 1.2],       // stump / snag
     ];
-    const CLUTTER_CAPACITY = [1024, 768, 1536, 512, 1024, 768, 1024];
+    const CLUTTER_CAPACITY = [2048, 1024, 3072, 768, 1536, 1024, 1536];
     this.clutterBatches = CLUTTER_BATCH.map((name, i) => this.batches
       .add(name, new GpuMesh(glw, clutter[i]), CLUTTER_CAPACITY[i], { castsShadow: false })
       .material(...CLUTTER_MAT[i]));
+
+    // Land features — the two-to-eight metre tier. Same idea as clutter one
+    // size up, and the size is the point: these are what a plain has instead of
+    // a mountain's banks and benches, and they are read from a hundred metres.
+    const features = buildFeatureMeshes(rng);
+    const FEATURE_MAT = [
+      [M.STONE, M.STONE, 1, 0.5],       // outcrop: broad rock grain, not gravel
+      [M.FOLIAGE, M.WOOD, 1.1, 2.0],    // thicket: leaf mass over dead cane
+      [M.FOLIAGE, M.WOOD, 1, 2.6],      // reed bed and its rotting posts
+      [M.DEFAULT, M.DEFAULT, 1.15, 0.4], // dune: soft, broadly blotched
+      [M.BONE, M.BONE, 0.9, 1.4],       // midden
+      [M.STONE, M.STONE, 1, 0.9],       // cairn: course-sized stone
+      [M.STONE, M.STONE, 1, 1.1],       // field wall
+    ];
+    const FEATURE_CAPACITY = [768, 512, 256, 512, 256, 256, 512];
+    this.featureBatches = FEATURE_BATCH.map((name, i) => this.batches
+      .add(name, new GpuMesh(glw, features[i]), FEATURE_CAPACITY[i],
+        { castsShadow: FEATURE_SHADOW[i] })
+      .material(...FEATURE_MAT[i]));
 
     // Structures.
     this.batches.add('hut', new GpuMesh(glw, buildHut(rng)), 96).material(M.WOOD, M.THATCH);
@@ -1650,6 +1692,35 @@ export class Game {
           }
         }
 
+        // --- land features ----------------------------------------------------
+        // Built unbudgeted, unlike clutter: a chunk is about a hundred
+        // candidates, and movement collision reads the same cache and cannot be
+        // told to wait a frame for the wall in front of the player.
+        const feat = this.scatter.featuresFor(cx, cz);
+        for (let i = 0; i < feat.length; i += FEATURE_STRIDE) {
+          const t = feat[i];
+          const x = feat[i + 1], y = feat[i + 2], z = feat[i + 3];
+          const ddx = x - px, ddz = z - pz;
+          const d2 = ddx * ddx + ddz * ddz;
+          let sx = feat[i + 5], sy = feat[i + 6], sz = feat[i + 7];
+          const lim = Math.min(FEATURE_RANGE[t], propDist);
+          if (d2 > lim * lim) continue;
+          // Off-screen features are worth keeping only while they can still
+          // cast into the frame; the rest are pure cost.
+          const keep = FEATURE_SHADOW[t] ? propShadowKeep : 16;
+          const size = sx > sz ? sx : sz;
+          if (frustum && d2 > keep * keep
+            && !sphereInFrustum(frustum, x, y + sy * 0.6, z, size * 0.9 + sy)) continue;
+          const fadeAt = lim * 0.9;
+          if (d2 > fadeAt * fadeAt) {
+            const f = (lim - Math.sqrt(d2)) / (lim * 0.1);
+            sx *= f; sy *= f; sz *= f;
+          }
+          this.featureBatches[t].push(x, y, z, sx, sy, sz, feat[i + 4],
+            feat[i + 8], feat[i + 9], feat[i + 10], 0, FEATURE_SWAY[t], feat[i + 14], 1, 1,
+            feat[i + 11], feat[i + 12], feat[i + 13]);
+        }
+
         // --- ground clutter -------------------------------------------------
         if (cd > CLUTTER_RANGE_MAX * clutterScale + CHUNK_SIZE) continue;
         const fresh = !this.scatter.clutterCache.has(this.scatter.chunkKey(cx, cz));
@@ -1669,7 +1740,12 @@ export class Game {
           // pixel it is only cost. 150x the largest dimension is that pixel at
           // the resolutions this runs at, capped by the kind's own limit.
           const size = sx > sy ? (sx > sz ? sx : sz) : (sy > sz ? sy : sz);
-          const lim = Math.min(CLUTTER_RANGE[t], Math.max(40, size * 150)) * clutterScale;
+          // ...then stretched by the biome's own multiplier. On a plain the
+          // last stretch of that range is drawing sub-pixel debris, which is
+          // usually waste — but there it is the only thing standing between the
+          // middle distance and bare shading, so the flat biomes buy it.
+          const lim = Math.min(CLUTTER_RANGE[t], Math.max(40, size * 150))
+            * cl[i + 15] * clutterScale;
           if (d2 > lim * lim) continue;
           if (frustum && d2 > 196
             && !sphereInFrustum(frustum, x, y + sy * 0.5, z, size * 0.9)) continue;
