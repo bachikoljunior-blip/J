@@ -732,10 +732,12 @@ export class Actor {
     if (!this.visible) return;
     const box = batches.get('box');
     const flashK = this.flash;
+    // Hit flash: enough to read at a glance, not enough to turn the character
+    // into a solid red silhouette mid-combo.
     const opts = {
-      tintR: 1 + flashK * 1.6,
-      tintG: 1 - flashK * 0.30,
-      tintB: 1 - flashK * 0.30,
+      tintR: 1 + flashK * 0.85,
+      tintG: 1 - flashK * 0.42,
+      tintB: 1 - flashK * 0.42,
       alpha: this.fadeAlpha !== undefined ? this.fadeAlpha : 1,
       emissive: this.emissive || 0,
     };

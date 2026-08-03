@@ -57,10 +57,19 @@ export function loadFromEnd(v, str) {
   return 42 + v * 1.5 + str * 0.35;
 }
 
-/** Cost in embers of the next level. */
+/**
+ * Cost in embers of the next level.
+ *
+ * The cubic is the genre's standard curve, but it only behaves above level 12
+ * — below that it goes negative — so the early levels come from a small table,
+ * chosen to meet the cubic exactly at 12.
+ */
+const EARLY_LEVEL_COST = [0, 673, 689, 706, 723, 740, 757, 775, 793, 811, 829, 847];
+
 export function levelCost(level) {
-  const L = level + 80;
-  return Math.round(0.02 * L * L * L + 3.06 * L * L + 105.6 * L - 895) - 6000;
+  if (level < EARLY_LEVEL_COST.length) return EARLY_LEVEL_COST[Math.max(level, 1)];
+  const L = level;
+  return Math.round(0.02 * L * L * L + 3.06 * L * L + 105.6 * L - 895);
 }
 
 export const CLASSES = [
