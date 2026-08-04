@@ -117,6 +117,18 @@ const UNIT_CHECKS = [
 
 const runUnits = async () => {
   const failed = [];
+  // Parse every file first. A syntax error in a module the unit checks do not
+  // import is invisible to them and costs a full audit to find, twelve minutes
+  // in, as a blank page.
+  const parseCode = await new Promise((resolve) => {
+    const child = spawn('sh', ['tools/parsecheck.sh'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
+    let buf = '';
+    child.stdout.on('data', (d) => { buf += d; });
+    child.stderr.on('data', (d) => { buf += d; });
+    child.on('close', (c) => { if (c !== 0) process.stdout.write(buf); resolve(c); });
+    child.on('error', () => resolve(0));
+  });
+  if (parseCode !== 0) failed.push('構文');
   for (const [name, script] of UNIT_CHECKS) {
     const code = await new Promise((resolve) => {
       const child = spawn('node', [script], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
