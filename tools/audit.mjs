@@ -671,23 +671,56 @@ try {
       g.renderer.forcedWeather = s.weather;
       g.terrain.primeAround(p.x, p.z, 320);
       g.grass.dirty = true;
-      // Let the weather, grade and atmosphere settle before measuring.
-      await new Promise((r) => {
+      const wait = (n) => new Promise((r) => {
         let i = 0;
-        const tick = () => (++i >= 150 ? r() : requestAnimationFrame(tick));
+        const tick = () => (++i >= n ? r() : requestAnimationFrame(tick));
         requestAnimationFrame(tick);
       });
+
+      // Let the weather, grade and atmosphere settle before measuring.
+      await wait(150);
       revive();
-      return new Promise((resolve) => {
-        requestAnimationFrame(() => {
-          const st = g.renderer.readbackStats(5);
-          st.tint = g.renderer.tint.slice();
-          st.saturationSetting = g.renderer.saturation;
-          resolve(st);
-        });
-      });
+
+      // Then wait for the resolution to stop moving.
+      //
+      // Dynamic resolution recreates the scene render target — including its
+      // depth texture — whenever it changes, and a freshly created depth texture
+      // is cleared to the far plane until something renders into it. The world
+      // mask is derived from that depth, so a readback taken across a resize
+      // sees no world at all and every spatial statistic collapses: 表面ディテール
+      // reports exactly 0, which reads as a flat frame rather than as a failed
+      // measurement. Four of six scenes did this while the frames themselves
+      // were fine — tools/png-stats.mjs decoded the same build at detail 0.28.
+      let stable = 0, lastScale = -1;
+      for (let i = 0; i < 240 && stable < 45; i++) {
+        const sc = g.dynamicScale;
+        stable = Math.abs(sc - lastScale) < 1e-4 ? stable + 1 : 0;
+        lastScale = sc;
+        await wait(1);
+      }
+
+      // Read outside a requestAnimationFrame callback. Inside one, this races
+      // the game's own render callback for the same frame and can land after a
+      // resize but before anything has drawn into the new targets. Called from
+      // here, the last render is complete and its depth is valid — which is why
+      // tools/diag-scene.mjs, which does exactly this, measures the same scenes
+      // at detail 0.69 while the audit measured 0.
+      let st = g.renderer.readbackStats(5);
+      // And if it still came back unmeasurable, say so after trying again
+      // rather than reporting the zero.
+      for (let attempt = 0; attempt < 3 && st.measurable === false; attempt++) {
+        await wait(40);
+        st = g.renderer.readbackStats(5);
+      }
+      st.tint = g.renderer.tint.slice();
+      st.saturationSetting = g.renderer.saturation;
+      st.dynamicScale = g.dynamicScale;
+      return st;
     }, scene);
     frames.push({ ...scene, ...stat });
+    console.log(`  frame  ${scene.id.padEnd(12)} 世界画素 ${stat.worldPixels ?? '?'} ` +
+      `res=${(stat.dynamicScale ?? -1).toFixed(2)} detail=${(stat.detail ?? -1).toFixed(3)} ` +
+      `bins=${stat.colorCells ?? '?'}`);
     console.log(`  frame  ${scene.id.padEnd(12)} luma=${stat.meanLuma.toFixed(3)} ` +
       `contrast=${stat.contrast.toFixed(3)} sat=${stat.saturation.toFixed(3)} ` +
       `clip=${(stat.clippedRatio * 100).toFixed(1)}% crush=${(stat.crushedRatio * 100).toFixed(1)}%`);

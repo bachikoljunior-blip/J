@@ -291,6 +291,11 @@ export class Renderer {
   }
 
   _targetsFor(w, h) {
+    // Recreating the targets throws away the depth that the world mask reads.
+    // Anything measured before the next scene render is measuring a cleared
+    // buffer — and reporting that as a number rather than as "not yet" cost
+    // most of a day.
+    this._sceneRendered = false;
     const glw = this.glw;
     const gl = glw.gl;
     if (this.scene) {
@@ -619,6 +624,11 @@ export class Renderer {
 
     // ---- 2. opaque pass ----------------------------------------------------
     glw.bindTarget(this.scene);
+    // The scene target now holds a rendered frame, so its depth texture is
+    // meaningful. Until this point after a resize it is a freshly created
+    // texture cleared to the far plane, and the world mask derived from it
+    // would call every pixel sky.
+    this._sceneRendered = true;
     const sky = this.sky;
     gl.clearColor(sky.fog[0], sky.fog[1], sky.fog[2], 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -756,7 +766,7 @@ export class Renderer {
     // than sky. Without this the spatial statistics grade a clear afternoon sky
     // as featureless ground, which it is not.
     let mask = null;
-    if (this.scene.depthTex) {
+    if (this.scene.depthTex && this._sceneRendered) {
       const mp = glw.use(this.progWorldMask);
       glw.bindTexture(0, this.scene.depthTex);
       glw.u1i(mp, 'uDepthTex', 0);
@@ -931,7 +941,10 @@ export class Renderer {
     // of six scenes and read as a rendering collapse, when the frames were fine
     // and the mask was not. So the count travels with the numbers, and callers
     // that care check `measurable` rather than trusting a zero.
-    const measurable = worldPixels > (w * h) * 0.02 && tiles > 0;
+    // No mask at all means the statistics cover the whole frame including sky,
+    // which is a weaker reading but a real one. An empty mask means the depth
+    // was not available and nothing was measured. Only the second is a failure.
+    const measurable = mask ? (worldPixels > (w * h) * 0.02 && tiles > 0) : tiles > 0;
     return {
       // Mean gradient magnitude: the headline "is there surface detail" number.
       detail: gradSum / Math.max(gradN, 1),
