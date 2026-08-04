@@ -99,7 +99,12 @@ for (const s of SCENES) {
       maskTotal,
       detail: stat0 ? +(stat0.detail ?? -1).toFixed(4) : -1,
       flatRatio: stat0 ? +(stat0.flatRatio ?? -1).toFixed(4) : -1,
-      colorBins: stat0 ? (stat0.colorBins ?? -1) : -1,
+      // The field is colorCells, not colorBins. Reading the wrong name printed
+      // -1 for three runs — the same shape of mistake as everything else here:
+      // a value that means "not measured" wearing the costume of a number.
+      colorCells: stat0 ? (stat0.colorCells ?? -1) : -1,
+      worldPixelsStat: stat0 ? (stat0.worldPixels ?? -1) : -1,
+      measurable: stat0 ? stat0.measurable : null,
       localContrast: stat0 ? +(stat0.localContrast ?? -1).toFixed(4) : -1,
       saturation: stat0 ? +(stat0.saturation ?? -1).toFixed(4) : -1,
       pos: [+c.pos.x.toFixed(2), +c.pos.y.toFixed(2), +c.pos.z.toFixed(2)],
@@ -128,7 +133,8 @@ for (const s of SCENES) {
     `dynScale=${stat.dynamicScale}/${stat.rendererScale} scene=${stat.sceneW}x${stat.sceneH} ` +
     `depthTex=${stat.hasDepthTex}`);
   console.log(`             マスク世界画素 ${stat.maskNonZero}/${stat.maskTotal}  ` +
-    `detail=${stat.detail} flat=${stat.flatRatio} bins=${stat.colorBins} ` +
+    `detail=${stat.detail} flat=${stat.flatRatio} bins=${stat.colorCells} ` +
+    `measurable=${stat.measurable} ` +
     `localC=${stat.localContrast} sat=${stat.saturation}`);
 }
 

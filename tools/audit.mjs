@@ -71,6 +71,21 @@ try {
   const genSeconds = (Date.now() - genStart) / 1000;
   await sleep(1200);
   await page.evaluate(() => { window.__g.applyQuality('medium'); window.__g.dynamicScale = 1; });
+
+  // Where the twelve to thirty-five minutes go.
+  //
+  // The gate's throughput is one audit per attempt, so every minute here is a
+  // minute the whole loop is blocked. Nothing measured that, which meant the
+  // obvious question — which probe is expensive, and is it expensive for a
+  // reason — had no answer.
+  const marks = [];
+  let markT = Date.now();
+  const mark = (name) => {
+    const now = Date.now();
+    marks.push({ name, ms: now - markT });
+    markT = now;
+  };
+  mark('起動');
   await sleep(600);
 
   // -------------------------------------------------------------------------
@@ -177,6 +192,8 @@ try {
     const rig = await import('/src/game/rig.js');
     rig.trackContinuity(true);
   });
+
+  mark('content');
 
   // -------------------------------------------------------------------------
   //  System probes — behaviours, exercised rather than assumed
@@ -314,6 +331,8 @@ try {
     await frames(2);
     return out;
   });
+
+  mark('systems');
 
   // -------------------------------------------------------------------------
   //  K / L / M — motion, place, voice
@@ -453,6 +472,7 @@ try {
     return out;
   });
 
+  mark('motion');
   // -------------------------------------------------------------------------
   //  Camera continuity, from the live game
   //
@@ -540,6 +560,7 @@ try {
     return out;
   });
 
+  mark('camera');
   const place = await page.evaluate(async () => {
     const g = window.__g;
     const structures = await import('/src/world/structures.js');
@@ -587,6 +608,7 @@ try {
     };
   });
 
+  mark('place');
   const voice = await page.evaluate(async () => {
     const g = window.__g;
     const audio = g.audio || {};
@@ -634,6 +656,7 @@ try {
     { id: 'waste', region: 'waste', hour: 12.0, weather: 'clear', yaw: 0.6 },
     { id: 'peak', region: 'peak', hour: 9.0, weather: 'clear', yaw: 0.6 },
   ];
+  mark('voice');
   const frames = [];
   for (const scene of SCENES) {
     const stat = await page.evaluate(async (s) => {
@@ -741,6 +764,7 @@ try {
   // -------------------------------------------------------------------------
   //  Performance
   // -------------------------------------------------------------------------
+  mark('frames');
   const perf = await page.evaluate(async () => {
     const g = window.__g;
     const p = g.player;
@@ -792,6 +816,7 @@ try {
   console.log('  triangles by pass:', JSON.stringify(perf.triByTag));
   console.log('  cull:', JSON.stringify(perf.cull));
 
+  mark('perf');
   const controls = await page.evaluate(() => {
     const ids = ['btn-attack', 'btn-heavy', 'btn-dodge', 'btn-guard', 'btn-interact',
       'btn-item', 'btn-spell', 'btn-lock', 'btn-jump', 'btn-flask', 'btn-flask-fp',
@@ -818,6 +843,7 @@ try {
     };
   });
 
+  mark('controls');
   const saveInfo = await page.evaluate(() => {
     const g = window.__g;
     const ok = g.save(2);
@@ -1197,6 +1223,14 @@ function writeReport(extra) {
     });
   }
   writeFileSync(`${ROOT}docs/BACKLOG.md`, bl);
+
+  mark('save');
+  const totalMs = marks.reduce((a, m) => a + m.ms, 0);
+  console.log(`  所要時間 ${(totalMs / 60000).toFixed(1)}分 — `
+    + marks.filter((m) => m.ms > 3000)
+      .sort((a, b) => b.ms - a.ms)
+      .map((m) => `${m.name} ${(m.ms / 1000).toFixed(0)}s`)
+      .join(', '));
 
   console.log(`\n================ AUDIT ================`);
   for (const r of rows) console.log(`  ${r.id} ${String(r.score).padStart(3)}  ${bar(r.score)}  ${r.name}`);
