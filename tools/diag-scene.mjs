@@ -54,6 +54,60 @@ const PRE = {
   camera: process.argv.includes('--camera') || process.argv.includes('--both'),
   motion: process.argv.includes('--motion') || process.argv.includes('--both'),
 };
+
+// --pin replicates the audit's resolution pin exactly (audit.mjs:141-143). It
+// is the difference between the two harnesses that is easiest to overlook,
+// because this file prints the game's scale AND the renderer's scale while the
+// audit prints one number — and `g.renderer.dynamicScale` is assigned directly
+// without anything calling resize() afterwards, so the scene target keeps the
+// size it had while the scale says otherwise.
+// --tier replicates the audit's per-tier load sweep (audit.mjs:935-957). It
+// calls applyQuality three times, and applyQuality recreates every render
+// target including the depth texture the world mask samples — so it is the
+// audit step most able to leave that attachment in a state the mask then reads
+// as entirely far. The pin and the camera probe have both already been ruled
+// out by measurement.
+if (process.argv.includes('--tier')) {
+  console.log('品質ティア掃引を先に実行: low → medium → high → 復帰');
+  await page.evaluate(async () => {
+    const g = window.__g;
+    const p = g.player;
+    const restore = g.renderer.quality.name;
+    for (const tier of ['low', 'medium', 'high']) {
+      g.applyQuality(tier);
+      g.autoResolution = false;
+      g.renderer.dynamicScale = g.dynamicScale;
+      g.renderer.resize(g.canvas.width, g.canvas.height);
+      let d2 = 0;
+      for (let i = 0; i < 900 && d2 < 30; i++) {
+        g.terrain.primeAround(p.x, p.z, g.renderer.quality.viewDistance);
+        const q = g.terrain.buildQueue ? g.terrain.buildQueue.length : 0;
+        d2 = q === 0 ? d2 + 1 : 0;
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+    }
+    g.applyQuality(restore === '低' ? 'low' : restore === '高' ? 'high' : 'medium');
+    g.autoResolution = false;
+    g.renderer.resize(g.canvas.width, g.canvas.height);
+    let d3 = 0;
+    for (let i = 0; i < 900 && d3 < 30; i++) {
+      g.terrain.primeAround(p.x, p.z, g.renderer.quality.viewDistance);
+      const q = g.terrain.buildQueue ? g.terrain.buildQueue.length : 0;
+      d3 = q === 0 ? d3 + 1 : 0;
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+  });
+}
+
+if (process.argv.includes('--pin')) {
+  console.log('解像度を監査と同じに固定: autoResolution=false, dynamicScale=0.75');
+  await page.evaluate(() => {
+    const g = window.__g;
+    g.autoResolution = false;
+    g.dynamicScale = 0.75;
+    g.renderer.dynamicScale = 0.75;
+  });
+}
 if (PRE.camera || PRE.motion) {
   console.log(`前段プローブ: ${Object.entries(PRE).filter(([, v]) => v).map(([k]) => k).join(', ')}`);
   await page.evaluate(async (pre) => {
