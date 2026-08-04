@@ -94,6 +94,42 @@ const runAudit = () => new Promise((resolve) => {
   child.on('close', (code) => resolve({ code, out }));
 });
 
+/**
+ * Unit checks, run before the browser audit on every attempt.
+ *
+ * The audit costs about twelve minutes and needs a GL context to say anything
+ * at all. These run the same engine code directly in node in a couple of
+ * seconds. When one of them fails, the audit that follows would have spent
+ * twelve minutes to reach a worse-explained version of the same verdict.
+ *
+ * They do not gate the attempt — a unit failure is printed and the audit still
+ * runs, because the audit measures thirteen axes and this covers one of them.
+ * The point is that the cheap signal arrives first.
+ */
+const UNIT_CHECKS = [['継続性', 'tools/unit-continuity.mjs']];
+
+const runUnits = async () => {
+  const failed = [];
+  for (const [name, script] of UNIT_CHECKS) {
+    const code = await new Promise((resolve) => {
+      const child = spawn('node', [script], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
+      let buf = '';
+      child.stdout.on('data', (d) => { buf += d; });
+      child.stderr.on('data', (d) => { buf += d; });
+      child.on('close', (c) => {
+        if (c !== 0) process.stdout.write(buf);
+        resolve(c);
+      });
+      child.on('error', () => resolve(0));   // a missing check must not block
+    });
+    if (code !== 0) failed.push(name);
+  }
+  console.log(failed.length
+    ? `単体検査: ${failed.join('・')} が不合格 — 監査の前にここで直る`
+    : `単体検査: ${UNIT_CHECKS.length} 件すべて合格`);
+  return failed;
+};
+
 const scoreOf = (out) => {
   const m = out.match(/総合\s+(\d+)\s*\/\s*100/);
   return m ? Number(m[1]) : null;
@@ -137,17 +173,24 @@ let stalledOut = false;
 for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
   console.log(`\n══════ 品質ゲート 試行 ${attempt}/${MAX_ATTEMPTS}` +
     ` (連続合格 ${streak}/${REQUIRED_STREAK}) ══════\n`);
+  const unitFailed = await runUnits();
   const { code, out } = await runAudit();
   const score = scoreOf(out);
-  const pass = code === 0;
+  // A unit failure counts as a failure of the attempt even when the audit is
+  // happy, because it means the audit is not looking at something the engine
+  // itself can already prove is broken. Folding it into the failure list also
+  // keeps the stall signature honest: a run where only the unit result changed
+  // has still learned something.
+  const pass = code === 0 && unitFailed.length === 0;
   streak = pass ? streak + 1 : 0;
-  history.push({ attempt, score, pass, failures: failuresOf(out) });
+  const failures = failuresOf(out).concat(unitFailed.map((n) => `- [単体] ${n}`));
+  history.push({ attempt, score, pass, failures });
 
   console.log(`\n── 試行 ${attempt}: ${pass ? 'PASS' : 'FAIL'} (${score ?? '?'}/100), ` +
     `連続合格 ${streak}/${REQUIRED_STREAK}`);
-  const sig = signatureOf(history[history.length - 1].failures);
+  const sig = signatureOf(failures);
   journal(`- 試行 ${attempt} — ${pass ? 'PASS' : 'FAIL'} ${score ?? '?'}/100, `
-    + `未達 ${history[history.length - 1].failures.length} 件`
+    + `未達 ${failures.length} 件`
     + `${sig === lastSignature ? '  ← 前回と同一' : ''}`);
 
   // Stall detection. An attempt that reproduces the previous one exactly means
@@ -197,7 +240,7 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     // thing that stops. Now it reports and keeps going, so the only ways out
     // are the bar being met or the attempt budget running out — and the
     // attempt budget exists solely so an unattended run cannot spin forever.
-    console.log(`\n未達 ${history[history.length - 1].failures.length} 件。`
+    console.log(`\n未達 ${failures.length} 件。`
       + 'docs/BACKLOG.md の上位から修正すること。次の試行まで待機する。');
     if (!ON_FAIL) {
       console.log('（--on-fail が指定されていないため、修正は自動では行われない）');
