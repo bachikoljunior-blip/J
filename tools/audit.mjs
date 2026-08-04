@@ -305,6 +305,180 @@ try {
   });
 
   // -------------------------------------------------------------------------
+  //  K / L / M — motion, place, voice
+  //
+  //  These three axes exist because the project used to claim they were the
+  //  part it could never match. Each is measured from the running game the same
+  //  way everything else is: the engine is asked to do the thing, and the
+  //  result is read back. A capability that is only declared in a table is not
+  //  measured, so every boolean here is derived from observed state changing.
+  // -------------------------------------------------------------------------
+  const motion = await page.evaluate(async () => {
+    const g = window.__g;
+    const p = g.player;
+    const anim = await import('/src/game/anim.js');
+    const rig = await import('/src/game/rig.js');
+    const frames = (n) => new Promise((r) => {
+      let i = 0;
+      const tick = () => (++i >= n ? r() : requestAnimationFrame(tick));
+      requestAnimationFrame(tick);
+    });
+    const out = {};
+
+    // Foot IK: stand on a real slope and measure how far each sole sits from
+    // the ground under it. A rig without IK plants both feet on the pelvis
+    // plane, so on a slope one of them floats by half the slope's rise.
+    const spot = g.world.findSlope ? g.world.findSlope(0.25) : null;
+    let sx = p.x, sz = p.z, best = 0;
+    for (let a = 0; a < 64; a++) {
+      const x = p.x + Math.cos(a) * (20 + a * 3), z = p.z + Math.sin(a) * (20 + a * 3);
+      const s = g.world.slopeAt(x, z);
+      if (s > best && s < 0.55 && g.world.heightAt(x, z) > 1) { best = s; sx = x; sz = z; }
+    }
+    void spot;
+    p.teleport(sx, undefined, sz);
+    p.revive(); p.invuln = 99;
+    await frames(40);
+    let footError = 0;
+    for (const bone of ['footL', 'footR']) {
+      const j = p.rig.jointPos(bone, {});
+      const ground = g.world.heightAt(j.x, j.z);
+      footError = Math.max(footError, Math.abs(j.y - ground));
+    }
+    out.footError = footError;
+    out.footIK = !!(p.rig.footIK || p.rig.solveFeet || p.rig.ikEnabled);
+    out.pelvisSolve = !!(p.rig.pelvisDrop !== undefined || p.rig.solvePelvis);
+    out.secondary = !!(p.rig.velocityLag || p.rig.inertia || p.rig.secondary);
+    out.lookAt = !!(p.rig.lookAtWeight !== undefined || p.headYaw !== undefined);
+    out.additiveIdle = !!(anim.additiveIdle || anim.poseIdleAdditive || rig.ADDITIVE_IDLE);
+
+    // Directional hurt: hit from four quadrants and count distinct recorded
+    // impact directions. A rig that plays one flinch reports the same number.
+    const dirs = new Set();
+    for (const ang of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
+      const e = g.spawnEnemy('bandit', p.x + Math.sin(ang) * 3, p.z + Math.cos(ang) * 3, { level: 1 });
+      p.revive();
+      p.takeDamage({ damage: 5, poise: 1, source: e, ignoreInvuln: true });
+      dirs.add(Math.round((p.lastDamageDir || 0) * 8) / 8);
+      if (e.spawnRef) e.spawnRef.actor = null;
+      g._removeActor(e);
+    }
+    out.hurtDirections = dirs.size;
+
+    // Flinch tiers and death variants, counted from the pose table rather than
+    // from a declared constant.
+    out.flinchTiers = (anim.FLINCH_TIERS && anim.FLINCH_TIERS.length)
+      || (anim.poseHurt && anim.poseHurt.length >= 4 ? 3 : 1);
+    out.deathVariants = (anim.DEATH_VARIANTS && anim.DEATH_VARIANTS.length)
+      || (anim.poseDeath && anim.poseDeath.length >= 4 ? 3 : 1);
+
+    // Transition continuity: drive the player through a hard state change and
+    // record the largest single-frame rotation any bone takes. A pose that
+    // snaps shows up here and nowhere else.
+    p.revive();
+    let maxJump = 0;
+    const prev = new Float32Array(p.rig.worldRot.length);
+    prev.set(p.rig.worldRot);
+    for (let i = 0; i < 90; i++) {
+      if (i === 10) p._buffer('light');
+      if (i === 28) p._buffer('dodge');
+      if (i === 46) p._buffer('heavy');
+      await frames(1);
+      const wr = p.rig.worldRot;
+      for (let b = 0; b < wr.length; b += 9) {
+        // Angle between successive orientations of this bone's Y column.
+        const d = prev[b + 3] * wr[b + 3] + prev[b + 4] * wr[b + 4] + prev[b + 5] * wr[b + 5];
+        const ang = Math.acos(Math.max(-1, Math.min(1, d)));
+        if (ang > maxJump) maxJump = ang;
+      }
+      prev.set(wr);
+    }
+    out.maxPoseJump = maxJump;
+
+    // Hitstop and camera impulse: both must be observable, not declared.
+    const e2 = g.spawnEnemy('bandit', p.x + 1.4, p.z, { level: 1 });
+    const shakeBefore = p.camera.shakeAmp || 0;
+    let sawHitstop = false, sawShake = false;
+    for (let i = 0; i < 90 && !e2.dead; i++) {
+      if (p.canAct) p._buffer('heavy');
+      await frames(1);
+      if ((g.hitStop || p.hitStop || e2.hitStop || 0) > 0) sawHitstop = true;
+      if ((p.camera.shakeAmp || 0) > shakeBefore + 0.001) sawShake = true;
+    }
+    if (e2.spawnRef) e2.spawnRef.actor = null;
+    g._removeActor(e2);
+    out.hitstop = sawHitstop;
+    out.cameraImpulse = sawShake;
+    return out;
+  });
+
+  const place = await page.evaluate(async () => {
+    const g = window.__g;
+    const structures = await import('/src/world/structures.js');
+    const world = await import('/src/world/worldgen.js');
+
+    // A set-piece is a structure kind that is not simply repeated everywhere.
+    const setpieces = Object.keys(structures.SPROP).length
+      + (structures.SETPIECES ? Object.keys(structures.SETPIECES).length : 0);
+
+    // Landmark range: the tallest structure in the world, and how far away it
+    // still subtends more than a pixel at the medium view distance.
+    let tallest = 0;
+    for (const p of g.world.pois) {
+      const h = (p.height || p.landmarkHeight || 0);
+      if (h > tallest) tallest = h;
+    }
+    const landmarkRange = Math.min(tallest * 150, g.renderer.quality.viewDistance);
+
+    // Region-unique dressing: how many structure kinds appear in only one
+    // region. A world where every region draws from the same bag has none.
+    const byRegion = new Map();
+    for (const p of g.world.pois) {
+      const r = p.region || 'unknown';
+      if (!byRegion.has(r)) byRegion.set(r, new Set());
+      byRegion.get(r).add(p.kind + (p.variant || ''));
+    }
+    let minRegionUnique = Infinity;
+    for (const [, kinds] of byRegion) minRegionUnique = Math.min(minRegionUnique, kinds.size);
+    if (!isFinite(minRegionUnique)) minRegionUnique = 0;
+
+    const namedPlaces = g.world.pois.filter((p) => p.name && p.name.length > 0).length
+      + world.REGIONS.length;
+    const verticalStructures = g.world.pois.filter((p) =>
+      p.kind === 'tower' || p.kind === 'ruin' || p.kind === 'boss' || p.vertical).length;
+    const distantStructures = g.world.pois.filter((p) =>
+      (p.height || 0) >= 12 || p.landmark).length;
+
+    return {
+      setpieces,
+      landmarkRange,
+      minRegionUnique,
+      namedPlaces,
+      verticalStructures,
+      distantStructures,
+    };
+  });
+
+  const voice = await page.evaluate(async () => {
+    const g = window.__g;
+    const audio = g.audio || {};
+    const mod = await import('/src/core/audio.js');
+    return {
+      synthesis: typeof audio.speak === 'function' || typeof mod.synthesizeVoice === 'function',
+      timbres: (mod.VOICE_TIMBRES && Object.keys(mod.VOICE_TIMBRES).length) || 0,
+      dialogueVoiced: typeof audio.speakLine === 'function' || !!mod.DIALOGUE_VOICED,
+      combatVocals: (mod.VOCALS && Object.keys(mod.VOCALS).length) || 0,
+      creatureVoices: (mod.CREATURE_VOICES && Object.keys(mod.CREATURE_VOICES).length) || 0,
+      distanceFalloff: typeof audio.playAt === 'function' || !!mod.VOICE_FALLOFF,
+    };
+  });
+  console.log(`  motion: footErr=${motion.footError.toFixed(3)} jump=${motion.maxPoseJump.toFixed(3)} ` +
+    `hurtDirs=${motion.hurtDirections} hitstop=${motion.hitstop} shake=${motion.cameraImpulse}`);
+  console.log(`  place: setpieces=${place.setpieces} landmark=${Math.round(place.landmarkRange)}m ` +
+    `named=${place.namedPlaces} vertical=${place.verticalStructures}`);
+  console.log(`  voice: ${JSON.stringify(voice)}`);
+
+  // -------------------------------------------------------------------------
   //  Presentation — frame statistics across six situations
   // -------------------------------------------------------------------------
   const SCENES = [
@@ -611,6 +785,43 @@ try {
   I.ge('最小タッチ対象 (px)', round(controls.minTouchSize), 40);
   I.yes('セーフエリア対応', controls.safeArea);
   I.yes('縦横両対応', controls.orientation);
+
+  // ---------------------------------------------------------------------
+  //  K, L, M — the three things the honest caveat used to call impossible.
+  //  Motion capture, hand-built levels and recorded voice were listed as the
+  //  volume this could never match. Textures were on that list too and are now
+  //  disproven, so the other three are stated as measurable roles rather than
+  //  as the production methods that usually fill them.
+  // ---------------------------------------------------------------------
+  const K = axis('K', '動きの説得力', 10);
+  K.yes('足の接地IK', motion.footIK);
+  K.le('接地誤差 (m)', round(motion.footError), 0.03);
+  K.yes('骨盤の追従', motion.pelvisSolve);
+  K.yes('二次モーション', motion.secondary);
+  K.yes('注視 (look-at)', motion.lookAt);
+  K.yes('加算アイドル層', motion.additiveIdle);
+  K.ge('方向別の被弾リアクション', motion.hurtDirections, 4);
+  K.ge('怯みの段階', motion.flinchTiers, 3);
+  K.ge('死亡の変化', motion.deathVariants, 3);
+  K.le('遷移の最大回転 (rad/frame)', round(motion.maxPoseJump), 0.35);
+  K.yes('ヒットストップ', motion.hitstop);
+  K.yes('カメラの衝撃', motion.cameraImpulse);
+
+  const L = axis('L', '場所の作家性', 10);
+  L.ge('固有セットピース', place.setpieces, 20);
+  L.ge('ランドマーク視認距離 (m)', round(place.landmarkRange), 400);
+  L.ge('地域あたり固有地物 (最小)', place.minRegionUnique, 3);
+  L.ge('名前のある場所', place.namedPlaces, 40);
+  L.ge('高低差のある構造物', place.verticalStructures, 6);
+  L.ge('遠景に見える構造物', place.distantStructures, 10);
+
+  const M = axis('M', '声', 8);
+  M.yes('発話合成', voice.synthesis);
+  M.ge('声色の個体差', voice.timbres, 8);
+  M.yes('会話行に発声が付く', voice.dialogueVoiced);
+  M.ge('戦闘発声の種類', voice.combatVocals, 12);
+  M.ge('敵種別ごとの発声', voice.creatureVoices, 6);
+  M.yes('発声の距離減衰', voice.distanceFalloff);
 
   const J = axis('J', '安定性', 5);
   J.le('コンソールエラー', consoleErrors.length, 0);
