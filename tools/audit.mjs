@@ -1270,6 +1270,17 @@ try {
   // do anything? Lock-on swings the camera at least 90 degrees in this probe by
   // construction, so anything under 1 rad means the probe, not the camera.
   K.ge('カメラプローブの旋回量 (rad)', round(camera.yawSwing), 1.0);
+  // The third way this measurement can report a perfect zero without measuring
+  // anything, found the same way as the first two — by not believing a pass.
+  //
+  // The run that produced this criterion reported 視線 0.000 rad/s next to
+  // 視線積算 NaN. A non-finite angle makes `vr > this.worstView` false, so the
+  // maximum is never assigned and stays at its initial 0 for the whole session.
+  // Frames were counted, the probe drove 3.069 rad of yaw, and both validity
+  // criteria above passed — because the frames DID run and the probe DID turn.
+  // What failed was arithmetic downstream of both, and a maximum that is never
+  // assigned reads exactly like a camera that never cut.
+  K.yes('カメラ視線の積算が有限', Number.isFinite(camera.angSum));
   // At a rate a thumb can actually sustain, a buffered press should almost
   // never be lost. The ceiling figure is reported but not gated: at twenty
   // presses a second the player is asking for the most recent intent, and

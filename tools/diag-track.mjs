@@ -100,6 +100,32 @@ const out = await page.evaluate(async () => {
   for (const e of [e1, e2]) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
   p.lockTarget = null;
 
+  // Keep playing after the locked target leaves the world.
+  //
+  // This is the frame the audit reaches and this probe used to stop just short
+  // of. `lastLock` still points at the removed actor, and the aim is read from
+  // it every frame after — so if removal leaves the actor without usable
+  // coordinates, the aim offset takes a NaN, and it is a damped accumulator:
+  // once poisoned it stays poisoned, the look point with it, and the view
+  // matrix with that. The audit reported 視線積算 NaN and then a world mask of
+  // exactly 0 pixels on all six scenes, while diag-scene.mjs — which never
+  // locks on — rendered the same scenes at 44145 pixels.
+  const afterRemoval = { poisonedAt: -1 };
+  for (let f = 0; f < 90; f++) {
+    await frames(1); rafTicks++;
+    if (afterRemoval.poisonedAt < 0
+      && !(Number.isFinite(c.look.x) && Number.isFinite(c.look.y) && Number.isFinite(c.look.z))) {
+      afterRemoval.poisonedAt = f;
+      afterRemoval.look = { x: c.look.x, y: c.look.y, z: c.look.z };
+      afterRemoval.aim = { x: c.aimOff.x, y: c.aimOff.y, z: c.aimOff.z };
+      afterRemoval.lastLock = c.lastLock
+        ? { x: c.lastLock.x, y: c.lastLock.y, z: c.lastLock.z, height: c.lastLock.height,
+            dead: c.lastLock.dead, removed: c.lastLock.removed }
+        : null;
+      afterRemoval.lockBlend = c.lockBlend;
+    }
+  }
+
   // Is the *look point* finite? `pos` has a guard and a recovery path; `look`
   // has neither, and it is what the view matrix is built from. A non-finite
   // look point renders a frame with no geometry in it while every guard in the
@@ -116,6 +142,7 @@ const out = await page.evaluate(async () => {
     afterWalk,
     lookFinite,
     aimFinite,
+    afterRemoval,
     look: { x: c.look.x, y: c.look.y, z: c.look.z },
     aim: { x: c.aimOff.x, y: c.aimOff.y, z: c.aimOff.z },
     boom: c.boom,
