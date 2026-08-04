@@ -128,6 +128,7 @@ const out = await page.evaluate(async () => {
     probe: {
       view: +(c.worstView ?? -1).toFixed(4),
       warpFrames: c.warpFrames ?? -1,
+      nonFinite: c.nonFiniteFrames ?? 0,
       angSum: +(c.angSum ?? -1).toFixed(3),
       lastWarpStep: c.lastWarpStep ?? -1,
       why: c.worstViewWhy,

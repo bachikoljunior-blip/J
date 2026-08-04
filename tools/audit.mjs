@@ -590,6 +590,7 @@ try {
     out.dollyAt = p.camera.worstDollyAt;
     out.why = p.camera.worstViewWhy || null;
     out.warpFrames = p.camera.warpFrames ?? -1;
+    out.nonFinite = p.camera.nonFiniteFrames ?? 0;
     out.angSum = p.camera.angSum ?? -1;
     out.lastWarpStep = p.camera.lastWarpStep ?? -1;
     for (const e of [e1, e2]) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
@@ -667,7 +668,7 @@ try {
   console.log(`  camera probe: spawned=${JSON.stringify(camera.spawned)} ` +
     `lock ${camera.lockHeld}/${camera.lockAsked}  yaw旋回 ${camera.yawSwing.toFixed(3)} rad  ` +
     `warp ${camera.warpFrames}/${camera.frames} (最大 ${camera.lastWarpStep}m)  ` +
-    `視線積算 ${Number(camera.angSum).toFixed(2)} rad` +
+    `視線積算 ${Number(camera.angSum).toFixed(2)} rad  非有限 ${camera.nonFinite}` +
     `${camera.why ? `  why=${JSON.stringify(camera.why)}` : ''}`);
   console.log(`  input buffer: 投入 ${motion.bufferOffered} / 上書き ${motion.bufferDropped} ` +
     `/ 期限切れ ${motion.bufferExpired} = 取りこぼし ${(motion.bufferLossRate * 100).toFixed(0)}%`);

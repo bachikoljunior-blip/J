@@ -1066,7 +1066,22 @@ export class PlayerCamera {
     // Widen the view when sprinting — a cheap, strong speed cue.
     this.targetFov = p.isSprinting ? 70 : lockTarget ? 60 : 62;
     this.fov = damp(this.fov, this.targetFov, 5, dt);
+    // targetDistance comes from the distance to the lock target, so it inherits
+    // whatever that actor's coordinates are. `distance` is a damped
+    // accumulator, and damp(NaN, x) is NaN forever — one bad frame would pin
+    // the boom, the eye and every frame after it. Guard at the source as well
+    // as recovering below; a value that never goes bad needs no recovery.
+    if (!Number.isFinite(this.targetDistance)) this.targetDistance = 5.4;
+    if (!Number.isFinite(this.distance)) this.distance = this.targetDistance;
     this.distance = damp(this.distance, this.targetDistance, 7, dt);
+    if (!Number.isFinite(this.boom)) this.boom = this.distance;
+    if (!Number.isFinite(this.groundLift)) this.groundLift = 0;
+    if (!Number.isFinite(this.lockBlend)) this.lockBlend = 0;
+    if (!Number.isFinite(this.yaw)) this.yaw = 0;
+    if (!Number.isFinite(this.pitch)) this.pitch = -0.20;
+    // shakeDur is only assigned by shake(); if anything sets shakeT or shakeAmp
+    // directly, the k below divides by undefined.
+    if (!Number.isFinite(this.shakeDur) || this.shakeDur <= 0) this.shakeDur = 0.2;
 
     // Over-the-shoulder offset: without it the character stands squarely in
     // front of everything the player is trying to look at. Blended on the
@@ -1201,7 +1216,14 @@ export class PlayerCamera {
       this.pos.x = fx; this.pos.y = fy + 1; this.pos.z = fz - this.distance;
       this.focusX = fx; this.focusY = fy; this.focusZ = fz;
       this.look.x = fx; this.look.y = fy; this.look.z = fz;
+      this.focusX = fx; this.focusY = fy; this.focusZ = fz;
       this._trk = null;
+      // Recovery must not be a trap. Without this, `seeded` stays false — it is
+      // only set at the end of a completed update — and every later frame takes
+      // the un-seeded branches, which is not the state this class expects to be
+      // in after the first frame.
+      this.seeded = true;
+      this._track(dt);
       return;
     }
 
