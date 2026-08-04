@@ -1013,6 +1013,11 @@ export class PlayerCamera {
     }
 
     this.shakeT -= dt;
+    // Let the amplitude die with the timer. Without this a single heavy hit
+    // leaves shakeAmp high for the rest of the session, and shake() taking
+    // max(previous * 0.6, amp) then means a light hit an hour later still
+    // shakes like the heavy one did.
+    if (this.shakeT <= 0) this.shakeAmp = 0;
     let shakeX = 0, shakeY = 0;
     if (this.shakeT > 0 && this.shakeAmp > 0) {
       const k = this.shakeAmp * (this.shakeT / this.shakeDur);

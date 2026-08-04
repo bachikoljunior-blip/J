@@ -47,6 +47,14 @@ const PI = Math.PI;
 const TURN_RATE = 17;    // rad/s
 const TURN_STEP = 0.27;  // rad/frame
 
+// How fast the ground solver takes hold of a foot, and lets go of one, in
+// weight per second. Asymmetric on purpose: a pose that lifts a foot has
+// already lifted it and the solver must get out of the way at once, while a
+// foot coming back down should be set down over a few frames rather than
+// teleported onto the terrain the instant the roll ends.
+const PLANT_ENGAGE = 7.0;
+const PLANT_RELEASE = 40.0;
+
 // How far above the ground sample a sole is planted. Not zero: a foot pinned
 // exactly to a bilinear height field reads as sunk, and the sole has thickness.
 const SOLE_LIFT = 0.02;
@@ -779,6 +787,12 @@ export class Rig {
     this.ikWeight = 1;
     /** Per-leg contact this frame, written by the poses. See planted(). */
     this.plant = new Float32Array(this.legs.length).fill(1);
+    // What the solver actually uses: the pose's plant weight, rate-limited.
+    // Poses set plant per frame, so a roll ending flips a leg from 0 to 1 in
+    // one frame and the foot snaps down onto the terrain. Easing the weight
+    // instead lets the foot arrive — which is both what a landing looks like
+    // and what keeps the frame-to-frame rotation inside the continuity budget.
+    this.plantS = new Float32Array(this.legs.length).fill(1);
     /** How far the hips are sunk this frame so the deepest foot can reach. */
     this.pelvisDrop = 0;
     /** 0..1 — how much of the gaze is currently spent on the look target. */
@@ -875,7 +889,19 @@ export class Rig {
     this.target.fill(0);
     // Feet are assumed to be standing on something until a pose says otherwise,
     // which is the right default: most poses are standing ones.
-    for (let i = 0; i < this.plant.length; i++) this.plant[i] = 1;
+    // Ease the solver's weight toward whatever the pose asked for last frame
+    // before the poses overwrite it. Engaging is slower than releasing: a foot
+    // leaving the ground should be instant (the pose has already taken it), a
+    // foot arriving should not.
+    for (let i = 0; i < this.plant.length; i++) {
+      const target = this.plant[i];
+      const cur = this.plantS[i];
+      const rate = target > cur ? PLANT_ENGAGE : PLANT_RELEASE;
+      const d = target - cur;
+      const step = rate * (this._lastDt || 0.016);
+      this.plantS[i] = Math.abs(d) <= step ? target : cur + Math.sign(d) * step;
+      this.plant[i] = 1;
+    }
   }
 
   /**
@@ -896,6 +922,9 @@ export class Rig {
    * world transforms, then put the feet on the ground.
    */
   apply(dt, x, y, z, yaw) {
+    // clearTarget() advances the smoothed plant weight and is called from the
+    // pose layer, which has no dt of its own.
+    this._lastDt = dt;
     this._sense(dt, x, y, z, yaw);
     this._layers(dt, x, y, z);
     this._damp(dt);
@@ -1271,7 +1300,7 @@ export class Rig {
       const ui = leg.upper, li = leg.lower;
       const lift = Math.max(0, f.lift - lowest);
       const gy = src.heightAt(f.x, f.z);
-      const w = gw * clamp(this.plant[c], 0, 1);
+      const w = gw * clamp(this.plantS[c], 0, 1);
       const wlim = Math.min(PLANT_SLEW * dt, PLANT_STEP);
       f.w = warped ? w : clamp(w, f.w - wlim, f.w + wlim);
       const fk = f.y;

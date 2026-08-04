@@ -396,15 +396,28 @@ try {
     out.maxPoseJump = maxJump;
 
     // Hitstop and camera impulse: both must be observable, not declared.
+    //
+    // The probe has to actually land a blow, which means facing the target and
+    // holding swing range — a bandit strafes, and a version of this that just
+    // stood still and swung measured "no camera impulse" when what it had
+    // really measured was "no hit". Hold station the way tools/gameplay.mjs
+    // does; this probe is about what a landed hit does, not about pursuit.
     const e2 = g.spawnEnemy('bandit', p.x + 1.4, p.z, { level: 1 });
-    const shakeBefore = p.camera.shakeAmp || 0;
-    let sawHitstop = false, sawShake = false;
-    for (let i = 0; i < 90 && !e2.dead; i++) {
+    let sawHitstop = false, sawShake = false, landed = 0;
+    const hpWas = { v: e2.hp };
+    for (let i = 0; i < 240 && !e2.dead; i++) {
+      const yaw = Math.atan2(e2.x - p.x, e2.z - p.z);
+      p.yaw = yaw;
+      p.teleport(e2.x - Math.sin(yaw) * 1.5, undefined, e2.z - Math.cos(yaw) * 1.5);
+      p.stamina = p.maxStamina;
       if (p.canAct) p._buffer('heavy');
+      const shakeBefore = p.camera.shakeAmp || 0;
       await frames(1);
+      if (e2.hp < hpWas.v) { landed++; hpWas.v = e2.hp; }
       if ((g.hitStop || p.hitStop || e2.hitStop || 0) > 0) sawHitstop = true;
       if ((p.camera.shakeAmp || 0) > shakeBefore + 0.001) sawShake = true;
     }
+    out.hitsLanded = landed;
     if (e2.spawnRef) e2.spawnRef.actor = null;
     g._removeActor(e2);
     out.hitstop = sawHitstop;
@@ -473,7 +486,8 @@ try {
     };
   });
   console.log(`  motion: footErr=${motion.footError.toFixed(3)} jump=${motion.maxPoseJump.toFixed(3)} ` +
-    `hurtDirs=${motion.hurtDirections} hitstop=${motion.hitstop} shake=${motion.cameraImpulse}`);
+    `hurtDirs=${motion.hurtDirections} hits=${motion.hitsLanded} ` +
+    `hitstop=${motion.hitstop} shake=${motion.cameraImpulse}`);
   console.log(`  place: setpieces=${place.setpieces} landmark=${Math.round(place.landmarkRange)}m ` +
     `named=${place.namedPlaces} vertical=${place.verticalStructures}`);
   console.log(`  voice: ${JSON.stringify(voice)}`);
