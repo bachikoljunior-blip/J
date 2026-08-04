@@ -468,6 +468,7 @@ try {
   const camera = await page.evaluate(async () => {
     const g = window.__g;
     const p = g.player;
+    const out = {};
     const frames = (n) => new Promise((r) => {
       let i = 0;
       const tick = () => (++i >= n ? r() : requestAnimationFrame(tick));
@@ -496,14 +497,29 @@ try {
     //    frame, and it is the case a player hits constantly in a crowd.
     const e1 = g.spawnEnemy('bandit', p.x + 7, p.z + 2, { level: 1 });
     const e2 = g.spawnEnemy('bandit', p.x - 6, p.z - 4, { level: 1 });
-    p.lockTarget = e1;
-    await frames(50);
-    p.lockTarget = e2;
-    await frames(50);
-    p.lockTarget = e1;
-    await frames(50);
-    p.lockTarget = null;
-    await frames(40);
+    // Whether the probe actually drove anything. Standalone this same sequence
+    // produces 5.68 rad/s; inside the audit it has reported 0.000 twice, and a
+    // probe that did not drive the camera is indistinguishable from a camera
+    // that never cut — both print zero. Record the difference rather than
+    // guessing at it again.
+    let lockAsked = 0, lockHeld = 0;
+    const yawStart = p.camera.yaw;
+    let yawSwing = 0;
+    for (const [tgt, n] of [[e1, 50], [e2, 50], [e1, 50], [null, 40]]) {
+      p.lockTarget = tgt;
+      for (let i = 0; i < n; i++) {
+        if (tgt) { lockAsked++; if (p.lockTarget === tgt) lockHeld++; }
+        await frames(1);
+        let d = p.camera.yaw - yawStart;
+        while (d > Math.PI) d -= 2 * Math.PI;
+        while (d < -Math.PI) d += 2 * Math.PI;
+        if (Math.abs(d) > yawSwing) yawSwing = Math.abs(d);
+      }
+    }
+    out.lockAsked = lockAsked;
+    out.lockHeld = lockHeld;
+    out.spawned = [!!e1, !!e2];
+    out.yawSwing = yawSwing;
 
     // 3. Sprint, which swings the camera behind the player on its own.
     p.isSprinting = true;
@@ -513,13 +529,12 @@ try {
     }
     p.isSprinting = false;
 
-    const out = {
-      view: p.camera.worstView || 0,
-      dolly: p.camera.worstDolly || 0,
-      frames: p.camera.trackFrames || 0,
-      viewAt: p.camera.worstViewAt,
-      dollyAt: p.camera.worstDollyAt,
-    };
+    out.view = p.camera.worstView || 0;
+    out.dolly = p.camera.worstDolly || 0;
+    out.frames = p.camera.trackFrames || 0;
+    out.viewAt = p.camera.worstViewAt;
+    out.dollyAt = p.camera.worstDollyAt;
+    out.why = p.camera.worstViewWhy || null;
     for (const e of [e1, e2]) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
     p.lockTarget = null;
     return out;
@@ -590,6 +605,9 @@ try {
     `hitstop=${motion.hitstop} shake=${motion.cameraImpulse}`);
   console.log(`  camera: ${camera.frames}f  視線 ${camera.view.toFixed(3)} rad/s @f${camera.viewAt}  ` +
     `ドリー ${camera.dolly.toFixed(3)} m/s @f${camera.dollyAt}`);
+  console.log(`  camera probe: spawned=${JSON.stringify(camera.spawned)} ` +
+    `lock ${camera.lockHeld}/${camera.lockAsked}  yaw旋回 ${camera.yawSwing.toFixed(3)} rad` +
+    `${camera.why ? `  why=${JSON.stringify(camera.why)}` : ''}`);
   if (motion.continuity) {
     const c = motion.continuity;
     console.log(`  continuity: ${c.frames}f ${c.rigs}rigs  steady=${c.maxSteady.toFixed(3)} ` +
@@ -874,6 +892,12 @@ try {
   // measure that directly, which is the thing mean luminance cannot see and the
   // reason this gate used to score 100 on a frame made of boxes.
   for (const f of frames) {
+    // The mask has to have found world before any of the spatial numbers mean
+    // anything: they are all averages over exactly those pixels. Without this,
+    // an empty mask reports a detail of 0 — indistinguishable from a genuinely
+    // flat frame, and wrong in the direction that sends you looking at the
+    // renderer instead of at the measurement. It cost most of a day.
+    G.yes(`${f.id} 画の計測が成立`, f.measurable !== false);
     G.ge(`${f.id} 表面ディテール`, round(f.detail), 0.25);
     G.le(`${f.id} 平坦領域率`, round(f.flatRatio), 0.10);
     G.ge(`${f.id} 局所コントラスト`, round(f.localContrast), 0.060);
@@ -939,6 +963,12 @@ try {
   // A probe that drove nothing would report a perfect zero, so require that it
   // ran. Every measurement here should be falsifiable by its own absence.
   K.ge('カメラ計測フレーム数', camera.frames, 300);
+  // A probe that drove nothing reports a perfect zero. Requiring the drive to
+  // have happened is what makes the two zeroes distinguishable — this is the
+  // same guard as 計測フレーム数, one level deeper: the frames ran, but did they
+  // do anything? Lock-on swings the camera at least 90 degrees in this probe by
+  // construction, so anything under 1 rad means the probe, not the camera.
+  K.ge('カメラプローブの旋回量 (rad)', round(camera.yawSwing), 1.0);
   K.yes('ヒットストップ', motion.hitstop);
   K.yes('カメラの衝撃', motion.cameraImpulse);
 

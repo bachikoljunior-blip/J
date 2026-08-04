@@ -111,7 +111,19 @@ for (const s of SCENES) {
       stats: g.renderer.stats ? JSON.parse(JSON.stringify(g.renderer.stats)) : null,
     };
   }, s);
+  // Hide the HUD before the shot. readbackStats composites the scene WITHOUT
+  // the DOM overlay, so a screenshot that includes buttons, bars and a minimap
+  // is not the same image and cannot be compared against it — the UI's flat
+  // saturated blocks move both saturation and colour-bin counts on their own.
+  await page.evaluate(() => {
+    const h = document.getElementById('hud');
+    if (h) h.style.visibility = 'hidden';
+  });
   await page.screenshot({ path: `${SHOTS}/diag-${s.id}.png` });
+  await page.evaluate(() => {
+    const h = document.getElementById('hud');
+    if (h) h.style.visibility = '';
+  });
   console.log(`${s.id.padEnd(12)} boom=${stat.boom} clear=${stat.clearance} ` +
     `dynScale=${stat.dynamicScale}/${stat.rendererScale} scene=${stat.sceneW}x${stat.sceneH} ` +
     `depthTex=${stat.hasDepthTex}`);

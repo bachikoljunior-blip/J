@@ -819,6 +819,13 @@ export class Renderer {
       lum[i] = (0.2126 * buf[p] + 0.7152 * buf[p + 1] + 0.0722 * buf[p + 2]) / 255;
     }
 
+    // How many pixels the mask calls world. Reported alongside the statistics,
+    // because every one of them is an average over exactly these pixels and a
+    // small or empty set makes them meaningless — while still printing as a
+    // perfectly ordinary number. An empty mask used to surface as
+    // "表面ディテール: 0", which reads as a flat image and is in fact a failed
+    // measurement. Those two need to be distinguishable.
+    let worldPixels = 0;
     let gradSum = 0, gradN = 0, edges = 0, flat = 0;
     // Structure is measured over the pixels that actually contain world.
     //
@@ -856,6 +863,7 @@ export class Renderer {
     for (let y = 1; y < h - 1; y++) {
       for (let x = 1; x < w - 1; x++) {
         if (!isWorld(x, y)) continue;
+        worldPixels++;
         const i = y * w + x;
         const gx = (lum[i - w + 1] + 2 * lum[i + 1] + lum[i + w + 1])
           - (lum[i - w - 1] + 2 * lum[i - 1] + lum[i + w - 1]);
@@ -917,6 +925,13 @@ export class Renderer {
     let filled = 0;
     for (let i = 0; i < bins.length; i++) filled += bins[i];
 
+    // Max(n, 1) turns "nothing was measured" into a value of zero, and zero is
+    // a legitimate reading here — it is what a perfectly flat frame scores. The
+    // two have to be told apart: an empty mask reported 表面ディテール 0 on four
+    // of six scenes and read as a rendering collapse, when the frames were fine
+    // and the mask was not. So the count travels with the numbers, and callers
+    // that care check `measurable` rather than trusting a zero.
+    const measurable = worldPixels > (w * h) * 0.02 && tiles > 0;
     return {
       // Mean gradient magnitude: the headline "is there surface detail" number.
       detail: gradSum / Math.max(gradN, 1),
@@ -926,6 +941,10 @@ export class Renderer {
       flatRatio: flat / Math.max(gradN, 1),
       localContrast: tileSum / Math.max(tiles, 1),
       colorCells: filled,
+      worldPixels,
+      worldTiles: tiles,
+      maskPresent: !!mask,
+      measurable,
     };
   }
 
