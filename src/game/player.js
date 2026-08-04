@@ -1190,6 +1190,8 @@ export class PlayerCamera {
     this.worstViewAt = -1; this.worstDollyAt = -1;
     this.worstViewWhy = null;
     this.trackFrames = 0;
+    this.warpFrames = 0;
+    this.angSum = 0;
   }
 
   /**
@@ -1215,7 +1217,17 @@ export class PlayerCamera {
       // A teleport moves the focus across the map; the view did not turn to
       // get there. Warps are the game cutting on purpose, and a cut on purpose
       // is a different thing from a cut by accident.
-      const warped = v3distXZ({ x: this.focusX, z: this.focusZ }, prev.focus) > 3;
+      const focusStep = v3distXZ({ x: this.focusX, z: this.focusZ }, prev.focus);
+      const warped = focusStep > 3;
+      // Counters, not a verdict. The audit's probe swung the camera 3.119 rad
+      // and the tracker still reported a worst of exactly 0, which can only
+      // mean every frame was discarded or every angle was zero — and those need
+      // telling apart by counting, not by reasoning about which is likelier.
+      this.angSum = (this.angSum || 0) + ang;
+      if (warped) {
+        this.warpFrames = (this.warpFrames || 0) + 1;
+        this.lastWarpStep = +focusStep.toFixed(3);
+      }
       if (!warped) {
         // Rates, for the same reason the rig reports rates: per-frame is a unit
         // that means something different on every machine, and the audit runs
