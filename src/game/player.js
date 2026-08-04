@@ -1093,7 +1093,15 @@ export class PlayerCamera {
     // nothing else is wrong. Sixteen samples plus the crossing makes the
     // length a continuous function of where the player is standing.
     let want = this.distance;
-    let prevGap = focusY - (world.heightAt(focusX, focusZ) + CAM_SKIN);
+    const focusGround = world.heightAt(focusX, focusZ);
+    // Guarded like the loop samples below. A non-finite seed would make the
+    // first crossing's interpolation NaN; `prevGap > 0` happens to reject NaN
+    // and fall back to the segment start, so this is not a live defect — but
+    // relying on a comparison's NaN behaviour to be safe is not a thing to
+    // leave in place.
+    let prevGap = Number.isFinite(focusGround)
+      ? focusY - (focusGround + CAM_SKIN)
+      : Infinity;
     for (let i = 1; i <= 16; i++) {
       const t = (i / 16) * this.distance;
       const sx = focusX + ox * t;
