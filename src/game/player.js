@@ -1137,7 +1137,7 @@ export class PlayerCamera {
     const wy = t ? (t.y + t.height * 0.55 - focusY) * aimW : 0;
     const wz = t ? (t.z - focusZ) * aimW : 0;
     if (lockTarget) this.lastLock = lockTarget;
-    else if (this.lockBlend < 0.01) this.lastLock = null;
+    else if (this.lockBlend < 0.01 || this.lastLock?.dead) this.lastLock = null;
 
     const a = this.aimOff;
     if (!this.seeded) { a.x = wx; a.y = wy; a.z = wz; } else {
