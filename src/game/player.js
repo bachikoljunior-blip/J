@@ -981,7 +981,7 @@ const CAM_AIM_RATE = 12;        // 1/s, how quickly the aim follows the framing
 // one at a 1.3 m boom, so a linear cap bounds nothing in particular. Converting
 // through the current view distance is what makes it spend a known share of the
 // same budget the swing spends.
-const CAM_AIM_ANG = 1.6;        // rad/s of view rotation the aim may contribute
+const CAM_AIM_ANG = 1.4;        // rad/s of view rotation the aim may contribute
 // What the camera may swing around the player under its own steam. Player look
 // input is deliberately outside this: that is the player's own hand, and
 // limiting it would read as the controller sticking. This bounds the game
@@ -993,12 +993,17 @@ const CAM_AIM_ANG = 1.6;        // rad/s of view rotation the aim may contribute
 // fix for that is to leave room in the budget, not to raise the number the
 // budget is checked against.
 //
-// 4.0 and 1.6 together are 5.6, inside the 6.0 the view is held to, with the
-// rest left for the focus sliding as the shoulder offset swings around the
-// player. Measured before this split: 8.25 rad/s, from dYaw 0.240 and dAim
-// 0.3225 arriving on the same frame — each inside its own cap, and together
-// well outside the only bound that matters.
-const CAM_SWING_RATE = 4.0;     // rad/s — a 90 deg lock-on lands in 0.39 s
+// There are three contributors, not two, and the third is why the first split
+// still measured 6.075 against a 6.0 cap in the running game: the focus itself
+// slides as the shoulder offset swings around the player, and that turns the
+// view as surely as the eye or the aim does. 3.6 for the swing, 1.4 for the aim
+// and about 0.5 for the focus is 5.5, which leaves the margin the previous
+// split did not.
+//
+// Measured before any of this: 8.25 rad/s, from dYaw 0.240 and dAim 0.3225 on
+// the same frame — each inside its own cap, together well outside the only
+// bound that matters.
+const CAM_SWING_RATE = 3.6;     // rad/s — a 90 deg lock-on lands in 0.44 s
 const CAM_SWING_STEP = CAM_SWING_RATE * MAX_DT;   // backstop only; see MAX_DT
 
 export class PlayerCamera {
