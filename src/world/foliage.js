@@ -62,15 +62,21 @@ export const FEATURE = {
  * each on a phone — both for memory and for the garbage collector, which must
  * not run mid-frame.
  *
- * Layout: type, x, y, z, yaw, sx, sy, sz, r, g, b, r2, g2, b2, phase, rangeMul
+ * Layout: type, x, y, z, yaw, sx, sy, sz, r, g, b, r2, g2, b2, phase, rangeMul,
+ * emissive
  *
  * `rangeMul` scales the kind's draw distance per item. It is a per-biome value
  * decided at scatter time rather than a constant in game.js because the biomes
  * that need debris carried further are exactly the flat ones — a stone on a
  * plain is the only thing between the player and an empty surface, while in the
  * woods the same stone is behind a tree.
+ *
+ * `emissive` is per item rather than per kind because it is per *place*: the
+ * only clutter in the world that glows is a heaved plate of baked ground in the
+ * Cinderwaste's burnt pans, and the same mesh in the same biome one surface
+ * over is cold stone.
  */
-export const CLUTTER_STRIDE = 16;
+export const CLUTTER_STRIDE = 17;
 
 /** Features are packed the same way. The last slot is a collider radius. */
 export const FEATURE_STRIDE = 16;
@@ -86,6 +92,15 @@ const FEATURE_CELL = 13;  // metres between feature candidates
  */
 const FEATURE_REACH = 44;
 
+/**
+ * The Cinderwaste and the mire are each three surfaces rather than one — see
+ * BIOME_INFO — and every table in this file is keyed by surface. These two
+ * predicates are for the places that mean "is this ash country" or "is this
+ * bog", which used to be a single equality test each.
+ */
+const isAsh = (b) => b === BIOME.ASH || b === BIOME.CINDER || b === BIOME.DRIFT;
+const isBog = (b) => b === BIOME.MARSH || b === BIOME.PEAT || b === BIOME.SEDGE;
+
 /** Per-biome scatter rules. Weights are relative within `trees`. */
 const BIOME_SCATTER = {
   [BIOME.OCEAN]: { tree: 0, bush: 0, rock: 0.02, reed: 0, trees: [1, 0, 0] },
@@ -97,6 +112,17 @@ const BIOME_SCATTER = {
   [BIOME.CRAG]: { tree: 0.04, bush: 0.05, rock: 0.42, reed: 0.0, trees: [0.05, 0.55, 0.40] },
   [BIOME.SNOW]: { tree: 0.11, bush: 0.03, rock: 0.22, reed: 0.0, trees: [0.02, 0.78, 0.20] },
   [BIOME.ASH]: { tree: 0.17, bush: 0.05, rock: 0.20, reed: 0.0, trees: [0.02, 0.06, 0.92] },
+  // The burnt pans are where the forest that used to stand here still stands,
+  // dead: the highest dead-tree count anywhere on the island, and the only
+  // thing in the Cinderwaste tall enough to put a silhouette on the horizon.
+  [BIOME.CINDER]: { tree: 0.30, bush: 0.02, rock: 0.22, reed: 0.0, trees: [0.0, 0.02, 0.98] },
+  // Drift buries what it lands on, so the crests carry stone and almost
+  // nothing standing.
+  [BIOME.DRIFT]: { tree: 0.05, bush: 0.02, rock: 0.16, reed: 0.0, trees: [0.0, 0.04, 0.96] },
+  // Open peat and standing water: dead trunks out in it, reeds around them.
+  [BIOME.PEAT]: { tree: 0.14, bush: 0.10, rock: 0.02, reed: 0.44, trees: [0.10, 0.0, 0.90] },
+  // The tussock islands are where anything with roots actually grows.
+  [BIOME.SEDGE]: { tree: 0.19, bush: 0.24, rock: 0.03, reed: 0.30, trees: [0.48, 0.0, 0.52] },
 };
 
 /** Foliage palettes, sampled per instance and jittered. */
@@ -110,6 +136,16 @@ const LEAF_COLORS = {
   [BIOME.ASH]: [[0.22, 0.17, 0.14], [0.26, 0.20, 0.16], [0.19, 0.15, 0.13]],
   [BIOME.BEACH]: [[0.28, 0.40, 0.20], [0.32, 0.44, 0.22], [0.26, 0.38, 0.19]],
   [BIOME.OCEAN]: [[0.20, 0.30, 0.18], [0.22, 0.32, 0.20], [0.18, 0.28, 0.17]],
+  // Nothing in the waste has a leaf. These are the tones charred and
+  // ash-dusted wood takes, which is what the scrub and thicket meshes wear
+  // there instead.
+  [BIOME.CINDER]: [[0.16, 0.13, 0.115], [0.21, 0.18, 0.16], [0.125, 0.105, 0.10]],
+  [BIOME.DRIFT]: [[0.34, 0.31, 0.28], [0.40, 0.37, 0.34], [0.28, 0.25, 0.23]],
+  // Weed lying on black water: darker and greener than the mire average.
+  [BIOME.PEAT]: [[0.17, 0.24, 0.12], [0.20, 0.27, 0.14], [0.14, 0.21, 0.12]],
+  // Standing dead cane. Pale, and the reason the tussock islands read from
+  // across the water.
+  [BIOME.SEDGE]: [[0.52, 0.47, 0.28], [0.58, 0.52, 0.32], [0.44, 0.41, 0.25]],
 };
 
 const BARK_COLORS = [[0.30, 0.22, 0.16], [0.35, 0.26, 0.18], [0.25, 0.19, 0.14]];
@@ -140,6 +176,22 @@ const CLUTTER_RULES = {
   [BIOME.CRAG]: { d: 0.34, w: [0.50, 0.03, 0.09, 0.06, 0.10, 0.22, 0.00] },
   [BIOME.SNOW]: { d: 0.26, w: [0.34, 0.04, 0.06, 0.06, 0.36, 0.12, 0.02] },
   [BIOME.ASH]: { d: 0.64, w: [0.16, 0.08, 0.02, 0.19, 0.24, 0.15, 0.16] },
+  // The two ash surfaces are weighted by what would actually be lying on
+  // them, and that turns out to be the same thing the eye needs: the burnt
+  // pan is the darkest ground in the world, so what collects there is the
+  // pale stuff — bone, drift banked against every rise, and the heaved plates
+  // of baked ground the fire is still in. Grey debris on grey ground is worth
+  // nothing; bone at four times the reflectance of the pan under it is worth
+  // more than another hundred stones.
+  [BIOME.CINDER]: { d: 0.62, w: [0.09, 0.09, 0.03, 0.26, 0.22, 0.16, 0.15] },
+  // A drift crest is bare by definition — it is the material, not a place
+  // things sit on. What shows through is what was buried and is coming back
+  // out of it.
+  [BIOME.DRIFT]: { d: 0.44, w: [0.10, 0.06, 0.01, 0.13, 0.42, 0.06, 0.22] },
+  // Rotting timber, and stumps of the drowned wood standing in open peat.
+  [BIOME.PEAT]: { d: 0.50, w: [0.02, 0.29, 0.19, 0.03, 0.06, 0.01, 0.40] },
+  // The tussock crowns: sedge, and last year's fallen cane under it.
+  [BIOME.SEDGE]: { d: 0.58, w: [0.03, 0.16, 0.55, 0.02, 0.06, 0.01, 0.17] },
 };
 
 /**
@@ -152,6 +204,10 @@ const CLUTTER_RANGE_MUL = {
   [BIOME.MEADOW]: 1.15,
   [BIOME.MARSH]: 1.15,
   [BIOME.ASH]: 1.20,
+  [BIOME.CINDER]: 1.20,
+  [BIOME.DRIFT]: 1.20,
+  [BIOME.PEAT]: 1.15,
+  [BIOME.SEDGE]: 1.15,
 };
 
 /** Largest `d` above — the cheap reject that runs before any terrain query. */
@@ -177,6 +233,15 @@ const FEATURE_RULES = {
   [BIOME.CRAG]: { d: 0.34, w: [0.70, 0.04, 0.00, 0.00, 0.02, 0.16, 0.08] },
   [BIOME.SNOW]: { d: 0.28, w: [0.62, 0.02, 0.00, 0.00, 0.02, 0.32, 0.02] },
   [BIOME.ASH]: { d: 0.84, w: [0.24, 0.02, 0.00, 0.34, 0.20, 0.08, 0.12] },
+  // Bone heaps and outcrops on the burnt pans, drift where the drift is. A
+  // dune feature standing in a pan would contradict the ground it is on: the
+  // pan is what the wind swept clean.
+  [BIOME.CINDER]: { d: 0.82, w: [0.28, 0.01, 0.00, 0.08, 0.32, 0.10, 0.21] },
+  [BIOME.DRIFT]: { d: 0.84, w: [0.14, 0.01, 0.00, 0.58, 0.13, 0.04, 0.10] },
+  // Reed beds are what the mire is made of at this scale, and open peat is
+  // where they stand.
+  [BIOME.PEAT]: { d: 0.48, w: [0.06, 0.12, 0.60, 0.00, 0.02, 0.02, 0.18] },
+  [BIOME.SEDGE]: { d: 0.50, w: [0.08, 0.30, 0.34, 0.00, 0.02, 0.06, 0.20] },
 };
 
 const FEATURE_MAX_D = 0.84;
@@ -188,6 +253,11 @@ const ROT_COLOR = [0.20, 0.16, 0.12];
 /** Bleached bone, and the pale splinter colour broken wood shows. */
 const BONE_COLOR = [0.58, 0.56, 0.48];
 const SPLINTER_COLOR = [0.44, 0.37, 0.27];
+
+/** Fresh ash fall — what the wind in the Cinderwaste is actually carrying. */
+const ASH_FALL = [0.55, 0.52, 0.49];
+/** Charred ground: the dark end of a dune's flank, wherever it stands. */
+const DUNE_SHADOW = [0.13, 0.11, 0.10];
 
 /**
  * Smooth value noise from the position hash — used to make clutter arrive in
@@ -459,10 +529,11 @@ export class Scatter {
         const rock = BIOME_INFO[biome].rock;
         const ground = BIOME_INFO[biome].ground;
         const snowy = biome === BIOME.SNOW;
-        const ashy = biome === BIOME.ASH;
+        const ashy = isAsh(biome);
         let sx = 1, sy = 1, sz = 1, yaw = r4 * 6.283;
         let cr = 0.4, cg = 0.4, cb = 0.4;
         let c2r = 0.5, c2g = 0.5, c2b = 0.5;
+        let emis = 0;
 
         switch (type) {
           case CLUTTER.ROCK: {
@@ -525,21 +596,43 @@ export class Scatter {
               ? Math.atan2(this._n.x, this._n.z) + Math.PI / 2 + (r4 - 0.5) * 0.5
               : r4 * 6.283;
             const t = 0.9 + r5 * 0.3;
-            cr = lerp(ground[0], rock[0], 0.45) * t;
-            cg = lerp(ground[1], rock[1], 0.45) * t;
-            cb = lerp(ground[2], rock[2], 0.45) * t;
+            // A drift is made of whatever the wind is carrying, not of the
+            // ground it has stopped against — which matters most exactly where
+            // the two differ most. A bank of fresh fall lying in a burnt pan is
+            // five times the reflectance of the pan, and taking its colour from
+            // the ground underneath made it invisible there.
+            const bed = ashy ? ASH_FALL : ground;
+            cr = lerp(bed[0], rock[0], ashy ? 0.12 : 0.45) * t;
+            cg = lerp(bed[1], rock[1], ashy ? 0.12 : 0.45) * t;
+            cb = lerp(bed[2], rock[2], ashy ? 0.12 : 0.45) * t;
             c2r = snowy ? 0.86 : cr * 1.4 + 0.05;
             c2g = snowy ? 0.89 : cg * 1.4 + 0.05;
             c2b = snowy ? 0.95 : cb * 1.35 + 0.05;
             break;
           }
           case CLUTTER.SLAB: {
-            sx = 1.0 + r4 * 2.2;
-            sy = 0.10 + r5 * 0.26;
+            const burnt = biome === BIOME.CINDER;
+            // Baked ground breaks into shorter, thicker plates than bedrock
+            // does, and the mesh's tilt only reaches the world at the ratio of
+            // its two scales — a 3 m plate 15 cm thick lies flat however it is
+            // modelled. Squatter and thicker is what actually stands an edge up.
+            sx = burnt ? 0.9 + r4 * 1.5 : 1.0 + r4 * 2.2;
+            sy = burnt ? 0.20 + r5 * 0.34 : 0.10 + r5 * 0.26;
             sz = sx * (0.65 + r5 * 0.45);
             const t = 0.7 + r5 * 0.4;
             cr = rock[0] * t; cg = rock[1] * t; cb = rock[2] * t;
-            c2r = cr * 1.3 + 0.05; c2g = cg * 1.3 + 0.05; c2b = cb * 1.25 + 0.05;
+            if (burnt) {
+              // On the burnt pans these are not stone but plates of baked
+              // ground, heaved apart by what is still burning under them. The
+              // raised edge is scorched through to red and the deeper cracks
+              // have never gone out. It is the only warm thing in the
+              // Cinderwaste, and one warm thing is what stops a place reading
+              // as a grey desert rather than as a burnt one.
+              c2r = 0.44 + r4 * 0.24; c2g = 0.145 + r4 * 0.10; c2b = 0.055;
+              emis = r5 > 0.55 ? 0.14 + r4 * 0.26 : 0;
+            } else {
+              c2r = cr * 1.3 + 0.05; c2g = cg * 1.3 + 0.05; c2b = cb * 1.25 + 0.05;
+            }
             break;
           }
           default: {   // CLUTTER.STUMP
@@ -597,7 +690,7 @@ export class Scatter {
         out.push(type, x, y - sy * 0.06, z, yaw, sx, sy, sz,
           clamp(cr, 0, 1), clamp(cg, 0, 1), clamp(cb, 0, 1),
           clamp(c2r, 0, 1), clamp(c2g, 0, 1), clamp(c2b, 0, 1), r2 * 6.283,
-          CLUTTER_RANGE_MUL[biome] || 1);
+          CLUTTER_RANGE_MUL[biome] || 1, emis);
       }
     }
 
@@ -662,8 +755,8 @@ export class Scatter {
     const rock = BIOME_INFO[biome].rock;
     const ground = BIOME_INFO[biome].ground;
     const snowy = biome === BIOME.SNOW;
-    const ashy = biome === BIOME.ASH;
-    const boggy = biome === BIOME.MARSH;
+    const ashy = isAsh(biome);
+    const boggy = isBog(biome);
     let sx = 1, sy = 1, sz = 1, collide = 0, tol = 1;
     let cr = 0.4, cg = 0.4, cb = 0.4;
     let c2r = 0.5, c2g = 0.5, c2b = 0.5;
@@ -724,11 +817,15 @@ export class Scatter {
         // Dark charred ground below, fresh pale material on the crest. That
         // ramp is the whole reason the shape is here: it turns one directional
         // light into a full tonal range across ground that otherwise has none.
+        // The base is fixed rather than taken from the ground it stands on,
+        // because on a pale drift crest `ground` is already the crest colour
+        // and the ramp collapsed to nothing exactly where the dunes are.
         const t = 0.85 + s1 * 0.3;
-        cr = ground[0] * 0.62 * t; cg = ground[1] * 0.62 * t; cb = ground[2] * 0.62 * t;
-        c2r = ashy ? 0.50 : lerp(ground[0], 1, 0.35);
-        c2g = ashy ? 0.47 : lerp(ground[1], 1, 0.35);
-        c2b = ashy ? 0.45 : lerp(ground[2], 1, 0.35);
+        const base = ashy ? DUNE_SHADOW : ground;
+        cr = base[0] * 0.62 * t; cg = base[1] * 0.62 * t; cb = base[2] * 0.62 * t;
+        c2r = ashy ? ASH_FALL[0] : lerp(ground[0], 1, 0.35);
+        c2g = ashy ? ASH_FALL[1] : lerp(ground[1], 1, 0.35);
+        c2b = ashy ? ASH_FALL[2] : lerp(ground[2], 1, 0.35);
         break;
       }
       case FEATURE.MIDDEN: {
@@ -1064,6 +1161,19 @@ export class Scatter {
 //  Grass — a rolling patch around the player
 // ---------------------------------------------------------------------------
 
+/**
+ * How thickly the rolling grass patch fills each surface.
+ *
+ * Worth more than its triangle count suggests, because the patch only reaches
+ * 46 m and that is the bottom of the frame — the near ground, which is the one
+ * part of a plain the player sees at anything but a grazing angle. The meadow
+ * gets most of its close-range texture from here.
+ *
+ * The Cinderwaste cannot have grass, but it can have what a burnt plain
+ * actually has standing in it: charred stalks and stems, bleached and dusted
+ * with fall. Those go on the burnt pans, which is where a fire leaves them,
+ * and not on the drift, which buries what it lands on.
+ */
 const GRASS_DENSITY = {
   [BIOME.MEADOW]: 1.0,
   [BIOME.FOREST]: 0.55,
@@ -1072,8 +1182,12 @@ const GRASS_DENSITY = {
   [BIOME.BEACH]: 0.12,
   [BIOME.CRAG]: 0.08,
   [BIOME.SNOW]: 0.05,
-  [BIOME.ASH]: 0.10,
+  [BIOME.ASH]: 0.12,
   [BIOME.OCEAN]: 0,
+  [BIOME.CINDER]: 0.26,
+  [BIOME.DRIFT]: 0.04,
+  [BIOME.PEAT]: 0.28,
+  [BIOME.SEDGE]: 0.85,
 };
 
 export class GrassField {
@@ -1159,12 +1273,23 @@ export class GrassField {
           // Tint follows the biome ground colour, shifted greener and varied.
           // The per-blade spread is wide on purpose: a patch of one flat green
           // is the single most synthetic thing a meadow can do.
-          const dry = biome === BIOME.ASH || biome === BIOME.SNOW || biome === BIOME.CRAG;
+          const dry = biome === BIOME.SNOW || biome === BIOME.CRAG;
           // Sparse blades sit in the dry gaps and go straw-coloured, which is
           // what ties the grass to the bleached patches in the terrain shader.
           const parch = (1 - clump) * 0.55 + r3 * 0.25;
           let cr, cg, cb;
-          if (dry) {
+          if (isAsh(biome)) {
+            // Not grass: the charred stems left standing after the fire went
+            // through, ash-dusted. Pale against ground that is nearly black,
+            // which is the whole reason they are worth drawing — a dark stalk
+            // on dark ground is a triangle spent on nothing.
+            cr = 0.30 + r3 * 0.20; cg = 0.27 + r3 * 0.17; cb = 0.24 + r3 * 0.14;
+          } else if (biome === BIOME.SEDGE) {
+            // Standing dead cane, which is what a tussock crown is made of and
+            // is the pale half of the mire's mosaic at eye height the way the
+            // crown itself is at fifty metres.
+            cr = 0.46 + r3 * 0.18; cg = 0.42 + r2 * 0.15; cb = 0.21 + r1 * 0.10;
+          } else if (dry) {
             cr = 0.32 + r3 * 0.14; cg = 0.28 + r3 * 0.11; cb = 0.20 + r3 * 0.08;
           } else {
             cr = lerp(0.28, 0.19, moist) + r3 * 0.16 + parch * 0.30;

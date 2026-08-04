@@ -26,8 +26,32 @@ export const CHUNKS = WORLD_SIZE / CHUNK_SIZE;    // 20
 export const BIOME = {
   OCEAN: 0, BEACH: 1, MEADOW: 2, FOREST: 3, MARSH: 4,
   HIGHLAND: 5, CRAG: 6, SNOW: 7, ASH: 8,
+  // Surface materials, not places. See the note under BIOME_INFO.
+  CINDER: 9, DRIFT: 10, PEAT: 11, SEDGE: 12,
 };
 
+/**
+ * Ground and stone colour per biome. The terrain builder reads `ground` for the
+ * per-vertex tint and the scatter reads both, so this table is the whole
+ * palette of the island.
+ *
+ * The last four ids are not regions. They are the surfaces the Cinderwaste and
+ * the mire are made of, and they exist because those two places were each
+ * being painted in exactly one colour.
+ *
+ * That is a real problem and not a cosmetic one. Both biomes are dark by
+ * design — ash sits at a sixth of the meadow's reflectance — so the light has
+ * far less to work with there to begin with; if on top of that every square
+ * metre carries the same albedo, the only thing separating one part of the
+ * frame from another is the shading of the surface normal, and on a plain that
+ * is almost nothing. Neither place is actually like that. Ash country is pale
+ * drift where the wind has dropped it, black burnt ground where the wind has
+ * taken it away, and the ordinary grey of settled fall in between. A mire is
+ * black peat in the creases, pale dead sedge on the mound tops, and wet ground
+ * between. Splitting each into three material ids gives the terrain tint a
+ * five-to-one value range to work in, which is what those two landscapes have
+ * in life and is worth more to them than any amount of extra geometry.
+ */
 export const BIOME_INFO = {
   [BIOME.OCEAN]: { name: '沿岸', ground: [0.42, 0.40, 0.32], rock: [0.34, 0.33, 0.31] },
   [BIOME.BEACH]: { name: '砂浜', ground: [0.74, 0.68, 0.52], rock: [0.52, 0.49, 0.44] },
@@ -38,6 +62,19 @@ export const BIOME_INFO = {
   [BIOME.CRAG]: { name: '岩場', ground: [0.36, 0.34, 0.30], rock: [0.44, 0.43, 0.42] },
   [BIOME.SNOW]: { name: '雪嶺', ground: [0.78, 0.82, 0.88], rock: [0.46, 0.48, 0.52] },
   [BIOME.ASH]: { name: '焦土', ground: [0.21, 0.18, 0.18], rock: [0.24, 0.21, 0.20] },
+  // Burnt ground: what is left when the wind has stripped the fall off it.
+  // Nearly black, faintly warm, because it is fired earth rather than soot.
+  [BIOME.CINDER]: { name: '焼け野', ground: [0.088, 0.074, 0.068], rock: [0.155, 0.128, 0.115] },
+  // Fresh drift. Wood ash really is this pale — it is the one bright material
+  // the Cinderwaste has, and withholding it is what made the place read grey.
+  [BIOME.DRIFT]: { name: '灰丘', ground: [0.55, 0.52, 0.49], rock: [0.32, 0.30, 0.28] },
+  // Saturated peat: black, and the shallows of the mire are made of it.
+  [BIOME.PEAT]: { name: '泥炭地', ground: [0.115, 0.105, 0.080], rock: [0.19, 0.19, 0.17] },
+  // Last year's cane, standing dead. A winter reedbed is genuinely one of the
+  // brightest surfaces in any landscape — pale straw-gold, not green — and it
+  // is what the mire has instead of the sand beach the shoreline rule used to
+  // draw around every pool.
+  [BIOME.SEDGE]: { name: '菅の原', ground: [0.62, 0.58, 0.36], rock: [0.32, 0.31, 0.27] },
 };
 
 // ---------------------------------------------------------------------------
@@ -100,7 +137,23 @@ const DUNE_SPACING = 38;
 const DUNE_WINDWARD = 0.74;
 const DUNE_HEIGHT = 5.0;
 
-const TUSSOCK_AMP = 2.6;
+// Tussock relief. Larger than it looks, and it has to be: the mire is the one
+// open region with no dry watercourses in it — the gully pass only cuts above
+// the water table, which is most of what gives the meadow its break lines —
+// and its landform is the shallowest on the island. Measured at the same
+// camera, the mire's ground was turning the surface normal a little over half
+// as much per metre as the meadow's, on a surface that in life is the most
+// broken ground in the world. All of that has to come from the mounds.
+const TUSSOCK_AMP = 3.0;
+const TUSSOCK_FINE = 2.2;
+
+// Where each plain's three surfaces divide. Chosen against the material fields
+// below to leave roughly a third of the ground in each class: enough of the
+// dark to keep both places bleak, enough of the pale to give the light a range
+// to work in, and enough of the middle that the two extremes read as the ends
+// of something rather than as two colours.
+const ASH_BURNT = -0.48, ASH_PALE = 0.10;
+const MIRE_BLACK = -0.30, MIRE_PALE = 0.20;
 
 /**
  * Authored regions. `cx/cz` place the region centre; `radius` controls how far
@@ -372,6 +425,44 @@ export class World {
   }
 
   /**
+   * Dune profile at a point: 0 on the pan floor, 1 on the crest, with the
+   * interdune mask already applied.
+   *
+   * Both the height field and the surface material read it, and they have to
+   * read the *same* one. Fresh ash lies where the wind dropped it, which is the
+   * dune it built; if the pale material were computed from its own copy of
+   * these numbers the two would part company on the first edit and the drift
+   * would end up lying beside the dunes instead of on them.
+   */
+  _duneProfile(wx, wz) {
+    const n = this.nDune;
+    const u = wx * this._windC + wz * this._windS;    // downwind
+    const v = -wx * this._windS + wz * this._windC;   // along the crest
+    // Interdune pans. The old bias sat so far positive that this never reached
+    // zero, so the plain was wall-to-wall dune and read as corrugation; but a
+    // gentle ramp is no better, because it scales every dune down instead of
+    // choosing between dune country and pan. An erg does choose: this is close
+    // to a threshold, with a band of a few dozen metres where the field dies
+    // out so the edge of it is not a line.
+    const drift = smoothstep(saturate(n.noise(u * 0.0032 + 12.7, v * 0.0026 - 5.1) * 5.0 + 1.0));
+    if (drift <= 0.001) return 0;
+    // Crests wander along their length instead of ruling straight lines.
+    const meander = n.noise(u * 0.0048, v * 0.0075) * 15;
+    const p = (u + meander) / DUNE_SPACING;
+    const t = p - Math.floor(p);
+    // The lee face is linear and that is the entire shape. A dune has a brink
+    // at the top of its slip face and a toe at the bottom, and those two break
+    // lines are what makes one legible from a kilometre away. Smoothstepping
+    // the lee rounded both off and buried the steepest ground in the middle of
+    // the face where nothing can read it — and it was steeper there than this
+    // is anywhere: smoothstep peaks at 1.5x the mean slope, so the old profile
+    // hit about 1 in 1.3 against 1 in 2 for the honest straight face.
+    return (t < DUNE_WINDWARD
+      ? smoothstep(t / DUNE_WINDWARD)
+      : 1 - (t - DUNE_WINDWARD) / (1 - DUNE_WINDWARD)) * drift;
+  }
+
+  /**
    * Wind-drifted ash dunes, for the Cinderwaste.
    *
    * Dunes are the one landform that is not symmetric: the windward side is a
@@ -383,19 +474,44 @@ export class World {
    */
   ashDunes(wx, wz, w) {
     if (w <= 0.01) return 0;
+    return this._duneProfile(wx, wz) * DUNE_HEIGHT * w;
+  }
+
+  /**
+   * Which material the ash plain is showing, -1 (scoured back to burnt
+   * hardpan) to +1 (fresh pale drift).
+   *
+   * The mechanism is sorting, and it is the same wind that built the dunes:
+   * material is dropped on the ramps and the crests and stripped from the pans
+   * between them, so the pale fall lies exactly where the dune is and the black
+   * burnt ground is everywhere it has been taken from. Reading the dune profile
+   * for it rather than an independent noise is the whole point — the albedo and
+   * the surface normal then agree about where the crest is, which is what turns
+   * a lit mound into a legible one.
+   *
+   * @returns {number} -1..1
+   */
+  ashSurface(wx, wz) {
     const n = this.nDune;
-    const u = wx * this._windC + wz * this._windS;    // downwind
-    const v = -wx * this._windS + wz * this._windC;   // along the crest
-    // Crests wander along their length instead of ruling straight lines.
-    const meander = n.noise(u * 0.0048, v * 0.0075) * 15;
-    // Interdune flats: an erg is not wall-to-wall dune.
-    const drift = saturate(n.noise(u * 0.0032 + 12.7, v * 0.0026 - 5.1) * 1.5 + 0.72);
-    const p = (u + meander) / DUNE_SPACING;
-    const t = p - Math.floor(p);
-    const prof = t < DUNE_WINDWARD
-      ? smoothstep(t / DUNE_WINDWARD)
-      : 1 - smoothstep((t - DUNE_WINDWARD) / (1 - DUNE_WINDWARD));
-    return prof * DUNE_HEIGHT * drift * w;
+    const d = this._duneProfile(wx, wz);
+    // Whole stretches of an erg are buried and whole stretches are stripped;
+    // without that the material would read as stripes painted across the
+    // ground. 34 m is the sheet and 14 m the ragged edge where it runs out.
+    const sheet = n.noise(wx / 34 + 5.3, wz / 34 - 9.1);
+    const edge = n.noise(wx / 14 - 2.7, wz / 14 + 6.4);
+    return clamp((d - 0.42) * 1.8 + sheet * 0.95 + edge * 0.30, -1, 1);
+  }
+
+  /**
+   * The mire's mound field, before it becomes either height or colour.
+   *
+   * Shared so that the tussock the player walks over and the pale dead cane
+   * growing on it are built from one number. Two fields would put the colour
+   * across the form instead of on it, which is exactly what makes procedural
+   * ground look printed rather than grown.
+   */
+  marshField(wx, wz) {
+    return this.nGround.fbm(wx / 26 + 13.7, wz / 26 - 4.2, 2, 2.3, 0.55);
   }
 
   /**
@@ -403,16 +519,57 @@ export class World {
    * with water lying in the creases between them, not a wet plane.
    *
    * @param {number} w blended weight of the marsh region, 0..1
-   * @param {number} h landform height so far, used to fade at the waterline
+   * @param {number} h landform height so far, used to fade above the water table
    */
   marshTussock(wx, wz, w, h) {
     if (w <= 0.01) return 0;
-    // Fade out at the waterline so the shore of every pool stays one readable
-    // edge instead of being shredded into a hundred islands.
-    const dry = 0.3 + 0.7 * saturate((h - WATER_LEVEL) / 3.0);
-    const t = this.nGround.fbm(wx / 26 + 13.7, wz / 26 - 4.2, 2, 2.3, 0.55);
-    // |t| makes mounds; the creases where it crosses zero dish out into pools.
-    return (Math.abs(t) - 0.36) * TUSSOCK_AMP * w * dry;
+    // This fade used to run the other way — full relief on the dry ground and
+    // almost none at the waterline — so that the shore of every pool stayed one
+    // clean edge. That is backwards for a marsh. The waterline is where a mire
+    // has its entire character: a hundred mound tops standing as islands with
+    // black water lying between them, and suppressing the relief there left the
+    // wet third of the region as a smooth wet plane, which is the one thing a
+    // swamp never is. The fade belongs at the top instead, where the ground
+    // climbs clear of the water table and becomes ordinary damp meadow.
+    const wet = 1 - smoothstep(saturate((h - WATER_LEVEL - 4.0) / 7.0));
+    if (wet <= 0.01) return 0;
+    const t = this.marshField(wx, wz);
+    // |t| makes mounds; the creases where it crosses zero dish out into
+    // channels. They are cut deeper than the mounds stand tall because the
+    // water lying in them carries the peat away, and it is that asymmetry —
+    // not the mounds — that puts standing water in the mire rather than merely
+    // wet ground.
+    const crown = Math.abs(t) - 0.34;
+    const mound = crown > 0 ? crown : crown * 1.7;
+    // A second scale at the grid's floor: a mire is islands inside islands, and
+    // one wavelength of mound on its own reads as corrugation. 12 m is a group
+    // of tussocks rather than one — a single tussock is a metre across, which
+    // the height field cannot hold and the clutter scatter carries instead.
+    const fine = Math.abs(this.nGround.noise(wx / 12 - 31.4, wz / 12 + 17.8)) - 0.32;
+    return (mound * TUSSOCK_AMP + fine * TUSSOCK_FINE) * w * wet;
+  }
+
+  /**
+   * The mire's surface material, -1 (black saturated peat, in the creases and
+   * the shallows) to +1 (pale dead sedge and cane on the tussock crowns).
+   *
+   * A marsh reads as a marsh because it is a mosaic and for no other reason —
+   * a wet plane of one green is a lawn. Built from marshField so the pale
+   * material sits on the mounds the light is already catching and the black
+   * sits in the creases the water lies in.
+   *
+   * @param {number} h baked height, which decides what can dry out at all
+   */
+  marshSurface(wx, wz, h) {
+    const t = Math.abs(this.marshField(wx, wz));
+    const fine = Math.abs(this.nGround.noise(wx / 12 - 31.4, wz / 12 + 17.8));
+    // How far the ground stands clear of the water table. Nothing sitting in it
+    // carries dead cane whatever the mound underneath is doing, and the mound
+    // tops that do stand clear are exactly where a marsh keeps its pale
+    // material — so this is the term that ties the colour to the water rather
+    // than merely to a noise field.
+    const drain = saturate((h - WATER_LEVEL - 0.4) / 3.0);
+    return clamp(t * 3.4 + fine * 1.1 + drain * 1.0 - 1.25, -1, 1);
   }
 
   /**
@@ -573,7 +730,6 @@ export class World {
         const nm = this.nMoist.fbm(wx * 0.0012, wz * 0.0012, 4) * 0.5 + 0.5;
         const riverBonus = saturate(1 - this.riverField(wx, wz) / 0.16) * 0.35;
         const m = saturate(regionMoist * 0.65 + nm * 0.35 + riverBonus);
-        this.moisture[i] = m;
 
         // Nearest authored region decides the base biome. The distance is
         // perturbed by low-frequency noise so borders interlock like real
@@ -591,13 +747,39 @@ export class World {
         let b = best ? best.biome : BIOME.MEADOW;
         if (bestW < -0.25) b = BIOME.MEADOW;               // the in-between land
         const slope = this._slopeFromGrid(ix, iz);
+        const boggy = b === BIOME.MARSH;
 
         if (h < WATER_LEVEL - 0.5) b = BIOME.OCEAN;
-        else if (h < WATER_LEVEL + 1.6) b = BIOME.BEACH;
+        // The generic shoreline rule puts sand around every pool, which in a
+        // peat swamp is a tropical beach in the wrong hemisphere. The mire keeps
+        // its own margin instead: black saturated mud at the water and bleached
+        // litter a pace above it, which the mosaic below sorts out by itself.
+        else if (h < WATER_LEVEL + 1.6) b = boggy ? BIOME.MARSH : BIOME.BEACH;
         else if (h > 118 + this.nDetail.noise(wx * 0.004, wz * 0.004) * 16) b = BIOME.SNOW;
         else if (slope > 0.62 && h > 24) b = BIOME.CRAG;
-        else if (b === BIOME.MARSH && h > 12) b = BIOME.MEADOW;
+        else if (boggy && h > 12) b = BIOME.MEADOW;
+
+        // Which of its three surfaces the ground is showing. Both plains are
+        // material mosaics rather than one colour — see BIOME_INFO — and the
+        // classification runs after the overrides above so that it covers
+        // exactly the ash and marsh footprint, ecotone included.
+        let mat = 0;
+        if (b === BIOME.ASH) {
+          mat = this.ashSurface(wx, wz);
+          b = mat > ASH_PALE ? BIOME.DRIFT : mat < ASH_BURNT ? BIOME.CINDER : BIOME.ASH;
+        } else if (b === BIOME.MARSH) {
+          mat = this.marshSurface(wx, wz, h);
+          b = mat > MIRE_PALE ? BIOME.SEDGE : mat < MIRE_BLACK ? BIOME.PEAT : BIOME.MARSH;
+        }
         this.biome[i] = b;
+
+        // Wetness carried at the scale the surface is actually built at. The
+        // mire's creases hold water and its crowns shed it; in the waste fresh
+        // drift is bone dry and the scoured pans keep what damp is left. This
+        // matters beyond the scatter because the terrain tint is modulated by
+        // moisture, so without it the only variation either place has below the
+        // 800 m swell of the noise field is none.
+        this.moisture[i] = saturate(m - mat * 0.22);
       }
       if (iz % step === 0) yield 0.56 + 0.18 * (iz / GRID);
     }

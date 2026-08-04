@@ -185,7 +185,40 @@ vec3 applyLighting(vec3 albedo, vec3 N, vec3 worldPos, float shadow, float ao, v
   // Every surface collects some of the band; a side-on one collects most.
   float band = 0.34 + 0.30 * (1.0 - abs(N.y));
   vec3 ambIrr = mix(vertical, uHorizonColor, band);
-  vec3 ambient = ambIrr * ao;
+
+  // The sky is an extended source, but it is not an isotropic one. A large
+  // share of its energy sits in the aureole around the key — circumsolar by
+  // day, circumlunar by night — and a surface still collects that share when
+  // the key itself is occluded.
+  //
+  // Modelling it is not a refinement, it is what makes shadow readable. Both
+  // terms above are *stationary* at N = up: the derivative of hemi and of band
+  // with respect to a small tilt of a level surface is zero, so on gently
+  // varying ground every hummock, rut and normal-map bump returns the identical
+  // ambient value. Under a lit key that costs nothing, because the direct term
+  // carries the shape. In shadow the ambient *is* the shape, and at night —
+  // where there is no lit atmosphere to fill in and ambient is nearly all the
+  // light there is — it is why shadowed ground reads as one flat wash no matter
+  // what the terrain under it is doing. A dot product against the key restores
+  // the first-order response to tilt that the hemisphere function cannot have.
+  //
+  // Referenced to a level normal, so it contributes exactly nothing to flat
+  // ground at any hour: this shapes the ambient, it does not lift it.
+  //
+  // The floor is what the anti-key half of the sky is still worth, and it has
+  // to be set by that and not by taste, because it is the only part of this
+  // term that can take light away. A floor of f says the aureole carries
+  // (1 - f) of all sky energy; at 0.55 that is 45%, which is far more than a
+  // clear night sky puts within a few degrees of the moon. 0.70 is the honest
+  // number and it is also the safe one: at night the ambient is nearly all the
+  // light there is, so the faces this bound applies to — steep ground turned
+  // more than about 80 degrees off the key, which is already the darkest thing
+  // in frame — are exactly the ones with no room left before they crush to
+  // black. Nothing is lost by raising it. The gently varying ground this term
+  // exists for sits far inside both bounds, where the response is linear and
+  // the clamp never engages at all.
+  float aureole = clamp(1.0 + 0.80 * (dot(N, uSunDir) - uSunDir.y), 0.70, 1.60);
+  vec3 ambient = ambIrr * aureole * ao;
 
   // Ambient specular. Without this, metal in shadow is just dark plastic — the
   // sky is the main light source for a polished surface most of the time. It

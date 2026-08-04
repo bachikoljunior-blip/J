@@ -1001,7 +1001,10 @@ export class Game {
 
     // Drifting ash in the wastes; pollen in the meadow.
     const biome = this.world.biomeAt(p.x, p.z);
-    if (biome === BIOME.ASH && Math.random() < dt * 22) {
+    // The waste is three surfaces now — burnt pan, settled fall, drift crest —
+    // and ash falls on all of them.
+    const inAsh = biome === BIOME.ASH || biome === BIOME.CINDER || biome === BIOME.DRIFT;
+    if (inAsh && Math.random() < dt * 22) {
       const a = Math.random() * TAU, r = Math.random() * 14;
       this.particles.spawn({
         x: p.x + Math.cos(a) * r, y: p.y + 1 + Math.random() * 6, z: p.z + Math.sin(a) * r,
@@ -1019,7 +1022,7 @@ export class Game {
         r: 1.0, g: 0.95, b: 0.6, alpha: 0.5,
         drag: 0.4, gravity: 0, soft: 0.9, blend: BLEND.ADDITIVE,
       });
-    } else if (this.isNight && Math.random() < dt * 5 && biome !== BIOME.ASH) {
+    } else if (this.isNight && Math.random() < dt * 5 && !inAsh) {
       const a = Math.random() * TAU, r = 2 + Math.random() * 12;
       this.particles.spawn({
         x: p.x + Math.cos(a) * r, y: p.y + 0.5 + Math.random() * 2, z: p.z + Math.sin(a) * r,
@@ -1343,9 +1346,9 @@ export class Game {
     const road = this.world.roadAt(actor.x, actor.z);
     const surface = road > 0.4 ? 'dirt'
       : b === BIOME.SNOW ? 'snow'
-        : b === BIOME.BEACH ? 'sand'
-          : b === BIOME.CRAG ? 'stone'
-            : b === BIOME.MARSH ? 'water' : 'grass';
+        : b === BIOME.BEACH || b === BIOME.DRIFT ? 'sand'
+          : b === BIOME.CRAG || b === BIOME.CINDER ? 'stone'
+            : b === BIOME.MARSH || b === BIOME.PEAT ? 'water' : 'grass';
     this.audio.playFootstep(surface, clamp(speed / 6, 0.4, 1.4));
     if (speed > 4) this.particles.dustStep(actor.x, actor.y, actor.z, clamp(speed / 8, 0.4, 1.2));
   }
@@ -1755,8 +1758,14 @@ export class Game {
             const f = (lim - Math.sqrt(d2)) / (lim * 0.14);
             sx *= f; sy *= f; sz *= f;
           }
+          // Embers are worth seeing across a burnt pan and worth nothing as a
+          // sub-pixel sparkle beyond it — a glowing dot smaller than a pixel is
+          // just noise on the horizon — so the glow is carried only while the
+          // crack holding it is still resolvable. Squared distance throughout:
+          // this is the hottest loop in the frame.
+          const emis = cl[i + 16] > 0 && d2 < 12100 ? cl[i + 16] * (1 - d2 / 12100) : 0;
           this.clutterBatches[t].push(x, y, z, sx, sy, sz, cl[i + 4],
-            cl[i + 8], cl[i + 9], cl[i + 10], 0, CLUTTER_SWAY[t], cl[i + 14], 1, 1,
+            cl[i + 8], cl[i + 9], cl[i + 10], emis, CLUTTER_SWAY[t], cl[i + 14], 1, 1,
             cl[i + 11], cl[i + 12], cl[i + 13]);
         }
       }

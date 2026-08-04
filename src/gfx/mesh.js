@@ -493,9 +493,9 @@ export function buildClutterDrift(rng) {
     const prof = Math.sin(Math.PI * Math.pow(t, 0.78));
     const h = (0.55 + rng() * 0.45) * prof + 0.02;
     const wA = 0.5 * (0.35 + 0.65 * prof) * (0.8 + rng() * 0.4);   // windward, long
-    const wB = 0.5 * (0.22 + 0.5 * prof) * (0.8 + rng() * 0.4);    // lee, steep
+    const wB = 0.5 * (0.13 + 0.30 * prof) * (0.8 + rng() * 0.4);   // lee, steep
     const zc = (rng() - 0.5) * 0.08;
-    ridge.push(m.useBlend(1).addVertex(t - 0.5, h, zc - wB * 0.3, 0, 1, 0));
+    ridge.push(m.useBlend(1).addVertex(t - 0.5, h, zc - wB * 0.55, 0, 1, 0));
     skirtA.push(m.useBlend(0).addVertex(t - 0.5, 0, zc + wA, 0, 1, 0));
     skirtB.push(m.useBlend(0).addVertex(t - 0.5, 0, zc - wB, 0, 1, 0));
   }
@@ -518,7 +518,12 @@ export function buildClutterDrift(rng) {
 export function buildClutterSlab(rng) {
   const m = new MeshData();
   const n = 5;
-  const tilt = (rng() - 0.5) * 0.5;
+  // Always decisively tilted, and to one side or the other rather than around
+  // zero. A plate that has been heaved has a raised edge and a buried one; the
+  // old range went through flat, and a flat plate lying on flat ground is a
+  // painted patch — same normal as everything under it, so it has no lit face,
+  // no shaded face and nothing for the light to say about it.
+  const tilt = (rng() < 0.5 ? -1 : 1) * (0.35 + rng() * 0.55);
   const top = groundRing(n, 0, 0, 0.5, 1, rng() * 6.283, rng, 0.28);
   let mid = 0;
   for (const p of top) { p[1] = 1 + p[0] * tilt; mid += p[1]; }
@@ -710,9 +715,13 @@ export function buildAshDune(rng) {
     const prof = Math.sin(Math.PI * Math.pow(t, 0.72));
     const h = (0.70 + rng() * 0.30) * prof + 0.01;
     const wA = 0.5 * (0.30 + 0.70 * prof) * (0.85 + rng() * 0.3);
-    const wB = 0.5 * (0.16 + 0.34 * prof) * (0.85 + rng() * 0.3);
+    // Lee face half what it was, and the crest line pushed most of the way out
+    // onto it. The terrain's own dunes now carry a straight slip face with a
+    // brink at the top of it, and a feature dune sitting in that field with a
+    // gently rounded back read as a different landform standing on it.
+    const wB = 0.5 * (0.09 + 0.19 * prof) * (0.85 + rng() * 0.3);
     const zc = (rng() - 0.5) * 0.10;
-    ridge.push(mound.useBlend(1).addVertex(t - 0.5, h, zc - wB * 0.35, 0, 1, 0));
+    ridge.push(mound.useBlend(1).addVertex(t - 0.5, h, zc - wB * 0.62, 0, 1, 0));
     skirtA.push(mound.useBlend(0).addVertex(t - 0.5, 0, zc + wA, 0, 1, 0));
     skirtB.push(mound.useBlend(0).addVertex(t - 0.5, 0, zc - wB, 0, 1, 0));
   }

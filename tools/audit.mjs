@@ -573,9 +573,9 @@ try {
   // measure that directly, which is the thing mean luminance cannot see and the
   // reason this gate used to score 100 on a frame made of boxes.
   for (const f of frames) {
-    G.ge(`${f.id} 表面ディテール`, round(f.detail), 0.12);
-    G.le(`${f.id} 平坦領域率`, round(f.flatRatio), 0.20);
-    G.ge(`${f.id} 局所コントラスト`, round(f.localContrast), 0.030);
+    G.ge(`${f.id} 表面ディテール`, round(f.detail), 0.25);
+    G.le(`${f.id} 平坦領域率`, round(f.flatRatio), 0.10);
+    G.ge(`${f.id} 局所コントラスト`, round(f.localContrast), 0.060);
     // 120, not 150: the Cinderwaste is deliberately near-monochrome ash and
     // the target must not fight the art direction. It still sits far above a
     // genuinely flat frame, which lands around 60.

@@ -786,12 +786,21 @@ export class Renderer {
     // scene fails a detail check for the crime of having a night sky, and would
     // reward putting noise in the atmosphere. The world is what has to hold up
     // to the test, so the test looks at the world.
-    const y0 = Math.max(1, Math.floor(h * 0.38));
+    //
+    // gl.readPixels returns rows bottom-up: buffer row 0 is the BOTTOM of the
+    // screen. This loop originally ran from 0.38h upward, which is the top 62%
+    // of the screen — precisely the region the paragraph above says to exclude,
+    // and the opposite of what it claimed to do. Every figure in the project's
+    // tuning history up to 2026-08-04 was therefore measured against sky and far
+    // field rather than ground, and the thresholds were re-derived when this was
+    // corrected. See docs/QUALITY.md.
+    const yTop = Math.max(2, Math.floor(h * 0.62));
+    const y0 = 1;
     // Sobel over the interior. The two thresholds are chosen against 8-bit
     // output: 1/255 is the smallest representable step, so "flat" means
     // genuinely quantised-identical, and the edge threshold sits well above
     // dither noise.
-    for (let y = y0; y < h - 1; y++) {
+    for (let y = y0; y < yTop; y++) {
       for (let x = 1; x < w - 1; x++) {
         const i = y * w + x;
         const gx = (lum[i - w + 1] + 2 * lum[i + 1] + lum[i + w + 1])
@@ -809,7 +818,7 @@ export class Renderer {
     // Local RMS contrast in 8x8 tiles: micro-shading variation, which survives
     // even where the frame has no strong edges.
     let tileSum = 0, tiles = 0;
-    for (let ty = y0; ty + 8 <= h; ty += 8) {
+    for (let ty = y0; ty + 8 <= yTop; ty += 8) {
       for (let tx = 0; tx + 8 <= w; tx += 8) {
         let s = 0, s2 = 0;
         for (let y = 0; y < 8; y++) {
