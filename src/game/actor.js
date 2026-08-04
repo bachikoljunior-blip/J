@@ -167,14 +167,32 @@ export class Actor {
 
   angleTo(o) { return Math.atan2(o.x - this.x, o.z - this.z); }
 
+  /**
+   * The facing the body is *drawn* at, which is what the player can see.
+   *
+   * The rig damps the actor's yaw under the continuity budget, so a body that
+   * has decided to turn takes up to a quarter of a second to finish doing it.
+   * Judging a backstab or a block on `this.yaw` means judging it on an intent
+   * the model has not expressed yet: an enemy that visibly still has its back
+   * turned would deny the backstab, and one that visibly faces away would block.
+   *
+   * Weapon hitboxes already work this way — combat.js builds them from the rig's
+   * own bones — so the facing tests were the odd ones out. What the player sees
+   * is what the rules use.
+   */
+  get drawnYaw() {
+    const y = this.rig && this.rig._yawS;
+    return y === null || y === undefined ? this.yaw : y;
+  }
+
   /** Is `o` in front of this actor, within `halfAngle`? */
   facing(o, halfAngle = 1.05) {
-    return Math.abs(angleDelta(this.yaw, this.angleTo(o))) < halfAngle;
+    return Math.abs(angleDelta(this.drawnYaw, this.angleTo(o))) < halfAngle;
   }
 
   /** Is this actor behind `o` (for backstabs)? */
   isBehind(o) {
-    return Math.abs(angleDelta(o.yaw, Math.atan2(this.x - o.x, this.z - o.z))) > 2.10;
+    return Math.abs(angleDelta(o.drawnYaw, Math.atan2(this.x - o.x, this.z - o.z))) > 2.10;
   }
 
   // -------------------------------------------------------------------------
@@ -250,7 +268,9 @@ export class Actor {
 
     const src = info.source;
     const fromAngle = src ? Math.atan2(src.x - this.x, src.z - this.z) : this.yaw + Math.PI;
-    const frontal = Math.abs(angleDelta(this.yaw, fromAngle)) < 1.25;
+    // Drawn, not intended: a shield the player can see pointing away must not
+    // block, and one pointing at the blow must. See drawnYaw.
+    const frontal = Math.abs(angleDelta(this.drawnYaw, fromAngle)) < 1.25;
 
     // --- parry -------------------------------------------------------------
     if (this.parryTimer > 0 && frontal && info.parryable !== false && src && !src.unparryable) {
