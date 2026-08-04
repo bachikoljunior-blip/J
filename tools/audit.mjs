@@ -8,7 +8,16 @@
 //  judgement call into a terminating condition.
 // ============================================================================
 
-import { chromium } from '/home/user/Simple-browser-cookie-clicker-game/node_modules/playwright-core/index.mjs';
+// Playwright lives in a sibling repository's node_modules on the development
+// machine, and is imported dynamically, late, rather than at module scope.
+//
+// A static import here is evaluated before any code in this file runs, so
+// AUDIT_DRY — whose whole purpose is to reach the report path in a second
+// without a browser — could not run anywhere that path does not exist. CI is
+// exactly that place, and it said so on the first run. Overridable, so a
+// machine with its own playwright can point at it.
+const PLAYWRIGHT_CORE = process.env.PLAYWRIGHT_CORE
+  || '/home/user/Simple-browser-cookie-clicker-game/node_modules/playwright-core/index.mjs';
 import { spawn } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -87,6 +96,7 @@ if (process.env.AUDIT_DRY) {
 
 
 try {
+  const { chromium } = await import(PLAYWRIGHT_CORE);
   browser = await chromium.launch({
     executablePath: process.env.CHROME_PATH || '/opt/pw-browsers/chromium',
     args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader',
