@@ -23,11 +23,20 @@
 import { Rig, HUMANOID, QUADRUPED, WINGED, trackContinuity, continuityReport, continuityFrame }
   from '../src/game/rig.js';
 
-// The limiter's own cap, plus room for the fact that the cost model bounds a
-// bone's swept angle rather than computing it exactly.
-const CAP = 0.27;
+// Expressed as an angular *velocity*, not as an angle per frame.
+//
+// A cut is a rotation that is fast in time. Per-frame is the wrong unit for it,
+// because the same criterion then means something different on every machine —
+// and worse, an engine built to satisfy a per-frame bound turns more slowly
+// when frames are long. This engine did exactly that: a 180 degree turn took
+// 0.25 s at 60 fps and 0.95 s at 20 fps, so the game played differently on a
+// weaker phone rather than merely looking rougher. The per-frame caps are now
+// backstops at RATE * MAX_DT and the rate is what governs.
+//
+// TOL is room for the fact that the limiter's cost model bounds a bone's swept
+// angle rather than computing it exactly.
+const CAP_RATE = 17;      // rad/s, the rig's own TURN_RATE
 const TOL = 1.12;
-const LIMIT = CAP * TOL;
 
 const PI = Math.PI;
 let failures = 0;
@@ -50,15 +59,17 @@ function scenario(name, template, dt, frames, drive) {
     rig.apply(dt, d.x || 0, d.y || 0, d.z || 0, d.yaw || 0);
   }
   const r = continuityReport(3);
-  const worst = r.maxSteady;
-  const ok = worst <= LIMIT;
+  const rate = r.maxSteady;              // already rad/s
+  const worst = r.maxSteadyAngle;        // the angle it took on one frame
+  const ok = rate <= CAP_RATE * TOL;
   if (!ok) failures++;
   const where = r.worst[0] ? `${r.worst[0].bone}@f${r.worst[0].frame}` : '-';
-  console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${name.padEnd(34)} ${worst.toFixed(4)} rad  ${where}`);
-  return worst;
+  console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${name.padEnd(34)} ${rate.toFixed(2)} rad/s ` +
+    `(${worst.toFixed(4)} rad @ ${(dt * 1000).toFixed(0)}ms)  ${where}`);
+  return rate;
 }
 
-console.log(`継続性の単体検査 — 上限 ${CAP} rad/frame (許容 ${LIMIT.toFixed(3)})`);
+console.log(`継続性の単体検査 — 上限 ${CAP_RATE} rad/s (許容 ${(CAP_RATE * TOL).toFixed(1)})`);
 
 // --- facing -----------------------------------------------------------------
 // dodge() assigns this.yaw outright, and AI turning is a damped step whose size
@@ -95,21 +106,40 @@ scenario('winged yaw snap 180deg', WINGED, 1 / 60, 60, (f) => ({ yaw: f < 30 ? 0
 // --- the debt has to be repaid ---------------------------------------------
 // A limiter that drops what it cannot afford is not a limiter, it is a bug that
 // leaves the model facing the wrong way. Check the facing actually arrives.
-console.log('追従の検査 — 制限した向きが最終的に一致すること');
-for (const [label, target, budget] of [['180deg', PI, 20], ['90deg', PI / 2, 12], ['45deg', PI / 4, 8]]) {
-  trackContinuity(false);
-  const rig = new Rig(HUMANOID, 1);
-  for (let f = 0; f < 30; f++) rig.apply(1 / 60, 0, 0, 0, 0);
-  let settled = -1;
-  for (let f = 0; f < 90; f++) {
-    rig.apply(1 / 60, 0, 0, 0, target);
-    if (settled < 0 && Math.abs((rig._yawS ?? target) - target) < 0.02) settled = f + 1;
+console.log('追従の検査 — 制限した向きが一致し、所要時間がフレームレートに依らないこと');
+// The time a turn takes must not depend on the frame rate, which is the whole
+// reason the caps were rewritten. Same turn, three frame rates, same seconds.
+for (const [label, target, budget] of [['180deg', PI, 0.40], ['90deg', PI / 2, 0.24], ['45deg', PI / 4, 0.14]]) {
+  const times = [];
+  for (const fps of [60, 30, 20]) {
+    trackContinuity(false);
+    const dt = 1 / fps;
+    const rig = new Rig(HUMANOID, 1);
+    for (let f = 0; f < 40; f++) rig.apply(dt, 0, 0, 0, 0);
+    let t = -1;
+    // Run past the settle point rather than breaking at it: the residual is
+    // checked below, and stopping the moment the error drops under 0.02 rad
+    // means the residual can only ever be 0.02.
+    for (let f = 0; f < 400; f++) {
+      rig.apply(dt, 0, 0, 0, target);
+      if (t < 0 && Math.abs((rig._yawS ?? target) - target) < 0.02) t = (f + 1) * dt;
+    }
+    times.push({ fps, t, err: Math.abs((rig._yawS ?? target) - target) });
   }
-  const err = Math.abs((rig._yawS ?? target) - target);
-  const ok = settled > 0 && settled <= budget && err < 1e-4;
+  const slowest = Math.max(...times.map((x) => x.t));
+  const fastest = Math.min(...times.map((x) => x.t));
+  // The spread has a floor that has nothing to do with the engine: a 20 fps
+  // frame is 50 ms, so a duration measured there is quantised to 50 ms, and the
+  // settle threshold costs another frame either side. Two slow frames is the
+  // tightest this measurement can resolve — asking for less would be asking the
+  // engine to beat the clock it is timed with.
+  const spreadFloor = 2 / Math.min(...times.map((x) => x.fps));
+  const ok = times.every((x) => x.t > 0 && x.t <= budget && x.err < 1e-4)
+    && slowest - fastest <= spreadFloor;
   if (!ok) failures++;
-  console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${label.padEnd(34)} ${settled} フレーム ` +
-    `(${(settled / 60).toFixed(3)}s, 上限 ${budget})  残差 ${err.toFixed(6)}`);
+  console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${label.padEnd(34)} ` +
+    times.map((x) => `${x.fps}fps ${x.t.toFixed(3)}s`).join('  ') +
+    `  幅 ${(slowest - fastest).toFixed(3)}s (量子化下限 ${spreadFloor.toFixed(3)}s, 所要上限 ${budget}s)`);
 }
 
 trackContinuity(false);

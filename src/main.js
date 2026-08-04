@@ -6,7 +6,7 @@ import { Game } from './game/game.js';
 import { UI } from './ui/ui.js';
 import { CLASSES } from './game/player.js';
 import { listSaves, loadGameData, deleteSave, formatPlaytime, loadSettings } from './core/save.js';
-import { clamp } from './core/math.js';
+import { clamp, MAX_DT } from './core/math.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -269,7 +269,7 @@ function frame(now) {
   let dt = (now - lastTime) / 1000;
   lastTime = now;
   // A long stall (tab switch, GC pause) must not teleport the world.
-  dt = clamp(dt, 0.0005, 0.05);
+  dt = clamp(dt, 0.0005, MAX_DT);
 
   try {
     game.update(dt);

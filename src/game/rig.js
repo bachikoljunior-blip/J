@@ -33,7 +33,7 @@
 //  a body wearing one.
 // ============================================================================
 
-import { clamp, saturate, damp } from '../core/math.js';
+import { clamp, saturate, damp, MAX_DT } from '../core/math.js';
 import { MATERIAL as SURFACE } from '../gfx/textures.js';
 import { CHAR_PART } from '../gfx/mesh.js';
 import { additiveIdle } from './anim.js';
@@ -44,8 +44,13 @@ const PI = Math.PI;
 // second, whichever binds first. The per-frame cap is what stops a pose change
 // from arriving as a jump-cut on a slow device; the per-second cap is what
 // keeps a fast attack fast on a quick one.
-const TURN_RATE = 17;    // rad/s
-const TURN_STEP = 0.27;  // rad/frame
+const TURN_RATE = 17;    // rad/s — the bound that actually governs
+// Backstops, not limits. Each is its rate over the longest frame the loop will
+// hand out, so it cannot bind while dt is clamped — it only catches a
+// regression in that clamp. Set any of them lower and the engine turns, plants
+// and steps more slowly on a slow device, which is a gameplay difference rather
+// than a visual one.
+const TURN_STEP = TURN_RATE * MAX_DT;   // rad/frame
 
 // How fast the ground solver takes hold of a foot, and lets go of one, in
 // weight per second. Asymmetric on purpose: a pose that lifts a foot has
@@ -65,11 +70,11 @@ const SOLE_LIFT = 0.02;
 // worst case (a leg let go of the ground by a roll, then handed back to the
 // solver a metre above it) comes in over a few frames instead of on one.
 const IK_SLEW = 1.6;     // m/s
-const IK_STEP = 0.020;   // m/frame
+const IK_STEP = IK_SLEW * MAX_DT;    // m/frame
 // The same argument for the contact weight, which scales how far the sole is
 // laid onto the slope: handing a foot back to the solver is a rotation too.
 const PLANT_SLEW = 7;      // 1/s
-const PLANT_STEP = 0.08;   // per frame
+const PLANT_STEP = PLANT_SLEW * MAX_DT;  // per frame
 
 // Look-at limits. Past LOOK_YAW the neck would invert, so the gaze is released
 // instead of twisted.
@@ -801,15 +806,22 @@ export function continuityFrame() {
  */
 export function continuityReport(limit = 12) {
   if (!CONTINUITY) return null;
-  const ev = CONTINUITY.events.slice().sort((a, b) => b.ang - a.ang);
+  // Ranked by rate, not by per-frame angle. A 0.8 rad step on a 50 ms frame and
+  // a 0.27 rad step on a 17 ms frame are the same rotation happening at the
+  // same speed; ranking by the raw angle would put the slow machine's ordinary
+  // frames above the fast machine's real defects.
+  const rateOf = (e) => (e.dt > 1e-6 ? e.ang / e.dt : 0);
+  const ev = CONTINUITY.events.slice().sort((a, b) => rateOf(b) - rateOf(a));
   const steady = ev.filter((e) => !e.warped);
+  const decorate = (e) => ({ ...e, rate: Math.round(rateOf(e) * 100) / 100 });
   return {
     frames: CONTINUITY.frame,
     rigs: CONTINUITY.rigs,
-    maxAny: ev.length ? ev[0].ang : 0,
-    maxSteady: steady.length ? steady[0].ang : 0,
-    worst: steady.slice(0, limit),
-    worstWarped: ev.filter((e) => e.warped).slice(0, 4),
+    maxAny: ev.length ? rateOf(ev[0]) : 0,
+    maxSteady: steady.length ? rateOf(steady[0]) : 0,
+    maxSteadyAngle: steady.length ? steady[0].ang : 0,
+    worst: steady.slice(0, limit).map(decorate),
+    worstWarped: ev.filter((e) => e.warped).slice(0, 4).map(decorate),
   };
 }
 
@@ -1012,8 +1024,9 @@ export class Rig {
     prev.set(wr);
     // Only frames worth explaining are kept, and the list is trimmed rather
     // than grown without bound — a long session must not turn the diagnostic
-    // into the leak it is there to find.
-    if (worst > 0.12) {
+    // into the leak it is there to find. The threshold is a rate so that a slow
+    // machine does not flood the list with ordinary frames.
+    if (dt > 1e-6 && worst / dt > 7) {
       const ev = CONTINUITY.events;
       ev.push({
         frame: CONTINUITY.frame,
@@ -1028,7 +1041,7 @@ export class Rig {
         ik: this.footIK ? Math.round(this.ikWeight * 100) / 100 : null,
       });
       if (ev.length > 400) {
-        ev.sort((a, b) => b.ang - a.ang);
+        ev.sort((a, b) => (b.ang / b.dt) - (a.ang / a.dt));
         ev.length = 200;
       }
     }

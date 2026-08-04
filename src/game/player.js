@@ -8,7 +8,7 @@
 // ============================================================================
 
 import {
-  clamp, lerp, saturate, damp, dampAngle, angleDelta, TAU, v3distXZ,
+  clamp, lerp, saturate, damp, dampAngle, angleDelta, TAU, v3distXZ, MAX_DT,
 } from '../core/math.js';
 import { Actor, STATE, FACTION, defaultPalette } from './actor.js';
 import { MAT } from './rig.js';
@@ -955,7 +955,7 @@ const CAM_BOOM_IN = 7.0;        // m/s, racing an obstruction about to occlude
 const CAM_BOOM_OUT = 2.2;       // m/s, nothing to race, so ease back out
 const CAM_MAX_LIFT = 1.5;       // m, ground roughness only — never a wall
 const CAM_AIM_RATE = 12;        // 1/s, how quickly the aim follows the framing
-const CAM_AIM_STEP = 0.20;      // m/frame bound on the aim sliding off the focus
+const CAM_AIM_SLEW = 12;        // m/s bound on the aim sliding off the focus
 // What the camera may swing around the player under its own steam. Player look
 // input is deliberately outside this: that is the player's own hand, and
 // limiting it would read as the controller sticking. This bounds the game
@@ -967,7 +967,7 @@ const CAM_AIM_STEP = 0.20;      // m/frame bound on the aim sliding off the focu
 // fix for that is to leave room in the budget, not to raise the number the
 // budget is checked against.
 const CAM_SWING_RATE = 4.8;     // rad/s — a 90 deg lock-on lands in 0.33 s
-const CAM_SWING_STEP = 0.08;    // rad/frame, the same bound on a long frame
+const CAM_SWING_STEP = CAM_SWING_RATE * MAX_DT;   // backstop only; see MAX_DT
 
 export class PlayerCamera {
   constructor(player) {
@@ -1146,7 +1146,8 @@ export class PlayerCamera {
       // A rate is not a bound: a long frame, or a switch to a target on the
       // other side, still lands a cut. Cap the step as well as damp it.
       const m = Math.hypot(sx, sy2, sz2);
-      if (m > CAM_AIM_STEP) { const f2 = CAM_AIM_STEP / m; sx *= f2; sy2 *= f2; sz2 *= f2; }
+      const aimCap = CAM_AIM_SLEW * dt;
+      if (m > aimCap) { const f2 = aimCap / m; sx *= f2; sy2 *= f2; sz2 *= f2; }
       a.x += sx; a.y += sy2; a.z += sz2;
     }
     this.look.x = focusX + a.x;
@@ -1158,6 +1159,19 @@ export class PlayerCamera {
     this.focusZ = focusZ;
     this.seeded = true;
     this._track(dt);
+  }
+
+  /**
+   * Start the continuity record over.
+   *
+   * Probes call this so that what they measure is what they drove. Reading the
+   * running total during a probe that holds the player still measures a
+   * stationary camera and reports 0.0000 — which is a true number about
+   * nothing, and the third time in this project that a measurement has been
+   * taken over a window where the thing being measured could not happen.
+   */
+  resetTracking() {
+    this._trk = null;
   }
 
   /**
@@ -1185,9 +1199,13 @@ export class PlayerCamera {
       // is a different thing from a cut by accident.
       const warped = v3distXZ({ x: this.focusX, z: this.focusZ }, prev.focus) > 3;
       if (!warped) {
-        if (ang > this.worstView) { this.worstView = ang; this.worstViewAt = this.trackFrames; }
-        const d = Math.abs(orbit - prev.orbit);
-        if (d > this.worstDolly) { this.worstDolly = d; this.worstDollyAt = this.trackFrames; }
+        // Rates, for the same reason the rig reports rates: per-frame is a unit
+        // that means something different on every machine, and the audit runs
+        // on a software rasteriser at a fraction of the target frame rate.
+        const vr = ang / dt;
+        if (vr > this.worstView) { this.worstView = vr; this.worstViewAt = this.trackFrames; }
+        const dr = Math.abs(orbit - prev.orbit) / dt;
+        if (dr > this.worstDolly) { this.worstDolly = dr; this.worstDollyAt = this.trackFrames; }
       }
       this.trackFrames++;
     } else {

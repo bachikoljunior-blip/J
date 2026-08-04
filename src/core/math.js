@@ -4,6 +4,21 @@
 //  matching what WebGL's uniformMatrix4fv expects with transpose=false.
 // ============================================================================
 
+/**
+ * The longest frame the game will ever simulate, in seconds.
+ *
+ * main.js clamps dt to this, so a hitch becomes slow motion rather than a body
+ * tunnelling through a wall. Every per-frame step cap in the engine is derived
+ * from it: a cap of RATE * MAX_DT never binds inside the normal range of frame
+ * times, which is what keeps the cap a backstop instead of the operative limit.
+ *
+ * Caps set below that — the value this file used to carry implicitly, one per
+ * call site — made the engine frame-rate dependent in the direction that hurts
+ * most: a 180 degree turn took 0.25 s at 60 fps and 0.95 s at 20 fps, so the
+ * game played differently on a weaker phone rather than merely looking rougher.
+ */
+export const MAX_DT = 0.05;
+
 export const TAU = Math.PI * 2;
 export const DEG = Math.PI / 180;
 

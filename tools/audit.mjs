@@ -421,13 +421,6 @@ try {
     out.maxPoseJump = report ? report.maxSteady : maxJump;
     out.continuity = report;
 
-    // The camera, from the live game rather than from the stubs the unit check
-    // drives. Same reasoning as the rig: a stub world is not the terrain
-    // generator, and the number that matters is the worst frame of the session.
-    const cam = p.camera || {};
-    out.camView = cam.worstView || 0;
-    out.camDolly = cam.worstDolly || 0;
-    out.camFrames = cam.trackFrames || 0;
 
     // Hitstop and camera impulse: both must be observable, not declared.
     //
@@ -456,6 +449,78 @@ try {
     g._removeActor(e2);
     out.hitstop = sawHitstop;
     out.cameraImpulse = sawShake;
+    return out;
+  });
+
+  // -------------------------------------------------------------------------
+  //  Camera continuity, from the live game
+  //
+  //  tools/unit-camera.mjs drives PlayerCamera with stubs, which is fast but is
+  //  not the terrain generator and not a player who rolls, sprints or dies.
+  //
+  //  This has to be its own probe rather than a reading taken during another
+  //  one. The first version read the running total inside the motion probe,
+  //  where the player stands still on a slope, and duly reported 0.0000 — a
+  //  true number about a stationary camera. So: reset the record, make the
+  //  camera do the things that used to break it, then read.
+  // -------------------------------------------------------------------------
+  const camera = await page.evaluate(async () => {
+    const g = window.__g;
+    const p = g.player;
+    const frames = (n) => new Promise((r) => {
+      let i = 0;
+      const tick = () => (++i >= n ? r() : requestAnimationFrame(tick));
+      requestAnimationFrame(tick);
+    });
+
+    p.revive();
+    p.invuln = 999;
+    p.lockTarget = null;
+    await frames(20);
+    p.camera.resetTracking();
+
+    // 1. Run a circuit over whatever terrain is here, so the boom has to ride
+    //    the ground and pull in past anything in the way. Stepped rather than
+    //    teleported: 0.08 m a frame is movement, and the tracker discards
+    //    warps precisely so that a teleport cannot be mistaken for one.
+    for (let i = 0; i < 200; i++) {
+      const a = i * 0.05;
+      p.x += Math.sin(a) * 0.08;
+      p.z += Math.cos(a) * 0.08;
+      await frames(1);
+    }
+
+    // 2. Acquire a lock, hold it, switch to a target on the other side, then
+    //    drop it. The switch is what used to swing the view 0.76 rad in one
+    //    frame, and it is the case a player hits constantly in a crowd.
+    const e1 = g.spawnEnemy('bandit', p.x + 7, p.z + 2, { level: 1 });
+    const e2 = g.spawnEnemy('bandit', p.x - 6, p.z - 4, { level: 1 });
+    p.lockTarget = e1;
+    await frames(50);
+    p.lockTarget = e2;
+    await frames(50);
+    p.lockTarget = e1;
+    await frames(50);
+    p.lockTarget = null;
+    await frames(40);
+
+    // 3. Sprint, which swings the camera behind the player on its own.
+    p.isSprinting = true;
+    for (let i = 0; i < 90; i++) {
+      p.x += 0.09; p.z += 0.04;
+      await frames(1);
+    }
+    p.isSprinting = false;
+
+    const out = {
+      view: p.camera.worstView || 0,
+      dolly: p.camera.worstDolly || 0,
+      frames: p.camera.trackFrames || 0,
+      viewAt: p.camera.worstViewAt,
+      dollyAt: p.camera.worstDollyAt,
+    };
+    for (const e of [e1, e2]) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
+    p.lockTarget = null;
     return out;
   });
 
@@ -522,14 +587,14 @@ try {
   console.log(`  motion: footErr=${motion.footError.toFixed(3)} jump=${motion.maxPoseJump.toFixed(3)} ` +
     `hurtDirs=${motion.hurtDirections} hits=${motion.hitsLanded} ` +
     `hitstop=${motion.hitstop} shake=${motion.cameraImpulse}`);
-  console.log(`  camera: ${motion.camFrames}f  視線 ${motion.camView.toFixed(4)} rad/frame  ` +
-    `ドリー ${motion.camDolly.toFixed(4)} m/frame`);
+  console.log(`  camera: ${camera.frames}f  視線 ${camera.view.toFixed(3)} rad/s @f${camera.viewAt}  ` +
+    `ドリー ${camera.dolly.toFixed(3)} m/s @f${camera.dollyAt}`);
   if (motion.continuity) {
     const c = motion.continuity;
     console.log(`  continuity: ${c.frames}f ${c.rigs}rigs  steady=${c.maxSteady.toFixed(3)} ` +
       `any=${c.maxAny.toFixed(3)}  window=${motion.windowPoseJump.toFixed(3)}`);
     for (const e of c.worst.slice(0, 5)) {
-      console.log(`    f${e.frame} ${e.bone} ${e.ang.toFixed(3)} rad  host=${e.host} ` +
+      console.log(`    f${e.frame} ${e.bone} ${e.rate.toFixed(2)} rad/s (${e.ang.toFixed(3)} rad)  host=${e.host} ` +
         `state=${e.state} dt=${e.dt} blend=${e.blend} ik=${e.ik}`);
     }
   } else if (motion.windowJumpAt) {
@@ -864,12 +929,15 @@ try {
   K.ge('方向別の被弾リアクション', motion.hurtDirections, 4);
   K.ge('怯みの段階', motion.flinchTiers, 3);
   K.ge('死亡の変化', motion.deathVariants, 3);
-  K.le('遷移の最大回転 (rad/frame)', round(motion.maxPoseJump), 0.35);
+  K.le('遷移の最大回転 (rad/s)', round(motion.maxPoseJump), 19);
   // The camera is the same guarantee with the whole screen behind it. Before
   // this was measured, walking beside a wall threw the view 19.8 m and 1.55 rad
   // in one frame, and nothing in thirteen axes noticed.
-  K.le('カメラ視線の最大回転 (rad/frame)', round(motion.camView), 0.10);
-  K.le('カメラのドリー段差 (m/frame)', round(motion.camDolly), 0.12);
+  K.le('カメラ視線の最大回転 (rad/s)', round(camera.view), 6.0);
+  K.le('カメラのドリー速度 (m/s)', round(camera.dolly), 7.2);
+  // A probe that drove nothing would report a perfect zero, so require that it
+  // ran. Every measurement here should be falsifiable by its own absence.
+  K.ge('カメラ計測フレーム数', camera.frames, 300);
   K.yes('ヒットストップ', motion.hitstop);
   K.yes('カメラの衝撃', motion.cameraImpulse);
 
