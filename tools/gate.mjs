@@ -109,6 +109,10 @@ const runAudit = () => new Promise((resolve) => {
 const UNIT_CHECKS = [
   ['継続性', 'tools/unit-continuity.mjs'],
   ['カメラ', 'tools/unit-camera.mjs'],
+  // Not a unit check of the game — a check of the measurement. It reads the
+  // criterion snapshots the audit leaves in docs/audit-runs.json and reports any
+  // criterion that changed its verdict without the code changing.
+  ['計測の安定性', 'tools/stability.mjs'],
 ];
 
 const runUnits = async () => {
@@ -154,6 +158,24 @@ const failuresOf = (out) => {
  */
 const signatureOf = (failures) => failures.slice().sort().join('|');
 
+/**
+ * The same fingerprint with the numbers stripped out.
+ *
+ * Stall detection compares full signatures, which fails in the direction that
+ * hides the problem: a criterion that measures the machine rather than the game
+ * reports a different number every run, so every attempt looks different and the
+ * loop reads noise as progress. Two audits of one commit have already reported
+ * 229,045 and 409,347 triangles.
+ *
+ * Comparing the *set of unmet criteria* instead catches that. The same targets
+ * unmet twice running is a stall whatever the digits did, and `node
+ * tools/stability.mjs` will name which criteria are the noisy ones.
+ */
+const labelsOf = (failures) => failures
+  .map((l) => l.replace(/:.*$/, '').trim())
+  .sort()
+  .join('|');
+
 /** Append one line per attempt as it finishes, so a killed run still tells you why. */
 const journal = (line) => {
   try {
@@ -170,6 +192,7 @@ if (!ON_FAIL && MAX_ATTEMPTS > REQUIRED_STREAK) {
 const history = [];
 let streak = 0;
 let lastSignature = null;
+let lastLabels = null;
 let stalled = 0;
 let stalledOut = false;
 
@@ -192,6 +215,7 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
   console.log(`\n── 試行 ${attempt}: ${pass ? 'PASS' : 'FAIL'} (${score ?? '?'}/100), ` +
     `連続合格 ${streak}/${REQUIRED_STREAK}`);
   const sig = signatureOf(failures);
+  const labels = labelsOf(failures);
   journal(`- 試行 ${attempt} — ${pass ? 'PASS' : 'FAIL'} ${score ?? '?'}/100, `
     + `未達 ${failures.length} 件`
     + `${sig === lastSignature ? '  ← 前回と同一' : ''}`);
@@ -199,8 +223,14 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
   // Stall detection. An attempt that reproduces the previous one exactly means
   // nothing moved, and continuing costs another full measurement to learn the
   // same thing again.
-  if (!pass && sig === lastSignature) {
+  // Compare on the criteria, not the digits: see labelsOf().
+  if (!pass && (sig === lastSignature || labels === lastLabels)) {
     stalled++;
+    if (sig !== lastSignature) {
+      console.log('\n未達の項目は前回と同じで、数値だけが動いている。'
+        + 'その数値は計測のぶれであってコードの変化ではない可能性が高い。');
+      console.log('  node tools/stability.mjs で、どの項目が機械の速度を測っているか確認すること。');
+    }
     if (!ON_FAIL) {
       console.log('\n同じ未達が2回続いた。--on-fail が無いので、'
         + 'この先は同じ計測を繰り返すだけになる。ここで止める。');
@@ -219,6 +249,7 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     stalled = 0;
   }
   lastSignature = sig;
+  lastLabels = labels;
 
   if (streak >= REQUIRED_STREAK) {
     if (!ON_PASS) break;

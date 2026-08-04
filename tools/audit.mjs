@@ -11,6 +11,7 @@
 import { chromium } from '/home/user/Simple-browser-cookie-clicker-game/node_modules/playwright-core/index.mjs';
 import { spawn } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 const PORT = process.env.PORT || 8155;
@@ -1074,6 +1075,37 @@ function writeReport(extra) {
     md += `\n`;
   }
   if (extra && extra.error) md += `\n監査が異常終了: \`${extra.error}\`\n`;
+
+  // Machine-readable snapshot of every criterion, for stability comparison.
+  //
+  // Two runs of the *same commit* reported 229,045 and 409,347 triangles, which
+  // means at least one criterion measures the machine rather than the game. A
+  // gate whose verdict flips with CPU load cannot be a termination condition,
+  // and the flip is invisible from inside a single run — you need two runs of
+  // one build side by side to see it. Markdown history cannot be diffed
+  // per-criterion, so the numbers go out as JSON too.
+  try {
+    let commit = 'unknown';
+    try {
+      commit = execSync('git rev-parse --short HEAD', { cwd: ROOT, encoding: 'utf8' }).trim();
+    } catch { /* not a checkout, or git missing — the snapshot is still useful */ }
+    const snapPath = `${ROOT}docs/audit-runs.json`;
+    const runs = existsSync(snapPath) ? JSON.parse(readFileSync(snapPath, 'utf8')) : [];
+    runs.unshift({
+      stamp,
+      commit,
+      total: totalScore,
+      weakest,
+      pass,
+      unmet,
+      items: AXES.flatMap((a) => a.items.map((it) => ({
+        axis: a.id, label: it.label, value: it.value, target: it.target, ok: it.ok,
+      }))),
+    });
+    writeFileSync(snapPath, JSON.stringify(runs.slice(0, 12), null, 1));
+  } catch (e) {
+    console.log(`  (計測スナップショットを書けなかった: ${e.message})`);
+  }
 
   // Append to history.
   const histPath = `${ROOT}docs/AUDIT.md`;
