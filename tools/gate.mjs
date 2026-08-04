@@ -106,7 +106,10 @@ const runAudit = () => new Promise((resolve) => {
  * runs, because the audit measures thirteen axes and this covers one of them.
  * The point is that the cheap signal arrives first.
  */
-const UNIT_CHECKS = [['継続性', 'tools/unit-continuity.mjs']];
+const UNIT_CHECKS = [
+  ['継続性', 'tools/unit-continuity.mjs'],
+  ['カメラ', 'tools/unit-camera.mjs'],
+];
 
 const runUnits = async () => {
   const failed = [];

@@ -941,6 +941,34 @@ export class Player extends Actor {
 //  Camera
 // ---------------------------------------------------------------------------
 
+// How far the camera may move and turn on its own in one frame.
+//
+// The rig has had a per-frame bound on every bone for a while, on the grounds
+// that a limb which snaps is visible. The camera is the same defect with the
+// whole screen behind it, and until these existed nothing measured it: a wall
+// beside the player threw the view 19.8 m and 88 degrees in a single frame, and
+// switching lock-on targets swung it 0.76 rad. tools/unit-camera.mjs drives
+// these cases directly, in about a second, with no browser.
+const CAM_SKIN = 0.42;          // clearance kept between the boom and terrain
+const CAM_MIN_BOOM = 1.25;      // m, closest the boom may be drawn in to
+const CAM_BOOM_IN = 7.0;        // m/s, racing an obstruction about to occlude
+const CAM_BOOM_OUT = 2.2;       // m/s, nothing to race, so ease back out
+const CAM_MAX_LIFT = 1.5;       // m, ground roughness only — never a wall
+const CAM_AIM_RATE = 12;        // 1/s, how quickly the aim follows the framing
+const CAM_AIM_STEP = 0.20;      // m/frame bound on the aim sliding off the focus
+// What the camera may swing around the player under its own steam. Player look
+// input is deliberately outside this: that is the player's own hand, and
+// limiting it would read as the controller sticking. This bounds the game
+// moving the camera — lock-on, and the sprint realign.
+//
+// These sit below the 0.10 rad/frame the view is held to rather than at it,
+// because the eye swinging and the aim sliding off the focus both turn the
+// view and their steps add. Set to the cap, the pair measured 0.1005 — and the
+// fix for that is to leave room in the budget, not to raise the number the
+// budget is checked against.
+const CAM_SWING_RATE = 4.8;     // rad/s — a 90 deg lock-on lands in 0.33 s
+const CAM_SWING_STEP = 0.08;    // rad/frame, the same bound on a long frame
+
 export class PlayerCamera {
   constructor(player) {
     this.player = player;
@@ -956,10 +984,30 @@ export class PlayerCamera {
     this.pos = { x: 0, y: 0, z: 0 };
     this.look = { x: 0, y: 0, z: 0 };
     this.autoAlign = 0;
+
+    // --- continuity state ----------------------------------------------------
+    // Everything below exists so that the frame the game changes its mind is
+    // not a frame the player sees a cut. Measured by tools/unit-camera.mjs.
+    /** How much of the framing belongs to the lock-on, blended not switched. */
+    this.lockBlend = 0;
+    /** Boom length actually in use, rate-limited toward what collision wants. */
+    this.boom = this.distance;
+    /** Damped lift out of the ground, bounded so a wall cannot launch it. */
+    this.groundLift = 0;
+    /** Aim point as an offset from the focus, so the eye's own motion is not
+     *  compensated for by pointing the camera somewhere else. */
+    this.aimOff = { x: 0, y: 0, z: 0 };
+    this.lastLock = null;
+    this.seeded = false;
   }
 
   update(dt, input, world, lockTarget) {
     const p = this.player;
+
+    // Blended, not switched. See the shoulder offset below.
+    this.lockBlend = this.seeded
+      ? damp(this.lockBlend, lockTarget ? 1 : 0, 8, dt)
+      : (lockTarget ? 1 : 0);
 
     if (lockTarget) {
       // Lock-on: frame both combatants, biasing toward the target.
@@ -967,10 +1015,10 @@ export class PlayerCamera {
       const dz = lockTarget.z - p.z;
       const dist = Math.hypot(dx, dz);
       const desiredYaw = Math.atan2(dx, dz);
-      this.yaw = dampAngle(this.yaw, desiredYaw, 9, dt);
+      this.yaw = this._swing(this.yaw, dampAngle(this.yaw, desiredYaw, 9, dt), dt);
       const heightDiff = (lockTarget.y + lockTarget.height * 0.6) - (p.y + 1.3);
       const desiredPitch = clamp(-0.10 + heightDiff / Math.max(dist, 3) * 0.5, -0.55, 0.35);
-      this.pitch = damp(this.pitch, desiredPitch, 6, dt);
+      this.pitch = this._swing(this.pitch, damp(this.pitch, desiredPitch, 6, dt), dt);
       this.targetDistance = clamp(4.8 + dist * 0.20, 4.8, 8.4);
     } else {
       this.yaw -= input.look.x;
@@ -979,7 +1027,7 @@ export class PlayerCamera {
 
       // Gently swing behind the player when sprinting and not steering.
       if (p.isSprinting && Math.abs(input.look.x) < 0.001) {
-        this.yaw = dampAngle(this.yaw, p.yaw, 1.6, dt);
+        this.yaw = this._swing(this.yaw, dampAngle(this.yaw, p.yaw, 1.6, dt), dt);
       }
     }
 
@@ -989,11 +1037,14 @@ export class PlayerCamera {
     this.distance = damp(this.distance, this.targetDistance, 7, dt);
 
     // Over-the-shoulder offset: without it the character stands squarely in
-    // front of everything the player is trying to look at.
-    const shoulder = lockTarget ? 0.22 : 0.52;
+    // front of everything the player is trying to look at. Blended on the
+    // lock-on rather than switched — the offset, the focus height and the aim
+    // point all move together over about a fifth of a second, so acquiring a
+    // target reframes instead of cutting.
+    const shoulder = lerp(0.52, 0.22, this.lockBlend);
     const rx2 = Math.cos(this.yaw), rz2 = -Math.sin(this.yaw);
     const focusX = p.x + rx2 * shoulder;
-    const focusY = p.y + this.height + (lockTarget ? 0.25 : 0);
+    const focusY = p.y + this.height + 0.25 * this.lockBlend;
     const focusZ = p.z + rz2 * shoulder;
 
     const cp = Math.cos(this.pitch);
@@ -1001,16 +1052,42 @@ export class PlayerCamera {
     let oz = -Math.cos(this.yaw) * cp;
     const oy = Math.sin(this.pitch);
 
-    let dist = this.distance;
-    // Pull in when the terrain would clip the camera.
-    for (let i = 1; i <= 8; i++) {
-      const t = (i / 8) * this.distance;
+    // --- how long the boom wants to be --------------------------------------
+    //
+    // Walk it out from the focus and interpolate the crossing instead of
+    // snapping to whichever sample happened to be under the ground. Eight
+    // discrete samples moved the boom in steps of an eighth of its length —
+    // 0.68 m arriving in one frame, which is a jump on its own even when
+    // nothing else is wrong. Sixteen samples plus the crossing makes the
+    // length a continuous function of where the player is standing.
+    let want = this.distance;
+    let prevGap = focusY - (world.heightAt(focusX, focusZ) + CAM_SKIN);
+    for (let i = 1; i <= 16; i++) {
+      const t = (i / 16) * this.distance;
       const sx = focusX + ox * t;
       const sy = focusY + oy * t;
       const sz = focusZ + oz * t;
-      const h = world.heightAt(sx, sz) + 0.42;
-      if (sy < h) { dist = Math.max(1.25, t - 0.35); break; }
+      const gap = sy - (world.heightAt(sx, sz) + CAM_SKIN);
+      if (gap < 0) {
+        const t0 = ((i - 1) / 16) * this.distance;
+        // Where along this segment the boom actually crossed the surface.
+        const hit = prevGap > 0 ? t0 + (t - t0) * (prevGap / (prevGap - gap)) : t0;
+        want = Math.max(CAM_MIN_BOOM, hit - 0.30);
+        break;
+      }
+      prevGap = gap;
     }
+
+    // --- and how fast it may get there --------------------------------------
+    //
+    // Asymmetric, because the two directions are different problems: coming in
+    // races an obstruction that is about to occlude the player, going out has
+    // nothing to race and a boom that springs back the instant a pillar clears
+    // is the most obvious cut a third-person camera makes.
+    if (!this.seeded) this.boom = want;
+    else if (want < this.boom) this.boom = Math.max(want, this.boom - CAM_BOOM_IN * dt);
+    else this.boom = Math.min(want, this.boom + CAM_BOOM_OUT * dt);
+    const dist = this.boom;
 
     this.shakeT -= dt;
     // Let the amplitude die with the timer. Without this a single heavy hit
@@ -1025,23 +1102,82 @@ export class PlayerCamera {
       shakeY = (Math.random() - 0.5) * k;
     }
 
-    this.pos.x = focusX + ox * dist + shakeX;
-    this.pos.y = Math.max(focusY + oy * dist + shakeY, world.heightAt(focusX + ox * dist, focusZ + oz * dist) + 0.3);
-    this.pos.z = focusZ + oz * dist;
+    const px = focusX + ox * dist;
+    const pz = focusZ + oz * dist;
+    const naturalY = focusY + oy * dist;
 
-    if (lockTarget) {
-      // Aim between the player and the target so both stay on screen.
-      this.look.x = lerp(focusX, lockTarget.x, 0.42);
-      this.look.y = lerp(focusY, lockTarget.y + lockTarget.height * 0.55, 0.42);
-      this.look.z = lerp(focusZ, lockTarget.z, 0.42);
-    } else {
-      this.look.x = focusX;
-      this.look.y = focusY;
-      this.look.z = focusZ;
+    // --- lift out of the ground ---------------------------------------------
+    //
+    // This used to be a bare max() against the terrain under the camera, which
+    // has a failure mode far worse than the roughness it was smoothing: stand
+    // near anything tall and the sample lands inside it, so the camera is
+    // clamped to the top. Walking beside a wall threw the view 19.8 m upward
+    // and 88 degrees over in one frame. The boom solve above is what keeps the
+    // camera out of geometry now; this is only for the last few centimetres of
+    // ground roughness, so it is bounded and damped rather than absolute.
+    const liftWant = Math.min(CAM_MAX_LIFT,
+      Math.max(0, world.heightAt(px, pz) + 0.30 - naturalY));
+    this.groundLift = this.seeded ? damp(this.groundLift, liftWant, 12, dt) : liftWant;
+
+    this.pos.x = px + shakeX;
+    this.pos.y = naturalY + this.groundLift + shakeY;
+    this.pos.z = pz;
+
+    // --- where it is pointed -------------------------------------------------
+    //
+    // The aim is damped toward what the framing asks for, not assigned. Every
+    // discontinuity the framing can produce arrives here — acquiring a lock,
+    // dropping one, and above all switching between two targets on opposite
+    // sides, which used to swing the view 0.76 rad in a single frame. Damping
+    // the point handles all three with one mechanism, and the angular cap below
+    // bounds whatever the damping alone does not.
+    const aimW = 0.42 * this.lockBlend;
+    const t = lockTarget || this.lastLock;
+    const wx = t ? (t.x - focusX) * aimW : 0;
+    const wy = t ? (t.y + t.height * 0.55 - focusY) * aimW : 0;
+    const wz = t ? (t.z - focusZ) * aimW : 0;
+    if (lockTarget) this.lastLock = lockTarget;
+    else if (this.lockBlend < 0.01) this.lastLock = null;
+
+    const a = this.aimOff;
+    if (!this.seeded) { a.x = wx; a.y = wy; a.z = wz; } else {
+      const k = 1 - Math.exp(-CAM_AIM_RATE * dt);
+      let sx = (wx - a.x) * k, sy2 = (wy - a.y) * k, sz2 = (wz - a.z) * k;
+      // A rate is not a bound: a long frame, or a switch to a target on the
+      // other side, still lands a cut. Cap the step as well as damp it.
+      const m = Math.hypot(sx, sy2, sz2);
+      if (m > CAM_AIM_STEP) { const f2 = CAM_AIM_STEP / m; sx *= f2; sy2 *= f2; sz2 *= f2; }
+      a.x += sx; a.y += sy2; a.z += sz2;
     }
+    this.look.x = focusX + a.x;
+    this.look.y = focusY + a.y;
+    this.look.z = focusZ + a.z;
+
     this.focusX = focusX;
     this.focusY = focusY;
     this.focusZ = focusZ;
+    this.seeded = true;
+  }
+
+  /**
+   * Bound one frame of camera rotation the game asked for.
+   *
+   * Damping toward a target is a rate, and a rate scales with how far away the
+   * target is: dampAngle at 9/s takes 0.44 rad in a single frame when the
+   * target is on the opposite side, which is what switching lock-on between two
+   * enemies does. That swung the eye 1.74 m around the player in one frame.
+   *
+   * The bound goes on the eye rather than on the view direction. Capping the
+   * direction instead would hold the number down by aiming the camera away from
+   * the player while the eye kept swinging, which is a worse picture than the
+   * one being prevented.
+   */
+  _swing(from, to, dt) {
+    let d = to - from;
+    if (d > Math.PI) d -= TAU; else if (d < -Math.PI) d += TAU;
+    const cap = Math.min(CAM_SWING_RATE * dt, CAM_SWING_STEP);
+    if (d > cap) d = cap; else if (d < -cap) d = -cap;
+    return from + d;
   }
 
   shake(amp, dur) {
