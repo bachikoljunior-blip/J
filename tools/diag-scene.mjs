@@ -40,6 +40,90 @@ await page.waitForFunction(() => document.getElementById('loading').classList.co
 await sleep(1500);
 await page.evaluate(() => { window.__g.applyQuality('medium'); window.__g.dynamicScale = 1; });
 
+// Bisect: optionally run the audit's earlier probes first. The audit reports
+// zero world-mask pixels on every scene; this file, running the same scenes
+// against the same build, reports 25,000 to 37,000. Something one of the
+// earlier probes leaves behind is the difference, and the cheapest way to find
+// out which is to add them one at a time.
+//
+//   node tools/diag-scene.mjs            # scenes only, the working case
+//   node tools/diag-scene.mjs --camera   # camera probe first
+//   node tools/diag-scene.mjs --motion   # motion probe first
+//   node tools/diag-scene.mjs --both
+const PRE = {
+  camera: process.argv.includes('--camera') || process.argv.includes('--both'),
+  motion: process.argv.includes('--motion') || process.argv.includes('--both'),
+};
+if (PRE.camera || PRE.motion) {
+  console.log(`前段プローブ: ${Object.entries(PRE).filter(([, v]) => v).map(([k]) => k).join(', ')}`);
+  await page.evaluate(async (pre) => {
+    const g = window.__g;
+    const p = g.player;
+    const frames = (n) => new Promise((r) => {
+      let i = 0;
+      const tick = () => (++i >= n ? r() : requestAnimationFrame(tick));
+      requestAnimationFrame(tick);
+    });
+    if (pre.motion) {
+      let sx = p.x, sz = p.z, best = 0;
+      for (let a = 0; a < 64; a++) {
+        const x = p.x + Math.cos(a) * (20 + a * 3), z = p.z + Math.sin(a) * (20 + a * 3);
+        const sl = g.world.slopeAt(x, z);
+        if (sl > best && sl < 0.55 && g.world.heightAt(x, z) > 1) { best = sl; sx = x; sz = z; }
+      }
+      p.teleport(sx, undefined, sz);
+      p.revive(); p.invuln = 99;
+      await frames(40);
+      for (const ang of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
+        const e = g.spawnEnemy('bandit', p.x + Math.sin(ang) * 3, p.z + Math.cos(ang) * 3, { level: 1 });
+        p.revive();
+        p.takeDamage({ damage: 5, poise: 1, source: e, ignoreInvuln: true });
+        if (e.spawnRef) e.spawnRef.actor = null;
+        g._removeActor(e);
+      }
+      p.revive();
+      for (let i = 0; i < 90; i++) {
+        if (i === 10) p._buffer('light');
+        if (i === 28) p._buffer('dodge');
+        if (i === 46) p._buffer('heavy');
+        await frames(1);
+      }
+      const e2 = g.spawnEnemy('bandit', p.x + 1.4, p.z, { level: 1 });
+      for (let i = 0; i < 200 && !e2.dead; i++) {
+        const yaw = Math.atan2(e2.x - p.x, e2.z - p.z);
+        p.yaw = yaw;
+        p.teleport(e2.x - Math.sin(yaw) * 1.5, undefined, e2.z - Math.cos(yaw) * 1.5);
+        if (i % 20 === 0) p._buffer('light');
+        await frames(1);
+      }
+      for (const e of g.enemies.slice()) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
+      p.setState('idle'); p.hp = p.maxHp; p.invuln = 0;
+      await frames(2);
+    }
+    if (pre.camera) {
+      p.revive(); p.invuln = 999; p.lockTarget = null;
+      await frames(20);
+      p.camera.resetTracking();
+      for (let i = 0; i < 200; i++) {
+        const a = i * 0.05;
+        p.x += Math.sin(a) * 0.08; p.z += Math.cos(a) * 0.08;
+        await frames(1);
+      }
+      const e1 = g.spawnEnemy('bandit', p.x + 7, p.z + 2, { level: 1 });
+      const e2 = g.spawnEnemy('bandit', p.x - 6, p.z - 4, { level: 1 });
+      for (const [tgt, n] of [[e1, 50], [e2, 50], [e1, 50], [null, 40]]) {
+        p.lockTarget = tgt;
+        await frames(n);
+      }
+      p.isSprinting = true;
+      for (let i = 0; i < 90; i++) { p.x += 0.09; p.z += 0.04; await frames(1); }
+      p.isSprinting = false;
+      for (const e of [e1, e2]) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
+      p.lockTarget = null;
+    }
+  }, PRE);
+}
+
 const SCENES = [
   { id: 'day-meadow', region: 'meadow', hour: 11.0, weather: 'clear', yaw: 0.6 },
   { id: 'peak', region: 'peak', hour: 9.0, weather: 'clear', yaw: 0.6 },
