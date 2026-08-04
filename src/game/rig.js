@@ -827,6 +827,10 @@ export class Rig {
     this.rootOffset = [0, 0, 0];                // animation-driven body offset
     this.rootRot = [0, 0, 0];                   // extra pitch/roll (rolls, death)
     this.blendRate = 16;
+    // The facing the body is *drawn* at, which trails the actor's own yaw by
+    // however much the continuity budget could not afford this frame.
+    this._yawS = null;
+    this._yawIn = 0;
 
     // --- the layers on top of the pose --------------------------------------
     this.clock = 0;
@@ -976,6 +980,7 @@ export class Rig {
     // clearTarget() advances the smoothed plant weight and is called from the
     // pose layer, which has no dt of its own.
     this._lastDt = dt;
+    this._yawIn = yaw;
     this._sense(dt, x, y, z, yaw);
     this._layers(dt, x, y, z);
     this._damp(dt);
@@ -1019,6 +1024,7 @@ export class Rig {
         host: this.hostTag || '?',
         warped: !!this.warped,
         blend: this.blendRate,
+        yawLag: Math.round((this._yawS === null ? 0 : this._yawIn - this._yawS) * 1e3) / 1e3,
         ik: this.footIK ? Math.round(this.ikWeight * 100) / 100 : null,
       });
       if (ev.length > 400) {
@@ -1215,6 +1221,25 @@ export class Rig {
       rootCost += Math.abs(d);
     }
 
+    // The actor's facing arrives from outside the rig, and _skin used to write
+    // it straight into the world transform. That made the one rotation which
+    // moves every bone at once the one rotation the budget never saw: a dodge
+    // assigns yaw outright, and an AI turning toward a target on a 50 ms frame
+    // can swing more than a radian. Both left the limiter reporting it had
+    // spent nothing while the whole body spun — a 180-degree reassignment moved
+    // a foot 2.71 rad in one frame, ten times the cap the limiter enforces on
+    // everything it can see. Charge it here, and draw the body at whatever
+    // facing the budget could actually pay for. The debt is never dropped, so
+    // the facing always arrives; it just takes 0.25 s to turn all the way round
+    // instead of zero.
+    let dYaw = 0;
+    if (this._yawS === null || this.warped) this._yawS = this._yawIn;
+    else {
+      dYaw = this._yawIn - this._yawS;
+      if (dYaw > PI) dYaw -= 2 * PI; else if (dYaw < -PI) dYaw += 2 * PI;
+      rootCost += Math.abs(dYaw);
+    }
+
     // The body offset is written straight through as well, and once the feet
     // are on the ground a step in body height *is* a step in leg angle: a
     // flinch that drops the hips 20 cm on its first frame swings the shin
@@ -1256,6 +1281,9 @@ export class Rig {
       rt[a] = v;
       rp[a] += ps[a] * f;
     }
+    let ys = this._yawS + dYaw * f;
+    if (ys > PI) ys -= 2 * PI; else if (ys < -PI) ys += 2 * PI;
+    this._yawS = ys;
   }
 
   /** Pose to world transforms. */
@@ -1270,7 +1298,8 @@ export class Rig {
     // the character happened to be facing. Facing first, body inside it — and
     // the facing is built here rather than borrowed, so the model's forward is
     // the direction the actor is actually moving.
-    const cy = Math.cos(yaw + rt[1]), sy = Math.sin(yaw + rt[1]);
+    const fy = this._yawS !== null ? this._yawS : yaw;
+    const cy = Math.cos(fy + rt[1]), sy = Math.sin(fy + rt[1]);
     const tilt = this._tilt;
     mat3RotXYZ(tilt, rt[0], 0, rt[2]);
     // The body's own frame: facing, plus whatever it is leaning. Its Y column
