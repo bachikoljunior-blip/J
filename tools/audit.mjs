@@ -33,6 +33,19 @@ let browser;
 // ---------------------------------------------------------------------------
 
 const AXES = [];
+// Timing state lives at module scope because the report is written by a
+// separate function. It was declared inside the run function first, which
+// `node --check` accepts happily — a syntax check does not resolve
+// identifiers — and the audit then ran to completion, printed every
+// measurement, and threw at the last line before the verdict.
+const marks = [];
+let markT = Date.now();
+const mark = (name) => {
+  const now = Date.now();
+  marks.push({ name, ms: now - markT });
+  markT = now;
+};
+
 const axis = (id, name, weight) => {
   const a = { id, name, weight, items: [] };
   AXES.push(a);
@@ -46,6 +59,32 @@ const axis = (id, name, weight) => {
   };
 };
 const round = (v) => (typeof v === 'number' ? Math.round(v * 1000) / 1000 : v);
+
+
+// AUDIT_DRY=1 exercises the report path with no measurements and exits.
+//
+// `node --check` parses; it does not resolve identifiers. A helper declared
+// inside the run function and referenced from writeReport passes the parse
+// check, runs the entire twelve-minute audit, prints every measurement, and
+// throws on the last line before the verdict. That happened. This makes the
+// report path reachable in about a second, so the gate finds it before
+// spending the twelve minutes.
+//
+// It sits here rather than at the top because it needs `axis`, and the first
+// attempt at placing it produced its own scope error — which is the argument
+// for this existing, made twice in five minutes.
+if (process.env.AUDIT_DRY) {
+  const A = axis('X', 'dry', 1);
+  A.yes('dry-yes', true);
+  A.ge('dry-ge', 1, 0);
+  A.le('dry-le', 0, 1);
+  A.band('dry-band', 0.5, 0, 1);
+  writeReport({ dry: true });
+  console.log('AUDIT_DRY: 報告経路は通った');
+  server.kill();
+  process.exit(0);
+}
+
 
 try {
   browser = await chromium.launch({
@@ -91,13 +130,6 @@ try {
   // minute the whole loop is blocked. Nothing measured that, which meant the
   // obvious question — which probe is expensive, and is it expensive for a
   // reason — had no answer.
-  const marks = [];
-  let markT = Date.now();
-  const mark = (name) => {
-    const now = Date.now();
-    marks.push({ name, ms: now - markT });
-    markT = now;
-  };
   mark('起動');
   await sleep(600);
 
@@ -1178,6 +1210,10 @@ function runNode(script) {
 }
 
 function writeReport(extra) {
+  // A dry run proves the report path resolves; it must not leave its dummy
+  // axis in the history, the backlog or the criterion snapshots. Writing those
+  // is the one thing it deliberately does not do.
+  const dry = !!(extra && extra.dry);
   let total = 0, weightSum = 0;
   const rows = [];
   const backlog = [];
@@ -1273,6 +1309,7 @@ function writeReport(extra) {
   // one build side by side to see it. Markdown history cannot be diffed
   // per-criterion, so the numbers go out as JSON too.
   try {
+    if (dry) return;
     let commit = 'unknown';
     try {
       commit = execSync('git rev-parse --short HEAD', { cwd: ROOT, encoding: 'utf8' }).trim();
@@ -1297,6 +1334,7 @@ function writeReport(extra) {
 
   // Append to history.
   const histPath = `${ROOT}docs/AUDIT.md`;
+  if (dry) { console.log('  (dry: 報告ファイルは書かない)'); return; }
   let history = '';
   if (existsSync(histPath)) {
     const prev = readFileSync(histPath, 'utf8');
