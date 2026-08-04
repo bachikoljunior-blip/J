@@ -100,10 +100,27 @@ const out = await page.evaluate(async () => {
   for (const e of [e1, e2]) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
   p.lockTarget = null;
 
+  // Is the *look point* finite? `pos` has a guard and a recovery path; `look`
+  // has neither, and it is what the view matrix is built from. A non-finite
+  // look point renders a frame with no geometry in it while every guard in the
+  // class reports itself satisfied.
+  const fin = (v) => Number.isFinite(v);
+  const lookFinite = fin(c.look.x) && fin(c.look.y) && fin(c.look.z);
+  const aimFinite = fin(c.aimOff.x) && fin(c.aimOff.y) && fin(c.aimOff.z);
+  let mask = null;
+  try { mask = g.renderer._spatialStats ? g.renderer._spatialStats() : null; } catch (e) { mask = String(e); }
+
   return {
     sameObject,
     rafTicks,
     afterWalk,
+    lookFinite,
+    aimFinite,
+    look: { x: c.look.x, y: c.look.y, z: c.look.z },
+    aim: { x: c.aimOff.x, y: c.aimOff.y, z: c.aimOff.z },
+    boom: c.boom,
+    pitchLift: c.pitchLift,
+    mask,
     updates: c.updateCalls ?? -1,
     track: c.trackFrames ?? -1,
     ang: c.angSum ?? -1,
