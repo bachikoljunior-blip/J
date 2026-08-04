@@ -1246,7 +1246,13 @@ export class Rig {
     // the facing always arrives; it just takes 0.25 s to turn all the way round
     // instead of zero.
     let dYaw = 0;
-    if (this._yawS === null || this.warped) this._yawS = this._yawIn;
+    // Same hazard the camera has: this is an accumulator now, not a value read
+    // fresh each frame, so one non-finite input poisons every bone for the rest
+    // of the session and the body is drawn at NaN — which renders nothing at
+    // all. Nothing upstream should produce one; that is not a reason to let it
+    // become permanent if something does.
+    if (!Number.isFinite(this._yawIn)) this._yawIn = Number.isFinite(this._yawS) ? this._yawS : 0;
+    if (this._yawS === null || !Number.isFinite(this._yawS) || this.warped) this._yawS = this._yawIn;
     else {
       dYaw = this._yawIn - this._yawS;
       if (dYaw > PI) dYaw -= 2 * PI; else if (dYaw < -PI) dYaw += 2 * PI;

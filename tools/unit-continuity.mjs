@@ -103,6 +103,26 @@ scenario('yaw + rootRot together', HUMANOID, 1 / 60, 60,
 scenario('quadruped yaw snap 180deg', QUADRUPED, 1 / 60, 60, (f) => ({ yaw: f < 30 ? 0 : PI }));
 scenario('winged yaw snap 180deg', WINGED, 1 / 60, 60, (f) => ({ yaw: f < 30 ? 0 : PI }));
 
+// --- hostile input ----------------------------------------------------------
+// The limited facing is an accumulator, so a single non-finite yaw would be
+// permanent and the body would draw at NaN — which renders nothing at all.
+console.log('非有限入力の検査 — 一度のNaNが恒久化しないこと');
+{
+  trackContinuity(false);
+  const rig = new Rig(HUMANOID, 1);
+  for (let f = 0; f < 20; f++) rig.apply(1 / 60, 0, 0, 0, 0);
+  rig.apply(1 / 60, 0, 0, 0, NaN);
+  for (let f = 0; f < 40; f++) rig.apply(1 / 60, 0, 0, 0, PI / 2);
+  const finite = Number.isFinite(rig._yawS)
+    && rig.worldRot.every((v) => Number.isFinite(v))
+    && rig.worldPos.every((v) => Number.isFinite(v));
+  const arrived = Math.abs((rig._yawS ?? 0) - PI / 2) < 0.02;
+  const ok = finite && arrived;
+  if (!ok) failures++;
+  console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${'yaw に一度 NaN が来る'.padEnd(30)} ` +
+    `有限=${finite} 目標到達=${arrived} (_yawS=${rig._yawS})`);
+}
+
 // --- the debt has to be repaid ---------------------------------------------
 // A limiter that drops what it cannot afford is not a limiter, it is a bug that
 // leaves the model facing the wrong way. Check the facing actually arrives.
