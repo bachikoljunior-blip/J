@@ -832,10 +832,35 @@ try {
   const perf = await page.evaluate(async () => {
     const g = window.__g;
     const p = g.player;
+    const out0 = {};
     // Measure under load: a busy camp, not an empty field.
     const camp = g.world.pois.find((q) => q.kind === 'camp');
     p.teleport(camp.x, undefined, camp.z + 10);
     g.terrain.primeAround(p.x, p.z, 320);
+
+    // Wait for the world to finish arriving before counting what it costs.
+    //
+    // Terrain chunks build a few per frame on a budget, so a count taken early
+    // is the streaming system's progress, not the game's load. This exact
+    // criterion has reported 229,045 and 409,347 triangles on the same commit
+    // at the same quality and the same camera position — the difference was
+    // how long an unrelated probe earlier in the run happened to wait, which
+    // changed how many chunks had been built by the time this one looked
+    // (24 chunks versus 65).
+    //
+    // The low reading is not the correct one. A phone renders the world once it
+    // has arrived, so the honest figure is the steady state, and it is the
+    // larger of the two. Measuring early was hiding an overrun.
+    let drained = 0;
+    for (let i = 0; i < 900 && drained < 30; i++) {
+      g.terrain.primeAround(p.x, p.z, g.renderer.quality.viewDistance);
+      const q = g.terrain.buildQueue ? g.terrain.buildQueue.length : 0;
+      drained = q === 0 ? drained + 1 : 0;
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+    out0.buildQueueLeft = g.terrain.buildQueue ? g.terrain.buildQueue.length : -1;
+    out0.chunkMapSize = g.terrain.chunks ? g.terrain.chunks.size : -1;
+
     const samples = [];
     let last = performance.now();
     for (let i = 0; i < 120; i++) {
@@ -846,6 +871,7 @@ try {
     }
     samples.sort((a, b) => a - b);
     return {
+      ...out0,
       median: samples[Math.floor(samples.length / 2)],
       p95: samples[Math.floor(samples.length * 0.95)],
       drawCalls: g.glw.drawCalls,
@@ -876,7 +902,8 @@ try {
   //  Controls
   // -------------------------------------------------------------------------
   console.log('  draw calls by pass:', JSON.stringify(perf.byTag),
-    `terrainChunks=${perf.terrainChunks} batches=${perf.batches}`);
+    `terrainChunks=${perf.terrainChunks} batches=${perf.batches} ` +
+    `待ち行列残り=${perf.buildQueueLeft} 保持チャンク=${perf.chunkMapSize}`);
   console.log('  triangles by pass:', JSON.stringify(perf.triByTag));
   console.log('  cull:', JSON.stringify(perf.cull));
 
