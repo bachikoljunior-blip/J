@@ -159,6 +159,12 @@ for (const s of SCENES) {
       const tick = () => (++i >= 150 ? res() : requestAnimationFrame(tick));
       requestAnimationFrame(tick);
     });
+    // Same ordering guarantee as the audit: a macrotask cannot run until the
+    // whole requestAnimationFrame batch has drained, so the game's render for
+    // this frame has definitely happened. Kept identical on both sides so the
+    // two remain comparable — the difference between them is the thing being
+    // investigated, and it must not be this.
+    await new Promise((r) => { requestAnimationFrame(() => setTimeout(r, 0)); });
     const stat0 = g.renderer.readbackStats(5);
     // Why the world mask matters here: 表面ディテール is gradSum/gradN over the
     // pixels the depth-derived mask calls world. If the mask is empty, gradN is

@@ -629,6 +629,7 @@ export class Renderer {
     // texture cleared to the far plane, and the world mask derived from it
     // would call every pixel sky.
     this._sceneRendered = true;
+    this._sceneRenderedAt = (this._sceneRenderedAt || 0) + 1;
     const sky = this.sky;
     gl.clearColor(sky.fog[0], sky.fog[1], sky.fog[2], 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -791,6 +792,11 @@ export class Renderer {
       const n = mask.length / 4;
       this._maskDepth = {
         min: dMin, max: dMax, mean: Math.round(dSum / n), atFar, total: n,
+        // How many scene renders have happened. A caller that reads the same
+        // value twice without this moving has read the same frame twice, which
+        // is the difference between measuring the game and measuring whatever
+        // the target happened to contain.
+        renders: this._sceneRenderedAt || 0,
       };
     }
 

@@ -727,17 +727,31 @@ try {
         await wait(1);
       }
 
-      // Read outside a requestAnimationFrame callback. Inside one, this races
-      // the game's own render callback for the same frame and can land after a
-      // resize but before anything has drawn into the new targets. Called from
-      // here, the last render is complete and its depth is valid — which is why
-      // tools/diag-scene.mjs, which does exactly this, measures the same scenes
-      // at detail 0.69 while the audit measured 0.
+      // Read after every rAF callback for the frame has run, not merely after
+      // one of them.
+      //
+      // `await` continuations are microtasks, so awaiting a promise resolved
+      // inside a rAF callback resumes *within the same rAF batch* — before or
+      // after the game's own render callback depending only on which was
+      // registered first. That is the whole difference between this probe and
+      // tools/diag-scene.mjs, which measures the same scenes on the same build
+      // at detail 0.69 while this one measured 0: if the read lands before the
+      // render, the scene target still holds whatever the frame started with
+      // and the depth the world mask reads is the cleared far plane.
+      //
+      // setTimeout(0) is a macrotask, which cannot run until the entire rAF
+      // batch has drained. That makes the ordering a fact rather than a
+      // coincidence of registration order.
+      const afterFrame = () => new Promise((r) => {
+        requestAnimationFrame(() => setTimeout(r, 0));
+      });
+      await afterFrame();
       let st = g.renderer.readbackStats(5);
       // And if it still came back unmeasurable, say so after trying again
       // rather than reporting the zero.
       for (let attempt = 0; attempt < 3 && st.measurable === false; attempt++) {
         await wait(40);
+        await afterFrame();
         st = g.renderer.readbackStats(5);
       }
       st.tint = g.renderer.tint.slice();
