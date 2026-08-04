@@ -70,13 +70,38 @@ for (const s of SCENES) {
     g.renderer.forcedWeather = sc.weather;
     g.terrain.primeAround(p.x, p.z, 320);
     g.grass.dirty = true;
-    await new Promise((r) => {
+    await new Promise((res) => {
       let i = 0;
-      const tick = () => (++i >= 150 ? r() : requestAnimationFrame(tick));
+      const tick = () => (++i >= 150 ? res() : requestAnimationFrame(tick));
       requestAnimationFrame(tick);
     });
+    const stat0 = g.renderer.readbackStats(5);
+    // Why the world mask matters here: 表面ディテール is gradSum/gradN over the
+    // pixels the depth-derived mask calls world. If the mask is empty, gradN is
+    // zero and the criterion reports exactly 0 — which is what the audit did on
+    // four of six scenes. That is a mask failure, not a rendering failure, and
+    // the two are indistinguishable from the printed number alone.
+    const r = g.renderer;
+    let maskNonZero = -1, maskTotal = -1;
+    if (r._maskBuf) {
+      maskTotal = r._maskBuf.length / 4;
+      maskNonZero = 0;
+      for (let i = 0; i < r._maskBuf.length; i += 4) if (r._maskBuf[i] > 127) maskNonZero++;
+    }
     const c = p.camera;
     return {
+      dynamicScale: +(g.dynamicScale ?? -1).toFixed(3),
+      rendererScale: +(r.dynamicScale ?? -1).toFixed(3),
+      sceneW: r.scene ? r.scene.width : -1,
+      sceneH: r.scene ? r.scene.height : -1,
+      hasDepthTex: !!(r.scene && r.scene.depthTex),
+      maskNonZero,
+      maskTotal,
+      detail: stat0 ? +(stat0.detail ?? -1).toFixed(4) : -1,
+      flatRatio: stat0 ? +(stat0.flatRatio ?? -1).toFixed(4) : -1,
+      colorBins: stat0 ? (stat0.colorBins ?? -1) : -1,
+      localContrast: stat0 ? +(stat0.localContrast ?? -1).toFixed(4) : -1,
+      saturation: stat0 ? +(stat0.saturation ?? -1).toFixed(4) : -1,
       pos: [+c.pos.x.toFixed(2), +c.pos.y.toFixed(2), +c.pos.z.toFixed(2)],
       look: [+c.look.x.toFixed(2), +c.look.y.toFixed(2), +c.look.z.toFixed(2)],
       boom: +(c.boom ?? -1).toFixed(2),
@@ -87,9 +112,12 @@ for (const s of SCENES) {
     };
   }, s);
   await page.screenshot({ path: `${SHOTS}/diag-${s.id}.png` });
-  console.log(`${s.id.padEnd(12)} pos=[${stat.pos}] look=[${stat.look}] boom=${stat.boom} ` +
-    `lift=${stat.lift} ground=${stat.ground} clear=${stat.clearance}`);
-  if (stat.stats) console.log(`             stats=${JSON.stringify(stat.stats).slice(0, 200)}`);
+  console.log(`${s.id.padEnd(12)} boom=${stat.boom} clear=${stat.clearance} ` +
+    `dynScale=${stat.dynamicScale}/${stat.rendererScale} scene=${stat.sceneW}x${stat.sceneH} ` +
+    `depthTex=${stat.hasDepthTex}`);
+  console.log(`             マスク世界画素 ${stat.maskNonZero}/${stat.maskTotal}  ` +
+    `detail=${stat.detail} flat=${stat.flatRatio} bins=${stat.colorBins} ` +
+    `localC=${stat.localContrast} sat=${stat.saturation}`);
 }
 
 await browser.close();
