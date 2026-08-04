@@ -421,6 +421,14 @@ try {
     out.maxPoseJump = report ? report.maxSteady : maxJump;
     out.continuity = report;
 
+    // The camera, from the live game rather than from the stubs the unit check
+    // drives. Same reasoning as the rig: a stub world is not the terrain
+    // generator, and the number that matters is the worst frame of the session.
+    const cam = p.camera || {};
+    out.camView = cam.worstView || 0;
+    out.camDolly = cam.worstDolly || 0;
+    out.camFrames = cam.trackFrames || 0;
+
     // Hitstop and camera impulse: both must be observable, not declared.
     //
     // The probe has to actually land a blow, which means facing the target and
@@ -514,6 +522,8 @@ try {
   console.log(`  motion: footErr=${motion.footError.toFixed(3)} jump=${motion.maxPoseJump.toFixed(3)} ` +
     `hurtDirs=${motion.hurtDirections} hits=${motion.hitsLanded} ` +
     `hitstop=${motion.hitstop} shake=${motion.cameraImpulse}`);
+  console.log(`  camera: ${motion.camFrames}f  視線 ${motion.camView.toFixed(4)} rad/frame  ` +
+    `ドリー ${motion.camDolly.toFixed(4)} m/frame`);
   if (motion.continuity) {
     const c = motion.continuity;
     console.log(`  continuity: ${c.frames}f ${c.rigs}rigs  steady=${c.maxSteady.toFixed(3)} ` +
@@ -855,6 +865,11 @@ try {
   K.ge('怯みの段階', motion.flinchTiers, 3);
   K.ge('死亡の変化', motion.deathVariants, 3);
   K.le('遷移の最大回転 (rad/frame)', round(motion.maxPoseJump), 0.35);
+  // The camera is the same guarantee with the whole screen behind it. Before
+  // this was measured, walking beside a wall threw the view 19.8 m and 1.55 rad
+  // in one frame, and nothing in thirteen axes noticed.
+  K.le('カメラ視線の最大回転 (rad/frame)', round(motion.camView), 0.10);
+  K.le('カメラのドリー段差 (m/frame)', round(motion.camDolly), 0.12);
   K.yes('ヒットストップ', motion.hitstop);
   K.yes('カメラの衝撃', motion.cameraImpulse);
 

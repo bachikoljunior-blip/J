@@ -1157,6 +1157,45 @@ export class PlayerCamera {
     this.focusY = focusY;
     this.focusZ = focusZ;
     this.seeded = true;
+    this._track(dt);
+  }
+
+  /**
+   * Watch how far the view actually cut, every frame, in the real game.
+   *
+   * tools/unit-camera.mjs drives this class with stubs, which is what makes it
+   * fast enough to run before every audit — and also what makes it incomplete.
+   * A stub world is not the terrain generator and a stub player does not roll,
+   * get knocked back, or die. The rig learned this the expensive way: its own
+   * probe watched a window it drove itself, reported a number 2.5 times under
+   * the truth, and cost days. So the live camera reports on itself too, and the
+   * audit reads the worst frame of the whole session rather than of a window.
+   */
+  _track(dt) {
+    const dx = this.look.x - this.pos.x, dy = this.look.y - this.pos.y, dz = this.look.z - this.pos.z;
+    const l = Math.hypot(dx, dy, dz) || 1;
+    const nx = dx / l, ny = dy / l, nz = dz / l;
+    const orbit = Math.hypot(this.pos.x - this.focusX, this.pos.y - this.focusY, this.pos.z - this.focusZ);
+    const prev = this._trk;
+    if (prev && dt > 1e-5) {
+      const dot = clamp(nx * prev.x + ny * prev.y + nz * prev.z, -1, 1);
+      const ang = Math.acos(dot);
+      // A teleport moves the focus across the map; the view did not turn to
+      // get there. Warps are the game cutting on purpose, and a cut on purpose
+      // is a different thing from a cut by accident.
+      const warped = v3distXZ({ x: this.focusX, z: this.focusZ }, prev.focus) > 3;
+      if (!warped) {
+        if (ang > this.worstView) { this.worstView = ang; this.worstViewAt = this.trackFrames; }
+        const d = Math.abs(orbit - prev.orbit);
+        if (d > this.worstDolly) { this.worstDolly = d; this.worstDollyAt = this.trackFrames; }
+      }
+      this.trackFrames++;
+    } else {
+      this.worstView = 0; this.worstDolly = 0;
+      this.worstViewAt = -1; this.worstDollyAt = -1;
+      this.trackFrames = 0;
+    }
+    this._trk = { x: nx, y: ny, z: nz, orbit, focus: { x: this.focusX, z: this.focusZ } };
   }
 
   /**
