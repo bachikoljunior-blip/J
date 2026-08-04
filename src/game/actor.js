@@ -583,6 +583,18 @@ export class Actor {
 
     // --- vertical ----------------------------------------------------------
     const ground = world.heightAt(this.x, this.z);
+    // The horizontal solve below already refuses to move a body to a non-finite
+    // coordinate; the vertical one accumulates and did not. `velY` is summed
+    // every frame and `y` is summed from it, so one bad value sticks — and a
+    // body at a non-finite height is gone: it cannot be drawn, hit, or hit
+    // anything, permanently and silently. Fall back to the ground under it,
+    // which is where a body that has lost track of its height belongs.
+    if (!Number.isFinite(this.velY)) this.velY = 0;
+    if (!Number.isFinite(this.y)) {
+      this.y = Number.isFinite(ground) ? ground : 0;
+      this.velY = 0;
+      this.grounded = true;
+    }
     if (this.state === STATE.JUMP || !this.grounded) {
       this.velY += GRAVITY * dt;
       this.y += this.velY * dt;
