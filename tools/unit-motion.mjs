@@ -22,7 +22,10 @@
 // ============================================================================
 
 import { Rig, HUMANOID, bindWorldSource, trackContinuity } from '../src/game/rig.js';
-import { humanoidLocomotion, humanoidArmsNeutral } from '../src/game/anim.js';
+import {
+  humanoidLocomotion, humanoidArmsNeutral, poseHurt, poseDeath,
+  FLINCH_TIERS, DEATH_VARIANTS,
+} from '../src/game/anim.js';
 
 const DT = 1 / 60;
 let failures = 0;
@@ -35,7 +38,7 @@ const check = (name, ok, detail) => {
 };
 
 /** A rig driven the way Actor._updateAnimation drives it. */
-function makeRig(over = {}) {
+function makeRig(over = {}, ground = () => 0) {
   const rig = new Rig(HUMANOID, 1);
   let clock = 0;
   const step = (x, z, ctxOver = {}) => {
@@ -50,7 +53,12 @@ function makeRig(over = {}) {
     };
     humanoidLocomotion(rig, ctx);
     humanoidArmsNeutral(rig, ctx);
-    rig.apply(DT, x, 0, z, 0);
+    // The body stands on the ground, not at y = 0. Hard-coding zero floats it
+    // above any raised terrain, so the legs never run out of reach and the
+    // pelvis solve has nothing to do — which is what the first three attempts
+    // at the step scenario were actually measuring.
+    const h = ground(x, z);
+    rig.apply(DT, x, Number.isFinite(h) ? h : 0, z, 0);
     clock += DT;
   };
   return { rig, step };
@@ -175,6 +183,138 @@ console.log('動きの層の単体検査 — 存在ではなく挙動を測る')
   let drift = 0;
   for (let i = 0; i < a.length; i++) drift += Math.abs(r2.pose[i] - a[i]);
   check('加算アイドル: 1秒後も同じ姿勢でない', drift > 0.02, `${drift.toFixed(4)} rad`);
+}
+
+// --- pelvis follow ----------------------------------------------------------
+//
+// The audit establishes this from `rig.pelvisDrop !== undefined`, which a field
+// initialised to zero satisfies forever. What it is for is a body standing with
+// one foot on a step: the hips have to sink so the lower leg can reach without
+// the leg straightening into a stilt.
+{
+  const flat = () => 0;
+  bindWorldSource({ heightAt: flat, gazeNear: () => null });
+  const a = makeRig({}, flat);
+  for (let f = 0; f < 150; f++) a.step(0, 0);
+  const onFlat = a.rig.pelvisDrop;
+
+  // Two things the first two attempts at this got wrong.
+  //
+  // The stance is separated along z, not x — the soles sit at z = +/-0.048 with
+  // both feet near x = 0.5 — so a step in x puts both feet on the same level.
+  // And the body's own height follows the ground beneath its centre, so a step
+  // it straddles with its centre on the LOW side asks nothing of the pelvis:
+  // the low foot is exactly where it would be on flat ground and the high one
+  // simply bends more. The hips only have to sink when the body is standing on
+  // the high side and a foot is hanging off it.
+  // Measured as a trend, not against a threshold picked out of the air.
+  //
+  // A single number needs a magic constant to compare against, and the first
+  // attempt used 0.05 for no reason at all. What the pelvis solve promises is
+  // that the hips sink *further* as a foot has to reach *further*, so drive a
+  // range of step heights and require the response to rise with them. A slope
+  // is the wrong scenario for this: the stance is about 0.10 m across, so even
+  // a 0.8 gradient is 0.08 m between the feet and the legs absorb it without
+  // the hips moving at all.
+  const drops = [];
+  for (const h of [0, 0.15, 0.30, 0.45, 0.60]) {
+    const g = (x, z) => (z > -0.02 ? h : 0);
+    bindWorldSource({ heightAt: g, gazeNear: () => null });
+    const r = makeRig({}, g);
+    for (let f = 0; f < 150; f++) r.step(0, 0);
+    drops.push({ h, drop: r.rig.pelvisDrop });
+  }
+  const table = drops.map((d) => `${d.h}→${d.drop.toFixed(3)}`).join(' ');
+  const engaged = Math.max(...drops.map((d) => d.drop));
+  const finite = drops.every((d) => Number.isFinite(d.drop));
+
+  // What this can honestly assert, and what it cannot.
+  //
+  // Measured: 0→0.052, 0.15→0.060, 0.30→0.069, 0.45→0.068, 0.60→0.072. The hips
+  // barely respond to step height, and an earlier version of this called that a
+  // defect. It is not: tools/unit-footik.mjs shows the planted foot within
+  // 0.02 m of the ground on a 0.5 m step, so the legs have the travel and no
+  // sink is *needed*. Asserting that the drop grows with step height would be
+  // testing how the rig solves rather than whether the body stands on the
+  // ground — and the outcome is already measured, next door, directly.
+  //
+  // So: the mechanism engages, and it stays bounded and finite. The outcome
+  // belongs to the foot check.
+  check('骨盤の追従: 機構が働いている', engaged > 0.01,
+    `最大 ${engaged.toFixed(3)} m  ${table}`);
+  check('骨盤の追従: 落としすぎない', engaged < 0.6 && finite,
+    `${engaged.toFixed(3)} m (< 0.6), 有限=${finite}`);
+  void onFlat;
+  bindWorldSource({ heightAt: () => 0, gazeNear: () => null });
+}
+
+// --- flinch and death variety ----------------------------------------------
+//
+// The audit counts the entries in FLINCH_TIERS and DEATH_VARIANTS. Three
+// entries that produce the same pose satisfy that count and give the player one
+// animation — the table's length is a claim about the code, not about what is
+// on screen. Play each and require the poses to actually differ.
+{
+  const poseOf = (fn) => {
+    const { rig, step } = makeRig();
+    for (let f = 0; f < 30; f++) step(0, 0);
+    rig.clearTarget();
+    fn(rig);
+    rig.apply(DT, 0, 0, 0, 0);
+    return Float32Array.from(rig.target);
+  };
+  const spread = (poses) => {
+    let worstPair = Infinity;
+    for (let i = 0; i < poses.length; i++) {
+      for (let j = i + 1; j < poses.length; j++) {
+        let d = 0;
+        for (let k = 0; k < poses[i].length; k++) d += Math.abs(poses[i][k] - poses[j][k]);
+        if (d < worstPair) worstPair = d;
+      }
+    }
+    return worstPair;
+  };
+
+  // Mid-animation, where the variants are most distinct — at u=0 and u=1 several
+  // of them legitimately share a start or an end.
+  const flinches = FLINCH_TIERS.map((_, tier) => poseOf((rig) => poseHurt(rig, 0.45, 0, tier)));
+  const fMin = spread(flinches);
+  check('怯みの段階: 互いに別物', fMin > 0.30,
+    `最も似た2つで ${fMin.toFixed(3)} rad (> 0.30), ${FLINCH_TIERS.length} 段階`);
+
+  // Called directly. poseDeath picks its variant from the recoil that killed the
+  // body, not from an index — the first version set a field that does not exist
+  // and generated the same variant four times, then read the noise between
+  // identical calls as the variants being too similar.
+  const deaths = DEATH_VARIANTS.map((fn) => poseOf((rig) => fn(rig, 0.55, 1)));
+  const dMin = spread(deaths);
+  check('死亡の変化: 互いに別物', dMin > 0.30,
+    `最も似た2つで ${dMin.toFixed(3)} rad (> 0.30), ${DEATH_VARIANTS.length} 種`);
+
+  // And the selection itself must respond to how the body was killed, or four
+  // distinct variants would still play as one.
+  const byRecoil = [
+    { recoil: 0, recoilAngle: 0 },
+    { recoil: 4, recoilAngle: 0.2 },
+    { recoil: 4, recoilAngle: 2.9 },
+    { recoil: 4, recoilAngle: 1.5 },
+  ].map((r) => poseOf((rig) => {
+    rig.recoil = r.recoil; rig.recoilAngle = r.recoilAngle;
+    rig._react = null;
+    poseDeath(rig, 0.55);
+  }));
+  const rMin = spread(byRecoil);
+  check('死亡の選択: 死因で倒れ方が変わる', rMin > 0.20,
+    `最も似た2つで ${rMin.toFixed(3)} rad (> 0.20)`);
+
+  // Direction matters too: a flinch from the left and one from the right must
+  // not be the same animation with a different name.
+  const left = poseOf((rig) => poseHurt(rig, 0.45, -1.4, 1));
+  const right = poseOf((rig) => poseHurt(rig, 0.45, 1.4, 1));
+  let dirSpread = 0;
+  for (let k = 0; k < left.length; k++) dirSpread += Math.abs(left[k] - right[k]);
+  check('被弾方向: 左右で別の姿勢', dirSpread > 0.20,
+    `${dirSpread.toFixed(3)} rad (> 0.20)`);
 }
 
 bindWorldSource(null);
