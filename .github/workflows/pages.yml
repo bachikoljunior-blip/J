@@ -35,11 +35,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  # Two jobs on purpose. The `github-pages` environment does not exist until
+  # Pages has been switched to the Actions source, and a job that *declares*
+  # that environment is rejected before any of its steps run — which is exactly
+  # what happened on the first attempt: the job died in one second with no logs
+  # at all. So enablement happens here, in a job with no environment, and only
+  # the deploy job below declares it.
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -75,8 +78,21 @@ jobs:
           date -u '+%Y-%m-%d %H:%M UTC' >> _site/BUILD.txt
 
       - uses: actions/configure-pages@v5
+        with:
+          # Switches the Pages source to Actions and creates the environment.
+          # Before this, Pages served the development branch directly.
+          enablement: true
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - id: deploy
         uses: actions/deploy-pages@v4
