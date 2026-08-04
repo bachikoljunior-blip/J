@@ -485,7 +485,17 @@ export class Player extends Actor {
     }
 
     this.bufferTime -= dt;
-    if (this.bufferTime <= 0) this.bufferedInput = null;
+    // An input that aged out without being consumed is the other way a
+    // buffered press disappears, and the one a player actually notices: they
+    // pressed attack, the window passed while they were still recovering, and
+    // nothing happened.
+    if (this.bufferTime <= 0) {
+      if (this.bufferedInput) {
+        this.bufferExpired = (this.bufferExpired || 0) + 1;
+        this.lastBufferExpiry = this.bufferedInput;
+      }
+      this.bufferedInput = null;
+    }
 
     // --- lock-on ------------------------------------------------------------
     this.lockSwitchCd = Math.max(0, this.lockSwitchCd - dt);
@@ -553,8 +563,18 @@ export class Player extends Actor {
   }
 
   _buffer(kind) {
+    // One slot, so a second input inside the window discards the first. Latest
+    // intent winning is the right policy for an action game — a player who
+    // presses dodge after attack means dodge — but it is still a dropped input,
+    // and docs/FALSIFY.md lists 先行入力の取りこぼし as unmeasured. Count it, so
+    // the rate is a number rather than an opinion.
+    if (this.bufferedInput && this.bufferTime > 0 && this.bufferedInput !== kind) {
+      this.bufferDropped = (this.bufferDropped || 0) + 1;
+      this.lastBufferDrop = `${this.bufferedInput}->${kind}`;
+    }
     this.bufferedInput = kind;
     this.bufferTime = 0.28;
+    this.bufferOffered = (this.bufferOffered || 0) + 1;
   }
 
   _tryConsumeBuffer(wx, wz) {

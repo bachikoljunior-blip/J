@@ -408,6 +408,27 @@ try {
     }
     out.hurtDirections = dirs.size;
 
+    // Buffered-input loss, from a burst of presses during recovery — the thing
+    // a player feels as "it dropped my input". Two ways a press disappears:
+    // another press overwrites it inside the window, or the window closes while
+    // the character is still committed to something else.
+    p.bufferDropped = 0; p.bufferExpired = 0; p.bufferOffered = 0;
+    p.revive(); p.invuln = 999;
+    await frames(10);
+    for (let i = 0; i < 200; i++) {
+      // Faster than a human can press, on purpose: this measures the ceiling of
+      // the loss rate, not a typical one.
+      if (i % 5 === 0) p._buffer('light');
+      if (i % 17 === 0) p._buffer('heavy');
+      if (i % 23 === 0) p._buffer('dodge');
+      await frames(1);
+    }
+    out.bufferOffered = p.bufferOffered || 0;
+    out.bufferDropped = p.bufferDropped || 0;
+    out.bufferExpired = p.bufferExpired || 0;
+    out.bufferLossRate = out.bufferOffered
+      ? (out.bufferDropped + out.bufferExpired) / out.bufferOffered : 0;
+
     // Flinch tiers and death variants, counted from the pose table rather than
     // from a declared constant.
     out.flinchTiers = (anim.FLINCH_TIERS && anim.FLINCH_TIERS.length)
@@ -648,6 +669,8 @@ try {
     `warp ${camera.warpFrames}/${camera.frames} (最大 ${camera.lastWarpStep}m)  ` +
     `視線積算 ${Number(camera.angSum).toFixed(2)} rad` +
     `${camera.why ? `  why=${JSON.stringify(camera.why)}` : ''}`);
+  console.log(`  input buffer: 投入 ${motion.bufferOffered} / 上書き ${motion.bufferDropped} ` +
+    `/ 期限切れ ${motion.bufferExpired} = 取りこぼし ${(motion.bufferLossRate * 100).toFixed(0)}%`);
   if (motion.continuity) {
     const c = motion.continuity;
     console.log(`  continuity: ${c.frames}f ${c.rigs}rigs  steady=${c.maxSteady.toFixed(3)} ` +
