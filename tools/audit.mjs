@@ -926,7 +926,18 @@ try {
     g.applyQuality(restore === '低' ? 'low' : restore === '高' ? 'high' : 'medium');
     g.autoResolution = false;
     g.renderer.resize(g.canvas.width, g.canvas.height);
-    for (let i = 0; i < 60; i++) await new Promise((r) => requestAnimationFrame(r));
+    // Drain again after restoring. The sweep above leaves the restored tier's
+    // chunks partly built, and everything below this point — frame time, the
+    // headline triangle count, the culling figures — would then be measured
+    // against a world still arriving, which is the exact defect this probe was
+    // just changed to stop doing.
+    let d3 = 0;
+    for (let i = 0; i < 900 && d3 < 30; i++) {
+      g.terrain.primeAround(p.x, p.z, g.renderer.quality.viewDistance);
+      const q = g.terrain.buildQueue ? g.terrain.buildQueue.length : 0;
+      d3 = q === 0 ? d3 + 1 : 0;
+      await new Promise((r) => requestAnimationFrame(r));
+    }
 
     const samples = [];
     let last = performance.now();
