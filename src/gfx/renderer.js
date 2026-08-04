@@ -776,6 +776,22 @@ export class Renderer {
       }
       mask = this._maskBuf;
       gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, mask);
+      // Summarise the depth the mask was derived from, so an empty mask can be
+      // explained rather than guessed at. All-255 with every pixel flagged
+      // exactly 1.0 means a cleared attachment; a spread means the depth is
+      // real and the threshold is what is wrong.
+      let dMin = 255, dMax = 0, dSum = 0, atFar = 0;
+      for (let i = 0; i < mask.length; i += 4) {
+        const d = mask[i + 1];
+        if (d < dMin) dMin = d;
+        if (d > dMax) dMax = d;
+        dSum += d;
+        if (mask[i + 2] > 127) atFar++;
+      }
+      const n = mask.length / 4;
+      this._maskDepth = {
+        min: dMin, max: dMax, mean: Math.round(dSum / n), atFar, total: n,
+      };
     }
 
     glw.bindTarget(null);
@@ -957,6 +973,7 @@ export class Renderer {
       worldPixels,
       worldTiles: tiles,
       maskPresent: !!mask,
+      maskDepth: this._maskDepth || null,
       measurable,
     };
   }

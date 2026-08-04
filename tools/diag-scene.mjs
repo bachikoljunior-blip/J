@@ -105,6 +105,7 @@ for (const s of SCENES) {
       colorCells: stat0 ? (stat0.colorCells ?? -1) : -1,
       worldPixelsStat: stat0 ? (stat0.worldPixels ?? -1) : -1,
       measurable: stat0 ? stat0.measurable : null,
+      maskDepth: stat0 ? stat0.maskDepth : null,
       localContrast: stat0 ? +(stat0.localContrast ?? -1).toFixed(4) : -1,
       saturation: stat0 ? +(stat0.saturation ?? -1).toFixed(4) : -1,
       pos: [+c.pos.x.toFixed(2), +c.pos.y.toFixed(2), +c.pos.z.toFixed(2)],
@@ -134,7 +135,7 @@ for (const s of SCENES) {
     `depthTex=${stat.hasDepthTex}`);
   console.log(`             マスク世界画素 ${stat.maskNonZero}/${stat.maskTotal}  ` +
     `detail=${stat.detail} flat=${stat.flatRatio} bins=${stat.colorCells} ` +
-    `measurable=${stat.measurable} ` +
+    `measurable=${stat.measurable} depth=${JSON.stringify(stat.maskDepth)} ` +
     `localC=${stat.localContrast} sat=${stat.saturation}`);
 }
 

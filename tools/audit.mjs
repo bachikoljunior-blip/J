@@ -748,7 +748,7 @@ try {
     frames.push({ ...scene, ...stat });
     console.log(`  frame  ${scene.id.padEnd(12)} 世界画素 ${stat.worldPixels ?? '?'} ` +
       `res=${(stat.dynamicScale ?? -1).toFixed(2)} detail=${(stat.detail ?? -1).toFixed(3)} ` +
-      `bins=${stat.colorCells ?? '?'}`);
+      `bins=${stat.colorCells ?? '?'} depth=${JSON.stringify(stat.maskDepth)}`);
     console.log(`  frame  ${scene.id.padEnd(12)} luma=${stat.meanLuma.toFixed(3)} ` +
       `contrast=${stat.contrast.toFixed(3)} sat=${stat.saturation.toFixed(3)} ` +
       `clip=${(stat.clippedRatio * 100).toFixed(1)}% crush=${(stat.crushedRatio * 100).toFixed(1)}%`);

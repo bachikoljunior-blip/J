@@ -1237,7 +1237,12 @@ void main() {
   // Anything at (or within a hair of) the far plane never had geometry written
   // to it. The epsilon is generous because a 24-bit depth buffer's far values
   // are extremely non-linear and the sky sits right at the top of that range.
-  gl_FragColor = vec4(d < 0.99995 ? 1.0 : 0.0, 0.0, 0.0, 1.0);
+  // Green carries the depth itself, quantised to 8 bits. When the mask comes
+  // back empty the only question that matters is whether the depth buffer is
+  // genuinely at the far plane or the sample is not landing on it at all, and
+  // the verdict alone cannot tell those apart. Blue marks exact 1.0, which is
+  // what a freshly cleared depth attachment reads as.
+  gl_FragColor = vec4(d < 0.99995 ? 1.0 : 0.0, d, d >= 1.0 ? 1.0 : 0.0, 1.0);
 }
 `;
 
