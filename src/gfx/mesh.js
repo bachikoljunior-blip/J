@@ -1356,30 +1356,101 @@ export function buildHut(rng) {
   return m;
 }
 
+/**
+ * Height of the tallest point of buildWatchtower() at unit scale, in metres.
+ *
+ * Structures that stack or measure this mesh need the number, and reading it
+ * off the builder by eye is how a landmark ends up reporting a height it does
+ * not have. Keep it in step with the merlon course below.
+ */
+export const WATCHTOWER_HEIGHT = 9.45;
+
+/**
+ * Watchtower. Read at two distances and it has to work at both: a kilometre
+ * out only the silhouette survives, so the profile steps — batter, string
+ * course, oversailing corbels, broken merlons — rather than running as one
+ * smooth cylinder that reads as a chimney. Standing under it the same steps are
+ * what give the eye something to measure the height against, which matters far
+ * more when this is instanced at three or four times scale as a region
+ * landmark than it does on a village at scale one.
+ */
 export function buildWatchtower() {
   const m = new MeshData();
-  m.merge(buildCylinder(8, 1.5, 1.9), 0, 0, 0, 1, 6.5, 1);
-  m.merge(buildCylinder(9, 2.3, 2.0), 0, 6.5, 0, 1, 0.9, 1);
+  // Battered shaft: wider at the foot, in two stages divided by a string
+  // course. The taper is what stops a scaled-up instance reading as a pipe.
+  m.merge(buildCylinder(10, 2.10, 2.40), 0, 0, 0, 1, 0.55, 1);
+  m.merge(buildCylinder(10, 1.45, 2.05), 0, 0.55, 0, 1, 5.35, 1);
+  m.merge(buildCylinder(12, 1.62, 1.62), 0, 5.90, 0, 1, 0.28, 1);
+  m.merge(buildCylinder(10, 1.35, 1.50), 0, 6.18, 0, 1, 1.55, 1);
+  // Machicolation: the parapet oversails the shaft, so the top reads as a
+  // fighting platform rather than as the end of the tube.
+  m.merge(buildCylinder(12, 2.05, 1.42), 0, 7.73, 0, 1, 0.62, 1);
+  m.merge(buildCylinder(12, 2.00, 2.05), 0, 8.35, 0, 1, 0.22, 1);
+  // Merlons, with two of the eight knocked out — a complete crown reads as new
+  // masonry, and nothing in this world is new.
   for (let i = 0; i < 8; i++) {
+    if (i === 3 || i === 6) continue;
     const a = (i / 8) * Math.PI * 2;
-    m.merge(buildBevelBox(0.15), Math.cos(a) * 2.05, 7.4, Math.sin(a) * 2.05, 0.5, 0.75, 0.5);
+    m.merge(buildBevelBox(0.14), Math.cos(a) * 1.72, 8.57, Math.sin(a) * 1.72, 0.62, 0.88, 0.50);
+  }
+  // Timber: door and the stubs of the hoarding beams that rotted away. The
+  // batch's secondary material is wood, which the blend slot selects.
+  m.merge(buildBevelBox(0.06), 0, 0.20, 2.00, 0.95, 1.85, 0.45, 1);
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * Math.PI * 2 + 0.4;
+    m.merge(buildBevelBox(0.2), Math.cos(a) * 1.95, 7.30, Math.sin(a) * 1.95, 0.36, 0.34, 0.36, 1);
   }
   return m;
 }
 
-/** Broken archway — the silhouette that marks ruins from a distance. */
+/** Height of the tallest point of buildArch() at unit scale, in metres. */
+export const ARCH_HEIGHT = 8.12;
+
+/**
+ * One bay of a ruined arcade: two piers, the ring over the opening, and the
+ * channel it carried.
+ *
+ * The spandrels are filled up to a level deck instead of the ring being left as
+ * a bare hoop. That is what an arcade is, and it is the whole difference
+ * between a line of these reading as an aqueduct marching across country and
+ * reading as a row of croquet hoops — the deck line is continuous from bay to
+ * bay, the openings are the only holes, and the eye follows the level.
+ *
+ * merge() has no rotation, so the ring arrives as a corbelled staircase of
+ * axis-aligned blocks. That is also what dry-laid voussoirs look like once the
+ * mortar has gone, and it is why the column count is odd: a crown block sits
+ * on the centre line rather than a joint.
+ */
 export function buildArch() {
   const m = new MeshData();
-  m.merge(buildBevelBox(0.1), -2.0, 0, 0, 1.0, 5.2, 1.2);
-  m.merge(buildBevelBox(0.1), 2.0, 0, 0, 1.0, 4.4, 1.2);
-  const segs = 7;
-  for (let i = 0; i <= segs; i++) {
-    const t = i / segs;
-    const a = Math.PI * t;
-    m.merge(buildBevelBox(0.1),
-      -Math.cos(a) * 2.0, 5.0 + Math.sin(a) * 1.4, 0,
-      0.85, 0.7, 1.2);
+  const SPAN = 2.05;     // half the clear opening
+  const SPRING = 4.60;   // where the ring starts off the pier
+  const DECK = 7.15;     // underside of the channel
+  const THICK = 1.35;    // depth through the arcade
+
+  // Piers, on stepped plinths.
+  for (const sx of [-1, 1]) {
+    const x = sx * (SPAN + 0.525);
+    m.merge(buildBevelBox(0.10), x, 0, 0, 1.40, 0.45, THICK + 0.25);
+    m.merge(buildBevelBox(0.10), x, 0.45, 0, 1.05, DECK - 0.45, THICK);
+    // Corbel under the deck — the shadow line that tells you how thick it is.
+    m.merge(buildBevelBox(0.10), x, DECK - 0.30, 0, 1.38, 0.30, THICK + 0.30);
   }
+
+  // Ring and spandrel: one block per column, from the intrados up to the deck.
+  const COLS = 9;
+  for (let i = 0; i < COLS; i++) {
+    const w = (SPAN * 2) / COLS;
+    const x = -SPAN + (i + 0.5) * w;
+    const yBot = SPRING + Math.sqrt(Math.max(0, SPAN * SPAN - x * x));
+    m.merge(buildBevelBox(0.06), x, yBot, 0, w * 1.04, DECK - yBot, THICK);
+  }
+
+  // The channel itself: a slab with a kerb either side, the far kerb broken
+  // through in the middle so the silhouette is not a ruled line.
+  m.merge(buildBevelBox(0.08), 0, DECK, 0, 6.30, 0.42, THICK + 0.15);
+  m.merge(buildBevelBox(0.10), 0, DECK + 0.42, 0.56, 6.30, 0.55, 0.32);
+  m.merge(buildBevelBox(0.10), -2.15, DECK + 0.42, -0.56, 2.00, 0.55, 0.32);
   return m;
 }
 

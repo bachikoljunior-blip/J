@@ -14,6 +14,7 @@
 
 import { Noise2D, makeRng, hashSeed, hash2 } from '../core/rng.js';
 import { clamp, lerp, smoothstep, saturate } from '../core/math.js';
+import { buildStructure, SETPIECES } from './structures.js';
 
 export const WORLD_SIZE = 2560;
 export const WORLD_HALF = WORLD_SIZE / 2;
@@ -209,6 +210,52 @@ export const REGIONS = [
     biome: BIOME.SNOW, level: 48,
     blurb: '世界の屋根。残り火の王が待つ。',
   },
+];
+
+/**
+ * Where the thirteen landmarks stand, and how each one is turned.
+ *
+ * The set-pieces themselves live in structures.js; this is the level design —
+ * which region gets which, and the three things that decide whether you ever
+ * see it: how far out from the region centre it sits, on what kind of ground,
+ * and which way it faces.
+ *
+ * `bearing` is measured from the direction back to the world centre, which is
+ * the direction you arrive from, so bearing 0 is on the approach and ±pi is
+ * deep in the region. Every region gets one of each: one you meet on the way
+ * in and one you have to go looking for. Between the two, no part of the island
+ * is more than a few hundred metres from something on the skyline.
+ *
+ * `site` picks the ground:
+ *   summit  the local high point, so it stands against sky from every side
+ *   rise    a shoulder — visible from below, hidden again as you climb
+ *   saddle  the pass, which everything crossing the ridge has to walk through
+ *   low     down at the waterline, the one thing you look down at
+ *
+ * `facing`:
+ *   in      turned to face the way you arrive from
+ *   across  turned square to it, so the road runs through rather than at it
+ *   gap     turned to whichever bearing has the deepest ground in the middle,
+ *           which is how the aqueduct finds a valley and the span a chasm
+ *
+ * `terrace` cuts a real platform of that many metres with a ramp onto it, so
+ * the vertical set-pieces have ground you can climb and fight on rather than
+ * a mesh you bump into.
+ */
+const LANDMARK_SITES = [
+  { region: 'meadow', variant: 'gate', bearing: 0.35, reach: 0.62, site: 'rise', facing: 'across', road: true },
+  { region: 'meadow', variant: 'henge', bearing: 2.45, reach: 0.80, site: 'summit', facing: 'in', road: true },
+  { region: 'wood', variant: 'watchtower', bearing: -0.55, reach: 0.66, site: 'summit', facing: 'in', road: true, terrace: 7 },
+  { region: 'wood', variant: 'greatstump', bearing: 2.90, reach: 0.42, site: 'rise', facing: 'in' },
+  { region: 'mire', variant: 'belltower', bearing: 0.75, reach: 0.60, site: 'low', facing: 'in' },
+  { region: 'mire', variant: 'pilings', bearing: -2.35, reach: 0.78, site: 'low', facing: 'across' },
+  { region: 'ridge', variant: 'gatekeep', bearing: 0.20, reach: 0.52, site: 'saddle', facing: 'across', road: true, terrace: 6 },
+  { region: 'ridge', variant: 'stele', bearing: -2.60, reach: 0.76, site: 'summit', facing: 'in' },
+  { region: 'crag', variant: 'colossus', bearing: 0.60, reach: 0.54, site: 'rise', facing: 'in' },
+  { region: 'crag', variant: 'span', bearing: -2.20, reach: 0.80, site: 'rise', facing: 'gap', gapReach: 29 },
+  { region: 'waste', variant: 'aqueduct', bearing: -0.40, reach: 0.66, site: 'rise', facing: 'gap', gapReach: 90 },
+  { region: 'waste', variant: 'crown', bearing: 2.70, reach: 0.78, site: 'summit', facing: 'in' },
+  { region: 'peak', variant: 'beacon', bearing: 0.15, reach: 0.40, site: 'summit', facing: 'in', road: true, terrace: 9 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -786,11 +833,13 @@ export class World {
 
     yield 0.76;
     this._placeRegionSites();
-    yield 0.84;
+    yield 0.82;
     this._buildRoads();
-    yield 0.92;
+    yield 0.88;
+    this._placeLandmarks();
+    yield 0.94;
     this._placeScatteredPois();
-    yield 0.97;
+    yield 0.98;
     this._chooseSpawn();
     yield 1.0;
   }
@@ -943,6 +992,198 @@ export class World {
           x: spot.x, z: spot.z, region: region.id, radius: 22, cleared: false, discovered: false,
         });
       }
+    }
+  }
+
+  // -- landmarks ------------------------------------------------------------
+
+  /**
+   * Ground that puts a structure against the sky.
+   *
+   * The measure is prominence, not altitude: how far the point stands above the
+   * mean of a ring 120 m out. A high shoulder of a higher mountain is invisible
+   * from below because the mountain is behind it; a modest knoll with land
+   * falling away on every side is not. That difference is the entire reason the
+   * island had nothing you could navigate by — the tall structures it did have
+   * were dropped on `findFlatSpot`, which optimises for the exact opposite
+   * thing, the flattest ground it can reach.
+   *
+   * @param {'summit'|'rise'|'saddle'|'low'} mode which of those it should find
+   * @returns {{x:number, z:number, y:number, prominence:number}}
+   */
+  findProminentSpot(cx, cz, searchRadius, mode, rng = this.rng) {
+    const RING = 120, N = 12;
+    let best = null, bestScore = -Infinity;
+    for (let i = 0; i < 200; i++) {
+      const a = rng() * Math.PI * 2;
+      const r = Math.sqrt(rng()) * searchRadius;
+      const x = cx + Math.cos(a) * r;
+      const z = cz + Math.sin(a) * r;
+      if (Math.abs(x) > WORLD_HALF - 110 || Math.abs(z) > WORLD_HALF - 110) continue;
+      const h = this.heightAt(x, z);
+      if (mode === 'low' ? (h < WATER_LEVEL + 0.2 || h > WATER_LEVEL + 4.5) : h < WATER_LEVEL + 6) continue;
+      const slope = this.slopeAt(x, z);
+      // Nothing may land on top of something already placed, and a landmark
+      // wants its own horizon rather than a camp in front of it.
+      let clear = true;
+      for (const p of this.pois) {
+        if (Math.hypot(p.x - x, p.z - z) < 115) { clear = false; break; }
+      }
+      if (!clear) continue;
+
+      let score;
+      if (mode === 'low') {
+        score = -Math.abs(h - (WATER_LEVEL + 1.6)) * 3 - slope * 20;
+      } else {
+        if (slope > 0.30) continue;              // it has to stand up somewhere
+        let ring = 0;
+        for (let k = 0; k < N; k++) {
+          const b = (k / N) * Math.PI * 2;
+          ring += this.heightAt(x + Math.cos(b) * RING, z + Math.sin(b) * RING);
+        }
+        const prom = h - ring / N;
+        score = mode === 'saddle'
+          // A saddle is high ground that is deliberately *not* a summit: the
+          // low point of a ridge line, which is where a gate belongs.
+          ? h * 0.10 - Math.abs(prom) * 1.2
+          : prom * (mode === 'summit' ? 1.0 : 0.6) + h * (mode === 'summit' ? 0.05 : 0.02);
+      }
+      score -= (r / searchRadius) * 1.5;
+      if (score > bestScore) {
+        bestScore = score;
+        best = { x, z, y: h, prominence: 0 };
+      }
+    }
+    if (!best) {
+      const f = this.findFlatSpot(cx, cz, searchRadius, 0.32, rng);
+      best = { x: f.x, z: f.z, y: f.y, prominence: 0 };
+    }
+    return best;
+  }
+
+  /**
+   * The bearing across a point with the deepest ground in the middle of it.
+   *
+   * Used by the aqueduct and the fallen span, both of which are only
+   * interesting where the land drops away underneath them: an arcade on level
+   * ground is a wall, and a broken bridge over nothing is two towers.
+   */
+  _gapBearing(cx, cz, reach) {
+    let bestA = 0, bestDrop = -Infinity;
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI;
+      const ha = this.heightAt(cx + Math.cos(a) * reach, cz + Math.sin(a) * reach);
+      const hb = this.heightAt(cx - Math.cos(a) * reach, cz - Math.sin(a) * reach);
+      const hm = this.heightAt(cx, cz);
+      const drop = (ha + hb) * 0.5 - hm;
+      if (drop > bestDrop) { bestDrop = drop; bestA = a; }
+    }
+    return bestA;
+  }
+
+  /**
+   * Raise a platform you can stand on and cut the ramp that gets you up there.
+   *
+   * Terrain, not geometry, because heightAt() is the only thing the player
+   * actually walks on — a stair built out of props is a stair you fall through.
+   * The ramp is stamped after the platform so it always meets it, and it is
+   * shallow enough (about one in five) that you can run up it under weight.
+   */
+  _terrace(cx, cz, radius, rise, rampAngle) {
+    const target = this.heightAt(cx, cz) + rise;
+    const foot = this.heightAt(cx + Math.cos(rampAngle) * radius * 2.4,
+      cz + Math.sin(rampAngle) * radius * 2.4);
+    this._stampPad(cx, cz, radius, target, 0.95, radius * 0.55);
+    const steps = 48;
+    for (let s = 0; s <= steps; s++) {
+      const u = s / steps;
+      const d = lerp(radius * 2.4, radius * 0.45, u);
+      const h = lerp(foot, target, smoothstep(u));
+      this._stampPad(cx + Math.cos(rampAngle) * d, cz + Math.sin(rampAngle) * d, 8.5, h, 0.9, 3.5);
+    }
+  }
+
+  /**
+   * Pull a disc of terrain toward a given height, flat in the middle and
+   * feathered at the rim. The one primitive both the platform and its ramp are
+   * built from.
+   */
+  _stampPad(cx, cz, radius, target, strength, flatRadius = 0) {
+    const gx0 = Math.max(0, Math.floor(this.worldToGrid(cx - radius)));
+    const gx1 = Math.min(GRID - 1, Math.ceil(this.worldToGrid(cx + radius)));
+    const gz0 = Math.max(0, Math.floor(this.worldToGrid(cz - radius)));
+    const gz1 = Math.min(GRID - 1, Math.ceil(this.worldToGrid(cz + radius)));
+    const span = Math.max(0.001, radius - flatRadius);
+    for (let iz = gz0; iz <= gz1; iz++) {
+      const wz = this.gridToWorld(iz);
+      for (let ix = gx0; ix <= gx1; ix++) {
+        const wx = this.gridToWorld(ix);
+        const d = Math.hypot(wx - cx, wz - cz);
+        if (d > radius) continue;
+        const t = 1 - smoothstep(saturate((d - flatRadius) / span));
+        const i = iz * GRID + ix;
+        this.height[i] = lerp(this.height[i], target, t * strength);
+      }
+    }
+  }
+
+  /**
+   * Place the thirteen landmarks.
+   *
+   * Runs after the roads so the ground under each one has stopped moving, and
+   * before the scattered chests so those keep their distance. Each landmark's
+   * height is *measured* off the structure that gets built rather than declared
+   * here: the number is what decides how far away the thing is still worth
+   * looking at, so it has to come from the geometry and not from an intention.
+   */
+  _placeLandmarks() {
+    const rng = makeRng(this.seed ^ 0x1a2dcb);
+    for (const spec of LANDMARK_SITES) {
+      const region = REGIONS.find((r) => r.id === spec.region);
+      const set = SETPIECES[spec.variant];
+      if (!region || !set) continue;
+
+      const towardCentre = Math.atan2(-region.cz, -region.cx);
+      const a = towardCentre + spec.bearing;
+      const spot = this.findProminentSpot(
+        region.cx + Math.cos(a) * region.radius * spec.reach,
+        region.cz + Math.sin(a) * region.radius * spec.reach,
+        180, spec.site, rng);
+
+      const inward = Math.atan2(-spot.z, -spot.x);
+      const yaw = spec.facing === 'gap' ? this._gapBearing(spot.x, spot.z, spec.gapReach || 60)
+        : spec.facing === 'across' ? inward + Math.PI / 2
+          : inward;
+
+      // A spur off the existing network. It stops short of the site so the
+      // road bed's own smoothing never touches the ground the landmark is
+      // measured on — and so the last stretch is walked, not driven.
+      if (spec.road) {
+        let hub = null, hubD = Infinity;
+        for (const p of this.pois) {
+          if (p.kind !== 'grace' && p.kind !== 'village' && p.kind !== 'ruin' && p.kind !== 'mini') continue;
+          const d = Math.hypot(p.x - spot.x, p.z - spot.z);
+          if (d < hubD) { hubD = d; hub = p; }
+        }
+        if (hub) {
+          const toHub = Math.atan2(hub.z - spot.z, hub.x - spot.x);
+          this._carveRoad(hub, { x: spot.x + Math.cos(toHub) * 60, z: spot.z + Math.sin(toHub) * 60 });
+        }
+      }
+
+      if (spec.terrace) this._terrace(spot.x, spot.z, 30, spec.terrace, inward);
+
+      const poi = this.addPoi({
+        kind: 'landmark', id: `landmark_${region.id}_${spec.variant}`,
+        variant: spec.variant, name: set.name, reading: set.reading,
+        x: spot.x, z: spot.z, yaw, region: region.id,
+        landmark: true, vertical: !!set.vertical, radius: 40,
+        cleared: false, discovered: false,
+      });
+      // Build it once here purely to read its height back off the props that
+      // were actually placed. game.js builds and caches its own copy from the
+      // same seed, so this costs a few hundred microseconds and never diverges.
+      poi.height = buildStructure(this, poi).height;
     }
   }
 

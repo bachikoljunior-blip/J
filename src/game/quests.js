@@ -301,12 +301,12 @@ export const NPCS = {
   harum: {
     id: 'harum', name: '村長ハラム', role: 'quest', region: 'meadow',
     palette: { SKIN: [0.68, 0.54, 0.44], CLOTH: [0.36, 0.30, 0.22], ARMOR: [0.34, 0.28, 0.22], HAIR: [0.72, 0.70, 0.66] },
-    dialogue: 'harum',
+    dialogue: 'harum', voice: 'elder',
   },
   mira: {
     id: 'mira', name: '行商人ミラ', role: 'merchant', region: 'meadow',
     palette: { SKIN: [0.74, 0.58, 0.46], CLOTH: [0.30, 0.24, 0.36], ARMOR: [0.32, 0.26, 0.38], HAIR: [0.22, 0.16, 0.12], ACCENT: [0.62, 0.44, 0.18] },
-    dialogue: 'mira',
+    dialogue: 'mira', voice: 'merchant',
     stock: [
       'flask_hp', 'herb_green', 'antidote', 'throwing_knife', 'firebomb',
       'stone_whet', 'resin_fire', 'homeward', 'mat_shard',
@@ -317,42 +317,42 @@ export const NPCS = {
   dorg: {
     id: 'dorg', name: '鍛冶師ドルグ', role: 'smith', region: 'meadow',
     palette: { SKIN: [0.60, 0.44, 0.34], CLOTH: [0.28, 0.24, 0.22], ARMOR: [0.36, 0.32, 0.28], HAIR: [0.34, 0.24, 0.14], LEATHER: [0.26, 0.20, 0.15] },
-    dialogue: 'dorg',
+    dialogue: 'dorg', voice: 'smith',
   },
   vane: {
     id: 'vane', name: '誓約者ヴェイン', role: 'quest', region: 'ridge',
     palette: { SKIN: [0.58, 0.46, 0.40], CLOTH: [0.28, 0.20, 0.20], ARMOR: [0.48, 0.46, 0.44], ACCENT: [0.68, 0.56, 0.22], HAIR: [0.18, 0.16, 0.14] },
-    dialogue: 'vane',
+    dialogue: 'vane', voice: 'knight',
   },
   sera: {
     id: 'sera', name: '灰纏いのセラ', role: 'quest', region: 'waste',
     palette: { SKIN: [0.66, 0.52, 0.44], CLOTH: [0.36, 0.28, 0.25], ARMOR: [0.32, 0.25, 0.22], ACCENT: [0.76, 0.38, 0.18], HAIR: [0.46, 0.22, 0.12] },
-    dialogue: 'sera',
+    dialogue: 'sera', voice: 'ash',
   },
   io: {
     id: 'io', name: '灯守イオ', role: 'quest', region: 'wood',
     palette: { SKIN: [0.70, 0.58, 0.48], CLOTH: [0.26, 0.32, 0.24], ARMOR: [0.28, 0.34, 0.26], LEATHER: [0.26, 0.24, 0.18], ACCENT: [0.86, 0.72, 0.34], HAIR: [0.30, 0.26, 0.18] },
-    dialogue: 'io',
+    dialogue: 'io', voice: 'keeper',
   },
   grim: {
     id: 'grim', name: '墓掘りグリム', role: 'quest', region: 'mire',
     palette: { SKIN: [0.54, 0.48, 0.42], CLOTH: [0.24, 0.26, 0.22], ARMOR: [0.28, 0.28, 0.24], LEATHER: [0.28, 0.22, 0.16], ACCENT: [0.46, 0.44, 0.38], HAIR: [0.20, 0.20, 0.18] },
-    dialogue: 'grim',
+    dialogue: 'grim', voice: 'grave',
   },
   nei: {
     id: 'nei', name: '隠者ネイ', role: 'quest', region: 'crag',
     palette: { SKIN: [0.62, 0.56, 0.50], CLOTH: [0.34, 0.36, 0.40], ARMOR: [0.36, 0.38, 0.42], LEATHER: [0.30, 0.28, 0.26], ACCENT: [0.60, 0.64, 0.72], HAIR: [0.74, 0.72, 0.68] },
-    dialogue: 'nei',
+    dialogue: 'nei', voice: 'hermit',
   },
   lusha: {
     id: 'lusha', name: '唄い手ルシャ', role: 'quest', region: 'peak',
     palette: { SKIN: [0.72, 0.62, 0.56], CLOTH: [0.30, 0.36, 0.44], ARMOR: [0.32, 0.38, 0.46], LEATHER: [0.28, 0.30, 0.34], ACCENT: [0.78, 0.86, 0.96], HAIR: [0.84, 0.86, 0.90] },
-    dialogue: 'lusha',
+    dialogue: 'lusha', voice: 'singer',
   },
   kaim: {
     id: 'kaim', name: '賞金首買いカイム', role: 'merchant', region: 'ridge',
     palette: { SKIN: [0.58, 0.44, 0.36], CLOTH: [0.26, 0.22, 0.24], ARMOR: [0.40, 0.36, 0.30], LEATHER: [0.30, 0.24, 0.18], ACCENT: [0.60, 0.50, 0.20], HAIR: [0.16, 0.14, 0.12] },
-    dialogue: 'kaim',
+    dialogue: 'kaim', voice: 'broker',
     stock: [
       'flask_fp', 'blood_stanch', 'warm_stone', 'throwing_spike', 'pot_poison',
       'oil_black', 'herb_iron', 'mat_shard', 'shield_buckler', 'dagger_venom',
@@ -1100,6 +1100,72 @@ export const DIALOGUE = {
     },
   },
 };
+
+// ---------------------------------------------------------------------------
+//  Giving the trees a speaker
+//
+//  Nobody recorded these lines and nobody will. What the audio engine can do
+//  is put a person behind them: each NPC owns a timbre, and a line is spoken
+//  in an invented phonology whose syllables and pitch contour are derived from
+//  the written text — so the same line always sounds the same, a long line
+//  takes longer, a question ends up, and none of it is ever a real word. See
+//  the Voice section of core/audio.js.
+//
+//  The hook is here rather than in the UI because the moment a line is spoken
+//  is exactly the moment something asks the node for its text. Wrapping `text`
+//  leaves the trees above completely untouched — same words, same branches,
+//  same conditions — and means a line written next week is voiced without
+//  anybody remembering to wire it up.
+// ---------------------------------------------------------------------------
+
+/** NPC id → VOICE_TIMBRES key in core/audio.js. */
+export const NPC_VOICE = {};
+for (const id in NPCS) NPC_VOICE[id] = NPCS[id].voice;
+
+/**
+ * Speak one rendered dialogue line, in the speaker's voice, from where the
+ * speaker is standing.
+ * @param {{q: object, p: object, g: object}} ctx  the dialogue render context
+ * @param {string} speakerId  NPC id, used when the tree is opened without one
+ * @param {string} nodeId     dialogue node id — dedupes a repeated render
+ * @param {string} line       the text exactly as the player will read it
+ * @returns {number} duration in seconds, 0 if nothing was spoken
+ */
+export function speakDialogueLine(ctx, speakerId, nodeId, line) {
+  const g = ctx && ctx.g;
+  const audio = g && g.audio;
+  if (!audio || typeof audio.speakLine !== 'function' || !line) return 0;
+
+  const npc = g.dialogue && g.dialogue.npc;
+  const def = (npc && npc.npcDef) || NPCS[speakerId];
+  const cam = g.player && g.player.camera;
+  // Place the ears at the camera, not the body: during a conversation the
+  // camera is the only thing that knows which way the player is facing.
+  if (cam && cam.pos && typeof audio.setListener === 'function') {
+    audio.setListener(cam.pos.x, cam.pos.y, cam.pos.z, cam.yaw);
+  }
+  return audio.speakLine(line, {
+    voice: (def && def.voice) || 'knight',
+    x: npc ? npc.x : undefined,
+    y: npc ? (npc.y || 0) + 1.45 : undefined,
+    z: npc ? npc.z : undefined,
+    key: `dlg:${speakerId}:${nodeId}`,
+  });
+}
+
+for (const treeId in DIALOGUE) {
+  const tree = DIALOGUE[treeId];
+  for (const nodeId in tree) {
+    const node = tree[nodeId];
+    if (!node || node.text === undefined) continue;
+    const written = node.text;
+    node.text = (ctx) => {
+      const line = typeof written === 'function' ? written(ctx) : written;
+      speakDialogueLine(ctx, treeId, nodeId, line);
+      return line;
+    };
+  }
+}
 
 // ---------------------------------------------------------------------------
 //  Tracker

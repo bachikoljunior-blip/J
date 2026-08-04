@@ -25,7 +25,7 @@ import { Scatter, GrassField, PROP, CLUTTER_STRIDE, FEATURE_STRIDE } from '../wo
 import { buildStructure, SPROP, pickEnemy } from '../world/structures.js';
 
 import { Actor, STATE, FACTION, defaultPalette } from './actor.js';
-import { MAT } from './rig.js';
+import { MAT, bindWorldSource } from './rig.js';
 import { Player, CLASSES, levelCost } from './player.js';
 import { Enemy, ARCHETYPES, spawnLootFor } from './enemies.js';
 import { Boss, BOSSES, MINI_BOSSES, createMiniBoss } from './bosses.js';
@@ -204,6 +204,35 @@ export class Game {
   //  Boot
   // -------------------------------------------------------------------------
 
+  /**
+   * Nearest living body to a point, for rigs deciding what to look at.
+   * Whoever is asking is standing at (x, z), so anything inside half a metre is
+   * the looker itself and must not be returned — a character staring at its own
+   * navel is the failure mode this guards against.
+   */
+  _gazeNear(x, z, maxDist) {
+    const lock = this.player && this.player.lockTarget;
+    if (lock && !lock.dead) {
+      const px = this.player.x - x, pz = this.player.z - z;
+      if (px * px + pz * pz < 0.36) return lock;
+    }
+    let best = null;
+    let bestD = maxDist * maxDist;
+    const consider = (a) => {
+      if (!a || a.dead || a.visible === false) return;
+      const dx = a.x - x, dz = a.z - z;
+      const d2 = dx * dx + dz * dz;
+      if (d2 < 0.36 || d2 >= bestD) return;
+      bestD = d2; best = a;
+    };
+    consider(this.player);
+    for (const list of [this.enemies, this.npcs]) {
+      if (!list) continue;
+      for (let i = 0; i < list.length; i++) consider(list[i]);
+    }
+    return best;
+  }
+
   /** Generator so the loading screen can report real progress. */
   *boot(seedStr = 'aldrath') {
     yield { p: 0.02, label: '大地を編んでいる' };
@@ -214,6 +243,16 @@ export class Game {
       yield { p: 0.02 + step.value * 0.62, label: '大地を編んでいる' };
       step = gen.next();
     }
+
+    // Rigs need the height field under their feet and somebody to look at, and
+    // a rig is built deep inside an actor that is handed neither. rig.js falls
+    // back to reading the running game off a global; binding it here is the
+    // same thing done properly, and it is what lets a test harness or a model
+    // viewer stand a character in a different world.
+    bindWorldSource({
+      heightAt: (x, z) => this.world.heightAt(x, z),
+      gazeNear: (x, z, maxDist) => this._gazeNear(x, z, maxDist),
+    });
 
     yield { p: 0.66, label: '木々を植えている' };
     this.scatter = new Scatter(this.world);
