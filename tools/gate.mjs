@@ -35,7 +35,7 @@
 // ============================================================================
 
 import { spawn } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, appendFileSync } from 'node:fs';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const STATE = `${ROOT}docs/GATE.md`;
@@ -105,8 +105,34 @@ const failuresOf = (out) => {
   return lines.slice(i + 1).filter((l) => l.trim().startsWith('- ')).map((l) => l.trim());
 };
 
+/**
+ * A fingerprint of one attempt: which targets are unmet and at what values.
+ *
+ * Two attempts with the same fingerprint mean the loop learned nothing between
+ * them. That is the signature of a loop burning wall-clock and producing
+ * nothing, and it is invisible from inside a single attempt — which is exactly
+ * why it has to be detected here rather than left to whoever is watching.
+ */
+const signatureOf = (failures) => failures.slice().sort().join('|');
+
+/** Append one line per attempt as it finishes, so a killed run still tells you why. */
+const journal = (line) => {
+  try {
+    appendFileSync(`${ROOT}docs/GATE-LOG.md`, `${line}\n`);
+  } catch { /* the log is a convenience; never let it stop the loop */ }
+};
+
+if (!ON_FAIL && MAX_ATTEMPTS > REQUIRED_STREAK) {
+  console.log('注意: --on-fail が無い。未達が出ても何も変わらないので、'
+    + `試行は ${REQUIRED_STREAK} 回で打ち切る。`);
+  console.log('  修正まで回すなら: node tools/gate.mjs --on-fail "<修正コマンド>"');
+}
+
 const history = [];
 let streak = 0;
+let lastSignature = null;
+let stalled = 0;
+let stalledOut = false;
 
 for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
   console.log(`\n══════ 品質ゲート 試行 ${attempt}/${MAX_ATTEMPTS}` +
@@ -119,6 +145,34 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
 
   console.log(`\n── 試行 ${attempt}: ${pass ? 'PASS' : 'FAIL'} (${score ?? '?'}/100), ` +
     `連続合格 ${streak}/${REQUIRED_STREAK}`);
+  const sig = signatureOf(history[history.length - 1].failures);
+  journal(`- 試行 ${attempt} — ${pass ? 'PASS' : 'FAIL'} ${score ?? '?'}/100, `
+    + `未達 ${history[history.length - 1].failures.length} 件`
+    + `${sig === lastSignature ? '  ← 前回と同一' : ''}`);
+
+  // Stall detection. An attempt that reproduces the previous one exactly means
+  // nothing moved, and continuing costs another full measurement to learn the
+  // same thing again.
+  if (!pass && sig === lastSignature) {
+    stalled++;
+    if (!ON_FAIL) {
+      console.log('\n同じ未達が2回続いた。--on-fail が無いので、'
+        + 'この先は同じ計測を繰り返すだけになる。ここで止める。');
+      stalledOut = true;
+      break;
+    }
+    if (stalled >= 2) {
+      console.log(`\n修正コマンドを ${stalled} 回実行したが、未達の内容も値も動いていない。`);
+      console.log('同じ計測を繰り返しても学べることはないので止める。');
+      console.log('原因を切り分けること——修正が対象に届いていないか、'
+        + '計測側が実際とは別のものを見ている可能性が高い。');
+      stalledOut = true;
+      break;
+    }
+  } else if (!pass) {
+    stalled = 0;
+  }
+  lastSignature = sig;
 
   if (streak >= REQUIRED_STREAK) {
     if (!ON_PASS) break;
@@ -180,9 +234,12 @@ writeFileSync(STATE, md);
 // bar. docs/FALSIFY.md keeps the record of the four times that was mistaken for
 // the other thing.
 console.log(`\n══════ ${finalPass ? '品質ゲート合格（暫定） — 基準が測っていない領域を疑うこと'
-  : '品質ゲート未達 — 開発継続'} ══════`);
+  : stalledOut ? '品質ゲート停滞 — 同じ結果が繰り返された。原因の切り分けが要る'
+    : '品質ゲート未達 — 開発継続'} ══════`);
 if (finalPass && !ON_PASS) {
   console.log('--on-pass が無いのでここで止まるが、これは「完成した」という意味ではない。');
   console.log('docs/FALSIFY.md の「今わかっている測っていないもの」を見ること。');
 }
-process.exitCode = finalPass ? 0 : 1;
+// 0 pass, 1 unmet, 2 stalled. A driver that cannot tell "still working" from
+// "going in circles" will happily go in circles for hours.
+process.exitCode = finalPass ? 0 : stalledOut ? 2 : 1;
