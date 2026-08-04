@@ -58,19 +58,36 @@ const stubPlayer = (over = {}) => ({
  * Run a scenario and report the worst single-frame view rotation and orbit
  * step. `drive(f)` may move the player, hand back a lock target, or both.
  */
-function scenario(name, world, drive, frames = 120) {
-  let worstRate = 0, worstDollyRate = 0, minClear = Infinity;
+/**
+ * `opts.finiteOnly` asserts that the camera stays finite without also demanding
+ * that it move smoothly.
+ *
+ * Continuity is a promise about a continuous world. A height field that answers
+ * NaN in one-metre bands between real values is discontinuous by construction,
+ * and no camera can follow it smoothly — demanding that would be asking the
+ * engine to invent information the world did not give it. What it CAN promise
+ * is that an unanswerable sample never produces a non-finite eye, because a
+ * non-finite eye renders nothing at all.
+ *
+ * The alternative was to loosen the caps until this case passed, which would
+ * have loosened them for every case that is a genuine continuity test.
+ */
+function scenario(name, world, drive, frames = 120, opts = {}) {
+  let worstRate = 0, worstDollyRate = 0, minClear = Infinity, nonFinite = false;
   for (const fps of RATES) {
     const r = once(name, world, drive, Math.round(frames * fps / 60), 1 / fps);
     if (r.view > worstRate) worstRate = r.view;
     if (r.dolly > worstDollyRate) worstDollyRate = r.dolly;
     if (r.clear < minClear) minClear = r.clear;
+    if (r.nonFinite) nonFinite = true;
   }
-  const ok = worstRate <= VIEW_CAP && worstDollyRate <= DOLLY_CAP && minClear >= CLEARANCE_MIN;
+  const ok = !nonFinite && (opts.finiteOnly
+    || (worstRate <= VIEW_CAP && worstDollyRate <= DOLLY_CAP && minClear >= CLEARANCE_MIN));
   if (!ok) failures++;
   console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${name.padEnd(30)} ` +
     `視線 ${worstRate.toFixed(2)} rad/s  ドリー ${worstDollyRate.toFixed(2)} m/s  ` +
-    `地面クリア ${minClear.toFixed(2)} m`);
+    `地面クリア ${minClear === Infinity ? '—' : minClear.toFixed(2)} m` +
+    `${opts.finiteOnly ? '  (有限性のみ)' : ''}${nonFinite ? '  ← 位置が非有限' : ''}`);
   return { worstRate, worstDollyRate, minClear };
 }
 
@@ -81,13 +98,15 @@ function once(name, world, drive, frames, DT) {
   let prevDir = null, prevOrbit = null;
   let worstView = 0, worstOrbit = 0, atView = -1, atOrbit = -1;
   let minClear = Infinity;
+  let nonFinite = false;
 
   // Settle on the opening conditions first. A camera constructed at its
   // defaults spends its first frames arriving, and that is not a cut.
   const K = DT * 60;
   const first = drive(0, K) || {};
   Object.assign(player, first.player || {});
-  player.y = world.heightAt(player.x, player.z);
+  const ph0 = world.heightAt(player.x, player.z);
+  player.y = Number.isFinite(ph0) ? ph0 : 0;
   for (let w = 0; w < 40; w++) cam.update(DT, noLook, world, first.lock || null);
 
   for (let f = 0; f < frames; f++) {
@@ -95,14 +114,29 @@ function once(name, world, drive, frames, DT) {
     Object.assign(player, d.player || {});
     // The player stands on the ground. Without this the body sinks into a rise
     // and the boom collides with terrain the player is supposedly inside.
-    player.y = world.heightAt(player.x, player.z);
+    //
+    // An unanswerable sample keeps the last good height rather than moving the
+    // player to NaN: the game never lets a body reach a coordinate the height
+    // field cannot answer for, so a harness that does is testing a condition
+    // the camera is not responsible for. What IS the camera's responsibility is
+    // surviving an unanswerable sample from its own boom march, which reaches
+    // past the player by several metres.
+    const ph = world.heightAt(player.x, player.z);
+    if (Number.isFinite(ph)) player.y = ph;
     cam.update(DT, noLook, world, d.lock || null);
 
     const vx = cam.look.x - cam.pos.x, vy = cam.look.y - cam.pos.y, vz = cam.look.z - cam.pos.z;
     const vl = Math.hypot(vx, vy, vz) || 1;
     const dir = [vx / vl, vy / vl, vz / vl];
     const orbit = Math.hypot(cam.pos.x - cam.focusX, cam.pos.y - cam.focusY, cam.pos.z - cam.focusZ);
-    const clear = cam.pos.y - world.heightAt(cam.pos.x, cam.pos.z);
+    // A camera that has gone non-finite renders nothing at all, so this is
+    // checked before anything else and reported as its own failure.
+    if (!Number.isFinite(cam.pos.x) || !Number.isFinite(cam.pos.y) || !Number.isFinite(cam.pos.z)
+      || !Number.isFinite(cam.look.x) || !Number.isFinite(cam.look.y) || !Number.isFinite(cam.look.z)) {
+      nonFinite = true;
+    }
+    const gh = world.heightAt(cam.pos.x, cam.pos.z);
+    const clear = Number.isFinite(gh) ? cam.pos.y - gh : Infinity;
     if (clear < minClear) minClear = clear;
 
     if (prevDir) {
@@ -116,7 +150,7 @@ function once(name, world, drive, frames, DT) {
   }
 
   void atView; void atOrbit;
-  return { view: worstView / DT, dolly: worstOrbit / DT, clear: minClear };
+  return { view: worstView / DT, dolly: worstOrbit / DT, clear: minClear, nonFinite };
 }
 
 console.log(`カメラの連続性 — 視線 ≤ ${VIEW_CAP} rad/s, ドリー ≤ ${DOLLY_CAP} m/s  (60/30/20fps)`);
@@ -144,6 +178,20 @@ scenario('ロックオン取得', flatWorld, (f, k) => (f > 40 / k ? { lock: tar
 scenario('ロックオン解除', flatWorld, (f, k) => (f < 40 / k ? { lock: target } : {}));
 scenario('ロックオン切替', flatWorld,
   (f, k) => (f > 40 / k && f < 80 / k ? { lock: target } : f >= 80 / k ? { lock: { x: -7, y: 0, z: 3, height: 1.8 } } : {}));
+
+// --- hostile terrain samples ------------------------------------------------
+// The world's height function is not guaranteed to answer for every coordinate
+// the camera asks about: the boom marches out past the player, and near a world
+// edge those samples leave the map. A damped accumulator poisoned by one
+// non-finite sample stays poisoned for the rest of the session, where the hard
+// max() it replaced recovered on the next frame. A NaN camera position renders
+// nothing, writes no depth, and produces a frame of pure sky — which is what
+// the audit measured while the game itself looked correct.
+const edgeWorld = stubWorld((x, z) => (Math.hypot(x, z) > 12 ? NaN : 0));
+scenario('世界の縁でNaNが返る', edgeWorld, (f, k) => ({ player: { x: -6 + f * 0.08 * k } }));
+const spikyNaN = stubWorld((x, z) => (Math.floor(Math.abs(z)) % 7 === 3 ? NaN : Math.sin(z * 0.2)));
+scenario('断続的にNaNが返る', spikyNaN, (f, k) => ({ player: { z: -f * 0.09 * k } }), 120,
+  { finiteOnly: true });
 
 // --- steep ground -----------------------------------------------------------
 // The case the removed max() was carrying: a slope rising behind the player, so

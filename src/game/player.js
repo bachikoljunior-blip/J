@@ -1079,7 +1079,10 @@ export class PlayerCamera {
       const sx = focusX + ox * t;
       const sy = focusY + oy * t;
       const sz = focusZ + oz * t;
-      const gap = sy - (world.heightAt(sx, sz) + CAM_SKIN);
+      const gh = world.heightAt(sx, sz);
+      // An unanswerable sample is not an obstruction. Treating it as one would
+      // pull the boom in for the rest of the walk along a world edge.
+      const gap = Number.isFinite(gh) ? sy - (gh + CAM_SKIN) : Infinity;
       if (gap < 0) {
         const t0 = ((i - 1) / 16) * this.distance;
         // Where along this segment the boom actually crossed the surface.
@@ -1127,13 +1130,52 @@ export class PlayerCamera {
     // and 88 degrees over in one frame. The boom solve above is what keeps the
     // camera out of geometry now; this is only for the last few centimetres of
     // ground roughness, so it is bounded and damped rather than absolute.
-    const liftWant = Math.min(CAM_MAX_LIFT,
-      Math.max(0, world.heightAt(px, pz) + 0.30 - naturalY));
-    this.groundLift = this.seeded ? damp(this.groundLift, liftWant, 12, dt) : liftWant;
+    const groundHere = world.heightAt(px, pz);
+    // An unanswerable sample is not a height of zero — it is no information.
+    // Forcing the target to zero made the lift oscillate wherever the height
+    // field could not answer on alternate frames, which moved the eye further
+    // than the boom limiter ever allows. Holding the current value is what
+    // "unknown" actually means.
+    const liftWant = Number.isFinite(groundHere)
+      ? Math.min(CAM_MAX_LIFT, Math.max(0, groundHere + 0.30 - naturalY))
+      : this.groundLift;
+    const liftNext = this.seeded ? damp(this.groundLift, liftWant, 12, dt) : liftWant;
+    // The lift moves the eye, so it spends the same budget the boom does and
+    // needs the same kind of bound. Without it the two together can step
+    // further in a frame than either is allowed to on its own.
+    const liftCap = CAM_BOOM_IN * dt;
+    this.groundLift += clamp(liftNext - this.groundLift, -liftCap, liftCap);
 
     this.pos.x = px + shakeX;
     this.pos.y = naturalY + this.groundLift + shakeY;
     this.pos.z = pz;
+
+    // A non-finite camera renders nothing: the view matrix is garbage, no
+    // geometry survives clipping, no depth is written, and the frame comes out
+    // as bare sky. Nothing upstream is supposed to produce one — the height
+    // field answers 0 for every coordinate including far outside the world —
+    // but this class now carries damped accumulators (boom, groundLift, aimOff)
+    // where it used to carry a hard max(), and a damped value poisoned once
+    // stays poisoned for the rest of the session. That turns a transient glitch
+    // into a permanent black screen, which is a much worse failure than the
+    // snap the damping was added to remove.
+    //
+    // So: notice, recover, and count. The count is what makes it a fact rather
+    // than a theory next time a frame comes back empty.
+    if (!Number.isFinite(this.pos.x) || !Number.isFinite(this.pos.y) || !Number.isFinite(this.pos.z)) {
+      this.nonFiniteFrames = (this.nonFiniteFrames || 0) + 1;
+      this.boom = this.distance;
+      this.groundLift = 0;
+      this.aimOff.x = 0; this.aimOff.y = 0; this.aimOff.z = 0;
+      const fy = Number.isFinite(focusY) ? focusY : (Number.isFinite(p.y) ? p.y + this.height : 0);
+      const fx = Number.isFinite(focusX) ? focusX : (Number.isFinite(p.x) ? p.x : 0);
+      const fz = Number.isFinite(focusZ) ? focusZ : (Number.isFinite(p.z) ? p.z : 0);
+      this.pos.x = fx; this.pos.y = fy + 1; this.pos.z = fz - this.distance;
+      this.focusX = fx; this.focusY = fy; this.focusZ = fz;
+      this.look.x = fx; this.look.y = fy; this.look.z = fz;
+      this._trk = null;
+      return;
+    }
 
     // --- where it is pointed -------------------------------------------------
     //
