@@ -167,6 +167,16 @@ try {
     };
   });
 
+  // Continuity is watched across every probe that follows, not just inside the
+  // window one probe drives for itself. A 90-frame window reported a number the
+  // limiter says is impossible and would not reproduce in a standalone harness
+  // running the same 90 frames, because the event was never in the window — it
+  // was in some earlier probe, and no window can see outside itself.
+  await page.evaluate(async () => {
+    const rig = await import('/src/game/rig.js');
+    rig.trackContinuity(true);
+  });
+
   // -------------------------------------------------------------------------
   //  System probes — behaviours, exercised rather than assumed
   // -------------------------------------------------------------------------
@@ -401,8 +411,15 @@ try {
       }
       prev.set(wr);
     }
-    out.maxPoseJump = maxJump;
-    out.jumpAt = jumpAt;
+    // The driven window, kept for comparison, and the session-wide figure,
+    // which is the one that counts. Every rig in the world is watched, so an
+    // enemy that snaps counts the same as the player doing it — the player
+    // does not have a monopoly on being looked at.
+    out.windowPoseJump = maxJump;
+    out.windowJumpAt = jumpAt;
+    const report = rig.continuityReport(8);
+    out.maxPoseJump = report ? report.maxSteady : maxJump;
+    out.continuity = report;
 
     // Hitstop and camera impulse: both must be observable, not declared.
     //
@@ -497,7 +514,17 @@ try {
   console.log(`  motion: footErr=${motion.footError.toFixed(3)} jump=${motion.maxPoseJump.toFixed(3)} ` +
     `hurtDirs=${motion.hurtDirections} hits=${motion.hitsLanded} ` +
     `hitstop=${motion.hitstop} shake=${motion.cameraImpulse}`);
-  if (motion.jumpAt) console.log(`  jump source: ${JSON.stringify(motion.jumpAt)}`);
+  if (motion.continuity) {
+    const c = motion.continuity;
+    console.log(`  continuity: ${c.frames}f ${c.rigs}rigs  steady=${c.maxSteady.toFixed(3)} ` +
+      `any=${c.maxAny.toFixed(3)}  window=${motion.windowPoseJump.toFixed(3)}`);
+    for (const e of c.worst.slice(0, 5)) {
+      console.log(`    f${e.frame} ${e.bone} ${e.ang.toFixed(3)} rad  host=${e.host} ` +
+        `state=${e.state} dt=${e.dt} blend=${e.blend} ik=${e.ik}`);
+    }
+  } else if (motion.windowJumpAt) {
+    console.log(`  jump source: ${JSON.stringify(motion.windowJumpAt)}`);
+  }
   console.log(`  place: setpieces=${place.setpieces} landmark=${Math.round(place.landmarkRange)}m ` +
     `named=${place.namedPlaces} vertical=${place.verticalStructures}`);
   console.log(`  voice: ${JSON.stringify(voice)}`);

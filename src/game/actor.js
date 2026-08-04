@@ -762,6 +762,9 @@ export class Actor {
     }
 
     this.blockImpact = Math.max(0, (this.blockImpact || 0) - dt * 5);
+    // Context for the continuity tracker, which sees the rig and not its host.
+    rig.hostState = this.state;
+    rig.hostTag = this.kind || this.archetype || (this.isPlayer ? 'player' : 'actor');
     rig.apply(dt, this.x, this.y, this.z, this.yaw);
   }
 

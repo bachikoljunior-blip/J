@@ -762,6 +762,57 @@ export const PROPORTIONS = {
 // order comes from the world seed, so this is reproducible.
 let RIG_PHASE = 0.31;
 
+// ---------------------------------------------------------------------------
+//  Continuity tracking
+//
+//  The audit used to measure pose continuity by watching one rig across a
+//  90-frame window it drove itself. That reported 0.364 rad/frame — above the
+//  limiter's own 0.27 cap, which should be impossible — and the number would
+//  not reproduce in a standalone harness running the identical 90 frames. Two
+//  diagnostics went looking for the difference between the harnesses and found
+//  none, because the window was never the thing that mattered: the limiter
+//  bounds `pose`, and `_ground` writes `worldRot` after it.
+//
+//  A probe that only watches its own window can only see the events inside it.
+//  This watches every rig on every frame it is enabled for, so whatever causes
+//  a discontinuity reports itself with its own context attached instead of
+//  having to be guessed at from one aggregate number.
+// ---------------------------------------------------------------------------
+
+let CONTINUITY = null;
+
+/** Start (or stop, and clear) session-wide continuity tracking. */
+export function trackContinuity(on = true) {
+  CONTINUITY = on ? { frame: 0, events: [], rigs: 0 } : null;
+}
+
+/** Advance the shared frame counter. Hosts call this once per rendered frame. */
+export function continuityFrame() {
+  if (CONTINUITY) CONTINUITY.frame++;
+}
+
+/**
+ * The worst frames seen since tracking began, worst first.
+ *
+ * `warped` marks a frame the rig was teleported on. Those are reported but
+ * kept separate: a body that was moved across the map did not *rotate* into
+ * its new orientation, and counting that as a snap would hide the ones that
+ * are real.
+ */
+export function continuityReport(limit = 12) {
+  if (!CONTINUITY) return null;
+  const ev = CONTINUITY.events.slice().sort((a, b) => b.ang - a.ang);
+  const steady = ev.filter((e) => !e.warped);
+  return {
+    frames: CONTINUITY.frame,
+    rigs: CONTINUITY.rigs,
+    maxAny: ev.length ? ev[0].ang : 0,
+    maxSteady: steady.length ? steady[0].ang : 0,
+    worst: steady.slice(0, limit),
+    worstWarped: ev.filter((e) => e.warped).slice(0, 4),
+  };
+}
+
 export class Rig {
   constructor(template, scale = 1) {
     this.template = compile(template);
@@ -930,6 +981,51 @@ export class Rig {
     this._damp(dt);
     this._skin(x, y, z, yaw);
     if (this.footIK) this._ground(dt, x, y, z);
+    if (CONTINUITY) this._continuity(dt);
+  }
+
+  /**
+   * Record how far the worst bone turned this frame, measured on the final
+   * world transforms — after the ground solver, which is the only place that
+   * can move a bone the limiter never charged for.
+   */
+  _continuity(dt) {
+    const wr = this.worldRot;
+    if (!this._contPrev) {
+      this._contPrev = new Float32Array(wr.length);
+      this._contPrev.set(wr);
+      CONTINUITY.rigs++;
+      return;
+    }
+    const prev = this._contPrev;
+    let worst = 0, at = 0;
+    for (let b = 0; b < wr.length; b += 9) {
+      const d = prev[b + 3] * wr[b + 3] + prev[b + 4] * wr[b + 4] + prev[b + 5] * wr[b + 5];
+      const ang = Math.acos(d > 1 ? 1 : d < -1 ? -1 : d);
+      if (ang > worst) { worst = ang; at = b / 9; }
+    }
+    prev.set(wr);
+    // Only frames worth explaining are kept, and the list is trimmed rather
+    // than grown without bound — a long session must not turn the diagnostic
+    // into the leak it is there to find.
+    if (worst > 0.12) {
+      const ev = CONTINUITY.events;
+      ev.push({
+        frame: CONTINUITY.frame,
+        bone: (this.template.boneList[at] || {}).name || `#${at}`,
+        ang: Math.round(worst * 1e4) / 1e4,
+        dt: Math.round(dt * 1e4) / 1e4,
+        state: this.hostState || '?',
+        host: this.hostTag || '?',
+        warped: !!this.warped,
+        blend: this.blendRate,
+        ik: this.footIK ? Math.round(this.ikWeight * 100) / 100 : null,
+      });
+      if (ev.length > 400) {
+        ev.sort((a, b) => b.ang - a.ang);
+        ev.length = 200;
+      }
+    }
   }
 
   /**

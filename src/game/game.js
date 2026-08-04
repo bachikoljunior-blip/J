@@ -25,7 +25,7 @@ import { Scatter, GrassField, PROP, CLUTTER_STRIDE, FEATURE_STRIDE } from '../wo
 import { buildStructure, SPROP, pickEnemy } from '../world/structures.js';
 
 import { Actor, STATE, FACTION, defaultPalette } from './actor.js';
-import { MAT, bindWorldSource } from './rig.js';
+import { MAT, bindWorldSource, continuityFrame } from './rig.js';
 import { Player, CLASSES, levelCost } from './player.js';
 import { Enemy, ARCHETYPES, spawnLootFor } from './enemies.js';
 import { Boss, BOSSES, MINI_BOSSES, createMiniBoss } from './bosses.js';
@@ -859,6 +859,7 @@ export class Game {
     this.time += dt;
     if (this.started && !this.paused) this.playtime += dt;
     this.frame++;
+    continuityFrame();
 
     // Timers run even while paused so scheduled fades still resolve.
     for (let i = this.timers.length - 1; i >= 0; i--) {
