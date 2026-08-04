@@ -77,11 +77,40 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > _site/BUILD.txt
           date -u '+%Y-%m-%d %H:%M UTC' >> _site/BUILD.txt
 
+      # `configure-pages` with enablement:true only *creates* a Pages site that
+      # does not exist. This repository already had one, serving the development
+      # branch, so enablement reported success and changed nothing — and deploy
+      # kept dying in one second with no steps at all, because the github-pages
+      # environment does not exist until the source is Actions. Converting an
+      # existing site is a different call, and this is it.
+      - name: 配信元を Actions に切り替える
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -u
+          url="https://api.github.com/repos/$GITHUB_REPOSITORY/pages"
+          auth="Authorization: Bearer $GH_TOKEN"
+          acc="Accept: application/vnd.github+json"
+          ver="X-GitHub-Api-Version: 2022-11-28"
+
+          get=$(curl -sS -o /tmp/pages.get -w '%{http_code}' \
+            -H "$auth" -H "$acc" -H "$ver" "$url")
+          echo "GET  /pages -> $get"; cat /tmp/pages.get; echo
+
+          # 404 means no site at all, which is the one case enablement handled.
+          if [ "$get" = "404" ]; then m=POST; else m=PUT; fi
+          code=$(curl -sS -o /tmp/pages.set -w '%{http_code}' -X "$m" \
+            -H "$auth" -H "$acc" -H "$ver" \
+            -d '{"build_type":"workflow"}' "$url")
+          echo "$m /pages -> $code"; cat /tmp/pages.set; echo
+
+          case "$code" in
+            200|201|204) echo "配信元 = workflow" ;;
+            *) echo "::error::Pages の配信元を Actions に切り替えられなかった。リポジトリの Settings → Pages → Source を GitHub Actions にする必要がある。"
+               exit 1 ;;
+          esac
+
       - uses: actions/configure-pages@v5
-        with:
-          # Switches the Pages source to Actions and creates the environment.
-          # Before this, Pages served the development branch directly.
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
