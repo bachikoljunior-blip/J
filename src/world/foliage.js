@@ -170,7 +170,20 @@ const CLUTTER_RULES = {
   [BIOME.OCEAN]: null,
   [BIOME.BEACH]: { d: 0.16, w: [0.30, 0.16, 0.12, 0.04, 0.30, 0.08, 0.00] },
   [BIOME.MEADOW]: { d: 0.62, w: [0.22, 0.14, 0.40, 0.02, 0.13, 0.02, 0.07] },
-  [BIOME.FOREST]: { d: 0.34, w: [0.14, 0.32, 0.26, 0.03, 0.09, 0.04, 0.12] },
+  // The forest floor used to be budgeted as if trees furnished it — half the
+  // meadow's allowance, on the argument that under a canopy the eye already has
+  // plenty to hold on to. That is backwards, and the corrected frame statistics
+  // showed it: the Whispering Wood was the emptiest ground on the island, below
+  // the ash plain. A wood is the busiest floor in any landscape, because
+  // everything the trees drop stays where it lands — leaf litter banked in the
+  // hollows, deadfall, fern in the gaps, stumps of what came down before. It
+  // now carries the largest budget outside the ash, and it is weighted toward
+  // the pale half of that list on purpose: under a closed canopy at dusk the
+  // loam is nearly black, so a dark stone on it is a triangle spent on nothing
+  // and a bank of dry leaf is worth ten of them. It stops at exactly 0.64 and
+  // not higher because CLUTTER_MAX_D is the cheap reject that runs before any
+  // terrain query, and that constant has to remain the largest `d` in here.
+  [BIOME.FOREST]: { d: 0.64, w: [0.13, 0.26, 0.22, 0.01, 0.32, 0.03, 0.14] },
   [BIOME.MARSH]: { d: 0.58, w: [0.06, 0.21, 0.38, 0.04, 0.11, 0.02, 0.18] },
   [BIOME.HIGHLAND]: { d: 0.36, w: [0.32, 0.10, 0.30, 0.02, 0.14, 0.08, 0.04] },
   [BIOME.CRAG]: { d: 0.34, w: [0.50, 0.03, 0.09, 0.06, 0.10, 0.22, 0.00] },
@@ -201,6 +214,13 @@ const CLUTTER_RULES = {
  * the only thing in that part of the frame.
  */
 const CLUTTER_RANGE_MUL = {
+  // The wood is the only entry below one, and it pays for the budget above.
+  // Sightlines in closed broadleaf are sixty or eighty metres, not two hundred
+  // — past that a leaf bank is behind a dozen trunks and every triangle in it
+  // is spent on something nobody can see. Shortening the tail is what lets the
+  // near field, which is what the player is actually walking through, carry
+  // nearly twice the debris it did.
+  [BIOME.FOREST]: 0.85,
   [BIOME.MEADOW]: 1.15,
   [BIOME.MARSH]: 1.15,
   [BIOME.ASH]: 1.20,
@@ -227,7 +247,12 @@ const FEATURE_RULES = {
   [BIOME.OCEAN]: null,
   [BIOME.BEACH]: { d: 0.22, w: [0.34, 0.08, 0.10, 0.30, 0.02, 0.06, 0.10] },
   [BIOME.MEADOW]: { d: 0.58, w: [0.26, 0.24, 0.03, 0.00, 0.00, 0.12, 0.35] },
-  [BIOME.FOREST]: { d: 0.22, w: [0.26, 0.38, 0.02, 0.00, 0.00, 0.10, 0.24] },
+  // Same correction as the clutter budget above, for the same reason. Trees
+  // are not furniture: they are all canopy, and the canopy is above the frame.
+  // What a wood has at this scale is mossed boulders where the soil is thin,
+  // holly and bramble in every gap the light gets through, and the field walls
+  // of whatever was cleared here before the trees took it back.
+  [BIOME.FOREST]: { d: 0.38, w: [0.28, 0.40, 0.02, 0.00, 0.00, 0.08, 0.22] },
   [BIOME.MARSH]: { d: 0.56, w: [0.10, 0.20, 0.46, 0.00, 0.02, 0.04, 0.18] },
   [BIOME.HIGHLAND]: { d: 0.62, w: [0.40, 0.14, 0.00, 0.00, 0.00, 0.20, 0.26] },
   [BIOME.CRAG]: { d: 0.34, w: [0.70, 0.04, 0.00, 0.00, 0.02, 0.16, 0.08] },
@@ -253,6 +278,32 @@ const ROT_COLOR = [0.20, 0.16, 0.12];
 /** Bleached bone, and the pale splinter colour broken wood shows. */
 const BONE_COLOR = [0.58, 0.56, 0.48];
 const SPLINTER_COLOR = [0.44, 0.37, 0.27];
+
+/** The straw dry scrub goes everywhere but the wood, which has bracken. */
+const DRY_SCRUB = [0.42, 0.37, 0.20];
+
+/**
+ * The wood's own palette, and every entry in it is here because it is *pale*.
+ *
+ * Forest loam under a closed canopy sits at about a third of the reflectance of
+ * meadow turf, and at dusk the whole floor is inside one tree shadow. Adding
+ * more dark green there buys nothing — it is the same value as the ground it
+ * lies on, so it has no edge and casts no tone. What a real wood floor has that
+ * reads in that light is the dry stuff: last autumn's leaf banked in the
+ * hollows, timber that lost its bark a winter ago and weathered silver, the
+ * bone-white shelf of a bracket fungus, and fern that has gone to bracken.
+ * Every one of those is brighter than the loam, which is what makes it visible.
+ *
+ * Moss is the one green kept, and only on the tops of things — a wall cap, a
+ * boulder crown — because that is where the light that got through the canopy
+ * lands, and moss growing in it is genuinely lighter than the floor below.
+ */
+const LITTER_COLOR = [0.50, 0.38, 0.21];
+const WEATHERED_WOOD = [0.41, 0.37, 0.30];
+const FUNGUS_COLOR = [0.64, 0.60, 0.48];
+const FERN_COLOR = [0.26, 0.47, 0.17];
+const BRACKEN_COLOR = [0.64, 0.48, 0.22];
+const MOSS_COLOR = [0.30, 0.43, 0.20];
 
 /** Fresh ash fall — what the wind in the Cinderwaste is actually carrying. */
 const ASH_FALL = [0.55, 0.52, 0.49];
@@ -505,11 +556,17 @@ export class Scatter {
         const moist = world.moisture[world.gridIndex(
           Math.round(world.worldToGrid(x)), Math.round(world.worldToGrid(z)))];
 
+        const leafy = biome === BIOME.FOREST;
+
         let total = 0;
         for (let k = 0; k < 7; k++) w[k] = rules.w[k];
         w[CLUTTER.ROCK] *= 1 + scree * 2.4;
         w[CLUTTER.SLAB] *= 1 + scree * 1.1;
-        w[CLUTTER.DRIFT] *= 0.4 + bank * 1.8;
+        // Blown material banks against relief, so on level ground there is
+        // almost none of it. Leaf fall is the opposite: nothing carried it
+        // there, it simply came down, and level floor under a closed canopy is
+        // exactly where it lies deepest instead of being swept off.
+        w[CLUTTER.DRIFT] *= leafy ? 0.95 + bank * 0.7 : 0.4 + bank * 1.8;
         w[CLUTTER.SCRUB] *= (1 - scree * 0.85) * (0.45 + moist * 1.1);
         w[CLUTTER.WOOD] *= (1 - scree * 0.8) * (0.4 + moist * 1.3);
         w[CLUTTER.STUMP] *= (1 - scree * 0.9);
@@ -550,13 +607,32 @@ export class Scatter {
             break;
           }
           case CLUTTER.WOOD: {
-            sx = 0.9 + r4 * 1.9;
-            sy = 0.10 + r5 * 0.14;
+            // In open country deadfall is branch-sized. In a wood a good part
+            // of it is whole boles — a tree that came down years ago and is
+            // still lying across the floor where it fell, which is the longest
+            // horizontal shape a forest has and the only one that reads from
+            // across a clearing. Its own hash, because r3 already chose the
+            // kind and reusing it would tie bole-ness to the weighting.
+            //
+            // Height stays under half a metre. Clutter carries no collider —
+            // see the note on snags below — so anything taller than a step
+            // would be a log the player walks straight through.
+            // One in eight, not more: a fallen giant is an event in a clearing,
+            // and a floor of them reads as a felling site rather than a wood.
+            const bole = leafy && hash2(gx + 1523, gz + 4703, seed ^ 0x6b) > 0.88;
+            sx = bole ? 3.0 + r4 * 3.0 : 0.9 + r4 * 1.9;
+            sy = bole ? 0.28 + r5 * 0.17 : 0.10 + r5 * 0.14;
             sz = sy;
             const t = 0.85 + r5 * 0.35;
             if (ashy) { cr = 0.115; cg = 0.100; cb = 0.095; }
-            else { cr = 0.26 * t; cg = 0.20 * t; cb = 0.145 * t; }
-            c2r = SPLINTER_COLOR[0]; c2g = SPLINTER_COLOR[1]; c2b = SPLINTER_COLOR[2];
+            // Bark comes off dead timber inside a season in ground this wet,
+            // and what is under it weathers to bare silver-grey. Fresh bark
+            // brown would put the deadfall at the same value as the loam.
+            else if (leafy) {
+              cr = WEATHERED_WOOD[0] * t; cg = WEATHERED_WOOD[1] * t; cb = WEATHERED_WOOD[2] * t;
+            } else { cr = 0.26 * t; cg = 0.20 * t; cb = 0.145 * t; }
+            const tip = leafy ? FUNGUS_COLOR : SPLINTER_COLOR;
+            c2r = tip[0]; c2g = tip[1]; c2b = tip[2];
             break;
           }
           case CLUTTER.SCRUB: {
@@ -564,14 +640,20 @@ export class Scatter {
             sy = 0.35 + r5 * 0.62;
             sz = sx;
             const leafSet = LEAF_COLORS[biome] || LEAF_COLORS[BIOME.MEADOW];
-            const leaf = leafSet[Math.floor(r5 * leafSet.length) % leafSet.length];
+            // The ground layer under a canopy is fern, not the tree's own leaf:
+            // lighter, yellower, and by this hour half of it has turned. Taking
+            // it from LEAF_COLORS painted the understory in exactly the canopy
+            // green above it, which is the one colour it cannot be seen against.
+            const leaf = leafy ? FERN_COLOR
+              : leafSet[Math.floor(r5 * leafSet.length) % leafSet.length];
             // Scrub is the dry counterpart of the grass field: where the grass
             // thins it goes straw, and it is that alternation the eye reads as
             // ground rather than carpet.
             const parch = saturate(0.75 - moist * 0.6 + r4 * 0.3);
-            cr = lerp(leaf[0], 0.42, parch);
-            cg = lerp(leaf[1], 0.37, parch);
-            cb = lerp(leaf[2], 0.20, parch);
+            const dead = leafy ? BRACKEN_COLOR : DRY_SCRUB;
+            cr = lerp(leaf[0], dead[0], parch);
+            cg = lerp(leaf[1], dead[1], parch);
+            cb = lerp(leaf[2], dead[2], parch);
             c2r = cr * 1.25 + 0.08; c2g = cg * 1.2 + 0.07; c2b = cb * 1.1 + 0.04;
             break;
           }
@@ -585,9 +667,12 @@ export class Scatter {
             break;
           }
           case CLUTTER.DRIFT: {
-            sx = 1.6 + r4 * 3.4;
-            sy = 0.24 + r4 * 0.5 + bank * 0.3;
-            sz = sx * (0.4 + r5 * 0.35);
+            // A leaf bank is lower and much broader in plan than a wind drift:
+            // it is a floor covering that has piled up, not a ridge the wind
+            // built, and given a sand dune's proportions it read as a dune.
+            sx = leafy ? 1.4 + r4 * 2.6 : 1.6 + r4 * 3.4;
+            sy = leafy ? 0.14 + r4 * 0.26 + bank * 0.18 : 0.24 + r4 * 0.5 + bank * 0.3;
+            sz = sx * (leafy ? 0.55 + r5 * 0.40 : 0.4 + r5 * 0.35);
             // Drifts lie across the slope, because that is where blown material
             // stops. The terrain normal gives the downhill direction for free.
             world.normalAt(x, z, this._n);
@@ -601,10 +686,16 @@ export class Scatter {
             // the two differ most. A bank of fresh fall lying in a burnt pan is
             // five times the reflectance of the pan, and taking its colour from
             // the ground underneath made it invisible there.
-            const bed = ashy ? ASH_FALL : ground;
-            cr = lerp(bed[0], rock[0], ashy ? 0.12 : 0.45) * t;
-            cg = lerp(bed[1], rock[1], ashy ? 0.12 : 0.45) * t;
-            cb = lerp(bed[2], rock[2], ashy ? 0.12 : 0.45) * t;
+            //
+            // Under a canopy the same shape is not blown mineral at all but
+            // leaf fall, banked exactly where the wind that got through the
+            // trees dropped it, and its material is last autumn rather than the
+            // ground beneath. It is the brightest thing on a forest floor.
+            const bed = ashy ? ASH_FALL : leafy ? LITTER_COLOR : ground;
+            const mix = ashy ? 0.12 : leafy ? 0.08 : 0.45;
+            cr = lerp(bed[0], rock[0], mix) * t;
+            cg = lerp(bed[1], rock[1], mix) * t;
+            cb = lerp(bed[2], rock[2], mix) * t;
             c2r = snowy ? 0.86 : cr * 1.4 + 0.05;
             c2g = snowy ? 0.89 : cg * 1.4 + 0.05;
             c2b = snowy ? 0.95 : cb * 1.35 + 0.05;
@@ -657,10 +748,17 @@ export class Scatter {
             sz = sx * (0.85 + r5 * 0.3);
             const t = 0.85 + r5 * 0.35;
             if (ashy) { cr = 0.125 * t; cg = 0.108 * t; cb = 0.100 * t; }
-            else { cr = 0.24 * t; cg = 0.19 * t; cb = 0.14 * t; }
-            c2r = ashy ? 0.20 : SPLINTER_COLOR[0];
-            c2g = ashy ? 0.17 : SPLINTER_COLOR[1];
-            c2b = ashy ? 0.15 : SPLINTER_COLOR[2];
+            else if (leafy) {
+              cr = WEATHERED_WOOD[0] * 0.88 * t;
+              cg = WEATHERED_WOOD[1] * 0.88 * t;
+              cb = WEATHERED_WOOD[2] * 0.88 * t;
+            } else { cr = 0.24 * t; cg = 0.19 * t; cb = 0.14 * t; }
+            // The secondary is the snapped core and the bracket shelves on the
+            // trunk (see buildClutterStump). In the wood those are fungus, and
+            // a bracket is genuinely near-white — the single brightest small
+            // object on a forest floor, and the one that survives the shade.
+            const core = ashy ? [0.20, 0.17, 0.15] : leafy ? FUNGUS_COLOR : SPLINTER_COLOR;
+            c2r = core[0]; c2g = core[1]; c2b = core[2];
             break;
           }
         }
@@ -861,11 +959,18 @@ export class Scatter {
         const t = 0.68 + s1 * 0.34;
         cr = rock[0] * t; cg = rock[1] * t; cb = rock[2] * t;
         // In grassland the wall is really a hedgebank: stone below, turf on
-        // top. On the moor and in the waste it is bare weathered cap stone.
-        const turf = biome === BIOME.MEADOW || biome === BIOME.FOREST;
-        c2r = turf ? ground[0] * 0.85 : cr * 1.32 + 0.06;
-        c2g = turf ? ground[1] * 0.85 : cg * 1.32 + 0.06;
-        c2b = turf ? ground[2] * 0.85 : cb * 1.26 + 0.05;
+        // top. In the wood it is a field boundary the trees took back, and what
+        // caps it there is moss — the one green in a wood that is lighter than
+        // the floor, because it is the only thing growing where the light still
+        // gets down. Capping it with the wood's own turf, as this used to, put
+        // the top course a shade *darker* than the loam it stands on. On the
+        // moor and in the waste it is bare weathered cap stone.
+        const cap = biome === BIOME.MEADOW
+          ? [ground[0] * 0.85, ground[1] * 0.85, ground[2] * 0.85]
+          : biome === BIOME.FOREST ? MOSS_COLOR : null;
+        c2r = cap ? cap[0] : cr * 1.32 + 0.06;
+        c2g = cap ? cap[1] : cg * 1.32 + 0.06;
+        c2b = cap ? cap[2] : cb * 1.26 + 0.05;
         break;
       }
     }
@@ -1176,7 +1281,12 @@ export class Scatter {
  */
 const GRASS_DENSITY = {
   [BIOME.MEADOW]: 1.0,
-  [BIOME.FOREST]: 0.55,
+  // The wood is wetter than the meadow (moisture 0.85 against 0.5) and its herb
+  // layer is correspondingly thicker, not thinner — bare forest floor is what
+  // you get under conifer plantation, not under broadleaf. The 46 m patch is
+  // the bottom of the frame, which under a canopy is also the darkest part of
+  // it, so this is the cheapest ground cover the wood has.
+  [BIOME.FOREST]: 0.74,
   [BIOME.MARSH]: 0.6,
   [BIOME.HIGHLAND]: 0.5,
   [BIOME.BEACH]: 0.12,

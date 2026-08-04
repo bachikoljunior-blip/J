@@ -880,9 +880,20 @@ uniform float uCloudSpeed;
 uniform vec2 uCloudWind;
 varying vec3 vRay;
 
+// Three octaves, not five, and the second layer below sits at 1.4x rather than
+// 2.4x. Both cuts are about the sampling rate, not the look.
+//
+// The cloud plane is read through a 1/elevation projection, so a feature's
+// angular size collapses as the ray flattens: at five octaves the finest one
+// was around a pixel a few degrees above the skyline. Detail below the sampling
+// rate is not detail, it is aliasing — it shimmers when the camera turns, and
+// it is worth nothing to a player. Three octaves plus a 1.4x layer keeps the
+// smallest component near five pixels of a 900-wide frame even down at three
+// degrees of elevation, and still spans six spatial scales between about three
+// and thirty degrees, which is what carries the shape of a cumulus field.
 float fbm2(vec2 p) {
   float s = 0.0, a = 0.5;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 3; i++) {
     s += a * vnoise(p);
     p *= 2.03;
     a *= 0.5;
@@ -894,9 +905,32 @@ void main() {
   vec3 dir = normalize(vRay);
   float up = dir.y;
 
-  // Base gradient with a compressed horizon band.
-  float t = pow(clamp(up * 0.5 + 0.5, 0.0, 1.0), 0.55);
-  vec3 sky = mix(uSkyHorizon, uSkyTop, smoothstep(0.35, 0.95, t));
+  // Base gradient, shaped by air mass rather than by elevation.
+  //
+  // What a clear sky does between the zenith and the horizon is set by how much
+  // atmosphere the ray crosses, and that grows as 1/sin(elevation): the colour
+  // and brightness change fastest in the first ten degrees and are nearly done
+  // by forty-five. The old curve — smoothstep over pow(up*0.5+0.5, 0.55) —
+  // spread the transition evenly across the whole hemisphere instead, which put
+  // it 58% of the way from uSkyHorizon to uSkyTop *at the horizon itself*. The
+  // consequence was that the horizon colour the keyframes author with some care
+  // was never actually drawn: [0.86, 0.40, 0.23] at dusk reached the screen as a
+  // muddy mauve, and no sunset in the game ever glowed along the skyline.
+  //
+  // The keyframes say this is the intent: every one of them authors its fog
+  // colour and its horizon colour as near enough the same, which only makes
+  // sense if the sky at the horizon is meant to be the colour distant terrain
+  // fades into. SKY_KEYS at dusk holds fog 0.62/0.36/0.27 against a horizon of
+  // 0.86/0.40/0.23, and this curve lands the skyline on 0.61/0.32/0.27 — the
+  // two now meet. The old curve put 0.39/0.53/0.76 there instead, so every
+  // frame carried a seam where the fogged far field ran into a sky several
+  // shades bluer than itself.
+  //
+  // 0.22 is the softening that keeps the zenith finite (a true 1/sin diverges),
+  // and 0.30 the optical depth — together they land the band in the lowest
+  // fifteen degrees, which is where the eye reads distance.
+  float airMass = 1.0 / (max(up, 0.0) + 0.22);
+  vec3 sky = mix(uSkyHorizon, uSkyTop, clamp(exp(-0.30 * (airMass - 1.0)), 0.0, 1.0));
 
   // Below the horizon fades into a ground haze rather than hard-cutting.
   sky = mix(uGroundColor * 0.7, sky, smoothstep(-0.12, 0.06, up));
@@ -933,22 +967,73 @@ void main() {
     }
   }
 
-  // Clouds: project the ray onto a plane above the camera and layer fbm.
-  if (up > 0.008) {
-    vec2 cp = dir.xz / max(up, 0.02) * 0.048 + uCloudWind * uCloudSpeed;
+  // Clouds: project the ray onto a deck above the camera and layer fbm.
+  //
+  // dir.xz / up is where the ray meets a plane one unit up, so the scale that
+  // multiplies it is (deck height / cloud size). At 0.048 that put one noise
+  // period roughly forty kilometres across a two-kilometre deck: the entire
+  // visible sky was a single sample of the field, and the shader could not draw
+  // a cloud at any cover setting — overcast and storm differed from clear only
+  // by a flat wash of grey. 1.2 puts a period at a kilometre on a deck twelve
+  // hundred metres up, which is what a fair-weather cumulus field measures.
+  //
+  // The +0.20 is the deck's own horizon. A flat layer recedes to infinity as
+  // the ray flattens, and hiding that singularity is what the old six-degree
+  // fade was for — it erased the clouds from the one part of the sky where a
+  // deck is most visible, leaving a bare ring around the whole world. Giving
+  // the projection a finite floor makes it converge into a compressed band
+  // instead, so the fade only has to cover the last degree and a half. It is
+  // also what bounds the compression: 0.20 stops the deck foreshortening past
+  // about six to one, which is what keeps the near-skyline band above the
+  // sampling rate rather than collapsing into noise.
+  if (up > 0.0) {
+    vec2 cp = dir.xz / (up + 0.20) * 1.2 + uCloudWind * uCloudSpeed;
     float d1 = fbm2(cp);
-    float d2 = fbm2(cp * 2.4 + vec2(11.3, 4.7));
+    float d2 = fbm2(cp * 1.4 + vec2(11.3, 4.7));
     float density = d1 * 0.72 + d2 * 0.28;
-    // Calibrated against fbm2's ~0.48 mean: at cover 0 the sky keeps a few
-    // scattered banks rather than being surgically clear.
-    float cover = mix(0.60, 0.24, uCloudCover);
+    // Against this field's 0.44 mean and 0.10 deviation, and read through the
+    // projection below rather than over a flat sample: clear-weather cloud
+    // (cover 0.30) leaves a bit over half the sky open in broken banks,
+    // overcast closes it to a handful of breaks, and rain and storm shut it
+    // completely. The old pair
+    // never reached a closed deck — it did not have to, because a sky that was
+    // one sample of the noise was uniform whatever the threshold did. With the
+    // field actually resolved, a storm that still showed blue between the
+    // clouds would be a worse sky than the flat wash it replaced.
+    float cover = mix(0.56, 0.06, uCloudCover);
     float cloud = smoothstep(cover, cover + 0.20, density);
-    cloud *= smoothstep(0.008, 0.11, up);
+    cloud *= smoothstep(0.0, 0.025, up);
 
-    // Light the cloud from the sun side using the density gradient.
-    float lit = smoothstep(cover - 0.08, cover + 0.30, density);
+    // Light the cloud from its own density, not from the coverage threshold.
+    //
+    // Keying the ramp to the coverage threshold meant weather moved it under
+    // the field: closing the deck for a storm also slid every sample to the top
+    // end and the sky came out as a sheet of white. What makes one part of a
+    // cloud brighter than another is how much of it the light crossed, so the
+    // window is fixed and reads the same at every cover — thin edges dark,
+    // piled tops bright, in clear weather and in a storm alike.
+    //
+    // It has to span the range the field actually produces, which is 0.44 mean
+    // and 0.10 deviation, not the 0.33 this was first calibrated against. Two
+    // deviations either side is 0.26 to 0.66. A narrower window costs the cloud
+    // its modelling and gives back a cut-out: at 0.24-0.47 every sample that
+    // was cloud at all in clear weather came out at the top of the ramp, so
+    // fair-weather cumulus drew as flat white shapes with no shading anywhere
+    // inside them — a tenth of the visible sky at exactly one colour, and
+    // three fifths of it under an overcast. Widening it takes that to about a
+    // thirtieth in every weather. Nothing here changes the noise: the same
+    // field is simply read across its whole range instead of its top fifth.
+    float lit = smoothstep(0.26, 0.66, density);
     vec3 cloudLit = mix(vec3(0.42, 0.45, 0.55), vec3(1.05, 1.0, 0.95), lit);
     cloudLit *= mix(vec3(0.28, 0.32, 0.45), uSunColor * 1.1, 1.0 - uNight);
+    // A deep deck passes less light than a few fair-weather banks: the reason a
+    // storm reads as a storm is that the whole sky goes down, not up. 0.66 and
+    // not 0.52 because the wider ramp above already carries part of that fall
+    // on its own — a closed deck sits lower in the field's distribution — and
+    // the two together were dimming a storm twice. This pair holds the mean
+    // cloud radiance within a few percent of what the narrow window gave in
+    // every weather, and spends the difference on variation instead.
+    cloudLit *= mix(1.0, 0.66, uCloudCover);
     float edgeGlow = pow(max(dot(dir, uSunDir), 0.0), 8.0) * (1.0 - lit) * 0.8;
     cloudLit += uSunColor * edgeGlow * (1.0 - uNight);
     sky = mix(sky, cloudLit, cloud * 0.94);
@@ -1132,6 +1217,29 @@ void main() {
 //  on top of it, and they are also the only occlusion fine enough to still
 //  vary from one patch of screen to the next.
 // ---------------------------------------------------------------------------
+
+/**
+ * World mask: 1 where the frame contains geometry, 0 where it is open sky.
+ *
+ * The image-fidelity metrics are supposed to grade the world, not the weather.
+ * Cropping to a fixed fraction of the screen was the first attempt at that and
+ * it does not work: the camera pitches up by about 11 degrees, so the true
+ * horizon sits around 67% of screen height and a third to a half of any
+ * "lower 62%" window is sky by construction. Depth knows exactly which pixels
+ * are sky, so it is depth that decides.
+ */
+export const WORLD_MASK_FS = `
+precision highp float;
+uniform sampler2D uDepthTex;
+varying vec2 vUV;
+void main() {
+  float d = texture2D(uDepthTex, vUV).r;
+  // Anything at (or within a hair of) the far plane never had geometry written
+  // to it. The epsilon is generous because a 24-bit depth buffer's far values
+  // are extremely non-linear and the sky sits right at the top of that range.
+  gl_FragColor = vec4(d < 0.99995 ? 1.0 : 0.0, 0.0, 0.0, 1.0);
+}
+`;
 
 export const AO_FS = `
 precision highp float;

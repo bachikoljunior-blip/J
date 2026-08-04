@@ -49,8 +49,26 @@ import { saveGame, loadGameData, saveSettings, loadSettings } from '../core/save
 // are inherently low-contrast subjects and need pulling apart, while the mire
 // and the woods already carry their own tonal separation.
 const REGION_GRADE = {
-  meadow: { tint: [1.00, 1.00, 1.00], sat: 1.06, vignette: 0.38, contrast: 1.38 },
-  wood: { tint: [0.95, 1.03, 0.95], sat: 1.02, vignette: 0.46, contrast: 1.14 },
+  // The meadow's lift came down from 1.06 because the frame was measuring 0.482
+  // mean chroma against a 0.48 ceiling — a hair over, and the fix belongs here
+  // rather than in the ground. The grass and the terrain tint are both carrying
+  // real per-blade and per-patch colour variation now, and draining that to buy
+  // half a percent would undo the thing the number is supposed to protect. The
+  // grade is the one place where taking it out costs nothing but the excess:
+  // 1.035 blends with the neighbouring regions to about 2.3% less chroma, which
+  // is under the threshold where an eye can tell two frames apart.
+  meadow: { tint: [1.00, 1.00, 1.00], sat: 1.035, vignette: 0.38, contrast: 1.38 },
+  // The wood moves the other way, and for a reason that has nothing to do with
+  // the wood floor. Fixing the sky's horizon band means the dusk keyframe's
+  // authored horizon — a deep orange, 0.86/0.40/0.23 — actually reaches the
+  // screen instead of being mixed halfway to zenith blue, and the Whispering
+  // Wood is the one scene sampled at dusk. Modelled over the part of the sky
+  // the frame statistics can see, its chroma goes from 0.32 to 0.54, and sky is
+  // better than a third of that window. Against a 0.48 ceiling and a measured
+  // 0.326 today that is enough headroom to be worth insuring, and 0.98 is a two
+  // percent drain nobody will see. If the audit comes back with room, this is
+  // the first thing to put back.
+  wood: { tint: [0.95, 1.03, 0.95], sat: 0.98, vignette: 0.46, contrast: 1.14 },
   mire: { tint: [0.92, 1.02, 0.90], sat: 0.86, vignette: 0.52, contrast: 1.12 },
   ridge: { tint: [0.97, 0.99, 1.05], sat: 0.98, vignette: 0.42, contrast: 1.20 },
   crag: { tint: [0.95, 0.98, 1.07], sat: 0.86, vignette: 0.44, contrast: 1.42 },

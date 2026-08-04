@@ -19,7 +19,7 @@ import {
   TERRAIN_VS, TERRAIN_FS, INSTANCE_VS, INSTANCE_FS, GRASS_VS, GRASS_FS,
   SHADOW_INSTANCE_VS, SHADOW_TERRAIN_VS, SHADOW_FS, SKY_VS, SKY_FS,
   WATER_VS, WATER_FS, PARTICLE_VS, PARTICLE_FS,
-  FULLSCREEN_VS, BRIGHT_FS, BLUR_FS, COMPOSITE_FS, AO_FS, AO_BLUR_FS,
+  FULLSCREEN_VS, BRIGHT_FS, BLUR_FS, COMPOSITE_FS, AO_FS, AO_BLUR_FS, WORLD_MASK_FS,
 } from './shaders.js';
 import {
   m4, m4perspective, m4lookAt, m4ortho, m4mul, m4invert,
@@ -44,6 +44,17 @@ export const SKY_KEYS = [
   { h: 20.2, sun: [0.48, 0.36, 0.40], top: [0.060, 0.075, 0.140], hor: [0.240, 0.165, 0.195], gnd: [0.090, 0.086, 0.094], fog: [0.225, 0.180, 0.205], fogSun: [0.54, 0.32, 0.30], amb: 0.55, exposure: 1.48 },
   { h: 24.0, sun: [0.20, 0.22, 0.32], top: [0.038, 0.050, 0.088], hor: [0.090, 0.100, 0.140], gnd: [0.058, 0.060, 0.072], fog: [0.090, 0.100, 0.135], fogSun: [0.16, 0.18, 0.26], amb: 0.52, exposure: 1.62 },
 ];
+
+/** Steady-state values each weather type crossfades toward. */
+const WEATHER_TARGETS = {
+  clear: { rain: 0, cloud: 0.30, fog: 0, wind: 0.35 },
+  overcast: { rain: 0, cloud: 0.82, fog: 0.25, wind: 0.55 },
+  rain: { rain: 1, cloud: 0.95, fog: 0.5, wind: 0.75 },
+  storm: { rain: 1.6, cloud: 1.0, fog: 0.7, wind: 1.5 },
+  fog: { rain: 0, cloud: 0.6, fog: 1.5, wind: 0.2 },
+  snow: { rain: 0.4, cloud: 0.9, fog: 0.6, wind: 0.5 },
+  ash: { rain: 0.3, cloud: 0.75, fog: 0.8, wind: 0.4 },
+};
 
 function lerpArr(a, b, t) {
   return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
@@ -148,6 +159,7 @@ export class Renderer {
     this.progBlur = glw.program(FULLSCREEN_VS, BLUR_FS, 'blur');
     this.progAO = glw.program(FULLSCREEN_VS, AO_FS, 'ao');
     this.progAOBlur = glw.program(FULLSCREEN_VS, AO_BLUR_FS, 'aoBlur');
+    this.progWorldMask = glw.program(FULLSCREEN_VS, WORLD_MASK_FS, 'worldMask');
     this.progComposite = glw.program(FULLSCREEN_VS, S(COMPOSITE_FS), 'composite');
 
     this.quadBuf = glw.vbo(new Float32Array([-1, -1, 3, -1, -1, 3]));
@@ -407,16 +419,28 @@ export class Renderer {
     }
     if (this.forcedWeather) w.target = this.forcedWeather;
 
-    const targets = {
-      clear: { rain: 0, cloud: 0.30, fog: 0, wind: 0.35 },
-      overcast: { rain: 0, cloud: 0.82, fog: 0.25, wind: 0.55 },
-      rain: { rain: 1, cloud: 0.95, fog: 0.5, wind: 0.75 },
-      storm: { rain: 1.6, cloud: 1.0, fog: 0.7, wind: 1.5 },
-      fog: { rain: 0, cloud: 0.6, fog: 1.5, wind: 0.2 },
-      snow: { rain: 0.4, cloud: 0.9, fog: 0.6, wind: 0.5 },
-      ash: { rain: 0.3, cloud: 0.75, fog: 0.8, wind: 0.4 },
-    };
-    const t = targets[w.target] || targets.clear;
+    const t = WEATHER_TARGETS[w.target] || WEATHER_TARGETS.clear;
+    // An override arrives fully formed. Weather crossfades over a ~4.5 s time
+    // constant, which is right for a sky changing on its own and wrong for a
+    // caller that has said "it is storming here": the tools set forcedWeather
+    // and then sample after about two and a half seconds, so before this every
+    // forced scene was measured less than half way to the weather it asked for
+    // — and, because the states settle in sequence, carrying whatever the
+    // previous scene left behind. The Cinderwaste sample, nominally clear, was
+    // reading at roughly cloud 0.5 because the storm shot ran before it. That
+    // did not matter while the cloud layer was a flat wash; now that cover
+    // drives both the deck and its brightness, it decides the frame.
+    if (this.forcedWeather && this.forcedWeather !== this._forcedApplied) {
+      this._forcedApplied = this.forcedWeather;
+      w.rainIntensity = t.rain;
+      w.cloudCover = t.cloud;
+      w.fogBoost = t.fog;
+      w.windX = t.wind * 0.8;
+      w.windZ = t.wind * 0.35;
+      w.wetness = t.rain > 0.15 ? 1 : 0;
+    } else if (!this.forcedWeather) {
+      this._forcedApplied = null;
+    }
     const k = 1 - Math.exp(-dt * 0.22);
     w.rainIntensity = lerp(w.rainIntensity, t.rain, k);
     w.cloudCover = lerp(w.cloudCover, t.cloud, k);
@@ -727,6 +751,23 @@ export class Renderer {
     }
     const buf = this._readBuf;
     gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+
+    // Second pass into the same target: which of those pixels are world rather
+    // than sky. Without this the spatial statistics grade a clear afternoon sky
+    // as featureless ground, which it is not.
+    let mask = null;
+    if (this.scene.depthTex) {
+      const mp = glw.use(this.progWorldMask);
+      glw.bindTexture(0, this.scene.depthTex);
+      glw.u1i(mp, 'uDepthTex', 0);
+      this._drawFullscreen(mp);
+      if (!this._maskBuf || this._maskBuf.length < w * h * 4) {
+        this._maskBuf = new Uint8Array(w * h * 4);
+      }
+      mask = this._maskBuf;
+      gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, mask);
+    }
+
     glw.bindTarget(null);
     gl.enable(gl.DEPTH_TEST);
 
@@ -754,7 +795,7 @@ export class Renderer {
       clippedRatio: clipped / n,
       crushedRatio: crushed / n,
       channelBalance: [rSum / n, gSum / n, bSum / n],
-      ...this._spatialStats(buf, w, h),
+      ...this._spatialStats(buf, w, h, mask),
     };
   }
 
@@ -771,7 +812,7 @@ export class Renderer {
    * These must be computed over the whole buffer, not a strided sample: skipping
    * pixels destroys exactly the spatial relationships being measured.
    */
-  _spatialStats(buf, w, h) {
+  _spatialStats(buf, w, h, mask) {
     const lum = this._lumaBuf && this._lumaBuf.length === w * h
       ? this._lumaBuf : (this._lumaBuf = new Float32Array(w * h));
     for (let i = 0, p = 0; i < w * h; i++, p += 4) {
@@ -779,29 +820,42 @@ export class Renderer {
     }
 
     let gradSum = 0, gradN = 0, edges = 0, flat = 0;
-    // Structure is measured over the lower part of the frame only.
+    // Structure is measured over the pixels that actually contain world.
     //
     // A smooth sky gradient is *correct* — it is what a sky looks like — and it
     // fills the top of every frame. Counting it as "flat" would mean a night
     // scene fails a detail check for the crime of having a night sky, and would
-    // reward putting noise in the atmosphere. The world is what has to hold up
-    // to the test, so the test looks at the world.
+    // reward putting noise in the atmosphere.
     //
-    // gl.readPixels returns rows bottom-up: buffer row 0 is the BOTTOM of the
-    // screen. This loop originally ran from 0.38h upward, which is the top 62%
-    // of the screen — precisely the region the paragraph above says to exclude,
-    // and the opposite of what it claimed to do. Every figure in the project's
-    // tuning history up to 2026-08-04 was therefore measured against sky and far
-    // field rather than ground, and the thresholds were re-derived when this was
-    // corrected. See docs/QUALITY.md.
-    const yTop = Math.max(2, Math.floor(h * 0.62));
-    const y0 = 1;
+    // Two earlier attempts at excluding it were both wrong, and the way they
+    // were wrong is worth keeping written down. The first cropped to a fraction
+    // of the buffer, but gl.readPixels returns rows bottom-up, so it kept
+    // exactly the half it meant to discard. The second fixed the direction and
+    // still failed, because the camera pitches up about eleven degrees: the true
+    // horizon sits near 67% of screen height, so a third to a half of any
+    // "lower 62%" window is sky no matter which way it is measured.
+    //
+    // Depth knows which pixels are sky. A pixel counts if it, or any of its
+    // immediate neighbours, has geometry — the neighbour test keeps the horizon
+    // silhouette, which is real structure and should be graded.
+    const isWorld = (x, y) => {
+      if (!mask) return true;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+          if (mask[(ny * w + nx) * 4] > 127) return true;
+        }
+      }
+      return false;
+    };
     // Sobel over the interior. The two thresholds are chosen against 8-bit
     // output: 1/255 is the smallest representable step, so "flat" means
     // genuinely quantised-identical, and the edge threshold sits well above
     // dither noise.
-    for (let y = y0; y < yTop; y++) {
+    for (let y = 1; y < h - 1; y++) {
       for (let x = 1; x < w - 1; x++) {
+        if (!isWorld(x, y)) continue;
         const i = y * w + x;
         const gx = (lum[i - w + 1] + 2 * lum[i + 1] + lum[i + w + 1])
           - (lum[i - w - 1] + 2 * lum[i - 1] + lum[i + w - 1]);
@@ -818,8 +872,15 @@ export class Renderer {
     // Local RMS contrast in 8x8 tiles: micro-shading variation, which survives
     // even where the frame has no strong edges.
     let tileSum = 0, tiles = 0;
-    for (let ty = y0; ty + 8 <= yTop; ty += 8) {
+    for (let ty = 0; ty + 8 <= h; ty += 8) {
       for (let tx = 0; tx + 8 <= w; tx += 8) {
+        // A tile counts once most of it is world; a tile straddling the horizon
+        // would otherwise report the sky's flatness as the ground's.
+        let world = 0;
+        for (let y = 0; y < 8; y += 2) {
+          for (let x = 0; x < 8; x += 2) if (isWorld(tx + x, ty + y)) world++;
+        }
+        if (world < 10) continue;
         let s = 0, s2 = 0;
         for (let y = 0; y < 8; y++) {
           for (let x = 0; x < 8; x++) {

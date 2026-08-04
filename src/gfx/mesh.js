@@ -2,7 +2,32 @@
 //  mesh.js — procedural geometry. Every model in the game is generated here;
 //  there are no art assets to download, which keeps the whole game a few
 //  hundred KB and makes it start instantly on a phone connection.
+//
+//  ONE RULE FOR EDITING THESE BUILDERS. game.js builds the whole mesh table
+//  from a single seeded stream, so the number of rng() calls a builder makes is
+//  part of the interface: change it and every mesh built after it in _buildMeshes
+//  is re-rolled. That is still deterministic, so nothing fails — it just
+//  silently swaps out geometry nobody touched. Adding the root flare and the
+//  bracket shelves below cost the bush a third of its triangles (240 -> 160),
+//  the conifer 21 and the ruin pillar 64, none of which was intended or visible
+//  in the diff. Detail added to a shared-stream builder therefore draws from a
+//  private stream (see `subRng`) and leaves the shared one exactly where it was.
 // ============================================================================
+
+import { makeRng } from '../core/rng.js';
+
+/**
+ * A private, fixed-seed stream for geometry added to an existing builder.
+ *
+ * Each builder here produces exactly one mesh that is then instanced, so its
+ * jitter never varied per instance in the first place and there is nothing to
+ * lose by taking it off the world seed. What there is to gain is that the
+ * shared stream stays put — see the note at the top of the file.
+ *
+ * @param {number} seed any distinct constant
+ * @returns {() => number} uniform [0, 1)
+ */
+function subRng(seed) { return makeRng(seed); }
 
 /** Simple CPU-side mesh under construction. */
 export class MeshData {
@@ -540,10 +565,15 @@ export function buildClutterSlab(rng) {
 /**
  * Broken stump. Scaled tall it is a standing scorched snag, which is the
  * silhouette the Cinderwaste is missing. The splintered core takes the
- * secondary colour. 18 triangles.
+ * secondary colour, together with the bracket shelves. 24 triangles.
  */
 export function buildClutterStump(rng) {
   const m = new MeshData();
+  // Six sides, unchanged. Dropping to five to pay for the shelves below saved
+  // three triangles on a mesh instanced a few hundred times, and cost far more
+  // than that elsewhere: the shorter trunk loop pulled the shared mesh stream
+  // three draws forward and re-rolled every builder after it. See the note at
+  // the top of the file. The waste has the headroom for the six.
   const n = 6;
   const base = groundRing(n, 0, 0, 0.5, 0, rng() * 6.283, rng, 0.18);
   const top = [];
@@ -558,6 +588,42 @@ export function buildClutterStump(rng) {
   // The rim falls away to a low core, the way a trunk actually breaks.
   const core = [(rng() - 0.5) * 0.16, 0.52 + rng() * 0.18, (rng() - 0.5) * 0.16];
   for (let i = 0; i < n; i++) flatTri(m, core, top[i], top[(i + 1) % n], 1, 1, 1);
+
+  // Bracket fungus, three shelves stepping round the trunk, on the secondary
+  // colour slot with the snapped core.
+  //
+  // A bracket is the brightest small object on a forest floor — near-white, and
+  // several times the reflectance of wet loam — and it is the one thing down
+  // there that still reads once the canopy has taken the light. Two triangles
+  // apiece buy a lit upper face and an underside that is never lit, so each
+  // shelf is its own small tonal step rather than one bright patch.
+  //
+  // The same geometry serves everywhere the stump does: outside the wood the
+  // secondary is splintered wood or, in the waste, char, and the shelves read
+  // as the flanges of bark left standing on a broken trunk.
+  const br = subRng(0x5f3b21);
+  for (let i = 0; i < 3; i++) {
+    const a = br() * 6.283;
+    const y = 0.22 + i * 0.19 + br() * 0.08;
+    const spread = 0.28 + br() * 0.18;   // half-angle where it grips the trunk
+    const reach = 0.30 + br() * 0.26;
+    // The trunk narrows going up, so the grip radius has to follow it or a
+    // shelf near the rim floats off the side.
+    const grip = 0.46 - y * 0.14;
+    const A = [Math.cos(a - spread) * grip, y, Math.sin(a - spread) * grip];
+    const B = [Math.cos(a + spread) * grip, y + (br() - 0.5) * 0.05,
+      Math.sin(a + spread) * grip];
+    const T = [Math.cos(a) * (grip + reach), y + 0.04 + br() * 0.04,
+      Math.sin(a) * (grip + reach)];
+    const U = [Math.cos(a) * (grip + reach * 0.78), y - 0.06 - br() * 0.05,
+      Math.sin(a) * (grip + reach * 0.78)];
+    flatTri(m, A, B, T, 1, 1, 1);   // upper face, catches what light there is
+    // Reversed, or the shelf is a flat tab with two lit faces. A and B run
+    // anticlockwise round the trunk, and for that order the face normal takes
+    // its sign from how far out the third point sits, not from whether it is
+    // above or below — so T and U wound the same way both come out facing up.
+    flatTri(m, B, A, U, 1, 1, 1);
+  }
   return m;
 }
 
@@ -1110,6 +1176,45 @@ export function buildBroadleafTree(rng) {
   const m = new MeshData();
   const trunk = buildCylinder(5, 0.24, 0.42);
   m.merge(trunk, 0, 0, 0, 1.0, 3.4, 1.0, 0);
+
+  // Root plate: a flare of buttress roots spreading out of the trunk foot.
+  //
+  // A broadleaf standing in deep soil does not meet the ground on a line, and
+  // the line was costing more than it looked. Where a tree meets the floor is
+  // the darkest place in a wood — it is the middle of the tree's own shadow —
+  // so it is exactly where the frame has nothing to say, and a hard silhouette
+  // edge against flat shade is all the eye gets. Fourteen faceted triangles at
+  // the base give that shadow something with a lit side and a turned-away side.
+  //
+  // Alternating the foot radius makes spurs rather than a smooth cone, and the
+  // knee heights vary per spur, so no two panels take the light at the same
+  // angle. The knee ring sits inside the pentagonal trunk's inscribed radius
+  // (0.42 * cos 36 deg at the foot) so the flare emerges from under the bark
+  // instead of leaving a visible ledge, and the foot sits below y = 0 so it
+  // stays bedded when the ground tilts under it.
+  const rootN = 7;
+  const rr = subRng(0x2c91d7);
+  const a0 = rr() * 6.283;
+  const foot = [], knee = [];
+  for (let i = 0; i < rootN; i++) {
+    const a = a0 - (i / rootN) * Math.PI * 2;   // clockwise: see groundRing
+    const spur = (i & 1) === 0 ? 0.98 : 0.62;
+    const r = spur * (0.80 + rr() * 0.34);
+    // Bedded deep, not just below zero. The foot ring is over a metre out on
+    // the long spurs, and the ground under a tree in the Whispering Wood is
+    // rarely level across that span: measured against the real height field,
+    // a foot at -0.12 left 23% of the rim hanging in the air and 10% of it
+    // more than a hand's width up. -0.28 takes that to 6% and 2%, and what it
+    // costs is only the part of the flare that was underground anyway — on the
+    // flat the spur still breaks the surface at twice the trunk radius.
+    foot.push([Math.cos(a) * r, -0.28, Math.sin(a) * r]);
+    knee.push([Math.cos(a) * 0.28, 0.40 + rr() * 0.34, Math.sin(a) * 0.28]);
+  }
+  for (let i = 0; i < rootN; i++) {
+    const j = (i + 1) % rootN;
+    flatQuad(m, foot[i], foot[j], knee[j], knee[i], 0, 0);
+  }
+
   m.useBlend(1);
 
   const blobCount = 3 + Math.floor(rng() * 2);
