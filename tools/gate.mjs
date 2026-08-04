@@ -20,10 +20,18 @@
 //    node tools/gate.mjs --once             # a single audit, then report
 //    node tools/gate.mjs --max 6            # give up after 6 attempts
 //    node tools/gate.mjs --on-fail "<cmd>"  # run <cmd> between failed attempts
+//    node tools/gate.mjs --on-pass "<cmd>"  # run <cmd> when the bar IS met
 //
 //  Without --on-fail the loop measures repeatedly and nothing changes between
 //  iterations, which is only useful for checking stability. With it, the loop
-//  is closed: measure, repair, measure again, and stop when the bar is met.
+//  is closed: measure, repair, measure again.
+//
+//  --on-pass closes the other half, and it matters more than it looks. This
+//  project has declared completion four times and been wrong four times
+//  (docs/FALSIFY.md): every pass meant "the criteria do not look at this
+//  defect". So clearing the bar runs --on-pass — whose job is to find what the
+//  criteria are not measuring — and the loop continues. A pass is a reason to
+//  distrust the test, not a reason to stop.
 // ============================================================================
 
 import { spawn } from 'node:child_process';
@@ -47,6 +55,29 @@ const MAX_ATTEMPTS = (() => {
  */
 const ON_FAIL = (() => {
   const i = process.argv.indexOf('--on-fail');
+  return i >= 0 ? process.argv[i + 1] : null;
+})();
+
+/**
+ * What to run when the bar IS met.
+ *
+ * This project has declared completion four times and been wrong four times —
+ * see docs/FALSIFY.md. Every one of those passes turned out to mean "the
+ * criteria do not look at this defect", not "the defect is gone". The first
+ * pass scored 100/100 on a frame that was untextured flat-shaded boxes, because
+ * nothing in the rubric looked at the image at all.
+ *
+ * Verifying every pattern of events reachable from here is not something that
+ * finishes in any practical span of time, so "proved it all" is not a state
+ * this loop can arrive at. Feeling close to it is better explained by not being
+ * able to see the unmeasured region than by actually being close.
+ *
+ * So a pass is not an exit. With --on-pass, clearing the bar runs that command
+ * — whose job is to find what the criteria are not measuring and add it — and
+ * then measures again. The loop's normal state is running.
+ */
+const ON_PASS = (() => {
+  const i = process.argv.indexOf('--on-pass');
   return i >= 0 ? process.argv[i + 1] : null;
 })();
 
@@ -89,7 +120,18 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
   console.log(`\n── 試行 ${attempt}: ${pass ? 'PASS' : 'FAIL'} (${score ?? '?'}/100), ` +
     `連続合格 ${streak}/${REQUIRED_STREAK}`);
 
-  if (streak >= REQUIRED_STREAK) break;
+  if (streak >= REQUIRED_STREAK) {
+    if (!ON_PASS) break;
+    // Clearing the bar is evidence about the bar, not about the game. Go look
+    // for what it does not measure, then measure again.
+    console.log(`\n${REQUIRED_STREAK} 回連続で合格した。`
+      + 'これは基準がその欠陥を見ていない可能性の合図なので、終了しない。');
+    console.log(`基準を疑うコマンドを実行: ${ON_PASS}`);
+    const r = await runFixer(ON_PASS);
+    if (r !== 0) console.log(`非ゼロ終了 (${r})。それでも計測は続ける。`);
+    streak = 0;
+    continue;
+  }
   if (!pass) {
     // Not finished. docs/BACKLOG.md now holds the ranked work list; whoever
     // drives this loop — a person or an agent — fixes the top of it and the
@@ -117,7 +159,9 @@ const finalPass = streak >= REQUIRED_STREAK;
 let md = '# 品質ゲートの記録\n\n';
 md += `判定: **${finalPass ? '合格' : '未達'}** — 連続合格 ${streak}/${REQUIRED_STREAK}\n\n`;
 md += '仕組みは `tools/gate.mjs`、基準は `docs/QUALITY.md`、計測は `tools/audit.mjs`。\n';
-md += `${REQUIRED_STREAK} 回連続で全軸 80 点以上かつ総合 88 点以上になるまで開発を続ける。\n\n`;
+md += `${REQUIRED_STREAK} 回連続で全軸 80 点以上かつ総合 88 点以上になるまで開発を続ける。\n`;
+md += '合格は終了条件ではない。過去4回の合格は全て「基準がその欠陥を見ていない」'
+  + 'ことの現れだった（`docs/FALSIFY.md`）。\n\n';
 md += '| 試行 | 総合 | 判定 | 未達 |\n|---|---|---|---|\n';
 for (const h of history) {
   md += `| ${h.attempt} | ${h.score ?? '—'} | ${h.pass ? 'PASS' : 'FAIL'} | ` +
@@ -132,6 +176,13 @@ if (existsSync(STATE)) {
 }
 writeFileSync(STATE, md);
 
-console.log(`\n══════ ${finalPass ? '品質ゲート合格 — 開発完了条件を満たした'
+// "合格" and not "完成": the bar was cleared, which is a statement about the
+// bar. docs/FALSIFY.md keeps the record of the four times that was mistaken for
+// the other thing.
+console.log(`\n══════ ${finalPass ? '品質ゲート合格（暫定） — 基準が測っていない領域を疑うこと'
   : '品質ゲート未達 — 開発継続'} ══════`);
+if (finalPass && !ON_PASS) {
+  console.log('--on-pass が無いのでここで止まるが、これは「完成した」という意味ではない。');
+  console.log('docs/FALSIFY.md の「今わかっている測っていないもの」を見ること。');
+}
 process.exitCode = finalPass ? 0 : 1;
