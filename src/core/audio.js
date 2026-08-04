@@ -104,19 +104,39 @@ export class AudioEngine {
     if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
   }
 
+  /**
+   * Move a bus gain over a few milliseconds instead of assigning it.
+   *
+   * Writing .value mid-sound is a step in the waveform, and a step is a click —
+   * the same defect the rig and the camera have per-frame bounds for, in the
+   * one output where it is audible rather than visible. Muting during combat
+   * is the worst case: every voice in the mix is cut at once, so the step is
+   * the full amplitude of the mix.
+   *
+   * 18 ms is long enough that the discontinuity falls below hearing and short
+   * enough that a mute still reads as instant.
+   */
+  _rampGain(node, value) {
+    const g = node.gain;
+    const t = this.ctx.currentTime;
+    g.cancelScheduledValues(t);
+    g.setValueAtTime(g.value, t);
+    g.linearRampToValueAtTime(value, t + 0.018);
+  }
+
   setVolumes({ master, music, sfx }) {
     if (master !== undefined) this.masterVolume = master;
     if (music !== undefined) this.musicVolume = music;
     if (sfx !== undefined) this.sfxVolume = sfx;
     if (!this.ready) return;
-    this.master.gain.value = this.muted ? 0 : this.masterVolume;
-    this.musicBus.gain.value = this.musicVolume;
-    this.sfxBus.gain.value = this.sfxVolume;
+    this._rampGain(this.master, this.muted ? 0 : this.masterVolume);
+    this._rampGain(this.musicBus, this.musicVolume);
+    this._rampGain(this.sfxBus, this.sfxVolume);
   }
 
   setMuted(m) {
     this.muted = m;
-    if (this.ready) this.master.gain.value = m ? 0 : this.masterVolume;
+    if (this.ready) this._rampGain(this.master, m ? 0 : this.masterVolume);
   }
 
   // -------------------------------------------------------------------------
