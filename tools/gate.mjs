@@ -109,6 +109,7 @@ const runAudit = () => new Promise((resolve) => {
 const UNIT_CHECKS = [
   ['継続性', 'tools/unit-continuity.mjs'],
   ['カメラ', 'tools/unit-camera.mjs'],
+  ['接地IK', 'tools/unit-footik.mjs'],
   // Not a unit check of the game — a check of the measurement. It reads the
   // criterion snapshots the audit leaves in docs/audit-runs.json and reports any
   // criterion that changed its verdict without the code changing.

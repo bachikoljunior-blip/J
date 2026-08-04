@@ -1118,8 +1118,14 @@ export class Rig {
       // Local axes on the ground plane: +Z ahead of the body, +X to its left.
       const fx = yb[6] * st, fz = yb[8] * st;
       const lx = yb[0] * st, lz = yb[2] * st;
-      const gradF = (src.heightAt(x + fx, z + fz) - src.heightAt(x - fx, z - fz)) / (2 * st);
-      const gradL = (src.heightAt(x + lx, z + lz) - src.heightAt(x - lx, z - lz)) / (2 * st);
+      // Four samples, and any of them may be unanswerable near a world edge. A
+      // non-finite gradient becomes a non-finite hip rotation, and from there
+      // every bone below the hips — which is all of them. Treat "no answer" as
+      // "no slope" rather than letting it into the pose.
+      const gF = (src.heightAt(x + fx, z + fz) - src.heightAt(x - fx, z - fz)) / (2 * st);
+      const gL = (src.heightAt(x + lx, z + lz) - src.heightAt(x - lx, z - lz)) / (2 * st);
+      const gradF = Number.isFinite(gF) ? gF : 0;
+      const gradL = Number.isFinite(gL) ? gL : 0;
       // The surface normal leans away from the rise; the hips lean with it.
       const pitch = clamp(Math.atan(gradF), -0.6, 0.6) * T.bodyTilt;
       const roll = clamp(-Math.atan(gradL), -0.6, 0.6) * T.bodyTilt;
@@ -1401,7 +1407,13 @@ export class Rig {
 
     // Airborne bodies have nothing to stand on. Fade out rather than reach for
     // ground that is forty metres down a cliff.
-    const under = src.heightAt(x, z);
+    const underRaw = src.heightAt(x, z);
+    // An unanswerable sample must not become a foot at NaN. The ground solve
+    // feeds corrections into damped per-foot state, so one non-finite height
+    // would stick — the same hazard the camera's boom and lift have, in the
+    // system that decides where a body's feet are.
+    if (!Number.isFinite(underRaw)) return;
+    const under = underRaw;
     const air = saturate((y - under - 0.22 * s) / (0.55 * s));
     // Nor has a body that is no longer upright: a pose that has pitched the
     // whole rig over is a body on the floor, whatever its feet think.
@@ -1443,7 +1455,11 @@ export class Rig {
       const leg = legs[c], f = feet[c];
       const ui = leg.upper, li = leg.lower;
       const lift = Math.max(0, f.lift - lowest);
-      const gy = src.heightAt(f.x, f.z);
+      const gyRaw = src.heightAt(f.x, f.z);
+      // Per-foot: no answer means leave this leg where the pose put it rather
+      // than solving toward a number that is not one.
+      if (!Number.isFinite(gyRaw)) continue;
+      const gy = gyRaw;
       const w = gw * clamp(this.plantS[c], 0, 1);
       const wlim = Math.min(PLANT_SLEW * dt, PLANT_STEP);
       f.w = warped ? w : clamp(w, f.w - wlim, f.w + wlim);
@@ -1477,8 +1493,12 @@ export class Rig {
       // enough apart to cross a bilinear cell edge without popping.
       if (leg.sole >= 0 && f.w > 0.01) {
         const d = 0.32 * s;
-        const nx = (src.heightAt(f.x - d, f.z) - src.heightAt(f.x + d, f.z)) / (2 * d);
-        const nz = (src.heightAt(f.x, f.z - d) - src.heightAt(f.x, f.z + d)) / (2 * d);
+        const nxRaw = (src.heightAt(f.x - d, f.z) - src.heightAt(f.x + d, f.z)) / (2 * d);
+        const nzRaw = (src.heightAt(f.x, f.z - d) - src.heightAt(f.x, f.z + d)) / (2 * d);
+        // Same for the sole's slope: an unanswerable pair means lay the foot
+        // flat, not rotate it by NaN.
+        const nx = Number.isFinite(nxRaw) ? nxRaw : 0;
+        const nz = Number.isFinite(nzRaw) ? nzRaw : 0;
         const l = Math.hypot(nx, 1, nz);
         if (!f.seeded || warped) { f.nx = nx / l; f.ny = 1 / l; f.nz = nz / l; f.seeded = true; }
         else {
