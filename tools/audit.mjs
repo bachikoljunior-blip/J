@@ -65,6 +65,16 @@ const axis = (id, name, weight) => {
       label, value: round(value), target: `${lo}–${hi}`, ok: value >= lo && value <= hi, cmp: '∈',
     }),
     yes: (label, value) => a.items.push({ label, value: value ? 'あり' : 'なし', target: 'あり', ok: !!value, cmp: '=' }),
+    // Reported, scored by nothing.
+    //
+    // For numbers worth watching that cannot be graded honestly — because the
+    // engine clamps them, so any bound above the clamp passes by construction
+    // and any bound below it fails by construction. Scoring one of those is
+    // worse than not measuring it: it adds a green tick that means "the clamp
+    // is still there" while reading as "the camera is good". Keep the number
+    // visible, keep it out of the score, and grade the thing the clamp cannot
+    // fake somewhere else.
+    note: (label, value, why) => a.items.push({ label, value, target: why, ok: true, cmp: '·', info: true }),
   };
 };
 const round = (v) => (typeof v === 'number' ? Math.round(v * 1000) / 1000 : v);
@@ -643,6 +653,15 @@ try {
     out.nonFinite = p.camera.nonFiniteFrames ?? 0;
     out.angSum = p.camera.angSum ?? -1;
     out.lastWarpStep = p.camera.lastWarpStep ?? -1;
+    // How many frames reached PlayerCamera.update at all. Without this, a
+    // frames=0 report has two causes that print identically: the game loop did
+    // not advance during the probe, or it advanced and the tracker rejected
+    // every frame. Those need completely different fixes.
+    out.updates = p.camera.updateCalls ?? -1;
+    out.dtSeen = p.camera.dtSeen ?? -1;
+    out.paused = !!g.paused;
+    out.dollySpan = p.camera.worstDollySpan ?? -1;
+    out.swingSpan = p.camera.worstSwingSpan ?? -1;
     for (const e of [e1, e2]) { if (e.spawnRef) e.spawnRef.actor = null; g._removeActor(e); }
     p.lockTarget = null;
     return out;
@@ -714,11 +733,13 @@ try {
     `hurtDirs=${motion.hurtDirections} hits=${motion.hitsLanded} ` +
     `hitstop=${motion.hitstop} shake=${motion.cameraImpulse}`);
   console.log(`  camera: ${camera.frames}f  視線 ${camera.view.toFixed(3)} rad/s @f${camera.viewAt}  ` +
-    `ドリー ${camera.dolly.toFixed(3)} m/s @f${camera.dollyAt}`);
+    `ドリー ${camera.dolly.toFixed(3)} m/s @f${camera.dollyAt}  ` +
+    `張り付き ドリー ${Number(camera.dollySpan).toFixed(3)}s / 旋回 ${Number(camera.swingSpan).toFixed(3)}s`);
   console.log(`  camera probe: spawned=${JSON.stringify(camera.spawned)} ` +
     `lock ${camera.lockHeld}/${camera.lockAsked}  yaw旋回 ${camera.yawSwing.toFixed(3)} rad  ` +
     `warp ${camera.warpFrames}/${camera.frames} (最大 ${camera.lastWarpStep}m)  ` +
-    `視線積算 ${Number(camera.angSum).toFixed(2)} rad  非有限 ${camera.nonFinite}` +
+    `視線積算 ${Number(camera.angSum).toFixed(2)} rad  非有限 ${camera.nonFinite}  ` +
+    `update ${camera.updates}回 dt=${Number(camera.dtSeen).toFixed(4)} paused=${camera.paused}` +
     `${camera.why ? `  why=${JSON.stringify(camera.why)}` : ''}`);
   for (const b of [motion.bufferHuman, motion.bufferCeiling]) {
     if (!b) continue;
@@ -1221,7 +1242,25 @@ try {
   // this was measured, walking beside a wall threw the view 19.8 m and 1.55 rad
   // in one frame, and nothing in thirteen axes noticed.
   K.le('カメラ視線の最大回転 (rad/s)', round(camera.view), 6.0);
-  K.le('カメラのドリー速度 (m/s)', round(camera.dolly), 7.2);
+  // Reported, not gated — and that demotion is the point.
+  //
+  // The boom's inward speed is clamped to CAM_BOOM_IN = 7.0 m/s where it is
+  // applied, so this number cannot exceed 7.0 unless the clamp breaks. It came
+  // back as 7.000000000000064 against a criterion of 7.2: a pass that says the
+  // clamp is present, and nothing whatever about whether the camera is pleasant
+  // to be behind. A criterion whose bound sits above the constant the code
+  // clamps to is a criterion that cannot fail.
+  K.note('カメラのドリー速度 (m/s)', round(camera.dolly), `上限 ${7.0} は実装側の固定値`);
+  // What the clamp cannot make look good: how long the camera stays pinned
+  // against it. One frame at full inward rate is a camera reacting to something
+  // that just occluded it. Half a second at full inward rate is 3.5 m of travel
+  // — most of the boom — and reads as the camera being dragged in. Seconds, not
+  // frames, so a slow machine cannot earn a better score by rendering less.
+  K.le('ドリーが上限に張り付く時間 (s)', round(camera.dollySpan), 0.35);
+  // Lock-on turns 90 degrees at CAM_SWING_RATE, which takes 0.44 s and is
+  // supposed to. Sustaining that rate past 0.7 s means 2.5 rad — 144 degrees —
+  // at maximum slew, which is not a framing decision any more.
+  K.le('旋回が上限に張り付く時間 (s)', round(camera.swingSpan), 0.7);
   // A probe that drove nothing would report a perfect zero, so require that it
   // ran. Every measurement here should be falsifiable by its own absence.
   K.ge('カメラ計測フレーム数', camera.frames, 300);
@@ -1299,8 +1338,12 @@ function writeReport(extra) {
   const backlog = [];
 
   for (const a of AXES) {
-    const passed = a.items.filter((i) => i.ok).length;
-    const score = a.items.length ? Math.round((passed / a.items.length) * 100) : 0;
+    // Informational rows are not criteria; counting them would inflate every
+    // axis that carries one by a free pass.
+    const scored = a.items.filter((i) => !i.info);
+    a.scored = scored;
+    const passed = scored.filter((i) => i.ok).length;
+    const score = scored.length ? Math.round((passed / scored.length) * 100) : 0;
     a.score = score;
     total += score * a.weight;
     weightSum += a.weight;
@@ -1344,8 +1387,9 @@ function writeReport(extra) {
     + `（最低軸 ${weakest} 点、未達 ${unmet} 件）\n\n`;
   md += `| 軸 | 重み | 点 | | 未達 |\n|---|---|---|---|---|\n`;
   for (const r of rows) {
-    const fails = r.items.filter((i) => !i.ok).length;
-    md += `| ${r.id} ${r.name} | ${r.weight} | ${r.score} | \`${bar(r.score)}\` | ${fails} / ${r.items.length} |\n`;
+    const scored = r.scored || r.items;
+    const fails = scored.filter((i) => !i.ok).length;
+    md += `| ${r.id} ${r.name} | ${r.weight} | ${r.score} | \`${bar(r.score)}\` | ${fails} / ${scored.length} |\n`;
   }
 
   md += `\n## 測定値\n\n`;
@@ -1353,7 +1397,7 @@ function writeReport(extra) {
     md += `### ${r.id} ${r.name} — ${r.score}点\n\n`;
     md += `| 項目 | 実測 | 目標 | |\n|---|---|---|---|\n`;
     for (const i of r.items) {
-      md += `| ${i.label} | ${i.value} | ${i.cmp} ${i.target} | ${i.ok ? '✅' : '❌'} |\n`;
+      md += `| ${i.label} | ${i.value} | ${i.cmp} ${i.target} | ${i.info ? '参考' : i.ok ? '✅' : '❌'} |\n`;
     }
     md += `\n`;
   }
@@ -1405,6 +1449,7 @@ function writeReport(extra) {
       unmet,
       items: AXES.flatMap((a) => a.items.map((it) => ({
         axis: a.id, label: it.label, value: it.value, target: it.target, ok: it.ok,
+        ...(it.info ? { info: true } : {}),
       }))),
     });
     writeFileSync(snapPath, JSON.stringify(runs.slice(0, 12), null, 1));

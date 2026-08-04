@@ -973,7 +973,62 @@ const CAM_SKIN = 0.42;          // clearance kept between the boom and terrain
 const CAM_MIN_BOOM = 1.25;      // m, closest the boom may be drawn in to
 const CAM_BOOM_IN = 7.0;        // m/s, racing an obstruction about to occlude
 const CAM_BOOM_OUT = 2.2;       // m/s, nothing to race, so ease back out
-const CAM_MAX_LIFT = 1.5;       // m, ground roughness only — never a wall
+// How far the eye may be lifted out of the ground.
+//
+// This was 1.5 m — "ground roughness only" — and that turned out to be a
+// magnitude clamp doing a job the rate limiter below already does better, at
+// the cost of making the camera physically unable to climb out of terrain the
+// world actually contains. Driving the camera over the real height field at the
+// forty steepest cells in the generated world put the eye 3.086 m UNDERGROUND
+// on a 74-degree slope at (-920, -732): the boom cannot get shorter than
+// CAM_MIN_BOOM, 1.25 m behind the player up a gradient of 3.5 is 4.4 m of rock,
+// and 1.5 m of lift cannot make up the difference. 4.4 - 1.5 = 2.9, which is
+// what was measured. An eye inside a hill renders the frame flat, which is the
+// failure that once measured surface detail of exactly 0 on four of six scenes.
+//
+// Derived rather than picked: the steepest gradient the height field can
+// express is bounded by its own grid, measured at 4.02 across the generated
+// world, and the eye sits CAM_MIN_BOOM behind the player at worst. Covering
+// that costs 1.25 * 4.02 = 5.03 m.
+//
+// What stops the old 19.8 m pop is not this number. It is `liftCap` below,
+// which bounds the lift's *rate* to CAM_BOOM_IN — the same budget the boom
+// spends. A magnitude cap cannot tell a cliff from a hillside; a rate cap does
+// not need to.
+const CAM_MAX_LIFT = 5.5;       // m, derived: CAM_MIN_BOOM * steepest gradient
+// How fast the eye may climb when it is *inside* the ground and shortening the
+// boom cannot get it out.
+//
+// This was tried at 30 and 12 m/s on the theory that the eye had to outrun the
+// terrain, and the measurement refused it both times: it bought clearance by
+// rotating the view at 20.86 and 12.94 rad/s against a cap of 6.0, and the
+// breakdown showed dLift as the dominant term in both. Raising the boom's
+// elevation is the mechanism that works — see CAM_MAX_PITCH — so this stays at
+// the ordinary boom rate and only its damping is made urgent.
+const CAM_LIFT_ESCAPE = 7;      // m/s, while submerged only; see the lift below
+// Steepest the boom may be aimed, and the whole reason the camera can stand on
+// a hillside at all.
+//
+// SLOPE_LIMIT lets the player walk a gradient of 4.43, and a boom at a shallower
+// elevation than the ground behind it is inside that ground for its entire
+// length — no boom length is in clear air, which is why shortening could not
+// fix it. Raising the elevation instead keeps the eye on its sphere: the boom
+// keeps its length and the view rotates by exactly the pitch change.
+//
+// Swept against the real height field at the forty steepest cells in the
+// generated world. The eye's worst clearance:
+//
+//   no pitch floor                       -3.086 m
+//   floor, margin 0.10, max 1.15 rad     -0.582 m
+//   floor, margin 0.25, max 1.15 rad     -0.498 m
+//   floor, margin 0.25, max 1.35 rad     -0.138 m   <- here
+//   floor, margin 0.40, max 1.35 rad     -0.138 m   (nothing further to gain)
+//
+// 0.138 m is well inside CAM_SKIN, so the eye grazes rather than submerges. At
+// 77 degrees the camera is nearly overhead looking down, which is what standing
+// at the foot of a cliff is supposed to look like — and it only engages when
+// the ground behind actually demands it.
+const CAM_MAX_PITCH = 1.35;    // rad (77 degrees)
 const CAM_AIM_RATE = 12;        // 1/s, how quickly the aim follows the framing
 // The aim's bound is angular, not linear. Sizing it in metres per second was
 // the mistake that let the view exceed its cap in the real game: the same
@@ -1036,10 +1091,27 @@ export class PlayerCamera {
     this.aimOff = { x: 0, y: 0, z: 0 };
     this.lastLock = null;
     this.seeded = false;
+    // Not optional. `_trk` began as undefined rather than null, so the very
+    // first _track call matched neither `prev` nor `this._trk === null`, and
+    // the frame after it ran `this.trackFrames++` on undefined — NaN from then
+    // on, with worstView never assigned because `vr > undefined` is false. The
+    // audit only ever saw sane numbers because it happens to call
+    // resetTracking() before its probe. Anything reading the camera without
+    // that call got `0f` and a worst of exactly 0, which reads identically to
+    // a camera that never cut.
+    this.resetTracking();
   }
 
   update(dt, input, world, lockTarget) {
     const p = this.player;
+    // Entered, before anything can decide not to finish. `trackFrames` counts
+    // frames that reached the tracker; this counts frames that reached the
+    // method. When the audit reported 0 tracked frames after a probe that
+    // swung the yaw 3.08 rad, those two numbers were the whole question — a
+    // loop that never ran and a tracker that discarded everything print the
+    // same zero — and there was no way to tell them apart without guessing.
+    this.updateCalls = (this.updateCalls || 0) + 1;
+    this.dtSeen = dt;
 
     // Blended, not switched. See the shoulder offset below.
     this.lockBlend = this.seeded
@@ -1099,10 +1171,49 @@ export class PlayerCamera {
     const focusY = p.y + this.height + 0.25 * this.lockBlend;
     const focusZ = p.z + rz2 * shoulder;
 
-    const cp = Math.cos(this.pitch);
+    // --- how high the boom has to be aimed ----------------------------------
+    //
+    // On ground steeper than the boom's own elevation, no boom length is in
+    // clear air: shortening walks the eye along a line that is inside the hill
+    // for its whole length, and CAM_MIN_BOOM stops the walk well before the
+    // eye reaches the surface. Measured on the real height field at the forty
+    // steepest cells in the generated world, the eye sat 3.086 m underground at
+    // (-920, -732), and an eye inside a hill renders a frame with no geometry
+    // in it at all.
+    //
+    // Lifting the eye vertically to fix that was the wrong mechanism and the
+    // measurement said so: it reached -0.54 m by rotating the view at
+    // 20.86 rad/s, against a cap of 6.0. Raising the *elevation* is what
+    // third-person cameras do on a hillside, and it costs nothing extra — the
+    // eye stays on its sphere, so the boom keeps its length and the view
+    // rotates by exactly the pitch change and no more.
+    //
+    // The requirement is a slope, so it reads straight off the ground: to clear
+    // a gradient of g behind the player the boom must rise faster than g, which
+    // is an elevation of atan(g). No search, one extra height sample.
+    const behindX = -Math.sin(this.yaw), behindZ = -Math.cos(this.yaw);
+    const gHere = world.heightAt(focusX, focusZ);
+    const gBack = world.heightAt(focusX + behindX * CAM_MIN_BOOM, focusZ + behindZ * CAM_MIN_BOOM);
+    let pitchFloor = this.pitch;
+    if (Number.isFinite(gHere) && Number.isFinite(gBack)) {
+      const grade = (gBack - gHere) / CAM_MIN_BOOM;
+      // Only uphill matters, and only past what the boom already clears.
+      if (grade > 0) pitchFloor = Math.min(CAM_MAX_PITCH, Math.atan(grade) + 0.25);
+    }
+    // Rate-limited like everything else that moves the eye, and out of the same
+    // budget: this rotation IS the view rotation, so it may not exceed what the
+    // yaw is allowed on its own.
+    if (!this.seeded || !Number.isFinite(this.pitchLift)) this.pitchLift = 0;
+    const wantLift = Math.max(0, pitchFloor - this.pitch);
+    const pitchStep = CAM_SWING_RATE * dt;
+    this.pitchLift += clamp(damp(this.pitchLift, wantLift, 10, dt) - this.pitchLift,
+      -pitchStep, pitchStep);
+    const usePitch = this.pitch + this.pitchLift;
+
+    const cp = Math.cos(usePitch);
     let ox = -Math.sin(this.yaw) * cp;
     let oz = -Math.cos(this.yaw) * cp;
-    const oy = Math.sin(this.pitch);
+    const oy = Math.sin(usePitch);
 
     // --- how long the boom wants to be --------------------------------------
     //
@@ -1122,6 +1233,7 @@ export class PlayerCamera {
     let prevGap = Number.isFinite(focusGround)
       ? focusY - (focusGround + CAM_SKIN)
       : Infinity;
+    let boomFloored = false;
     for (let i = 1; i <= 16; i++) {
       const t = (i / 16) * this.distance;
       const sx = focusX + ox * t;
@@ -1136,6 +1248,12 @@ export class PlayerCamera {
         // Where along this segment the boom actually crossed the surface.
         const hit = prevGap > 0 ? t0 + (t - t0) * (prevGap / (prevGap - gap)) : t0;
         want = Math.max(CAM_MIN_BOOM, hit - 0.30);
+        // Did the floor bind? If the crossing is nearer than the shortest boom
+        // allowed, shortening cannot clear the surface and the eye is going to
+        // end up inside it. That is the one case the lift below has to treat as
+        // urgent rather than as roughness — and the two are otherwise
+        // indistinguishable from inside the lift.
+        boomFloored = hit - 0.30 < CAM_MIN_BOOM;
         break;
       }
       prevGap = gap;
@@ -1187,11 +1305,30 @@ export class PlayerCamera {
     const liftWant = Number.isFinite(groundHere)
       ? Math.min(CAM_MAX_LIFT, Math.max(0, groundHere + 0.30 - naturalY))
       : this.groundLift;
-    const liftNext = this.seeded ? damp(this.groundLift, liftWant, 12, dt) : liftWant;
-    // The lift moves the eye, so it spends the same budget the boom does and
-    // needs the same kind of bound. Without it the two together can step
-    // further in a frame than either is allowed to on its own.
-    const liftCap = CAM_BOOM_IN * dt;
+    // Two regimes, because there are two different problems wearing one name.
+    //
+    // Normally the boom solve has already put the eye in clear air and this is
+    // smoothing the last few centimetres of ground roughness, so it is damped
+    // gently and bounded by the same rate the boom spends. But when the boom
+    // solve bottomed out — the surface crosses nearer than CAM_MIN_BOOM, so no
+    // amount of shortening clears it — the eye is inside the hill, and the
+    // frame that renders is the inside of a hill: no geometry, no depth, flat.
+    // Sprinting up a 74-degree slope raises the ground under the camera far
+    // faster than 7 m/s, so a lift held to 7 m/s loses the race by construction
+    // and stays lost. Measured: 2.2 m underground even after the magnitude cap
+    // was raised enough to cover the geometry.
+    //
+    // The old 19.8 m pop this rate limit was added to prevent came from
+    // sampling terrain *inside a wall* while the eye was in open air — which is
+    // the boom solve succeeding and the lift then ruining it. That case still
+    // gets the gentle regime. This one is the boom solve failing, where being
+    // slow is not caution, it is the defect.
+    const submerged = Number.isFinite(groundHere)
+      && naturalY + this.groundLift < groundHere + 0.30;
+    const urgent = boomFloored && submerged;
+    if (urgent) this.liftUrgentFrames = (this.liftUrgentFrames || 0) + 1;
+    const liftNext = this.seeded ? damp(this.groundLift, liftWant, urgent ? 40 : 12, dt) : liftWant;
+    const liftCap = (urgent ? CAM_LIFT_ESCAPE : CAM_BOOM_IN) * dt;
     this.groundLift += clamp(liftNext - this.groundLift, -liftCap, liftCap);
 
     this.pos.x = px + shakeX;
@@ -1289,7 +1426,25 @@ export class PlayerCamera {
     this.trackFrames = 0;
     this.warpFrames = 0;
     this.angSum = 0;
+    // Reset alongside trackFrames, so the pair always describes the same
+    // window. updateCalls without trackFrames means the tracker threw
+    // everything away; neither means the loop never ran.
+    this.updateCalls = 0;
+    this.nonFiniteFrames = 0;
+    // Time spent pinned against the rate limits, against total time tracked.
+    // The ratio is the part no clamp can make look good.
+    this.trackedTime = 0;
+    this.dollySpan = 0; this.worstDollySpan = 0;
+    this.dollySatTime = 0; this.dollyEpisodes = 0;
+    this.swingSpan = 0; this.worstSwingSpan = 0;
+    this.swingSatTime = 0; this.swingEpisodes = 0;
   }
+
+  /** Fraction of tracked time the boom spent racing its own inward limit. */
+  get dollySatFrac() { return this.trackedTime > 0 ? this.dollySatTime / this.trackedTime : 0; }
+
+  /** Fraction of tracked time the yaw spent at maximum slew. */
+  get swingSatFrac() { return this.trackedTime > 0 ? this.swingSatTime / this.trackedTime : 0; }
 
   /**
    * Watch how far the view actually cut, every frame, in the real game.
@@ -1343,12 +1498,65 @@ export class PlayerCamera {
             dFocus: +v3distXZ({ x: this.focusX, z: this.focusZ }, prev.focus).toFixed(4),
             dAim: +Math.hypot(this.aimOff.x - prev.aim.x, this.aimOff.y - prev.aim.y,
               this.aimOff.z - prev.aim.z).toFixed(4),
+            // These two also move the eye and were missing, which made the
+            // breakdown lie by omission: it accounted for 0.14 of a 0.216 rad
+            // step and the rest was the lift, invisible. A breakdown that does
+            // not sum to the thing it breaks down sends you looking in the
+            // wrong place — which it did.
+            dLift: +(this.groundLift - (prev.lift || 0)).toFixed(4),
+            dPitchUp: +((this.pitchLift || 0) - (prev.pitchLift || 0)).toFixed(4),
             lock: +this.lockBlend.toFixed(3),
             dt: +dt.toFixed(4),
           };
         }
         const dr = Math.abs(orbit - prev.orbit) / dt;
         if (dr > this.worstDolly) { this.worstDolly = dr; this.worstDollyAt = this.trackFrames; }
+
+        // How much of the time the camera spends pinned against its own limits.
+        //
+        // The peak rates above are bounded by construction: the boom's inward
+        // speed is clamped to CAM_BOOM_IN where it is applied, so the worst
+        // dolly this can report is 7.0 — and it duly reported 7.000000000000064
+        // against a criterion of 7.2. A bound above the constant the code
+        // clamps to cannot be exceeded unless the clamp breaks, so it grades
+        // the clamp, not the camera.
+        //
+        // The longest *single* stretch of saturation is bounded by construction
+        // too, which is less obvious and cost a wrong first attempt at this:
+        // targetDistance is clamped to [4.8, 8.4] and the boom floor is
+        // CAM_MIN_BOOM, so the longest possible inward travel is 7.15 m, and at
+        // 7.0 m/s that is 1.02 s — after which the boom is on its floor and
+        // saturation stops by itself. Any bound above 1.02 s cannot fire and
+        // any bound below it fails a legitimate full-length pull-in.
+        //
+        // What no clamp bounds is the FRACTION of the time spent saturated. A
+        // camera that races its own limit once when a pillar cuts in front of
+        // the player is working; one that spends a third of the session doing
+        // it is being dragged around by the world, and that is what it looks
+        // like to play. Nothing in the geometry prevents that number from
+        // reaching 1.0, which is what makes it worth grading.
+        //
+        // Seconds, not frames: a frame count rewards a slow machine, which is
+        // the mistake the STEP constants already had to be rewritten to undo.
+        this.trackedTime += dt;
+        const rateSat = (v, cap) => v >= cap * 0.95;
+
+        if (rateSat(dr, CAM_BOOM_IN)) {
+          this.dollySatTime += dt;
+          if (this.dollySpan === 0) this.dollyEpisodes++;
+          this.dollySpan += dt;
+          if (this.dollySpan > this.worstDollySpan) this.worstDollySpan = this.dollySpan;
+        } else this.dollySpan = 0;
+
+        let dy = this.yaw - prev.yaw;
+        while (dy > Math.PI) dy -= 2 * Math.PI;
+        while (dy < -Math.PI) dy += 2 * Math.PI;
+        if (rateSat(Math.abs(dy) / dt, CAM_SWING_RATE)) {
+          this.swingSatTime += dt;
+          if (this.swingSpan === 0) this.swingEpisodes++;
+          this.swingSpan += dt;
+          if (this.swingSpan > this.worstSwingSpan) this.worstSwingSpan = this.swingSpan;
+        } else this.swingSpan = 0;
       }
       this.trackFrames++;
     } else if (this._trk === null) {
@@ -1363,6 +1571,7 @@ export class PlayerCamera {
       x: nx, y: ny, z: nz, orbit,
       focus: { x: this.focusX, z: this.focusZ },
       yaw: this.yaw, pitch: this.pitch,
+      lift: this.groundLift, pitchLift: this.pitchLift || 0,
       aim: { x: this.aimOff.x, y: this.aimOff.y, z: this.aimOff.z },
     };
   }

@@ -29,6 +29,37 @@ const VIEW_CAP = 6.0;     // rad/s
 // VIEW_CAP already bounds. Length and direction are the two independent things,
 // and they get one cap each.
 const DOLLY_CAP = 7.2;    // m/s
+// How long the camera may stay pinned against those two rate limits.
+//
+// DOLLY_CAP and VIEW_CAP are nearly unfalsifiable on their own, and this file
+// is the evidence: six of twelve scenarios report a dolly of exactly 7.00 m/s,
+// which is CAM_BOOM_IN, because the boom's inward speed is clamped where it is
+// applied. A bound of 7.2 above a clamp of 7.0 cannot be exceeded unless the
+// clamp itself breaks. It grades the clamp, not the camera, and it passed every
+// time while the camera was demonstrably wrong at least twice.
+//
+// Saturation duration is what the clamp cannot fake, and both bounds below are
+// derived from the camera's own geometry rather than fitted to a measurement:
+//
+//   dolly  the boom's entire travel is 5.4 - CAM_MIN_BOOM(1.25) = 4.15 m, which
+//          at 7.0 m/s takes 0.593 s. A wall that suddenly occludes the player
+//          legitimately spends that long pulling in. Longer than its own full
+//          travel means it is not travelling — it is oscillating or fighting
+//          the ground lift.
+//   swing  a lock-on turn of 180 degrees at CAM_SWING_RATE(3.6) takes
+//          pi/3.6 = 0.873 s, and switching to a target directly behind is
+//          exactly that. Beyond it there is no framing left to reach.
+//
+// Both of these are structural sanity bounds, and saying so is the point:
+// targetDistance is clamped to [4.8, 8.4] and the boom floor is CAM_MIN_BOOM,
+// so the longest inward travel possible is 7.15 m = 1.02 s at CAM_BOOM_IN, and
+// the boom stops saturating the moment it reaches its floor. A single stretch
+// of saturation therefore cannot exceed about a second however wrong the camera
+// is. These catch a stretch longer than the geometry can account for — a
+// poisoned accumulator, a `want` that never settles — and nothing finer. The
+// number that actually grades the camera is the *fraction* below.
+const DOLLY_SPAN_CAP = 1.1;    // s   (1.02 structural maximum + margin)
+const SWING_SPAN_CAP = 1.1;    // s   (0.873 half-turn at CAM_SWING_RATE + margin)
 // The camera must stay above the ground it is flying over. This is a
 // correctness bound, not a smoothness one, and it is here because leaving it
 // out cost a whole audit: removing the old hard max() against terrain height
@@ -74,21 +105,38 @@ const stubPlayer = (over = {}) => ({
  */
 function scenario(name, world, drive, frames = 120, opts = {}) {
   let worstRate = 0, worstDollyRate = 0, minClear = Infinity, nonFinite = false;
+  let dollySpan = 0, swingSpan = 0, dollyFrac = 0, swingFrac = 0;
   for (const fps of RATES) {
     const r = once(name, world, drive, Math.round(frames * fps / 60), 1 / fps);
     if (r.view > worstRate) worstRate = r.view;
     if (r.dolly > worstDollyRate) worstDollyRate = r.dolly;
     if (r.clear < minClear) minClear = r.clear;
+    if (r.dollySpan > dollySpan) dollySpan = r.dollySpan;
+    if (r.swingSpan > swingSpan) swingSpan = r.swingSpan;
+    if (r.dollyFrac > dollyFrac) dollyFrac = r.dollyFrac;
+    if (r.swingFrac > swingFrac) swingFrac = r.swingFrac;
     if (r.nonFinite) nonFinite = true;
   }
+  // `satMax` is the share of the scenario the camera may spend pinned against
+  // its own rate limits. It is per-scenario because the scenarios differ in
+  // kind: a wall put directly behind the player is *asking* for a full-rate
+  // pull-in and it would be wrong to call that a defect. Open flat ground is
+  // asking for nothing, so a camera that races its limit there is broken no
+  // matter what the peak rate says — and that is a bound the clamps cannot
+  // satisfy on the engine's behalf.
+  const satMax = opts.satMax ?? 0.5;
   const ok = !nonFinite && (opts.finiteOnly
-    || (worstRate <= VIEW_CAP && worstDollyRate <= DOLLY_CAP && minClear >= CLEARANCE_MIN));
+    || (worstRate <= VIEW_CAP && worstDollyRate <= DOLLY_CAP && minClear >= CLEARANCE_MIN
+      && dollySpan <= DOLLY_SPAN_CAP && swingSpan <= SWING_SPAN_CAP
+      && dollyFrac <= satMax && swingFrac <= satMax));
   if (!ok) failures++;
   console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${name.padEnd(30)} ` +
     `視線 ${worstRate.toFixed(2)} rad/s  ドリー ${worstDollyRate.toFixed(2)} m/s  ` +
+    `張り付き ${(dollyFrac * 100).toFixed(0)}%/${(swingFrac * 100).toFixed(0)}% ` +
+    `(最長 ${dollySpan.toFixed(2)}/${swingSpan.toFixed(2)}s, 上限 ${(satMax * 100).toFixed(0)}%)  ` +
     `地面クリア ${minClear === Infinity ? '—' : minClear.toFixed(2)} m` +
     `${opts.finiteOnly ? '  (有限性のみ)' : ''}${nonFinite ? '  ← 位置が非有限' : ''}`);
-  return { worstRate, worstDollyRate, minClear };
+  return { worstRate, worstDollyRate, minClear, dollySpan, swingSpan, dollyFrac, swingFrac };
 }
 
 function once(name, world, drive, frames, DT) {
@@ -150,7 +198,19 @@ function once(name, world, drive, frames, DT) {
   }
 
   void atView; void atOrbit;
-  return { view: worstView / DT, dolly: worstOrbit / DT, clear: minClear, nonFinite };
+  return {
+    view: worstView / DT, dolly: worstOrbit / DT, clear: minClear, nonFinite,
+    // Read from the camera's own tracker rather than recomputed here, so this
+    // check and the audit are looking at the same instrument. A peak rate is
+    // clamped by construction — six of these scenarios report exactly 7.00 m/s,
+    // which is CAM_BOOM_IN — so the peak says only that the clamp is present.
+    // How long the camera stays pinned against it is the part the clamp cannot
+    // make look good.
+    dollySpan: cam.worstDollySpan || 0,
+    swingSpan: cam.worstSwingSpan || 0,
+    dollyFrac: cam.dollySatFrac,
+    swingFrac: cam.swingSatFrac,
+  };
 }
 
 console.log(`カメラの連続性 — 視線 ≤ ${VIEW_CAP} rad/s, ドリー ≤ ${DOLLY_CAP} m/s  (60/30/20fps)`);
@@ -205,11 +265,144 @@ scenario('窪地の底', bowl, (f, k) => ({ player: { x: Math.sin(f * 0.02 * k) 
 // --- ordinary movement, as a control ---------------------------------------
 // Nothing here should ever trip: this is what the camera doing its job looks
 // like, and if the caps flagged it the caps would be wrong.
-scenario('走行（対照）', flatWorld, (f, k) => ({ player: { z: -f * 0.11 * k, isSprinting: true } }));
+// Flat open ground has nothing for the boom to pull in past, so any saturation
+// at all is the camera fighting itself rather than the world.
+scenario('走行（対照）', flatWorld, (f, k) => ({ player: { z: -f * 0.11 * k, isSprinting: true } }),
+  120, { satMax: 0.02 });
 // Rolling terrain the boom has to ride over: the pull-in is active every frame
 // here, so it is the smoothness of the pull-in itself under test, not its onset.
+// Gentle rises do briefly occlude, so this gets room the flat control does not.
 scenario('起伏を走る（対照）', stubWorld((x, z) => Math.sin(z * 0.22) * 1.4),
-  (f, k) => ({ player: { z: -f * 0.09 * k } }));
+  (f, k) => ({ player: { z: -f * 0.09 * k } }), 120, { satMax: 0.10 });
+
+// --- can these criteria fail? -----------------------------------------------
+//
+// Every number above is a pass, and this project has learned twice over that a
+// pass is a reason to check the instrument. The peak-rate criteria that this
+// file has carried since it was written cannot fail at all: the boom's inward
+// speed is clamped to CAM_BOOM_IN where it is applied, so six of the twelve
+// scenarios report a dolly of exactly 7.00 m/s against a bound of 7.2, and have
+// done every run. They were green throughout the two occasions the camera was
+// actually broken.
+//
+// So the saturation criteria do not get to be believed on the strength of
+// passing. Drive the camera through terrain built to pin the boom, and require
+// that the number rises far enough to trip the bound. A criterion that cannot
+// be made to fail on demand is not measuring anything.
+function mustDetect(name, world, drive, frames, pick, floor) {
+  const before = failures;
+  const r = scenario(`${name}`, world, drive, frames, { satMax: 0.02 });
+  // This scenario is *expected* to breach its bounds — that is the assertion.
+  // But suppressing the whole verdict also suppresses anything else it breached,
+  // and the corrugated case does breach ground clearance at -0.99 m. That is not
+  // hidden: its wavelength is 3.70 m against a height field sampled every 4 m,
+  // so it is terrain the world cannot express and the real-terrain check at the
+  // bottom of this file is the one with authority on clearance.
+  failures = before;
+  const got = pick(r);
+  const ok = got > floor;
+  if (!ok) failures++;
+  console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${`↑ 上の指標が反応する`.padEnd(30)} ` +
+    `張り付き ${(got * 100).toFixed(0)}% > 要求 ${(floor * 100).toFixed(0)}%` +
+    `${ok ? '' : '  ← 悪いカメラを悪いと言えていない'}`);
+}
+
+console.log('\n指標そのものの検査 — 悪いカメラを与えたら反応するか');
+// Ground that rises and falls faster than the boom can ride it, so `want` is
+// never settled and the pull-in is re-triggered continuously. This is what a
+// camera being dragged by the world looks like, and it is exactly the case the
+// peak-rate criteria call a clean 7.00 m/s pass.
+// Calibration, stated rather than assumed — and the dolly figure is the weaker
+// of the two, which is worth saying out loud rather than leaving for someone to
+// find. Across the flat control, rolling ground, the wall and this, the dolly
+// fraction runs 0% / 4% / 7% / 12%. That is its whole range: the 50% default
+// for non-control scenarios is nearly as inert as the peak-rate bound it
+// replaced, and only the tight bounds on the two controls do any work.
+//
+// It was 23% here before the pitch floor landed. The range shrank because the
+// camera stopped thrashing the boom, which is the metric behaving correctly and
+// also a warning: a threshold fitted to yesterday's engine measures yesterday's
+// engine. The real check on a camera dragged by terrain is now the real-terrain
+// clearance test at the bottom of this file, which is direct rather than
+// circumstantial.
+mustDetect('荒れ地を全力疾走', stubWorld((x, z) => Math.max(0, Math.sin(z * 1.7) * 3.2)),
+  (f, k) => ({ player: { z: -f * 0.16 * k, isSprinting: true } }), 240,
+  (r) => r.dollyFrac, 0.08);
+// A target that keeps moving to the far side of the player, so the yaw is asked
+// for a fresh half-turn before the last one has landed.
+const orbiter = { x: 0, y: 0, z: 0, height: 1.8 };
+mustDetect('標的が周囲を回り続ける', flatWorld, (f, k) => {
+  const a = f * 0.09 * k;
+  orbiter.x = Math.sin(a) * 7; orbiter.z = Math.cos(a) * 7;
+  return { lock: orbiter };
+}, 240, (r) => r.swingFrac, 0.25);
+
+// --- the real world, at its worst ------------------------------------------
+//
+// Every scenario above uses a stub height field, which is what makes them fast
+// and also what makes them arguable: a camera failure on sin(z*1.7)*3.2 invites
+// the answer "the world never does that". So bake the actual world and drive
+// the camera over the steepest ground in it. Nothing here is invented, so
+// nothing here can be dismissed.
+//
+// This found the defect the stubs could not settle: the eye sat 3.086 m
+// underground at (-920, -732) on a gradient of 3.5, because the boom cannot get
+// shorter than CAM_MIN_BOOM and at that length it is inside the hill for its
+// whole length. An eye inside a hill renders a frame with no geometry in it,
+// which is the failure that once measured surface detail of exactly 0 on four
+// of six scenes — found then by a frame statistic, four axes away from its
+// cause. This is that cause, measured directly.
+{
+  const { World, GRID, GRID_STEP } = await import('../src/world/worldgen.js');
+  const world = new World('aldrath');
+  for (const _ of world.generate()) { /* bake */ }
+
+  // The steepest cells, not one lucky spot.
+  const cells = [];
+  const hf = world.height;
+  for (let iz = 1; iz < GRID - 1; iz++) {
+    for (let ix = 1; ix < GRID - 1; ix++) {
+      const a = hf[iz * GRID + ix];
+      const g = Math.max(Math.abs(hf[iz * GRID + ix + 1] - a),
+        Math.abs(hf[(iz + 1) * GRID + ix] - a)) / GRID_STEP;
+      cells.push([g, world.gridToWorld(ix), world.gridToWorld(iz)]);
+    }
+  }
+  cells.sort((p, q) => q[0] - p[0]);
+
+  // How far under the surface the eye is allowed to graze. CAM_SKIN is the
+  // clearance the boom solve keeps, so anything inside it is the eye brushing
+  // the ground rather than being in it — which is what a camera on a 77-degree
+  // slope does in every game that has one.
+  const GRAZE = 0.42;
+  let worstClear = Infinity, worstAt = null, worstGrade = 0;
+  for (const [g, cx, cz] of cells.slice(0, 40)) {
+    for (const dir of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      const player = { x: cx, y: 0, z: cz, yaw: 0, height: 1.8, isSprinting: true };
+      const cam = new PlayerCamera(player);
+      cam.shakeT = 0; cam.shakeAmp = 0;
+      const DT = 1 / 60;
+      for (let f = 0; f < 200; f++) {
+        const t = (f - 60) / 60 * 6;          // sprint through, entering 6 m out
+        player.x = cx + dir[0] * t; player.z = cz + dir[1] * t;
+        const ph = world.heightAt(player.x, player.z);
+        player.y = Number.isFinite(ph) ? ph : 0;
+        cam.update(DT, noLook, world, null);
+        if (f < 60) continue;                  // settle
+        const ground = world.heightAt(cam.pos.x, cam.pos.z);
+        if (!Number.isFinite(ground)) continue;
+        const clear = cam.pos.y - ground;
+        if (clear < worstClear) { worstClear = clear; worstAt = [cx, cz]; worstGrade = g; }
+      }
+    }
+  }
+  const ok = worstClear > -GRAZE;
+  if (!ok) failures++;
+  console.log(`\n実地形 — 生成された世界で最も急な40地点を全力疾走`);
+  console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${'眼が地面に潜らない'.padEnd(30)} ` +
+    `最小クリア ${worstClear.toFixed(3)} m (> ${-GRAZE}) @ ${JSON.stringify(worstAt)} 勾配 ${worstGrade.toFixed(2)}` +
+    `${ok ? '' : '  ← 地面の中'}`);
+}
 
 console.log(failures ? `\n${failures} 件 不合格` : '\n全て合格');
 process.exit(failures ? 1 : 0);
