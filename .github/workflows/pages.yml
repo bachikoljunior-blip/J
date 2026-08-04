@@ -77,13 +77,22 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > _site/BUILD.txt
           date -u '+%Y-%m-%d %H:%M UTC' >> _site/BUILD.txt
 
+      # Fail here, with the reason, rather than in `deploy`.
+      #
       # `configure-pages` with enablement:true only *creates* a Pages site that
       # does not exist. This repository already had one, serving the development
-      # branch, so enablement reported success and changed nothing — and deploy
-      # kept dying in one second with no steps at all, because the github-pages
-      # environment does not exist until the source is Actions. Converting an
-      # existing site is a different call, and this is it.
-      - name: 配信元を Actions に切り替える
+      # branch (build_type "legacy"), so enablement reported success and changed
+      # nothing — and deploy died in one second with no steps at all, twice,
+      # because the github-pages environment does not exist until the source is
+      # Actions. A job rejected at environment resolution produces no log to
+      # read, so the failure said nothing about its cause.
+      #
+      # Converting an existing site needs PUT /repos/{owner}/{repo}/pages, and
+      # GITHUB_TOKEN cannot do it at any permission level the `permissions:` key
+      # can grant: "Resource not accessible by integration". It is a repository
+      # setting, so it takes a repository owner. This step reports that in one
+      # line instead of leaving a silent one-second failure downstream.
+      - name: 配信元を確かめる
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -95,20 +104,28 @@ jobs:
 
           get=$(curl -sS -o /tmp/pages.get -w '%{http_code}' \
             -H "$auth" -H "$acc" -H "$ver" "$url")
-          echo "GET  /pages -> $get"; cat /tmp/pages.get; echo
+          echo "GET /pages -> $get"; cat /tmp/pages.get; echo
 
-          # 404 means no site at all, which is the one case enablement handled.
-          if [ "$get" = "404" ]; then m=POST; else m=PUT; fi
-          code=$(curl -sS -o /tmp/pages.set -w '%{http_code}' -X "$m" \
-            -H "$auth" -H "$acc" -H "$ver" \
-            -d '{"build_type":"workflow"}' "$url")
-          echo "$m /pages -> $code"; cat /tmp/pages.set; echo
+          # No site at all: creating one is the case GITHUB_TOKEN *is* allowed,
+          # and it creates it already pointed at Actions.
+          if [ "$get" = "404" ]; then
+            code=$(curl -sS -o /tmp/pages.new -w '%{http_code}' -X POST \
+              -H "$auth" -H "$acc" -H "$ver" \
+              -d '{"build_type":"workflow"}' "$url")
+            echo "POST /pages -> $code"; cat /tmp/pages.new; echo
+            case "$code" in 201|204) exit 0 ;; esac
+            echo "::error::Pages サイトを作成できなかった (HTTP $code)。"
+            exit 1
+          fi
 
-          case "$code" in
-            200|201|204) echo "配信元 = workflow" ;;
-            *) echo "::error::Pages の配信元を Actions に切り替えられなかった。リポジトリの Settings → Pages → Source を GitHub Actions にする必要がある。"
-               exit 1 ;;
-          esac
+          # Already ours: nothing to do, and re-asserting it would 403.
+          if grep -q '"build_type": *"workflow"' /tmp/pages.get; then
+            echo "配信元 = workflow"
+            exit 0
+          fi
+
+          echo "::error::Pages の配信元がブランチ配信のままです。リポジトリの Settings → Pages → Source を 'GitHub Actions' に変更してください。この切り替えだけはワークフローの権限では行えません (PUT /pages が 403 Resource not accessible by integration)。"
+          exit 1
 
       - uses: actions/configure-pages@v5
 
