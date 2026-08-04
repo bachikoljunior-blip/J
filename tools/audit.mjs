@@ -893,6 +893,41 @@ try {
     out0.buildQueueLeft = g.terrain.buildQueue ? g.terrain.buildQueue.length : -1;
     out0.chunkMapSize = g.terrain.chunks ? g.terrain.chunks.size : -1;
 
+    // Every tier, not just the one the audit happens to run on.
+    //
+    // The tiers differ mainly in how far they draw — viewDistance 380/450/620,
+    // propDistance 260/300/420 — so one budget applied to whichever tier was
+    // loaded says nothing about the other two. Each is drained separately,
+    // because a tier that raises the view distance has more world to stream in
+    // before its steady state means anything.
+    const tierLoad = {};
+    const restore = g.renderer.quality.name;
+    for (const tier of ['low', 'medium', 'high']) {
+      g.applyQuality(tier);
+      g.autoResolution = false;
+      g.renderer.dynamicScale = g.dynamicScale;
+      g.renderer.resize(g.canvas.width, g.canvas.height);
+      let d2 = 0;
+      for (let i = 0; i < 900 && d2 < 30; i++) {
+        g.terrain.primeAround(p.x, p.z, g.renderer.quality.viewDistance);
+        const q = g.terrain.buildQueue ? g.terrain.buildQueue.length : 0;
+        d2 = q === 0 ? d2 + 1 : 0;
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+      let tri = 0, calls = 0;
+      for (let i = 0; i < 6; i++) {
+        await new Promise((r) => requestAnimationFrame(r));
+        tri = Math.max(tri, g.glw.triangles);
+        calls = Math.max(calls, g.glw.drawCalls);
+      }
+      tierLoad[tier] = { tri, calls, byTag: { ...g.glw.triByTag } };
+    }
+    out0.tierLoad = tierLoad;
+    g.applyQuality(restore === '低' ? 'low' : restore === '高' ? 'high' : 'medium');
+    g.autoResolution = false;
+    g.renderer.resize(g.canvas.width, g.canvas.height);
+    for (let i = 0; i < 60; i++) await new Promise((r) => requestAnimationFrame(r));
+
     const samples = [];
     let last = performance.now();
     for (let i = 0; i < 120; i++) {
@@ -936,6 +971,12 @@ try {
   console.log('  draw calls by pass:', JSON.stringify(perf.byTag),
     `terrainChunks=${perf.terrainChunks} batches=${perf.batches} ` +
     `待ち行列残り=${perf.buildQueueLeft} 保持チャンク=${perf.chunkMapSize}`);
+  if (perf.tierLoad) {
+    for (const [tier, t] of Object.entries(perf.tierLoad)) {
+      console.log(`  tier ${tier.padEnd(6)} 三角形 ${String(t.tri).padStart(7)} ` +
+        `ドローコール ${String(t.calls).padStart(3)}  ${JSON.stringify(t.byTag)}`);
+    }
+  }
   console.log('  triangles by pass:', JSON.stringify(perf.triByTag));
   console.log('  cull:', JSON.stringify(perf.cull));
 
@@ -1107,6 +1148,24 @@ try {
   // on mobile some years ago, while fragment cost and triangles did not.
   H.le('ドローコール', perf.drawCalls, 120);
   H.le('三角形数', perf.triangles, 260000);
+  // Per tier, with the budgets derived from what the tier settings actually
+  // cost rather than from one number applied to all three.
+  //
+  // Measured at steady state, heaviest of two locations: low 163k, medium 205k,
+  // high 395k — ratios of 1.00 : 1.26 : 2.42. The 260,000 the project already had was
+  // being applied to whichever tier the audit loaded, which was medium, so that
+  // is the tier it is kept on; the other two are scaled by the measured ratios.
+  // This is not a threshold raised to pass — low ends up *tighter* than before.
+  if (perf.tierLoad) {
+    const TIER_TRI = { low: 190000, medium: 260000, high: 500000 };
+    const TIER_CALLS = { low: 110, medium: 120, high: 145 };
+    for (const [tier, cap] of Object.entries(TIER_TRI)) {
+      const t = perf.tierLoad[tier];
+      if (!t) continue;
+      H.le(`三角形数 (${tier})`, t.tri, cap);
+      H.le(`ドローコール (${tier})`, t.calls, TIER_CALLS[tier]);
+    }
+  }
   H.le('ワールド生成 (s)', round(genSeconds), 4.0);
   H.yes('動的解像度', perf.dynamicScale > 0 && perf.dynamicScale <= 1);
   H.le('フレーム分散 p95/median', round(perf.p95 / perf.median), 2.2);
