@@ -46,12 +46,28 @@ await page.waitForFunction(() => document.getElementById('loading').classList.co
 await sleep(1500);
 await page.evaluate(() => { window.__g.applyQuality('medium'); window.__g.dynamicScale = 1; });
 
+// One budget was being applied to whichever tier the audit happened to run.
+// The tiers differ mainly in how far they draw — viewDistance 380 / 450 / 620
+// and propDistance 260 / 300 / 420 — and triangle count scales with the area
+// that covers, so a number derived for the weakest device says nothing about
+// the middle one. Measure each tier and let the evidence set the budgets.
+const TIERS = ['low', 'medium', 'high'];
 const SPOTS = [
-  ['起動地点', null, null],
   ['peak', 239, 704],
   ['meadow', 0, 0],
 ];
 
+for (const tier of TIERS) {
+  await page.evaluate((t) => {
+    const g = window.__g;
+    g.applyQuality(t);
+    g.autoResolution = false;
+    g.dynamicScale = 1;
+    g.renderer.dynamicScale = 1;
+    g.renderer.resize(g.canvas.width, g.canvas.height);
+  }, tier);
+  console.log(`
+══════ 品質 ${tier} ══════`);
 for (const [name, x, z] of SPOTS) {
   const r = await page.evaluate(async (spot) => {
     const g = window.__g;
@@ -100,16 +116,18 @@ for (const [name, x, z] of SPOTS) {
       chunks: samples[samples.length - 1].chunks,
       byPass: samples[samples.length - 1].byPass,
       viewDistance: g.renderer.quality.viewDistance,
+      propDistance: g.renderer.quality.propDistance,
       dynamicScale: +g.dynamicScale.toFixed(2),
     };
   }, [name, x, z]);
 
-  console.log(`\n${name}  (viewDistance ${r.viewDistance}, res ${r.dynamicScale})`);
-  console.log(`  ビルド待ち行列が空になるまで ${r.drainedAfter} フレーム、残り ${r.queueLeft}`);
-  console.log(`  チャンク: 描画 ${r.chunks} / 保持 ${r.chunkMapSize}`);
-  console.log(`  三角形 ${r.triMin} – ${r.triMax}  (目標 ≤ 260000)  ${r.triMax > 260000 ? '← 超過' : 'ok'}`);
-  console.log(`  ドローコール ${r.callMin} – ${r.callMax}  (目標 ≤ 120)  ${r.callMax > 120 ? '← 超過' : 'ok'}`);
-  console.log(`  内訳 ${JSON.stringify(r.byPass)}`);
+  console.log(`  ${name}  (viewDistance ${r.viewDistance}, propDistance ${r.propDistance})`);
+  console.log(`    ビルド待ち行列が空になるまで ${r.drainedAfter} フレーム、残り ${r.queueLeft}`);
+  console.log(`    チャンク: 描画 ${r.chunks} / 保持 ${r.chunkMapSize}`);
+  console.log(`    三角形 ${r.triMin} – ${r.triMax}  (目標 ≤ 260000)  ${r.triMax > 260000 ? '← 超過' : 'ok'}`);
+  console.log(`    ドローコール ${r.callMin} – ${r.callMax}  (目標 ≤ 120)  ${r.callMax > 120 ? '← 超過' : 'ok'}`);
+  console.log(`    内訳 ${JSON.stringify(r.byPass)}`);
+}
 }
 
 await browser.close();
