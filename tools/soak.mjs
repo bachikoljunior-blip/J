@@ -66,6 +66,8 @@ const result = await page.evaluate(async (minutes) => {
   const g = window.__g;
   const p = g.player;
   const frame = () => new Promise((r) => requestAnimationFrame(r));
+  let saveFn = null;
+  try { saveFn = (await import('/src/core/save.js')).saveGame; } catch { saveFn = null; }
 
   const ARRAYS = ['actors', 'enemies', 'npcs', 'projectiles', 'areaEffects', 'timers',
     'lights', 'structureColliders', 'damageNumbers', 'interacts', 'notifications'];
@@ -118,7 +120,10 @@ const result = await page.evaluate(async (minutes) => {
       const ang = i * 0.7;
       g.spawnEnemy('bandit', p.x + Math.sin(ang) * 9, p.z + Math.cos(ang) * 9, { level: 1 });
     }
-    if (i % 900 === 0) { try { g.save?.(); } catch { /* save is measured, not required */ } }
+    // saveGame lives in core/save.js, not on the game object. Called through a
+    // dynamic import once, so a save happens periodically the way it would in
+    // play and the stored size can grow if anything is going to make it grow.
+    if (i % 900 === 0 && saveFn) { try { saveFn(1, g); } catch { /* size is what is measured */ } }
 
     await frame();
     const now = performance.now();
