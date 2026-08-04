@@ -1,0 +1,82 @@
+# ============================================================================
+#  Pages — publish a verified snapshot, twice a day.
+#
+#  Before this existed, Pages served the working branch directly, so every push
+#  went live. That is roughly forty deploys on a working day, and several of
+#  them were intermediate states that did not work: an audit that threw before
+#  its verdict, a camera whose recovery path trapped itself. Anyone opening the
+#  link during one of those saw it.
+#
+#  So the site is now a checkpoint rather than a mirror. Twice a day, this
+#  checks out the working branch, runs every unit check, and publishes only if
+#  they all pass. A red check leaves the previous good build up, which is the
+#  behaviour worth having: the published thing should be one that was verified,
+#  not merely the most recent thing that was written.
+#
+#  workflow_dispatch is here so a checkpoint can also be published on purpose,
+#  when something worth showing has just landed.
+# ============================================================================
+name: Pages
+
+on:
+  schedule:
+    # 03:00 and 15:00 UTC — twice a day, twelve hours apart.
+    - cron: '0 3,15 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; never cancel one that is already publishing.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/mobile-open-world-action-rpg-kbf2zt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The gate's cheap half. These need no browser and no GL context, so they
+      # run here in seconds — and they are the checks that have actually caught
+      # things: a continuity bound escaping, a camera going non-finite, a foot
+      # leaving the ground, a voice table that is one entry repeated.
+      - name: 検査
+        run: |
+          sh tools/parsecheck.sh
+          node tools/unit-continuity.mjs
+          node tools/unit-camera.mjs
+          node tools/unit-footik.mjs
+          node tools/unit-motion.mjs
+          node tools/unit-voice.mjs
+
+      # What a player needs, and the record of how it was built. Not tools/:
+      # those are development scripts that reach outside this repository and
+      # have no meaning to anyone opening the page.
+      - name: 公開物を組む
+        run: |
+          mkdir -p _site
+          cp index.html style.css manifest.json icon.svg sw.js _site/
+          cp -r src _site/
+          cp -r docs _site/
+          printf '%s\n' "$GITHUB_SHA" > _site/BUILD.txt
+          date -u '+%Y-%m-%d %H:%M UTC' >> _site/BUILD.txt
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4
