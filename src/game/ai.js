@@ -402,8 +402,16 @@ export class EnemyBrain {
     const cfg = this.cfg;
 
     // Read the player's wind-up: the tell is the first third of their attack.
+    //
+    // Drawn facing, not intended. This is a perception test — the enemy is
+    // reacting to a swing it can see coming — so it has to read the body the
+    // player is looking at, the same one the weapon hitbox is built from. An
+    // enemy that blocks because the attacker's yaw had already come round,
+    // while the model still faces elsewhere, is reacting to information the
+    // player was never shown.
+    const tYaw = t.drawnYaw !== undefined ? t.drawnYaw : t.yaw;
     const incoming = t.state === STATE.ATTACK && t.actionU < 0.45 && d < 3.6
-      && Math.abs(angleDelta(t.yaw, Math.atan2(a.x - t.x, a.z - t.z))) < 0.9;
+      && Math.abs(angleDelta(tYaw, Math.atan2(a.x - t.x, a.z - t.z))) < 0.9;
 
     if (incoming && this.blockTimer <= 0) {
       if (cfg.canDodge && Math.random() < cfg.dodgeChance * cfg.aggression + 0.12) {
