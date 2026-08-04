@@ -111,6 +111,7 @@ const UNIT_CHECKS = [
   ['カメラ', 'tools/unit-camera.mjs'],
   ['接地IK', 'tools/unit-footik.mjs'],
   ['動きの層', 'tools/unit-motion.mjs'],
+  ['声', 'tools/unit-voice.mjs'],
   // Not a unit check of the game — a check of the measurement. It reads the
   // criterion snapshots the audit leaves in docs/audit-runs.json and reports any
   // criterion that changed its verdict without the code changing.
