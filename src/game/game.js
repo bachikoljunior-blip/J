@@ -188,6 +188,8 @@ export class Game {
     this._accum = 0;
     this._fpsSamples = [];
     this.dynamicScale = 1;
+    /** Whether the resolution is allowed to hunt. See _updatePerf. */
+    this.autoResolution = true;
     this._perfTimer = 0;
   }
 
@@ -958,6 +960,13 @@ export class Game {
     const avg = sum / this._fpsSamples.length;
     const fps = 1 / avg;
     const prev = this.dynamicScale;
+    // Resolution can be pinned. Every change recreates the render targets,
+    // including the depth texture the presentation statistics read, so a
+    // measurement taken while this is still hunting is a measurement taken
+    // across a target recreation. Pinning it makes the audit deterministic, and
+    // it is the setting a player would want on a device where the hunting is
+    // itself the thing they can see.
+    if (!this.autoResolution) { this.fps = fps; return; }
     if (fps < 42) this.dynamicScale = Math.max(0.6, this.dynamicScale - 0.08);
     else if (fps > 57) this.dynamicScale = Math.min(1.0, this.dynamicScale + 0.05);
     if (Math.abs(prev - this.dynamicScale) > 0.005) {

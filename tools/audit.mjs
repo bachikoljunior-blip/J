@@ -70,7 +70,20 @@ try {
     null, { timeout: 180000 });
   const genSeconds = (Date.now() - genStart) / 1000;
   await sleep(1200);
-  await page.evaluate(() => { window.__g.applyQuality('medium'); window.__g.dynamicScale = 1; });
+  // Pin quality AND resolution. Dynamic resolution recreates the render
+  // targets on every change, and the presentation statistics read the depth
+  // texture those targets carry, so an audit that lets it hunt is measuring
+  // across target recreations at unpredictable moments. 0.75 is the middle of
+  // the range it settles into on this software rasteriser, so the numbers stay
+  // representative rather than becoming a best case.
+  await page.evaluate(() => {
+    const g = window.__g;
+    g.applyQuality('medium');
+    g.autoResolution = false;
+    g.dynamicScale = 0.75;
+    g.renderer.dynamicScale = 0.75;
+    g.renderer.resize(g.canvas.width, g.canvas.height);
+  });
 
   // Where the twelve to thirty-five minutes go.
   //
@@ -719,13 +732,9 @@ try {
       // reports exactly 0, which reads as a flat frame rather than as a failed
       // measurement. Four of six scenes did this while the frames themselves
       // were fine — tools/png-stats.mjs decoded the same build at detail 0.28.
-      let stable = 0, lastScale = -1;
-      for (let i = 0; i < 240 && stable < 45; i++) {
-        const sc = g.dynamicScale;
-        stable = Math.abs(sc - lastScale) < 1e-4 ? stable + 1 : 0;
-        lastScale = sc;
-        await wait(1);
-      }
+      // Resolution is pinned for the whole run (see the top of this file), so
+      // this only has to outlast anything else that settles.
+      await wait(30);
 
       // Read after every rAF callback for the frame has run, not merely after
       // one of them.
