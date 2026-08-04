@@ -29,6 +29,16 @@ const VIEW_CAP = 6.0;     // rad/s
 // VIEW_CAP already bounds. Length and direction are the two independent things,
 // and they get one cap each.
 const DOLLY_CAP = 7.2;    // m/s
+// The camera must stay above the ground it is flying over. This is a
+// correctness bound, not a smoothness one, and it is here because leaving it
+// out cost a whole audit: removing the old hard max() against terrain height
+// made the boom continuous and also let the camera sit *inside* hills, which
+// the eight continuity scenarios all passed cleanly while the rendered frame
+// went flat — surface detail measured exactly 0 on four of six scenes.
+//
+// A test suite that only measures the property you were working on will
+// certify the damage you did to the ones you weren't.
+const CLEARANCE_MIN = 0.0;   // m above the terrain under the eye
 
 // Every scenario runs at all three, because a camera that satisfies a per-frame
 // bound by moving more slowly on a slow device has not solved anything.
@@ -49,18 +59,19 @@ const stubPlayer = (over = {}) => ({
  * step. `drive(f)` may move the player, hand back a lock target, or both.
  */
 function scenario(name, world, drive, frames = 120) {
-  let worstRate = 0, worstDollyRate = 0, detail = '';
+  let worstRate = 0, worstDollyRate = 0, minClear = Infinity;
   for (const fps of RATES) {
     const r = once(name, world, drive, Math.round(frames * fps / 60), 1 / fps);
     if (r.view > worstRate) worstRate = r.view;
     if (r.dolly > worstDollyRate) worstDollyRate = r.dolly;
-    detail += `${fps}:${r.view.toFixed(2)}/${r.dolly.toFixed(2)} `;
+    if (r.clear < minClear) minClear = r.clear;
   }
-  const ok = worstRate <= VIEW_CAP && worstDollyRate <= DOLLY_CAP;
+  const ok = worstRate <= VIEW_CAP && worstDollyRate <= DOLLY_CAP && minClear >= CLEARANCE_MIN;
   if (!ok) failures++;
   console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${name.padEnd(30)} ` +
-    `視線 ${worstRate.toFixed(2)} rad/s  ドリー ${worstDollyRate.toFixed(2)} m/s   ${detail}`);
-  return { worstRate, worstDollyRate };
+    `視線 ${worstRate.toFixed(2)} rad/s  ドリー ${worstDollyRate.toFixed(2)} m/s  ` +
+    `地面クリア ${minClear.toFixed(2)} m`);
+  return { worstRate, worstDollyRate, minClear };
 }
 
 function once(name, world, drive, frames, DT) {
@@ -69,6 +80,7 @@ function once(name, world, drive, frames, DT) {
   cam.shakeT = 0; cam.shakeAmp = 0;   // shake is random by design; not the subject
   let prevDir = null, prevOrbit = null;
   let worstView = 0, worstOrbit = 0, atView = -1, atOrbit = -1;
+  let minClear = Infinity;
 
   // Settle on the opening conditions first. A camera constructed at its
   // defaults spends its first frames arriving, and that is not a cut.
@@ -90,6 +102,8 @@ function once(name, world, drive, frames, DT) {
     const vl = Math.hypot(vx, vy, vz) || 1;
     const dir = [vx / vl, vy / vl, vz / vl];
     const orbit = Math.hypot(cam.pos.x - cam.focusX, cam.pos.y - cam.focusY, cam.pos.z - cam.focusZ);
+    const clear = cam.pos.y - world.heightAt(cam.pos.x, cam.pos.z);
+    if (clear < minClear) minClear = clear;
 
     if (prevDir) {
       const dot = dir[0] * prevDir[0] + dir[1] * prevDir[1] + dir[2] * prevDir[2];
@@ -102,7 +116,7 @@ function once(name, world, drive, frames, DT) {
   }
 
   void atView; void atOrbit;
-  return { view: worstView / DT, dolly: worstOrbit / DT };
+  return { view: worstView / DT, dolly: worstOrbit / DT, clear: minClear };
 }
 
 console.log(`カメラの連続性 — 視線 ≤ ${VIEW_CAP} rad/s, ドリー ≤ ${DOLLY_CAP} m/s  (60/30/20fps)`);
@@ -130,6 +144,15 @@ scenario('ロックオン取得', flatWorld, (f, k) => (f > 40 / k ? { lock: tar
 scenario('ロックオン解除', flatWorld, (f, k) => (f < 40 / k ? { lock: target } : {}));
 scenario('ロックオン切替', flatWorld,
   (f, k) => (f > 40 / k && f < 80 / k ? { lock: target } : f >= 80 / k ? { lock: { x: -7, y: 0, z: 3, height: 1.8 } } : {}));
+
+// --- steep ground -----------------------------------------------------------
+// The case the removed max() was carrying: a slope rising behind the player, so
+// the boom is aimed into the hillside. If the boom cannot get short enough, the
+// eye ends up inside the hill and the frame goes flat.
+const slope = stubWorld((x, z) => Math.max(0, (-z - 2) * 1.6));
+scenario('急斜面を背に立つ', slope, (f, k) => ({ player: { z: 6 - f * 0.05 * k } }));
+const bowl = stubWorld((x, z) => Math.max(0, (Math.hypot(x, z) - 6) * 2.2));
+scenario('窪地の底', bowl, (f, k) => ({ player: { x: Math.sin(f * 0.02 * k) * 3, z: Math.cos(f * 0.02 * k) * 3 } }));
 
 // --- ordinary movement, as a control ---------------------------------------
 // Nothing here should ever trip: this is what the camera doing its job looks

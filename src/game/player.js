@@ -955,7 +955,13 @@ const CAM_BOOM_IN = 7.0;        // m/s, racing an obstruction about to occlude
 const CAM_BOOM_OUT = 2.2;       // m/s, nothing to race, so ease back out
 const CAM_MAX_LIFT = 1.5;       // m, ground roughness only — never a wall
 const CAM_AIM_RATE = 12;        // 1/s, how quickly the aim follows the framing
-const CAM_AIM_SLEW = 12;        // m/s bound on the aim sliding off the focus
+// The aim's bound is angular, not linear. Sizing it in metres per second was
+// the mistake that let the view exceed its cap in the real game: the same
+// 0.32 m of aim slide is a sixteenth of a radian at a 5 m boom and a quarter of
+// one at a 1.3 m boom, so a linear cap bounds nothing in particular. Converting
+// through the current view distance is what makes it spend a known share of the
+// same budget the swing spends.
+const CAM_AIM_ANG = 1.6;        // rad/s of view rotation the aim may contribute
 // What the camera may swing around the player under its own steam. Player look
 // input is deliberately outside this: that is the player's own hand, and
 // limiting it would read as the controller sticking. This bounds the game
@@ -966,7 +972,13 @@ const CAM_AIM_SLEW = 12;        // m/s bound on the aim sliding off the focus
 // view and their steps add. Set to the cap, the pair measured 0.1005 — and the
 // fix for that is to leave room in the budget, not to raise the number the
 // budget is checked against.
-const CAM_SWING_RATE = 4.8;     // rad/s — a 90 deg lock-on lands in 0.33 s
+//
+// 4.0 and 1.6 together are 5.6, inside the 6.0 the view is held to, with the
+// rest left for the focus sliding as the shoulder offset swings around the
+// player. Measured before this split: 8.25 rad/s, from dYaw 0.240 and dAim
+// 0.3225 arriving on the same frame — each inside its own cap, and together
+// well outside the only bound that matters.
+const CAM_SWING_RATE = 4.0;     // rad/s — a 90 deg lock-on lands in 0.39 s
 const CAM_SWING_STEP = CAM_SWING_RATE * MAX_DT;   // backstop only; see MAX_DT
 
 export class PlayerCamera {
@@ -1146,7 +1158,9 @@ export class PlayerCamera {
       // A rate is not a bound: a long frame, or a switch to a target on the
       // other side, still lands a cut. Cap the step as well as damp it.
       const m = Math.hypot(sx, sy2, sz2);
-      const aimCap = CAM_AIM_SLEW * dt;
+      // How far the aim may slide this frame to rotate the view by no more than
+      // CAM_AIM_ANG: an offset that far from the eye subtends that angle.
+      const aimCap = CAM_AIM_ANG * dt * Math.max(1.0, dist);
       if (m > aimCap) { const f2 = aimCap / m; sx *= f2; sy2 *= f2; sz2 *= f2; }
       a.x += sx; a.y += sy2; a.z += sz2;
     }
@@ -1172,6 +1186,10 @@ export class PlayerCamera {
    */
   resetTracking() {
     this._trk = null;
+    this.worstView = 0; this.worstDolly = 0;
+    this.worstViewAt = -1; this.worstDollyAt = -1;
+    this.worstViewWhy = null;
+    this.trackFrames = 0;
   }
 
   /**
@@ -1203,17 +1221,41 @@ export class PlayerCamera {
         // that means something different on every machine, and the audit runs
         // on a software rasteriser at a fraction of the target frame rate.
         const vr = ang / dt;
-        if (vr > this.worstView) { this.worstView = vr; this.worstViewAt = this.trackFrames; }
+        if (vr > this.worstView) {
+          this.worstView = vr;
+          this.worstViewAt = this.trackFrames;
+          // One number cannot say which of the four things that move the view
+          // did it. Record them, so the next time this exceeds its bound the
+          // answer does not need another day of diagnostics.
+          this.worstViewWhy = {
+            dYaw: +((this.yaw - prev.yaw)).toFixed(4),
+            dPitch: +((this.pitch - prev.pitch)).toFixed(4),
+            dBoom: +((orbit - prev.orbit)).toFixed(4),
+            dFocus: +v3distXZ({ x: this.focusX, z: this.focusZ }, prev.focus).toFixed(4),
+            dAim: +Math.hypot(this.aimOff.x - prev.aim.x, this.aimOff.y - prev.aim.y,
+              this.aimOff.z - prev.aim.z).toFixed(4),
+            lock: +this.lockBlend.toFixed(3),
+            dt: +dt.toFixed(4),
+          };
+        }
         const dr = Math.abs(orbit - prev.orbit) / dt;
         if (dr > this.worstDolly) { this.worstDolly = dr; this.worstDollyAt = this.trackFrames; }
       }
       this.trackFrames++;
-    } else {
-      this.worstView = 0; this.worstDolly = 0;
-      this.worstViewAt = -1; this.worstDollyAt = -1;
-      this.trackFrames = 0;
+    } else if (this._trk === null) {
+      // First frame after a reset only seeds the reference. It must not clear
+      // the maxima: an accidental reset mid-probe is indistinguishable from a
+      // clean run, and reports a perfect zero either way.
+      this.worstView = this.worstView || 0;
+      this.worstDolly = this.worstDolly || 0;
+      this.trackFrames = this.trackFrames || 0;
     }
-    this._trk = { x: nx, y: ny, z: nz, orbit, focus: { x: this.focusX, z: this.focusZ } };
+    this._trk = {
+      x: nx, y: ny, z: nz, orbit,
+      focus: { x: this.focusX, z: this.focusZ },
+      yaw: this.yaw, pitch: this.pitch,
+      aim: { x: this.aimOff.x, y: this.aimOff.y, z: this.aimOff.z },
+    };
   }
 
   /**
