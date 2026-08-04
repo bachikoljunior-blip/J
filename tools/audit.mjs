@@ -377,6 +377,7 @@ try {
     // snaps shows up here and nowhere else.
     p.revive();
     let maxJump = 0;
+    let jumpAt = null;
     const prev = new Float32Array(p.rig.worldRot.length);
     prev.set(p.rig.worldRot);
     for (let i = 0; i < 90; i++) {
@@ -389,11 +390,19 @@ try {
         // Angle between successive orientations of this bone's Y column.
         const d = prev[b + 3] * wr[b + 3] + prev[b + 4] * wr[b + 4] + prev[b + 5] * wr[b + 5];
         const ang = Math.acos(Math.max(-1, Math.min(1, d)));
-        if (ang > maxJump) maxJump = ang;
+        if (ang > maxJump) {
+          maxJump = ang;
+          // One number cannot say which event produced it, and a bare number
+          // that will not reproduce outside this harness costs hours. Record
+          // where it came from.
+          jumpAt = { frame: i, bone: (p.rig.template.boneList[b / 9] || {}).name || `#${b / 9}`,
+            state: p.state, ang: Math.round(ang * 1000) / 1000 };
+        }
       }
       prev.set(wr);
     }
     out.maxPoseJump = maxJump;
+    out.jumpAt = jumpAt;
 
     // Hitstop and camera impulse: both must be observable, not declared.
     //
@@ -488,6 +497,7 @@ try {
   console.log(`  motion: footErr=${motion.footError.toFixed(3)} jump=${motion.maxPoseJump.toFixed(3)} ` +
     `hurtDirs=${motion.hurtDirections} hits=${motion.hitsLanded} ` +
     `hitstop=${motion.hitstop} shake=${motion.cameraImpulse}`);
+  if (motion.jumpAt) console.log(`  jump source: ${JSON.stringify(motion.jumpAt)}`);
   console.log(`  place: setpieces=${place.setpieces} landmark=${Math.round(place.landmarkRange)}m ` +
     `named=${place.namedPlaces} vertical=${place.verticalStructures}`);
   console.log(`  voice: ${JSON.stringify(voice)}`);
