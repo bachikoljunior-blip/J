@@ -746,6 +746,13 @@ export class Renderer {
   readbackStats(stride = 1) {
     const glw = this.glw;
     const gl = glw.gl;
+    // Has a frame been drawn since the last time someone asked? If not, this
+    // call is about to describe the same image again — and if the answer is
+    // zero renders ever, it is about to describe a cleared buffer. Both are
+    // states a caller needs to know about rather than receive as numbers.
+    const rendersNow = this._sceneRenderedAt || 0;
+    const stale = rendersNow === this._lastReadbackAt;
+    this._lastReadbackAt = rendersNow;
     if (!this.captureTarget) {
       this.captureTarget = glw.createRenderTarget(320, 180, { depth: false });
     }
@@ -828,6 +835,8 @@ export class Renderer {
       crushedRatio: crushed / n,
       channelBalance: [rSum / n, gSum / n, bSum / n],
       ...this._spatialStats(buf, w, h, mask),
+      sceneRenders: rendersNow,
+      staleFrame: stale,
     };
   }
 

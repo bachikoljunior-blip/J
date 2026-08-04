@@ -771,7 +771,8 @@ try {
     frames.push({ ...scene, ...stat });
     console.log(`  frame  ${scene.id.padEnd(12)} 世界画素 ${stat.worldPixels ?? '?'} ` +
       `res=${(stat.dynamicScale ?? -1).toFixed(2)} detail=${(stat.detail ?? -1).toFixed(3)} ` +
-      `bins=${stat.colorCells ?? '?'} depth=${JSON.stringify(stat.maskDepth)}`);
+      `bins=${stat.colorCells ?? '?'} 描画${stat.sceneRenders ?? '?'}` +
+      `${stat.staleFrame ? ' (同一フレーム)' : ''} depth=${JSON.stringify(stat.maskDepth)}`);
     console.log(`  frame  ${scene.id.padEnd(12)} luma=${stat.meanLuma.toFixed(3)} ` +
       `contrast=${stat.contrast.toFixed(3)} sat=${stat.saturation.toFixed(3)} ` +
       `clip=${(stat.clippedRatio * 100).toFixed(1)}% crush=${(stat.crushedRatio * 100).toFixed(1)}%`);
@@ -984,7 +985,7 @@ try {
     // an empty mask reports a detail of 0 — indistinguishable from a genuinely
     // flat frame, and wrong in the direction that sends you looking at the
     // renderer instead of at the measurement. It cost most of a day.
-    G.yes(`${f.id} 画の計測が成立`, f.measurable !== false);
+    G.yes(`${f.id} 画の計測が成立`, f.measurable !== false && f.staleFrame !== true);
     G.ge(`${f.id} 表面ディテール`, round(f.detail), 0.25);
     G.le(`${f.id} 平坦領域率`, round(f.flatRatio), 0.10);
     G.ge(`${f.id} 局所コントラスト`, round(f.localContrast), 0.060);
