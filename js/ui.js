@@ -881,7 +881,7 @@
   function renderQuests() {
     const list = el('div', 'qlist', menuBody);
     const ids = Object.keys(G.Quests.state);
-    if (!ids.length) { el('div', 'mnote', menuBody, 'まだ任務はない。'); return; }
+    if (!ids.length) el('div', 'mnote', menuBody, 'まだ任務はない。');
     const order = ids.sort((a, b) => {
       const da = G.Quests.DEFS[a], db = G.Quests.DEFS[b];
       const sa = G.Quests.state[a].status === 'done' ? 1 : 0;
@@ -898,6 +898,20 @@
       row.innerHTML = `<div class="qname">${D.main ? '【主】' : '【副】'}${D.name}${prog}</div>
         <div class="qdesc">${st.status === 'done' ? '達成済み' : st.status === 'ready' ? '条件達成 — 報告しよう' : D.desc}</div>`;
     }
+    // 称号
+    el('div', 'shophead', menuBody, '― 称号 ―');
+    const tl = el('div', 'qlist', menuBody);
+    let any = false;
+    for (const id in G.Achieve.DEFS) {
+      const got = G.State.titles && G.State.titles[id];
+      if (!got) continue;
+      any = true;
+      const D = G.Achieve.DEFS[id];
+      const row = el('div', 'qrow ready', tl);
+      row.innerHTML = `<div class="qname">「${D.name}」</div><div class="qdesc">${D.desc}</div>`;
+    }
+    if (!any) el('div', 'mnote', menuBody, '称号はまだない。討伐や探索で手に入る。');
+    el('div', 'mnote', menuBody, `討伐数: ${G.State.killCount || 0}`);
   }
 
   function renderSettings() {

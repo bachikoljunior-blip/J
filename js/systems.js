@@ -23,6 +23,8 @@
     sword_fang:     { name: '狼牙の剣',   type: 'weapon', kind: 'sword', atk: 16, desc: 'フェンリルの牙から鍛えた剣。', sell: 300 },
     axe_ruin:       { name: '遺跡の戦斧', type: 'weapon', kind: 'axe',  atk: 20, desc: '古代文明の重い戦斧。', sell: 400 },
     sword_dragon:   { name: '竜断ちの剣', type: 'weapon', kind: 'sword', atk: 26, desc: '竜をも断つと謳われた聖剣。', sell: 800 },
+    spear_venom:    { name: '毒針の槍',   type: 'weapon', kind: 'spear', atk: 18, desc: '砂帝の毒針から作られた槍。', sell: 350 },
+    sword_wind:     { name: '風の大剣',   type: 'weapon', kind: 'sword', atk: 23, desc: '風哭の洞窟に眠っていた大剣。', sell: 600 },
     /* 防具 */
     armor_cloth:    { name: '旅人の服',     type: 'armor', def: 2,  color: 0x5d7a9a, color2: 0x3e4f63, desc: '長旅に馴染んだ服。', sell: 10 },
     armor_leather:  { name: '旅装',         type: 'armor', def: 4,  color: 0x7a6a4a, color2: 0x554832, desc: '革を重ねた旅装。', price: 180, sell: 60 },
@@ -100,6 +102,7 @@
       G.Player.stamina = S.maxSta();
       G.Audio.sfx('levelup');
       G.UI.toast('レベルアップ！ Lv.' + S.level, 'gold');
+      G.events.emit('levelup', S.level);
       G.FX.burst(G.Player.pos.x, G.Player.pos.y + 1, G.Player.pos.z,
         { n: 24, color: 0xffdd44, speed: 3, up: 1.5, gravity: -2, life: 1.0, size: 3.5 });
     }
@@ -121,7 +124,9 @@
     respawn: 'shrine1',
     mainStage: 0,      // 進行度 (表示用)
     cleared: false,    // 黒竜討伐済み
-    playtime: 0
+    playtime: 0,
+    titles: {},        // 獲得した称号
+    killCount: 0
   };
 })();
 
@@ -142,7 +147,13 @@
     side_wolf:  { name: '狼狩り',       desc: '野狼を6匹狩ってガルドに報告する', giver: 'hunter',
                   kill: 'wolf', count: 6, reward: { gold: 150, items: { potion: 2 } } },
     side_cargo: { name: '失われた積荷', desc: '南の廃墟から積荷を持ち帰る', giver: 'merchant',
-                  fetch: 'cargo', reward: { gold: 250 }, mark: { x: 150, z: 430 } }
+                  fetch: 'cargo', reward: { gold: 250 }, mark: { x: 150, z: 430 } },
+    side_bandit: { name: '盗賊退治', desc: '街道を荒らす盗賊を5人倒しモーガンに報告', giver: 'merchant',
+                  kill: 'bandit', count: 5, reward: { gold: 260, items: { hipotion: 2 } }, mark: { x: -150, z: 250 } },
+    side_scorp: { name: '砂漠の異変', desc: '砂丘の主・砂帝スコルグを討つ', giver: 'hunter',
+                  boss: 'scorpking', reward: { gold: 500, items: { spear_venom: 1 } }, mark: { x: 390, z: 380 } },
+    side_cave: { name: '風哭の洞窟', desc: '山麓の洞窟の最深部で風の大剣を見つける', giver: 'elder',
+                  fetch: 'sword_wind', reward: { gold: 400 }, mark: { x: -260, z: -360 } }
   };
   Q.DEFS = DEFS;
   Q.state = {};   // id -> {status:'active'|'ready'|'done', progress}
@@ -296,6 +307,21 @@
         if (Q.isActive('main2')) return { text: '西の森の奥、静寂の空き地に白狼王フェンリルがおる。突進は横に転がってかわすのじゃ。', options: [{ label: '分かった', close: true }] };
         if (Q.isActive('main3')) return { text: '東の遺跡の巨像は岩の拳を振るう。懐に入り、攻撃の後の隙を突け。', options: [{ label: '分かった', close: true }] };
         if (Q.isActive('main4')) return { text: '北の頂へは山麓の祠から登るがよい。竜の炎は地を這う……走り続けよ。そなたに風の加護があらんことを。', options: [{ label: '行ってくる', close: true }] };
+        if (!Q.state['side_cave'] && G.State.mainStage >= 3) {
+          return {
+            text: 'そういえば……北西の山麓に「風哭の洞窟」と呼ばれる古い坑道がある。風の唸る奥底に、古の大剣が眠っておるそうじゃ。腕に覚えがあるなら行ってみるがよい。',
+            options: [
+              { label: '探索する', action: () => Q.start('side_cave'), closeText: '洞窟の入り口は山麓の祠の南東じゃ。中は暗い。魔物に気をつけよ。' },
+              { label: 'また今度', close: true }
+            ]
+          };
+        }
+        if (Q.isReady('side_cave')) {
+          return {
+            text: 'おお、それが風の大剣か……! 見事じゃ。剣はそなたが持つがよい。これは褒美じゃ。',
+            options: [{ label: '受け取る', action: () => Q.complete('side_cave'), close: true }]
+          };
+        }
         if (G.State.cleared) return { text: 'そなたが黒竜を討ったと聞いた時、村中が歓声に沸いたわい。エルドリアの英雄よ、この村はいつでもそなたの家じゃ。', options: [{ label: 'ありがとう', close: true }] };
         return { text: '風が穏やかじゃな……。', options: [{ label: '立ち去る', close: true }] };
       }
@@ -346,6 +372,24 @@
             options: [{ label: '積荷を渡す', action: () => { G.Inv.remove('cargo', 1); Q.complete('side_cargo'); }, close: true }]
           };
         }
+        if (!Q.state['side_bandit'] && G.State.mainStage >= 2) {
+          opts.push({
+            label: '盗賊の噂を聞く',
+            next: {
+              text: '最近、街道に盗賊が出て仕入れが滞ってるんだ。5人ばかり懲らしめてくれたら礼をするぜ。西と東の草原に焚き火の野営地がある。',
+              options: [
+                { label: '引き受ける', action: () => Q.start('side_bandit'), closeText: '頼んだぜ! 奴ら結構腕が立つから気をつけな。' },
+                { label: 'また今度', close: true }
+              ]
+            }
+          });
+        }
+        if (Q.isReady('side_bandit')) {
+          return {
+            text: 'おお、盗賊どもが逃げ出したって噂だ! あんたのおかげだな。これは約束の礼だ。',
+            options: [{ label: '受け取る', action: () => Q.complete('side_bandit'), close: true }]
+          };
+        }
         opts.unshift({ label: '買い物をする', action: () => G.UI.openShop(), close: true });
         opts.push({ label: '立ち去る', close: true });
         return { text: 'いらっしゃい! 旅の必需品ならなんでも揃うぜ。', options: opts };
@@ -380,6 +424,16 @@
           };
         }
         if (Q.isActive('side_wolf')) return { text: '狼どもは群れる前に仕留めるんだ。回避は転がりが基本だぜ。', options: [{ label: '分かった', close: true }] };
+        if (Q.isDone('side_wolf') && !Q.state['side_scorp']) {
+          return {
+            text: '南東の砂漠で、馬鹿でかいサソリが隊商を襲ってるらしい。「砂帝スコルグ」……訛った名だが奴は本物の化物だ。挑むか?',
+            options: [
+              { label: '討伐を引き受ける', action: () => Q.start('side_scorp'), closeText: '砂丘の廃墟に巣があるそうだ。突進は横っ飛びでかわせ。生きて帰れよ。' },
+              { label: 'また今度', close: true }
+            ]
+          };
+        }
+        if (Q.isActive('side_scorp')) return { text: 'スコルグは砂丘の廃墟だ。尻尾の一撃は喰らうな。', options: [{ label: '分かった', close: true }] };
         return { text: '戦いのコツか? 敵が構えたら転がって背後を取れ。あとはスタミナ管理だな。', options: [{ label: '参考になった', close: true }] };
       }
     }
@@ -390,6 +444,45 @@
     G.events.emit('talk', npc.id);
     G.UI.showDialogue(npc.name, D.build(npc.id));
   };
+})();
+
+/* ======================= 称号 (実績) ======================= */
+(function () {
+  const A = G.Achieve = {};
+  const DEFS = {
+    first_kill: { name: '初陣',         desc: '初めて魔物を倒した' },
+    kills_100:  { name: '百戦錬磨',     desc: '魔物を100体倒した' },
+    all_shrines:{ name: '導きの灯',     desc: '全ての祠を灯した' },
+    lv10:       { name: '熟達の旅人',   desc: 'レベル10に到達した' },
+    boss_first: { name: '狩人の証',     desc: '初めてボスを討伐した' },
+    all_bosses: { name: '大地の守護者', desc: '全てのボスを討伐した' },
+    cave:       { name: '風を断つ者',   desc: '風の大剣を手に入れた' },
+    clear:      { name: '竜殺し',       desc: '黒竜ヴァルドレクを討った' },
+    upgrade5:   { name: '名工の相棒',   desc: '装備を+5まで強化した' }
+  };
+  A.DEFS = DEFS;
+  A.earn = function (id) {
+    if (!DEFS[id] || G.State.titles[id]) return;
+    G.State.titles[id] = true;
+    G.UI.toast('称号獲得 「' + DEFS[id].name + '」', 'gold');
+    G.Audio.sfx('questDone');
+  };
+  G.events.on('kill', () => {
+    G.State.killCount = (G.State.killCount || 0) + 1;
+    A.earn('first_kill');
+    if (G.State.killCount >= 100) A.earn('kills_100');
+  });
+  G.events.on('bossKilled', id => {
+    A.earn('boss_first');
+    if (id === 'dragon') A.earn('clear');
+    if (['fenrir', 'golem', 'scorpking', 'dragon'].every(b => G.State.bossKilled[b])) A.earn('all_bosses');
+  });
+  G.events.on('collect', d => { if (d.id === 'sword_wind') A.earn('cave'); });
+  G.events.on('shrineLit', () => {
+    if (Object.keys(G.State.shrines).length >= G.World.shrines.length) A.earn('all_shrines');
+  });
+  G.events.on('levelup', lv => { if (lv >= 10) A.earn('lv10'); });
+  G.events.on('upgraded', d => { if (d.lvl >= 5) A.earn('upgrade5'); });
 })();
 
 /* ======================= 鍛冶 (強化) ======================= */
@@ -424,6 +517,7 @@
     G.Inv.gold -= r.cost.gold;
     for (const m in r.cost.mats) G.Inv.remove(m, r.cost.mats[m]);
     G.Inv.upgrades[id] = G.Inv.upgLevel(id) + 1;
+    G.events.emit('upgraded', { id, lvl: G.Inv.upgrades[id] });
     G.Audio.sfx('clang');
     G.Audio.sfx('levelup');
     const it = G.Items.get(id);
@@ -493,7 +587,9 @@
           respawn: G.State.respawn,
           mainStage: G.State.mainStage,
           cleared: G.State.cleared,
-          playtime: G.State.playtime
+          playtime: G.State.playtime,
+          titles: G.State.titles,
+          killCount: G.State.killCount
         }
       };
       localStorage.setItem(KEY, JSON.stringify(data));
@@ -543,6 +639,7 @@
     G.State.herbs = {}; G.State.shrines = {};
     G.State.respawn = 'shrine1';
     G.State.mainStage = 0; G.State.cleared = false; G.State.playtime = 0;
+    G.State.titles = {}; G.State.killCount = 0;
     const p = G.Player;
     p.hp = G.Stats.maxHp();
     p.stamina = G.Stats.maxSta();

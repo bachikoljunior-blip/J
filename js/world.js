@@ -38,6 +38,8 @@
     { id: 'shrine3',    x: -120, z: -430, y: 30, r: 14, R: 45,  name: null },
     { id: 'shrine4',    x: 350,  z: 320,  y: 7,  r: 14, R: 40,  name: null },
     { id: 'shrine5',    x: 260,  z: -180, y: 8,  r: 14, R: 40,  name: null },
+    { id: 'arena_scorp',x: 390,  z: 380,  y: 8,  r: 26, R: 60,  name: '砂丘の廃墟' },
+    { id: 'cave_mouth', x: -260, z: -360, y: 26, r: 12, R: 34,  name: null },
     { id: 'tower1',     x: -200, z: 200,  y: 16, r: 10, R: 35,  name: null },
     { id: 'tower2',     x: 180,  z: -320, y: 22, r: 10, R: 35,  name: null }
   ];
@@ -51,6 +53,12 @@
     { id: 'shrine5', x: 260,  z: -180, name: '湖畔の祠' }
   ];
 
+  /* ポータル (洞窟の出入り) */
+  W.portals = [
+    { x: -260, z: -360, tx: 1205, tz: 1166, label: '風哭の洞窟に入る' },
+    { x: 1205, z: 1162, tx: -260, tz: -355, label: '洞窟から出る' }
+  ];
+
   /* 宝箱: id / 位置 / 中身 (systems.js の Item id) */
   W.chests = [
     { id: 'c_vil',    x: -26,  z: 16,   items: { potion: 2 },            gold: 30 },
@@ -62,7 +70,11 @@
     { id: 'c_lake',   x: 240,  z: -196, items: { hipotion: 1, herb: 2 }, gold: 70 },
     { id: 'c_mount',  x: -140, z: -448, items: { axe_ruin: 1 },         gold: 120 },
     { id: 'c_peak',   x: -70,  z: -616, items: { sword_dragon: 1 },     gold: 200 },
-    { id: 'c_tower',  x: -200, z: 194,  items: { hipotion: 2 },         gold: 60 }
+    { id: 'c_tower',  x: -200, z: 194,  items: { hipotion: 2 },         gold: 60 },
+    { id: 'm_west',   x: -320, z: 120,  items: {}, gold: 0, mimic: true },
+    { id: 'm_east',   x: 310,  z: -260, items: {}, gold: 0, mimic: true },
+    { id: 'c_cave1',  x: 1205, z: 1236, items: { sword_wind: 1 },       gold: 150 },
+    { id: 'c_cave2',  x: 1188, z: 1218, items: { hipotion: 2, magicstone: 3 }, gold: 100 }
   ];
 
   /* ======================= 高さ関数 ======================= */
@@ -104,7 +116,18 @@
     return h;
   }
 
+  /* 風哭の洞窟 (別空間: ワールド北東の海上に隔離配置) */
+  W.CAVE = { x0: 1150, x1: 1260, z0: 1150, z1: 1260, cx: 1205, cz: 1205 };
+  W.inCaveRegion = (x, z) => x > W.CAVE.x0 && x < W.CAVE.x1 && z > W.CAVE.z0 && z < W.CAVE.z1;
+  function caveHeight(x, z) {
+    const r = G.dist(x, z, W.CAVE.cx, W.CAVE.cz);
+    let h = 60 + G.noise2(x * 0.15, z * 0.15) * 0.9;
+    h += G.smoothstep(36, 50, r) * 40;   // 外周は壁
+    return h;
+  }
+
   W.heightAt = function (x, z) {
+    if (W.inCaveRegion(x, z)) return caveHeight(x, z);
     let h = baseHeight(x, z);
     // ランドマーク平坦化
     const lm = W.landmarks;
@@ -143,6 +166,7 @@
   /* ======================= バイオーム ======================= */
   /* 'grass' | 'forest' | 'desert' | 'rock' | 'snow' | 'beach' */
   W.biomeAt = function (x, z, h) {
+    if (W.inCaveRegion(x, z)) return 'rock';
     if (h === undefined) h = W.heightAt(x, z);
     if (h < WATER_Y + 1.1) return 'beach';
     const temp = 0.55 + z * 0.00075 - h * 0.004;
@@ -513,8 +537,14 @@
       let type;
       if (b === 'forest') type = spawnRnd() < 0.6 ? 'wolf' : 'goblin';
       else if (b === 'desert') type = spawnRnd() < 0.5 ? 'scorpion' : 'goblin';
-      else if (b === 'rock' || b === 'snow') type = spawnRnd() < 0.55 ? 'golemling' : 'skeleton';
-      else type = spawnRnd() < 0.5 ? 'goblin' : 'wolf';
+      else if (b === 'rock' || b === 'snow') {
+        const r = spawnRnd();
+        type = r < 0.4 ? 'golemling' : r < 0.75 ? 'skeleton' : 'fireimp';
+      }
+      else {
+        const r = spawnRnd();
+        type = r < 0.4 ? 'goblin' : r < 0.8 ? 'wolf' : 'bandit';
+      }
       chunk.spawns.push({ x, z, type, alive: false, deadUntil: 0, eid: key + ':' + i });
     }
 
@@ -772,10 +802,116 @@
     addStatic(ch.x, ch.z, 0.7);
   }
 
+  W.hideChest = function (id) {
+    const c = W.chestMeshes[id];
+    if (c) scene.remove(c.group);
+  };
   W.openChestVisual = function (id) {
     const c = W.chestMeshes[id];
     if (c && !c.opened) { c.opened = true; c.lid.rotation.x = -1.9; }
   };
+
+  function buildCamp(x, z) {
+    const y = W.heightAt(x, z);
+    // 焚き火
+    const logs = G.mergeGeo([
+      { geo: new THREE.CylinderGeometry(0.08, 0.08, 1.0, 5), m: (() => { const m = M4(0, 0.12, 0, 0, 1); m.multiply(new THREE.Matrix4().makeRotationZ(1.4)); return m; })(), color: 0x5a4630 },
+      { geo: new THREE.CylinderGeometry(0.08, 0.08, 1.0, 5), m: (() => { const m = M4(0, 0.12, 0, 1.2, 1); m.multiply(new THREE.Matrix4().makeRotationZ(1.4)); return m; })(), color: 0x6b5238 }
+    ]);
+    const lm = shadowify(new THREE.Mesh(logs, sharedTreeMat));
+    lm.position.set(x, y, z);
+    scene.add(lm);
+    const spr = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: G.makeRadialTex(64, [[0, 'rgba(255,220,120,1)'], [0.4, 'rgba(255,140,40,0.85)'], [1, 'rgba(255,80,0,0)']]),
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+    }));
+    spr.position.set(x, y + 0.7, z);
+    spr.scale.set(1.6, 2.0, 1);
+    scene.add(spr);
+    W.torches.push({ x, z, y: y + 0.7, sprite: spr, seed: Math.random() * 10 });
+    // テント
+    for (const [tx, tz, ry] of [[3.5, 1.5, 0.8], [-3, 2.5, -0.6], [0.5, -3.5, 2.4]]) {
+      const ty = W.heightAt(x + tx, z + tz);
+      const tent = shadowify(new THREE.Mesh(new THREE.ConeGeometry(1.6, 1.9, 4),
+        new THREE.MeshLambertMaterial({ color: 0x6a5844 })));
+      tent.position.set(x + tx, ty + 0.9, z + tz);
+      tent.rotation.y = ry;
+      scene.add(tent);
+      addStatic(x + tx, z + tz, 1.4);
+    }
+  }
+
+  function buildCaveMouth() {
+    const x = -260, z = -360;
+    const y = W.heightAt(x, z);
+    const arch = G.mergeGeo([
+      { geo: new THREE.BoxGeometry(0.9, 4.2, 0.9), m: M4(-2.0, 2.1, 0), color: 0x6a6a72 },
+      { geo: new THREE.BoxGeometry(0.9, 4.2, 0.9), m: M4(2.0, 2.1, 0), color: 0x6a6a72 },
+      { geo: new THREE.BoxGeometry(5.4, 0.9, 1.1), m: M4(0, 4.4, 0), color: 0x5a5a62 }
+    ]);
+    const m = shadowify(new THREE.Mesh(arch, sharedTreeMat));
+    m.position.set(x, y, z);
+    scene.add(m);
+    // 暗い入口
+    const dark = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 3.8),
+      new THREE.MeshBasicMaterial({ color: 0x05070c }));
+    dark.position.set(x, y + 1.9, z - 0.2);
+    scene.add(dark);
+    addStatic(x - 2, z, 0.7); addStatic(x + 2, z, 0.7);
+  }
+
+  function buildCaveInterior() {
+    const cx = W.CAVE.cx, cz = W.CAVE.cz;
+    // 天蓋 (内側から見える暗い殻)
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(56, 20, 12),
+      new THREE.MeshLambertMaterial({ color: 0x14161e, side: THREE.BackSide })
+    );
+    dome.position.set(cx, 58, cz);
+    scene.add(dome);
+    // 石筍
+    const rnd = G.srand(777);
+    for (let i = 0; i < 12; i++) {
+      const a = rnd() * Math.PI * 2, r = 8 + rnd() * 30;
+      const px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r;
+      const h = 1.5 + rnd() * 3.5;
+      const cone = shadowify(new THREE.Mesh(new THREE.ConeGeometry(0.6 + rnd() * 0.7, h, 5),
+        new THREE.MeshLambertMaterial({ color: 0x565a66 })));
+      cone.position.set(px, caveHeight(px, pz) + h / 2 - 0.1, pz);
+      scene.add(cone);
+      addStatic(px, pz, 0.8);
+    }
+    // 光る水晶
+    const crystalMat = new THREE.MeshLambertMaterial({ color: 0x77ccff, emissive: 0x3377bb });
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + 0.4, r = 12 + (i % 3) * 9;
+      const px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r;
+      const c = new THREE.Mesh(new THREE.OctahedronGeometry(0.7, 0), crystalMat);
+      c.position.set(px, caveHeight(px, pz) + 0.7, pz);
+      c.rotation.set(rnd(), rnd(), rnd());
+      scene.add(c);
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: G.makeRadialTex(64, [[0, 'rgba(130,200,255,0.8)'], [1, 'rgba(80,150,255,0)']]),
+        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+      }));
+      glow.position.copy(c.position);
+      glow.scale.set(3.2, 3.2, 1);
+      scene.add(glow);
+    }
+    // 青い光源
+    const pt = new THREE.PointLight(0x6699dd, 1.1, 70);
+    pt.position.set(cx, 66, cz);
+    scene.add(pt);
+    // 出口の枠
+    const arch = G.mergeGeo([
+      { geo: new THREE.BoxGeometry(0.8, 3.8, 0.8), m: M4(-1.8, 1.9, 0), color: 0x6a6a72 },
+      { geo: new THREE.BoxGeometry(0.8, 3.8, 0.8), m: M4(1.8, 1.9, 0), color: 0x6a6a72 },
+      { geo: new THREE.BoxGeometry(4.6, 0.8, 1.0), m: M4(0, 4.0, 0), color: 0x5a5a62 }
+    ]);
+    const m = shadowify(new THREE.Mesh(arch, sharedTreeMat));
+    m.position.set(cx, caveHeight(cx, 1160), 1160);
+    scene.add(m);
+  }
 
   function buildVillage() {
     buildHouse(-18, -10, 0.3);
@@ -894,6 +1030,11 @@
     buildRuinCircle(150, 430, 13, 7, 44);       // 南の廃墟
     buildTower(-200, 200);
     buildTower(180, -320);
+    buildRuinCircle(390, 380, 16, 8, 55);       // スコルグの巣
+    buildCamp(-150, 250);
+    buildCamp(220, 140);
+    buildCaveMouth();
+    buildCaveInterior();
     for (const ch of W.chests) buildChest(ch);
     buildHerbs();
   };
@@ -1199,10 +1340,33 @@
   const _white = new THREE.Color(0xffffff);
   const _fogC = new THREE.Color();
 
-  /* tod: 0-24, weather: 0(晴)〜1(雨), cam: THREE.Vector3 */
-  Sky.update = function (dt, tod, weather, cam) {
+  /* tod: 0-24, weather: 0(晴)〜1(雨), cam: THREE.Vector3, inCave: 洞窟内 */
+  Sky.update = function (dt, tod, weather, cam, inCave) {
     const s = sample(tod);
     _camXZ.set(cam.x, 0, cam.z);
+    // 空関連の表示切替
+    const skyVisible = !inCave;
+    skyDome.visible = skyVisible;
+    sunSpr.visible = skyVisible;
+    moonSpr.visible = skyVisible;
+    stars.visible = skyVisible;
+    for (const c of clouds) c.visible = skyVisible;
+    if (inCave) {
+      hemi.intensity = 0.58;
+      hemi.color.set(0x93a4d4);
+      hemi.groundColor.set(0x46506a);
+      sun.intensity = 0.02;
+      _fogC.set(0x0b0f1c);
+      scene.fog.color.copy(_fogC);
+      scene.fog.near = 8;
+      scene.fog.far = 66;
+      if (scene.background) scene.background.copy(_fogC);
+      rainPts.material.opacity = 0;
+      const lightC = 0.52;
+      Sky.lightLevel = lightC;
+      G.World.syncEnv(_fogC, scene.fog.near, scene.fog.far, lightC);
+      return;
+    }
     // 天候で暗く
     const wDim = 1 - weather * 0.45;
     hemi.intensity = s.hem * wDim;

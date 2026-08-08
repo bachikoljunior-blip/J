@@ -134,12 +134,34 @@
         G.UI.toast(s.name + ' を灯した', 'gold');
         G.FX.burst(s.x, G.World.heightAt(s.x, s.z) + 2, s.z,
           { n: 30, color: 0x66ddff, speed: 3, up: 1.5, gravity: -1, life: 1.2, size: 3.5 });
+        G.events.emit('shrineLit');
         G.Save.save();
       } else {
         G.UI.shrineMenu(s);
       }
+    } else if (it.kind === 'portal') {
+      const pt = it.obj;
+      if (G.Player.mounted) G.Horse.dismount();
+      G.Player.pos.set(pt.tx, G.World.heightAt(pt.tx, pt.tz), pt.tz);
+      G.Player.vy = 0;
+      G.Player.target = null;
+      G.Projectiles.clear();
+      warmupChunks();
+      G.Audio.sfx('shrine');
+      G.UI.toast(pt.label.includes('入る') ? '風哭の洞窟 — 風の唸りが聞こえる…' : '外の光が眩しい');
     } else if (it.kind === 'chest') {
       const c = it.obj;
+      if (c.mimic) {
+        // ミミック!
+        G.State.openedChests[c.id] = true;
+        G.World.hideChest(c.id);
+        const e = G.Enemies.spawn('mimic', c.x, c.z);
+        e.aggro = true;
+        G.Audio.sfx('roar');
+        G.events.emit('shake', 0.5);
+        G.UI.toast('宝箱はミミックだった！');
+        return;
+      }
       G.State.openedChests[c.id] = true;
       G.World.openChestVisual(c.id);
       G.Audio.sfx('uiOpen');
@@ -202,6 +224,7 @@
       switch (a) {
         case 'attack': G.Player.tryAttack(false); break;
         case 'heavy': G.Player.tryAttack(true); break;
+        case 'spin': G.Player.tryAttack('spin'); break;
         case 'roll': G.Player.tryRoll(); break;
         case 'jump': G.Player.tryJump(); break;
         case 'interact': doInteract(); break;
@@ -310,6 +333,23 @@
     }
   }
 
+  /* ---------------- 環境音 ---------------- */
+  let ambientT = 4;
+  function updateAmbient(dt) {
+    ambientT -= dt;
+    if (ambientT > 0) return;
+    ambientT = 2.5 + Math.random() * 5;
+    if (!started || G.paused) return;
+    const tod = G.State.tod;
+    const p = G.Player.pos;
+    if (G.inCave) { G.Audio.sfx('drip'); return; }
+    const night = tod > 20 || tod < 5;
+    if (night) { G.Audio.sfx('cricket'); return; }
+    if (p.y > 38) { G.Audio.sfx('windgust'); return; }
+    const b = G.World.biomeAt(p.x, p.z);
+    if (b === 'forest' || b === 'grass') G.Audio.sfx('bird');
+  }
+
   /* ---------------- 音楽状態 ---------------- */
   function updateMusic(dt) {
     musicT -= dt;
@@ -355,7 +395,8 @@
       G.FX.update(dt);
       G.World.update(dt, G.Player.pos.x, G.Player.pos.z);
       updateCamera(dt);
-      G.Sky.update(dt, G.State.tod, G.State.weather, camera.position);
+      G.inCave = G.World.inCaveRegion(G.Player.pos.x, G.Player.pos.z);
+      G.Sky.update(dt, G.State.tod, G.State.weather, camera.position, G.inCave);
 
       // ダメージフラッシュ
       if (started) {
@@ -375,6 +416,7 @@
     }
 
     updateMusic(dt);
+    updateAmbient(dt);
     if (started) G.UI.update(dt);
     const _t1 = performance.now();
     renderer.render(scene, camera);

@@ -152,6 +152,21 @@
       seq.forEach((f, i) => tone(f, 'sine', 0.02, 0.8, 0.13, { delay: i * 0.15 }));
     },
     arrow()  { noiseHit(0.005, 0.12, 0.12, 2200, 2, { fglide: 900 }); },
+    bird() {
+      const base = 1800 + Math.random() * 1200;
+      tone(base, 'sine', 0.01, 0.08, 0.06, { glide: base * 1.4 });
+      tone(base * 1.15, 'sine', 0.01, 0.1, 0.05, { delay: 0.12, glide: base * 0.9 });
+      if (Math.random() < 0.5) tone(base * 0.9, 'sine', 0.01, 0.07, 0.045, { delay: 0.26, glide: base * 1.3 });
+    },
+    cricket() {
+      for (let i = 0; i < 5; i++) {
+        tone(4200 + Math.random() * 400, 'sine', 0.004, 0.03, 0.025, { delay: i * 0.07 });
+      }
+    },
+    windgust() { noiseHit(0.7, 1.6, 0.05, 500, 0.4, { fglide: 250, ftype: 'bandpass' }); },
+    drip() {
+      tone(900 + Math.random() * 500, 'sine', 0.002, 0.18, 0.07, { glide: 300 });
+    },
     thunder() {
       tone(50, 'sawtooth', 0.01, 1.8, 0.3, { glide: 30 });
       noiseHit(0.01, 1.5, 0.25, 300, 0.5, { fglide: 80, ftype: 'lowpass' });

@@ -205,7 +205,7 @@
     const legL = mkLeg(-1), legR = mkLeg(1);
 
     let weapon = null;
-    if (conf.weapon === 'sword' || conf.weapon === 'axe' || conf.weapon === 'club') {
+    if (conf.weapon === 'sword' || conf.weapon === 'axe' || conf.weapon === 'club' || conf.weapon === 'spear') {
       weapon = new THREE.Group();
       if (conf.weapon === 'sword') {
         const blade = box(0.07, 0.85, 0.02, 0xc9d2da);
@@ -220,6 +220,12 @@
         const bit = box(0.3, 0.26, 0.05, 0xaab3bb);
         bit.position.set(0.14, 0.66, 0);
         weapon.add(pole, bit);
+      } else if (conf.weapon === 'spear') {
+        const pole = box(0.05, 1.5, 0.05, 0x6b4a2f);
+        pole.position.y = 0.55;
+        const tip = box(0.1, 0.3, 0.03, 0xb8c4cc);
+        tip.position.y = 1.35;
+        weapon.add(pole, tip);
       } else {
         const cl = box(0.12, 0.6, 0.12, 0x7a5a3a);
         cl.position.y = 0.3;
@@ -566,6 +572,52 @@
       }
     }
     return { group: g, parts: {}, pose };
+  };
+
+  /* ミミック (宝箱の化物) */
+  Rigs.mimic = function () {
+    const g = new THREE.Group();
+    const body = box(1.1, 0.6, 0.7, 0x7a5230);
+    body.position.y = 0.3;
+    const lid = new THREE.Group();
+    const lidM = box(1.1, 0.28, 0.7, 0x8a5f38);
+    lidM.position.set(0, 0.14, 0.35);
+    lid.add(lidM);
+    for (let i = 0; i < 4; i++) {
+      const tooth = box(0.1, 0.16, 0.05, 0xe8e4d0);
+      tooth.position.set(-0.4 + i * 0.26, 0.02, 0.32);
+      lid.add(tooth);
+      const tooth2 = tooth.clone();
+      tooth2.position.y = 0.55; tooth2.position.z = 0.3;
+      g.add(tooth2);
+    }
+    lid.position.set(0, 0.6, -0.35);
+    lid.rotation.x = -0.7;
+    const eye = box(0.14, 0.1, 0.04, 0xcc2222);
+    eye.position.set(0, 0.75, 0.1);
+    lid.add(eye);
+    const band = box(1.16, 0.62, 0.12, 0xc9a94a);
+    band.position.y = 0.31;
+    const tongue = box(0.3, 0.05, 0.4, 0xaa3344);
+    tongue.position.set(0, 0.62, 0.15);
+    g.add(body, lid, band, tongue);
+    const parts = { lid };
+    function pose(p) {
+      const t = G.time;
+      const mv = p.moveAmt || 0;
+      g.position.y = (p.baseY || 0) + Math.abs(Math.sin(t * 9)) * 0.22 * mv;
+      g.rotation.z = 0;
+      if (p.state === 'dead') {
+        const k = G.clamp(p.t * 2, 0, 1);
+        g.rotation.z = k * Math.PI * 0.9;
+        g.position.y = (p.baseY || 0) - k * 0.1;
+        return;
+      }
+      if (p.state === 'windup') lid.rotation.x = -1.5;
+      else if (p.state === 'attack') lid.rotation.x = -0.15;
+      else lid.rotation.x = -0.7 + Math.sin(t * 2.5) * 0.15;
+    }
+    return { group: g, parts, pose };
   };
 
   /* 馬 */
@@ -1113,6 +1165,9 @@
     skeleton:  { name: 'スケルトン', rigFn: 'skeleton', barH: 2.0, hp: 45,  atk: 13, speed: 3.2, xp: 20, gold: 14, aggroR: 22, atkR: 12,  windup: 0.7,  cool: 2.4, radius: 0.45, scale: 1,   ranged: true, drops: [['bone', 0.6], ['magicstone', 0.12]] },
     golemling: { name: '岩の子鬼',   rigFn: 'golemling',barH: 1.8, hp: 90,  atk: 20, speed: 2.6, xp: 30, gold: 20, aggroR: 14, atkR: 2.3, windup: 0.85, cool: 2.0, radius: 0.6, scale: 0.62, poise: 3, drops: [['magicstone', 0.5]] },
     scorpion:  { name: '砂蠍',       rigFn: 'scorpion', barH: 1.3, hp: 50,  atk: 16, speed: 4.4, xp: 22, gold: 15, aggroR: 15, atkR: 1.8, windup: 0.5,  cool: 1.4, radius: 0.55, scale: 1.1, drops: [['magicstone', 0.15], ['potion', 0.1]] },
+    bandit:    { name: '盗賊',       rigFn: 'bandit',   barH: 1.9, hp: 70,  atk: 18, speed: 4.2, xp: 26, gold: 24, aggroR: 17, atkR: 1.9, windup: 0.5,  cool: 1.4, radius: 0.45, scale: 0.95, drops: [['potion', 0.15], ['magicstone', 0.1]] },
+    fireimp:   { name: '火の小鬼',   rigFn: 'fireimp',  barH: 1.5, hp: 48,  atk: 16, speed: 3.6, xp: 24, gold: 18, aggroR: 20, atkR: 13,  windup: 0.6,  cool: 2.2, radius: 0.4, scale: 0.7, ranged: true, proj: 'fire', drops: [['magicstone', 0.3]] },
+    mimic:     { name: 'ミミック',   rigFn: 'mimic',    barH: 1.4, hp: 130, atk: 26, speed: 5.0, xp: 60, gold: 80, aggroR: 30, atkR: 1.8, windup: 0.4,  cool: 1.1, radius: 0.55, scale: 1, poise: 3, drops: [['hipotion', 0.5], ['magicstone', 0.5]] },
     nightwisp: { name: '夜の骸骨',   rigFn: 'skeleton', barH: 2.0, hp: 38,  atk: 14, speed: 4.0, xp: 16, gold: 10, aggroR: 26, atkR: 1.8, windup: 0.5,  cool: 1.3, radius: 0.45, scale: 1, night: true, drops: [['bone', 0.5]] }
   };
   E.TYPES = TYPES;
@@ -1124,6 +1179,9 @@
       case 'skeleton': return G.Rigs.humanoid({ scale: T.scale, skin: 0xd8d4c8, cloth: 0xb5b0a3, cloth2: 0x8a867c, skull: true, weapon: type === 'nightwisp' ? 'sword' : 'bow' });
       case 'golemling': return G.Rigs.golem({ scale: T.scale });
       case 'scorpion': return G.Rigs.scorpion({ scale: T.scale });
+      case 'bandit': return G.Rigs.humanoid({ scale: T.scale, skin: 0xd8a880, hair: 0x992222, cloth: 0x4a4a55, cloth2: 0x33333c, weapon: 'sword' });
+      case 'fireimp': return G.Rigs.humanoid({ scale: T.scale, skin: 0xd05533, hair: 0x220000, cloth: 0x882211, cloth2: 0x551108 });
+      case 'mimic': return G.Rigs.mimic();
     }
     return G.Rigs.humanoid({ scale: T.scale });
   }
@@ -1204,6 +1262,16 @@
     for (const e of list.slice()) remove(e);
   };
 
+  /* 盗賊キャンプの固定スポーン */
+  const FIXED_SPAWNS = [
+    { x: -153, z: 247, type: 'bandit', alive: false, deadUntil: 0 },
+    { x: -147, z: 252, type: 'bandit', alive: false, deadUntil: 0 },
+    { x: -150, z: 256, type: 'bandit', alive: false, deadUntil: 0 },
+    { x: 217, z: 137, type: 'bandit', alive: false, deadUntil: 0 },
+    { x: 224, z: 142, type: 'bandit', alive: false, deadUntil: 0 },
+    { x: 220, z: 146, type: 'bandit', alive: false, deadUntil: 0 }
+  ];
+
   /* スポーン管理 */
   let spawnT = 0, nightT = 0;
   function manageSpawns(dt) {
@@ -1212,6 +1280,13 @@
     spawnT = 0.8;
     const p = G.Player.pos;
     if (list.length < 26) {
+      for (const s of FIXED_SPAWNS) {
+        if (s.alive || G.time < s.deadUntil) continue;
+        const d2 = G.dist2(p.x, p.z, s.x, s.z);
+        if (d2 < 28 * 28 || d2 > 190 * 190) continue;
+        s.alive = true;
+        E.spawn(s.type, s.x, s.z, { spawnRef: s });
+      }
       for (const s of G.World.activeSpawns()) {
         if (s.alive || G.time < s.deadUntil) continue;
         const d2 = G.dist2(p.x, p.z, s.x, s.z);
@@ -1290,10 +1365,10 @@
       if (e.stateT >= T.windup) {
         e.state = 'attack'; e.stateT = 0;
         if (T.ranged && e.type !== 'nightwisp') {
-          // 矢を放つ
-          G.Audio.sfx('arrow');
+          const pj = T.proj || 'arrow';
+          G.Audio.sfx(pj === 'fire' ? 'fireball' : 'arrow');
           const sy = e.pos.y + 1.2;
-          G.Projectiles.spawn('arrow', e.pos.x, sy, e.pos.z, p.pos.x, p.pos.y + 0.9, p.pos.z, 16, T.atk);
+          G.Projectiles.spawn(pj, e.pos.x, sy, e.pos.z, p.pos.x, p.pos.y + 0.9, p.pos.z, pj === 'fire' ? 13 : 16, T.atk);
         } else {
           G.Audio.sfx('swing');
         }
@@ -1402,6 +1477,11 @@
       name: '遺跡の巨像', hp: 700, atk: 34, speed: 2.9, xp: 600, gold: 500,
       x: 430, z: -80, arenaR: 36, radius: 1.6, barH: 5.0,
       build: () => G.Rigs.golem({ scale: 2.4, rock: 0x8a8478 })
+    },
+    scorpking: {
+      name: '砂帝スコルグ', hp: 550, atk: 30, speed: 5.6, xp: 900, gold: 700,
+      x: 390, z: 380, arenaR: 30, radius: 1.5, barH: 2.6,
+      build: () => G.Rigs.scorpion({ scale: 2.6, shell: 0xb8863f })
     },
     dragon: {
       name: '黒竜ヴァルドレク', hp: 1400, atk: 40, xp: 2000, gold: 1500, speed: 5,
@@ -1530,6 +1610,15 @@
     let mv = 0;
     const phase2 = b.hp < b.maxHp * 0.5;
 
+    // スコルグ: 半減で子サソリ召喚
+    if (b.bossId === 'scorpking' && phase2 && !b.summoned && b.engaged && b.alive) {
+      b.summoned = true;
+      G.Enemies.spawn('scorpion', b.pos.x + 3, b.pos.z + 2).aggro = true;
+      G.Enemies.spawn('scorpion', b.pos.x - 3, b.pos.z - 2).aggro = true;
+      G.Audio.sfx('roar');
+      G.UI.toast('スコルグが仔サソリを呼んだ！');
+    }
+
     if (!b.engaged) {
       // 帰還
       if (distHome > 3) {
@@ -1628,6 +1717,16 @@
       } else if (dist < 30) {
         b.state = 'windup'; b.stateT = 0; b.windupDur = 0.6;
         b.nextAtk = 'rock';
+      }
+    } else if (id === 'scorpking') {
+      if (dist > 7 && Math.random() < 0.5) {
+        b.state = 'charge'; b.stateT = 0; b.chargeHit = false;
+        G.Audio.sfx('roar');
+      } else if (dist < 4.5) {
+        b.state = 'windup'; b.stateT = 0; b.windupDur = phase2 ? 0.35 : 0.5;
+        b.nextAtk = 'bite';
+      } else {
+        b.cool = 0.5;
       }
     } else if (id === 'dragon') {
       if (b.fly > 0.5) {
@@ -2005,6 +2104,12 @@
     for (const n of G.NPCs.list) {
       if (G.dist2(p.pos.x, p.pos.z, n.pos.x, n.pos.z) < R2 + 1) {
         return { kind: 'npc', label: n.name + ' と話す', obj: n };
+      }
+    }
+    // ポータル
+    for (const pt of G.World.portals) {
+      if (G.dist2(p.pos.x, p.pos.z, pt.x, pt.z) < 4.2 * 4.2) {
+        return { kind: 'portal', label: pt.label, obj: pt };
       }
     }
     // 祠
