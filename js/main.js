@@ -340,15 +340,20 @@
       bossCine -= dt;
       const b = cineBoss;
       const dx = p.pos.x - b.pos.x, dz = p.pos.z - b.pos.z;
-      const d = Math.hypot(dx, dz) || 1;
       const back = b.radius * 3 + 9;
       const h = (b.D.barH || 3);
+      // 真後ろからだとボスと自機が重なるため、側面へ回り込んだ2ショット構図
+      const a = Math.atan2(dx, dz) + 0.95;
       camera.position.set(
-        b.pos.x + (dx / d) * back,
-        b.pos.y + h * 1.15 + 1.5,
-        b.pos.z + (dz / d) * back
+        b.pos.x + Math.sin(a) * back,
+        b.pos.y + h * 1.05 + 1.2,
+        b.pos.z + Math.cos(a) * back
       );
-      camera.lookAt(b.pos.x, b.pos.y + h * 0.55, b.pos.z);
+      camera.lookAt(
+        b.pos.x * 0.72 + p.pos.x * 0.28,
+        b.pos.y + h * 0.5,
+        b.pos.z * 0.72 + p.pos.z * 0.28
+      );
       if (bossCine <= 0) cineBoss = null;
       G.Input.camDX = 0; G.Input.camDY = 0;
       return;

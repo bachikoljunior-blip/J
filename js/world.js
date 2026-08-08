@@ -874,6 +874,29 @@
     }
   }
 
+  /* 竜の頂の焦土に残り火 (フォグ越しでも「焦土」が伝わる暖色の光点) */
+  function buildEmbers(x, z) {
+    const rnd = G.srand(4242);
+    const emberMat = new THREE.MeshLambertMaterial({ color: 0x33221a, emissive: 0xbb3d12 });
+    const glowMap = G.makeRadialTex(48, [[0, 'rgba(255,120,40,0.7)'], [1, 'rgba(255,60,0,0)']]);
+    for (let i = 0; i < 9; i++) {
+      const a = rnd() * Math.PI * 2, r = 4 + rnd() * 17;
+      const px = x + Math.cos(a) * r, pz = z + Math.sin(a) * r;
+      const py = W.heightAt(px, pz);
+      const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.28 + rnd() * 0.3, 0), emberMat);
+      rock.position.set(px, py + 0.2, pz);
+      rock.rotation.set(rnd() * 3, rnd() * 3, rnd() * 3);
+      scene.add(rock);
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glowMap, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+      }));
+      glow.position.set(px, py + 0.35, pz);
+      glow.scale.set(1.5, 1.0, 1);
+      glow.material.opacity = 0.5;
+      scene.add(glow);
+    }
+  }
+
   function buildTower(x, z) {
     const y = W.heightAt(x, z);
     const body = new THREE.CylinderGeometry(2.2, 2.8, 11, 8);
@@ -1209,7 +1232,8 @@
     for (const sh of W.shrines) buildShrine(sh);
     buildRuinCircle(-430, -140, 18, 9, 11, 0xbfdcec, true);   // 狼ボス闘技場 (氷の結晶柱)
     buildRuinCircle(430, -80, 20, 11, 22);              // ゴーレム闘技場
-    buildRuinCircle(-40, -640, 22, 12, 33, 0x4a4250);   // 竜の頂 (黒曜石の柱)
+    buildRuinCircle(-40, -640, 22, 12, 33, 0x3d3a4c);   // 竜の頂 (黒曜石の柱)
+    buildEmbers(-40, -640);                              // 焦土の残り火
     buildRuinCircle(150, 430, 13, 7, 44);       // 南の廃墟
     buildTower(-200, 200);
     buildTower(180, -320);
@@ -1446,7 +1470,7 @@
 
     // 太陽・月スプライト
     sunSpr = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: G.makeRadialTex(128, [[0, 'rgba(255,250,230,1)'], [0.25, 'rgba(255,235,180,0.9)'], [1, 'rgba(255,220,140,0)']]),
+      map: G.makeRadialTex(128, [[0, 'rgba(255,252,240,1)'], [0.42, 'rgba(255,240,195,0.96)'], [0.6, 'rgba(255,225,160,0.4)'], [1, 'rgba(255,210,130,0)']]),
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
     }));
     sunSpr.scale.set(120, 120, 1);
@@ -1633,7 +1657,7 @@
     scene.fog.color.copy(_fogC);
     const baseFar = G.Q.chunkRadius * 64 * 0.95;
     const alt = Math.max(0, cam.y - G.World.heightAt(cam.x, cam.z));
-    const altBoost = 1 + G.clamp((alt - 8) / 50, 0, 1) * 0.9;  // 高所ほど遠くまで見せる
+    const altBoost = 1 + G.clamp((alt - 8) / 50, 0, 1) * 1.5;  // 高所 (滑空中) は大きく視界を広げる
     scene.fog.far = baseFar * (1 - weather * 0.35) * (0.75 + s.hem * 0.4) * altBoost;
     scene.fog.near = scene.fog.far * 0.22;
     if (scene.background) scene.background.copy(_fogC);
@@ -1642,7 +1666,8 @@
     // 雨 / 雪パーティクル (雪原バイオームでは常時ゆっくり降る雪に)
     const snowy = G.World.biomeAt(cam.x, cam.z) === 'snow';
     const wantPrecip = weather > 0.5 ? 1 : (snowy ? 0.7 : 0);
-    rainOn += (wantPrecip - rainOn) * G.damp(1.5, dt);
+    // 止むときは速く消す (晴天の空に雨筋が残留しない)
+    rainOn += (wantPrecip - rainOn) * G.damp(wantPrecip < rainOn ? 4.5 : 1.5, dt);
     const snowMode = snowy && weather <= 0.5;
     // 夜間は雨粒を明るく・不透明にして暗背景でも見えるようにする
     const darkF = 1 - G.clamp(s.hem * 1.7, 0, 1);

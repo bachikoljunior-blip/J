@@ -467,8 +467,9 @@
       head.add(mkGlow(-0.09), mkGlow(0.09));
     }
     head.position.set(0, 0.78, 0.62);
-    const tail = box(0.1, 0.1, 0.5, fur);
-    tail.position.set(0, 0.72, -0.75);
+    const tail = box(conf.mane ? 0.15 : 0.1, conf.mane ? 0.15 : 0.1, conf.mane ? 0.72 : 0.5, fur);
+    tail.position.set(0, conf.mane ? 0.8 : 0.72, conf.mane ? -0.86 : -0.75);
+    if (conf.mane) tail.rotation.x = 0.4;   // 王の尾は高く掲げる
     const mkLeg = (x, z) => {
       const grp = new THREE.Group();
       const l = box(0.12, 0.45, 0.12, fur);
@@ -762,10 +763,10 @@
     const neck = new THREE.Group();
     const neckM = box(0.5, 0.5, 0.9, dark);
     neckM.position.set(0, 0.25, 0.4);
-    // 首の第二節 (前方へ伸ばし竜らしいS字シルエットに)
-    const neckM2 = box(0.44, 0.44, 0.8, dark);
-    neckM2.position.set(0, 0.45, 0.95);
-    neckM2.rotation.x = -0.3;
+    // 首の第二節 (前方+上方へ伸ばし、頭を胴体より一段高く出すS字)
+    const neckM2 = box(0.44, 0.44, 0.9, 0x453a4a);
+    neckM2.position.set(0, 0.62, 1.0);
+    neckM2.rotation.x = -0.55;
     neck.add(neckM2);
     const headG = new THREE.Group();
     const headM = box(0.5, 0.45, 0.8, dark);
@@ -778,20 +779,22 @@
     eyeL.position.set(-0.2, 0.1, 0.3);
     const eyeR = eyeL.clone(); eyeR.position.x = 0.2;
     headG.add(headM, jaw, hornL, hornR, eyeL, eyeR);
-    headG.position.set(0, 0.72, 1.45);
+    headG.position.set(0, 1.05, 1.5);
     neck.add(neckM, headG);
     neck.position.set(0, 1.5, 0.9);
-    // 尻尾は6節、先細り+緩い垂れ下がり
+    // 尻尾は6節、先細り+緩やかに持ち上がるカーブ (俯瞰でも胴体からはみ出す)
     const tail = new THREE.Group();
     for (let i = 0; i < 6; i++) {
-      const t = box(Math.max(0.13, 0.4 - i * 0.055), Math.max(0.1, 0.3 - i * 0.04), 0.7, dark);
-      t.position.set(0, -i * i * 0.022, -0.6 - i * 0.62);
+      const t = box(Math.max(0.13, 0.4 - i * 0.05), Math.max(0.1, 0.3 - i * 0.035), 0.7,
+        i === 5 ? 0x7a2430 : dark);
+      t.position.set(0, i * i * 0.03, -0.6 - i * 0.6);
       tail.add(t);
-      const spike = box(0.08, Math.max(0.1, 0.3 - i * 0.035), 0.12, i % 2 ? 0x241a26 : 0x7a2430);
-      spike.position.set(0, 0.22 - i * i * 0.022, -0.6 - i * 0.62);
+      const spike = box(0.09, Math.max(0.12, 0.3 - i * 0.03), 0.14, i % 2 ? 0x241a26 : 0x7a2430);
+      spike.position.set(0, 0.22 + i * i * 0.03, -0.6 - i * 0.6);
       tail.add(spike);
     }
-    tail.position.set(0, 1.15, -0.9);
+    tail.position.set(0, 1.2, -0.9);
+    tail.rotation.x = 0.1;
     // 背びれの棘列 (シルエットが遠目で竜と読める高さ)
     for (let i = 0; i < 6; i++) {
       const sp = box(0.16, Math.max(0.35, 1.0 - i * 0.13), 0.3, i % 2 ? 0x241a26 : 0x7a2430);
@@ -833,7 +836,7 @@
       wingL.rotation.z = -flap - 0.15;
       wingR.rotation.z = flap + 0.15;
       neck.rotation.x = -0.2 + Math.sin(t * 1.1) * 0.05;
-      tail.rotation.y = Math.sin(t * 0.9) * 0.25;
+      tail.rotation.y = Math.sin(t * 0.9) * 0.45;
       if (p.state === 'dead') {
         const k = G.clamp(p.t * 1.2, 0, 1);
         g.rotation.z = k * Math.PI / 2 * 0.8;
@@ -869,19 +872,20 @@
     for (let i = 0; i < 4; i++) {
       // 2層構造: 外周リング=攻撃範囲、内側フィル=着弾タイミングゲージ
       const m = new THREE.Mesh(
-        new THREE.RingGeometry(0.92, 1.0, 24),
+        new THREE.RingGeometry(0.9, 1.0, 24),
         new THREE.MeshBasicMaterial({
-          color: 0xff2020, transparent: true, opacity: 0.55,
+          color: 0xd01818, transparent: true, opacity: 0.6,
           depthWrite: false, side: THREE.DoubleSide
         })
       );
       m.rotation.x = -Math.PI / 2;
       m.visible = false;
       m.renderOrder = 2;
+      // 暗色の赤フィル: 白い氷床でも緑の草地でも沈まないコントラスト
       const d = new THREE.Mesh(
         new THREE.CircleGeometry(1, 24),
         new THREE.MeshBasicMaterial({
-          color: 0xff5030, transparent: true, opacity: 0.22,
+          color: 0xb31414, transparent: true, opacity: 0.3,
           depthWrite: false, side: THREE.DoubleSide
         })
       );
@@ -902,12 +906,12 @@
     s.m.visible = true;
     s.m.position.set(x, gh + 0.12, z);
     s.m.scale.setScalar(r);
-    s.m.material.opacity = 0.4 + t * 0.35;
+    s.m.material.opacity = 0.45 + t * 0.35;
     // 内側フィルが t=1 で外周に到達する = 避けるタイミングが読める
     s.d.visible = true;
     s.d.position.set(x, gh + 0.1, z);
     s.d.scale.setScalar(Math.max(0.05, r * t));
-    s.d.material.opacity = 0.16 + t * 0.2;
+    s.d.material.opacity = 0.28 + t * 0.22;
   };
   R.end = function () {
     for (let i = used; i < pool.length; i++) { pool[i].m.visible = false; pool[i].d.visible = false; }
@@ -1817,7 +1821,7 @@
 
   const DEFS = {
     fenrir: {
-      name: '白狼王フェンリル', hp: 300, atk: 22, speed: 7.2, xp: 300, gold: 250,
+      name: '白狼王フェンリル', hp: 220, atk: 22, speed: 7.2, xp: 300, gold: 250,
       x: -430, z: -140, arenaR: 34, radius: 1.3, pushR: 2.1, barH: 3.4,
       build: () => G.Rigs.wolf({ scale: 2.9, fur: 0xd8d8e0, snout: 0xb8b8c2, eye: 0x44ddff, mane: true })
     },
@@ -1957,6 +1961,14 @@
       b.cool = b.bossId === 'dragon' ? 0.4 : 1.0;   // 開幕の間延び防止
       G.Audio.sfx('roar');
       G.events.emit('bossEngage', b);
+      // 開幕にボスとプレイヤーが重なっていたら引き離す (めり込み絵の防止)
+      if (dist < D.pushR + 2) {
+        const a = Math.atan2(p.pos.x - b.pos.x, p.pos.z - b.pos.z);
+        const rr = D.pushR + 3;
+        const c = G.World.collide(b.pos.x + Math.sin(a) * rr, b.pos.z + Math.cos(a) * rr, 0.5);
+        p.pos.x = c.x; p.pos.z = c.z;
+        p.pos.y = G.World.heightAt(c.x, c.z);
+      }
     }
     if (b.engaged && (!p.alive || dist > D.arenaR + 30)) {
       b.engaged = false;
@@ -2343,10 +2355,21 @@
     mesh.position.set(x, y, z);
     if (type === 'arrow') mesh.lookAt(tx, ty, tz);
     scene.add(mesh);
-    // 火弾/岩弾はブロブ影で高度と着弾点を読めるように
+    // 着弾点マーカー: 火弾は暗い焦土でも見える発光リング、岩弾はブロブ影
     let shadow = null;
-    if (type === 'fire' || type === 'rock') {
-      shadow = G.makeShadow(type === 'rock' ? 1.7 : 1.2);
+    if (type === 'fire') {
+      const a2 = assets();
+      if (!a2.fireRingGeo) {
+        a2.fireRingGeo = new THREE.RingGeometry(0.6, 0.85, 18);
+        a2.fireRingGeo.rotateX(-Math.PI / 2);
+      }
+      shadow = new THREE.Mesh(a2.fireRingGeo, new THREE.MeshBasicMaterial({
+        color: 0xff7020, transparent: true, opacity: 0.5,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      }));
+      scene.add(shadow);
+    } else if (type === 'rock') {
+      shadow = G.makeShadow(1.7);
       scene.add(shadow);
     }
     list.push({
@@ -2367,14 +2390,15 @@
       pr.pos.addScaledVector(pr.vel, dt);
       pr.mesh.position.copy(pr.pos);
       if (pr.type === 'fire') {
-        G.FX.burst(pr.pos.x, pr.pos.y, pr.pos.z, { n: 1, color: 0xff8833, speed: 0.5, life: 0.35, size: 3, gravity: -2 });
+        G.FX.burst(pr.pos.x, pr.pos.y, pr.pos.z, { n: 1, color: 0xff8833, speed: 0.5, life: 0.6, size: 3.6, gravity: -2, drag: 0.6 });
       }
       let dead = false;
       // 地形
       const gh = G.World.heightAt(pr.pos.x, pr.pos.z);
       if (pr.shadow) {
-        pr.shadow.position.set(pr.pos.x, gh + 0.07, pr.pos.z);
-        pr.shadow.material.opacity = G.clamp(1 - (pr.pos.y - gh) * 0.08, 0.3, 0.85);
+        pr.shadow.position.set(pr.pos.x, gh + 0.08, pr.pos.z);
+        // 高度が下がるほど濃く (着弾タイミングの手掛かり)
+        pr.shadow.material.opacity = G.clamp(1 - (pr.pos.y - gh) * 0.06, 0.35, 0.9);
       }
       if (pr.pos.y <= gh) {
         dead = true;
@@ -2402,7 +2426,10 @@
       if (pr.life > pr.maxLife) dead = true;
       if (dead) {
         scene.remove(pr.mesh);
-        if (pr.shadow) scene.remove(pr.shadow);
+        if (pr.shadow) {
+          scene.remove(pr.shadow);
+          if (pr.type === 'fire') pr.shadow.material.dispose();
+        }
         list.splice(i, 1);
       }
     }

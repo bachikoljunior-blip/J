@@ -60,10 +60,19 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 .barcol { display: flex; flex-direction: column; gap: 4px; padding-top: 2px; }
 .bar {
+  position: relative;
   width: min(42vw, 230px); height: 12px; border-radius: 6px;
-  background: rgba(10, 14, 22, 0.72); overflow: hidden;
+  background: rgba(10, 14, 22, 0.72); overflow: visible;
   border: 1px solid rgba(255,255,255,0.22);
 }
+/* バーの意味をアイコンで明示 (HP=♥ / スタミナ=⚡) */
+.bar.hp::before, .bar.sta::before {
+  position: absolute; left: -15px; top: 50%; transform: translateY(-54%);
+  font-size: 10px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); pointer-events: none;
+}
+.bar.hp::before { content: '♥'; color: #ff8a7a; }
+.bar.sta::before { content: '⚡'; color: #9fdc7a; }
+.bar .fill, .bar .chip { border-radius: 6px; }
 .bar.sta { height: 8px; width: min(36vw, 190px); }
 .bar.xp { height: 4px; width: min(30vw, 160px); }
 .bar .fill { height: 100%; border-radius: 6px; transition: width 0.15s; }
@@ -151,7 +160,9 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 .bossbar {
   position: relative; height: 13px; border-radius: 3px; overflow: hidden;
   background: rgba(30, 28, 32, 0.85); border: 1px solid rgba(245, 220, 200, 0.75);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+  /* 二重枠 + 金の外光でボスUIの格を出す */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 0 3px rgba(20, 18, 22, 0.7),
+              0 0 0 4px rgba(212, 169, 79, 0.5);
 }
 .bossbar .chip {
   position: absolute; inset: 0 auto 0 0; height: 100%;
