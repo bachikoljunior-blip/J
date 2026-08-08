@@ -628,11 +628,18 @@
   function updateEnemyBars(dt) {
     let used = 0;
     const p = G.Player;
+    const placedBars = [];
     for (const e of G.Enemies.list) {
       if (!e.alive || !e.aggro) continue;
       if (G.dist2(p.pos.x, p.pos.z, e.pos.x, e.pos.z) > 40 * 40) continue;
       const pr = UI.project(e.pos.x, e.pos.y + (e.T.barH || 1.9), e.pos.z);
       if (!pr.visible) continue;
+      // 密集時はスクリーン空間で縦にずらして重なりを避ける
+      for (let k = 0; k < placedBars.length; k++) {
+        const q = placedBars[k];
+        if (Math.abs(pr.x - q.x) < 58 && Math.abs(pr.y - q.y) < 10) pr.y = q.y - 11;
+      }
+      placedBars.push({ x: pr.x, y: pr.y });
       let b = ebarPool[used];
       if (!b) {
         const wrap = el('div', 'ebar', dmgLayer);

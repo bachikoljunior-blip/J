@@ -814,13 +814,14 @@
     const headM = box(0.5, 0.45, 0.8, dark);
     const jaw = box(0.4, 0.15, 0.6, belly);
     jaw.position.set(0, -0.25, 0.1);
-    // 大きく後方へ湾曲する対の角 (2節)
-    const hornMat = new THREE.MeshLambertMaterial({ color: 0xcabb96 });
+    // 大きく後方へ湾曲する対の角 (基部=黒曜石 / 先端=金 でテーパー)
+    const hornMat = new THREE.MeshLambertMaterial({ color: 0x2b2334 });
+    const hornTipMat = new THREE.MeshLambertMaterial({ color: 0xd8b96a });
     const mkHorn = side => {
       const grp = new THREE.Group();
-      const h1 = new THREE.Mesh(boxGeo(0.11, 0.34, 0.11), hornMat);
+      const h1 = new THREE.Mesh(boxGeo(0.13, 0.34, 0.13), hornMat);
       h1.position.y = 0.15;
-      const h2 = new THREE.Mesh(boxGeo(0.07, 0.28, 0.07), hornMat);
+      const h2 = new THREE.Mesh(boxGeo(0.07, 0.28, 0.07), hornTipMat);
       h2.position.set(0.03 * side, 0.36, -0.2); h2.rotation.x = -1.0; h2.rotation.z = 0.2 * side;
       grp.add(h1, h2);
       grp.position.set(0.17 * side, 0.28, -0.22);
@@ -878,8 +879,9 @@
       bone.position.set(1.3 * side, 0.02, 0.34);
       const f1 = box(0.08, 0.07, 0.85, boneC);
       f1.position.set(0.85 * side, -0.02, -0.08);
-      const f2 = f1.clone(); f2.position.x = 1.65 * side;
-      const f3 = f1.clone(); f3.position.x = 2.35 * side; f3.scale.z = 0.72;
+      f1.rotation.y = -0.12 * side;
+      const f2 = f1.clone(); f2.position.x = 1.65 * side; f2.rotation.y = -0.3 * side;
+      const f3 = f1.clone(); f3.position.x = 2.35 * side; f3.scale.z = 0.72; f3.rotation.y = -0.5 * side;
       const mem1 = box(0.82, 0.03, 0.74, 0x3a2438);
       mem1.position.set(1.25 * side, -0.06, -0.06);
       mem1.rotation.x = 0.09;
@@ -1006,7 +1008,7 @@
       s.m.material.opacity = 0.45 + q.t * 0.35;
       const fill = i < 2;
       s.d.visible = fill;
-      s.f.visible = fill;
+      s.f.visible = i === 0;   // 全域フィルは最も切迫した1つだけ (重なりの混濁防止)
       if (fill) {
         // 内側フィルが t=1 で外周に到達する = 避けるタイミングが読める
         s.d.position.set(q.x, gh + 0.1, q.z);

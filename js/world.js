@@ -677,7 +677,10 @@
     sh.uniforms.uWet = { value: 0 };
     sh.fragmentShader = 'uniform float uWet;\n' + sh.fragmentShader.replace(
       '#include <color_fragment>',
-      '#include <color_fragment>\n  diffuseColor.rgb *= (1.0 - uWet * 0.3);'
+      '#include <color_fragment>\n' +
+      '  diffuseColor.rgb *= (1.0 - uWet * 0.3);\n' +
+      '  // 濡れた地面は青みがかった光沢感 (単なる暗化に見せない)\n' +
+      '  diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(0.92, 0.97, 1.12), uWet * 0.6);'
     );
     terrainMat.userData.shader = sh;
   };
