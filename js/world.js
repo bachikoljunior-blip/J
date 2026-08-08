@@ -1082,6 +1082,9 @@
         if (!ch.grassMesh && !grassBuilt) { addGrass(ch); grassBuilt = true; }
       }
       else if (ch.grassMesh) removeGrass(ch);
+      // 影パスはシャドウカメラ範囲 (±52m ≈ 2チャンク) 内の植生だけ描く
+      const cast = dist <= 2;
+      for (const t of ch.trees) if (t.castShadow !== cast) t.castShadow = cast;
     }
 
     // 水面アニメ
