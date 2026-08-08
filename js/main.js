@@ -492,8 +492,8 @@
       const x = p.x + Math.cos(a) * d, z = p.z + Math.sin(a) * d;
       const h = G.World.heightAt(x, z);
       G.FX.burst(x, Math.max(h, G.World.WATER_Y) + 0.08, z, {
-        n: 2, color: 0xcfe4f2, speed: 1.4, up: 1.6, gravity: 5,
-        life: 0.32, size: 1.3, drag: 0.8
+        n: 2, color: 0xaec4d4, speed: 1.3, up: 1.4, gravity: 5,
+        life: 0.26, size: 0.95, drag: 0.8
       });
     }
 

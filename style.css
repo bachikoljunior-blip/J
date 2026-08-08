@@ -278,7 +278,8 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
   box-shadow: 0 4px 24px rgba(0,0,0,0.6);
 }
 .dlgname { font-size: 13px; color: #ffd97a; margin-bottom: 6px; letter-spacing: 0.1em; }
-.dlgtext { font-size: 14px; line-height: 1.75; color: #e8f0f8; min-height: 48px; overflow-y: auto; flex: 1 1 auto; }
+/* min-height: 0 が無いと flex 子の overflow が効かず選択肢が画面外へ溢れる */
+.dlgtext { font-size: 14px; line-height: 1.75; color: #e8f0f8; min-height: 0; overflow-y: auto; flex: 1 1 auto; }
 .dlgopts { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
 /* 会話中は探索系HUDを沈めて話者に集中させる */
 .hud.dlgmode .mmwrap, .hud.dlgmode .tracker, .hud.dlgmode .gold { opacity: 0.12; transition: opacity 0.3s; }

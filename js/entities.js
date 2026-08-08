@@ -882,11 +882,11 @@
       f1.rotation.y = -0.12 * side;
       const f2 = f1.clone(); f2.position.x = 1.65 * side; f2.rotation.y = -0.3 * side;
       const f3 = f1.clone(); f3.position.x = 2.35 * side; f3.scale.z = 0.72; f3.rotation.y = -0.5 * side;
-      const mem1 = box(0.82, 0.03, 0.74, 0x3a2438);
-      mem1.position.set(1.25 * side, -0.06, -0.06);
+      const mem1 = box(0.86, 0.03, 0.86, 0x3a2438);
+      mem1.position.set(1.25 * side, -0.03, 0.0);
       mem1.rotation.x = 0.09;
-      const mem2 = box(1.05, 0.03, 0.78, 0x2c1e2e);
-      mem2.position.set(2.05 * side, -0.09, -0.12);
+      const mem2 = box(1.1, 0.03, 0.9, 0x2c1e2e);
+      mem2.position.set(2.05 * side, -0.06, -0.05);
       mem2.rotation.x = 0.14;
       const edge = box(2.5, 0.05, 0.1, 0x7a2430);
       edge.position.set(1.3 * side, -0.1, -0.5);
@@ -1401,9 +1401,19 @@
       P.stamina = Math.min(P.maxSta(), P.stamina + 24 * dt);
     }
 
-    // ロックオン対象消滅
+    // ロックオン対象消滅 → 近くの敵へ自動リターゲット (UIの迷子を防ぐ)
     if (P.target && (!P.target.alive || G.dist2(P.pos.x, P.pos.z, P.target.pos.x, P.target.pos.z) > 40 * 40)) {
+      const dead = !P.target.alive;
       P.target = null;
+      if (dead) {
+        let best = null, bd = 12 * 12;
+        for (const e of G.Enemies.all()) {
+          if (!e.alive) continue;
+          const d2 = G.dist2(P.pos.x, P.pos.z, e.pos.x, e.pos.z);
+          if (d2 < bd) { bd = d2; best = e; }
+        }
+        P.target = best;
+      }
     }
     // ロックオン対象の頭上に金のマーカー (予兆の赤と別の記号体系)
     const lm = lockMark();
@@ -2156,13 +2166,14 @@
       G.Audio.sfx('roar');
       G.events.emit('shake', 0.6);
       // 白飽和を避けるため彩度のある色で (氷=青 / 竜=橙)
-      const c = b.bossId === 'fenrir' ? 0x55a8e8 : b.bossId === 'dragon' ? 0xff6a20 : 0xc8b070;
+      const c = b.bossId === 'fenrir' ? 0x3d96e0 : b.bossId === 'dragon' ? 0xff6a20 : 0xc8b070;
+      // サイズ/数を抑えて加算の白飽和を防ぎ、色相が読めるように
       G.FX.burst(b.pos.x, b.pos.y + 2, b.pos.z, {
-        n: 40, color: c, speed: 9, up: 0.8, gravity: 2, life: 0.9, size: 4
+        n: 28, color: c, speed: 9, up: 0.8, gravity: 2, life: 0.9, size: 2.8
       });
       // 足元に残留リング (低FPS計測でも痕跡が写る)
       G.Scorch.add(b.pos.x, b.pos.z,
-        b.bossId === 'fenrir' ? 0xbfdcec : b.bossId === 'dragon' ? 0x3a1c10 : 0x4a4030, 2.6);
+        b.bossId === 'fenrir' ? 0x8fc8e8 : b.bossId === 'dragon' ? 0x241d18 : 0x4a4030, 3.2);
     }
 
     // スコルグ: 半減で子サソリ召喚
