@@ -314,15 +314,17 @@
     if (h < WATER_Y + 0.4) {
       out.lerp(BIOME_COL.under, G.smoothstep(WATER_Y + 0.4, WATER_Y - 2.5, h));
     }
-    // フェンリルの凍土アリーナ (バイオームまだらの後に適用しないと緑に戻される)
+    // フェンリルの凍土アリーナ (バイオームまだらの後に適用しないと緑に戻される)。
+    // 縁の半径をノイズで揺らし、円盤のハードエッジを崩す
     const fd = G.dist2(x, z, -430, -140);
-    if (fd < 38 * 38) {
-      out.lerp(FROST_COL, (1 - G.smoothstep(26, 38, Math.sqrt(fd))) * 0.88);
+    if (fd < 42 * 42) {
+      const fr2 = Math.sqrt(fd) + G.noise2(x * 0.08, z * 0.08) * 5;
+      out.lerp(FROST_COL, (1 - G.smoothstep(26, 38, fr2)) * 0.88);
     }
     // 竜の頂の焦土 (中心ほど濃く、ひび割れ状の明暗ムラ)
     const dd = G.dist2(x, z, -40, -640);
-    if (dd < 34 * 34) {
-      const dr = Math.sqrt(dd);
+    if (dd < 40 * 40) {
+      const dr = Math.sqrt(dd) + G.noise2(x * 0.08 + 9, z * 0.08) * 5;
       out.lerp(CHAR_COL, (1 - G.smoothstep(18, 34, dr)) * 0.85);
       const crack = G.fbm(x * 0.22, z * 0.22, 2);
       out.multiplyScalar(0.8 + (crack * 0.5 + 0.5) * 0.4);
