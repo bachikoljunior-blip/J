@@ -1706,8 +1706,9 @@
     // 夕焼け空の下で真っ暗なオリーブ色に落ちる問題への対策)。
     // 見た目の太陽スプライトは実方向のまま沈む
     _lightDir.copy(_sunDir);
-    if (s.dir > 0.05 && _lightDir.y < 0.12) {
-      _lightDir.y = 0.12;
+    if (s.dir > 0.05 && _lightDir.y < 0.3) {
+      // 0.3 まで持ち上げると上向きの地形面にも夕陽の暖色が乗る
+      _lightDir.y = 0.3;
       _lightDir.normalize();
     }
     sun.position.copy(_lightDir).multiplyScalar(150).add(_camXZ);

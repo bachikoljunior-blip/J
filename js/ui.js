@@ -553,22 +553,30 @@
     if (opts.tgt) {
       const now = performance.now();
       const ex = dmgPool.find(d => d.active && d.tgt === opts.tgt &&
-        now - d.born < 420 && !d.crit === !opts.crit);
+        now - d.born < 420 && !d.crit === !opts.crit &&
+        now - (d.firstBorn || d.born) < 1200);   // 1.2秒で合算を確定し新規へ
       if (ex) {
         ex.val += n;
         ex.eln.textContent = ex.val;
         // 合算中はフェードをリセット (合計値を読み切れる寿命を保証)
         ex.born = Math.max(ex.born, now - 300);
+        // 対象が動いた場合は現在位置へ緩やかに寄せる
+        ex.x += (x - ex.x) * 0.4; ex.z += (z - ex.z) * 0.4;
         return;
       }
     }
     let d = dmgPool.find(d => !d.active);
     if (!d) {
-      d = { eln: el('div', 'dmgnum', dmgLayer), active: false };
-      dmgPool.push(d);
-      if (dmgPool.length > 40) { }
+      if (dmgPool.length >= 40) {
+        // プール上限: 最も古い表示を再利用
+        d = dmgPool.reduce((a, c) => (c.born < a.born ? c : a), dmgPool[0]);
+      } else {
+        d = { eln: el('div', 'dmgnum', dmgLayer), active: false };
+        dmgPool.push(d);
+      }
     }
     d.active = true; d.t = 0; d.born = performance.now();
+    d.firstBorn = d.born; d.riseBorn = d.born;
     d.val = n; d.tgt = opts.tgt || null; d.crit = !!opts.crit;
     // ▼ロックオンマーカー/HPバーと重ならないよう、頭上さらに上へ
     d.x = x + (Math.random() - 0.5) * 1.6; d.y = y + 0.7 + Math.random() * 0.5; d.z = z;
@@ -583,7 +591,9 @@
       if (!d.active) continue;
       d.t = (now - (d.born || now)) / 1000;
       if (d.t > 0.9) { d.active = false; d.eln.style.display = 'none'; continue; }
-      const pr = UI.project(d.x, d.y + d.t * 1.2, d.z);
+      // 上昇は合算でリセットされない専用タイマーで (数字が下に跳ねない)
+      const riseT = (now - (d.riseBorn || d.born)) / 1000;
+      const pr = UI.project(d.x, d.y + Math.min(riseT, 1.2) * 1.2, d.z);
       if (!pr.visible) { d.eln.style.display = 'none'; continue; }
       d.eln.style.display = 'block';
       d.eln.style.left = pr.x + 'px';

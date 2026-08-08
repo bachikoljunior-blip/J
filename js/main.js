@@ -405,7 +405,7 @@
     if (bigBoss) {
       bossBonus = 4.5;
       for (const b of G.Enemies.bosses) {
-        if (b.alive && b.engaged && (b.D.barH || 0) > 5) { bossBonus = 7; break; }
+        if (b.alive && b.engaged && (b.D.barH || 0) > 5) { bossBonus = 8.5; break; }
       }
     }
     const dist = C.dist + (p.mounted ? 1.8 : 0) + bossBonus;
