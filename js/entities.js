@@ -309,8 +309,9 @@
         return;
       }
       if (p.state === 'roll') {
-        g.rotation.x = -(p.t / 0.45) * Math.PI * 2;
-        g.position.y = (p.baseY || 0) + 0.5;
+        const rt = G.clamp(p.t / 0.45, 0, 1);
+        g.rotation.x = -rt * Math.PI * 2;
+        g.position.y = (p.baseY || 0) + 0.18 + Math.sin(rt * Math.PI) * 0.42;
         legL.rotation.x = 0.9; legR.rotation.x = 0.9;
         armL.rotation.x = 0.8; armR.rotation.x = 0.8;
         return;
@@ -1667,7 +1668,13 @@
     for (const b of bosses) {
       G.Bosses.update(b, dt);
       if (b.alive && b.state === 'windup') {
-        G.TelegraphRing.show(b.pos.x, b.pos.z, b.radius + 2.4, G.clamp(b.stateT / (b.windupDur || 0.8), 0, 1));
+        const t = G.clamp(b.stateT / (b.windupDur || 0.8), 0, 1);
+        G.TelegraphRing.show(b.pos.x, b.pos.z, b.radius + 2.4, t);
+        // 遠隔攻撃は着弾予定地 (プレイヤー足元) にも警告
+        if (b.nextAtk === 'fireball' || b.nextAtk === 'breath' || b.nextAtk === 'rock') {
+          const p = G.Player;
+          G.TelegraphRing.show(p.pos.x, p.pos.z, 2.4, t);
+        }
       }
     }
     G.TelegraphRing.end();

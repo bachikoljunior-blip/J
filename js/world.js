@@ -215,6 +215,7 @@
   /* ny: 事前計算済みの法線Y (省略時は計算する) */
   const CAVE_FLOOR = new THREE.Color(0x4e5462);
   const CAVE_FLOOR2 = new THREE.Color(0x39404f);
+  const FROST_COL = new THREE.Color(0xc8dce6);
   function groundColor(x, z, h, out, ny) {
     if (W.inCaveRegion(x, z)) {
       // 洞窟の床: 青灰のまだら
@@ -226,6 +227,15 @@
     out.copy(BIOME_COL[b] || BIOME_COL.grass);
     const pb = pathBlend(x, z);
     if (pb > 0) out.lerp(PATH_COL, pb * 0.85);
+    // フェンリルの凍土アリーナ
+    const fd = G.dist2(x, z, -430, -140);
+    if (fd < 34 * 34) {
+      out.lerp(FROST_COL, (1 - G.smoothstep(24, 34, Math.sqrt(fd))) * 0.75);
+    }
+    // 雪面の起伏まだら
+    if (b === 'snow') {
+      out.multiplyScalar(0.92 + (G.fbm(x * 0.05, z * 0.05, 2) * 0.5 + 0.5) * 0.1);
+    }
     if (b === 'grass') {
       const t = G.fbm(x * 0.012 + 55, z * 0.012 + 55, 2) * 0.5 + 0.5;
       out.lerp(BIOME_COL.grass2, t * 0.8);
