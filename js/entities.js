@@ -404,6 +404,23 @@
     const fur = conf.fur !== undefined ? conf.fur : 0x6e6459;
     const body = box(0.5, 0.45, 1.1, fur);
     body.position.y = 0.62;
+    if (conf.mane) {
+      // 王の鬣: 首まわりに氷青の房
+      for (let i = 0; i < 5; i++) {
+        const m = box(0.14, 0.5 - Math.abs(i - 2) * 0.08, 0.16, i % 2 ? 0xbdd6e8 : 0x9fc2dc);
+        const a = (i - 2) * 0.5;
+        m.position.set(Math.sin(a) * 0.32, 0.95 + (0.2 - Math.abs(i - 2) * 0.05), 0.42 + Math.cos(a) * 0.1);
+        m.rotation.z = -a * 0.4;
+        g.add(m);
+      }
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: G.makeRadialTex(48, [[0, 'rgba(120,210,255,0.55)'], [1, 'rgba(80,180,255,0)']]),
+        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+      }));
+      glow.position.set(0, 0.85, 0.75);
+      glow.scale.set(1.5, 1.5, 1);
+      g.add(glow);
+    }
     const head = new THREE.Group();
     const hm = box(0.34, 0.3, 0.42, fur);
     const snout = box(0.16, 0.14, 0.22, conf.snout !== undefined ? conf.snout : 0x4e463e);
@@ -780,7 +797,7 @@
       const m = new THREE.Mesh(
         new THREE.RingGeometry(0.8, 1.0, 24),
         new THREE.MeshBasicMaterial({
-          color: 0xff4433, transparent: true, opacity: 0.55,
+          color: 0xff2020, transparent: true, opacity: 0.6,
           depthWrite: false, side: THREE.DoubleSide
         })
       );
@@ -844,8 +861,8 @@
   SA.update = function (dt) {
     for (const p of pool) {
       if (p.t >= 1) { p.mesh.visible = false; continue; }
-      p.t += dt * 6.5;
-      p.mesh.material.opacity = Math.max(0, 0.55 * (1 - p.t));
+      p.t += dt * 4.2;
+      p.mesh.material.opacity = Math.max(0, 0.75 * (1 - p.t));
       if (p.t >= 1) p.mesh.visible = false;
     }
   };
@@ -1591,7 +1608,7 @@
     fenrir: {
       name: '白狼王フェンリル', hp: 380, atk: 22, speed: 7.2, xp: 300, gold: 250,
       x: -430, z: -140, arenaR: 34, radius: 1.3, barH: 3.4,
-      build: () => G.Rigs.wolf({ scale: 2.9, fur: 0xd8d8e0, snout: 0xb8b8c2, eye: 0x44ddff })
+      build: () => G.Rigs.wolf({ scale: 2.9, fur: 0xd8d8e0, snout: 0xb8b8c2, eye: 0x44ddff, mane: true })
     },
     golem: {
       name: '遺跡の巨像', hp: 700, atk: 34, speed: 2.9, xp: 600, gold: 500,
@@ -1759,7 +1776,7 @@
       if (b.state === 'breath') {
         // 火炎放射継続
         b.breathT = (b.breathT || 0) + dt;
-        if (b.breathT > 0.14) {
+        if (b.breathT > 0.08) {
           b.breathT = 0;
           const sy = b.pos.y + 3.2;
           const spread = (Math.random() - 0.5) * 0.5;
