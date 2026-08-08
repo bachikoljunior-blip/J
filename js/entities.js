@@ -424,12 +424,12 @@
         m.rotation.z = -a * 0.4;
         g.add(m);
       }
-      // 背筋の氷稜 + 明色の腹部 (側面から見てもボスと分かるシルエット)
-      for (let i = 0; i < 4; i++) {
-        const r = box(0.1, 0.36 - i * 0.05, 0.2, i % 2 ? 0xbdd6e8 : 0x9fc2dc);
-        r.position.set(0, 0.96 - i * 0.04, 0.05 - i * 0.3);
-        r.rotation.x = -0.15;
-        g.add(r);
+      // 肩の毛のたてがみウェッジ (板の列は恐竜の背板に誤読されるため廃止)
+      for (let i = 0; i < 3; i++) {
+        const w = box(0.56 - i * 0.1, 0.34 - i * 0.06, 0.3, i % 2 ? 0xcfe0ec : 0xbdd6e8);
+        w.position.set(0, 0.92 - i * 0.05, 0.28 - i * 0.26);
+        w.rotation.x = -0.3;
+        g.add(w);
       }
       const bellyM = box(0.42, 0.16, 0.92, 0xe6ebf2);
       bellyM.position.y = 0.44;
@@ -445,13 +445,21 @@
     }
     const head = new THREE.Group();
     // 王狼は頭部を大きく・鼻先を長く (恐竜に誤読されない狼シルエット)
-    const hw = conf.mane ? 1.28 : 1;
+    const hw = conf.mane ? 1.6 : 1;
     const hm = box(0.34 * hw, 0.3 * hw, 0.42 * hw, fur);
-    const snout = box(0.16 * hw, 0.14 * hw, conf.mane ? 0.36 : 0.22, conf.snout !== undefined ? conf.snout : 0x4e463e);
-    snout.position.set(0, -0.05 * hw, conf.mane ? 0.4 : 0.28);
-    const earL = box(0.08 * hw, 0.14 * hw * (conf.mane ? 1.4 : 1), 0.04, fur);
-    earL.position.set(-0.1 * hw, 0.2 * hw, -0.05);
-    const earR = earL.clone(); earR.position.x = 0.1 * hw;
+    const snout = box(0.17 * hw, 0.15 * hw, conf.mane ? 0.5 : 0.22, conf.snout !== undefined ? conf.snout : 0x4e463e);
+    snout.position.set(0, -0.05 * hw, conf.mane ? 0.52 : 0.28);
+    if (conf.mane) {
+      // 鼻先の黒い鼻ブロック (狼の記号)
+      const nose = box(0.12, 0.1, 0.08, 0x1a1a20);
+      nose.position.set(0, -0.04, 0.8);
+      head.add(nose);
+    }
+    const earL = box(0.1 * hw, 0.14 * hw * (conf.mane ? 1.7 : 1), 0.05, fur);
+    earL.position.set(-0.11 * hw, 0.24 * hw, -0.05);
+    if (conf.mane) earL.rotation.z = 0.18;
+    const earR = earL.clone(); earR.position.x = 0.11 * hw;
+    if (conf.mane) earR.rotation.z = -0.18;
     const eyeL = box(0.05, 0.05, 0.02, conf.eye !== undefined ? conf.eye : 0xcc2222);
     eyeL.position.set(-0.09, 0.05, 0.21);
     const eyeR = eyeL.clone(); eyeR.position.x = 0.09;
@@ -470,9 +478,14 @@
       head.add(mkGlow(-0.09), mkGlow(0.09));
     }
     head.position.set(0, 0.78, 0.62);
-    const tail = box(conf.mane ? 0.15 : 0.1, conf.mane ? 0.15 : 0.1, conf.mane ? 0.72 : 0.5, fur);
-    tail.position.set(0, conf.mane ? 0.8 : 0.72, conf.mane ? -0.86 : -0.75);
-    if (conf.mane) tail.rotation.x = 0.4;   // 王の尾は高く掲げる
+    const tail = box(conf.mane ? 0.2 : 0.1, conf.mane ? 0.2 : 0.1, conf.mane ? 0.78 : 0.5, fur);
+    tail.position.set(0, conf.mane ? 0.82 : 0.72, conf.mane ? -0.88 : -0.75);
+    if (conf.mane) {
+      tail.rotation.x = 0.45;   // 王の尾は高く掲げ、先端をふさふさの明色に
+      const tuft = box(0.26, 0.26, 0.3, 0xe6ebf2);
+      tuft.position.set(0, 0, -0.5);
+      tail.add(tuft);
+    }
     const mkLeg = (x, z) => {
       const grp = new THREE.Group();
       const l = box(0.12, 0.45, 0.12, fur);
@@ -491,7 +504,7 @@
       g.traverse(o => {
         if (o.isMesh && o.material && o.material.emissive && o.material.color.getHex() === fur) {
           o.material = o.material.clone();
-          o.material.emissive.set(0x1a222c);
+          o.material.emissive.set(0x333e4a);   // 逆光でも「白狼」として読める下限輝度
         }
       });
     }
@@ -758,7 +771,9 @@
       legFR.rotation.x = -sw; legBL.rotation.x = -sw;
       body.position.y = 1.12 + Math.abs(Math.sin(wt)) * 0.07 * mv;
       tail.rotation.y = Math.sin(t * 1.5) * 0.25;
-      headG.rotation.x = mv > 0.05 ? -0.1 : Math.sin(t * 0.8 + (p.seed || 0)) * 0.18 + 0.12;
+      // 疾走時は首を前方へ伸ばし上下にバウンス (静止画でも走りが読める)
+      neck.rotation.x = -0.45 - mv * 0.35 + Math.sin(wt) * 0.06 * mv;
+      headG.rotation.x = mv > 0.05 ? -0.1 + mv * 0.25 : Math.sin(t * 0.8 + (p.seed || 0)) * 0.18 + 0.12;
     }
     return { group: g, parts, pose };
   };
@@ -790,19 +805,28 @@
       const grp = new THREE.Group();
       const h1 = new THREE.Mesh(boxGeo(0.11, 0.34, 0.11), hornMat);
       h1.position.y = 0.15;
-      const h2 = new THREE.Mesh(boxGeo(0.08, 0.3, 0.08), hornMat);
-      h2.position.set(0, 0.4, -0.1); h2.rotation.x = -0.55;
+      const h2 = new THREE.Mesh(boxGeo(0.07, 0.28, 0.07), hornMat);
+      h2.position.set(0.03 * side, 0.36, -0.2); h2.rotation.x = -1.0; h2.rotation.z = 0.2 * side;
       grp.add(h1, h2);
       grp.position.set(0.17 * side, 0.28, -0.22);
-      grp.rotation.x = -0.5;
+      grp.rotation.x = -0.65;
       return grp;
     };
     const hornL = mkHorn(-1), hornR = mkHorn(1);
-    // 目は残り火色の自己発光 (黒いボディへの視線誘導)
-    const eyeMat = new THREE.MeshLambertMaterial({ color: 0xffaa22, emissive: 0xff7716 });
-    const eyeL = new THREE.Mesh(boxGeo(0.09, 0.09, 0.04), eyeMat);
-    eyeL.position.set(-0.2, 0.1, 0.3);
+    // 目は残り火色の自己発光+グロー (正面・側面のどちらからも見える大きさ)
+    const eyeMat = new THREE.MeshLambertMaterial({ color: 0xffb433, emissive: 0xff8a1e });
+    const eyeL = new THREE.Mesh(boxGeo(0.15, 0.13, 0.1), eyeMat);
+    eyeL.position.set(-0.2, 0.1, 0.32);
     const eyeR = eyeL.clone(); eyeR.position.x = 0.2;
+    const eyeGlowMap = G.makeRadialTex(48, [[0, 'rgba(255,150,40,0.9)'], [1, 'rgba(255,90,0,0)']]);
+    for (const side of [-1, 1]) {
+      const gl = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: eyeGlowMap, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+      }));
+      gl.position.set(0.22 * side, 0.1, 0.36);
+      gl.scale.set(0.5, 0.4, 1);
+      headG.add(gl);
+    }
     headG.add(headM, jaw, hornL, hornR, eyeL, eyeR);
     headG.position.set(0, 1.05, 1.5);
     neck.add(neckM, headG);
@@ -819,7 +843,7 @@
       tail.add(spike);
     }
     tail.position.set(0, 1.2, -0.9);
-    tail.rotation.x = 0.1;
+    tail.rotation.x = 0.32;   // 付け根から持ち上げ、俯瞰でも「上がった尾」が読める
     // 背びれの棘列 (シルエットが遠目で竜と読める高さ)
     for (let i = 0; i < 6; i++) {
       const sp = box(0.16, Math.max(0.35, 1.0 - i * 0.13), 0.3, i % 2 ? 0x241a26 : 0x7a2430);
@@ -833,7 +857,12 @@
       m1.position.set(0.8 * side, 0, 0);
       const m2 = box(1.2, 0.06, 0.7, wingC);
       m2.position.set(1.9 * side, -0.1, -0.1);
-      grp.add(m1, m2);
+      // 翼膜: スパー間に暗色の膜パネル+深紅のエッジ (側面から棒に見えない)
+      const mem = box(2.4, 0.03, 0.78, 0x2c1e2e);
+      mem.position.set(1.25 * side, -0.05, -0.05);
+      const edge = box(2.4, 0.05, 0.1, 0x7a2430);
+      edge.position.set(1.25 * side, -0.05, -0.46);
+      grp.add(m1, m2, mem, edge);
       grp.position.set(0.45 * side, 1.65, 0.2);
       return grp;
     };
@@ -1740,6 +1769,12 @@
     if (e.aggro && (!p.alive || dist > T.aggroR * 2.6)) {
       e.aggro = false;
       e.state = 'idle';
+    }
+    // 村の中心部は安全地帯: 追跡してきた敵はアグロを解いて巣へ帰る
+    if (e.aggro && G.dist2(e.pos.x, e.pos.z, 0, 0) < 22 * 22) {
+      e.aggro = false;
+      e.state = 'idle';
+      e.wanderT = 0;
     }
 
     e.cool = Math.max(0, e.cool - dt);

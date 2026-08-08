@@ -1017,6 +1017,10 @@
 
   function buildCaveInterior() {
     const cx = W.CAVE.cx, cz = W.CAVE.cz;
+    // この関数で追加したオブジェクトは末尾で1グループにまとめ、
+    // 遠距離では丸ごと非表示にする (天蓋球がカメラfar平面でクリップされ、
+    // 地上から弧状のアーティファクトとして見えていたため)
+    const childrenBefore = scene.children.length;
     // 天蓋 (内側から見える暗い殻)
     const dome = new THREE.Mesh(
       new THREE.SphereGeometry(56, 20, 12),
@@ -1026,16 +1030,34 @@
     scene.add(dome);
     // 石筍 (密度を上げて洞窟の情報量を出す)
     const rnd = G.srand(777);
-    const stalMat = new THREE.MeshLambertMaterial({ color: 0x565a66 });
+    const stalMats = [
+      new THREE.MeshLambertMaterial({ color: 0x565a66 }),
+      new THREE.MeshLambertMaterial({ color: 0x454b58 }),
+      new THREE.MeshLambertMaterial({ color: 0x62697a })
+    ];
+    const mkStal = (px, pz, h) => {
+      // 2段重ねで岩らしい輪郭に (単一の滑らかな円錐はテントに見える)
+      const base = shadowify(new THREE.Mesh(
+        new THREE.ConeGeometry(0.62 + rnd() * 0.9, h * 0.55, 6), stalMats[(rnd() * 3) | 0]));
+      base.position.set(px, caveHeight(px, pz) + h * 0.27 - 0.1, pz);
+      base.rotation.y = rnd() * 3;
+      scene.add(base);
+      const top = shadowify(new THREE.Mesh(
+        new THREE.ConeGeometry(0.34 + rnd() * 0.45, h, 5), stalMats[(rnd() * 3) | 0]));
+      top.position.set(px + (rnd() - 0.5) * 0.3, caveHeight(px, pz) + h / 2 - 0.1, pz + (rnd() - 0.5) * 0.3);
+      top.rotation.y = rnd() * 3;
+      scene.add(top);
+      if (h > 2) addStatic(px, pz, 0.7);
+    };
     for (let i = 0; i < 42; i++) {
       const a = rnd() * Math.PI * 2, r = 5 + rnd() * 40;
-      const px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r;
-      const h = 1.2 + rnd() * 3.8;
-      const cone = shadowify(new THREE.Mesh(new THREE.ConeGeometry(0.45 + rnd() * 0.8, h, 5), stalMat));
-      cone.position.set(px, caveHeight(px, pz) + h / 2 - 0.1, pz);
-      cone.rotation.y = rnd() * 3;
-      scene.add(cone);
-      if (h > 2) addStatic(px, pz, 0.7);
+      mkStal(cx + Math.cos(a) * r, cz + Math.sin(a) * r, 1.2 + rnd() * 3.8);
+    }
+    // 入口通路の両脇にも列を作り、密度と導線を出す
+    for (let i = 0; i < 8; i++) {
+      const zz = 1162 + i * 5.5;
+      mkStal(cx - 9 - rnd() * 5, zz, 1.0 + rnd() * 2.6);
+      mkStal(cx + 9 + rnd() * 5, zz, 1.0 + rnd() * 2.6);
     }
     // 床の岩屑 (平坦な床の空虚さを埋める)
     const rockMat = new THREE.MeshLambertMaterial({ color: 0x4a4f5c });
@@ -1094,6 +1116,13 @@
     const m = shadowify(new THREE.Mesh(arch, sharedTreeMat));
     m.position.set(cx, caveHeight(cx, 1160), 1160);
     scene.add(m);
+
+    // この関数で追加した全オブジェクトをグループへ移す (遠距離カリング用)
+    const grp = new THREE.Group();
+    const added = scene.children.slice(childrenBefore);
+    for (const o of added) grp.add(o);
+    scene.add(grp);
+    W._caveGrp = grp;
   }
 
   function buildVillage() {
@@ -1338,6 +1367,10 @@
       t.sprite.material.opacity = torchOn;
     }
     // 祠クリスタル回転 & 光の柱の色 (灯すと金色に)
+    // 洞窟内装は近づいた時だけ描画 (遠方から天蓋の縁が見えるのを防ぐ)
+    if (W._caveGrp) {
+      W._caveGrp.visible = G.dist2(camX, camZ, W.CAVE.cx, W.CAVE.cz) < 350 * 350;
+    }
     for (const id in W.shrineMeshes) {
       const s = W.shrineMeshes[id];
       s.crystal.rotation.y += dt * 1.2;
@@ -1351,7 +1384,11 @@
           s.crystal.material.color.set(0xffd58a);
           s.crystal.material.emissive.set(0xcc8822);
         }
-        s.beam.material.opacity = (s.litApplied ? 0.09 : 0.15) + Math.sin(G.time * 1.3 + s.baseY) * 0.03;
+        // 近距離では減衰させ、至近で祠が白飛びしないように
+        const bd = G.dist(camX, camZ, s.beam.position.x, s.beam.position.z);
+        const att = G.clamp(bd / 30, 0.12, 1);
+        s.beam.material.opacity = ((s.litApplied ? 0.09 : 0.15) + Math.sin(G.time * 1.3 + s.baseY) * 0.03) * att;
+        if (s.glow) s.glow.material.opacity = 0.42 * G.clamp(bd / 14, 0.3, 1);
       }
     }
     // 未開封の宝箱のきらめき
@@ -1398,7 +1435,7 @@
  * ========================================================================== */
 (function () {
   const Sky = G.Sky = {};
-  let scene, hemi, sun, skyDome, sunSpr, moonSpr, stars, clouds = [];
+  let scene, hemi, sun, skyDome, sunSpr, sunHalo, moonSpr, stars, clouds = [];
   let rainPts = null, rainVel = null, rainPos = null, rainN = 0, rainOn = 0;
 
   /* 時刻キーフレーム: [時, 天頂色, 地平色, 太陽色, 直射光強度, 半球光強度] */
@@ -1410,8 +1447,8 @@
     [8.5, 0x4a86d0, 0xc8dcea, 0xfff0d4, 1.05, 0.62],
     [12, 0x4a86d0, 0xbcd8e8, 0xfff2dd, 1.32, 0.5],
     [16, 0x4d82c2, 0xd6c9a2, 0xffe2b2, 1.0, 0.6],
-    [17.5, 0x46639e, 0xe6a878, 0xffb070, 0.85, 0.48],
-    [18.7, 0x3a4a80, 0xe08a55, 0xff8a4a, 0.74, 0.42],
+    [17.5, 0x46639e, 0xe6a878, 0xffb070, 1.0, 0.56],
+    [18.7, 0x3a4a80, 0xe08a55, 0xff8a4a, 0.88, 0.5],
     [20, 0x141c3d, 0x33305c, 0x445, 0.05, 0.2],
     [24, 0x0a1026, 0x141c33, 0x223, 0.02, 0.16]
   ];
@@ -1480,9 +1517,10 @@
           float t = smoothstep(-0.05, 0.35, vDir.y);
           vec3 c = mix(uHor, uTop, t);
           float s = max(dot(normalize(vDir), normalize(uSunDir)), 0.0);
+          // 太陽ディスク本体はスプライトが担当。ドームは広い残光のみ
+          // (超高指数の点光はチャンネルクリップの縁がリング状に見える)
           c += uSunCol * pow(s, 24.0) * uGlow;
-          c += uSunCol * pow(s, 350.0) * 1.6 * uGlow;
-          gl_FragColor = vec4(c, 1.0);
+          gl_FragColor = vec4(min(c, vec3(1.0)), 1.0);
         }`
     });
     skyDome = new THREE.Mesh(geo, mat);
@@ -1491,12 +1529,21 @@
     scene.add(skyDome);
 
     // 太陽・月スプライト
+    // 本体は通常合成の実体ディスク (加算だと明るい空で中心が飽和して
+    // テクスチャの縁だけがリング状に浮くアーティファクトになる)
     sunSpr = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: G.makeRadialTex(128, [[0, 'rgba(255,252,240,1)'], [0.42, 'rgba(255,240,195,0.96)'], [0.6, 'rgba(255,225,160,0.4)'], [1, 'rgba(255,210,130,0)']]),
+      map: G.makeRadialTex(128, [[0, 'rgba(255,247,225,1)'], [0.38, 'rgba(255,240,205,1)'], [0.48, 'rgba(255,232,185,0.85)'], [0.58, 'rgba(255,224,165,0)'], [1, 'rgba(255,224,165,0)']]),
+      transparent: true, depthWrite: false, fog: false
+    }));
+    sunSpr.scale.set(64, 64, 1);
+    scene.add(sunSpr);
+    // 柔らかいハローだけ加算合成
+    sunHalo = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: G.makeRadialTex(128, [[0, 'rgba(255,236,190,0.55)'], [1, 'rgba(255,210,130,0)']]),
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
     }));
-    sunSpr.scale.set(100, 100, 1);
-    scene.add(sunSpr);
+    sunHalo.scale.set(150, 150, 1);
+    scene.add(sunHalo);
     moonSpr = new THREE.Sprite(new THREE.SpriteMaterial({
       map: G.makeRadialTex(128, [[0, 'rgba(230,238,255,1)'], [0.18, 'rgba(210,225,255,0.85)'], [0.3, 'rgba(190,210,255,0.2)'], [1, 'rgba(180,200,255,0)']]),
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
@@ -1596,6 +1643,7 @@
     const skyVisible = !inCave;
     skyDome.visible = skyVisible;
     sunSpr.visible = skyVisible;
+    sunHalo.visible = skyVisible;
     moonSpr.visible = skyVisible;
     stars.visible = skyVisible;
     for (const c of clouds) c.visible = skyVisible;
@@ -1604,10 +1652,10 @@
       hemi.color.set(0x9fb0dd);
       hemi.groundColor.set(0x525d7d);
       sun.intensity = 0.02;
-      _fogC.set(0x10152a);
+      _fogC.set(0x0c1120);
       scene.fog.color.copy(_fogC);
       scene.fog.near = 12;
-      scene.fog.far = 96;
+      scene.fog.far = 82;
       if (scene.background) scene.background.copy(_fogC);
       rainPts.material.opacity = 0;
       const lightC = 0.6;
@@ -1653,6 +1701,8 @@
     // スプライトが欠けてリング状のアーティファクトになる)
     sunSpr.position.copy(_sunDir).multiplyScalar(540).add(_camXZ);
     sunSpr.material.opacity = G.clamp(_sunDir.y + 0.15, 0, 1) * (1 - weather * 0.85);
+    sunHalo.position.copy(sunSpr.position);
+    sunHalo.material.opacity = sunSpr.material.opacity * 0.8;
     _moonDir.copy(_sunDir).negate();
     moonSpr.position.copy(_moonDir).multiplyScalar(525).add(_camXZ);
     moonSpr.material.opacity = G.clamp(_moonDir.y + 0.1, 0, 0.9) * (1 - weather * 0.85);

@@ -555,16 +555,19 @@
       dmgPool.push(d);
       if (dmgPool.length > 40) { }
     }
-    d.active = true; d.t = 0;
-    d.x = x + (Math.random() - 0.5) * 1.6; d.y = y + Math.random() * 0.5; d.z = z;
+    d.active = true; d.t = 0; d.born = performance.now();
+    // ▼ロックオンマーカー/HPバーと重ならないよう、頭上さらに上へ
+    d.x = x + (Math.random() - 0.5) * 1.6; d.y = y + 0.7 + Math.random() * 0.5; d.z = z;
     d.eln.textContent = n;
     d.eln.className = 'dmgnum' + (opts.crit ? ' crit' : '') + (opts.player ? ' onplayer' : '');
     d.eln.style.display = 'block';
   };
   function updateDmgNums(dt) {
+    // 実時間で寿命管理 (低FPS環境でゲームdtが縮んでも数分残留させない)
+    const now = performance.now();
     for (const d of dmgPool) {
       if (!d.active) continue;
-      d.t += dt;
+      d.t = (now - (d.born || now)) / 1000;
       if (d.t > 0.9) { d.active = false; d.eln.style.display = 'none'; continue; }
       const pr = UI.project(d.x, d.y + d.t * 1.2, d.z);
       if (!pr.visible) { d.eln.style.display = 'none'; continue; }
