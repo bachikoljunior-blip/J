@@ -950,10 +950,17 @@
       el('div', 'slabel', row, label);
       const input = document.createElement('input');
       input.type = 'range'; input.min = 0; input.max = 100;
-      input.value = get() * 100;
-      input.addEventListener('input', () => set(input.value / 100));
+      input.value = Math.round(get() * 100);
+      const val = el('div', 'sval', null, input.value + '%');
+      const paint = () => {
+        input.style.setProperty('--fill', input.value + '%');
+        val.textContent = input.value + '%';
+      };
+      paint();
+      input.addEventListener('input', () => { set(input.value / 100); paint(); });
       input.addEventListener('pointerdown', e => e.stopPropagation());
       row.appendChild(input);
+      row.appendChild(val);
     };
     mkSlider('音楽', () => G.settings.music, v => { G.settings.music = v; G.Audio.setMusicVol(v); G.settings.save(); });
     mkSlider('効果音', () => G.settings.sfx, v => { G.settings.sfx = v; G.Audio.setSfxVol(v); G.settings.save(); });

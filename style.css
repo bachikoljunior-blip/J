@@ -323,10 +323,35 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 .qrow.active { border-left-color: #ffd35a; }
 .qname { font-size: 14px; color: #e8f0f8; }
 .qdesc { font-size: 12px; color: #9fb0c4; margin-top: 3px; line-height: 1.5; }
-.setlist { display: flex; flex-direction: column; gap: 12px; max-width: 460px; margin: 0 auto; }
+.setlist { display: flex; flex-direction: column; gap: 12px; max-width: 460px; margin: 0 auto; padding-bottom: 28px; }
 .srow { display: flex; align-items: center; gap: 12px; }
 .slabel { width: 130px; font-size: 13px; color: #c8d4e2; flex-shrink: 0; }
-.srow input[type=range] { flex: 1; }
+.sval { width: 44px; font-size: 13px; color: #ffd35a; text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+/* テーマに合わせたカスタムスライダー (ゴールドの充填 + 白サム) */
+.srow input[type=range] {
+  flex: 1; -webkit-appearance: none; appearance: none; height: 26px;
+  background: transparent; margin: 0; --fill: 50%;
+}
+.srow input[type=range]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 3px;
+  background: linear-gradient(90deg, #d4a94f 0%, #d4a94f var(--fill), #2a3850 var(--fill), #2a3850 100%);
+}
+.srow input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; border: 2px solid #d4a94f; margin-top: -7px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.srow input[type=range]::-moz-range-track {
+  height: 6px; border-radius: 3px; background: #2a3850;
+}
+.srow input[type=range]::-moz-range-progress {
+  height: 6px; border-radius: 3px; background: #d4a94f;
+}
+.srow input[type=range]::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 2px solid #d4a94f;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
 .srow select { flex: 1; padding: 8px; background: #263248; color: #fff; border: 1px solid #4a5a72; border-radius: 6px; }
 
 /* ---------- 汎用ボタン ---------- */

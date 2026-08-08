@@ -63,11 +63,13 @@
       const up = o.up !== undefined ? o.up : 0.5;
       const sp = (o.speed || 3) * (0.4 + Math.random() * 0.6);
       const spread = o.spread !== undefined ? o.spread : 1;
+      // dirX/dirZ 指定時は指向性放出 (ブレス等)、なければ全方位
+      const dk = (o.dirX !== undefined) ? 0.3 : 1;
       P.push({
         x, y, z,
-        vx: Math.cos(a) * sp * spread,
+        vx: Math.cos(a) * sp * spread * dk + (o.dirX || 0) * sp,
         vy: up * sp * (0.5 + Math.random()),
-        vz: Math.sin(a) * sp * spread,
+        vz: Math.sin(a) * sp * spread * dk + (o.dirZ || 0) * sp,
         life: 0, max: (o.life || 0.6) * (0.6 + Math.random() * 0.7),
         size: (o.size || 3) * (0.6 + Math.random() * 0.8),
         r: tmpC.r * (0.8 + Math.random() * 0.2),
@@ -247,12 +249,15 @@
     let wing = null;
     if (conf.glider) {
       wing = new THREE.Group();
-      // 中央から連続したアーチ状キャノピー (5枚の板を繋げる)
+      // アーチ状キャノピー: 各板の縁が隣の板の縁と一致する連鎖配置 (隙間ゼロ)
+      const WP = [
+        [-1.212, -0.108, 0.34], [-0.615, 0.048, 0.17], [0, 0.1, 0],
+        [0.615, 0.048, -0.17], [1.212, -0.108, -0.34]
+      ];
       for (let i = 0; i < 5; i++) {
-        const t = (i - 2) / 2;             // -1..1
-        const seg = box(0.5, 0.045, 0.55, i % 2 ? 0x5f9fb4 : 0x74b7cc);
-        seg.position.set(t * 0.95, -Math.abs(t) * 0.22 + 0.1, 0);
-        seg.rotation.z = t * 0.42;
+        const seg = box(0.64, 0.045, 0.55, i % 2 ? 0x5f9fb4 : 0x74b7cc);
+        seg.position.set(WP[i][0], WP[i][1], 0);
+        seg.rotation.z = WP[i][2];
         wing.add(seg);
       }
       const frame = box(0.06, 0.06, 0.5, 0x6b4a2f);
@@ -668,30 +673,52 @@
     body.position.y = 1.12;
     const neck = box(0.3, 0.75, 0.35, coat);
     neck.position.set(0, 1.62, 0.72); neck.rotation.x = -0.45;
+    // 首筋のたてがみ帯 (遠目でも馬と分かる記号)
+    const maneNeck = box(0.1, 0.66, 0.16, maneC);
+    maneNeck.position.set(0, 0.16, -0.22);
+    neck.add(maneNeck);
     const headG = new THREE.Group();
     const hm = box(0.26, 0.28, 0.6, coat);
     hm.position.z = 0.1;
+    const blaze = box(0.09, 0.2, 0.03, 0xe8e0d2);   // 鼻筋の白
+    blaze.position.set(0, 0.02, 0.41);
     const maneM = box(0.1, 0.42, 0.3, maneC);
     maneM.position.set(0, 0.1, -0.3);
     const earL = box(0.06, 0.14, 0.05, coat); earL.position.set(-0.09, 0.24, -0.14);
     const earR = earL.clone(); earR.position.x = 0.09;
-    headG.add(hm, maneM, earL, earR);
+    // 手綱 (頭から鞍方向へ)
+    const reinL = box(0.025, 0.025, 0.72, 0x2e2013);
+    reinL.position.set(-0.14, -0.12, -0.32); reinL.rotation.x = 0.55;
+    const reinR = reinL.clone(); reinR.position.x = 0.14;
+    headG.add(hm, blaze, maneM, earL, earR, reinL, reinR);
     headG.position.set(0, 2.02, 1.02);
+    // 尻尾は2節で流れをつける
     const tail = box(0.13, 0.62, 0.16, maneC);
     tail.position.set(0, 1.22, -0.95); tail.rotation.x = 0.5;
-    const saddle = box(0.56, 0.15, 0.62, 0x5a3a28);
-    saddle.position.y = 1.53;
+    const tail2 = box(0.1, 0.4, 0.12, maneC);
+    tail2.position.set(0, -0.42, -0.1); tail2.rotation.x = 0.25;
+    tail.add(tail2);
+    // 鞍 + 赤い鞍敷
+    const blanket = box(0.68, 0.07, 0.8, 0x8a3030);
+    blanket.position.y = 1.5;
+    const saddle = box(0.56, 0.15, 0.62, 0x6e4629);
+    saddle.position.y = 1.56;
+    const pommel = box(0.14, 0.12, 0.1, 0x53341e);
+    pommel.position.set(0, 0.12, 0.24);
+    saddle.add(pommel);
     const mkLeg = (x, z) => {
       const grp = new THREE.Group();
       const l = box(0.16, 0.78, 0.16, coat);
       l.position.y = -0.38;
-      grp.add(l);
+      const hoof = box(0.17, 0.12, 0.17, 0x2e2620);
+      hoof.position.y = -0.72;
+      grp.add(l, hoof);
       grp.position.set(x, 0.78, z);
       return grp;
     };
     const legFL = mkLeg(-0.22, 0.6), legFR = mkLeg(0.22, 0.6);
     const legBL = mkLeg(-0.22, -0.6), legBR = mkLeg(0.22, -0.6);
-    g.add(body, neck, headG, tail, saddle, legFL, legFR, legBL, legBR);
+    g.add(body, neck, headG, tail, blanket, saddle, legFL, legFR, legBL, legBR);
     const parts = { body, headG, tail, legFL, legFR, legBL, legBR };
     function pose(p) {
       const t = G.time;
@@ -746,7 +773,7 @@
     tail.position.set(0, 1.15, -0.9);
     // 背びれの棘列 (シルエットが遠目で竜と読める高さ)
     for (let i = 0; i < 4; i++) {
-      const sp = box(0.14, 0.7 - i * 0.08, 0.2, 0xe4dcb4);
+      const sp = box(0.14, 0.7 - i * 0.08, 0.2, i % 2 ? 0x241a26 : 0x7a2430);
       sp.position.set(0, 1.95, 0.65 - i * 0.5);
       sp.rotation.x = -0.25;
       g.add(sp);
@@ -1889,8 +1916,15 @@
           const sy = b.pos.y + 3.2;
           const spread = (Math.random() - 0.5) * 0.5;
           const a = b.yaw + spread;
-          G.Projectiles.spawn('fire', b.pos.x + Math.sin(b.yaw) * 3, sy, b.pos.z + Math.cos(b.yaw) * 3,
+          const mx = b.pos.x + Math.sin(b.yaw) * 3, mz = b.pos.z + Math.cos(b.yaw) * 3;
+          G.Projectiles.spawn('fire', mx, sy, mz,
             b.pos.x + Math.sin(a) * 25, p.pos.y + 0.8, b.pos.z + Math.cos(a) * 25, 15, D.atk * 0.55);
+          // 口元の火炎コーン (弾と別に炎の広がりを見せる)
+          G.FX.burst(mx, sy, mz, {
+            n: 5, color: 0xff8830, speed: 7, up: 0.5, gravity: 1.5,
+            life: 0.55, size: 3.2, drag: 1.2,
+            dirX: Math.sin(a), dirZ: Math.cos(a)
+          });
         }
         b.yaw = G.angLerp(b.yaw, toP, G.damp(0.9, dt));
       }
@@ -2213,9 +2247,9 @@
     } else if (type === 'fire') {
       mesh = new THREE.Group();
       const core = new THREE.Mesh(a.fireGeo, a.fireMat);
-      core.scale.setScalar(1.4);
+      core.scale.setScalar(1.8);
       const glow = new THREE.Sprite(a.fireGlow);
-      glow.scale.set(2.6, 2.6, 1);
+      glow.scale.set(3.6, 3.6, 1);
       mesh.add(core, glow);
     } else { // rock
       mesh = new THREE.Mesh(a.rockGeo, a.rockMat);
