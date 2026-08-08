@@ -837,14 +837,15 @@
     scene.add(glow);
     addStatic(x - 1.3, z, 0.45); addStatic(x + 1.3, z, 0.45);
     // 遠くからでも見える光の柱
+    // 上に向かって細く消えるコーン (遠景で平坦な帯に見えないように)
     const beam = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.55, 0.85, 70, 6, 1, true),
+      new THREE.CylinderGeometry(0.16, 1.2, 48, 6, 1, true),
       new THREE.MeshBasicMaterial({
-        color: 0x55bbff, transparent: true, opacity: 0.1,
+        color: 0x55bbff, transparent: true, opacity: 0.09,
         blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
       })
     );
-    beam.position.set(x, y + 35, z);
+    beam.position.set(x, y + 24, z);
     scene.add(beam);
     W.shrineMeshes[sh.id] = { crystal, glow, beam, baseY: y + 2.0 };
   }
@@ -1022,8 +1023,8 @@
     // 石筍 (密度を上げて洞窟の情報量を出す)
     const rnd = G.srand(777);
     const stalMat = new THREE.MeshLambertMaterial({ color: 0x565a66 });
-    for (let i = 0; i < 26; i++) {
-      const a = rnd() * Math.PI * 2, r = 6 + rnd() * 34;
+    for (let i = 0; i < 42; i++) {
+      const a = rnd() * Math.PI * 2, r = 5 + rnd() * 40;
       const px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r;
       const h = 1.2 + rnd() * 3.8;
       const cone = shadowify(new THREE.Mesh(new THREE.ConeGeometry(0.45 + rnd() * 0.8, h, 5), stalMat));
@@ -1031,6 +1032,16 @@
       cone.rotation.y = rnd() * 3;
       scene.add(cone);
       if (h > 2) addStatic(px, pz, 0.7);
+    }
+    // 床の岩屑 (平坦な床の空虚さを埋める)
+    const rockMat = new THREE.MeshLambertMaterial({ color: 0x4a4f5c });
+    for (let i = 0; i < 14; i++) {
+      const a = rnd() * Math.PI * 2, r = 4 + rnd() * 42;
+      const px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r;
+      const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.35 + rnd() * 0.55, 0), rockMat);
+      rock.position.set(px, caveHeight(px, pz) + 0.25, pz);
+      rock.rotation.set(rnd() * 3, rnd() * 3, rnd() * 3);
+      scene.add(rock);
     }
     // 光る水晶
     const crystalMat = new THREE.MeshLambertMaterial({ color: 0x77ccff, emissive: 0x3377bb });
@@ -1050,6 +1061,10 @@
     for (let i = 0; i < 6; i++) {
       const a = (i / 6) * Math.PI * 2 + 0.4, r = 12 + (i % 3) * 9;
       addCrystal(cx + Math.cos(a) * r, cz + Math.sin(a) * r, 1);
+    }
+    // 入口(ポータル)から中心への通路沿いにも小水晶を灯し、進む方向を導く
+    for (let i = 0; i < 5; i++) {
+      addCrystal(cx + (i % 2 ? 5 : -5) + (rnd() - 0.5) * 3, 1170 + i * 8, 0.6 + rnd() * 0.3);
     }
     // 宝箱の周りに水晶群 (報酬エリアの見せ場)
     for (const ch of W.chests) {

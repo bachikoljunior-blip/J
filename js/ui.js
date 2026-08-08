@@ -711,6 +711,7 @@
   /* ---------- 会話 ---------- */
   UI.showDialogue = function (name, node) {
     G.paused = true;
+    UI.hideTutChip();
     const kh = hudEl.querySelector('.keyhelp');
     if (kh) kh.style.display = 'none';
     dlgWrap.style.display = 'block';
@@ -771,6 +772,7 @@
     // チュートリアル中に非表示化されている場合は復元しない
     const kh = hudEl.querySelector('.keyhelp');
     if (kh && khWanted && !G.isTouch) kh.style.display = '';
+    G.events.emit('dialogueClosed');
   };
 
   /* ---------- 祠メニュー ---------- */

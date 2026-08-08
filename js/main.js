@@ -148,6 +148,9 @@
       G.UI.showTutChip(G.isTouch ? TUT[tutStage].t : TUT[tutStage].k);
     }
   }
+  // 「話す」ステップは会話を終えた時点で完了 (会話中に次のヒントを出さない)
+  G.events.on('dialogueClosed', () => { tutAdvance(1); tutHidden = true; });
+
   /* チュートリアルを外部からスキップ (計測ハーネス・デバッグ用) */
   G.tutSkip = function () {
     tutStage = -1;
@@ -194,7 +197,6 @@
     } else if (it.kind === 'npc') {
       G.Dialogue.start(it.obj);
       dialogueCam(it.obj);
-      tutAdvance(1);
     } else if (it.kind === 'shrine') {
       const s = it.obj;
       if (!G.State.shrines[s.id]) {
