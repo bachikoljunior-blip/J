@@ -1044,6 +1044,7 @@
     const i = list.indexOf(e);
     if (i >= 0) list.splice(i, 1);
     if (e.spawnRef && e.alive) e.spawnRef.alive = false;
+    if (G.Player.target === e) G.Player.target = null;  // 幽霊ロックオン防止
   }
   E.removeAll = function () {
     for (const e of list.slice()) remove(e);
@@ -1212,7 +1213,9 @@
     e.rig.pose({
       state: e.state === 'windup' ? 'windup' : e.state,
       t: e.stateT, windup: T.windup, moveAmt: e.moveAmt, seed: e.seed,
-      baseY: e.pos.y
+      baseY: e.pos.y,
+      atkT: e.state === 'attack' ? G.clamp(e.stateT / 0.38, 0, 1) : 0,
+      combo: 0
     });
     G.Actors.updateShadow(e);
   }

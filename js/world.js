@@ -482,7 +482,10 @@
           im.setMatrixAt(i, m);
         }
         im.instanceMatrix.needsUpdate = true;
-        im.frustumCulled = true;
+        // r150 の InstancedMesh は境界球がベースジオメトリ基準 (原点) のため
+        // 視錐台カリングすると植生が丸ごと誤って消える。チャンク単位で管理して
+        // いるのでカリングは切る。
+        im.frustumCulled = false;
         scene.add(im);
         chunk.trees.push(im);
       }
@@ -535,6 +538,7 @@
     const im = new THREE.InstancedMesh(grassGeo, grassMat, mats.length);
     for (let i = 0; i < mats.length; i++) im.setMatrixAt(i, mats[i]);
     im.instanceMatrix.needsUpdate = true;
+    im.frustumCulled = false;   // 上記と同じ理由
     scene.add(im);
     chunk.grassMesh = im;
   }
