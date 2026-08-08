@@ -361,6 +361,19 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
   background: #333d4e; color: #8593a6; pointer-events: none; opacity: 0.8;
 }
 
+/* 段階式チュートリアルチップ */
+.tutchip {
+  position: absolute; top: 52px; left: 50%; transform: translateX(-50%);
+  background: rgba(16, 22, 34, 0.9); border: 1px solid #d4a94f; border-radius: 10px;
+  padding: 9px 18px; font-size: 14px; color: #f0e6d2; pointer-events: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.45); white-space: nowrap; z-index: 30;
+}
+.tutchip b { color: #ffd35a; font-weight: 600; }
+.tutchip.pop { animation: tutpop 0.35s ease-out; }
+@keyframes tutpop {
+  from { transform: translateX(-50%) scale(0.85); opacity: 0; }
+}
+
 /* ---------- 汎用ボタン ---------- */
 .bigbtn {
   padding: 14px 38px; border-radius: 12px; font-size: 16px; text-align: center;

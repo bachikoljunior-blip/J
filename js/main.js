@@ -97,6 +97,7 @@
       G.Save.reset();
       G.Save.newGame();
       G.UI.showIntro();
+      tutStart();
     } else {
       const data = G.Save.load();
       if (data) G.Save.apply(data);
@@ -118,6 +119,45 @@
     started = true;
   };
 
+  /* ---------------- 段階式チュートリアル ---------------- */
+  /* 全操作を1行に詰めた常時ヘルプの代わりに、1つずつ提示して実行で進める */
+  const TUT = [
+    { k: '<b>移動</b>: WASD (Shiftで走る)', t: '<b>移動</b>: 左スティック' },
+    { k: '<b>長老ハルド</b>に近づき <b>E</b> で話す', t: '<b>長老ハルド</b>に近づき「調べる」で話す' },
+    { k: '<b>攻撃</b>: F / クリック (長押しで強撃)', t: '<b>攻撃</b>: 剣ボタン (長押しで強撃)' },
+    { k: '<b>回避</b>: Space', t: '<b>回避</b>: 回避ボタン' }
+  ];
+  let tutStage = -1, tutMove = 0, tutPX = null, tutPZ = null;
+  function tutStart() {
+    if (localStorage.getItem('eldria_tut') === 'done') { G.UI.setKeyhelpVisible(true); return; }
+    tutStage = 0; tutMove = 0;
+    G.UI.setKeyhelpVisible(false);
+    G.UI.showTutChip(G.isTouch ? TUT[0].t : TUT[0].k);
+  }
+  function tutAdvance(i) {
+    if (tutStage !== i) return;
+    tutStage++;
+    G.Audio.sfx('ui');
+    if (tutStage >= TUT.length) {
+      tutStage = -1;
+      localStorage.setItem('eldria_tut', 'done');
+      G.UI.hideTutChip();
+      G.UI.setKeyhelpVisible(true);
+      G.UI.toast('基本操作を覚えた', 'gold');
+    } else {
+      G.UI.showTutChip(G.isTouch ? TUT[tutStage].t : TUT[tutStage].k);
+    }
+  }
+  function tutUpdate() {
+    if (tutStage < 0) return;
+    const p = G.Player.pos;
+    if (tutPX !== null && tutStage === 0) {
+      tutMove += Math.hypot(p.x - tutPX, p.z - tutPZ);
+      if (tutMove > 6) tutAdvance(0);
+    }
+    tutPX = p.x; tutPZ = p.z;
+  }
+
   /* ---------------- イベント ---------------- */
   G.events.on('shake', v => { trauma = Math.min(1, trauma + v); });
   let bossCine = 0, cineBoss = null;
@@ -136,6 +176,7 @@
     } else if (it.kind === 'npc') {
       G.Dialogue.start(it.obj);
       dialogueCam(it.obj);
+      tutAdvance(1);
     } else if (it.kind === 'shrine') {
       const s = it.obj;
       if (!G.State.shrines[s.id]) {
@@ -232,10 +273,10 @@
       }
       if (!started) continue;
       switch (a) {
-        case 'attack': G.Player.tryAttack(false); break;
-        case 'heavy': G.Player.tryAttack(true); break;
-        case 'spin': G.Player.tryAttack('spin'); break;
-        case 'roll': G.Player.tryRoll(); break;
+        case 'attack': G.Player.tryAttack(false); tutAdvance(2); break;
+        case 'heavy': G.Player.tryAttack(true); tutAdvance(2); break;
+        case 'spin': G.Player.tryAttack('spin'); tutAdvance(2); break;
+        case 'roll': G.Player.tryRoll(); tutAdvance(3); break;
         case 'jump': G.Player.tryJump(); break;
         case 'interact': doInteract(); break;
         case 'lock': G.Player.toggleLock(); break;
@@ -477,6 +518,7 @@
       G.time += dt;
       if (started) {
         updateWorldState(dt);
+        tutUpdate();
         G.Player.update(dt);
         G.Horse.update(dt);
         G.Enemies.update(dt);

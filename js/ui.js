@@ -632,6 +632,20 @@
     }
   }
 
+  /* ---------- 段階式チュートリアルチップ ---------- */
+  let tutEl = null;
+  UI.showTutChip = function (html) {
+    if (!tutEl) tutEl = el('div', 'tutchip', hudEl);
+    tutEl.innerHTML = html;
+    tutEl.style.display = 'block';
+    tutEl.classList.remove('pop'); void tutEl.offsetWidth; tutEl.classList.add('pop');
+  };
+  UI.hideTutChip = function () { if (tutEl) tutEl.style.display = 'none'; };
+  UI.setKeyhelpVisible = function (v) {
+    const kh = hudEl.querySelector('.keyhelp');
+    if (kh) kh.style.display = (v && !G.isTouch) ? '' : 'none';
+  };
+
   /* ---------- クエストトラッカー ---------- */
   UI.refreshTracker = function () {
     const lines = G.Quests.trackerLines().slice(0, 3);
