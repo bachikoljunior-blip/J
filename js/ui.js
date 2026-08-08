@@ -387,6 +387,8 @@
     lvlEl.textContent = G.Stats.level;
     hpFill.classList.toggle('low', p.hp < p.maxHp() * 0.3);
 
+    updateTrackerDist(dt);
+
     // 時計
     const tod = G.State.tod;
     const hh = Math.floor(tod), mm = Math.floor((tod - hh) * 60);
@@ -653,12 +655,30 @@
   };
 
   /* ---------- クエストトラッカー ---------- */
+  let trackerMark = null;
   UI.refreshTracker = function () {
     const lines = G.Quests.trackerLines().slice(0, 3);
-    trackerEl.innerHTML = lines.map(l =>
-      `<div class="tline ${l.main ? 'main' : ''} ${l.ready ? 'ready' : ''}">${l.line}</div>`
-    ).join('');
+    trackerMark = null;
+    trackerEl.innerHTML = lines.map((l, i) => {
+      // 先頭 (メイン優先) のクエストには目標距離を添える
+      let dist = '';
+      if (i === 0 && l.mx !== null) {
+        trackerMark = { x: l.mx, z: l.mz };
+        dist = ' <span class="tdist"></span>';
+      }
+      return `<div class="tline ${l.main ? 'main' : ''} ${l.ready ? 'ready' : ''}">${l.line}${dist}</div>`;
+    }).join('');
   };
+  let tdistT = 0;
+  function updateTrackerDist(dt) {
+    tdistT -= dt;
+    if (tdistT > 0 || !trackerMark) return;
+    tdistT = 0.5;
+    const eln = trackerEl.querySelector('.tdist');
+    if (!eln) return;
+    const d = G.dist(G.Player.pos.x, G.Player.pos.z, trackerMark.x, trackerMark.z);
+    eln.textContent = d > 12 ? Math.round(d) + 'm' : '';
+  }
 
   /* ---------- ボスバー ---------- */
   let curBoss = null;

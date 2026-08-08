@@ -849,7 +849,7 @@
     W.shrineMeshes[sh.id] = { crystal, glow, beam, baseY: y + 2.0 };
   }
 
-  function buildRuinCircle(x, z, radius, n, seed, tint) {
+  function buildRuinCircle(x, z, radius, n, seed, tint, ice) {
     const rnd = G.srand(seed);
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2;
@@ -857,9 +857,12 @@
       const py = W.heightAt(px, pz);
       const broken = rnd() < 0.4;
       const h = broken ? 1.2 + rnd() * 1.5 : 4.5 + rnd() * 1.5;
+      // 氷柱は先細りの結晶プリズム+微発光、遺跡柱は石の円柱
       const pillar = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.55, 0.7, h, 6),
-        new THREE.MeshLambertMaterial({ color: tint || 0x9d998f })
+        ice ? new THREE.CylinderGeometry(0.16, 0.66, h, 5)
+            : new THREE.CylinderGeometry(0.55, 0.7, h, 6),
+        ice ? new THREE.MeshLambertMaterial({ color: tint, emissive: 0x16344a })
+            : new THREE.MeshLambertMaterial({ color: tint || 0x9d998f })
       );
       shadowify(pillar);
       pillar.position.set(px, py + h / 2 - 0.1, pz);
@@ -1204,7 +1207,7 @@
     buildWater();
     buildVillage();
     for (const sh of W.shrines) buildShrine(sh);
-    buildRuinCircle(-430, -140, 18, 9, 11, 0xa9c6d6);   // 狼ボス闘技場 (氷を纏う柱)
+    buildRuinCircle(-430, -140, 18, 9, 11, 0xbfdcec, true);   // 狼ボス闘技場 (氷の結晶柱)
     buildRuinCircle(430, -80, 20, 11, 22);              // ゴーレム闘技場
     buildRuinCircle(-40, -640, 22, 12, 33, 0x4a4250);   // 竜の頂 (黒曜石の柱)
     buildRuinCircle(150, 430, 13, 7, 44);       // 南の廃墟

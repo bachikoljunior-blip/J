@@ -424,6 +424,16 @@
         m.rotation.z = -a * 0.4;
         g.add(m);
       }
+      // 背筋の氷稜 + 明色の腹部 (側面から見てもボスと分かるシルエット)
+      for (let i = 0; i < 4; i++) {
+        const r = box(0.1, 0.36 - i * 0.05, 0.2, i % 2 ? 0xbdd6e8 : 0x9fc2dc);
+        r.position.set(0, 0.96 - i * 0.04, 0.05 - i * 0.3);
+        r.rotation.x = -0.15;
+        g.add(r);
+      }
+      const bellyM = box(0.42, 0.16, 0.92, 0xe6ebf2);
+      bellyM.position.y = 0.44;
+      g.add(bellyM);
       const glow = new THREE.Sprite(new THREE.SpriteMaterial({
         map: G.makeRadialTex(48, [[0, 'rgba(120,210,255,0.55)'], [1, 'rgba(80,180,255,0)']]),
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending

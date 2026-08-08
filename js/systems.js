@@ -217,7 +217,10 @@
       if (D.kill) line += ` (${Math.min(st.progress, D.count)}/${D.count})`;
       else if (D.collect) line += ` (${Math.min(G.Inv.count(D.collect), D.count)}/${D.count})`;
       if (st.status === 'ready') line += ' — 報告する';
-      out.push({ id, line, main: !!D.main, ready: st.status === 'ready' });
+      // 目標地点 (ready なら村へ報告)
+      const mk = st.status === 'ready' ? { x: 0, z: 0 } : (D.mark || null);
+      out.push({ id, line, main: !!D.main, ready: st.status === 'ready',
+                 mx: mk ? mk.x : null, mz: mk ? mk.z : null });
     }
     out.sort((a, b) => (b.main ? 1 : 0) - (a.main ? 1 : 0));
     return out;
