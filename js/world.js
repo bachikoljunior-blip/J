@@ -683,7 +683,7 @@
           float k = smoothstep(-0.3, 0.4, vWave);
           vec3 base = uColor * mix(vec3(1.0), uSunTint, 0.55);
           vec3 c = mix(base, uColor2 * uSunTint, k) * uLight;
-          float fr = 0.12 + smoothstep(15.0, 160.0, vDist) * 0.55;
+          float fr = 0.14 + smoothstep(12.0, 140.0, vDist) * 0.62;
           c = mix(c, uFogColor, fr);   // 擬似フレネル: 遠いほど空を映す
           float f = smoothstep(uFogNear, uFogFar, vDist);
           c = mix(c, uFogColor, f);

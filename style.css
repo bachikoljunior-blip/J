@@ -140,8 +140,8 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 
 /* ボスバー (画面下部中央の大型バー) */
 .bosswrap {
-  position: absolute; bottom: calc(92px + env(safe-area-inset-bottom)); left: 50%;
-  transform: translateX(-50%); width: min(62vw, 500px); pointer-events: none;
+  position: absolute; bottom: calc(34px + env(safe-area-inset-bottom)); left: 50%;
+  transform: translateX(-50%); width: min(58vw, 470px); pointer-events: none;
 }
 .bossname {
   text-align: center; font-size: 16px; color: #f2ded2; text-shadow: 0 1px 4px #000;
@@ -183,15 +183,17 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 .dmglayer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .dmgnum {
   position: absolute; transform: translate(-50%, -50%);
-  font-size: 17px; font-weight: bold; color: #ffe9a0; text-shadow: 0 2px 4px #000;
+  font-size: 17px; font-weight: bold; color: #ffe9a0;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 5px #000;
   pointer-events: none;
 }
 .dmgnum.crit { font-size: 23px; color: #ff8a4a; }
 .dmgnum.onplayer { color: #ff5a5a; }
 .ebar {
   position: absolute; transform: translate(-50%, -50%);
-  width: 52px; height: 5px; background: rgba(0,0,0,0.65); border-radius: 3px;
-  pointer-events: none; border: 1px solid rgba(255,255,255,0.25);
+  width: 54px; height: 6px; background: rgba(8, 8, 12, 0.85); border-radius: 3px;
+  pointer-events: none; border: 1px solid rgba(0, 0, 0, 0.9);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.6);
 }
 .ebar .fill { height: 100%; background: #c94a3a; border-radius: 2px; }
 .ebar.locked { outline: 2px solid #ffd35a; }

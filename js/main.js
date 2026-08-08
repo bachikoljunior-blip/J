@@ -294,6 +294,17 @@
       C.pitch = G.lerp(C.pitch, bigBoss ? 0.5 : 0.35, G.damp(3, dt));
     } else if (bigBoss) {
       C.pitch = G.lerp(C.pitch, 0.45, G.damp(2.5, dt));
+      // 最も近い交戦ボスへ弱くヨー追従
+      let nb = null, nd = 1e9;
+      for (const b of G.Enemies.bosses) {
+        if (!b.alive || !b.engaged) continue;
+        const d2 = G.dist2(p.pos.x, p.pos.z, b.pos.x, b.pos.z);
+        if (d2 < nd) { nd = d2; nb = b; }
+      }
+      if (nb) {
+        const ty = Math.atan2(nb.pos.x - p.pos.x, nb.pos.z - p.pos.z);
+        C.yaw = G.angLerp(C.yaw, ty, G.damp(1.4, dt));
+      }
     }
 
     const fx = Math.sin(C.yaw) * Math.cos(C.pitch);
@@ -327,10 +338,8 @@
       cy = eyeY + (cy - eyeY) * occ;
     }
 
-    // カメラの水没防止
-    if (p.pos.y > G.World.WATER_Y - 0.2 && cy < G.World.WATER_Y + 0.5) {
-      cy = G.World.WATER_Y + 0.5;
-    }
+    // カメラは常に水面より上 (いかなる場合も水没しない)
+    if (cy < G.World.WATER_Y + 0.45) cy = G.World.WATER_Y + 0.45;
 
     // 画面揺れ
     trauma = Math.max(0, trauma - dt * 1.8);
