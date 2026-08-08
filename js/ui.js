@@ -1165,7 +1165,11 @@
       row.innerHTML = `<div class="qname">「${D.name}」</div><div class="qdesc">${D.desc}</div>`;
     }
     if (!any) el('div', 'mnote', menuBody, '称号はまだない。討伐や探索で手に入る。');
-    el('div', 'mnote', menuBody, `討伐数: ${G.State.killCount || 0}`);
+    // 統計もクエストカードと同じカード造形で (帯が途切れた未完成パネルに見える指摘)
+    el('div', 'shophead', menuBody, '― 記録 ―');
+    const srow = el('div', 'qrow', el('div', 'qlist', menuBody));
+    srow.innerHTML = `<div class="qname">討伐数 <span class="istat">${G.State.killCount || 0}</span></div>` +
+      `<div class="qdesc">灯した祠 ${Object.keys(G.State.shrines || {}).length} / 開けた宝箱 ${Object.keys(G.State.openedChests || {}).length}</div>`;
   }
 
   function renderSettings() {

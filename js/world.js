@@ -1237,8 +1237,9 @@
     for (let i = 0; i < 3; i++) addShrooms(cx + (i % 2 ? 7 : -7), 1168 + i * 12);
     // 光る水晶
     // エミッシブは控えめに: 強すぎるとファセット陰影が消え、近接時に
-    // 白飛びした均一シアンのビルボードに見える
-    const crystalMat = new THREE.MeshLambertMaterial({ color: 0x77ccff, emissive: 0x255e8c });
+    // 白飛びした均一シアンのビルボードに見える。フラットシェーディングで
+    // 面ごとの明度差を出し、至近でも結晶のファセットが読めるように
+    const crystalMat = new THREE.MeshLambertMaterial({ color: 0x77ccff, emissive: 0x1e4e78, flatShading: true });
     const glowMap = G.makeRadialTex(64, [[0, 'rgba(130,200,255,0.8)'], [1, 'rgba(80,150,255,0)']]);
     const addCrystal = (px, pz, s) => {
       const c = new THREE.Mesh(new THREE.OctahedronGeometry(0.7 * s, 0), crystalMat);
