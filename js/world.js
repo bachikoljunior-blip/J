@@ -258,10 +258,15 @@
     if (fd < 38 * 38) {
       out.lerp(FROST_COL, (1 - G.smoothstep(26, 38, Math.sqrt(fd))) * 0.88);
     }
-    // 竜の頂の焦土
+    // 竜の頂の焦土 (中心ほど濃く、ひび割れ状の明暗ムラ)
     const dd = G.dist2(x, z, -40, -640);
     if (dd < 34 * 34) {
-      out.lerp(CHAR_COL, (1 - G.smoothstep(20, 34, Math.sqrt(dd))) * 0.8);
+      const dr = Math.sqrt(dd);
+      out.lerp(CHAR_COL, (1 - G.smoothstep(18, 34, dr)) * 0.85);
+      const crack = G.fbm(x * 0.22, z * 0.22, 2);
+      out.multiplyScalar(0.8 + (crack * 0.5 + 0.5) * 0.4);
+      // 中心付近は残り火の熱がわずかに透ける
+      if (dr < 14) out.r += (1 - dr / 14) * 0.05;
     }
     // 高度の微妙な明暗
     const shade = 0.92 + G.hash2((x * 7) | 0, (z * 7) | 0) * 0.08;
@@ -584,6 +589,7 @@
       const h = W.heightAt(x, z);
       if (h < WATER_Y + 1) continue;
       if (nearLandmark(x, z, 26)) continue;      // 村・祠の近くは安全地帯
+      if (G.dist2(x, z, 0, 0) < 42 * 42) continue;  // 村中心はさらに広く禁止
       const b = W.biomeAt(x, z, h);
       let type;
       if (b === 'forest') type = spawnRnd() < 0.6 ? 'wolf' : 'goblin';

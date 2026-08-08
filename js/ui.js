@@ -887,17 +887,32 @@
     if (!has) el('div', 'mnote', menuBody, '装備品は宝箱や店、ボス討伐で手に入る。');
   }
 
+  /* アイテム種別ごとの絵文字アイコンとタイル色 */
+  const ITEM_ICONS = {
+    potion: ['🧪', '#7a2e3e'], hipotion: ['🧪', '#8e2438'], herb: ['🌿', '#2e5a38'],
+    pelt: ['🟤', '#5a4430'], bone: ['🦴', '#565a62'], magicstone: ['💠', '#2e4a72'],
+  };
+  function itemIcon(id, it) {
+    if (ITEM_ICONS[id]) return ITEM_ICONS[id];
+    if (it.type === 'weapon') return ['⚔️', '#4e4258'];
+    if (it.type === 'armor') return ['🛡️', '#3e4a58'];
+    return ['📦', '#4a4438'];
+  }
+
   function renderItems() {
-    const list = el('div', 'ilist', menuBody);
     const ids = Object.keys(G.Inv.items);
     if (!ids.length) { el('div', 'mnote', menuBody, '何も持っていない。'); return; }
-    for (const id of ids) {
-      const it = G.Items.get(id);
-      if (!it) continue;
-      const row = el('div', 'irow', list);
-      row.innerHTML = `<div class="iname">${it.name} ×${G.Inv.count(id)}</div><div class="idesc">${it.desc}</div>`;
+    // アイコン付きグリッド + 下に選択中アイテムの詳細
+    const grid = el('div', 'igrid', menuBody);
+    const detail = el('div', 'idetail', menuBody);
+    let selected = null;
+    const select = (id, it, tile) => {
+      selected = id;
+      grid.querySelectorAll('.itile.on').forEach(t => t.classList.remove('on'));
+      tile.classList.add('on');
+      detail.innerHTML = `<div class="iname">${it.name} ×${G.Inv.count(id)}</div><div class="idesc">${it.desc}</div>`;
       if (it.type === 'consumable') {
-        const b = el('div', 'ibtn', row, '使う');
+        const b = el('div', 'ibtn', detail, '使う');
         b.addEventListener('pointerdown', e => {
           e.stopPropagation();
           if (id === 'potion' || id === 'hipotion') { G.Player.potionCd = 0; G.Player.usePotion(id); }
@@ -907,7 +922,19 @@
           UI.showTab('items');
         });
       }
+    };
+    let first = null;
+    for (const id of ids) {
+      const it = G.Items.get(id);
+      if (!it) continue;
+      const [glyph, tint] = itemIcon(id, it);
+      const tile = el('div', 'itile', grid);
+      tile.style.background = tint;
+      tile.innerHTML = `<div class="iglyph">${glyph}</div><div class="icount">×${G.Inv.count(id)}</div><div class="itname">${it.name}</div>`;
+      tile.addEventListener('pointerdown', e => { e.stopPropagation(); G.Audio.sfx('ui'); select(id, it, tile); });
+      if (!first) first = [id, it, tile];
     }
+    if (first) select(first[0], first[1], first[2]);
   }
 
   function renderMap() {
@@ -918,7 +945,9 @@
     }
     wrap.appendChild(bigMapCanvas);
     drawBigMap();
-    el('div', 'mnote', menuBody, '◆=任務 ●=祠(タップでファストトラベル) ▲=現在地');
+    // 凡例は横に並べて地図を大きく取る
+    el('div', 'maplegend', wrap,
+      '<div>◆ 任務</div><div>● 祠<br><span class="mlsub">タップで<br>ファストトラベル</span></div><div>▲ 現在地</div>');
     // 祠タップでファストトラベル
     bigMapCanvas.onpointerdown = e => {
       e.stopPropagation();

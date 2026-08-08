@@ -334,13 +334,18 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 .mnote { font-size: 12px; color: #8a98ac; padding: 10px 6px; line-height: 1.6; }
 .shophead { font-size: 13px; color: #cfe0f0; margin: 12px 0 6px; text-align: center; }
-.mapwrap { display: flex; justify-content: center; }
+.mapwrap { display: flex; justify-content: center; align-items: center; gap: 18px; }
 .mapwrap canvas {
-  /* タブ・凡例と合わせて1画面に収める (横持ちスマホで下端が見切れない) */
-  width: min(92vw, calc(100dvh - 225px), 560px); height: min(92vw, calc(100dvh - 225px), 560px);
-  min-width: 180px; min-height: 180px;
+  /* 凡例を横に置き、縦方向いっぱいまで地図を大きく取る */
+  width: min(70vw, calc(100dvh - 150px), 560px); height: min(70vw, calc(100dvh - 150px), 560px);
+  min-width: 200px; min-height: 200px;
   border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
 }
+.maplegend {
+  display: flex; flex-direction: column; gap: 14px;
+  font-size: 13px; color: #cfe0f0; line-height: 1.5;
+}
+.maplegend .mlsub { font-size: 11px; color: #8a98ac; }
 .qlist { display: flex; flex-direction: column; gap: 6px; max-width: 740px; margin: 0 auto; width: 100%; }
 .qrow { padding: 10px 12px; background: rgba(26, 34, 50, 0.66); border-radius: 10px; border-left: 3px solid #7b8aa0; }
 .qrow.done { opacity: 0.45; border-left-color: #5a6a7a; }
@@ -384,6 +389,29 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 
 .tdist { color: #ffd35a; font-size: 11px; opacity: 0.95; }
+
+/* 持ち物のアイコングリッド */
+.igrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+  gap: 10px; max-width: 720px; margin: 0 auto; width: 100%;
+}
+.itile {
+  position: relative; border-radius: 12px; padding: 10px 6px 8px;
+  text-align: center; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.14);
+}
+.itile.on { border-color: #ffd35a; box-shadow: 0 0 0 1px #ffd35a inset; }
+.iglyph { font-size: 30px; line-height: 1.2; }
+.icount {
+  position: absolute; top: 5px; right: 7px; font-size: 11px; color: #ffe9b0;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+.itname { font-size: 11px; color: #e8f0f8; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.idetail {
+  max-width: 720px; margin: 12px auto 0; width: 100%;
+  padding: 10px 14px; background: rgba(26, 34, 50, 0.66); border-radius: 10px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
 
 /* 段階式チュートリアルチップ */
 .tutchip {

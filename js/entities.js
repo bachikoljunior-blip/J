@@ -1018,7 +1018,8 @@
     p.mesh.visible = true;
     p.mesh.position.set(x, y + 1.05, z);
     p.mesh.rotation.z = -yaw + Math.PI / 2 - 1.2;
-    p.mesh.material.color.set(kind === 1 ? 0xffd27a : kind === 2 ? 0xa8ffd0 : 0xcfe8ff);
+    // 通常=白 / 強撃=金 / 回転=鋼青 — 敵予兆の赤・地面の緑と色相分離
+    p.mesh.material.color.set(kind === 1 ? 0xffd27a : kind === 2 ? 0x9fc8f0 : 0xe8f2ff);
     const s = kind === 1 ? 1.2 : 1;
     p.mesh.scale.set(s, s, s);
   };
