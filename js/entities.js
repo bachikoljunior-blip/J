@@ -889,7 +889,10 @@
         i === 5 ? 0x7a2430 : dark);
       t.position.set(0, i * i * 0.03, -0.6 - i * 0.6);
       tail.add(t);
-      const spike = box(0.09, Math.max(0.12, 0.3 - i * 0.03), 0.14, i % 2 ? 0x241a26 : 0x7a2430);
+      // 尾棘は根元=黒→先端=暗赤のグラデーション (交互の縞はキャンディケインに
+      // 見え、漆黒の竜のトーンから浮く)
+      const spikeCol = [0x1c151f, 0x241a26, 0x2e1c28, 0x3a2028, 0x4c2028, 0x5e2229][i];
+      const spike = box(0.09, Math.max(0.12, 0.3 - i * 0.03), 0.14, spikeCol);
       spike.position.set(0, 0.22 + i * i * 0.03, -0.6 - i * 0.6);
       tail.add(spike);
     }
@@ -1650,15 +1653,15 @@
   E.all = function () { return list.concat(bosses); };
 
   const TYPES = {
-    wolf:      { name: '野狼',       rigFn: 'wolf',     barH: 1.4, hp: 40,  atk: 12, speed: 5.2, xp: 14, gold: 6,  aggroR: 18, atkR: 1.7, windup: 0.45, cool: 1.2, radius: 0.5, scale: 1,   drops: [['pelt', 0.6], ['potion', 0.08]] },
-    goblin:    { name: 'ゴブリン',   rigFn: 'goblin',   barH: 1.9, hp: 55,  atk: 15, speed: 3.8, xp: 18, gold: 12, aggroR: 16, atkR: 1.9, windup: 0.55, cool: 1.5, radius: 0.45, scale: 0.9, drops: [['potion', 0.12], ['magicstone', 0.1]] },
-    skeleton:  { name: 'スケルトン', rigFn: 'skeleton', barH: 2.0, hp: 45,  atk: 13, speed: 3.2, xp: 20, gold: 14, aggroR: 22, atkR: 12,  windup: 0.7,  cool: 2.4, radius: 0.45, scale: 1,   ranged: true, drops: [['bone', 0.6], ['magicstone', 0.12]] },
+    wolf:      { name: '野狼',       rigFn: 'wolf',     barH: 1.4, hp: 40,  atk: 15, speed: 5.2, xp: 14, gold: 6,  aggroR: 18, atkR: 1.7, windup: 0.45, cool: 1.2, radius: 0.5, scale: 1,   drops: [['pelt', 0.6], ['potion', 0.08]] },
+    goblin:    { name: 'ゴブリン',   rigFn: 'goblin',   barH: 1.9, hp: 55,  atk: 18, speed: 3.8, xp: 18, gold: 12, aggroR: 16, atkR: 1.9, windup: 0.55, cool: 1.5, radius: 0.45, scale: 0.9, drops: [['potion', 0.12], ['magicstone', 0.1]] },
+    skeleton:  { name: 'スケルトン', rigFn: 'skeleton', barH: 2.0, hp: 45,  atk: 15, speed: 3.2, xp: 20, gold: 14, aggroR: 22, atkR: 12,  windup: 0.7,  cool: 2.4, radius: 0.45, scale: 1,   ranged: true, drops: [['bone', 0.6], ['magicstone', 0.12]] },
     golemling: { name: '岩の子鬼',   rigFn: 'golemling',barH: 1.8, hp: 90,  atk: 20, speed: 2.6, xp: 30, gold: 20, aggroR: 14, atkR: 2.3, windup: 0.85, cool: 2.0, radius: 0.6, scale: 0.62, poise: 3, drops: [['magicstone', 0.5]] },
-    scorpion:  { name: '砂蠍',       rigFn: 'scorpion', barH: 1.3, hp: 50,  atk: 16, speed: 4.4, xp: 22, gold: 15, aggroR: 15, atkR: 1.8, windup: 0.5,  cool: 1.4, radius: 0.55, scale: 1.1, drops: [['magicstone', 0.15], ['potion', 0.1]] },
-    bandit:    { name: '盗賊',       rigFn: 'bandit',   barH: 1.9, hp: 70,  atk: 18, speed: 4.2, xp: 26, gold: 24, aggroR: 17, atkR: 1.9, windup: 0.5,  cool: 1.4, radius: 0.45, scale: 0.95, drops: [['potion', 0.15], ['magicstone', 0.1]] },
-    fireimp:   { name: '火の小鬼',   rigFn: 'fireimp',  barH: 1.5, hp: 48,  atk: 16, speed: 3.6, xp: 24, gold: 18, aggroR: 20, atkR: 13,  windup: 0.6,  cool: 2.2, radius: 0.4, scale: 0.7, ranged: true, proj: 'fire', drops: [['magicstone', 0.3]] },
+    scorpion:  { name: '砂蠍',       rigFn: 'scorpion', barH: 1.3, hp: 50,  atk: 19, speed: 4.4, xp: 22, gold: 15, aggroR: 15, atkR: 1.8, windup: 0.5,  cool: 1.4, radius: 0.55, scale: 1.1, drops: [['magicstone', 0.15], ['potion', 0.1]] },
+    bandit:    { name: '盗賊',       rigFn: 'bandit',   barH: 1.9, hp: 70,  atk: 22, speed: 4.2, xp: 26, gold: 24, aggroR: 17, atkR: 1.9, windup: 0.5,  cool: 1.4, radius: 0.45, scale: 0.95, drops: [['potion', 0.15], ['magicstone', 0.1]] },
+    fireimp:   { name: '火の小鬼',   rigFn: 'fireimp',  barH: 1.5, hp: 48,  atk: 19, speed: 3.6, xp: 24, gold: 18, aggroR: 20, atkR: 13,  windup: 0.6,  cool: 2.2, radius: 0.4, scale: 0.7, ranged: true, proj: 'fire', drops: [['magicstone', 0.3]] },
     mimic:     { name: 'ミミック',   rigFn: 'mimic',    barH: 1.4, hp: 130, atk: 26, speed: 5.0, xp: 60, gold: 80, aggroR: 30, atkR: 1.8, windup: 0.4,  cool: 1.1, radius: 0.55, scale: 1, poise: 3, drops: [['hipotion', 0.5], ['magicstone', 0.5]] },
-    nightwisp: { name: '夜の骸骨',   rigFn: 'skeleton', barH: 2.0, hp: 38,  atk: 14, speed: 4.0, xp: 16, gold: 10, aggroR: 26, atkR: 1.8, windup: 0.5,  cool: 1.3, radius: 0.45, scale: 1, night: true, drops: [['bone', 0.5]] }
+    nightwisp: { name: '夜の骸骨',   rigFn: 'skeleton', barH: 2.0, hp: 38,  atk: 17, speed: 4.0, xp: 16, gold: 10, aggroR: 26, atkR: 1.8, windup: 0.5,  cool: 1.3, radius: 0.45, scale: 1, night: true, drops: [['bone', 0.5]] }
   };
   E.TYPES = TYPES;
 
@@ -2548,8 +2551,9 @@
       H.dustT = (H.dustT || 0) - dt;
       if (H.dustT <= 0) {
         H.dustT = 0.12;
+        // 加算合成では明るい砂色が緑の上で発光して見える — 暗めに抑える
         G.FX.burst(H.pos.x - Math.sin(H.yaw) * 1.2, H.pos.y + 0.25, H.pos.z - Math.cos(H.yaw) * 1.2,
-          { n: 4, color: 0xc4b394, speed: 1.8, life: 0.65, size: 3.8, up: 0.8, gravity: 1 });
+          { n: 3, color: 0x6e6250, speed: 1.8, life: 0.6, size: 2.4, up: 0.8, gravity: 1 });
       }
     }
     G.Actors.updateShadow(H);

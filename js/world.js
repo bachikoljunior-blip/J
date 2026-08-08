@@ -430,6 +430,17 @@
 
   const treeMat = () => new THREE.MeshLambertMaterial({ vertexColors: true });
   let sharedTreeMat = null;
+  // 植生の接地影 (柔らかい放射グラデの円盤。全チャンク共有)
+  let vegShadowGeo = null, vegShadowMat = null;
+  function ensureVegShadow() {
+    if (vegShadowGeo) return;
+    vegShadowGeo = new THREE.PlaneGeometry(2, 2);
+    vegShadowGeo.rotateX(-Math.PI / 2);
+    vegShadowMat = new THREE.MeshBasicMaterial({
+      map: G.makeRadialTex(64, [[0, 'rgba(8,12,18,0.4)'], [0.65, 'rgba(8,12,18,0.24)'], [1, 'rgba(8,12,18,0)']]),
+      transparent: true, depthWrite: false
+    });
+  }
 
   /* ======================= 草シェーダ ======================= */
   let grassGeo = null, grassMat = null;
@@ -598,6 +609,7 @@
       const d = decorDensity(W.biomeAt(bx, bz));
       for (const k in d) counts[k] = Math.max(counts[k] || 0, d[k]);
     }
+    const shadowSpots = [];   // 植生の接地ブロブ影 (世界が浮いて見える指摘)
     for (const type of ['pine', 'oak', 'rock', 'cactus', 'dead']) {
       const n = (counts[type] || 0);
       if (!n) continue;
@@ -613,6 +625,8 @@
         if (W.slopeYAt(x, z) < 0.72 && type !== 'rock') continue; // 急斜面は岩のみ
         const sc = 0.75 + rnd() * 0.7;
         placed.push({ x, z, h, ry: rnd() * Math.PI * 2, s: sc });
+        if (type === 'pine' || type === 'oak') shadowSpots.push({ x, z, h, s: sc * 1.5 });
+        else if (type === 'cactus' || type === 'dead') shadowSpots.push({ x, z, h, s: sc * 0.8 });
         if (type !== 'rock' && type !== 'dead') {
           chunk.colliders.push({ x, z, r: 0.55 * sc + 0.15 });
         } else if (type === 'rock') {
@@ -639,6 +653,23 @@
         scene.add(im);
         chunk.trees.push(im);
       }
+    }
+    // 植生の接地ブロブ影 (1チャンク1インスタンスメッシュ。静的な柔らかいAO円)
+    if (shadowSpots.length) {
+      ensureVegShadow();
+      const sm = new THREE.InstancedMesh(vegShadowGeo, vegShadowMat, shadowSpots.length);
+      const m2 = new THREE.Matrix4();
+      for (let i = 0; i < shadowSpots.length; i++) {
+        const p = shadowSpots[i];
+        m2.makeScale(p.s, 1, p.s);
+        m2.setPosition(p.x, p.h + 0.05, p.z);
+        sm.setMatrixAt(i, m2);
+      }
+      sm.instanceMatrix.needsUpdate = true;
+      sm.frustumCulled = false;
+      sm.renderOrder = 1;
+      scene.add(sm);
+      chunk.trees.push(sm);
     }
 
     /* --- 敵スポーン地点 (決定的) --- */
