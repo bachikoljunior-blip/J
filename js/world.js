@@ -950,7 +950,7 @@
     const pt = new THREE.PointLight(0x6699dd, 1.1, 70);
     pt.position.set(cx, 66, cz);
     scene.add(pt);
-    const pt2 = new THREE.PointLight(0x7799cc, 0.9, 45);
+    const pt2 = new THREE.PointLight(0x88a8d8, 1.5, 60);
     pt2.position.set(cx, 64, 1170);
     scene.add(pt2);
     // 出口の枠
@@ -1448,7 +1448,7 @@
     stars.visible = skyVisible;
     for (const c of clouds) c.visible = skyVisible;
     if (inCave) {
-      hemi.intensity = 0.58;
+      hemi.intensity = 0.74;
       hemi.color.set(0x93a4d4);
       hemi.groundColor.set(0x46506a);
       sun.intensity = 0.02;

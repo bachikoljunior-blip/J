@@ -851,6 +851,7 @@
   SA.show = function (x, y, z, yaw, kind) {
     const p = pool[kind === 2 ? 2 : (pool[0].t < 1 ? 1 : 0)];
     p.t = 0;
+    p.decay = kind === 0 ? 4.2 : 2.0;   // 強/回転は約0.5秒残す
     p.mesh.visible = true;
     p.mesh.position.set(x, y + 1.05, z);
     p.mesh.rotation.z = -yaw + Math.PI / 2 - 1.2;
@@ -861,7 +862,7 @@
   SA.update = function (dt) {
     for (const p of pool) {
       if (p.t >= 1) { p.mesh.visible = false; continue; }
-      p.t += dt * 4.2;
+      p.t += dt * (p.decay || 4.2);
       p.mesh.material.opacity = Math.max(0, 0.75 * (1 - p.t));
       if (p.t >= 1) p.mesh.visible = false;
     }
@@ -1208,11 +1209,11 @@
       }
     }
 
-    // ボス体内への侵入を押し出す
+    // ボス体内への侵入を押し出す (見た目サイズの押し出し半径)
     for (const b of G.Enemies.bosses) {
       if (!b.alive) continue;
       const dx = P.pos.x - b.pos.x, dz = P.pos.z - b.pos.z;
-      const rr = b.radius + P.radius;
+      const rr = (b.D.pushR || b.radius) + P.radius;
       const d2 = dx * dx + dz * dz;
       if (d2 < rr * rr && d2 > 0.0001) {
         const d = Math.sqrt(d2);
@@ -1642,17 +1643,17 @@
   const DEFS = {
     fenrir: {
       name: '白狼王フェンリル', hp: 380, atk: 22, speed: 7.2, xp: 300, gold: 250,
-      x: -430, z: -140, arenaR: 34, radius: 1.3, barH: 3.4,
+      x: -430, z: -140, arenaR: 34, radius: 1.3, pushR: 2.1, barH: 3.4,
       build: () => G.Rigs.wolf({ scale: 2.9, fur: 0xd8d8e0, snout: 0xb8b8c2, eye: 0x44ddff, mane: true })
     },
     golem: {
       name: '遺跡の巨像', hp: 700, atk: 34, speed: 2.9, xp: 600, gold: 500,
-      x: 430, z: -80, arenaR: 36, radius: 1.6, barH: 5.0,
+      x: 430, z: -80, arenaR: 36, radius: 1.6, pushR: 2.2, barH: 5.0,
       build: () => G.Rigs.golem({ scale: 2.4, rock: 0x8a8478 })
     },
     scorpking: {
       name: '砂帝スコルグ', hp: 550, atk: 30, speed: 5.6, xp: 900, gold: 700,
-      x: 390, z: 380, arenaR: 30, radius: 1.5, barH: 2.6,
+      x: 390, z: 380, arenaR: 30, radius: 1.5, pushR: 2.4, barH: 2.6,
       build: () => G.Rigs.scorpion({ scale: 2.6, shell: 0xb8863f })
     },
     dragon: {
@@ -1769,6 +1770,7 @@
     // 交戦開始/離脱
     if (!b.engaged && p.alive && dist < 26) {
       b.engaged = true;
+      b.cool = b.bossId === 'dragon' ? 0.4 : 1.0;   // 開幕の間延び防止
       G.Audio.sfx('roar');
       G.events.emit('bossEngage', b);
     }
@@ -2140,8 +2142,9 @@
     } else if (type === 'fire') {
       mesh = new THREE.Group();
       const core = new THREE.Mesh(a.fireGeo, a.fireMat);
+      core.scale.setScalar(1.4);
       const glow = new THREE.Sprite(a.fireGlow);
-      glow.scale.set(1.8, 1.8, 1);
+      glow.scale.set(2.6, 2.6, 1);
       mesh.add(core, glow);
     } else { // rock
       mesh = new THREE.Mesh(a.rockGeo, a.rockMat);
