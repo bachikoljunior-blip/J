@@ -1701,6 +1701,17 @@
       baseY: P.pos.y + (P.mounted ? 0.92 : 0),
       glide: P.gliding, ride: P.mounted
     });
+    // 夜間は自機に最低輝度の下駄 (月光逆光・暗い樹林背景で完全な黒
+    // シルエットにならず、色と形が常に読める)
+    const nightLit = (G.Sky.lightLevel || 1) < 0.3;
+    if (P._nightLit !== nightLit) {
+      P._nightLit = nightLit;
+      rig.group.traverse(o => {
+        if (o.isMesh && o.material && o.material.emissive && !o.material.userData._noNight) {
+          o.material.emissive.setHex(nightLit ? 0x1e2836 : 0x000000);
+        }
+      });
+    }
     G.Actors.updateShadow(P);
   };
 

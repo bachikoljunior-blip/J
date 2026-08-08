@@ -152,12 +152,16 @@
     if (thumbEl) thumbEl.style.transform = `translate(${dx * 0.68}px, ${dy * 0.68}px)`;
   }
   function hideJoy() {
-    // 完全に消さず、左下に淡いゴーストを常駐 (移動操作領域のアフォーダンス)
     if (joyEl) {
-      joyEl.style.display = 'block';
-      joyEl.style.opacity = '0.28';
-      joyEl.style.left = '36px';
-      joyEl.style.top = (window.innerHeight - 170) + 'px';
+      if (G.isTouch) {
+        // タッチ端末では左下に淡いゴーストを常駐 (移動操作領域のアフォーダンス)
+        joyEl.style.display = 'block';
+        joyEl.style.opacity = '0.28';
+        joyEl.style.left = '36px';
+        joyEl.style.top = (window.innerHeight - 170) + 'px';
+      } else {
+        joyEl.style.display = 'none';
+      }
     }
     if (thumbEl) thumbEl.style.transform = 'translate(0,0)';
   }
