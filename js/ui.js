@@ -576,9 +576,16 @@
   /* ---------- ボスバー ---------- */
   let curBoss = null;
   UI.showBoss = function (b) {
+    const isNew = curBoss !== b;
     curBoss = b;
     bossName.textContent = b.name;
     bossWrap.style.display = 'block';
+    if (isNew) {
+      // 登場演出: 中央に大きく名前
+      const intro = el('div', 'bossintro', root, b.name);
+      setTimeout(() => { intro.classList.add('out'); }, 2200);
+      setTimeout(() => { intro.remove(); }, 3400);
+    }
   };
   UI.hideBoss = function () {
     curBoss = null;
