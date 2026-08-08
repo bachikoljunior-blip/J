@@ -1292,12 +1292,22 @@
         } else {
           P.yaw = G.angLerp(P.yaw, dir, G.damp(P.mounted ? 5 : 11, dt));
         }
-        G.Actors.groundMove(P, Math.sin(dir) * spd, Math.cos(dir) * spd, dt);
-        mv = Math.min(1, spd / (P.mounted ? 13 : 7.8));
+        // 浅瀬では減速 (ウェード)
+        const wading = P.pos.y < G.World.WATER_Y - 0.15 && P.grounded;
+        const wspd = wading ? spd * 0.55 : spd;
+        G.Actors.groundMove(P, Math.sin(dir) * wspd, Math.cos(dir) * wspd, dt);
+        mv = Math.min(1, wspd / (P.mounted ? 13 : 7.8));
         P.state = 'move';
-        // 足音
-        P.stepT = (P.stepT || 0) + dt * spd;
-        if (P.stepT > (P.mounted ? 3.2 : 2.2) && P.grounded) { P.stepT = 0; G.Audio.sfx('step'); }
+        // 足音 / 水しぶき
+        P.stepT = (P.stepT || 0) + dt * wspd;
+        if (P.stepT > (P.mounted ? 3.2 : 2.2) && P.grounded) {
+          P.stepT = 0;
+          G.Audio.sfx('step');
+          if (wading) {
+            G.FX.burst(P.pos.x, G.World.WATER_Y + 0.1, P.pos.z,
+              { n: 5, color: 0xbfe0ec, speed: 1.6, life: 0.45, size: 2.4, up: 1.2, gravity: 5 });
+          }
+        }
       } else if (P.gliding) {
         // 入力なしでも前方へ滑空
         G.Actors.groundMove(P, Math.sin(P.yaw) * 6.5, Math.cos(P.yaw) * 6.5, dt);

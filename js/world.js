@@ -160,7 +160,7 @@
   };
 
   W.isDeepWater = function (x, z) {
-    return W.heightAt(x, z) < WATER_Y - 0.55;
+    return W.heightAt(x, z) < WATER_Y - 1.1;
   };
 
   /* ======================= バイオーム ======================= */
@@ -175,7 +175,7 @@
     if (h > 40) return 'rock';
     const dMask = G.smoothstep(120, 320, x) * G.smoothstep(80, 260, z);
     if (dMask > 0.5 && h < 22) return 'desert';
-    if (moist > 0.58 && temp > 0.15 && temp < 0.8) return 'forest';
+    if (moist > 0.52 && temp > 0.15 && temp < 0.8) return 'forest';
     return 'grass';
   };
 
