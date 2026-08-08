@@ -472,7 +472,8 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 .intro {
   position: absolute; inset: 0; z-index: 85;
-  background: linear-gradient(180deg, #05080e 0%, #0a1220 55%, #101b2e 100%);
+  /* 半透明にして背後の村 (3Dシーン) が霧越しに透ける */
+  background: linear-gradient(180deg, rgba(5,8,14,0.93) 0%, rgba(10,18,32,0.82) 55%, rgba(16,27,46,0.86) 100%);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px;
   padding: 24px; overflow: hidden;
 }

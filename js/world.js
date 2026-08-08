@@ -662,6 +662,18 @@
   }
 
   const terrainMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  // 雨天の濡れ表現: 地形アルベドを暗く沈める uniform を注入
+  terrainMat.onBeforeCompile = sh => {
+    sh.uniforms.uWet = { value: 0 };
+    sh.fragmentShader = 'uniform float uWet;\n' + sh.fragmentShader.replace(
+      '#include <color_fragment>',
+      '#include <color_fragment>\n  diffuseColor.rgb *= (1.0 - uWet * 0.3);'
+    );
+    terrainMat.userData.shader = sh;
+  };
+  W.setWetness = function (w) {
+    if (terrainMat.userData.shader) terrainMat.userData.shader.uniforms.uWet.value = w;
+  };
 
   /* ======================= 水面 ======================= */
   let waterMesh = null;
@@ -1819,6 +1831,9 @@
       pa.needsUpdate = true;
       rainPts.position.set(cam.x, cam.y, cam.z);
     }
+
+    // 雨天は地形が濡れて暗くなる
+    G.World.setWetness(weather * 0.85);
 
     // 光量 (草/水シェーダ用) と環境同期
     // 地形の Lambert 照明 (hemi+直射) に近い明るさを草/水にも与える

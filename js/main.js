@@ -115,7 +115,9 @@
     G.Bosses.init(scene);
     G.UI.refreshTracker();
     G.UI.refreshHUDStatic();
-    G.UI.setHudVisible(true);
+    // 新規開始時は導入オーバーレイが閉じた時にHUDを出す (半透明の導入越しに
+    // HUDが透けるのを防ぐ)
+    G.UI.setHudVisible(!newGame);
     G.Audio.setMusic('peace');
     warmupChunks();
     started = true;
