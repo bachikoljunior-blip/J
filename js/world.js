@@ -678,7 +678,17 @@
     glow.scale.set(2.6, 2.6, 1);
     scene.add(glow);
     addStatic(x - 1.3, z, 0.45); addStatic(x + 1.3, z, 0.45);
-    W.shrineMeshes[sh.id] = { crystal, glow, baseY: y + 2.0 };
+    // 遠くからでも見える光の柱
+    const beam = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.55, 0.85, 70, 6, 1, true),
+      new THREE.MeshBasicMaterial({
+        color: 0x55bbff, transparent: true, opacity: 0.16,
+        blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+      })
+    );
+    beam.position.set(x, y + 35, z);
+    scene.add(beam);
+    W.shrineMeshes[sh.id] = { crystal, glow, beam, baseY: y + 2.0 };
   }
 
   function buildRuinCircle(x, z, radius, n, seed) {
@@ -923,13 +933,40 @@
       const f = 0.9 + Math.sin(torchT * 9 + t.seed * 7) * 0.15 + Math.sin(torchT * 23 + t.seed) * 0.08;
       t.sprite.scale.set(1.1 * f, 1.4 * f, 1);
     }
-    // 祠クリスタル回転
+    // 祠クリスタル回転 & 光の柱の色 (灯すと金色に)
     for (const id in W.shrineMeshes) {
       const s = W.shrineMeshes[id];
       s.crystal.rotation.y += dt * 1.2;
       s.crystal.position.y = s.baseY + Math.sin(G.time * 1.6) * 0.12;
+      if (s.beam) {
+        const lit = G.State && G.State.shrines && G.State.shrines[id];
+        if (lit && !s.litApplied) {
+          s.litApplied = true;
+          s.beam.material.color.set(0xffd58a);
+          s.beam.material.opacity = 0.1;
+          s.crystal.material.color.set(0xffd58a);
+          s.crystal.material.emissive.set(0xcc8822);
+        }
+        s.beam.material.opacity = (s.litApplied ? 0.09 : 0.15) + Math.sin(G.time * 1.3 + s.baseY) * 0.03;
+      }
+    }
+    // 未開封の宝箱のきらめき
+    sparkleT -= dt;
+    if (sparkleT <= 0) {
+      sparkleT = 1.4;
+      for (const c of W.chests) {
+        const cm = W.chestMeshes[c.id];
+        if (!cm || cm.opened) continue;
+        if (G.dist2(camX, camZ, c.x, c.z) > 45 * 45) continue;
+        const y = c.baseY !== undefined ? c.baseY : (c.baseY = W.heightAt(c.x, c.z));
+        G.FX.burst(c.x, y + 0.9, c.z, {
+          n: 2, color: 0xffe08a, speed: 0.5, up: 0.8, gravity: -0.4,
+          life: 1.1, size: 1.8, drag: 0.5
+        });
+      }
     }
   };
+  let sparkleT = 0;
 
   /* 草・水のフォグ/明るさ同期 (Sky から呼ぶ) */
   W.syncEnv = function (fogColor, fogNear, fogFar, light) {
