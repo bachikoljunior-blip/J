@@ -481,9 +481,20 @@
       cx = p.pos.x + (cx - p.pos.x) * f;
       cz = p.pos.z + (cz - p.pos.z) * f;
       cy = eyeY + (cy - eyeY) * f;
-      // 地表すれすれだと斜面の稜が自機下半身を隠す — 十分な余裕で持ち上げる
+      // 地表すれすれだと斜面の稜が自機下半身を隠す — 十分な余裕で持ち上げ、
+      // さらに短縮後の視線に対してもう一度リフトを掛けて全身を確保する
       const gh2 = G.World.heightAt(cx, cz);
       if (cy < gh2 + 1.4) cy = gh2 + 1.4;
+      let lift2 = 0;
+      for (let k = 0; k < 3; k++) {
+        const t2 = 0.35 + k * 0.3;
+        const sx2 = p.pos.x + (cx - p.pos.x) * t2;
+        const sz2 = p.pos.z + (cz - p.pos.z) * t2;
+        const sy2 = eyeY + (cy - eyeY) * t2;
+        const need2 = (G.World.heightAt(sx2, sz2) + 0.45 - sy2) / t2;
+        if (need2 > lift2) lift2 = need2;
+      }
+      if (lift2 > 0) cy += Math.min(lift2, 3.5);
     } else if (lift > 0) cy += lift;
 
     // 木や岩が視線を遮るならカメラを手前へ寄せる
@@ -511,7 +522,7 @@
     // ボス頭部のフレーミング: 接近戦で頭が画面上端に見切れるなら、来フレームで
     // その分だけカメラを引く (フィードバックで数フレームかけて収束・離脱で減衰)。
     // 滞空ボスは引きでは追い切れないため、注視点を上へずらして仰ぎ見る
-    let overAng = -1, lookUp = 0;
+    let overAng = -1, lookUp = 0, fbBoss = null;
     if (bigBoss) {
       let fb = (p.target && p.target.alive && p.target.D && (p.target.D.barH || 0) > 3) ? p.target : null;
       if (!fb) {
@@ -523,6 +534,7 @@
         }
       }
       if (fb) {
+        fbBoss = fb;
         lookUp = Math.min(7, Math.max(0, fb.pos.y - p.pos.y) * 0.6);
         // 立ち上がりモーション中は頭部が barH より上に出るため 1.5倍で見積もる
         const headY = fb.pos.y + (fb.D.barH || 3) * 1.5 + 1.0;
@@ -544,8 +556,13 @@
     }
     camera.lookAt(p.pos.x, p.pos.y + 1.5 + lookUp, p.pos.z);
 
-    // 視線を遮る建造物 (柱・塔・家屋) を半透明化
-    G.World.updateFaders(dt, p.pos.x, p.pos.z, cx, cz, eyeY, cy);
+    // 視線を遮る建造物 (柱・塔・家屋) を半透明化。交戦ボスへの視線も守る
+    if (fbBoss) {
+      G.World.updateFaders(dt, p.pos.x, p.pos.z, cx, cz, eyeY, cy,
+        fbBoss.pos.x, fbBoss.pos.z, fbBoss.pos.y + 2);
+    } else {
+      G.World.updateFaders(dt, p.pos.x, p.pos.z, cx, cz, eyeY, cy);
+    }
 
     // 疾走・騎乗・滑空の速度感: FOVを滑らかに広げる
     const tFov = 60 + (p.fovBoost || 0) * 12;

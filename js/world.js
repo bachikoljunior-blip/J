@@ -889,18 +889,24 @@
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     W.faders.push({ mats, x, z, r, topY, cur: 1 });
   }
-  W.updateFaders = function (dt, ax, az, bx, bz, ay, by) {
-    const dx = bx - ax, dz = bz - az;
-    const len2 = Math.max(dx * dx + dz * dz, 0.01);
+  /* (ex,ez,eh) 指定時はカメラ→その地点 (交戦ボス) の視線も遮蔽判定に含める
+     — ボス戦で黒曜石柱がブレスの見せ場を塞ぐ指摘への対応 */
+  W.updateFaders = function (dt, ax, az, bx, bz, ay, by, ex, ez, eh) {
+    const segs = [[ax, az, ay]];
+    if (ex !== undefined) segs.push([ex, ez, eh]);
     const k = G.damp(9, dt);
     for (const f of W.faders) {
       let target = 1;
-      if (Math.abs(f.x - ax) < 60 && Math.abs(f.z - az) < 60) {
-        const t = G.clamp(((f.x - ax) * dx + (f.z - az) * dz) / len2, 0.02, 0.98);
-        const px = ax + dx * t, pz = az + dz * t;
+      for (let s = 0; s < segs.length && target === 1; s++) {
+        const [sx, sz, sy] = segs[s];
+        if (Math.abs(f.x - sx) >= 60 || Math.abs(f.z - sz) >= 60) continue;
+        const dx = bx - sx, dz = bz - sz;
+        const len2 = Math.max(dx * dx + dz * dz, 0.01);
+        const t = G.clamp(((f.x - sx) * dx + (f.z - sz) * dz) / len2, 0.02, 0.98);
+        const px = sx + dx * t, pz = sz + dz * t;
         const rr = f.r + 0.55;
         // 水平に視線と交差し、かつ視線がその高さを越えていない場合のみフェード
-        if (G.dist2(px, pz, f.x, f.z) < rr * rr && ay + (by - ay) * t < f.topY + 0.4) target = 0.24;
+        if (G.dist2(px, pz, f.x, f.z) < rr * rr && sy + (by - sy) * t < f.topY + 0.4) target = 0.24;
       }
       if (target === 1 && f.cur > 0.995) continue;
       f.cur += (target - f.cur) * k;
@@ -1611,8 +1617,8 @@
           s.crystal.material.color.set(0xffd58a);
           // エミッシブ控えめ — 点灯直後にグロー+加算が重なると祠全体が
           // 白いブロブに沈む
-          s.crystal.material.emissive.set(0x8a5c18);
-          if (s.glow) s.glow.scale.set(0.9, 0.9, 1);
+          s.crystal.material.emissive.set(0x6a4614);
+          if (s.glow) { s.glow.scale.set(0.72, 0.72, 1); s.glow.material.opacity = 0.3; }
         }
         // 近距離では減衰させ、至近で祠が白飛びしないように
         const bd = G.dist(camX, camZ, s.beam.position.x, s.beam.position.z);

@@ -1726,7 +1726,8 @@
       P._nightLit = nightLit;
       rig.group.traverse(o => {
         if (o.isMesh && o.material && o.material.emissive && !o.material.userData._noNight) {
-          o.material.emissive.setHex(nightLit ? 0x1e2836 : 0x000000);
+          // 控えめに — 強すぎると至近で陰影が平坦化し単色の板に見える
+          o.material.emissive.setHex(nightLit ? 0x161e2a : 0x000000);
         }
       });
     }
@@ -2106,6 +2107,9 @@
         }
         o.material.transparent = on ? true : o.userData._tr0;
         o.material.opacity = on ? Math.min(0.3, o.userData._op0) : o.userData._op0;
+        // transparent の切替はシェーダ再コンパイルが必要 — これが無いと
+        // opacity を書いても視覚に反映されない
+        o.material.needsUpdate = true;
       }
     });
   }
@@ -2371,7 +2375,7 @@
       });
       // 足元に残留リング (低FPS計測でも痕跡が写る)。氷床上でも影と見分く濃い霜色
       G.Scorch.add(b.pos.x, b.pos.z,
-        b.bossId === 'fenrir' ? 0x6e9cc4 : b.bossId === 'dragon' ? 0x241d18 : 0x4a4030, 3.2);
+        b.bossId === 'fenrir' ? 0x4a7fae : b.bossId === 'dragon' ? 0x241d18 : 0x4a4030, 3.2);
       // 竜は体側の亀裂を赤熱させる (黒い体表でもフェーズ変化が体から読める)
       const cm = b.rig && b.rig.group && b.rig.group.userData.crackMat;
       if (cm) { cm.color.set(0xff5a1a); b._crackHot = true; }
