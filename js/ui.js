@@ -552,9 +552,16 @@
     ctx.closePath(); ctx.fill();
     ctx.restore();
     ctx.restore();
-    // 枠
-    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-    ctx.lineWidth = 1.5;
+    // 枠 (ボス交戦中は赤く脈動して戦闘状態を示す)
+    let bossOn = false;
+    for (const b of G.Enemies.bosses) { if (b.alive && b.engaged) { bossOn = true; break; } }
+    if (bossOn) {
+      ctx.strokeStyle = `rgba(255,70,60,${0.5 + Math.sin(G.time * 5) * 0.3})`;
+      ctx.lineWidth = 3;
+    } else {
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx.lineWidth = 1.5;
+    }
     ctx.beginPath(); ctx.arc(S / 2, S / 2, S / 2 - 1, 0, Math.PI * 2); ctx.stroke();
   }
 

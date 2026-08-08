@@ -187,7 +187,8 @@
     rock:   new THREE.Color(0x8b8b90),
     snow:   new THREE.Color(0xeef2f6),
     beach:  new THREE.Color(0xdccf98),
-    under:  new THREE.Color(0x958d5e)
+    under:  new THREE.Color(0x958d5e),
+    forest2: new THREE.Color(0x39642e)
   };
 
   const _c = new THREE.Color();
@@ -245,6 +246,11 @@
     if (b === 'grass') {
       const t = G.fbm(x * 0.012 + 55, z * 0.012 + 55, 2) * 0.5 + 0.5;
       out.lerp(BIOME_COL.grass2, t * 0.8);
+    }
+    // 森の林床は苔色のむらで単色ベタ塗りを避ける
+    if (b === 'forest') {
+      const t = G.fbm(x * 0.03 + 9, z * 0.03, 2) * 0.5 + 0.5;
+      out.lerp(BIOME_COL.forest2, t * 0.75);
     }
     // 斜面は岩肌に
     if (ny === undefined) ny = W.slopeYAt(x, z);

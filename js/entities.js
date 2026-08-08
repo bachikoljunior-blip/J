@@ -535,7 +535,10 @@
       const sw = Math.sin(wt) * 0.9 * mv;
       legFL.rotation.x = sw; legBR.rotation.x = sw;
       legFR.rotation.x = -sw; legBL.rotation.x = -sw;
-      body.position.y = 0.62 + Math.abs(Math.sin(wt)) * 0.06 * mv;
+      // 待機中も胸が呼吸で上下する (静止した置物に見えない)
+      const breath = Math.sin(t * 1.9 + (p.seed || 0)) * 0.03 * (1 - mv);
+      body.position.y = 0.62 + Math.abs(Math.sin(wt)) * 0.06 * mv + breath;
+      body.scale.y = 1 + breath * 0.8;
       tail.rotation.y = Math.sin(t * 3) * 0.3;
       if (p.state === 'windup') {
         g.rotation.x = 0.12;
@@ -1083,12 +1086,13 @@
       pool.push({ mesh: m, t: 1 });
     }
   };
-  S.add = function (x, z) {
+  S.add = function (x, z, color, scale) {
     const p = pool[idx++ % pool.length];
     p.t = 0;
     p.mesh.visible = true;
+    p.mesh.material.color.set(color !== undefined ? color : 0x14100c);
     p.mesh.position.set(x, G.World.heightAt(x, z) + 0.08, z);
-    p.mesh.scale.setScalar(0.8 + Math.random() * 0.5);
+    p.mesh.scale.setScalar((scale || 1) * (0.8 + Math.random() * 0.5));
   };
   S.update = function (dt) {
     for (const p of pool) {
@@ -2143,15 +2147,19 @@
     let mv = 0;
     const phase2 = b.hp < b.maxHp * 0.5;
 
-    // フェーズ2移行の一回演出 (咆哮+シェイク+バースト — 戦闘の緊張曲線)
+    // フェーズ2移行の一回演出 (咆哮+シェイク+バースト+残留デカール)
     if (phase2 && !b.phase2Cued && b.engaged && b.alive) {
       b.phase2Cued = true;
       G.Audio.sfx('roar');
       G.events.emit('shake', 0.6);
+      // 白飽和を避けるため彩度のある色で (氷=青 / 竜=橙)
+      const c = b.bossId === 'fenrir' ? 0x55a8e8 : b.bossId === 'dragon' ? 0xff6a20 : 0xc8b070;
       G.FX.burst(b.pos.x, b.pos.y + 2, b.pos.z, {
-        n: 40, color: b.bossId === 'fenrir' ? 0x9fd8ff : b.bossId === 'dragon' ? 0xff7730 : 0xd8c890,
-        speed: 9, up: 0.8, gravity: 2, life: 0.9, size: 4.5
+        n: 40, color: c, speed: 9, up: 0.8, gravity: 2, life: 0.9, size: 4
       });
+      // 足元に残留リング (低FPS計測でも痕跡が写る)
+      G.Scorch.add(b.pos.x, b.pos.z,
+        b.bossId === 'fenrir' ? 0xbfdcec : b.bossId === 'dragon' ? 0x3a1c10 : 0x4a4030, 2.6);
     }
 
     // スコルグ: 半減で子サソリ召喚
