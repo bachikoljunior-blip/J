@@ -202,6 +202,16 @@
   function updateCamera(dt) {
     const C = G.Camera;
     const p = G.Player;
+    if (!started) {
+      // タイトル画面: 村をゆっくり旋回
+      C.yaw += dt * 0.06;
+      const cx = p.pos.x - Math.sin(C.yaw) * 16;
+      const cz = p.pos.z - Math.cos(C.yaw) * 16;
+      const cy = Math.max(G.World.heightAt(cx, cz) + 2.5, p.pos.y + 5);
+      camera.position.set(cx, cy, cz);
+      camera.lookAt(p.pos.x, p.pos.y + 2, p.pos.z);
+      return;
+    }
     C.yaw -= G.Input.camDX;
     C.pitch += G.Input.camDY;
     C.pitch = G.clamp(C.pitch, -0.1, 1.15);
@@ -261,6 +271,21 @@
     }
     S.weather += (S.weatherTarget - S.weather) * G.damp(0.25, dt);
     G.Audio.setRain(S.weatherTarget === 1);
+
+    // 夜の蛍 (雨天以外)
+    const night = S.tod > 20 || S.tod < 4.5;
+    if (night && S.weather < 0.3 && Math.random() < dt * 2.2) {
+      const p = G.Player.pos;
+      const a = Math.random() * Math.PI * 2, d = 4 + Math.random() * 16;
+      const x = p.x + Math.cos(a) * d, z = p.z + Math.sin(a) * d;
+      const h = G.World.heightAt(x, z);
+      if (h > G.World.WATER_Y) {
+        G.FX.burst(x, h + 0.6 + Math.random() * 1.2, z, {
+          n: 1, color: 0xaaffcc, speed: 0.4, up: 0.35, gravity: -0.15,
+          life: 2.6, size: 1.6, drag: 0.4, spread: 1
+        });
+      }
+    }
   }
 
   /* ---------------- 音楽状態 ---------------- */

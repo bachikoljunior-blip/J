@@ -148,7 +148,11 @@
   Q.start = function (id) {
     if (Q.state[id]) return;
     Q.state[id] = { status: 'active', progress: 0 };
-    G.UI.toast('クエスト開始: ' + DEFS[id].name, 'quest');
+    const D = DEFS[id];
+    // 対象アイテムを既に持っている場合は即「報告待ち」に
+    if (D.fetch && G.Inv.count(D.fetch) > 0) Q.state[id].status = 'ready';
+    if (D.collect && G.Inv.count(D.collect) >= D.count) Q.state[id].status = 'ready';
+    G.UI.toast('クエスト開始: ' + D.name, 'quest');
     G.Audio.sfx('uiOpen');
     G.events.emit('questChange');
   };
@@ -209,10 +213,10 @@
     const out = [];
     for (const id in Q.state) {
       const st = Q.state[id];
-      if (st.status !== 'active') continue;
+      if (st.status === 'done') continue;
       const D = DEFS[id];
-      if (D.mark) out.push({ x: D.mark.x, z: D.mark.z, name: D.name });
-      if (st.status === 'ready' || (D.giver && st.status === 'ready')) out.push({ x: 0, z: 0, name: '村へ報告' });
+      if (st.status === 'active' && D.mark) out.push({ x: D.mark.x, z: D.mark.z, name: D.name });
+      if (st.status === 'ready') out.push({ x: 0, z: 0, name: '村へ報告' });
     }
     return out;
   };

@@ -31,6 +31,10 @@
 
     startSequencer();
     started = true;
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && ctx && ctx.state === 'suspended') ctx.resume();
+    });
   };
 
   A.setMusicVol = v => { if (musicBus) musicBus.gain.value = v; };
@@ -270,7 +274,7 @@
 
     seqTimer = setInterval(() => {
       if (!ctx || ctx.state !== 'running') return;
-      if (musicState === 'none') { nextTime = ctx.currentTime + 0.1; return; }
+      if (musicState === 'none' || document.hidden) { nextTime = ctx.currentTime + 0.1; return; }
 
       // 目標インテンシティへ滑らかに移行
       const target = (musicState === 'combat' || musicState === 'boss') ? 1 : 0;

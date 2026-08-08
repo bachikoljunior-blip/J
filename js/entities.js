@@ -699,6 +699,7 @@
     P.iframe = 0.55;
     G.Audio.sfx('hitPlayer');
     G.events.emit('shake', 0.35);
+    if (navigator.vibrate) navigator.vibrate(45);
     G.UI.dmgNum(P.pos.x, P.pos.y + 1.6, P.pos.z, real, { player: true });
     G.FX.burst(P.pos.x, P.pos.y + 1, P.pos.z, { n: 10, color: 0xcc3333, speed: 3, life: 0.5 });
     if (P.hp <= 0) {
