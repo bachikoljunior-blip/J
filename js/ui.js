@@ -408,7 +408,10 @@
     const tod = G.State.tod;
     const hh = Math.floor(tod), mm = Math.floor((tod - hh) * 60);
     clockEl.textContent = `${G.State.day}日目 ${hh}:${mm < 10 ? '0' : ''}${mm}`;
-    weatherEl.textContent = G.State.weather > 0.5 ? '☂' : (tod > 19 || tod < 5 ? '☾' : '☀');
+    // アイコンは実際の降雨粒子量と同期 (状態値だけ見ると、粒子が残っている
+    // のに晴れアイコンになる desync が起きる)
+    const raining = G.State.weather > 0.5 || (G.Sky.rainAmt || 0) > 0.25;
+    weatherEl.textContent = raining ? '☂' : (tod > 19 || tod < 5 ? '☾' : '☀');
 
     // ボスバー (黄色の削り残像つき)
     if (curBoss) {
@@ -494,13 +497,13 @@
       const fx = (C.cx - p.pos.x) / view * S + S / 2;
       const fz = (C.cz - p.pos.z) / view * S + S / 2;
       const fr = 46 / view * S;
-      ctx.fillStyle = '#55628a';
+      ctx.fillStyle = '#67759f';
       ctx.beginPath(); ctx.arc(fx, fz, fr, 0, Math.PI * 2); ctx.fill();
       // 入口通路 (北側の縁から主洞へ)
       const wpx = Math.max(4, 14 / view * S);
       const ez = (C.z0 - 18 - p.pos.z) / view * S + S / 2;
       ctx.fillRect(fx - wpx / 2, Math.min(ez, fz), wpx, Math.abs(fz - ez));
-      ctx.strokeStyle = '#b8c8ea'; ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#dce6fa'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(fx, fz, fr, 0, Math.PI * 2); ctx.stroke();
     } else {
       const scale = (256 / (MAP_R * 2));
@@ -957,7 +960,15 @@
     else if (tab === 'map') renderMap();
     else if (tab === 'quests') renderQuests();
     else if (tab === 'settings') renderSettings();
+    updateScrollHint();
   };
+  /* 下端フェードはスクロール余地がある時だけ (2件しかない装備画面で
+     最終カードが減光され「偽のスクロール示唆」になる指摘) */
+  function updateScrollHint() {
+    requestAnimationFrame(() => {
+      menuBody.classList.toggle('canscroll', menuBody.scrollHeight > menuBody.clientHeight + 4);
+    });
+  }
 
   function renderEquip() {
     const s = el('div', 'stats', menuBody);
@@ -1005,7 +1016,7 @@
 
   /* アイテム種別ごとの絵文字アイコンとタイル色 */
   const ITEM_ICONS = {
-    potion: ['🧪', '#7a2e3e'], hipotion: ['🧪', '#8e2438'], herb: ['🌿', '#2e5a38'],
+    potion: ['🧪', '#7a2e3e'], hipotion: ['⚗️', '#8e2438'], herb: ['🌿', '#2e5a38'],
     pelt: ['🟤', '#5a4430'], bone: ['🦴', '#565a62'], magicstone: ['💠', '#2e4a72'],
   };
   function itemIcon(id, it) {
@@ -1063,7 +1074,7 @@
     drawBigMap();
     // 凡例は横に並べて地図を大きく取る
     el('div', 'maplegend', wrap,
-      '<div>◆ 任務</div><div>● 祠<br><span class="mlsub">タップで<br>ファストトラベル</span></div><div>▲ 現在地</div>');
+      '<div>◆ 任務</div><div>● 祠(灯)<br><span class="mlsub">タップで<br>ファストトラベル</span></div><div>○ 祠(未灯)</div><div>▲ 現在地</div>');
     // 祠タップでファストトラベル
     bigMapCanvas.onpointerdown = e => {
       e.stopPropagation();
@@ -1091,8 +1102,11 @@
     for (const s of G.World.shrines) {
       const [x, z] = worldToMap(s.x, s.z, 512);
       if (!G.State.shrines[s.id]) {
-        ctx.strokeStyle = 'rgba(150,195,225,0.5)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(x, z, 6, 0, Math.PI * 2); ctx.stroke();
+        // 未灯: 暗色縁+半透明グレー塗り (地形ノイズと区別できるコントラスト)
+        ctx.fillStyle = 'rgba(210,220,235,0.4)';
+        ctx.beginPath(); ctx.arc(x, z, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(20,30,45,0.85)'; ctx.lineWidth = 2;
+        ctx.stroke();
         continue;
       }
       ctx.fillStyle = '#6fe3ff';
@@ -1275,6 +1289,7 @@
       b.addEventListener('pointerdown', e => { e.stopPropagation(); if (G.Shop.sell(id)) UI.openShop(); });
     }
     if (!any) el('div', 'mnote', sell, '売れる物がない。');
+    updateScrollHint();
   };
 
   /* ---------- 鍛冶 ---------- */
@@ -1329,6 +1344,7 @@
       }
     }
     el('div', 'mnote', menuBody, '強化は装備中の武器・防具に施される。素材は敵のドロップや売店で。');
+    updateScrollHint();
   };
 
   /* ---------- 死亡/クリア ---------- */

@@ -889,13 +889,14 @@
     g.add(chestPlug);
     // 体側の亀裂 (通常はほぼ体色。フェーズ2で赤熱させ、黒い体でも
     // フェーズ変化が体表から読めるようにする)
-    const crackMat = new THREE.MeshBasicMaterial({ color: 0x2e2430 });
+    // fog:false — 赤熱亀裂は地表フォグに埋もれず距離があっても「熱」と読める
+    const crackMat = new THREE.MeshBasicMaterial({ color: 0x2e2430, fog: false });
     g.userData.crackMat = crackMat;
     // ジグザグの割れ目: 各体側に短いセグメントを交互の傾きで連結し、
     // 均一な矩形パッチではなく「亀裂」として読める形に
     for (const side of [-1, 1]) {
       for (let i = 0; i < 5; i++) {
-        const cr = new THREE.Mesh(boxGeo(0.055, 0.34, 0.16), crackMat);
+        const cr = new THREE.Mesh(boxGeo(0.075, 0.4, 0.2), crackMat);
         cr.position.set(0.51 * side, 1.18 + (i % 2) * 0.22, 0.75 - i * 0.36);
         cr.rotation.x = (i % 2 ? 0.7 : -0.7);
         cr.rotation.y = side * 0.08;
@@ -1261,6 +1262,19 @@
       weapon: wpn ? (wpn.kind || 'sword') : 'sword',
       glider: true
     });
+    // 自機の恒常識別リング: 乱戦で人型敵と配色が近くても、足元のリングで
+    // 「自分」が一目で判別できる (ロックオンUIとの誤読も防ぐ)
+    const idRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.5, 0.62, 24),
+      new THREE.MeshBasicMaterial({
+        color: 0x8fd0ff, transparent: true, opacity: 0.28,
+        depthWrite: false, side: THREE.DoubleSide
+      })
+    );
+    idRing.rotation.x = -Math.PI / 2;
+    idRing.position.y = 0.09;
+    idRing.renderOrder = 1;
+    rig.group.add(idRing);
     scene.add(rig.group);
   };
 
@@ -1900,7 +1914,7 @@
       if (!e.mark) {
         e.mark = new THREE.Sprite(getMarkMat());
         e.mark.scale.set(0.62, 0.88, 1);
-        e.mark.position.y = (T.barH || 1.6) + 0.55;
+        e.mark.position.y = (T.barH || 1.6) + 0.8;   // HPバーと密着しない間隔
         e.rig.group.add(e.mark);
       }
     }
@@ -2008,7 +2022,7 @@
     if (e.mark) {
       if (e.aggroMarkT > 0) e.aggroMarkT -= dt;
       e.mark.visible = e.aggroMarkT > 0 && G.Player.target !== e;
-      if (e.mark.visible) e.mark.position.y = (T.barH || 1.6) + 0.55 + Math.sin(G.time * 6) * 0.06;
+      if (e.mark.visible) e.mark.position.y = (T.barH || 1.6) + 0.8 + Math.sin(G.time * 6) * 0.06;
     }
     e.rig.pose({
       state: e.state === 'windup' ? 'windup' : e.state,
@@ -2082,7 +2096,7 @@
   const DEFS = {
     fenrir: {
       name: '白狼王フェンリル', hp: 220, atk: 22, speed: 7.2, xp: 300, gold: 250,
-      x: -430, z: -140, arenaR: 34, radius: 1.3, pushR: 2.7, barH: 3.4,
+      x: -430, z: -140, arenaR: 34, radius: 1.3, pushR: 3.1, barH: 3.4,
       build: () => G.Rigs.wolf({ scale: 2.9, fur: 0xd8d8e0, snout: 0xdde2ea, eye: 0x44ddff, mane: true })
     },
     golem: {
@@ -2355,8 +2369,9 @@
     if (b._crackHot) {
       const cm2 = b.rig.group.userData.crackMat;
       if (cm2) {
-        const k = 0.72 + Math.sin(G.time * 6 + 1) * 0.28;
-        cm2.color.setRGB(k, 0.36 * k, 0.09 * k);
+        // 完全消灯しない明滅 (低FPS撮影がオフ位相を引いても常に読める)
+        const k = 0.88 + Math.sin(G.time * 6 + 1) * 0.12;
+        cm2.color.setRGB(k, 0.38 * k, 0.1 * k);
       }
     }
     G.Actors.updateShadow(b);

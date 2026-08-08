@@ -389,6 +389,8 @@
     G.Input.camDX = 0; G.Input.camDY = 0;
     C.dist = G.clamp(C.dist + G.Input.wheel, 4, 13);
     G.Input.wheel = 0;
+    // 洞窟内は近め固定 (通路でカメラが引き離され自機が豆粒になるのを防ぐ)
+    const camDist = G.inCave ? Math.min(C.dist, 6.5) : C.dist;
 
     // ロックオン時は対象へ向く (巨大ボスはカメラを引いて全身を映す)
     let bigBoss = p.target && p.target.alive && p.target.D && (p.target.D.barH || 0) > 3;
@@ -427,7 +429,7 @@
         if (b.alive && b.engaged && (b.D.barH || 0) > 5) { bossBonus = 8.5; break; }
       }
     }
-    const dist = C.dist + (p.mounted ? 1.8 : 0) + bossBonus + framePull;
+    const dist = camDist + (p.mounted ? 1.8 : 0) + bossBonus + framePull;
     let cx = p.pos.x - fx * dist;
     let cz = p.pos.z - fz * dist;
     let cy = p.pos.y + 1.6 + fy * dist;
@@ -689,18 +691,24 @@
     // 寄与を大きくし、低fps環境でも数秒で実負荷に収束させる
     const emaA = 1 - Math.exp(-Math.min(lastRawGap, 1000) / 800);
     perfEMA += (_t2 - _t0 - perfEMA) * emaA;
-    perfAdjustT += dt;
+    // 調整間隔も実経過時間で計る (ゲームdtはクランプされるため低fps環境では
+    // 1.2秒分の蓄積に十数秒かかり、段階降下が事実上進まない)
+    perfAdjustT += Math.min(lastRawGap, 1000) / 1000;
     // RAF間隔が異常に長い環境 (バックグラウンド/ヘッドレス計測) では調整しない。
     // ?drs=1 でガードを無効化 (ヘッドレスでDRS動作そのものを検証するテスト用フック)
     if (perfAdjustT > 1.2 && started && (lastRawGap < 150 || G.forceDRS)) {
       perfAdjustT = 0;
       let want = resScale;
-      // 60fps予算 (16.6ms) を基準に、50fps相当を割ったら降下・十分軽ければ復帰
-      if (perfEMA > 26 && resScale > 0.6) want = Math.max(0.6, resScale - 0.2);
+      // 60fps予算 (16.6ms) を基準に、50fps相当を割ったら降下・十分軽ければ復帰。
+      // 大幅超過 (閾値1.5倍) は2段降下で素早く収束させる
+      if (perfEMA > 26 && resScale > 0.6) want = Math.max(0.6, resScale - (perfEMA > 39 ? 0.4 : 0.2));
       else if (perfEMA < 16 && resScale < 1) want = Math.min(1, resScale + 0.1);
       if (want !== resScale) {
         resScale = want;
         renderer.setPixelRatio(basePixelRatio * resScale);
+        // 実バッファへの適用証跡 (resScaleが数値だけでないことの検証用)
+        console.log('[dbg] DRS resScale', resScale, 'buffer',
+          renderer.domElement.width + 'x' + renderer.domElement.height);
       }
       G.perf.resScale = resScale;   // 計測ハーネスからDRSの実動作を検分できるように
     }

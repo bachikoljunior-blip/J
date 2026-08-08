@@ -245,6 +245,10 @@
   const CHAR_COL = new THREE.Color(0x2e2824);
   const _dirtCol = new THREE.Color(0x6a5844);
   const _snowShade = new THREE.Color(0xb4c4da);
+  // 崖の地層3色 (雪・空と色相が分離する暖灰〜茶)
+  const _strata1 = new THREE.Color(0x84705c);
+  const _strata2 = new THREE.Color(0x635a50);
+  const _strata3 = new THREE.Color(0x75685a);
   const _winWarm = new THREE.Color(0xffd88a);
   function groundColor(x, z, h, out, ny) {
     if (W.inCaveRegion(x, z)) {
@@ -297,11 +301,13 @@
     if (b === 'snow') {
       out.lerp(BIOME_COL.rock, G.smoothstep(0.35, 0.65, slope));
     }
-    // 急斜面 (崖面) には地層の横縞 — 特徴のない灰色一枚板に見せない
+    // 急斜面 (崖面) は色相を分離した岩アルベド+ワールドYの段階色地層。
+    // sin縞の明暗だけでは遠景LODの粗い頂点で潰れて無彩色のスミアになる —
+    // 大きな帯単位で色そのものを変えると粗い頂点密度でも層が読める
     const steep = G.smoothstep(0.3, 0.55, slope);
     if (steep > 0.01) {
-      const band = Math.sin(h * 0.85 + G.noise2(x * 0.05, z * 0.05) * 2.4) * 0.5 + 0.5;
-      out.multiplyScalar(1 - steep * (0.1 + band * 0.3));
+      const bi = ((Math.floor((h + G.noise2(x * 0.045, z * 0.045) * 5) / 8) % 3) + 3) % 3;
+      out.lerp(bi === 0 ? _strata1 : bi === 1 ? _strata2 : _strata3, steep * 0.6);
     }
     // 水中は砂色へ
     if (h < WATER_Y + 0.4) {
@@ -827,19 +833,23 @@
           vec3 n = normalize(vNorm);
           vec3 vd = normalize(cameraPosition - vWorld);
           // 角度依存フレネル: 浅い角度ほど空を強く映す。反射色は空色に
-          // 青バイアスを混ぜる — 夕刻に純粋な暖色フォグを映すと水面が
-          // 砂浜と同化して水と読めなくなる
-          vec3 skyRef = mix(uFogColor, uFogColor * vec3(0.55, 0.78, 1.1), 0.5);
+          // 弱い青バイアス — 夕刻に純粋な暖色フォグを映すと砂浜と同化するが、
+          // 青すぎると今度は夕空の色を全く拾わない
+          vec3 skyRef = mix(uFogColor, uFogColor * vec3(0.55, 0.78, 1.1), 0.35);
           float fr = 0.2 + 0.62 * pow(1.0 - max(dot(vd, n), 0.0), 3.0);
           fr += smoothstep(12.0, 140.0, vDist) * 0.3;
           c = mix(c, skyRef, clamp(fr, 0.0, 0.85));
-          // 太陽のスペキュラ: 鋭い芯 + 広いサンパス帯の2ローブ。
-          // 太陽が低いほど広帯を増幅 (夕刻の湖面に長い光条が伸びる)
+          // 太陽のスペキュラ: 鋭い芯 + カメラ→太陽方位に整列した細長い光条。
+          // 広ローブの面発光は湖面全体に散って「拡散した白いシート」になる —
+          // 光条は方位整列 (幅) × 波形 (きらめき) で明示的に描く
           vec3 sd = normalize(uSunDir);
           vec3 h = normalize(vd + sd);
           float ndh = max(dot(n, h), 0.0);
-          float lowSun = clamp(1.6 - sd.y * 2.2, 0.6, 1.6);
-          float spec = pow(ndh, 110.0) * 0.9 + pow(ndh, 10.0) * 0.5 * lowSun;
+          float lowSun = clamp(1.7 - sd.y * 2.4, 0.5, 1.7);
+          vec2 toFrag = normalize(vWorld.xz - cameraPosition.xz);
+          float az = pow(max(dot(toFrag, normalize(sd.xz)), 0.0), 42.0);
+          float sparkle = 0.35 + 0.65 * smoothstep(0.0, 0.28, abs(vWave));
+          float spec = pow(ndh, 110.0) * 0.9 + az * sparkle * 0.5 * lowSun;
           c += uSunTint * spec * uSunI;
           // 波頭の白泡: 光量に殆ど依存しない自己発光的な白
           // (夕刻・曇天でuLightに比例させると泡が一度も見えない)
@@ -1565,9 +1575,12 @@
         if (lit && !s.litApplied) {
           s.litApplied = true;
           s.beam.material.color.set(0xffd58a);
-          s.beam.material.opacity = 0.1;
+          s.beam.material.opacity = 0.08;
           s.crystal.material.color.set(0xffd58a);
-          s.crystal.material.emissive.set(0xcc8822);
+          // エミッシブ控えめ — 点灯直後にグロー+加算が重なると祠全体が
+          // 白いブロブに沈む
+          s.crystal.material.emissive.set(0x8a5c18);
+          if (s.glow) s.glow.scale.set(0.9, 0.9, 1);
         }
         // 近距離では減衰させ、至近で祠が白飛びしないように
         const bd = G.dist(camX, camZ, s.beam.position.x, s.beam.position.z);
@@ -2011,6 +2024,7 @@
     const wantPrecip = weather > 0.5 ? 1 : (snowy ? 0.7 : 0);
     // 止むときは速く消す (晴天の空に雨筋が残留しない)
     rainOn += (wantPrecip - rainOn) * G.damp(wantPrecip < rainOn ? 4.5 : 1.5, dt);
+    Sky.rainAmt = rainOn;   // HUD天候アイコンを実際の降雨粒子量と同期させる
     const snowMode = snowy && weather <= 0.5;
     // 夜間は雨粒を明るく・不透明にして暗背景でも見えるようにする
     const darkF = 1 - G.clamp(s.hem * 1.7, 0, 1);
