@@ -993,34 +993,45 @@
     );
     dome.position.set(cx, 58, cz);
     scene.add(dome);
-    // 石筍
+    // 石筍 (密度を上げて洞窟の情報量を出す)
     const rnd = G.srand(777);
-    for (let i = 0; i < 12; i++) {
-      const a = rnd() * Math.PI * 2, r = 8 + rnd() * 30;
+    const stalMat = new THREE.MeshLambertMaterial({ color: 0x565a66 });
+    for (let i = 0; i < 26; i++) {
+      const a = rnd() * Math.PI * 2, r = 6 + rnd() * 34;
       const px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r;
-      const h = 1.5 + rnd() * 3.5;
-      const cone = shadowify(new THREE.Mesh(new THREE.ConeGeometry(0.6 + rnd() * 0.7, h, 5),
-        new THREE.MeshLambertMaterial({ color: 0x565a66 })));
+      const h = 1.2 + rnd() * 3.8;
+      const cone = shadowify(new THREE.Mesh(new THREE.ConeGeometry(0.45 + rnd() * 0.8, h, 5), stalMat));
       cone.position.set(px, caveHeight(px, pz) + h / 2 - 0.1, pz);
+      cone.rotation.y = rnd() * 3;
       scene.add(cone);
-      addStatic(px, pz, 0.8);
+      if (h > 2) addStatic(px, pz, 0.7);
     }
     // 光る水晶
     const crystalMat = new THREE.MeshLambertMaterial({ color: 0x77ccff, emissive: 0x3377bb });
-    for (let i = 0; i < 6; i++) {
-      const a = (i / 6) * Math.PI * 2 + 0.4, r = 12 + (i % 3) * 9;
-      const px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r;
-      const c = new THREE.Mesh(new THREE.OctahedronGeometry(0.7, 0), crystalMat);
-      c.position.set(px, caveHeight(px, pz) + 0.7, pz);
+    const glowMap = G.makeRadialTex(64, [[0, 'rgba(130,200,255,0.8)'], [1, 'rgba(80,150,255,0)']]);
+    const addCrystal = (px, pz, s) => {
+      const c = new THREE.Mesh(new THREE.OctahedronGeometry(0.7 * s, 0), crystalMat);
+      c.position.set(px, caveHeight(px, pz) + 0.7 * s, pz);
       c.rotation.set(rnd(), rnd(), rnd());
       scene.add(c);
       const glow = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: G.makeRadialTex(64, [[0, 'rgba(130,200,255,0.8)'], [1, 'rgba(80,150,255,0)']]),
-        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+        map: glowMap, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
       }));
       glow.position.copy(c.position);
-      glow.scale.set(3.2, 3.2, 1);
+      glow.scale.set(3.2 * s, 3.2 * s, 1);
       scene.add(glow);
+    };
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + 0.4, r = 12 + (i % 3) * 9;
+      addCrystal(cx + Math.cos(a) * r, cz + Math.sin(a) * r, 1);
+    }
+    // 宝箱の周りに水晶群 (報酬エリアの見せ場)
+    for (const ch of W.chests) {
+      if (!W.inCaveRegion(ch.x, ch.z)) continue;
+      for (let k = 0; k < 4; k++) {
+        const a = rnd() * Math.PI * 2, r = 2.2 + rnd() * 2.5;
+        addCrystal(ch.x + Math.cos(a) * r, ch.z + Math.sin(a) * r, 0.55 + rnd() * 0.5);
+      }
     }
     // 青い光源 (中央 + 入口側)。床の高さ基準で置く (固定yだと地中に埋まり寄与しない)
     const pt = new THREE.PointLight(0x6699dd, 1.1, 70);

@@ -1319,6 +1319,7 @@
 
     // 移動 (attack/roll 以外)
     let mv = 0;
+    P.fovBoost = P.gliding ? 0.8 : 0;
     if (P.state !== 'roll' && P.state !== 'attack' && P.state !== 'hit') {
       const ix = inp.moveX, iy = inp.moveY;
       const len = Math.hypot(ix, iy);
@@ -1334,6 +1335,8 @@
         if (P.mounted) spd = (10.5 + (sprint ? 3.2 : 0)) * Math.min(1, len);
         else if (P.gliding) spd = 7.5;
         else spd = (4.6 + (sprint ? 3.2 : 0)) * Math.min(1, len);
+        // 速度感の演出用 (カメラFOVブースト)
+        P.fovBoost = P.mounted ? (sprint ? 1 : 0.55) : P.gliding ? 0.8 : sprint ? 0.5 : 0;
         // ロックオン中は対象を向きつつ移動
         if (P.target && P.target.alive && !sprint && !P.mounted && !P.gliding) {
           P.yaw = G.angLerp(P.yaw, Math.atan2(P.target.pos.x - P.pos.x, P.target.pos.z - P.pos.z), G.damp(12, dt));

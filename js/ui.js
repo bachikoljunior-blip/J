@@ -1041,8 +1041,12 @@
       const row = el('div', 'irow', buy);
       const st = it.type === 'weapon' ? ` / 攻 ${it.atk}` : it.type === 'armor' ? ` / 防 ${it.def}` : '';
       row.innerHTML = `<div class="iname">${it.name} <span class="istat">${it.price}G${st}</span></div><div class="idesc">${it.desc}</div>`;
-      const b = el('div', 'ibtn', row, '買う');
-      b.addEventListener('pointerdown', e => { e.stopPropagation(); if (G.Shop.buy(id)) UI.openShop(); });
+      if (G.Inv.gold >= it.price) {
+        const b = el('div', 'ibtn', row, '買う');
+        b.addEventListener('pointerdown', e => { e.stopPropagation(); if (G.Shop.buy(id)) UI.openShop(); });
+      } else {
+        el('div', 'ibtn off', row, 'G不足');
+      }
     }
     el('div', 'shophead', menuBody, '― 売却 ―');
     const sell = el('div', 'ilist', menuBody);
@@ -1079,19 +1083,29 @@
       const stat = it.type === 'weapon'
         ? `攻 ${it.atk + lvl * 2}` : `防 ${it.def + lvl}`;
       let costTxt = '最大強化済み';
+      let can = false;
       if (lvl < 5) {
         const c = G.Forge.cost(lvl);
         const mats = Object.keys(c.mats).map(m => `${G.Items.get(m).name}×${c.mats[m]}`).join(' ');
-        costTxt = `${c.gold}G + ${mats}`;
+        // 強化後の数値を予告して費用対効果を判断できるように
+        const next = it.type === 'weapon' ? `攻 ${it.atk + lvl * 2} → ${it.atk + (lvl + 1) * 2}`
+                                          : `防 ${it.def + lvl} → ${it.def + lvl + 1}`;
+        costTxt = `${next} / ${c.gold}G + ${mats}`;
+        can = G.Inv.gold >= c.gold &&
+              Object.keys(c.mats).every(m => G.Inv.count(m) >= c.mats[m]);
       }
       row.innerHTML = `<div class="iname">${it.name}${lvl ? ' +' + lvl : ''} <span class="istat">${stat}</span></div>
         <div class="idesc">${lvl < 5 ? '次の強化: ' + costTxt : costTxt}</div>`;
       if (lvl < 5) {
-        const b = el('div', 'ibtn', row, '強化');
-        b.addEventListener('pointerdown', e => {
-          e.stopPropagation();
-          if (G.Forge.upgrade(id)) UI.openForge();
-        });
+        if (can) {
+          const b = el('div', 'ibtn', row, '強化');
+          b.addEventListener('pointerdown', e => {
+            e.stopPropagation();
+            if (G.Forge.upgrade(id)) UI.openForge();
+          });
+        } else {
+          el('div', 'ibtn off', row, '素材不足');
+        }
       }
     }
     el('div', 'mnote', menuBody, '強化は装備中の武器・防具に施される。素材は敵のドロップや売店で。');

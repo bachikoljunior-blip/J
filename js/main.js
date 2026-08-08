@@ -364,6 +364,13 @@
 
     // 視線を遮る建造物 (柱・塔・家屋) を半透明化
     G.World.updateFaders(dt, p.pos.x, p.pos.z, cx, cz, eyeY, cy);
+
+    // 疾走・騎乗・滑空の速度感: FOVを滑らかに広げる
+    const tFov = 60 + (p.fovBoost || 0) * 12;
+    if (Math.abs(camera.fov - tFov) > 0.05) {
+      camera.fov = G.lerp(camera.fov, tFov, G.damp(4, dt));
+      camera.updateProjectionMatrix();
+    }
   }
 
   /* ---------------- 時間 / 天候 ---------------- */
