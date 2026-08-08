@@ -380,11 +380,14 @@
       }
     }
 
-    updateMinimap();
+    // ミニマップは 0.1 秒間隔で再描画 (毎フレームは無駄)
+    mmT -= dt;
+    if (mmT <= 0) { mmT = 0.1; updateMinimap(); }
     updateDmgNums(dt);
     updateEnemyBars();
     updateToasts(dt);
   };
+  let mmT = 0;
 
   /* ---------- ミニマップ ---------- */
   const MAP_R = 1000;       // ワールド範囲 ±1000
@@ -448,15 +451,17 @@
       ctx.moveTo(cx, cz - 4); ctx.lineTo(cx + 4, cz); ctx.lineTo(cx, cz + 4); ctx.lineTo(cx - 4, cz);
       ctx.closePath(); ctx.fill();
     }
-    // 敵
+    // 敵 (配列生成を避けるため list と bosses を別々に描く)
     ctx.fillStyle = '#ff5a5a';
-    for (const e of G.Enemies.all()) {
-      if (!e.alive) continue;
+    const drawEnemy = e => {
+      if (!e.alive) return;
       const dx = (e.pos.x - p.pos.x) / view * S + S / 2;
       const dz = (e.pos.z - p.pos.z) / view * S + S / 2;
-      if (dx < 4 || dx > S - 4 || dz < 4 || dz > S - 4) continue;
+      if (dx < 4 || dx > S - 4 || dz < 4 || dz > S - 4) return;
       ctx.beginPath(); ctx.arc(dx, dz, 1.6, 0, Math.PI * 2); ctx.fill();
-    }
+    };
+    for (const e of G.Enemies.list) drawEnemy(e);
+    for (const b of G.Enemies.bosses) drawEnemy(b);
     // プレイヤー矢印
     ctx.save();
     ctx.translate(S / 2, S / 2);
