@@ -224,7 +224,10 @@
       out.copy(CAVE_FLOOR).lerp(CAVE_FLOOR2, m);
       return out;
     }
-    const b = W.biomeAt(x, z, h);
+    // バイオーム境界は座標を揺らしてディザ (定規で引いた直線帯の解消)
+    const jx = G.noise2(x * 0.09 + 31, z * 0.09) * 9;
+    const jz = G.noise2(x * 0.09, z * 0.09 + 77) * 9;
+    const b = W.biomeAt(x + jx, z + jz, h);
     out.copy(BIOME_COL[b] || BIOME_COL.grass);
     const pb = pathBlend(x, z);
     if (pb > 0) out.lerp(PATH_COL, pb * 0.85);
@@ -878,7 +881,8 @@
       shadowify(pillar);
       pillar.position.set(px, py + h / 2 - 0.1, pz);
       pillar.rotation.y = rnd();
-      if (broken) pillar.rotation.z = (rnd() - 0.5) * 0.16;
+      // 氷晶は傾けすぎると浮いて見えるため直立気味に
+      if (broken) pillar.rotation.z = (rnd() - 0.5) * (ice ? 0.06 : 0.16);
       scene.add(pillar);
       addStatic(px, pz, 0.8).fade = true;
       addFader(pillar, px, pz, 0.8, py + h);
@@ -1036,10 +1040,10 @@
     const childrenBefore = scene.children.length;
     // 天蓋 (内側から見える暗い殻)
     const dome = new THREE.Mesh(
-      new THREE.SphereGeometry(56, 20, 12),
+      new THREE.SphereGeometry(66, 20, 12),
       new THREE.MeshLambertMaterial({ color: 0x14161e, side: THREE.BackSide })
     );
-    dome.position.set(cx, 58, cz);
+    dome.position.set(cx, 56, cz);
     scene.add(dome);
     // 石筍 (密度を上げて洞窟の情報量を出す)
     const rnd = G.srand(777);
@@ -1608,7 +1612,8 @@
       s.scale.set(scl, scl * 0.4, 1);
       s.userData = {
         a: crnd() * Math.PI * 2, r: 180 + crnd() * 380,
-        y: 130 + crnd() * 90, sp: 0.002 + crnd() * 0.004
+        // 滑空高度 (~100m) と交差しない高さに置く (灰色の板が視界を塞ぐ指摘)
+        y: 175 + crnd() * 110, sp: 0.002 + crnd() * 0.004
       };
       scene.add(s);
       clouds.push(s);
@@ -1641,6 +1646,7 @@
   Sky.lightLevel = 1;
 
   const _sunDir = new THREE.Vector3();
+  const _lightDir = new THREE.Vector3();
   const _moonDir = new THREE.Vector3();
   const _camXZ = new THREE.Vector3();
   const _grey = new THREE.Color(0x8b98a5);
@@ -1694,7 +1700,15 @@
     // 太陽の位置 (6時に東から昇り18時に西へ沈む)
     const sunA = ((tod - 6) / 12) * Math.PI; // 高度角パラメータ
     _sunDir.set(Math.cos(sunA) * 0.8, Math.sin(sunA), 0.45).normalize();
-    sun.position.copy(_sunDir).multiplyScalar(150).add(_camXZ);
+    // 照明用の方向は薄暮でも地平線下に沈めない (地形の上向き面が
+    // 夕焼け空の下で真っ暗なオリーブ色に落ちる問題への対策)。
+    // 見た目の太陽スプライトは実方向のまま沈む
+    _lightDir.copy(_sunDir);
+    if (s.dir > 0.05 && _lightDir.y < 0.12) {
+      _lightDir.y = 0.12;
+      _lightDir.normalize();
+    }
+    sun.position.copy(_lightDir).multiplyScalar(150).add(_camXZ);
     sun.target.position.set(cam.x, 0, cam.z);
     sun.target.updateMatrixWorld();
 
@@ -1734,7 +1748,7 @@
         ud.y,
         cam.z + Math.sin(ud.a) * ud.r
       );
-      c.material.opacity = (0.25 + weather * 0.5) * G.clamp(s.hem * 2, 0.25, 1);
+      c.material.opacity = (0.2 + weather * 0.45) * G.clamp(s.hem * 2, 0.25, 1);
     }
 
     // 霧 (雪原では少し濃い青に寄せて空と分離)

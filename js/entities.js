@@ -455,11 +455,11 @@
       nose.position.set(0, -0.04, 0.8);
       head.add(nose);
     }
-    const earL = box(0.1 * hw, 0.14 * hw * (conf.mane ? 1.7 : 1), 0.05, fur);
-    earL.position.set(-0.11 * hw, 0.24 * hw, -0.05);
-    if (conf.mane) earL.rotation.z = 0.18;
+    const earL = box(conf.mane ? 0.14 * hw : 0.1 * hw, 0.14 * hw * (conf.mane ? 2.1 : 1), conf.mane ? 0.07 : 0.05, fur);
+    earL.position.set(-0.11 * hw, conf.mane ? 0.3 * hw : 0.24 * hw, -0.05);
+    if (conf.mane) earL.rotation.z = 0.22;
     const earR = earL.clone(); earR.position.x = 0.11 * hw;
-    if (conf.mane) earR.rotation.z = -0.18;
+    if (conf.mane) earR.rotation.z = -0.22;
     const eyeL = box(0.05, 0.05, 0.02, conf.eye !== undefined ? conf.eye : 0xcc2222);
     eyeL.position.set(-0.09, 0.05, 0.21);
     const eyeR = eyeL.clone(); eyeR.position.x = 0.09;
@@ -481,10 +481,14 @@
     const tail = box(conf.mane ? 0.2 : 0.1, conf.mane ? 0.2 : 0.1, conf.mane ? 0.78 : 0.5, fur);
     tail.position.set(0, conf.mane ? 0.82 : 0.72, conf.mane ? -0.88 : -0.75);
     if (conf.mane) {
-      tail.rotation.x = 0.45;   // 王の尾は高く掲げ、先端をふさふさの明色に
-      const tuft = box(0.26, 0.26, 0.3, 0xe6ebf2);
-      tuft.position.set(0, 0, -0.5);
-      tail.add(tuft);
+      tail.rotation.x = 0.45;   // 王の尾は高く掲げ、房状に太く→先細り
+      const t1 = box(0.28, 0.28, 0.3, 0xe6ebf2);
+      t1.position.set(0, 0.02, -0.42);
+      const t2 = box(0.22, 0.22, 0.24, 0xcfe0ec);
+      t2.position.set(0, 0.05, -0.64);
+      const t3 = box(0.14, 0.14, 0.18, 0xe6ebf2);
+      t3.position.set(0, 0.09, -0.8);
+      tail.add(t1, t2, t3);
     }
     const mkLeg = (x, z) => {
       const grp = new THREE.Group();
@@ -501,10 +505,12 @@
     const parts = { body, head, tail, legFL, legFR, legBL, legBR };
     if (conf.mane) {
       // 白狼王は逆光でも白く読めるよう、毛皮に弱い自己発光を乗せる
+      // 毛皮・たてがみ・腹・尾房すべてに発光を乗せる (逆光で黒く潰れる指摘)
+      const brightParts = new Set([fur, 0xcfe0ec, 0xbdd6e8, 0xe6ebf2, 0x9fc2dc, 0xdde2ea]);
       g.traverse(o => {
-        if (o.isMesh && o.material && o.material.emissive && o.material.color.getHex() === fur) {
+        if (o.isMesh && o.material && o.material.emissive && brightParts.has(o.material.color.getHex())) {
           o.material = o.material.clone();
-          o.material.emissive.set(0x333e4a);   // 逆光でも「白狼」として読める下限輝度
+          o.material.emissive.set(0x38434f);   // 逆光でも「白狼」として読める下限輝度
         }
       });
     }
@@ -1954,7 +1960,7 @@
     fenrir: {
       name: '白狼王フェンリル', hp: 220, atk: 22, speed: 7.2, xp: 300, gold: 250,
       x: -430, z: -140, arenaR: 34, radius: 1.3, pushR: 2.1, barH: 3.4,
-      build: () => G.Rigs.wolf({ scale: 2.9, fur: 0xd8d8e0, snout: 0xb8b8c2, eye: 0x44ddff, mane: true })
+      build: () => G.Rigs.wolf({ scale: 2.9, fur: 0xd8d8e0, snout: 0xdde2ea, eye: 0x44ddff, mane: true })
     },
     golem: {
       name: '遺跡の巨像', hp: 700, atk: 34, speed: 2.9, xp: 600, gold: 500,

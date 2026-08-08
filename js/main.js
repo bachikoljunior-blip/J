@@ -206,7 +206,7 @@
         G.Audio.sfx('shrine');
         G.UI.toast(s.name + ' を灯した', 'gold');
         G.FX.burst(s.x, G.World.heightAt(s.x, s.z) + 2, s.z,
-          { n: 30, color: 0x66ddff, speed: 3, up: 1.5, gravity: -1, life: 1.2, size: 3.5 });
+          { n: 16, color: 0x66ddff, speed: 3, up: 1.5, gravity: -1, life: 0.85, size: 2.4 });
         G.events.emit('shrineLit');
         G.Save.save();
       } else {

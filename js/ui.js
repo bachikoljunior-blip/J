@@ -557,6 +557,8 @@
       if (ex) {
         ex.val += n;
         ex.eln.textContent = ex.val;
+        // 合算中はフェードをリセット (合計値を読み切れる寿命を保証)
+        ex.born = Math.max(ex.born, now - 300);
         return;
       }
     }
