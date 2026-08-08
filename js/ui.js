@@ -388,6 +388,9 @@
     if (lockBtn) lockBtn.classList.toggle('on', !!(p.target && p.target.alive));
     // バー
     const hpPctP = 100 * p.hp / p.maxHp();
+    // HPバーは残量で緑→黄→赤 (満タンでも赤いと危険状態と誤認する指摘)
+    hpFill.style.background = hpPctP > 50 ? 'linear-gradient(180deg,#5fbf4a,#3e8f34)'
+      : hpPctP > 25 ? 'linear-gradient(180deg,#d8b03a,#a8842a)' : 'linear-gradient(180deg,#d84a3a,#a02a22)';
     hpFill.style.width = hpPctP + '%';
     // 自機HPも遅延チップで被弾量を見せる (敵/ボスバーと同じUI言語)
     if (hpChipW < hpPctP) hpChipW = hpPctP;
@@ -1016,7 +1019,7 @@
 
   /* アイテム種別ごとの絵文字アイコンとタイル色 */
   const ITEM_ICONS = {
-    potion: ['🧪', '#7a2e3e'], hipotion: ['⚗️', '#8e2438'], herb: ['🌿', '#2e5a38'],
+    potion: ['🧪', '#7a2e3e'], hipotion: ['💊', '#8e2438'], herb: ['🌿', '#2e5a38'],
     pelt: ['🟤', '#5a4430'], bone: ['🦴', '#565a62'], magicstone: ['💠', '#2e4a72'],
   };
   function itemIcon(id, it) {
@@ -1104,10 +1107,10 @@
     for (const s of G.World.shrines) {
       const [x, z] = worldToMap(s.x, s.z, 512);
       if (!G.State.shrines[s.id]) {
-        // 未灯: 暗色縁+半透明グレー塗り (地形ノイズと区別できるコントラスト)
-        ctx.fillStyle = 'rgba(210,220,235,0.4)';
+        // 未灯: 凡例の「○」と同じ白抜き円に暗色縁 (凡例と実マーカーの一致)
+        ctx.fillStyle = 'rgba(235,242,250,0.55)';
         ctx.beginPath(); ctx.arc(x, z, 6, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(20,30,45,0.85)'; ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(25,35,55,0.9)'; ctx.lineWidth = 2;
         ctx.stroke();
         continue;
       }

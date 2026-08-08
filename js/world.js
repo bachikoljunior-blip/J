@@ -329,9 +329,9 @@
       // 中心付近は残り火の熱がわずかに透ける
       if (dr < 14) out.r += (1 - dr / 14) * 0.05;
     }
-    // 高度の微妙な明暗
+    // 高度の微妙な明暗。急斜面はジッタを増やし、面中央の「ボケた土の壁」を防ぐ
     const shade = 0.92 + G.hash2((x * 7) | 0, (z * 7) | 0) * 0.08;
-    out.multiplyScalar(shade);
+    out.multiplyScalar(shade * (1 + (G.hash2((x * 3) | 0, (z * 3) | 0) - 0.5) * 0.16 * steep));
     return out;
   }
   W.minimapColor = function (x, z) {
@@ -446,7 +446,7 @@
     vegShadowGeo = new THREE.PlaneGeometry(2, 2);
     vegShadowGeo.rotateX(-Math.PI / 2);
     vegShadowMat = new THREE.MeshBasicMaterial({
-      map: G.makeRadialTex(64, [[0, 'rgba(8,12,18,0.4)'], [0.65, 'rgba(8,12,18,0.24)'], [1, 'rgba(8,12,18,0)']]),
+      map: G.makeRadialTex(64, [[0, 'rgba(8,12,18,0.5)'], [0.65, 'rgba(8,12,18,0.3)'], [1, 'rgba(8,12,18,0)']]),
       transparent: true, depthWrite: false
     });
   }
@@ -852,13 +852,13 @@
           vec2 toFrag = normalize(vWorld.xz - cameraPosition.xz);
           float azRaw = max(dot(toFrag, normalize(sd.xz)), 0.0);
           float az = pow(azRaw, 42.0);
-          // 鋭い芯にも方位整列を掛ける (太陽が高い時間帯に画面幅1/4の
-          // 白い拡散ブロブになるのを抑え、常に太陽方位の帯に限定する)
-          float coreAniso = 0.15 + 0.85 * pow(azRaw, 8.0);
+          // 鋭い芯にも方位整列を掛け、さらにピーク輝度を上限クランプ —
+          // 純白の円形ブロブが湖面を支配するのを防ぎ、常に「筋」として読む
+          float coreAniso = 0.1 + 0.9 * pow(azRaw, 10.0);
           float sparkle = 0.35 + 0.65 * smoothstep(0.0, 0.28, abs(vWave));
-          float spec = pow(ndh, 110.0) * 0.9 * coreAniso + az * sparkle * 0.75 * lowSun;
-          // 光条は低太陽時に太陽色へ寄せる (無彩色の白灰にしない)
-          vec3 specTint = mix(uSunTint, vec3(1.0, 0.62, 0.3), clamp((lowSun - 0.9) * 0.8, 0.0, 0.55));
+          float spec = min(pow(ndh, 160.0) * 0.9 * coreAniso, 0.5) + az * sparkle * 0.75 * lowSun;
+          // 光条は太陽が傾き始めた時点から太陽色へ寄せる (無彩色の白灰にしない)
+          vec3 specTint = mix(uSunTint, vec3(1.0, 0.62, 0.3), clamp((lowSun - 0.7) * 0.8, 0.0, 0.6));
           c += specTint * spec * uSunI;
           // 夕刻は水面ベースにも空の暖色を薄く乗せる (空との色乖離の解消)
           c = mix(c, skyRef, clamp((lowSun - 1.0) * 0.28, 0.0, 0.35));
@@ -1997,13 +1997,14 @@
       _moonDir.x *= hs; _moonDir.z *= hs; _moonDir.y = 0.42;
     }
     moonSpr.position.copy(_moonDir).multiplyScalar(525).add(_camXZ);
-    moonSpr.material.opacity = G.clamp(moonRawY * 1.4 + 0.1, 0, 0.95) * (1 - weather * 0.85);
+    moonSpr.material.opacity = G.clamp(moonRawY * 1.4 + 0.1, 0, 0.95) * (1 - Math.max(weather, rainOn) * 0.85);
     moonHalo.position.copy(moonSpr.position);
     moonHalo.material.opacity = moonSpr.material.opacity * 0.4;
 
-    // 星
+    // 星 (降雨粒子が残っている間も減光 — 土砂降り+満天の星の矛盾を防ぐ)
     const night = G.smoothstep(19.3, 21, tod) + (1 - G.smoothstep(4, 6, tod));
-    stars.material.opacity = G.clamp(night, 0, 1) * G.clamp(1 - weather * 1.4, 0, 1) * 0.9;
+    const wetSky = Math.max(weather, rainOn);
+    stars.material.opacity = G.clamp(night, 0, 1) * G.clamp(1 - wetSky * 1.4, 0, 1) * 0.9;
     stars.position.set(cam.x, 0, cam.z);
 
     // 雲

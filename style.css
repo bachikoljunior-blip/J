@@ -443,7 +443,10 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
   border: 1px solid rgba(255,255,255,0.14);
 }
 .itile.on { border-color: #ffd35a; box-shadow: 0 0 0 1px #ffd35a inset; }
-.itile.empty { background: rgba(30, 38, 54, 0.35) !important; border-style: dashed; opacity: 0.5; pointer-events: none; }
+.itile.empty {
+  background: rgba(30, 38, 54, 0.35) !important; border-style: dashed;
+  opacity: 0.5; pointer-events: none; aspect-ratio: 1 / 1;   /* 中身が無くても正方形を保つ */
+}
 .iglyph { font-size: 30px; line-height: 1.2; }
 .icount {
   position: absolute; top: 5px; right: 7px; font-size: 11px; color: #ffe9b0;

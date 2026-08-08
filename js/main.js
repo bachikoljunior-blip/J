@@ -389,8 +389,9 @@
     G.Input.camDX = 0; G.Input.camDY = 0;
     C.dist = G.clamp(C.dist + G.Input.wheel, 4, 13);
     G.Input.wheel = 0;
-    // 洞窟内は近め固定 (通路でカメラが引き離され自機が豆粒になるのを防ぐ)
-    const camDist = G.inCave ? Math.min(C.dist, 6.5) : C.dist;
+    // 洞窟内は近め固定 (通路でカメラが引き離され自機が豆粒になるのを防ぐ)。
+    // 滑空中は引き画 (翼が画面の大半を覆い進行方向が見えない指摘)
+    const camDist = G.inCave ? Math.min(C.dist, 6.5) : (p.gliding ? C.dist + 3 : C.dist);
 
     // ロックオン時は対象へ向く (巨大ボスはカメラを引いて全身を映す)
     let bigBoss = p.target && p.target.alive && p.target.D && (p.target.D.barH || 0) > 3;

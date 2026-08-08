@@ -919,7 +919,7 @@
       tail.add(spike);
     }
     tail.position.set(0, 1.2, -0.9);
-    tail.rotation.x = 0.32;   // 付け根から持ち上げ、俯瞰でも「上がった尾」が読める
+    tail.rotation.x = 0.22;   // 持ち上げは控えめ (正対時に尾先が頭上に重なる誤読の防止)
     // 背びれの棘列 (シルエットが遠目で竜と読める高さ)。
     // 間隔を詰め奥行きを重ねて、独立したドミノ板の列に見えないように
     for (let i = 0; i < 6; i++) {
@@ -973,6 +973,8 @@
       const mv = p.moveAmt || 0;
       const fly = p.fly || 0;   // 0=接地 1=飛行
       g.position.y = (p.baseY || 0) + fly * (2.2 + Math.sin(t * 2.2) * 0.4);
+      // 飛行+移動時は胴体を進行方向へピッチ (直立トーテムの静止浮遊に見えない)
+      g.rotation.x = fly * (0.1 + mv * 0.18);
       const flap = fly > 0.05 ? Math.sin(t * 6) * (0.5 + fly * 0.4) : Math.sin(t * 1.2) * 0.06;
       wingL.rotation.z = -flap - 0.15;
       wingR.rotation.z = flap + 0.15;
@@ -1288,6 +1290,18 @@
     idRing.position.y = 0.09;
     idRing.renderOrder = 3;   // 予兆フィルより上 — 乱戦時こそ自機が読める
     rig.group.add(idRing);
+    // 暗色の外縁: 明色の砂道・雪面でもリングが白飛びしない図地分離
+    const idRingDark = new THREE.Mesh(
+      new THREE.RingGeometry(0.62, 0.72, 24),
+      new THREE.MeshBasicMaterial({
+        color: 0x0c1420, transparent: true, opacity: 0.4,
+        depthWrite: false, depthTest: false, side: THREE.DoubleSide, fog: false
+      })
+    );
+    idRingDark.rotation.x = -Math.PI / 2;
+    idRingDark.position.y = 0.085;
+    idRingDark.renderOrder = 3;
+    rig.group.add(idRingDark);
     scene.add(rig.group);
   };
 
@@ -1374,6 +1388,7 @@
     // コンボ継続判定
     if (!heavy && !spin && G.time - P.lastAtkEnd < 0.7) P.combo = (P.combo + 1) % 3;
     else P.combo = 0;
+    if (G.dmgLog) console.log('[dbg] attack start' + (heavy ? ' heavy' : spin ? ' spin' : ''));
     P.state = 'attack';
     P.stateT = 0;
     P.atkT = 0;
@@ -2103,18 +2118,23 @@
       const pp = G.Player.pos;
       const sx = pp.x - camP.x, sy = pp.y + 1.2 - camP.y, sz = pp.z - camP.z;
       const segLen2 = sx * sx + sy * sy + sz * sz;
+      const occTest = (e, r2) => {
+        if (segLen2 <= 1) return false;
+        const ex = e.pos.x - camP.x, ey = e.pos.y + 1 - camP.y, ez = e.pos.z - camP.z;
+        const t = (ex * sx + ey * sy + ez * sz) / segLen2;
+        if (t <= 0.15 || t >= 0.92) return false;
+        const ox = ex - sx * t, oy = ey - sy * t, oz = ez - sz * t;
+        return (ox * ox + oy * oy + oz * oz) < r2;
+      };
       for (const e of list) {
         if (!e.alive || !e.rig) continue;
-        let fade = false;
-        if (segLen2 > 1) {
-          const ex = e.pos.x - camP.x, ey = e.pos.y + 1 - camP.y, ez = e.pos.z - camP.z;
-          const t = (ex * sx + ey * sy + ez * sz) / segLen2;
-          if (t > 0.15 && t < 0.92) {
-            const ox = ex - sx * t, oy = ey - sy * t, oz = ez - sz * t;
-            fade = (ox * ox + oy * oy + oz * oz) < 1.2;
-          }
-        }
-        setOccFade(e, fade);
+        setOccFade(e, occTest(e, 1.2));
+      }
+      // ボスも同様 (ボス戦中に自機がボス胴体に完全遮蔽される指摘)。
+      // 判定半径はボスの体格に合わせて広めに
+      for (const b of bosses) {
+        if (!b.alive || !b.rig) continue;
+        setOccFade(b, occTest(b, Math.max(2.5, (b.D.pushR || 2) * 1.6)));
       }
     }
     for (const b of bosses) {
