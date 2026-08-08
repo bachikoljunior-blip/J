@@ -582,7 +582,7 @@
       // 暗いほど自機フィルライトを強く。洞窟では携行光として常時強めに灯す
       G.playerLight.position.set(G.Player.pos.x, G.Player.pos.y + 2.2, G.Player.pos.z);
       G.playerLight.intensity = G.inCave ? 1.25
-        : G.clamp((0.5 - G.Sky.lightLevel) * 1.6, 0, 0.65);
+        : G.clamp((0.45 - G.Sky.lightLevel) * 1.6, 0, 0.55);
       G.playerLight.distance = G.inCave ? 16 : 11;
 
       // ダメージフラッシュ
