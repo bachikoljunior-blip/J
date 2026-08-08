@@ -1115,6 +1115,8 @@
   };
   /* kind: 0=弱 1=強 2=回転 */
   SA.show = function (x, y, z, yaw, kind) {
+    // 短命VFXは低FPS計測では写らないため証跡ログを残す
+    if (G.dmgLog) console.log('[dbg] swing arc kind=' + kind);
     const p = pool[kind === 2 ? 2 : (pool[0].t < 1 ? 1 : 0)];
     p.t = 0;
     p.kind = kind;
@@ -2045,6 +2047,23 @@
     G.Actors.updateShadow(e);
   }
 
+  /* 遮蔽フェードの適用/解除 (共有マテリアルの「!」マーカーは除外) */
+  function setOccFade(e, on) {
+    if (e._faded === !!on) return;
+    e._faded = !!on;
+    e.rig.group.traverse(o => {
+      if (o === e.mark) return;
+      if ((o.isMesh || o.isSprite) && o.material) {
+        if (o.userData._op0 === undefined) {
+          o.userData._op0 = o.material.opacity;
+          o.userData._tr0 = o.material.transparent;
+        }
+        o.material.transparent = on ? true : o.userData._tr0;
+        o.material.opacity = on ? Math.min(0.35, o.userData._op0) : o.userData._op0;
+      }
+    });
+  }
+
   E.update = function (dt) {
     manageSpawns(dt);
     G.TelegraphRing.begin();
@@ -2076,6 +2095,26 @@
           a.pos.x -= dx * push; a.pos.z -= dz * push;
           c.pos.x += dx * push; c.pos.z += dz * push;
         }
+      }
+    }
+    // カメラと自機の間に立つ敵の遮蔽フェード (乱戦時に自機が完全に隠れる指摘)
+    const camP = G.Camera && G.Camera.cam ? G.Camera.cam.position : null;
+    if (camP) {
+      const pp = G.Player.pos;
+      const sx = pp.x - camP.x, sy = pp.y + 1.2 - camP.y, sz = pp.z - camP.z;
+      const segLen2 = sx * sx + sy * sy + sz * sz;
+      for (const e of list) {
+        if (!e.alive || !e.rig) continue;
+        let fade = false;
+        if (segLen2 > 1) {
+          const ex = e.pos.x - camP.x, ey = e.pos.y + 1 - camP.y, ez = e.pos.z - camP.z;
+          const t = (ex * sx + ey * sy + ez * sz) / segLen2;
+          if (t > 0.15 && t < 0.92) {
+            const ox = ex - sx * t, oy = ey - sy * t, oz = ez - sz * t;
+            fade = (ox * ox + oy * oy + oz * oz) < 1.2;
+          }
+        }
+        setOccFade(e, fade);
       }
     }
     for (const b of bosses) {
