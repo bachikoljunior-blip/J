@@ -1245,6 +1245,19 @@
       addShrooms(cx + Math.cos(a) * r, cz + Math.sin(a) * r);
     }
     for (let i = 0; i < 3; i++) addShrooms(cx + (i % 2 ? 7 : -7), 1168 + i * 12);
+    // 吊り鍾乳石: 主洞の上方に垂下するコーン群。天蓋球は高すぎて視界に
+    // 入らないため、これが「天井がある」ことを示す唯一の手掛かりになる
+    for (let i = 0; i < 14; i++) {
+      const a = rnd() * Math.PI * 2, r = 6 + rnd() * 26;
+      const px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r;
+      const len = 2.2 + rnd() * 3.5;
+      const st = new THREE.Mesh(
+        new THREE.ConeGeometry(0.35 + rnd() * 0.4, len, 5), stalMats[(rnd() * 3) | 0]);
+      st.rotation.x = Math.PI;   // 先端を下向きに
+      st.position.set(px, caveHeight(px, pz) + 13.5 + rnd() * 3 - len / 2, pz);
+      st.rotation.y = rnd() * 3;
+      scene.add(st);
+    }
     // 光る水晶
     // エミッシブは控えめに: 強すぎるとファセット陰影が消え、近接時に
     // 白飛びした均一シアンのビルボードに見える。フラットシェーディングで

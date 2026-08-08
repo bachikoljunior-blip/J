@@ -467,7 +467,8 @@
       nose.position.set(0, 0.02, 0.84);
       head.add(nose);
     }
-    const earL = box(conf.mane ? 0.14 * hw : 0.1 * hw, 0.14 * hw * (conf.mane ? 2.1 : 1), conf.mane ? 0.07 : 0.05, fur);
+    // 王狼の耳は青グレー寄り — 背景の氷スパイクと白い尖形要素同士で混同しない
+    const earL = box(conf.mane ? 0.14 * hw : 0.1 * hw, 0.14 * hw * (conf.mane ? 2.1 : 1), conf.mane ? 0.07 : 0.05, conf.mane ? 0xaec4d8 : fur);
     earL.position.set(-0.11 * hw, conf.mane ? 0.3 * hw : 0.24 * hw, -0.05);
     if (conf.mane) earL.rotation.z = 0.22;
     const earR = earL.clone(); earR.position.x = 0.11 * hw;
