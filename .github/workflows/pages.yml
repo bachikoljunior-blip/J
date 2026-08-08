@@ -1,55 +1,26 @@
 # ============================================================================
-#  Pages — publish a verified snapshot, twice a day.
+#  Pages — 検証済みスナップショットを公開する
 #
-#  Before this existed, Pages served the working branch directly, so every push
-#  went live. That is roughly forty deploys on a working day, and several of
-#  them were intermediate states that did not work: an audit that threw before
-#  its verdict, a camera whose recovery path trapped itself. Anyone opening the
-#  link during one of those saw it.
-#
-#  So the site is a checkpoint rather than a mirror. Twice a day this checks out
-#  the working branch, runs every unit check, and publishes only if they all
-#  pass. A red check leaves the previous good build up, which is the behaviour
-#  worth having: the published thing should be one that was verified, not merely
-#  the most recent thing that was written.
-#
-#  workflow_dispatch is here so a checkpoint can also be published on purpose,
-#  when something worth showing has just landed.
-#
-#  ---------------------------------------------------------------------------
-#  Why this commits to `main` instead of using actions/deploy-pages
-#
-#  Pages is configured as a *branch* site ("legacy" build_type) serving `main`.
-#  Switching it to the Actions source is a repository setting, and GITHUB_TOKEN
-#  cannot make that change at any permission level the `permissions:` key can
-#  grant — PUT /repos/{owner}/{repo}/pages answers 403 "Resource not accessible
-#  by integration". Three runs died proving that, two of them in one second with
-#  no log at all, because a job that declares the `github-pages` environment is
-#  rejected before its first step when that environment does not exist.
-#
-#  Publishing to the served branch needs no setting changed by anyone, and it
-#  gives exactly the same property: the development branch is not the served
-#  branch, so a push no longer goes live, and what is live is what passed.
+#  作業ブランチを検査し、通った場合だけ main (Pages 配信ブランチ) へ
+#  コピーして公開する。壊れた中間状態が公開されるのを防ぐ。
+#  スケジュールに加え、workflow_dispatch で任意のタイミングでも公開できる。
 # ============================================================================
 name: Pages
 
 on:
   schedule:
-    # 03:00 and 15:00 UTC — twice a day, twelve hours apart.
     - cron: '0 3,15 * * *'
   workflow_dispatch:
 
-# contents: write because publishing *is* a commit here.
 permissions:
   contents: write
 
-# Never let two publishes race; never cancel one that is already running.
 concurrency:
   group: pages
   cancel-in-progress: false
 
 env:
-  DEV_BRANCH: claude/mobile-open-world-action-rpg-kbf2zt
+  DEV_BRANCH: claude/mobile-open-world-action-rpg-8uw40p
   PAGES_BRANCH: main
 
 jobs:
@@ -59,41 +30,24 @@ jobs:
       - name: 作業ブランチを取得
         uses: actions/checkout@v4
         with:
-          ref: claude/mobile-open-world-action-rpg-kbf2zt
+          ref: claude/mobile-open-world-action-rpg-8uw40p
           path: src-branch
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      # The gate's cheap half. These need no browser and no GL context, so they
-      # run in seconds — and they are the checks that have actually caught
-      # things: a continuity bound escaping, a camera going non-finite, a foot
-      # leaving the ground, an eye ending up inside a hill, a voice table that
-      # is one entry repeated.
-      #
-      # This is the whole point of the workflow. If it fails, nothing is
-      # published and the previous good build stays up.
+      # 全スクリプトの構文検査。落ちたら公開せず、前回の良品が残る。
       - name: 検査
         working-directory: src-branch
-        run: |
-          sh tools/parsecheck.sh
-          node tools/unit-continuity.mjs
-          node tools/unit-camera.mjs
-          node tools/unit-footik.mjs
-          node tools/unit-motion.mjs
-          node tools/unit-voice.mjs
+        run: sh tools/parsecheck.sh
 
-      # What a player needs, and the record of how it was built. Not tools/:
-      # those are development scripts that reach outside this repository and
-      # have no meaning to anyone opening the page.
       - name: 公開物を組む
         run: |
           mkdir -p site
           cd src-branch
-          cp index.html style.css manifest.json icon.svg sw.js ../site/
-          cp -r src ../site/
-          cp -r docs ../site/
+          cp index.html style.css manifest.json icon.svg sw.js README.md ../site/
+          cp -r js ../site/
           cd ..
           {
             printf 'commit %s\n' "$(git -C src-branch rev-parse HEAD)"
@@ -108,25 +62,17 @@ jobs:
           ref: main
           path: pages-branch
 
-      # Replace the published tree wholesale, so a file deleted upstream also
-      # disappears from the site. `.git` and `.github` are the two things that
-      # must survive: the first is the checkout, the second holds this workflow
-      # — and a scheduled workflow only fires from the default branch, so
-      # deleting it would stop all future publishes including the one that would
-      # put it back.
       - name: 差し替えて commit
         working-directory: pages-branch
         run: |
           set -eu
           find . -mindepth 1 -maxdepth 1 \
-            ! -name .git ! -name .github ! -name README.md -exec rm -rf {} +
+            ! -name .git ! -name .github -exec rm -rf {} +
           cp -r ../site/. .
 
           git config user.name  'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add -A
-          # Nothing changed since the last checkpoint: that is a normal outcome
-          # on a quiet day, not a failure.
           if git diff --cached --quiet; then
             echo '変更なし — 公開済みのものと同じ'
             exit 0
