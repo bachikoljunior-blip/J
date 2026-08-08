@@ -57,6 +57,8 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 .bars {
   position: absolute; top: calc(10px + env(safe-area-inset-top)); left: calc(12px + env(safe-area-inset-left));
   display: flex; align-items: flex-start; gap: 8px; pointer-events: none;
+  /* 明るい樹冠・雪原の上でも読める半透明バックプレート */
+  background: rgba(8, 12, 20, 0.32); border-radius: 12px; padding: 5px 10px 5px 5px;
 }
 .lvl {
   width: 38px; height: 38px; border-radius: 50%;
@@ -439,6 +441,7 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
   border: 1px solid rgba(255,255,255,0.14);
 }
 .itile.on { border-color: #ffd35a; box-shadow: 0 0 0 1px #ffd35a inset; }
+.itile.empty { background: rgba(30, 38, 54, 0.35) !important; border-style: dashed; opacity: 0.5; pointer-events: none; }
 .iglyph { font-size: 30px; line-height: 1.2; }
 .icount {
   position: absolute; top: 5px; right: 7px; font-size: 11px; color: #ffe9b0;

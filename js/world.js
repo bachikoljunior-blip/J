@@ -1734,7 +1734,9 @@
     // fog:false とし、色は毎フレーム空の地平色から手動で合成する
     const mkRidgeLayer = (dist, count, hMin, hMax, seed) => {
       const grp = new THREE.Group();
-      const mat2 = new THREE.MeshBasicMaterial({ color: 0x8fa6c0, fog: false });
+      // Lambert+フラットシェーディング: 昼でも日向/日陰の面差が出て、
+      // 無陰影の単色カード (書き割り) に見えない
+      const mat2 = new THREE.MeshLambertMaterial({ color: 0x8fa6c0, fog: false, flatShading: true });
       const rr = G.srand(seed);
       for (let i = 0; i < count; i++) {
         const a = (i / count) * Math.PI * 2 + rr() * 0.5;

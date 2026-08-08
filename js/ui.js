@@ -1061,6 +1061,8 @@
       tile.addEventListener('pointerdown', e => { e.stopPropagation(); G.Audio.sfx('ui'); select(id, it, tile); });
       if (!first) first = [id, it, tile];
     }
+    // 空きスロットのプレースホルダー (所持枠のグリッド構造を可視化)
+    for (let i = ids.length; i < 12; i++) el('div', 'itile empty', grid);
     if (first) select(first[0], first[1], first[2]);
   }
 
@@ -1301,7 +1303,7 @@
     menuTabs.style.display = 'none';
     menuBody.innerHTML = '';
     el('div', 'shoptitle', menuBody, '⚒ ドヴァンの鍛冶場');
-    el('div', 'mnote', menuBody, `所持金: ${G.Inv.gold} G / 魔石×${G.Inv.count('magicstone')} 骨×${G.Inv.count('bone')} 毛皮×${G.Inv.count('pelt')}`);
+    el('div', 'mnote', menuBody, `所持金: ${G.Inv.gold} G / 💠魔石×${G.Inv.count('magicstone')} 🦴骨×${G.Inv.count('bone')} 🟤毛皮×${G.Inv.count('pelt')}`);
     el('div', 'shophead', menuBody, '― 装備強化 ―');
     const list = el('div', 'ilist', menuBody);
     for (const id of [G.Inv.equip.weapon, G.Inv.equip.armor]) {

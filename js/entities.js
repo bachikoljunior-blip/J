@@ -951,6 +951,8 @@
       return grp;
     };
     const wingL = mkWing(-1), wingR = mkWing(1);
+    // 前後のピッチ傾け: 真正面から見ても翼膜の面積が残り、線に潰れない
+    wingL.rotation.x = 0.12; wingR.rotation.x = 0.12;
     const mkLeg = (x, z) => {
       const grp = new THREE.Group();
       const l = box(0.25, 0.7, 0.25, dark);
@@ -1139,11 +1141,16 @@
   let scene, idx = 0;
   S.init = function (sc) {
     scene = sc;
-    const geo = new THREE.CircleGeometry(1.3, 12);
+    // 放射フォールオフのアルファマップ — ハードエッジの単色ポリゴン円盤は
+    // プレースホルダーに見える
+    const alphaTex = G.makeRadialTex(64,
+      [[0, 'rgba(255,255,255,1)'], [0.55, 'rgba(255,255,255,0.85)'], [1, 'rgba(255,255,255,0)']]);
+    const geo = new THREE.CircleGeometry(1.3, 16);
     geo.rotateX(-Math.PI / 2);
     for (let i = 0; i < 6; i++) {
       const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-        color: 0x14100c, transparent: true, opacity: 0, depthWrite: false
+        color: 0x14100c, transparent: true, opacity: 0, depthWrite: false,
+        alphaMap: alphaTex
       }));
       m.visible = false;
       m.renderOrder = 1;
