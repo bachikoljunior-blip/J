@@ -2111,6 +2111,17 @@
     let mv = 0;
     const phase2 = b.hp < b.maxHp * 0.5;
 
+    // フェーズ2移行の一回演出 (咆哮+シェイク+バースト — 戦闘の緊張曲線)
+    if (phase2 && !b.phase2Cued && b.engaged && b.alive) {
+      b.phase2Cued = true;
+      G.Audio.sfx('roar');
+      G.events.emit('shake', 0.6);
+      G.FX.burst(b.pos.x, b.pos.y + 2, b.pos.z, {
+        n: 40, color: b.bossId === 'fenrir' ? 0x9fd8ff : b.bossId === 'dragon' ? 0xff7730 : 0xd8c890,
+        speed: 9, up: 0.8, gravity: 2, life: 0.9, size: 4.5
+      });
+    }
+
     // スコルグ: 半減で子サソリ召喚
     if (b.bossId === 'scorpking' && phase2 && !b.summoned && b.engaged && b.alive) {
       b.summoned = true;

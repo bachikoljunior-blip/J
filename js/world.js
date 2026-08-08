@@ -998,11 +998,18 @@
     const m = shadowify(new THREE.Mesh(arch, sharedTreeMat));
     m.position.set(x, y, z);
     scene.add(m);
-    // 暗い入口
+    // 暗い入口 (完全な黒ベタではなく、奥からの水晶の微光で奥行きを示す)
     const dark = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 3.8),
-      new THREE.MeshBasicMaterial({ color: 0x05070c }));
+      new THREE.MeshBasicMaterial({ color: 0x070a14 }));
     dark.position.set(x, y + 1.9, z - 0.2);
     scene.add(dark);
+    const innerGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: G.makeRadialTex(64, [[0, 'rgba(90,160,230,0.5)'], [0.5, 'rgba(60,120,200,0.2)'], [1, 'rgba(40,90,170,0)']]),
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+    }));
+    innerGlow.position.set(x, y + 1.4, z - 0.1);
+    innerGlow.scale.set(2.6, 2.2, 1);
+    scene.add(innerGlow);
     addStatic(x - 2, z, 0.7); addStatic(x + 2, z, 0.7);
     // 入口の周りに岩塊 (地形に埋まった洞窟らしさ)
     const rrnd = G.srand(88);
