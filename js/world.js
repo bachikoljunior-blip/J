@@ -832,8 +832,8 @@
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
     }));
     glow.position.copy(crystal.position);
-    glow.scale.set(1.6, 1.6, 1);
-    glow.material.opacity = 0.55;
+    glow.scale.set(1.15, 1.15, 1);
+    glow.material.opacity = 0.42;
     scene.add(glow);
     addStatic(x - 1.3, z, 0.45); addStatic(x + 1.3, z, 0.45);
     // 遠くからでも見える光の柱

@@ -289,7 +289,7 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
   background: rgba(30, 40, 58, 0.5); border-radius: 10px; font-size: 13px; color: #c8d4e2;
 }
 .stats b { color: #fff; }
-.ilist { display: flex; flex-direction: column; gap: 6px; max-width: 740px; margin: 0 auto; width: 100%; }
+.ilist { display: flex; flex-direction: column; gap: 6px; max-width: 560px; margin: 0 auto; width: 100%; }
 .irow {
   position: relative; padding: 10px 12px; padding-right: 76px;
   background: rgba(26, 34, 50, 0.66); border-radius: 10px;

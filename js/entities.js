@@ -319,10 +319,13 @@
         const rt = G.clamp(p.t / 0.45, 0, 1);
         g.rotation.x = -rt * Math.PI * 2;
         g.position.y = (p.baseY || 0) + 0.18 + Math.sin(rt * Math.PI) * 0.42;
-        legL.rotation.x = 0.9; legR.rotation.x = 0.9;
-        armL.rotation.x = 0.8; armR.rotation.x = 0.8;
+        // 丸まり: スカッシュ+深い抱え込みで「転がり」に読ませる
+        g.scale.setScalar(s * (1 - Math.sin(rt * Math.PI) * 0.22));
+        legL.rotation.x = 1.5; legR.rotation.x = 1.5;
+        armL.rotation.x = 1.25; armR.rotation.x = 1.25;
         return;
       }
+      g.scale.setScalar(s);
       // 歩行サイクル
       const wt = t * (8 + mv * 4);
       const swing = Math.sin(wt) * 0.75 * mv;
@@ -780,9 +783,9 @@
     }
     tail.position.set(0, 1.15, -0.9);
     // 背びれの棘列 (シルエットが遠目で竜と読める高さ)
-    for (let i = 0; i < 4; i++) {
-      const sp = box(0.14, 0.7 - i * 0.08, 0.2, i % 2 ? 0x241a26 : 0x7a2430);
-      sp.position.set(0, 1.95, 0.65 - i * 0.5);
+    for (let i = 0; i < 6; i++) {
+      const sp = box(0.16, Math.max(0.35, 1.0 - i * 0.13), 0.3, i % 2 ? 0x241a26 : 0x7a2430);
+      sp.position.set(0, 1.95 - i * 0.04, 0.65 - i * 0.52);
       sp.rotation.x = -0.25;
       g.add(sp);
     }
@@ -1561,7 +1564,7 @@
   ];
 
   /* スポーン管理 */
-  let spawnT = 0, nightT = 0;
+  let spawnT = 0, nightT = 0, attackerCount = 0;
   function manageSpawns(dt) {
     if (G.noSpawn) return;   // 計測/撮影用: 新規スポーン抑止
     spawnT -= dt;
@@ -1708,8 +1711,10 @@
           const sp = T.speed;
           G.Actors.groundMove(e, Math.sin(toP) * sp, Math.cos(toP) * sp, dt);
           mv = 1;
-        } else if (e.cool <= 0) {
+        } else if (e.cool <= 0 && attackerCount < 2) {
+          // 攻撃トークン制: 同時に仕掛けるのは2体まで (残りは牽制に回る)
           e.state = 'windup'; e.stateT = 0;
+          attackerCount++;
         } else {
           // クールダウン中は左右にステップ
           const strafe = toP + Math.PI / 2 * (e.seed > 5 ? 1 : -1);
@@ -1761,6 +1766,11 @@
   E.update = function (dt) {
     manageSpawns(dt);
     G.TelegraphRing.begin();
+    // 攻撃トークン: 現在攻撃動作中の敵数 (同時攻撃は2体まで)
+    attackerCount = 0;
+    for (const e of list) {
+      if (e.alive && (e.state === 'windup' || e.state === 'attack')) attackerCount++;
+    }
     // remove() が splice するので逆順走査 (毎フレームの配列複製を避ける)
     for (let i = list.length - 1; i >= 0; i--) {
       const e = list[i];
