@@ -324,11 +324,34 @@
   function dialogueCam(npc) {
     const p = G.Player.pos, n = npc.pos;
     const mx = (p.x + n.x) / 2, mz = (p.z + n.z) / 2;
-    // 二人を結ぶ線に対し横へオフセットし、両者を画面に収める
+    // 二人を結ぶ線に対し横へオフセットし、両者を画面に収める。
+    // 候補位置が建物コライダー内に入るなら反対側へ回る (壁内カメラの防止)
     const a = Math.atan2(n.x - p.x, n.z - p.z);
-    const side = a + Math.PI / 2;
-    const cx = mx + Math.sin(side) * 3.4 - Math.sin(a) * 1.2;
-    const cz = mz + Math.cos(side) * 3.4 - Math.cos(a) * 1.2;
+    const cols = G.World.staticColliders || [];
+    const bad = (x, z) => {
+      // カメラ位置がコライダー内、または話者への視線が建物に遮られる候補は不可
+      for (let i = 0; i < cols.length; i++) {
+        const c = cols[i];
+        if (G.dist2(x, z, c.x, c.z) < (c.r + 0.6) * (c.r + 0.6)) return true;
+        const dx = (mx - x) * 0.75, dz = (mz - z) * 0.75;   // 中点の手前70%まで
+        const L2 = dx * dx + dz * dz || 1;
+        let t = ((c.x - x) * dx + (c.z - z) * dz) / L2;
+        t = Math.max(0, Math.min(1, t));
+        const px = x + dx * t, pz = z + dz * t;
+        if (G.dist2(px, pz, c.x, c.z) < (c.r + 0.2) * (c.r + 0.2)) return true;
+      }
+      return false;
+    };
+    // 候補: 右側面 / 左側面 / 正面引き — 遮られない最初の構図を採用
+    const cands = [
+      [mx + Math.sin(a + Math.PI / 2) * 3.4 - Math.sin(a) * 1.2, mz + Math.cos(a + Math.PI / 2) * 3.4 - Math.cos(a) * 1.2],
+      [mx + Math.sin(a - Math.PI / 2) * 3.4 - Math.sin(a) * 1.2, mz + Math.cos(a - Math.PI / 2) * 3.4 - Math.cos(a) * 1.2],
+      [mx - Math.sin(a) * 3.8, mz - Math.cos(a) * 3.8]
+    ];
+    let cx = cands[0][0], cz = cands[0][1];
+    for (const [qx, qz] of cands) {
+      if (!bad(qx, qz)) { cx = qx; cz = qz; break; }
+    }
     // やや高め+注視も高め: 話者の頭部が下部の会話パネルに隠れない構図
     let cy = Math.max(p.y, n.y) + 2.05;
     const gh = G.World.heightAt(cx, cz);
@@ -338,7 +361,9 @@
       p0: camera.position.clone(),
       p1: new THREE.Vector3(cx, cy, cz),
       l0: new THREE.Vector3(p.x, p.y + 1.5, p.z),
-      l1: new THREE.Vector3(mx, Math.max(p.y, n.y) + 1.55, mz)
+      // 注視はやや低め — 話者が画面上半分に収まり、選択肢の背の高い
+      // パネルが出ても胴体まで見える
+      l1: new THREE.Vector3(mx, Math.max(p.y, n.y) + 1.1, mz)
     };
   }
   G.events.on('dialogueClosed', () => { dlgTween = null; camBlend = 0.45; });
