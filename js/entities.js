@@ -1026,9 +1026,11 @@
       s.m.position.set(q.x, gh + 0.12, q.z);
       s.m.scale.setScalar(q.r);
       s.m.material.opacity = 0.45 + q.t * 0.35;
-      const fill = i < 2;
+      // フィル (タイミングゲージ+全域) は最も切迫した1つだけ。
+      // 2つ以上に出すと「どれを避けるべきか」が読めなくなる
+      const fill = i === 0;
       s.d.visible = fill;
-      s.f.visible = i === 0;   // 全域フィルは最も切迫した1つだけ (重なりの混濁防止)
+      s.f.visible = fill;
       if (fill) {
         // 内側フィルが t=1 で外周に到達する = 避けるタイミングが読める
         s.d.position.set(q.x, gh + 0.1, q.z);

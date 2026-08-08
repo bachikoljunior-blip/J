@@ -41,6 +41,14 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 
 /* ---------- HUD ---------- */
 .hud { position: absolute; inset: 0; pointer-events: none; }
+/* 会話モードの上下レターボックス (シネマティックな帯。dlgmode付与でスライドイン) */
+.hud::before, .hud::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 7vh; background: #05070c;
+  z-index: 4; transform: scaleY(0); transition: transform 0.35s ease; pointer-events: none;
+}
+.hud::before { top: 0; transform-origin: top; }
+.hud::after { bottom: 0; transform-origin: bottom; }
+.hud.dlgmode::before, .hud.dlgmode::after { transform: scaleY(1); }
 .flash {
   position: absolute; inset: 0; pointer-events: none; z-index: 5;
   background: radial-gradient(ellipse at center, transparent 40%, rgba(200,30,30,0.55) 100%);

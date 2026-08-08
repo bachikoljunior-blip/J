@@ -244,6 +244,7 @@
   const FROST_COL = new THREE.Color(0xc8dce6);
   const CHAR_COL = new THREE.Color(0x2e2824);
   const _dirtCol = new THREE.Color(0x6a5844);
+  const _snowShade = new THREE.Color(0xb4c4da);
   const _winWarm = new THREE.Color(0xffd88a);
   function groundColor(x, z, h, out, ny) {
     if (W.inCaveRegion(x, z)) {
@@ -262,9 +263,11 @@
     out.copy(BIOME_COL[b] || BIOME_COL.grass);
     const pb = pathBlend(x, z);
     if (pb > 0) out.lerp(PATH_COL, pb * 0.85);
-    // 雪面の起伏まだら
+    // 雪面の起伏まだら + 風紋の青い影 (無地の白平面に情報量を足す)
     if (b === 'snow') {
       out.multiplyScalar(0.88 + (G.fbm(x * 0.05, z * 0.05, 2) * 0.5 + 0.5) * 0.16);
+      const bl = G.fbm(x * 0.02 + 41, z * 0.02, 2) * 0.5 + 0.5;
+      out.lerp(_snowShade, G.smoothstep(0.55, 0.85, bl) * 0.3);
     }
     // 岩肌の縞ムラ+土の帯 (滑空時の眼下が無地のスメアにならないように)
     if (b === 'rock') {
@@ -275,6 +278,8 @@
     if (b === 'grass') {
       const t = G.fbm(x * 0.012 + 55, z * 0.012 + 55, 2) * 0.5 + 0.5;
       out.lerp(BIOME_COL.grass2, t * 0.8);
+      // 細かい第2オクターブの濃淡 (正午の平坦な単色ベタを避ける)
+      out.multiplyScalar(0.95 + (G.fbm(x * 0.06 + 3, z * 0.06, 2) * 0.5 + 0.5) * 0.1);
     }
     // 森の林床は苔色のむらで単色ベタ塗りを避ける
     if (b === 'forest') {
@@ -289,6 +294,12 @@
     }
     if (b === 'snow') {
       out.lerp(BIOME_COL.rock, G.smoothstep(0.35, 0.65, slope));
+    }
+    // 急斜面 (崖面) には地層の横縞 — 特徴のない灰色一枚板に見せない
+    const steep = G.smoothstep(0.3, 0.55, slope);
+    if (steep > 0.01) {
+      const band = Math.sin(h * 0.85 + G.noise2(x * 0.05, z * 0.05) * 2.4) * 0.5 + 0.5;
+      out.multiplyScalar(1 - steep * (0.08 + band * 0.2));
     }
     // 水中は砂色へ
     if (h < WATER_Y + 0.4) {
@@ -1557,6 +1568,7 @@
 (function () {
   const Sky = G.Sky = {};
   let scene, hemi, sun, skyDome, sunSpr, sunHalo, moonSpr, moonHalo, stars, clouds = [];
+  let ridgeFar = null, ridgeNear = null;
   let rainPts = null, rainVel = null, rainPos = null, rainN = 0, rainOn = 0;
 
   /* 時刻キーフレーム: [時, 天頂色, 地平色, 太陽色, 直射光強度, 半球光強度] */
@@ -1648,6 +1660,31 @@
     skyDome.frustumCulled = false;
     skyDome.renderOrder = -10;
     scene.add(skyDome);
+
+    // 遠景の山なみシルエット2層 (どの地平線にも奥行きの層を作る)。
+    // 空ドーム同様カメラXZに追従する書き割り。フォグ距離の外にあるため
+    // fog:false とし、色は毎フレーム空の地平色から手動で合成する
+    const mkRidgeLayer = (dist, count, hMin, hMax, seed) => {
+      const grp = new THREE.Group();
+      const mat2 = new THREE.MeshBasicMaterial({ color: 0x8fa6c0, fog: false });
+      const rr = G.srand(seed);
+      for (let i = 0; i < count; i++) {
+        const a = (i / count) * Math.PI * 2 + rr() * 0.5;
+        const h = hMin + rr() * (hMax - hMin);
+        const w = 120 + rr() * 160;
+        const m = new THREE.Mesh(new THREE.ConeGeometry(w, h, 4, 1), mat2);
+        m.scale.z = 0.22;
+        m.rotation.y = rr() * Math.PI;
+        m.position.set(Math.cos(a) * dist, h * 0.28, Math.sin(a) * dist);
+        grp.add(m);
+      }
+      grp.renderOrder = -9;
+      grp.userData.mat = mat2;
+      scene.add(grp);
+      return grp;
+    };
+    ridgeFar = mkRidgeLayer(640, 9, 60, 130, 31);
+    ridgeNear = mkRidgeLayer(560, 7, 36, 80, 77);
 
     // 太陽・月スプライト
     // 本体は通常合成の実体ディスク (加算だと明るい空で中心が飽和して
@@ -1777,6 +1814,7 @@
     sunHalo.visible = skyVisible;
     moonSpr.visible = skyVisible;
     moonHalo.visible = skyVisible;
+    if (ridgeFar) { ridgeFar.visible = skyVisible; ridgeNear.visible = skyVisible; }
     stars.visible = skyVisible;
     for (const c of clouds) c.visible = skyVisible;
     if (inCave) {
@@ -1893,6 +1931,17 @@
     scene.fog.near = scene.fog.far * 0.22;
     if (scene.background) scene.background.copy(_fogC);
     else scene.background = _fogC.clone();
+
+    // 遠景山なみ: カメラ追従+地平色より僅かに濃い色 (霧に溶ける寸前の稜線)
+    if (ridgeFar) {
+      ridgeFar.position.set(cam.x, 0, cam.z);
+      ridgeNear.position.set(cam.x, 0, cam.z);
+      ridgeFar.userData.mat.color.copy(_fogC).multiplyScalar(0.93);
+      ridgeNear.userData.mat.color.copy(_fogC).multiplyScalar(0.85).lerp(cTop, 0.06);
+      const rv = 1 - weather * 0.85;   // 雨天は霞に沈める
+      ridgeFar.visible = skyVisible && rv > 0.3;
+      ridgeNear.visible = skyVisible && rv > 0.3;
+    }
 
     // 雨 / 雪パーティクル (雪原バイオームでは常時ゆっくり降る雪に)
     const snowy = G.World.biomeAt(cam.x, cam.z) === 'snow';
