@@ -238,17 +238,21 @@
     return 1 - G.smoothstep(1.1, 2.6, Math.sqrt(best));
   }
   /* ny: 事前計算済みの法線Y (省略時は計算する) */
-  const CAVE_FLOOR = new THREE.Color(0x646b7c);
-  const CAVE_FLOOR2 = new THREE.Color(0x4a5265);
+  const CAVE_FLOOR = new THREE.Color(0x565d6f);
+  const CAVE_FLOOR2 = new THREE.Color(0x3d4456);
+  const CAVE_WALL = new THREE.Color(0x262b3a);
   const FROST_COL = new THREE.Color(0xc8dce6);
   const CHAR_COL = new THREE.Color(0x2e2824);
   const _dirtCol = new THREE.Color(0x6a5844);
   const _winWarm = new THREE.Color(0xffd88a);
   function groundColor(x, z, h, out, ny) {
     if (W.inCaveRegion(x, z)) {
-      // 洞窟の床: 青灰のまだら
+      // 洞窟の床: 青灰のまだら。壁の立ち上がりに向けて暗く落とす
+      // (床も壁も同じ明るさだと空間の輪郭が消え、霧の虚空に見える)
       const m = G.fbm(x * 0.11, z * 0.11, 2) * 0.5 + 0.5;
       out.copy(CAVE_FLOOR).lerp(CAVE_FLOOR2, m);
+      const wr = G.smoothstep(30, 48, G.dist(x, z, W.CAVE.cx, W.CAVE.cz));
+      out.lerp(CAVE_WALL, wr);
       return out;
     }
     // バイオーム境界は座標を揺らしてディザ (定規で引いた直線帯の解消)
@@ -773,10 +777,14 @@
           float fr = 0.1 + 0.7 * pow(1.0 - max(dot(vd, n), 0.0), 3.0);
           fr += smoothstep(12.0, 140.0, vDist) * 0.3;
           c = mix(c, uFogColor, clamp(fr, 0.0, 0.85));
-          // 太陽のスペキュラ (波の法線でギラつく光帯)
+          // 太陽のスペキュラ: 鋭い芯 + 広いサンパス帯の2ローブ
+          // (斜め視点でも太陽方位に沿ったギラつきの筋が読める)
           vec3 h = normalize(vd + normalize(uSunDir));
-          float spec = pow(max(dot(n, h), 0.0), 110.0) * uSunI;
-          c += uSunTint * spec * 0.9;
+          float ndh = max(dot(n, h), 0.0);
+          float spec = pow(ndh, 110.0) * 0.9 + pow(ndh, 16.0) * 0.22;
+          c += uSunTint * spec * uSunI;
+          // 波頭の白泡 (単色の平面に見えないよう頂部だけ砕けさせる)
+          c += vec3(0.85, 0.9, 0.95) * smoothstep(0.34, 0.5, vWave) * 0.2 * uLight;
           float f = smoothstep(uFogNear, uFogFar, vDist);
           c = mix(c, uFogColor, f);
           gl_FragColor = vec4(c, 0.82 + fr * 0.1);
@@ -1124,8 +1132,10 @@
       scene.add(top);
       if (h > 2) addStatic(px, pz, 0.7);
     };
+    // 半径は歩行可能な床 (r<36) 内に収める。壁の立ち上がり面に置くと
+    // 床から見上げたとき空中に浮いたデブリに見える
     for (let i = 0; i < 42; i++) {
-      const a = rnd() * Math.PI * 2, r = 5 + rnd() * 40;
+      const a = rnd() * Math.PI * 2, r = 5 + rnd() * 29;
       mkStal(cx + Math.cos(a) * r, cz + Math.sin(a) * r, 1.2 + rnd() * 3.8);
     }
     // 入口通路の両脇にも列を作り、密度と導線を出す
@@ -1137,13 +1147,33 @@
     // 床の岩屑 (平坦な床の空虚さを埋める)
     const rockMat = new THREE.MeshLambertMaterial({ color: 0x4a4f5c });
     for (let i = 0; i < 14; i++) {
-      const a = rnd() * Math.PI * 2, r = 4 + rnd() * 42;
+      const a = rnd() * Math.PI * 2, r = 4 + rnd() * 30;
       const px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r;
       const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.35 + rnd() * 0.55, 0), rockMat);
       rock.position.set(px, caveHeight(px, pz) + 0.25, pz);
       rock.rotation.set(rnd() * 3, rnd() * 3, rnd() * 3);
       scene.add(rock);
     }
+    // 光るキノコの群生 (壁際と通路の視覚密度を上げる低コストプロップ)
+    const shroomCap = new THREE.MeshLambertMaterial({ color: 0x3aa06a, emissive: 0x1e5c3a });
+    const shroomStem = new THREE.MeshLambertMaterial({ color: 0x8a8f9c });
+    const addShrooms = (px, pz) => {
+      const base = caveHeight(px, pz);
+      for (let k = 0; k < 3 + (rnd() * 3 | 0); k++) {
+        const ox = (rnd() - 0.5) * 1.6, oz = (rnd() - 0.5) * 1.6;
+        const s = 0.5 + rnd() * 0.9;
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.045 * s, 0.06 * s, 0.3 * s, 5), shroomStem);
+        stem.position.set(px + ox, base + 0.15 * s, pz + oz);
+        const cap = new THREE.Mesh(new THREE.ConeGeometry(0.16 * s, 0.14 * s, 6), shroomCap);
+        cap.position.set(px + ox, base + 0.34 * s, pz + oz);
+        scene.add(stem, cap);
+      }
+    };
+    for (let i = 0; i < 9; i++) {
+      const a = rnd() * Math.PI * 2, r = 24 + rnd() * 9;
+      addShrooms(cx + Math.cos(a) * r, cz + Math.sin(a) * r);
+    }
+    for (let i = 0; i < 3; i++) addShrooms(cx + (i % 2 ? 7 : -7), 1168 + i * 12);
     // 光る水晶
     const crystalMat = new THREE.MeshLambertMaterial({ color: 0x77ccff, emissive: 0x3377bb });
     const glowMap = G.makeRadialTex(64, [[0, 'rgba(130,200,255,0.8)'], [1, 'rgba(80,150,255,0)']]);
@@ -1874,7 +1904,7 @@
     const darkF = 1 - G.clamp(s.hem * 1.7, 0, 1);
     rainPts.material.color.set(snowMode ? 0xffffff : 0xaec8dc);
     if (!snowMode) rainPts.material.color.lerp(_white, darkF * 0.85);
-    rainPts.material.opacity = rainOn < 0.06 ? 0 : rainOn * (snowMode ? 0.85 : 0.72 + darkF * 0.25);
+    rainPts.material.opacity = rainOn < 0.06 ? 0 : rainOn * (snowMode ? 0.85 : 0.82 + darkF * 0.16);
     rainPts.visible = rainOn > 0.06;
     if (rainOn > 0.02) {
       const pa = rainPts.geometry.attributes.position;
@@ -1890,7 +1920,7 @@
         }
         rainPos[i * 3] = x; rainPos[i * 3 + 1] = y; rainPos[i * 3 + 2] = z;
         // 雪は短い点、雨は速度に応じた縦ストリーク
-        const len = snowMode ? 0.08 : rainVel[i] * 0.045;
+        const len = snowMode ? 0.08 : rainVel[i] * 0.058;
         pa.setXYZ(i * 2, x, y + len, z);
         pa.setXYZ(i * 2 + 1, x, y, z);
       }

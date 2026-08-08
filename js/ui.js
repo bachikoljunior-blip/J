@@ -278,7 +278,7 @@
       actionBtn('b-attack', '<b>攻</b>', 'attack', { holdable: true, holdAction: 'heavy', spinAction: 'spin', heldKey: 'attack' });
       actionBtn('b-roll', '回避', 'roll');
       actionBtn('b-jump', '跳', 'jump', { fireOnPress: true, heldKey: 'jump' });
-      actionBtn('b-lock', '◎<span class="blabel">注視</span>', 'lock');
+      lockBtn = actionBtn('b-lock', '◎<span class="blabel">注視</span>', 'lock');
       potBtn = actionBtn('b-potion', '薬', 'potion');
       actionBtn('b-menu', '≡', 'menu');
       actionBtn('b-map', '地図', 'map');
@@ -373,7 +373,7 @@
   };
 
   /* ---------- HUD 更新 ---------- */
-  let hudT = 0, promptT = 0, curInteract = null;
+  let hudT = 0, promptT = 0, curInteract = null, lockBtn = null;
   UI.refreshHUDStatic = function () {
     goldEl.innerHTML = '<span class="gicon">G</span> ' + G.Inv.gold;
     if (potBtn) {
@@ -384,6 +384,8 @@
 
   UI.update = function (dt) {
     const p = G.Player;
+    // 注視ボタンのON/OFF状態を見た目に反映
+    if (lockBtn) lockBtn.classList.toggle('on', !!(p.target && p.target.alive));
     // バー
     const hpPctP = 100 * p.hp / p.maxHp();
     hpFill.style.width = hpPctP + '%';
@@ -481,9 +483,18 @@
     ctx.arc(S / 2, S / 2, S / 2 - 1, 0, Math.PI * 2);
     ctx.clip();
     if (G.inCave) {
-      // 洞窟は島の地図の範囲外 — 洞窟床色で塗って可読性を保つ
-      ctx.fillStyle = '#2a3044';
+      // 洞窟内は岩盤(暗)の上に歩行可能な床(明)を描き、空間の形が読めるように
+      ctx.fillStyle = '#1d2230';
       ctx.fillRect(0, 0, S, S);
+      const C = G.World.CAVE;
+      const fx = (C.cx - p.pos.x) / view * S + S / 2;
+      const fz = (C.cz - p.pos.z) / view * S + S / 2;
+      ctx.fillStyle = '#3d4560';
+      ctx.beginPath(); ctx.arc(fx, fz, 46 / view * S, 0, Math.PI * 2); ctx.fill();
+      // 入口通路 (北側の縁から主洞へ)
+      const wpx = Math.max(3, 12 / view * S);
+      const ez = (C.z0 - 18 - p.pos.z) / view * S + S / 2;
+      ctx.fillRect(fx - wpx / 2, Math.min(ez, fz), wpx, Math.abs(fz - ez));
     } else {
       const scale = (256 / (MAP_R * 2));
       const sw = view * scale;
@@ -513,6 +524,8 @@
     ctx.fillStyle = '#ff5a5a';
     const drawEnemy = e => {
       if (!e.alive) return;
+      // 非交戦の敵は近距離のみ表示 (村の周囲が赤ドットで埋まる過密の抑制)
+      if (!e.aggro && G.dist2(e.pos.x, e.pos.z, p.pos.x, p.pos.z) > 85 * 85) return;
       const dx = (e.pos.x - p.pos.x) / view * S + S / 2;
       const dz = (e.pos.z - p.pos.z) / view * S + S / 2;
       if (dx < 4 || dx > S - 4 || dz < 4 || dz > S - 4) return;
@@ -980,7 +993,7 @@
       selected = id;
       grid.querySelectorAll('.itile.on').forEach(t => t.classList.remove('on'));
       tile.classList.add('on');
-      detail.innerHTML = `<div class="iname">${it.name} ×${G.Inv.count(id)}</div><div class="idesc">${it.desc}</div>`;
+      detail.innerHTML = `<div class="itext"><div class="iname">${it.name} ×${G.Inv.count(id)}</div><div class="idesc">${it.desc}</div></div>`;
       if (it.type === 'consumable') {
         const b = el('div', 'ibtn', detail, '使う');
         b.addEventListener('pointerdown', e => {
@@ -1041,10 +1054,14 @@
   function drawBigMap() {
     const ctx = bigMapCanvas.getContext('2d');
     ctx.drawImage(mapCanvas, 0, 0, 512, 512);
-    // 祠
+    // 祠 (未灯は場所だけ淡く示す — 凡例に●があるのに1つも出ない状態を避ける)
     for (const s of G.World.shrines) {
-      if (!G.State.shrines[s.id]) continue;
       const [x, z] = worldToMap(s.x, s.z, 512);
+      if (!G.State.shrines[s.id]) {
+        ctx.strokeStyle = 'rgba(150,195,225,0.5)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(x, z, 6, 0, Math.PI * 2); ctx.stroke();
+        continue;
+      }
       ctx.fillStyle = '#6fe3ff';
       ctx.beginPath(); ctx.arc(x, z, 7, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();

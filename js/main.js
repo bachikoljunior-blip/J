@@ -16,6 +16,8 @@
   let flashEl = null;
 
   G.paused = false;
+  // ?drs=1: ヘッドレス計測でも動的解像度スケーリングを作動させる検証フック
+  G.forceDRS = /[?&]drs=1/.test(location.search);
   G.Camera = { yaw: Math.PI, pitch: 0.42, dist: 7.5, cam: null };
 
   /* ---------------- 起動 ---------------- */
@@ -186,7 +188,7 @@
 
   /* ---------------- イベント ---------------- */
   G.events.on('shake', v => { trauma = Math.min(1, trauma + v); });
-  let bossCine = 0, cineBoss = null;
+  let bossCine = 0, cineBoss = null, framePull = 0;
   G.events.on('bossEngage', b => { bossCine = 2.1; cineBoss = b; G.events.emit('shake', 0.55); });
   G.events.on('hitstop', v => { hitstop = Math.max(hitstop, v); });
   G.events.on('gameClear', () => { G.Save.save(); });
@@ -414,7 +416,7 @@
         if (b.alive && b.engaged && (b.D.barH || 0) > 5) { bossBonus = 8.5; break; }
       }
     }
-    const dist = C.dist + (p.mounted ? 1.8 : 0) + bossBonus;
+    const dist = C.dist + (p.mounted ? 1.8 : 0) + bossBonus + framePull;
     let cx = p.pos.x - fx * dist;
     let cz = p.pos.z - fz * dist;
     let cy = p.pos.y + 1.6 + fy * dist;
@@ -452,8 +454,33 @@
     cy += (Math.random() - 0.5) * sh;
     cz += (Math.random() - 0.5) * sh;
 
+    // ボス頭部のフレーミング: 接近戦で頭が画面上端に見切れるなら、来フレームで
+    // その分だけカメラを引く (フィードバックで数フレームかけて収束・離脱で減衰)。
+    // 滞空ボスは引きでは追い切れないため、注視点を上へずらして仰ぎ見る
+    let overAng = -1, lookUp = 0;
+    if (bigBoss) {
+      let fb = (p.target && p.target.alive && p.target.D && (p.target.D.barH || 0) > 3) ? p.target : null;
+      if (!fb) {
+        let nd = 30 * 30;
+        for (const b of G.Enemies.bosses) {
+          if (!b.alive || !b.engaged || (b.D.barH || 0) <= 3) continue;
+          const d2 = G.dist2(p.pos.x, p.pos.z, b.pos.x, b.pos.z);
+          if (d2 < nd) { nd = d2; fb = b; }
+        }
+      }
+      if (fb) {
+        lookUp = Math.min(4.5, Math.max(0, fb.pos.y - p.pos.y) * 0.4);
+        const headY = fb.pos.y + (fb.D.barH || 3) + 1.0;
+        const headAng = Math.atan2(headY - cy, Math.hypot(fb.pos.x - cx, fb.pos.z - cz));
+        const ctrAng = Math.atan2((p.pos.y + 1.5 + lookUp) - cy, Math.hypot(p.pos.x - cx, p.pos.z - cz));
+        // 視野上半分 (FOV60の半分=0.52rad) に対する余白付き限界
+        overAng = (headAng - ctrAng) - 0.4;
+      }
+    }
+    framePull = G.clamp(framePull + (overAng > 0 ? overAng * 26 : -6) * dt, 0, 12);
+
     camera.position.set(cx, cy, cz);
-    camera.lookAt(p.pos.x, p.pos.y + 1.5, p.pos.z);
+    camera.lookAt(p.pos.x, p.pos.y + 1.5 + lookUp, p.pos.z);
 
     // 視線を遮る建造物 (柱・塔・家屋) を半透明化
     G.World.updateFaders(dt, p.pos.x, p.pos.z, cx, cz, eyeY, cy);
@@ -492,8 +519,8 @@
       const x = p.x + Math.cos(a) * d, z = p.z + Math.sin(a) * d;
       const h = G.World.heightAt(x, z);
       G.FX.burst(x, Math.max(h, G.World.WATER_Y) + 0.08, z, {
-        n: 2, color: 0xaec4d4, speed: 1.3, up: 1.4, gravity: 5,
-        life: 0.26, size: 0.95, drag: 0.8
+        n: 2, color: 0x7e93a4, speed: 1.3, up: 1.4, gravity: 5,
+        life: 0.22, size: 0.8, drag: 0.8
       });
     }
 
@@ -622,8 +649,9 @@
     // フレームレートを守る (render時間のEMAで2.5秒ごとに調整)
     perfEMA += (_t2 - _t0 - perfEMA) * 0.04;
     perfAdjustT += dt;
-    // RAF間隔が異常に長い環境 (バックグラウンド/ヘッドレス計測) では調整しない
-    if (perfAdjustT > 1.2 && started && lastRawGap < 150) {
+    // RAF間隔が異常に長い環境 (バックグラウンド/ヘッドレス計測) では調整しない。
+    // ?drs=1 でガードを無効化 (ヘッドレスでDRS動作そのものを検証するテスト用フック)
+    if (perfAdjustT > 1.2 && started && (lastRawGap < 150 || G.forceDRS)) {
       perfAdjustT = 0;
       let want = resScale;
       if (perfEMA > 36 && resScale > 0.6) want = Math.max(0.6, resScale - 0.2);
@@ -632,6 +660,7 @@
         resScale = want;
         renderer.setPixelRatio(basePixelRatio * resScale);
       }
+      G.perf.resScale = resScale;   // 計測ハーネスからDRSの実動作を検分できるように
     }
   }
   G.perf = { sim: 0, render: 0 };

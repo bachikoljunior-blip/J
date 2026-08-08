@@ -9,7 +9,7 @@
   const Items = G.Items = {};
   const DB = {
     /* 消耗品 */
-    potion:    { name: '回復薬',      type: 'consumable', desc: 'HPを42%回復する赤い薬。',  price: 40,  sell: 15 },
+    potion:    { name: '回復薬',      type: 'consumable', desc: 'HPを42%回復する薬湯。',  price: 40,  sell: 15 },
     hipotion:  { name: '上回復薬',    type: 'consumable', desc: 'HPを70%回復する濃い薬。',  price: 110, sell: 40 },
     herb:      { name: '月光草',      type: 'consumable', desc: '夜光を宿す薬草。少し回復。', price: 30, sell: 8 },
     /* 素材 */

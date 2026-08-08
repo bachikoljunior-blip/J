@@ -67,8 +67,13 @@
       const spread = o.spread !== undefined ? o.spread : 1;
       // dirX/dirZ 指定時は指向性放出 (ブレス等)、なければ全方位
       const dk = (o.dirX !== undefined) ? 0.3 : 1;
+      // spawnR: 発生点を散らす半径。加算合成は同一点発生だと全粒が重なり
+      // 必ず白飽和するため、大型バーストは最初から散らして色相を保つ
+      const sr = o.spawnR || 0;
       P.push({
-        x, y, z,
+        x: x + (Math.random() - 0.5) * 2 * sr,
+        y: y + (Math.random() - 0.5) * 1.2 * sr,
+        z: z + (Math.random() - 0.5) * 2 * sr,
         vx: Math.cos(a) * sp * spread * dk + (o.dirX || 0) * sp,
         vy: up * sp * (0.5 + Math.random()),
         vz: Math.sin(a) * sp * spread * dk + (o.dirZ || 0) * sp,
@@ -474,11 +479,13 @@
       // 王の眼光 (氷青の発光)
       const mkGlow = (x) => {
         const gs = new THREE.Sprite(new THREE.SpriteMaterial({
-          map: G.makeRadialTex(32, [[0, 'rgba(140,230,255,1)'], [1, 'rgba(80,190,255,0)']]),
+          // ボス級の拡大リグでは眼グローも拡大される。中心アルファを抑えて
+          // 顔の造形 (マズル/鼻) がグローに沈まない強度に
+          map: G.makeRadialTex(32, [[0, 'rgba(120,205,255,0.66)'], [1, 'rgba(80,190,255,0)']]),
           transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
         }));
         gs.position.set(x, 0.06 * hw, 0.36 * hw);
-        gs.scale.set(0.55, 0.55, 1);
+        gs.scale.set(0.42, 0.42, 1);
         return gs;
       };
       head.add(mkGlow(-0.09 * hw), mkGlow(0.09 * hw));
@@ -851,6 +858,18 @@
     const chestPlug = box(0.8, 0.7, 0.6, dark);
     chestPlug.position.set(0, 1.35, 0.85);
     g.add(chestPlug);
+    // 体側の亀裂 (通常はほぼ体色。フェーズ2で赤熱させ、黒い体でも
+    // フェーズ変化が体表から読めるようにする)
+    const crackMat = new THREE.MeshBasicMaterial({ color: 0x2e2430 });
+    g.userData.crackMat = crackMat;
+    for (const side of [-1, 1]) {
+      for (let i = 0; i < 3; i++) {
+        const cr = new THREE.Mesh(boxGeo(0.06, 0.3 - i * 0.06, 0.5 + i * 0.15), crackMat);
+        cr.position.set(0.51 * side, 1.25 + (i % 2) * 0.18, 0.45 - i * 0.55);
+        cr.rotation.x = (i - 1) * 0.3;
+        g.add(cr);
+      }
+    }
     // 尻尾は6節、先細り+緩やかに持ち上がるカーブ (俯瞰でも胴体からはみ出す)
     const tail = new THREE.Group();
     for (let i = 0; i < 6; i++) {
@@ -864,10 +883,11 @@
     }
     tail.position.set(0, 1.2, -0.9);
     tail.rotation.x = 0.32;   // 付け根から持ち上げ、俯瞰でも「上がった尾」が読める
-    // 背びれの棘列 (シルエットが遠目で竜と読める高さ)
+    // 背びれの棘列 (シルエットが遠目で竜と読める高さ)。
+    // 間隔を詰め奥行きを重ねて、独立したドミノ板の列に見えないように
     for (let i = 0; i < 6; i++) {
-      const sp = box(0.16, Math.max(0.35, 1.0 - i * 0.13), 0.3, i % 2 ? 0x241a26 : 0x7a2430);
-      sp.position.set(0, 1.95 - i * 0.04, 0.65 - i * 0.52);
+      const sp = box(0.16, Math.max(0.35, 1.0 - i * 0.13), 0.46, i % 2 ? 0x241a26 : 0x7a2430);
+      sp.position.set(0, 1.9 - i * 0.05, 0.65 - i * 0.42);
       sp.rotation.x = -0.25;
       g.add(sp);
     }
@@ -1298,6 +1318,23 @@
     // ロックオン中は対象へ向く
     if (P.target && P.target.alive) {
       P.yaw = Math.atan2(P.target.pos.x - P.pos.x, P.target.pos.z - P.pos.z);
+    } else {
+      // 非ロック時は前方±100°・6.5m内の最寄り敵へ向き直る
+      // (タッチのタップ攻撃が微妙な向きズレで空振りし続けるのを防ぐソフトロック)
+      let best = null, bd = 6.5 * 6.5;
+      const scan = e => {
+        if (!e.alive) return;
+        const dx = e.pos.x - P.pos.x, dz = e.pos.z - P.pos.z;
+        const d2 = dx * dx + dz * dz;
+        if (d2 >= bd) return;
+        let da = Math.atan2(dx, dz) - P.yaw;
+        da = Math.atan2(Math.sin(da), Math.cos(da));
+        if (Math.abs(da) > 1.75) return;
+        bd = d2; best = e;
+      };
+      for (const e of G.Enemies.list) scan(e);
+      for (const b of G.Enemies.bosses) scan(b);
+      if (best) P.yaw = Math.atan2(best.pos.x - P.pos.x, best.pos.z - P.pos.z);
     }
   };
 
@@ -2169,11 +2206,14 @@
       const c = b.bossId === 'fenrir' ? 0x3d96e0 : b.bossId === 'dragon' ? 0xff6a20 : 0xc8b070;
       // サイズ/数を抑えて加算の白飽和を防ぎ、色相が読めるように
       G.FX.burst(b.pos.x, b.pos.y + 2, b.pos.z, {
-        n: 28, color: c, speed: 9, up: 0.8, gravity: 2, life: 0.9, size: 2.8
+        n: 16, color: c, speed: 9, up: 0.8, gravity: 2, life: 0.9, size: 2.2, spawnR: 1.4
       });
-      // 足元に残留リング (低FPS計測でも痕跡が写る)
+      // 足元に残留リング (低FPS計測でも痕跡が写る)。氷床上でも影と見分く濃い霜色
       G.Scorch.add(b.pos.x, b.pos.z,
-        b.bossId === 'fenrir' ? 0x8fc8e8 : b.bossId === 'dragon' ? 0x241d18 : 0x4a4030, 3.2);
+        b.bossId === 'fenrir' ? 0x6e9cc4 : b.bossId === 'dragon' ? 0x241d18 : 0x4a4030, 3.2);
+      // 竜は体側の亀裂を赤熱させる (黒い体表でもフェーズ変化が体から読める)
+      const cm = b.rig && b.rig.group && b.rig.group.userData.crackMat;
+      if (cm) cm.color.set(0xff5a1a);
     }
 
     // スコルグ: 半減で子サソリ召喚
