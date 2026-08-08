@@ -1044,11 +1044,13 @@
       s.d.visible = fill;
       s.f.visible = fill;
       if (fill) {
-        // 内側フィルが t=1 で外周に到達する = 避けるタイミングが読める
-        s.d.position.set(q.x, gh + 0.1, q.z);
+        // 内側フィルが t=1 で外周に到達する = 避けるタイミングが読める。
+        // 高さ差は最小限に (差が大きいと浅い視線でフィルが輪郭から
+        // 下にはみ出し、同心に見えない)
+        s.d.position.set(q.x, gh + 0.115, q.z);
         s.d.scale.setScalar(Math.max(0.05, q.r * q.t));
         s.d.material.opacity = 0.28 + q.t * 0.22;
-        s.f.position.set(q.x, gh + 0.09, q.z);
+        s.f.position.set(q.x, gh + 0.11, q.z);
         s.f.scale.setScalar(q.r);
       }
     }

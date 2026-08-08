@@ -1243,7 +1243,7 @@
           ` <span class="${diff > 0 ? 'diffup' : 'diffdown'}">(${diff > 0 ? '+' : ''}${diff})</span>`;
         st = ` / ${it.type === 'weapon' ? '攻' : '防'} ${v}${dTxt}`;
       }
-      row.innerHTML = `<div class="iname">${it.name} <span class="istat">${it.price}G${st}</span></div><div class="idesc">${it.desc}</div>`;
+      row.innerHTML = `<div class="iname"><span class="rowicon">${itemIcon(id, it)[0]}</span>${it.name} <span class="istat">${it.price}G${st}</span></div><div class="idesc">${it.desc}</div>`;
       if (G.Inv.gold >= it.price) {
         const b = el('div', 'ibtn', row, '買う');
         b.addEventListener('pointerdown', e => { e.stopPropagation(); if (G.Shop.buy(id)) UI.openShop(); });
@@ -1259,7 +1259,7 @@
       if (!it || !it.sell) continue;
       any = true;
       const row = el('div', 'irow', sell);
-      row.innerHTML = `<div class="iname">${it.name} ×${G.Inv.count(id)} <span class="istat">${it.sell}G</span></div>`;
+      row.innerHTML = `<div class="iname"><span class="rowicon">${itemIcon(id, it)[0]}</span>${it.name} ×${G.Inv.count(id)} <span class="istat">${it.sell}G</span></div>`;
       const b = el('div', 'ibtn', row, '売る');
       b.addEventListener('pointerdown', e => { e.stopPropagation(); if (G.Shop.sell(id)) UI.openShop(); });
     }
@@ -1303,7 +1303,7 @@
         can = G.Inv.gold >= c.gold &&
               Object.keys(c.mats).every(m => G.Inv.count(m) >= c.mats[m]);
       }
-      row.innerHTML = `<div class="iname">${it.name}${lvl ? ' +' + lvl : ''} <span class="istat">${stat}</span></div>
+      row.innerHTML = `<div class="iname"><span class="rowicon">${itemIcon(id, it)[0]}</span>${it.name}${lvl ? ' +' + lvl : ''} <span class="istat">${stat}</span></div>
         <div class="idesc">${lvl < 5 ? '次の強化: ' + costTxt : costTxt}</div>`;
       if (lvl < 5) {
         if (can) {

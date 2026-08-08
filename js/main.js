@@ -328,7 +328,8 @@
     const side = a + Math.PI / 2;
     const cx = mx + Math.sin(side) * 3.4 - Math.sin(a) * 1.2;
     const cz = mz + Math.cos(side) * 3.4 - Math.cos(a) * 1.2;
-    let cy = Math.max(p.y, n.y) + 1.9;
+    // やや高め+注視も高め: 話者の頭部が下部の会話パネルに隠れない構図
+    let cy = Math.max(p.y, n.y) + 2.05;
     const gh = G.World.heightAt(cx, cz);
     if (cy < gh + 0.6) cy = gh + 0.6;
     dlgTween = {
@@ -336,7 +337,7 @@
       p0: camera.position.clone(),
       p1: new THREE.Vector3(cx, cy, cz),
       l0: new THREE.Vector3(p.x, p.y + 1.5, p.z),
-      l1: new THREE.Vector3(mx, Math.max(p.y, n.y) + 1.35, mz)
+      l1: new THREE.Vector3(mx, Math.max(p.y, n.y) + 1.55, mz)
     };
   }
   G.events.on('dialogueClosed', () => { dlgTween = null; camBlend = 0.45; });

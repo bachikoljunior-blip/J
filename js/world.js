@@ -404,12 +404,18 @@
 
     const cacBody = new THREE.CylinderGeometry(0.42, 0.5, 3.0, 6);
     const cacArm = new THREE.CylinderGeometry(0.26, 0.3, 1.3, 6);
+    // 肘 (幹と腕をつなぐ水平セグメント)。無いと腕が幹の横に浮かぶ平行柱に
+    // 見え、サワロサボテンとして読めない
+    const cacElbow = new THREE.CylinderGeometry(0.24, 0.24, 0.62, 6);
+    cacElbow.rotateZ(Math.PI / 2);
     const cactus = G.mergeGeo([
       { geo: cacBody, m: M4(0, 1.5, 0), color: 0x5f8f4a },
       { geo: cacArm, m: M4(0.62, 1.9, 0, 0, 1), color: 0x69994f },
-      { geo: cacArm, m: M4(-0.62, 1.4, 0, 0, 1), color: 0x69994f }
+      { geo: cacArm, m: M4(-0.62, 1.4, 0, 0, 1), color: 0x69994f },
+      { geo: cacElbow, m: M4(0.35, 1.32, 0), color: 0x69994f },
+      { geo: cacElbow, m: M4(-0.35, 0.85, 0), color: 0x69994f }
     ]);
-    cacBody.dispose(); cacArm.dispose();
+    cacBody.dispose(); cacArm.dispose(); cacElbow.dispose();
 
     const deadT = new THREE.CylinderGeometry(0.16, 0.3, 3.4, 5);
     const deadB = new THREE.CylinderGeometry(0.08, 0.14, 1.6, 4);
@@ -932,8 +938,10 @@
     addStatic(x - 1.3, z, 0.45); addStatic(x + 1.3, z, 0.45);
     // 遠くからでも見える光の柱
     // 上に向かって細く消えるコーン (遠景で平坦な帯に見えないように)
+    // 上端も幅を持たせる: 極遠で1px幅の「白い縦筋」に潰れず、柔らかな
+    // 光の柱 (ビーコン) として読める太さを保つ
     const beam = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.16, 1.2, 48, 6, 1, true),
+      new THREE.CylinderGeometry(0.5, 1.4, 48, 6, 1, true),
       new THREE.MeshBasicMaterial({
         color: 0x55bbff, transparent: true, opacity: 0.09,
         blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
