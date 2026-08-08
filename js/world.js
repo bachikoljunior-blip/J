@@ -128,6 +128,14 @@
     return n.normalize();
   };
 
+  /* 法線の Y 成分のみ (アロケーション無し)。1=平坦 */
+  W.slopeYAt = function (x, z) {
+    const e = 0.9;
+    const hx = W.heightAt(x - e, z) - W.heightAt(x + e, z);
+    const hz = W.heightAt(x, z - e) - W.heightAt(x, z + e);
+    return (2 * e) / Math.sqrt(hx * hx + 4 * e * e + hz * hz);
+  };
+
   W.isDeepWater = function (x, z) {
     return W.heightAt(x, z) < WATER_Y - 0.55;
   };
@@ -168,7 +176,7 @@
       out.lerp(BIOME_COL.grass2, t * 0.8);
     }
     // 斜面は岩肌に
-    if (ny === undefined) ny = W.normalAt(x, z).y;
+    if (ny === undefined) ny = W.slopeYAt(x, z);
     const slope = 1 - ny; // 0=平坦
     if (b !== 'desert' && b !== 'snow') {
       out.lerp(BIOME_COL.rock, G.smoothstep(0.22, 0.5, slope));
@@ -460,8 +468,7 @@
         const b = W.biomeAt(x, z, h);
         if ((type === 'pine' || type === 'oak') && (b === 'desert' || b === 'beach')) continue;
         if (type === 'cactus' && b !== 'desert') continue;
-        const n2 = W.normalAt(x, z);
-        if (n2.y < 0.72 && type !== 'rock') continue; // 急斜面は岩のみ
+        if (W.slopeYAt(x, z) < 0.72 && type !== 'rock') continue; // 急斜面は岩のみ
         const sc = 0.75 + rnd() * 0.7;
         placed.push({ x, z, h, ry: rnd() * Math.PI * 2, s: sc });
         if (type !== 'rock' && type !== 'dead') {
@@ -527,7 +534,7 @@
       const b = W.biomeAt(x, z, h);
       const d = decorDensity(b).grass || 0;
       if (rnd() > d) continue;
-      if (W.normalAt(x, z).y < 0.8) continue;
+      if (W.slopeYAt(x, z) < 0.8) continue;
       m.makeRotationY(rnd() * Math.PI * 2);
       const s = 0.7 + rnd() * 0.8;
       m.scale(new THREE.Vector3(s, s * (0.8 + rnd() * 0.6), s));

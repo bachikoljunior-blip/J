@@ -76,6 +76,7 @@
     }
   };
 
+  let prevN = 0;
   FX.update = function (dt) {
     if (!pts) return;
     let w = 0;
@@ -91,6 +92,9 @@
     }
     P.length = w;
     const n = Math.min(w, MAX());
+    // 粒子ゼロが続く間は転送も描画も行わない
+    if (n === 0 && prevN === 0) { pts.visible = false; return; }
+    pts.visible = n > 0;
     for (let i = 0; i < n; i++) {
       const p = P[i];
       const k = 1 - p.life / p.max;
@@ -98,11 +102,11 @@
       col[i * 3] = p.r * k + 0.001; col[i * 3 + 1] = p.g * k; col[i * 3 + 2] = p.b * k;
       sizes[i] = p.size * (0.5 + k * 0.5);
     }
-    for (let i = n; i < MAX(); i++) sizes[i] = 0;
+    prevN = n;
     pts.geometry.attributes.position.needsUpdate = true;
     pts.geometry.attributes.color.needsUpdate = true;
     pts.geometry.attributes.psize.needsUpdate = true;
-    pts.geometry.setDrawRange(0, MAX());
+    pts.geometry.setDrawRange(0, n);
   };
 })();
 
@@ -110,7 +114,22 @@
 (function () {
   const Rigs = G.Rigs = {};
   let shadowTex = null, shadowGeo = null;
-  const lam = c => new THREE.MeshLambertMaterial({ color: c });
+  /* ジオメトリ/マテリアルは寸法・色でキャッシュ共有する。
+     敵の入れ替わりでGPUリソースが増え続けるのを防ぎ、
+     マテリアル切替も減らす (リグは全てこのキャッシュ経由)。 */
+  const matCache = new Map();
+  const geoCache = new Map();
+  const lam = c => {
+    let m = matCache.get(c);
+    if (!m) { m = new THREE.MeshLambertMaterial({ color: c }); matCache.set(c, m); }
+    return m;
+  };
+  const boxGeo = (w, h, d) => {
+    const k = w + ',' + h + ',' + d;
+    let g = geoCache.get(k);
+    if (!g) { g = new THREE.BoxGeometry(w, h, d); geoCache.set(k, g); }
+    return g;
+  };
 
   G.makeShadow = function (scale) {
     if (!shadowTex) {
@@ -126,7 +145,7 @@
     return m;
   };
 
-  function box(w, h, d, c) { return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), lam(c)); }
+  function box(w, h, d, c) { return new THREE.Mesh(boxGeo(w, h, d), lam(c)); }
 
   /* 人型。conf: {skin, cloth, cloth2, hair, scale, weapon:'sword'|'axe'|'bow'|'club'|null} */
   Rigs.humanoid = function (conf) {
@@ -204,7 +223,9 @@
       armR.add(weapon);
     } else if (conf.weapon === 'bow') {
       weapon = new THREE.Group();
-      const bowC = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.03, 4, 8, Math.PI), lam(0x6b4a2f));
+      let bowGeo = geoCache.get('bow');
+      if (!bowGeo) { bowGeo = new THREE.TorusGeometry(0.4, 0.03, 4, 8, Math.PI); geoCache.set('bow', bowGeo); }
+      const bowC = new THREE.Mesh(bowGeo, lam(0x6b4a2f));
       bowC.rotation.z = Math.PI / 2;
       weapon.add(bowC);
       weapon.position.set(0, -0.5, 0.05);
@@ -1041,6 +1062,7 @@
   function remove(e) {
     scene.remove(e.rig.group);
     scene.remove(e.shadow);
+    e.shadow.material.dispose();   // 影のマテリアルのみ個別 (geo/texは共有)
     const i = list.indexOf(e);
     if (i >= 0) list.splice(i, 1);
     if (e.spawnRef && e.alive) e.spawnRef.alive = false;
@@ -1222,7 +1244,8 @@
 
   E.update = function (dt) {
     manageSpawns(dt);
-    for (const e of list.slice()) updateEnemy(e, dt);
+    // remove() が splice するので逆順走査 (毎フレームの配列複製を避ける)
+    for (let i = list.length - 1; i >= 0; i--) updateEnemy(list[i], dt);
     for (const b of bosses) G.Bosses.update(b, dt);
   };
 
@@ -1603,25 +1626,39 @@
 
   Pr.init = function (sc) { scene = sc; };
 
-  Pr.spawn = function (type, x, y, z, tx, ty, tz, speed, dmg) {
-    const dir = new THREE.Vector3(tx - x, ty - y, tz - z).normalize();
-    let mesh;
-    if (type === 'arrow') {
-      mesh = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.7),
-        new THREE.MeshLambertMaterial({ color: 0x8a6a3a }));
-    } else if (type === 'fire') {
-      mesh = new THREE.Group();
-      const core = new THREE.Mesh(new THREE.SphereGeometry(0.28, 6, 5),
-        new THREE.MeshBasicMaterial({ color: 0xffaa33 }));
-      const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+  /* 共有アセット (毎発の geometry/material/texture 生成はリークかつ遅い) */
+  let A = null;
+  function assets() {
+    if (A) return A;
+    A = {
+      arrowGeo: new THREE.BoxGeometry(0.05, 0.05, 0.7),
+      arrowMat: new THREE.MeshLambertMaterial({ color: 0x8a6a3a }),
+      fireGeo: new THREE.SphereGeometry(0.28, 6, 5),
+      fireMat: new THREE.MeshBasicMaterial({ color: 0xffaa33 }),
+      fireGlow: new THREE.SpriteMaterial({
         map: G.makeRadialTex(64, [[0, 'rgba(255,200,80,0.9)'], [1, 'rgba(255,100,0,0)']]),
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-      }));
+      }),
+      rockGeo: new THREE.IcosahedronGeometry(0.55, 0),
+      rockMat: new THREE.MeshLambertMaterial({ color: 0x8a8478 })
+    };
+    return A;
+  }
+
+  Pr.spawn = function (type, x, y, z, tx, ty, tz, speed, dmg) {
+    const dir = new THREE.Vector3(tx - x, ty - y, tz - z).normalize();
+    const a = assets();
+    let mesh;
+    if (type === 'arrow') {
+      mesh = new THREE.Mesh(a.arrowGeo, a.arrowMat);
+    } else if (type === 'fire') {
+      mesh = new THREE.Group();
+      const core = new THREE.Mesh(a.fireGeo, a.fireMat);
+      const glow = new THREE.Sprite(a.fireGlow);
       glow.scale.set(1.8, 1.8, 1);
       mesh.add(core, glow);
     } else { // rock
-      mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.55, 0),
-        new THREE.MeshLambertMaterial({ color: 0x8a8478 }));
+      mesh = new THREE.Mesh(a.rockGeo, a.rockMat);
     }
     mesh.position.set(x, y, z);
     if (type === 'arrow') mesh.lookAt(tx, ty, tz);
@@ -1693,17 +1730,31 @@
   Pk.init = function (sc) { scene = sc; };
 
   const COLORS = { potion: 0xff6688, hipotion: 0xff4466, pelt: 0xaa8855, bone: 0xddddcc, magicstone: 0x66aaff, herb: 0x88ff99 };
+  /* アイテム色ごとにマテリアル/テクスチャを共有 */
+  let dropGeo = null, glowTex = null;
+  const coreMats = {}, glowMats = {};
+  function dropAssets(id) {
+    if (!dropGeo) {
+      dropGeo = new THREE.OctahedronGeometry(0.22, 0);
+      glowTex = G.makeRadialTex(48, [[0, 'rgba(255,255,255,0.6)'], [1, 'rgba(255,255,255,0)']]);
+    }
+    const c = COLORS[id] || 0xffffff;
+    if (!coreMats[id]) {
+      coreMats[id] = new THREE.MeshLambertMaterial({ color: c, emissive: c, emissiveIntensity: 0.4 });
+      glowMats[id] = new THREE.SpriteMaterial({
+        map: glowTex, transparent: true, depthWrite: false,
+        blending: THREE.AdditiveBlending, color: c
+      });
+    }
+    return { core: coreMats[id], glow: glowMats[id] };
+  }
 
   Pk.drop = function (id, x, z) {
     const y = G.World.heightAt(x, z);
+    const am = dropAssets(id);
     const mesh = new THREE.Group();
-    const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0),
-      new THREE.MeshLambertMaterial({ color: COLORS[id] || 0xffffff, emissive: COLORS[id] || 0x888888, emissiveIntensity: 0.4 }));
-    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: G.makeRadialTex(48, [[0, 'rgba(255,255,255,0.6)'], [1, 'rgba(255,255,255,0)']]),
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      color: COLORS[id] || 0xffffff
-    }));
+    const core = new THREE.Mesh(dropGeo, am.core);
+    const glow = new THREE.Sprite(am.glow);
     glow.scale.set(1, 1, 1);
     mesh.add(core, glow);
     mesh.position.set(x + (Math.random() - 0.5) * 1.2, y + 0.4, z + (Math.random() - 0.5) * 1.2);

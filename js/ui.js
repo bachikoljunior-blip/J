@@ -12,8 +12,9 @@
   I.sprint = false;
   I.wheel = 0;
   const pressQ = [];             // ボタンイベントキュー
+  const EMPTY = [];
   I.push = a => pressQ.push(a);
-  I.poll = function () { return pressQ.splice(0, pressQ.length); };
+  I.poll = function () { return pressQ.length ? pressQ.splice(0, pressQ.length) : EMPTY; };
 
   const keys = {};
   let joyPtr = null, camPtr = null;
@@ -59,6 +60,8 @@
             mouseDownT = performance.now();
             mouseMoved = 0;
           }
+          // ウィンドウ外で離しても pointerup を受け取れるように捕捉
+          try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
         }
       }
     };
@@ -100,6 +103,13 @@
     window.addEventListener('pointercancel', onUp);
     window.addEventListener('wheel', e => { I.wheel += e.deltaY * 0.01; }, { passive: true });
     window.addEventListener('contextmenu', e => e.preventDefault());
+    // フォーカス喪失時は入力状態を全解除 (押しっぱなし・カメラ固着防止)
+    window.addEventListener('blur', () => {
+      joyPtr = null; camPtr = null;
+      I.moveX = 0; I.moveY = 0;
+      for (const k in keys) keys[k] = false;
+      hideJoy();
+    });
   };
 
   I.updateFromKeys = function () {
@@ -380,9 +390,9 @@
       }
     }
 
-    // ミニマップは 0.1 秒間隔で再描画 (毎フレームは無駄)
+    // ミニマップは 0.1 秒間隔で再描画 (毎フレームは無駄、メニュー中は不要)
     mmT -= dt;
-    if (mmT <= 0) { mmT = 0.1; updateMinimap(); }
+    if (mmT <= 0 && !menuOpen) { mmT = 0.1; updateMinimap(); }
     updateDmgNums(dt);
     updateEnemyBars();
     updateToasts(dt);
