@@ -204,7 +204,8 @@
   }
 
   /* ---------- 生成 ---------- */
-  let hudEl, hpBar, hpFill, staFill, xpFill, lvlEl, goldEl, clockEl, weatherEl;
+  let hudEl, hpBar, hpFill, hpChip, staFill, xpFill, lvlEl, goldEl, clockEl, weatherEl;
+  let hpChipW = 100, hpChipHold = 0;
   let miniCanvas, miniCtx, mapCanvas = null;
   let bigMapCanvas = null;
   let trackerEl, toastWrap, promptEl, bossWrap, bossFill, bossName, bossChip;
@@ -225,7 +226,9 @@
     const bars = el('div', 'bars', hudEl);
     lvlEl = el('div', 'lvl', bars, '1');
     const barCol = el('div', 'barcol', bars);
-    hpBar = el('div', 'bar hp', barCol); hpFill = el('div', 'fill', hpBar);
+    hpBar = el('div', 'bar hp', barCol);
+    hpChip = el('div', 'chip', hpBar);
+    hpFill = el('div', 'fill', hpBar);
     const staBar = el('div', 'bar sta', barCol); staFill = el('div', 'fill', staBar);
     const xpBar = el('div', 'bar xp', barCol); xpFill = el('div', 'fill', xpBar);
     goldEl = el('div', 'gold', barCol, '<span class="gicon">G</span> 0');
@@ -382,7 +385,16 @@
   UI.update = function (dt) {
     const p = G.Player;
     // バー
-    hpFill.style.width = (100 * p.hp / p.maxHp()) + '%';
+    const hpPctP = 100 * p.hp / p.maxHp();
+    hpFill.style.width = hpPctP + '%';
+    // 自機HPも遅延チップで被弾量を見せる (敵/ボスバーと同じUI言語)
+    if (hpChipW < hpPctP) hpChipW = hpPctP;
+    else if (hpChipW > hpPctP + 0.01) {
+      if (hpChipHold <= 0) hpChipHold = 0.35;
+    }
+    if (hpChipHold > 0) hpChipHold -= dt;
+    else hpChipW += (hpPctP - hpChipW) * G.damp(5.5, dt);
+    hpChip.style.width = hpChipW + '%';
     staFill.style.width = (100 * p.stamina / p.maxSta()) + '%';
     xpFill.style.width = (100 * G.Stats.xp / G.Stats.xpNeed()) + '%';
     lvlEl.textContent = G.Stats.level;
@@ -424,7 +436,7 @@
     mmT -= dt;
     if (mmT <= 0 && !menuOpen) { mmT = 0.1; updateMinimap(); }
     updateDmgNums(dt);
-    updateEnemyBars();
+    updateEnemyBars(dt);
     updateToasts(dt);
   };
   let mmT = 0;
@@ -606,7 +618,7 @@
 
   /* ---------- 敵HPバー ---------- */
   const ebarPool = [];
-  function updateEnemyBars() {
+  function updateEnemyBars(dt) {
     let used = 0;
     const p = G.Player;
     for (const e of G.Enemies.list) {
@@ -628,9 +640,11 @@
       b.wrap.style.top = pr.y + 'px';
       const hpPct = 100 * Math.max(0, e.hp) / e.maxHp;
       b.fill.style.width = hpPct + '%';
-      // 遅延チップ: 直前の被弾量を黄で見せてから追従 (強撃の手応え)
+      // 遅延チップ: 0.35秒保持してから dt 基準で追従 (リフレッシュレート非依存)
       if (e._chipW === undefined || e._chipW < hpPct) e._chipW = hpPct;
-      e._chipW += (hpPct - e._chipW) * 0.09;
+      if (e._chipW > hpPct + 0.01 && e._chipPrev !== hpPct) { e._chipHold = 0.35; e._chipPrev = hpPct; }
+      if (e._chipHold > 0) e._chipHold -= dt;
+      else e._chipW += (hpPct - e._chipW) * G.damp(5.5, dt);
       b.chip.style.width = e._chipW + '%';
       // ロックオン対象マーク
       b.wrap.classList.toggle('locked', G.Player.target === e);
@@ -911,10 +925,13 @@
     for (const id of [G.Inv.equip.weapon, G.Inv.equip.armor]) {
       if (ids.includes(id)) continue;
       const it = G.Items.get(id);
+      if (!it) continue;
+      has = true;
       const ul = G.Inv.upgLevel(id);
       const row = el('div', 'irow equipped', list);
       const st = it.type === 'weapon' ? `攻 ${it.atk + ul * 2}` : `防 ${it.def + ul}`;
-      row.innerHTML = `<div class="iname">${it.name}${ul ? ' +' + ul : ''} <span class="istat">${st}</span></div><div class="idesc">${it.desc}</div>`;
+      const glyph = it.type === 'weapon' ? '⚔️' : '🛡️';
+      row.innerHTML = `<div class="iname"><span class="rowicon">${glyph}</span>${it.name}${ul ? ' +' + ul : ''} <span class="istat">${st}</span></div><div class="idesc">${it.desc}</div>`;
       el('div', 'itag', row, '装備中');
     }
     if (!has) el('div', 'mnote', menuBody, '装備品は宝箱や店、ボス討伐で手に入る。');

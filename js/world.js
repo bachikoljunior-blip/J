@@ -217,6 +217,7 @@
   const CAVE_FLOOR2 = new THREE.Color(0x4a5265);
   const FROST_COL = new THREE.Color(0xc8dce6);
   const CHAR_COL = new THREE.Color(0x2e2824);
+  const _dirtCol = new THREE.Color(0x6a5844);
   function groundColor(x, z, h, out, ny) {
     if (W.inCaveRegion(x, z)) {
       // 洞窟の床: 青灰のまだら
@@ -235,9 +236,11 @@
     if (b === 'snow') {
       out.multiplyScalar(0.88 + (G.fbm(x * 0.05, z * 0.05, 2) * 0.5 + 0.5) * 0.16);
     }
-    // 岩肌の縞ムラ (滑空時の眼下が無地のスメアにならないように)
+    // 岩肌の縞ムラ+土の帯 (滑空時の眼下が無地のスメアにならないように)
     if (b === 'rock') {
-      out.multiplyScalar(0.82 + (G.fbm(x * 0.07, z * 0.07, 2) * 0.5 + 0.5) * 0.3);
+      out.multiplyScalar(0.68 + (G.fbm(x * 0.07, z * 0.07, 2) * 0.5 + 0.5) * 0.52);
+      const dirt = G.fbm(x * 0.035 + 17, z * 0.035, 2) * 0.5 + 0.5;
+      out.lerp(_dirtCol, G.smoothstep(0.6, 0.85, dirt) * 0.4);
     }
     if (b === 'grass') {
       const t = G.fbm(x * 0.012 + 55, z * 0.012 + 55, 2) * 0.5 + 0.5;
@@ -733,8 +736,8 @@
           vec3 n = normalize(vNorm);
           vec3 vd = normalize(cameraPosition - vWorld);
           // 角度依存フレネル: 浅い角度ほど空 (フォグ色) を強く映す
-          float fr = 0.07 + 0.7 * pow(1.0 - max(dot(vd, n), 0.0), 3.0);
-          fr += smoothstep(12.0, 140.0, vDist) * 0.2;
+          float fr = 0.1 + 0.7 * pow(1.0 - max(dot(vd, n), 0.0), 3.0);
+          fr += smoothstep(12.0, 140.0, vDist) * 0.3;
           c = mix(c, uFogColor, clamp(fr, 0.0, 0.85));
           // 太陽のスペキュラ (波の法線でギラつく光帯)
           vec3 h = normalize(vd + normalize(uSunDir));

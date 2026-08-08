@@ -461,7 +461,11 @@
     if (conf.mane) earL.rotation.z = 0.22;
     const earR = earL.clone(); earR.position.x = 0.11 * hw;
     if (conf.mane) earR.rotation.z = -0.22;
-    const eyeL = box(0.05, 0.05, 0.02, conf.eye !== undefined ? conf.eye : 0xcc2222);
+    const eyeL = box(conf.mane ? 0.09 : 0.05, conf.mane ? 0.07 : 0.05, 0.02, conf.eye !== undefined ? conf.eye : 0xcc2222);
+    if (conf.mane) {
+      eyeL.material = eyeL.material.clone();
+      eyeL.material.emissive.set(0x2288cc);   // 王狼の眼光
+    }
     eyeL.position.set(-0.09, 0.05, 0.21);
     const eyeR = eyeL.clone(); eyeR.position.x = 0.09;
     head.add(hm, snout, earL, earR, eyeL, eyeR);

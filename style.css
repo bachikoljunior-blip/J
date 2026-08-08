@@ -73,6 +73,8 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 .bar.hp::before { content: '♥'; color: #ff8a7a; }
 .bar.sta::before { content: '⚡'; color: #9fdc7a; }
 .bar .fill, .bar .chip { border-radius: 6px; }
+.bar .chip { position: absolute; inset: 0 auto 0 0; height: 100%; background: #e0b03a; }
+.bar .fill { position: relative; }
 .bar.sta { height: 8px; width: min(36vw, 190px); }
 .bar.xp { height: 4px; width: min(30vw, 160px); }
 .bar .fill { height: 100%; border-radius: 6px; transition: width 0.15s; }

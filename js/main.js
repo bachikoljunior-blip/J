@@ -618,10 +618,10 @@
     perfEMA += (_t2 - _t0 - perfEMA) * 0.04;
     perfAdjustT += dt;
     // RAF間隔が異常に長い環境 (バックグラウンド/ヘッドレス計測) では調整しない
-    if (perfAdjustT > 2.5 && started && lastRawGap < 150) {
+    if (perfAdjustT > 1.2 && started && lastRawGap < 150) {
       perfAdjustT = 0;
       let want = resScale;
-      if (perfEMA > 36 && resScale > 0.6) want = Math.max(0.6, resScale - 0.15);
+      if (perfEMA > 36 && resScale > 0.6) want = Math.max(0.6, resScale - 0.2);
       else if (perfEMA < 20 && resScale < 1) want = Math.min(1, resScale + 0.1);
       if (want !== resScale) {
         resScale = want;
