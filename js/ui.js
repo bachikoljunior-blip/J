@@ -642,6 +642,7 @@
 
   /* ---------- 段階式チュートリアルチップ ---------- */
   let tutEl = null;
+  let khWanted = true;   // チュートリアル中などは false (会話後の復元先)
   UI.showTutChip = function (html) {
     if (!tutEl) tutEl = el('div', 'tutchip', hudEl);
     tutEl.innerHTML = html;
@@ -650,6 +651,7 @@
   };
   UI.hideTutChip = function () { if (tutEl) tutEl.style.display = 'none'; };
   UI.setKeyhelpVisible = function (v) {
+    khWanted = v;
     const kh = hudEl.querySelector('.keyhelp');
     if (kh) kh.style.display = (v && !G.isTouch) ? '' : 'none';
   };
@@ -766,8 +768,9 @@
     dlgWrap.style.display = 'none';
     G.paused = false;
     typing = null;
+    // チュートリアル中に非表示化されている場合は復元しない
     const kh = hudEl.querySelector('.keyhelp');
-    if (kh) kh.style.display = '';
+    if (kh && khWanted && !G.isTouch) kh.style.display = '';
   };
 
   /* ---------- 祠メニュー ---------- */
