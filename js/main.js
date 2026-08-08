@@ -292,6 +292,8 @@
       const ty = Math.atan2(p.target.pos.x - p.pos.x, p.target.pos.z - p.pos.z);
       C.yaw = G.angLerp(C.yaw, ty, G.damp(4, dt));
       C.pitch = G.lerp(C.pitch, bigBoss ? 0.5 : 0.35, G.damp(3, dt));
+    } else if (bigBoss) {
+      C.pitch = G.lerp(C.pitch, 0.45, G.damp(2.5, dt));
     }
 
     const fx = Math.sin(C.yaw) * Math.cos(C.pitch);

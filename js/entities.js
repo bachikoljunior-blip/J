@@ -418,7 +418,8 @@
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
       }));
       glow.position.set(0, 0.85, 0.75);
-      glow.scale.set(1.5, 1.5, 1);
+      glow.scale.set(0.7, 0.7, 1);
+      glow.material.opacity = 0.6;
       g.add(glow);
     }
     const head = new THREE.Group();
@@ -737,8 +738,17 @@
       const t = box(0.4 - i * 0.08, 0.3 - i * 0.05, 0.7, dark);
       t.position.set(0, 0, -0.6 - i * 0.62);
       tail.add(t);
+      const spike = box(0.08, 0.3 - i * 0.04, 0.12, 0xd8cfa8);
+      spike.position.set(0, 0.25 - i * 0.03, -0.6 - i * 0.62);
+      tail.add(spike);
     }
     tail.position.set(0, 1.15, -0.9);
+    // 背びれの棘列
+    for (let i = 0; i < 3; i++) {
+      const sp = box(0.1, 0.42 - i * 0.06, 0.16, 0xd8cfa8);
+      sp.position.set(0, 1.75, 0.5 - i * 0.55);
+      g.add(sp);
+    }
     const mkWing = (side) => {
       const grp = new THREE.Group();
       const m1 = box(1.6, 0.08, 0.9, wingC);
@@ -1222,6 +1232,20 @@
       }
     }
 
+    // 通常敵との重なり分離 (密着スタック防止)
+    for (const e of G.Enemies.list) {
+      if (!e.alive) continue;
+      const dx = P.pos.x - e.pos.x, dz = P.pos.z - e.pos.z;
+      const rr = e.radius + P.radius - 0.1;
+      const d2 = dx * dx + dz * dz;
+      if (d2 < rr * rr && d2 > 0.0001) {
+        const d = Math.sqrt(d2);
+        const push = (rr - d) * 0.5;
+        P.pos.x += dx / d * push; P.pos.z += dz / d * push;
+        e.pos.x -= dx / d * push; e.pos.z -= dz / d * push;
+      }
+    }
+
     // ボス体内への侵入を押し出す (見た目サイズの押し出し半径)
     for (const b of G.Enemies.bosses) {
       if (!b.alive) continue;
@@ -1345,7 +1369,7 @@
   function buildRig(type, T) {
     switch (T.rigFn) {
       case 'wolf': return G.Rigs.wolf({ scale: T.scale });
-      case 'goblin': return G.Rigs.humanoid({ scale: T.scale, skin: 0x7a9a4a, cloth: 0x6b5a3a, cloth2: 0x4a3f2a, weapon: 'club' });
+      case 'goblin': return G.Rigs.humanoid({ scale: T.scale, skin: 0xb08d6a, hair: 0x3a4a2a, cloth: 0x7a4a3a, cloth2: 0x4a2f24, weapon: 'club' });
       case 'skeleton': return G.Rigs.humanoid({ scale: T.scale, skin: 0xd8d4c8, cloth: 0xb5b0a3, cloth2: 0x8a867c, skull: true, weapon: type === 'nightwisp' ? 'sword' : 'bow' });
       case 'golemling': return G.Rigs.golem({ scale: T.scale });
       case 'scorpion': return G.Rigs.scorpion({ scale: T.scale });
@@ -1395,10 +1419,11 @@
     G.FX.burst(e.pos.x, e.pos.y + 1, e.pos.z, { n: crit ? 8 : 5, color: 0xffd24a, speed: 3.2, life: 0.28, size: 1.6 });
     G.FX.burst(e.pos.x, e.pos.y + 0.9, e.pos.z, { n: 1, color: 0xffffff, speed: 0.05, life: 0.18, size: 9, gravity: 0, drag: 0 });
     if (e.hp <= 0) { kill(e); return; }
-    // ノックバック (プレイヤーから離れる方向へ)
+    // ノックバック (プレイヤーから離れる方向へ、強/回転は大きく)
+    const kb = (G.Player.spin || G.Player.heavy) && G.Player.state === 'attack' ? 1.1 : 0.4;
     const kdx = e.pos.x - G.Player.pos.x, kdz = e.pos.z - G.Player.pos.z;
     const kd = Math.hypot(kdx, kdz) || 1;
-    const c2 = G.World.collide(e.pos.x + kdx / kd * 0.4, e.pos.z + kdz / kd * 0.4, e.radius);
+    const c2 = G.World.collide(e.pos.x + kdx / kd * kb, e.pos.z + kdz / kd * kb, e.radius);
     e.pos.x = c2.x; e.pos.z = c2.z;
     e.poiseC++;
     if (e.poiseC >= (e.T.poise || 1)) {

@@ -673,6 +673,7 @@
           float k = smoothstep(-0.3, 0.4, vWave);
           vec3 base = uColor * mix(vec3(1.0), uSunTint, 0.55);
           vec3 c = mix(base, uColor2 * uSunTint, k) * uLight;
+          c = mix(c, uFogColor, 0.34);   // 空の色を映す (夕焼け/朝焼けの反射近似)
           float f = smoothstep(uFogNear, uFogFar, vDist);
           c = mix(c, uFogColor, f);
           gl_FragColor = vec4(c, 0.82);
