@@ -512,7 +512,7 @@
     for (const e of G.Enemies.list) {
       if (!e.alive || !e.aggro) continue;
       if (G.dist2(p.pos.x, p.pos.z, e.pos.x, e.pos.z) > 40 * 40) continue;
-      const pr = UI.project(e.pos.x, e.pos.y + 1.9 * (e.T.scale || 1) + 0.4, e.pos.z);
+      const pr = UI.project(e.pos.x, e.pos.y + (e.T.barH || 1.9), e.pos.z);
       if (!pr.visible) continue;
       let b = ebarPool[used];
       if (!b) {
@@ -752,7 +752,7 @@
         const b = el('div', 'ibtn', row, '使う');
         b.addEventListener('pointerdown', e => {
           e.stopPropagation();
-          if (id === 'potion' || id === 'hipotion') { G.Player.usePotion(); }
+          if (id === 'potion' || id === 'hipotion') { G.Player.potionCd = 0; G.Player.usePotion(id); }
           else if (id === 'herb') {
             if (G.Inv.remove('herb', 1)) { G.Player.heal(Math.round(G.Player.maxHp() * 0.12)); G.Audio.sfx('potion'); }
           }

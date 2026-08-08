@@ -733,14 +733,14 @@
     P.staRegenDelay = 0.85;
   }
 
-  P.usePotion = function () {
+  /* id 指定でその薬だけを使う。省略時は弱い方から */
+  P.usePotion = function (id) {
     if (P.potionCd > 0 || !P.alive) return;
-    if (G.Inv.count('hipotion') > 0) {
-      G.Inv.remove('hipotion', 1);
-      P.heal(Math.round(P.maxHp() * 0.7));
-    } else if (G.Inv.count('potion') > 0) {
-      G.Inv.remove('potion', 1);
+    if (!id) id = G.Inv.count('potion') > 0 ? 'potion' : 'hipotion';
+    if (id === 'potion' && G.Inv.remove('potion', 1)) {
       P.heal(Math.round(P.maxHp() * 0.42));
+    } else if (id === 'hipotion' && G.Inv.remove('hipotion', 1)) {
+      P.heal(Math.round(P.maxHp() * 0.7));
     } else {
       G.UI.toast('回復薬がない…');
       return;
@@ -955,12 +955,12 @@
   E.all = function () { return list.concat(bosses); };
 
   const TYPES = {
-    wolf:      { name: '野狼',       rigFn: 'wolf',     hp: 40,  atk: 12, speed: 5.2, xp: 14, gold: 6,  aggroR: 18, atkR: 1.7, windup: 0.45, cool: 1.2, radius: 0.5, scale: 1,   drops: [['pelt', 0.6], ['potion', 0.08]] },
-    goblin:    { name: 'ゴブリン',   rigFn: 'goblin',   hp: 55,  atk: 15, speed: 3.8, xp: 18, gold: 12, aggroR: 16, atkR: 1.9, windup: 0.55, cool: 1.5, radius: 0.45, scale: 0.9, drops: [['potion', 0.12], ['magicstone', 0.1]] },
-    skeleton:  { name: 'スケルトン', rigFn: 'skeleton', hp: 45,  atk: 13, speed: 3.2, xp: 20, gold: 14, aggroR: 22, atkR: 12,  windup: 0.7,  cool: 2.4, radius: 0.45, scale: 1,   ranged: true, drops: [['bone', 0.6], ['magicstone', 0.12]] },
-    golemling: { name: '岩の子鬼',   rigFn: 'golemling',hp: 90,  atk: 20, speed: 2.6, xp: 30, gold: 20, aggroR: 14, atkR: 2.3, windup: 0.85, cool: 2.0, radius: 0.6, scale: 0.62, poise: 3, drops: [['magicstone', 0.5]] },
-    scorpion:  { name: '砂蠍',       rigFn: 'scorpion', hp: 50,  atk: 16, speed: 4.4, xp: 22, gold: 15, aggroR: 15, atkR: 1.8, windup: 0.5,  cool: 1.4, radius: 0.55, scale: 1.1, drops: [['magicstone', 0.15], ['potion', 0.1]] },
-    nightwisp: { name: '夜の骸骨',   rigFn: 'skeleton', hp: 38,  atk: 14, speed: 4.0, xp: 16, gold: 10, aggroR: 26, atkR: 1.8, windup: 0.5,  cool: 1.3, radius: 0.45, scale: 1, night: true, drops: [['bone', 0.5]] }
+    wolf:      { name: '野狼',       rigFn: 'wolf',     barH: 1.4, hp: 40,  atk: 12, speed: 5.2, xp: 14, gold: 6,  aggroR: 18, atkR: 1.7, windup: 0.45, cool: 1.2, radius: 0.5, scale: 1,   drops: [['pelt', 0.6], ['potion', 0.08]] },
+    goblin:    { name: 'ゴブリン',   rigFn: 'goblin',   barH: 1.9, hp: 55,  atk: 15, speed: 3.8, xp: 18, gold: 12, aggroR: 16, atkR: 1.9, windup: 0.55, cool: 1.5, radius: 0.45, scale: 0.9, drops: [['potion', 0.12], ['magicstone', 0.1]] },
+    skeleton:  { name: 'スケルトン', rigFn: 'skeleton', barH: 2.0, hp: 45,  atk: 13, speed: 3.2, xp: 20, gold: 14, aggroR: 22, atkR: 12,  windup: 0.7,  cool: 2.4, radius: 0.45, scale: 1,   ranged: true, drops: [['bone', 0.6], ['magicstone', 0.12]] },
+    golemling: { name: '岩の子鬼',   rigFn: 'golemling',barH: 1.8, hp: 90,  atk: 20, speed: 2.6, xp: 30, gold: 20, aggroR: 14, atkR: 2.3, windup: 0.85, cool: 2.0, radius: 0.6, scale: 0.62, poise: 3, drops: [['magicstone', 0.5]] },
+    scorpion:  { name: '砂蠍',       rigFn: 'scorpion', barH: 1.3, hp: 50,  atk: 16, speed: 4.4, xp: 22, gold: 15, aggroR: 15, atkR: 1.8, windup: 0.5,  cool: 1.4, radius: 0.55, scale: 1.1, drops: [['magicstone', 0.15], ['potion', 0.1]] },
+    nightwisp: { name: '夜の骸骨',   rigFn: 'skeleton', barH: 2.0, hp: 38,  atk: 14, speed: 4.0, xp: 16, gold: 10, aggroR: 26, atkR: 1.8, windup: 0.5,  cool: 1.3, radius: 0.45, scale: 1, night: true, drops: [['bone', 0.5]] }
   };
   E.TYPES = TYPES;
 
@@ -1010,7 +1010,7 @@
     if (!e.alive) return;
     e.hp -= dmg;
     e.aggro = true;
-    G.UI.dmgNum(e.pos.x, e.pos.y + 1.6 * (e.T ? e.T.scale : 1) + 0.4, e.pos.z, dmg, { crit });
+    G.UI.dmgNum(e.pos.x, e.pos.y + (e.T && e.T.barH ? e.T.barH - 0.2 : 1.6), e.pos.z, dmg, { crit });
     G.FX.burst(e.pos.x, e.pos.y + 1, e.pos.z, { n: crit ? 14 : 8, color: 0xffdd66, speed: 3.5, life: 0.4, size: 2.5 });
     if (e.hp <= 0) { kill(e); return; }
     e.poiseC++;

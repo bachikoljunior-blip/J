@@ -155,6 +155,8 @@
     G.UI.toast('クエスト開始: ' + D.name, 'quest');
     G.Audio.sfx('uiOpen');
     G.events.emit('questChange');
+    // 対象ボスを既に討伐済みなら即完了 (順序破り対策)
+    if (D.boss && G.State.bossKilled[D.boss]) Q.complete(id);
   };
 
   Q.isActive = id => Q.state[id] && Q.state[id].status === 'active';
@@ -305,13 +307,15 @@
             ]
           };
         }
-        if (Q.isReady('side_herb')) {
+        if ((Q.isReady('side_herb') || Q.isActive('side_herb')) && G.Inv.count('herb') >= Q.DEFS.side_herb.count) {
           return {
             text: 'まあ、こんなに立派な月光草……! 本当にありがとう。お礼にこの薬を持っていって。',
-            options: [{ label: '渡す', action: () => { G.Inv.remove('herb', Q.DEFS.side_herb.count); Q.complete('side_herb'); }, close: true }]
+            options: [{ label: '渡す', action: () => {
+              if (G.Inv.remove('herb', Q.DEFS.side_herb.count)) Q.complete('side_herb');
+            }, close: true }]
           };
         }
-        if (Q.isActive('side_herb')) return { text: '月光草は暗くなると淡く光るわ。草原を探してみて。', options: [{ label: '分かった', close: true }] };
+        if (Q.isReady('side_herb') || Q.isActive('side_herb')) return { text: '月光草は暗くなると淡く光るわ。草原を探してみて。5本必要よ。', options: [{ label: '分かった', close: true }] };
         return {
           text: '怪我はない? 疲れたらここで休んでいってね。',
           options: [
