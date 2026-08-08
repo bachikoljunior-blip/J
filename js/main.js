@@ -363,6 +363,8 @@
     C.yaw -= G.Input.camDX;
     C.pitch += G.Input.camDY;
     C.pitch = G.clamp(C.pitch, -0.1, 1.15);
+    // 滑空中は視線を下げて着地予定地点を見せる
+    if (p.gliding) C.pitch = G.lerp(C.pitch, 0.68, G.damp(1.1, dt));
     G.Input.camDX = 0; G.Input.camDY = 0;
     C.dist = G.clamp(C.dist + G.Input.wheel, 4, 13);
     G.Input.wheel = 0;

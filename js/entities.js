@@ -444,11 +444,14 @@
       g.add(glow);
     }
     const head = new THREE.Group();
-    const hm = box(0.34, 0.3, 0.42, fur);
-    const snout = box(0.16, 0.14, 0.22, conf.snout !== undefined ? conf.snout : 0x4e463e);
-    snout.position.set(0, -0.05, 0.28);
-    const earL = box(0.08, 0.14, 0.04, fur); earL.position.set(-0.1, 0.2, -0.05);
-    const earR = earL.clone(); earR.position.x = 0.1;
+    // 王狼は頭部を大きく・鼻先を長く (恐竜に誤読されない狼シルエット)
+    const hw = conf.mane ? 1.28 : 1;
+    const hm = box(0.34 * hw, 0.3 * hw, 0.42 * hw, fur);
+    const snout = box(0.16 * hw, 0.14 * hw, conf.mane ? 0.36 : 0.22, conf.snout !== undefined ? conf.snout : 0x4e463e);
+    snout.position.set(0, -0.05 * hw, conf.mane ? 0.4 : 0.28);
+    const earL = box(0.08 * hw, 0.14 * hw * (conf.mane ? 1.4 : 1), 0.04, fur);
+    earL.position.set(-0.1 * hw, 0.2 * hw, -0.05);
+    const earR = earL.clone(); earR.position.x = 0.1 * hw;
     const eyeL = box(0.05, 0.05, 0.02, conf.eye !== undefined ? conf.eye : 0xcc2222);
     eyeL.position.set(-0.09, 0.05, 0.21);
     const eyeR = eyeL.clone(); eyeR.position.x = 0.09;
@@ -483,6 +486,15 @@
     g.add(body, head, tail, legFL, legFR, legBL, legBR);
     g.scale.setScalar(s);
     const parts = { body, head, tail, legFL, legFR, legBL, legBR };
+    if (conf.mane) {
+      // 白狼王は逆光でも白く読めるよう、毛皮に弱い自己発光を乗せる
+      g.traverse(o => {
+        if (o.isMesh && o.material && o.material.emissive && o.material.color.getHex() === fur) {
+          o.material = o.material.clone();
+          o.material.emissive.set(0x1a222c);
+        }
+      });
+    }
 
     function pose(p) {
       const t = G.time;
@@ -772,10 +784,23 @@
     const headM = box(0.5, 0.45, 0.8, dark);
     const jaw = box(0.4, 0.15, 0.6, belly);
     jaw.position.set(0, -0.25, 0.1);
-    const hornL = box(0.08, 0.4, 0.08, 0xd8cfa8);
-    hornL.position.set(-0.16, 0.35, -0.3); hornL.rotation.x = -0.5;
-    const hornR = hornL.clone(); hornR.position.x = 0.16;
-    const eyeL = box(0.08, 0.08, 0.03, 0xffaa22);
+    // 大きく後方へ湾曲する対の角 (2節)
+    const hornMat = new THREE.MeshLambertMaterial({ color: 0xcabb96 });
+    const mkHorn = side => {
+      const grp = new THREE.Group();
+      const h1 = new THREE.Mesh(boxGeo(0.11, 0.34, 0.11), hornMat);
+      h1.position.y = 0.15;
+      const h2 = new THREE.Mesh(boxGeo(0.08, 0.3, 0.08), hornMat);
+      h2.position.set(0, 0.4, -0.1); h2.rotation.x = -0.55;
+      grp.add(h1, h2);
+      grp.position.set(0.17 * side, 0.28, -0.22);
+      grp.rotation.x = -0.5;
+      return grp;
+    };
+    const hornL = mkHorn(-1), hornR = mkHorn(1);
+    // 目は残り火色の自己発光 (黒いボディへの視線誘導)
+    const eyeMat = new THREE.MeshLambertMaterial({ color: 0xffaa22, emissive: 0xff7716 });
+    const eyeL = new THREE.Mesh(boxGeo(0.09, 0.09, 0.04), eyeMat);
     eyeL.position.set(-0.2, 0.1, 0.3);
     const eyeR = eyeL.clone(); eyeR.position.x = 0.2;
     headG.add(headM, jaw, hornL, hornR, eyeL, eyeR);
@@ -892,8 +917,19 @@
       d.rotation.x = -Math.PI / 2;
       d.visible = false;
       d.renderOrder = 2;
-      scene.add(m); scene.add(d);
-      pool.push({ m, d });
+      // 全域の薄い危険フィル (ゲージが小さい序盤でも内外が読める)
+      const f = new THREE.Mesh(
+        new THREE.CircleGeometry(1, 24),
+        new THREE.MeshBasicMaterial({
+          color: 0x8a1010, transparent: true, opacity: 0.17,
+          depthWrite: false, side: THREE.DoubleSide
+        })
+      );
+      f.rotation.x = -Math.PI / 2;
+      f.visible = false;
+      f.renderOrder = 2;
+      scene.add(m); scene.add(d); scene.add(f);
+      pool.push({ m, d, f });
     }
   };
   let used = 0;
@@ -912,9 +948,14 @@
     s.d.position.set(x, gh + 0.1, z);
     s.d.scale.setScalar(Math.max(0.05, r * t));
     s.d.material.opacity = 0.28 + t * 0.22;
+    s.f.visible = true;
+    s.f.position.set(x, gh + 0.09, z);
+    s.f.scale.setScalar(r);
   };
   R.end = function () {
-    for (let i = used; i < pool.length; i++) { pool[i].m.visible = false; pool[i].d.visible = false; }
+    for (let i = used; i < pool.length; i++) {
+      pool[i].m.visible = false; pool[i].d.visible = false; pool[i].f.visible = false;
+    }
   };
 })();
 
@@ -925,8 +966,8 @@
   const pool = [];
   SA.init = function (sc) {
     scene = sc;
-    const sector = new THREE.RingGeometry(1.1, 2.3, 18, 1, -1.2, 2.4);
-    const full = new THREE.RingGeometry(1.2, 2.9, 24);
+    const sector = new THREE.RingGeometry(1.35, 2.25, 18, 1, -1.2, 2.4);
+    const full = new THREE.RingGeometry(1.5, 2.85, 24);
     for (let i = 0; i < 3; i++) {
       const m = new THREE.Mesh(i === 2 ? full : sector, new THREE.MeshBasicMaterial({
         color: 0xcfe8ff, transparent: true, opacity: 0,
@@ -956,8 +997,8 @@
     for (const p of pool) {
       if (p.t >= 1) { p.mesh.visible = false; continue; }
       p.t += dt * (p.decay || 4.2);
-      // 回転斬りは加算合成の白飛びを抑えるためピークを低めに
-      p.mesh.material.opacity = Math.max(0, (p.kind === 2 ? 0.5 : 0.75) * (1 - p.t));
+      // 加算合成の白飛びを抑えるためピークを低めに (氷床などの明色地面対策)
+      p.mesh.material.opacity = Math.max(0, (p.kind === 2 ? 0.45 : 0.6) * (1 - p.t));
       if (p.t >= 1) p.mesh.visible = false;
     }
   };
@@ -1215,6 +1256,25 @@
     G.Audio.sfx('jump');
   };
 
+  /* ロックオンマーカー (金の下向き三角) */
+  let lockMarkSpr = null;
+  function lockMark() {
+    if (lockMarkSpr) return lockMarkSpr;
+    const c = document.createElement('canvas');
+    c.width = 64; c.height = 64;
+    const x = c.getContext('2d');
+    x.beginPath(); x.moveTo(13, 15); x.lineTo(51, 15); x.lineTo(32, 46); x.closePath();
+    x.lineWidth = 6; x.strokeStyle = 'rgba(24,16,4,0.9)'; x.stroke();
+    x.fillStyle = '#ffd35a'; x.fill();
+    lockMarkSpr = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false
+    }));
+    lockMarkSpr.scale.set(0.55, 0.55, 1);
+    lockMarkSpr.visible = false;
+    scene.add(lockMarkSpr);
+    return lockMarkSpr;
+  }
+
   P.toggleLock = function () {
     if (P.target) { P.target = null; return; }
     let best = null, bd = 24 * 24;
@@ -1267,6 +1327,16 @@
     // ロックオン対象消滅
     if (P.target && (!P.target.alive || G.dist2(P.pos.x, P.pos.z, P.target.pos.x, P.target.pos.z) > 40 * 40)) {
       P.target = null;
+    }
+    // ロックオン対象の頭上に金のマーカー (予兆の赤と別の記号体系)
+    const lm = lockMark();
+    if (P.target && P.target.alive) {
+      const th = (P.target.T && P.target.T.barH) || (P.target.D && P.target.D.barH) || 2;
+      lm.visible = true;
+      lm.position.set(P.target.pos.x,
+        P.target.pos.y + th + 0.45 + Math.sin(G.time * 5) * 0.07, P.target.pos.z);
+    } else {
+      lm.visible = false;
     }
 
     if (P.state === 'dead') {
@@ -1791,6 +1861,23 @@
       updateEnemy(e, dt);
       if (e.alive && e.state === 'windup') {
         G.TelegraphRing.show(e.pos.x, e.pos.z, (e.T.atkR > 5 ? 1.2 : e.T.atkR + 0.6), G.clamp(e.stateT / e.T.windup, 0, 1));
+      }
+    }
+    // 敵同士の相互分離 (同一地点に重なって個体が判別できなくなるのを防ぐ)
+    for (let i = 0; i < list.length; i++) {
+      const a = list[i];
+      if (!a.alive) continue;
+      for (let j = i + 1; j < list.length; j++) {
+        const c = list[j];
+        if (!c.alive) continue;
+        const dx = c.pos.x - a.pos.x, dz = c.pos.z - a.pos.z;
+        const rr = a.radius + c.radius + 0.35;
+        const d2 = dx * dx + dz * dz;
+        if (d2 < rr * rr && d2 > 0.0001) {
+          const d = Math.sqrt(d2), push = (rr - d) / d * 0.5;
+          a.pos.x -= dx * push; a.pos.z -= dz * push;
+          c.pos.x += dx * push; c.pos.z += dz * push;
+        }
       }
     }
     for (const b of bosses) {

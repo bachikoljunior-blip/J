@@ -230,7 +230,11 @@
     if (pb > 0) out.lerp(PATH_COL, pb * 0.85);
     // 雪面の起伏まだら
     if (b === 'snow') {
-      out.multiplyScalar(0.92 + (G.fbm(x * 0.05, z * 0.05, 2) * 0.5 + 0.5) * 0.1);
+      out.multiplyScalar(0.88 + (G.fbm(x * 0.05, z * 0.05, 2) * 0.5 + 0.5) * 0.16);
+    }
+    // 岩肌の縞ムラ (滑空時の眼下が無地のスメアにならないように)
+    if (b === 'rock') {
+      out.multiplyScalar(0.82 + (G.fbm(x * 0.07, z * 0.07, 2) * 0.5 + 0.5) * 0.3);
     }
     if (b === 'grass') {
       const t = G.fbm(x * 0.012 + 55, z * 0.012 + 55, 2) * 0.5 + 0.5;
@@ -1326,9 +1330,12 @@
       }
     }
     torchT += dt;
+    // 松明は暗い時間帯のみ灯す (真昼に燃えっぱなしにしない)
+    const torchOn = G.clamp((0.62 - (G.Sky.lightLevel || 1)) * 3.2, 0, 1);
     for (const t of W.torches) {
       const f = 0.9 + Math.sin(torchT * 9 + t.seed * 7) * 0.15 + Math.sin(torchT * 23 + t.seed) * 0.08;
       t.sprite.scale.set(1.1 * f, 1.4 * f, 1);
+      t.sprite.material.opacity = torchOn;
     }
     // 祠クリスタル回転 & 光の柱の色 (灯すと金色に)
     for (const id in W.shrineMeshes) {
@@ -1488,7 +1495,7 @@
       map: G.makeRadialTex(128, [[0, 'rgba(255,252,240,1)'], [0.42, 'rgba(255,240,195,0.96)'], [0.6, 'rgba(255,225,160,0.4)'], [1, 'rgba(255,210,130,0)']]),
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
     }));
-    sunSpr.scale.set(120, 120, 1);
+    sunSpr.scale.set(100, 100, 1);
     scene.add(sunSpr);
     moonSpr = new THREE.Sprite(new THREE.SpriteMaterial({
       map: G.makeRadialTex(128, [[0, 'rgba(230,238,255,1)'], [0.18, 'rgba(210,225,255,0.85)'], [0.3, 'rgba(190,210,255,0.2)'], [1, 'rgba(180,200,255,0)']]),
@@ -1614,9 +1621,12 @@
     // 太陽が低いときは環境光も暖色に (朝夕の空気感)
     const sunLow = G.smoothstep(0.55, 0.12, Math.abs(Math.sin(((tod - 6) / 12) * Math.PI))) *
                    G.smoothstep(4.5, 6, tod) * (1 - G.smoothstep(19.5, 21, tod));
-    hemi.color.copy(cTop).lerp(_white, 0.5).lerp(cSun, sunLow * 0.55);
+    hemi.color.copy(cTop).lerp(_white, 0.5).lerp(cSun, sunLow * 0.7);
     hemi.groundColor.set(0x6a7a52);
-    hemi.groundColor.lerp(cSun, sunLow * 0.4);
+    // 朝夕は地面にも暖色を強くバウンスさせ、空と前景の乖離を防ぐ
+    hemi.groundColor.lerp(cSun, sunLow * 0.7);
+    // 雨天は地面が濡れて暗くなる
+    hemi.groundColor.multiplyScalar(1 - weather * 0.3);
     sun.intensity = s.dir * wDim;
     sun.color.copy(cSun);
 
@@ -1639,10 +1649,12 @@
     skyDome.position.set(cam.x, 0, cam.z);
 
     // 太陽・月
-    sunSpr.position.copy(_sunDir).multiplyScalar(640).add(_camXZ);
+    // ドーム(半径700)の内側に完全に収める (半径ぎりぎりだと球殻と交差し
+    // スプライトが欠けてリング状のアーティファクトになる)
+    sunSpr.position.copy(_sunDir).multiplyScalar(540).add(_camXZ);
     sunSpr.material.opacity = G.clamp(_sunDir.y + 0.15, 0, 1) * (1 - weather * 0.85);
     _moonDir.copy(_sunDir).negate();
-    moonSpr.position.copy(_moonDir).multiplyScalar(620).add(_camXZ);
+    moonSpr.position.copy(_moonDir).multiplyScalar(525).add(_camXZ);
     moonSpr.material.opacity = G.clamp(_moonDir.y + 0.1, 0, 0.9) * (1 - weather * 0.85);
 
     // 星
