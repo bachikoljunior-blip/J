@@ -47,6 +47,8 @@
     });
     pts = new THREE.Points(geo, mat);
     pts.frustumCulled = false;
+    // 原点基準の透明ソートで水面等に沈まないよう、常に最後に加算描画する
+    pts.renderOrder = 4;
     scene.add(pts);
   };
 
@@ -142,7 +144,6 @@
       map: shadowTex, transparent: true, depthWrite: false
     }));
     m.scale.set(scale, 1, scale);
-    m.renderOrder = 1;
     return m;
   };
 
@@ -1264,17 +1265,17 @@
   const DEFS = {
     fenrir: {
       name: '白狼王フェンリル', hp: 380, atk: 22, speed: 7.2, xp: 300, gold: 250,
-      x: -430, z: -140, arenaR: 34, radius: 0.9,
+      x: -430, z: -140, arenaR: 34, radius: 0.9, barH: 2.6,
       build: () => G.Rigs.wolf({ scale: 2.1, fur: 0xd8d8e0, snout: 0xb8b8c2, eye: 0x44ddff })
     },
     golem: {
       name: '遺跡の巨像', hp: 700, atk: 34, speed: 2.9, xp: 600, gold: 500,
-      x: 430, z: -80, arenaR: 36, radius: 1.6,
+      x: 430, z: -80, arenaR: 36, radius: 1.6, barH: 5.0,
       build: () => G.Rigs.golem({ scale: 2.4, rock: 0x8a8478 })
     },
     dragon: {
       name: '黒竜ヴァルドレク', hp: 1400, atk: 40, xp: 2000, gold: 1500, speed: 5,
-      x: -40, z: -640, arenaR: 40, radius: 2.2,
+      x: -40, z: -640, arenaR: 40, radius: 4.0, barH: 6.5,
       build: () => G.Rigs.dragon()
     }
   };
@@ -1314,7 +1315,8 @@
     if (!b.alive) return;
     b.hp -= dmg;
     b.engaged = true;
-    G.UI.dmgNum(b.pos.x, b.pos.y + 2.5, b.pos.z, dmg, { crit });
+    const ny = b.pos.y + (b.D.barH || 2.5) + (b.fly || 0) * 2.4;
+    G.UI.dmgNum(b.pos.x, ny, b.pos.z, dmg, { crit });
     G.FX.burst(b.pos.x, b.pos.y + 1.5, b.pos.z, { n: 10, color: 0xffdd66, speed: 4, life: 0.4 });
     if (b.hp <= 0) {
       b.hp = 0; b.alive = false;

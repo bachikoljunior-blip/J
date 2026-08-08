@@ -233,14 +233,20 @@
     let cz = p.pos.z - fz * C.dist;
     let cy = p.pos.y + 1.6 + fy * C.dist;
 
-    // 地形にめり込まない
+    // 地形にめり込まない (視線上の複数点をサンプルして必要な持ち上げ量を求める)
     const gh = G.World.heightAt(cx, cz);
     if (cy < gh + 0.5) cy = gh + 0.5;
-    // 中間点も確認
-    const mx = (p.pos.x + cx) / 2, mz = (p.pos.z + cz) / 2;
-    const mh = G.World.heightAt(mx, mz) + 0.4;
-    const my = (p.pos.y + 1.6 + cy) / 2;
-    if (my < mh) cy += (mh - my) * 2;
+    const eyeY = p.pos.y + 1.6;
+    let lift = 0;
+    for (let k = 0; k < 3; k++) {
+      const t = 0.3 + k * 0.25;   // 0.3, 0.55, 0.8
+      const sx = p.pos.x + (cx - p.pos.x) * t;
+      const sz = p.pos.z + (cz - p.pos.z) * t;
+      const sy = eyeY + (cy - eyeY) * t;
+      const need = (G.World.heightAt(sx, sz) + 0.45 - sy) / t;
+      if (need > lift) lift = need;
+    }
+    if (lift > 0) cy += lift;
 
     // 画面揺れ
     trauma = Math.max(0, trauma - dt * 1.8);

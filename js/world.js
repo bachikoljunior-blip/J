@@ -588,13 +588,14 @@
         varying float vWave;
         varying float vDist;
         void main(){
-          vec3 p = position;
-          float w = sin(p.x * 0.08 + uTime * 1.1) * 0.18
-                  + sin(p.z * 0.11 + uTime * 0.8) * 0.14
-                  + sin((p.x + p.z) * 0.05 + uTime * 0.5) * 0.1;
-          p.y += w;
+          // メッシュはカメラ追従で動くため、波はワールド座標で評価する
+          vec4 wp = modelMatrix * vec4(position, 1.0);
+          float w = sin(wp.x * 0.08 + uTime * 1.1) * 0.18
+                  + sin(wp.z * 0.11 + uTime * 0.8) * 0.14
+                  + sin((wp.x + wp.z) * 0.05 + uTime * 0.5) * 0.1;
+          wp.y += w;
           vWave = w;
-          vec4 mv = modelViewMatrix * vec4(p, 1.0);
+          vec4 mv = viewMatrix * wp;
           vDist = -mv.z;
           gl_Position = projectionMatrix * mv;
         }`,
@@ -1083,13 +1084,13 @@
     // 太陽・月スプライト
     sunSpr = new THREE.Sprite(new THREE.SpriteMaterial({
       map: G.makeRadialTex(128, [[0, 'rgba(255,250,230,1)'], [0.25, 'rgba(255,235,180,0.9)'], [1, 'rgba(255,220,140,0)']]),
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
     }));
     sunSpr.scale.set(120, 120, 1);
     scene.add(sunSpr);
     moonSpr = new THREE.Sprite(new THREE.SpriteMaterial({
       map: G.makeRadialTex(128, [[0, 'rgba(230,238,255,1)'], [0.18, 'rgba(210,225,255,0.85)'], [0.3, 'rgba(190,210,255,0.2)'], [1, 'rgba(180,200,255,0)']]),
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
     }));
     moonSpr.scale.set(70, 70, 1);
     scene.add(moonSpr);
@@ -1106,7 +1107,7 @@
     sgeo.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
     stars = new THREE.Points(sgeo, new THREE.PointsMaterial({
       color: 0xdfe8ff, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0,
-      depthWrite: false
+      depthWrite: false, fog: false
     }));
     stars.frustumCulled = false;
     scene.add(stars);
@@ -1131,7 +1132,7 @@
     const crnd = G.srand(31);
     for (let i = 0; i < 16; i++) {
       const spm = new THREE.SpriteMaterial({
-        map: cloudTex, transparent: true, opacity: 0.55, depthWrite: false
+        map: cloudTex, transparent: true, opacity: 0.55, depthWrite: false, fog: false
       });
       const s = new THREE.Sprite(spm);
       const scl = 90 + crnd() * 160;
@@ -1255,7 +1256,8 @@
     }
 
     // 光量 (草/水シェーダ用) と環境同期
-    const light = G.clamp(0.25 + s.hem * 1.15, 0.28, 1.1) * wDim;
+    // 地形の Lambert 照明 (hemi+直射) に近い明るさを草/水にも与える
+    const light = G.clamp(0.05 + s.hem * 1.4, 0.16, 1.15) * wDim;
     Sky.lightLevel = light;
     G.World.syncEnv(_fogC, scene.fog.near, scene.fog.far, light);
   };
