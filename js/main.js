@@ -475,6 +475,18 @@
     S.weather += (S.weatherTarget - S.weather) * G.damp(0.25, dt);
     G.Audio.setRain(S.weatherTarget === 1);
 
+    // 雨の地面スプラッシュ (降雨がワールドに触れている感触)
+    if (S.weather > 0.5 && Math.random() < dt * 10) {
+      const p = G.Player.pos;
+      const a = Math.random() * Math.PI * 2, d = 2 + Math.random() * 9;
+      const x = p.x + Math.cos(a) * d, z = p.z + Math.sin(a) * d;
+      const h = G.World.heightAt(x, z);
+      G.FX.burst(x, Math.max(h, G.World.WATER_Y) + 0.08, z, {
+        n: 2, color: 0xcfe4f2, speed: 1.4, up: 1.6, gravity: 5,
+        life: 0.32, size: 1.3, drag: 0.8
+      });
+    }
+
     // 夜の蛍 (雨天以外)
     const night = S.tod > 20 || S.tod < 4.5;
     if (night && S.weather < 0.3 && Math.random() < dt * 2.2) {

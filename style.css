@@ -294,7 +294,16 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
   cursor: pointer; border-bottom: 2px solid transparent;
 }
 .mtab.on { background: rgba(50, 66, 92, 0.8); color: #fff; border-bottom-color: #ffd35a; }
-.mbody { flex: 1; overflow-y: auto; padding: 10px 4px; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+.mbody { flex: 1; overflow-y: auto; padding: 10px 4px 34px; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+/* スクロール可能であることを示す下端フェード */
+.mbody::after {
+  content: ''; position: sticky; bottom: -34px; display: block; height: 30px;
+  margin-top: -30px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10,14,20,0), rgba(10,14,20,0.85));
+}
+.diffup { color: #7ee08a; }
+.diffdown { color: #f08a7a; }
+.lack { color: #ff7a6a; }
 .stats { max-width: 740px; margin-left: auto; margin-right: auto;
   display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 10px 12px; margin-bottom: 10px;
   background: rgba(30, 40, 58, 0.5); border-radius: 10px; font-size: 13px; color: #c8d4e2;
@@ -428,14 +437,36 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 .intro {
   position: absolute; inset: 0; z-index: 85;
-  background: #06090f;
+  background: linear-gradient(180deg, #05080e 0%, #0a1220 55%, #101b2e 100%);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px;
-  padding: 24px;
+  padding: 24px; overflow: hidden;
 }
+/* 流れる霧のレイヤー (世界観「霧深き大地」の第一印象) */
+.imist {
+  position: absolute; left: -60%; right: -60%; height: 46%;
+  top: 52%; pointer-events: none; opacity: 0.5;
+  background:
+    radial-gradient(ellipse 42% 60% at 25% 55%, rgba(150, 180, 215, 0.16), transparent 70%),
+    radial-gradient(ellipse 50% 55% at 60% 45%, rgba(130, 165, 205, 0.13), transparent 70%),
+    radial-gradient(ellipse 38% 62% at 85% 60%, rgba(150, 180, 215, 0.15), transparent 70%);
+  animation: mistDrift 26s linear infinite;
+}
+.imist.m2 {
+  top: 20%; opacity: 0.32;
+  animation-duration: 38s; animation-direction: reverse;
+}
+@keyframes mistDrift {
+  from { transform: translateX(-6%); }
+  50%  { transform: translateX(6%); }
+  to   { transform: translateX(-6%); }
+}
+.intro .iname { position: relative; animation: introFade 1.6s ease-out; }
 .itext {
+  position: relative;
   font-size: 15px; line-height: 2.2; text-align: center; color: #cfd8e4;
-  animation: introFade 2.4s ease-out;
+  animation: introFade 2.8s ease-out;
 }
+.intro .bigbtn { position: relative; animation: introFade 3.6s ease-out backwards; }
 @keyframes introFade { from { opacity: 0; transform: translateY(14px); } }
 
 /* ---------- 死亡 / クリア ---------- */

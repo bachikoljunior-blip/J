@@ -357,6 +357,7 @@
   UI.showIntro = function () {
     UI.setHudVisible(false);
     introEl = el('div', 'intro', root,
+      '<div class="imist"></div><div class="imist m2"></div>' +
       '<div class="iname">E L D R I A</div>' +
       '<div class="itext">霧深き大地エルドリア。<br><br>北の頂に黒竜ヴァルドレクが目覚めしとき、<br>大地は魔物で溢れ、人々は小さな村に身を寄せた。<br><br>――旅人よ。風がお前を呼んでいる。</div>');
     const skip = el('div', 'bigbtn', introEl, '旅を始める');
@@ -1084,7 +1085,19 @@
     for (const id of G.Shop.stock) {
       const it = G.Items.get(id);
       const row = el('div', 'irow', buy);
-      const st = it.type === 'weapon' ? ` / 攻 ${it.atk}` : it.type === 'armor' ? ` / 防 ${it.def}` : '';
+      // 装備中との比較差分を添える (+4 / -2)
+      let st = '';
+      if (it.type === 'weapon' || it.type === 'armor') {
+        const curId = G.Inv.equip[it.type];
+        const cur = G.Items.get(curId);
+        const lvl = curId ? G.Inv.upgLevel(curId) : 0;
+        const curV = cur ? (it.type === 'weapon' ? cur.atk + lvl * 2 : cur.def + lvl) : 0;
+        const v = it.type === 'weapon' ? it.atk : it.def;
+        const diff = v - curV;
+        const dTxt = diff === 0 ? '' :
+          ` <span class="${diff > 0 ? 'diffup' : 'diffdown'}">(${diff > 0 ? '+' : ''}${diff})</span>`;
+        st = ` / ${it.type === 'weapon' ? '攻' : '防'} ${v}${dTxt}`;
+      }
       row.innerHTML = `<div class="iname">${it.name} <span class="istat">${it.price}G${st}</span></div><div class="idesc">${it.desc}</div>`;
       if (G.Inv.gold >= it.price) {
         const b = el('div', 'ibtn', row, '買う');
@@ -1131,11 +1144,17 @@
       let can = false;
       if (lvl < 5) {
         const c = G.Forge.cost(lvl);
-        const mats = Object.keys(c.mats).map(m => `${G.Items.get(m).name}×${c.mats[m]}`).join(' ');
+        // 不足している素材/所持金を赤字で強調
+        const mats = Object.keys(c.mats).map(m => {
+          const lack = G.Inv.count(m) < c.mats[m];
+          const t = `${G.Items.get(m).name}×${c.mats[m]}`;
+          return lack ? `<span class="lack">${t}</span>` : t;
+        }).join(' ');
         // 強化後の数値を予告して費用対効果を判断できるように
         const next = it.type === 'weapon' ? `攻 ${it.atk + lvl * 2} → ${it.atk + (lvl + 1) * 2}`
                                           : `防 ${it.def + lvl} → ${it.def + lvl + 1}`;
-        costTxt = `${next} / ${c.gold}G + ${mats}`;
+        const goldTxt = G.Inv.gold < c.gold ? `<span class="lack">${c.gold}G</span>` : `${c.gold}G`;
+        costTxt = `${next} / ${goldTxt} + ${mats}`;
         can = G.Inv.gold >= c.gold &&
               Object.keys(c.mats).every(m => G.Inv.count(m) >= c.mats[m]);
       }
