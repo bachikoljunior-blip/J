@@ -127,7 +127,7 @@
     { k: '<b>攻撃</b>: F / クリック (長押しで強撃)', t: '<b>攻撃</b>: 剣ボタン (長押しで強撃)' },
     { k: '<b>回避</b>: Space', t: '<b>回避</b>: 回避ボタン' }
   ];
-  let tutStage = -1, tutMove = 0, tutPX = null, tutPZ = null;
+  let tutStage = -1, tutMove = 0, tutPX = null, tutPZ = null, tutHidden = false;
   function tutStart() {
     if (localStorage.getItem('eldria_tut') === 'done') { G.UI.setKeyhelpVisible(true); return; }
     tutStage = 0; tutMove = 0;
@@ -148,6 +148,14 @@
       G.UI.showTutChip(G.isTouch ? TUT[tutStage].t : TUT[tutStage].k);
     }
   }
+  /* チュートリアルを外部からスキップ (計測ハーネス・デバッグ用) */
+  G.tutSkip = function () {
+    tutStage = -1;
+    localStorage.setItem('eldria_tut', 'done');
+    G.UI.hideTutChip();
+    G.UI.setKeyhelpVisible(true);
+  };
+
   function tutUpdate() {
     if (tutStage < 0) return;
     const p = G.Player.pos;
@@ -156,6 +164,16 @@
       if (tutMove > 6) tutAdvance(0);
     }
     tutPX = p.x; tutPZ = p.z;
+    // 村を大きく離れたら「長老と話す」は押し付けない (次の戦闘ヒントへ)
+    if (tutStage === 1 && G.dist2(p.x, p.z, 0, 0) > 120 * 120) tutAdvance(1);
+    // ボス交戦中はチップを隠す (演出を邪魔しない)
+    let bossOn = false;
+    for (const b of G.Enemies.bosses) { if (b.alive && b.engaged) { bossOn = true; break; } }
+    if (bossOn && !tutHidden) { tutHidden = true; G.UI.hideTutChip(); }
+    else if (!bossOn && tutHidden && tutStage >= 0) {
+      tutHidden = false;
+      G.UI.showTutChip(G.isTouch ? TUT[tutStage].t : TUT[tutStage].k);
+    }
   }
 
   /* ---------------- イベント ---------------- */

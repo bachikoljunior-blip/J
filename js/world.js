@@ -1350,7 +1350,7 @@
 (function () {
   const Sky = G.Sky = {};
   let scene, hemi, sun, skyDome, sunSpr, moonSpr, stars, clouds = [];
-  let rainPts = null, rainVel = null, rainOn = 0;
+  let rainPts = null, rainVel = null, rainPos = null, rainN = 0, rainOn = 0;
 
   /* 時刻キーフレーム: [時, 天頂色, 地平色, 太陽色, 直射光強度, 半球光強度] */
   const KEYS = [
@@ -1362,7 +1362,7 @@
     [12, 0x4a86d0, 0xbcd8e8, 0xfff2dd, 1.32, 0.5],
     [16, 0x4d82c2, 0xd6c9a2, 0xffe2b2, 1.0, 0.6],
     [17.5, 0x46639e, 0xe6a878, 0xffb070, 0.85, 0.48],
-    [18.7, 0x3a4a80, 0xe08a55, 0xff8a4a, 0.6, 0.34],
+    [18.7, 0x3a4a80, 0xe08a55, 0xff8a4a, 0.74, 0.42],
     [20, 0x141c3d, 0x33305c, 0x445, 0.05, 0.2],
     [24, 0x0a1026, 0x141c33, 0x223, 0.02, 0.16]
   ];
@@ -1505,22 +1505,23 @@
       clouds.push(s);
     }
 
-    // 雨 (サイズはピクセル固定 — 距離減衰ありだと至近の粒が巨大クアッド化する)
-    const RN = 700;
-    const rp = new Float32Array(RN * 3);
+    // 雨: 落下方向のラインストリーク (点よりも「雨が降っている」ことが伝わる)
+    const RN = 500;
+    rainN = RN;
+    rainPos = new Float32Array(RN * 3);
     rainVel = new Float32Array(RN);
+    const rp = new Float32Array(RN * 6);   // 1粒 = 2頂点
     const rrnd = G.srand(55);
     for (let i = 0; i < RN; i++) {
-      rp[i * 3] = (rrnd() - 0.5) * 60;
-      rp[i * 3 + 1] = rrnd() * 30;
-      rp[i * 3 + 2] = (rrnd() - 0.5) * 60;
+      rainPos[i * 3] = (rrnd() - 0.5) * 60;
+      rainPos[i * 3 + 1] = rrnd() * 30;
+      rainPos[i * 3 + 2] = (rrnd() - 0.5) * 60;
       rainVel[i] = 22 + rrnd() * 12;
     }
     const rgeo = new THREE.BufferGeometry();
     rgeo.setAttribute('position', new THREE.BufferAttribute(rp, 3));
-    rainPts = new THREE.Points(rgeo, new THREE.PointsMaterial({
-      color: 0xbdd4e6, size: 2.4, sizeAttenuation: false,
-      transparent: true, opacity: 0, depthWrite: false, fog: false
+    rainPts = new THREE.LineSegments(rgeo, new THREE.LineBasicMaterial({
+      color: 0xbdd4e6, transparent: true, opacity: 0, depthWrite: false, fog: false
     }));
     rainPts.frustumCulled = false;
     scene.add(rainPts);
@@ -1642,24 +1643,27 @@
     const snowMode = snowy && weather <= 0.5;
     // 夜間は雨粒を明るく・不透明にして暗背景でも見えるようにする
     const darkF = 1 - G.clamp(s.hem * 1.7, 0, 1);
-    const pr = G.renderer ? G.renderer.getPixelRatio() : 1;
     rainPts.material.color.set(snowMode ? 0xffffff : 0xaec8dc);
     if (!snowMode) rainPts.material.color.lerp(_white, darkF * 0.85);
-    rainPts.material.size = (snowMode ? 3.2 : 2.4 + darkF * 0.8) * pr;
-    rainPts.material.opacity = rainOn < 0.06 ? 0 : rainOn * (snowMode ? 0.85 : 0.7 + darkF * 0.25);
+    rainPts.material.opacity = rainOn < 0.06 ? 0 : rainOn * (snowMode ? 0.85 : 0.72 + darkF * 0.25);
     rainPts.visible = rainOn > 0.06;
     if (rainOn > 0.02) {
       const pa = rainPts.geometry.attributes.position;
       const fall = snowMode ? 0.12 : 1;
-      for (let i = 0; i < pa.count; i++) {
-        let y = pa.getY(i) - rainVel[i] * dt * fall;
-        if (snowMode) pa.setX(i, pa.getX(i) + Math.sin(G.time * 1.3 + i) * dt * 0.6);
+      for (let i = 0; i < rainN; i++) {
+        let x = rainPos[i * 3], y = rainPos[i * 3 + 1], z = rainPos[i * 3 + 2];
+        y -= rainVel[i] * dt * fall;
+        if (snowMode) x += Math.sin(G.time * 1.3 + i) * dt * 0.6;
         if (y < -2) {
           y = 25 + Math.random() * 8;
-          pa.setX(i, (Math.random() - 0.5) * 60);
-          pa.setZ(i, (Math.random() - 0.5) * 60);
+          x = (Math.random() - 0.5) * 60;
+          z = (Math.random() - 0.5) * 60;
         }
-        pa.setY(i, y);
+        rainPos[i * 3] = x; rainPos[i * 3 + 1] = y; rainPos[i * 3 + 2] = z;
+        // 雪は短い点、雨は速度に応じた縦ストリーク
+        const len = snowMode ? 0.08 : rainVel[i] * 0.045;
+        pa.setXYZ(i * 2, x, y + len, z);
+        pa.setXYZ(i * 2 + 1, x, y, z);
       }
       pa.needsUpdate = true;
       rainPts.position.set(cam.x, cam.y, cam.z);

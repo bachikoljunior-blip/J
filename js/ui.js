@@ -463,10 +463,16 @@
     ctx.beginPath();
     ctx.arc(S / 2, S / 2, S / 2 - 1, 0, Math.PI * 2);
     ctx.clip();
-    const scale = (256 / (MAP_R * 2));
-    const sw = view * scale;
-    const [mx, mz] = worldToMap(p.pos.x, p.pos.z, 256);
-    ctx.drawImage(mapCanvas, mx - sw / 2, mz - sw / 2, sw, sw, 0, 0, S, S);
+    if (G.inCave) {
+      // 洞窟は島の地図の範囲外 — 洞窟床色で塗って可読性を保つ
+      ctx.fillStyle = '#2a3044';
+      ctx.fillRect(0, 0, S, S);
+    } else {
+      const scale = (256 / (MAP_R * 2));
+      const sw = view * scale;
+      const [mx, mz] = worldToMap(p.pos.x, p.pos.z, 256);
+      ctx.drawImage(mapCanvas, mx - sw / 2, mz - sw / 2, sw, sw, 0, 0, S, S);
+    }
     // 祠
     for (const s of G.World.shrines) {
       if (!G.State.shrines[s.id]) continue;

@@ -53,6 +53,8 @@
   };
 
   const tmpC = new THREE.Color();
+  FX.clear = function () { P.length = 0; };
+
   FX.burst = function (x, y, z, o) {
     o = o || {};
     const n = o.n || 10;
@@ -687,8 +689,8 @@
     const earL = box(0.06, 0.14, 0.05, coat); earL.position.set(-0.09, 0.24, -0.14);
     const earR = earL.clone(); earR.position.x = 0.09;
     // 手綱 (頭から鞍方向へ)
-    const reinL = box(0.025, 0.025, 0.72, 0x2e2013);
-    reinL.position.set(-0.14, -0.12, -0.32); reinL.rotation.x = 0.55;
+    const reinL = box(0.025, 0.025, 0.66, 0x2e2013);
+    reinL.position.set(-0.15, -0.16, -0.34); reinL.rotation.x = 0.78;
     const reinR = reinL.clone(); reinR.position.x = 0.14;
     headG.add(hm, blaze, maneM, earL, earR, reinL, reinR);
     headG.position.set(0, 2.02, 1.02);
@@ -710,7 +712,7 @@
       const grp = new THREE.Group();
       const l = box(0.16, 0.78, 0.16, coat);
       l.position.y = -0.38;
-      const hoof = box(0.17, 0.12, 0.17, 0x2e2620);
+      const hoof = box(0.21, 0.15, 0.21, 0x2e2620);
       hoof.position.y = -0.72;
       grp.add(l, hoof);
       grp.position.set(x, 0.78, z);
@@ -924,6 +926,7 @@
   SA.show = function (x, y, z, yaw, kind) {
     const p = pool[kind === 2 ? 2 : (pool[0].t < 1 ? 1 : 0)];
     p.t = 0;
+    p.kind = kind;
     p.decay = kind === 0 ? 4.2 : 2.0;   // 強/回転は約0.5秒残す
     p.mesh.visible = true;
     p.mesh.position.set(x, y + 1.05, z);
@@ -936,7 +939,8 @@
     for (const p of pool) {
       if (p.t >= 1) { p.mesh.visible = false; continue; }
       p.t += dt * (p.decay || 4.2);
-      p.mesh.material.opacity = Math.max(0, 0.75 * (1 - p.t));
+      // 回転斬りは加算合成の白飛びを抑えるためピークを低めに
+      p.mesh.material.opacity = Math.max(0, (p.kind === 2 ? 0.5 : 0.75) * (1 - p.t));
       if (p.t >= 1) p.mesh.visible = false;
     }
   };
@@ -1559,6 +1563,7 @@
   /* スポーン管理 */
   let spawnT = 0, nightT = 0;
   function manageSpawns(dt) {
+    if (G.noSpawn) return;   // 計測/撮影用: 新規スポーン抑止
     spawnT -= dt;
     if (spawnT > 0) return;
     spawnT = 0.8;
@@ -2318,8 +2323,14 @@
     mesh.position.set(x, y, z);
     if (type === 'arrow') mesh.lookAt(tx, ty, tz);
     scene.add(mesh);
+    // 火弾/岩弾はブロブ影で高度と着弾点を読めるように
+    let shadow = null;
+    if (type === 'fire' || type === 'rock') {
+      shadow = G.makeShadow(type === 'rock' ? 1.7 : 1.2);
+      scene.add(shadow);
+    }
     list.push({
-      type, mesh, dmg,
+      type, mesh, dmg, shadow,
       pos: new THREE.Vector3(x, y, z),
       vel: dir.multiplyScalar(speed),
       life: 0, maxLife: type === 'fire' ? 2.2 : 4,
@@ -2341,6 +2352,10 @@
       let dead = false;
       // 地形
       const gh = G.World.heightAt(pr.pos.x, pr.pos.z);
+      if (pr.shadow) {
+        pr.shadow.position.set(pr.pos.x, gh + 0.07, pr.pos.z);
+        pr.shadow.material.opacity = G.clamp(1 - (pr.pos.y - gh) * 0.08, 0.3, 0.85);
+      }
       if (pr.pos.y <= gh) {
         dead = true;
         if (pr.type === 'fire' || pr.type === 'rock') {
@@ -2367,13 +2382,14 @@
       if (pr.life > pr.maxLife) dead = true;
       if (dead) {
         scene.remove(pr.mesh);
+        if (pr.shadow) scene.remove(pr.shadow);
         list.splice(i, 1);
       }
     }
   };
 
   Pr.clear = function () {
-    for (const pr of list) scene.remove(pr.mesh);
+    for (const pr of list) { scene.remove(pr.mesh); if (pr.shadow) scene.remove(pr.shadow); }
     list.length = 0;
   };
 })();
