@@ -9,6 +9,7 @@
   let running = false;
   let prevT = 0;
   let hitstop = 0, trauma = 0;
+  let basePixelRatio = 1, resScale = 1, perfEMA = 16, perfAdjustT = 0, lastRawGap = 16;
   let autosaveT = 30;
   let musicT = 0;
   let prevHp = null;
@@ -25,7 +26,8 @@
       antialias: G.quality !== 'low',
       powerPreference: 'high-performance'
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, G.Q.dpr));
+    basePixelRatio = Math.min(window.devicePixelRatio || 1, G.Q.dpr);
+    renderer.setPixelRatio(basePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     // リアルタイム影 (low品質と設定オフ以外)
@@ -540,8 +542,10 @@
   /* ---------------- メインループ ---------------- */
   function loop(now) {
     requestAnimationFrame(loop);
-    let dt = Math.min((now - prevT) / 1000, 0.05);
+    const rawGap = now - prevT;
+    let dt = Math.min(rawGap / 1000, 0.05);
     prevT = now;
+    lastRawGap = rawGap;
     if (!running) return;
 
     handleActions();
@@ -605,6 +609,22 @@
     // 移動平均の負荷計測 (デバッグ用)
     G.perf.sim += (_t1 - _t0 - G.perf.sim) * 0.05;
     G.perf.render += (_t2 - _t1 - G.perf.render) * 0.05;
+
+    // 動的解像度スケーリング: 低スペック端末では描画解像度を下げて
+    // フレームレートを守る (render時間のEMAで2.5秒ごとに調整)
+    perfEMA += (_t2 - _t0 - perfEMA) * 0.04;
+    perfAdjustT += dt;
+    // RAF間隔が異常に長い環境 (バックグラウンド/ヘッドレス計測) では調整しない
+    if (perfAdjustT > 2.5 && started && lastRawGap < 150) {
+      perfAdjustT = 0;
+      let want = resScale;
+      if (perfEMA > 36 && resScale > 0.6) want = Math.max(0.6, resScale - 0.15);
+      else if (perfEMA < 20 && resScale < 1) want = Math.min(1, resScale + 0.1);
+      if (want !== resScale) {
+        resScale = want;
+        renderer.setPixelRatio(basePixelRatio * resScale);
+      }
+    }
   }
   G.perf = { sim: 0, render: 0 };
 

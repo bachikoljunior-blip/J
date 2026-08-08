@@ -549,6 +549,17 @@
   UI.dmgNum = function (x, y, z, n, opts) {
     if (!G.settings.showDmg) return;
     opts = opts || {};
+    // 同一対象への連続ヒットは合算表示 (画面が数字で埋まるのを防ぐ)
+    if (opts.tgt) {
+      const now = performance.now();
+      const ex = dmgPool.find(d => d.active && d.tgt === opts.tgt &&
+        now - d.born < 420 && !d.crit === !opts.crit);
+      if (ex) {
+        ex.val += n;
+        ex.eln.textContent = ex.val;
+        return;
+      }
+    }
     let d = dmgPool.find(d => !d.active);
     if (!d) {
       d = { eln: el('div', 'dmgnum', dmgLayer), active: false };
@@ -556,6 +567,7 @@
       if (dmgPool.length > 40) { }
     }
     d.active = true; d.t = 0; d.born = performance.now();
+    d.val = n; d.tgt = opts.tgt || null; d.crit = !!opts.crit;
     // ▼ロックオンマーカー/HPバーと重ならないよう、頭上さらに上へ
     d.x = x + (Math.random() - 0.5) * 1.6; d.y = y + 0.7 + Math.random() * 0.5; d.z = z;
     d.eln.textContent = n;

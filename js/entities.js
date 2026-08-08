@@ -961,28 +961,36 @@
       pool.push({ m, d, f });
     }
   };
-  let used = 0;
-  R.begin = function () { used = 0; };
+  const queue = [];
+  R.begin = function () { queue.length = 0; };
   /* windup 中の敵の足元に出す。t: 0..1 進行度, r: 半径 */
   R.show = function (x, z, r, t) {
-    if (used >= pool.length) return;
-    const s = pool[used++];
-    const gh = G.World.heightAt(x, z);
-    s.m.visible = true;
-    s.m.position.set(x, gh + 0.12, z);
-    s.m.scale.setScalar(r);
-    s.m.material.opacity = 0.45 + t * 0.35;
-    // 内側フィルが t=1 で外周に到達する = 避けるタイミングが読める
-    s.d.visible = true;
-    s.d.position.set(x, gh + 0.1, z);
-    s.d.scale.setScalar(Math.max(0.05, r * t));
-    s.d.material.opacity = 0.28 + t * 0.22;
-    s.f.visible = true;
-    s.f.position.set(x, gh + 0.09, z);
-    s.f.scale.setScalar(r);
+    queue.push({ x, z, r, t });
   };
   R.end = function () {
-    for (let i = used; i < pool.length; i++) {
+    // 発動が近い順に優先。フィルは上位2つだけに絞り、重なりの混濁を防ぐ
+    queue.sort((a, b) => b.t - a.t);
+    const n = Math.min(queue.length, pool.length);
+    for (let i = 0; i < n; i++) {
+      const q = queue[i], s = pool[i];
+      const gh = G.World.heightAt(q.x, q.z);
+      s.m.visible = true;
+      s.m.position.set(q.x, gh + 0.12, q.z);
+      s.m.scale.setScalar(q.r);
+      s.m.material.opacity = 0.45 + q.t * 0.35;
+      const fill = i < 2;
+      s.d.visible = fill;
+      s.f.visible = fill;
+      if (fill) {
+        // 内側フィルが t=1 で外周に到達する = 避けるタイミングが読める
+        s.d.position.set(q.x, gh + 0.1, q.z);
+        s.d.scale.setScalar(Math.max(0.05, q.r * q.t));
+        s.d.material.opacity = 0.28 + q.t * 0.22;
+        s.f.position.set(q.x, gh + 0.09, q.z);
+        s.f.scale.setScalar(q.r);
+      }
+    }
+    for (let i = n; i < pool.length; i++) {
       pool[i].m.visible = false; pool[i].d.visible = false; pool[i].f.visible = false;
     }
   };
@@ -1619,7 +1627,7 @@
     e.hp -= dmg;
     e.aggro = true;
     e.hurtT = 0.3;
-    G.UI.dmgNum(e.pos.x, e.pos.y + (e.T && e.T.barH ? e.T.barH - 0.2 : 1.6), e.pos.z, dmg, { crit });
+    G.UI.dmgNum(e.pos.x, e.pos.y + (e.T && e.T.barH ? e.T.barH - 0.2 : 1.6), e.pos.z, dmg, { crit, tgt: e });
     G.FX.burst(e.pos.x, e.pos.y + 1, e.pos.z, { n: crit ? 8 : 5, color: 0xffd24a, speed: 3.2, life: 0.28, size: 1.6 });
     G.FX.burst(e.pos.x, e.pos.y + 0.9, e.pos.z, { n: 1, color: 0xfff0c8, speed: 0.05, life: 0.15, size: 4.2, gravity: 0, drag: 0 });
     if (e.hp <= 0) { kill(e); return; }
@@ -2001,7 +2009,7 @@
     b.hp -= dmg;
     b.engaged = true;
     const ny = b.pos.y + (b.D.barH || 2.5) + (b.fly || 0) * 2.4;
-    G.UI.dmgNum(b.pos.x, ny, b.pos.z, dmg, { crit });
+    G.UI.dmgNum(b.pos.x, ny, b.pos.z, dmg, { crit, tgt: b });
     G.FX.burst(b.pos.x, b.pos.y + 1.5, b.pos.z, { n: 6, color: 0xffd24a, speed: 3.5, life: 0.3, size: 1.7 });
     if (b.hp <= 0) {
       b.hp = 0; b.alive = false;
