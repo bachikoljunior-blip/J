@@ -143,17 +143,25 @@
   function showJoy(x, y) {
     if (!joyEl) return;
     joyEl.style.display = 'block';
+    joyEl.style.opacity = '1';
     joyEl.style.left = (x - 64) + 'px';
     joyEl.style.top = (y - 64) + 'px';
   }
   function moveJoyThumb(dx, dy) {
-    if (thumbEl) thumbEl.style.transform = `translate(${dx}px, ${dy}px)`;
+    // 見た目のノブは外輪の内側に収める (入力値のクランプ半径より小さく)
+    if (thumbEl) thumbEl.style.transform = `translate(${dx * 0.68}px, ${dy * 0.68}px)`;
   }
   function hideJoy() {
-    if (joyEl) joyEl.style.display = 'none';
+    // 完全に消さず、左下に淡いゴーストを常駐 (移動操作領域のアフォーダンス)
+    if (joyEl) {
+      joyEl.style.display = 'block';
+      joyEl.style.opacity = '0.28';
+      joyEl.style.left = '36px';
+      joyEl.style.top = (window.innerHeight - 170) + 'px';
+    }
     if (thumbEl) thumbEl.style.transform = 'translate(0,0)';
   }
-  I.bindJoyEls = (j, t) => { joyEl = j; thumbEl = t; };
+  I.bindJoyEls = (j, t) => { joyEl = j; thumbEl = t; hideJoy(); };
 })();
 
 /* ======================= UI 本体 ======================= */
@@ -211,7 +219,7 @@
   let trackerEl, toastWrap, promptEl, bossWrap, bossFill, bossName, bossChip;
   let bossChipW = 100;
   let dlgWrap, dlgName, dlgText, dlgOpts;
-  let menuWrap, menuTabs, menuBody;
+  let menuWrap, menuTabs, menuBody, menuFade;
   let deathEl, endEl, titleEl, introEl;
   let dmgLayer;
   let joyBase, joyThumb;
@@ -303,6 +311,9 @@
     closeB.addEventListener('pointerdown', e => { e.stopPropagation(); UI.closeMenu(); });
     menuTabs = el('div', 'mtabs', menuWrap);
     menuBody = el('div', 'mbody', menuWrap);
+    // 下端フェードはスクロールコンテナの外のオーバーレイ (sticky ::after は
+    // コンテナのpadding分だけ上にずれ、最終行がフェードの下に露出していた)
+    menuFade = el('div', 'mfade', menuWrap);
     menuWrap.style.display = 'none';
     const tabs = [['equip', '装備'], ['items', '持ち物'], ['map', '地図'], ['quests', '任務'], ['settings', '設定']];
     for (const [id, label] of tabs) {
@@ -420,7 +431,8 @@
     if (curBoss) {
       const w = 100 * Math.max(0, curBoss.hp) / curBoss.maxHp;
       bossFill.style.width = w + '%';
-      bossChipW += (w - bossChipW) * G.damp(2.2, dt);
+      // 約0.5秒で追いつく (ラグ区間が広すぎると実HPが読めない指摘)
+      bossChipW += (w - bossChipW) * G.damp(5.5, dt);
       if (bossChipW < w) bossChipW = w;
       bossChip.style.width = bossChipW + '%';
     }
@@ -969,7 +981,8 @@
      最終カードが減光され「偽のスクロール示唆」になる指摘) */
   function updateScrollHint() {
     requestAnimationFrame(() => {
-      menuBody.classList.toggle('canscroll', menuBody.scrollHeight > menuBody.clientHeight + 4);
+      const can = menuBody.scrollHeight > menuBody.clientHeight + 4;
+      if (menuFade) menuFade.classList.toggle('on', can);
     });
   }
 

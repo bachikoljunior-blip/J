@@ -1088,10 +1088,19 @@
     lidM.position.set(0, 0.14, 0.35);
     lid.add(lidM);
     lid.position.set(0, 0.6, -0.35);
-    const band = new THREE.Mesh(new THREE.BoxGeometry(1.16, 0.62, 0.12),
-      new THREE.MeshLambertMaterial({ color: 0xc9a94a }));
-    band.position.y = 0.31;
-    grp.add(body, lid, band);
+    // 金具2本+錠前+蓋の継ぎ目 — 無地の直方体が「光る段ボール」に見える指摘
+    const bandMat = new THREE.MeshLambertMaterial({ color: 0xc9a94a });
+    const band = new THREE.Mesh(new THREE.BoxGeometry(1.16, 0.62, 0.12), bandMat);
+    band.position.set(-0.3, 0.31, 0);
+    const band2 = new THREE.Mesh(new THREE.BoxGeometry(1.16, 0.62, 0.12), bandMat);
+    band2.position.set(0.3, 0.31, 0);
+    band2.rotation.y = Math.PI / 2; band.rotation.y = Math.PI / 2;
+    const seam = new THREE.Mesh(new THREE.BoxGeometry(1.12, 0.03, 0.72),
+      new THREE.MeshLambertMaterial({ color: 0x4a3018 }));
+    seam.position.y = 0.6;
+    const lock = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.2, 0.08), bandMat);
+    lock.position.set(0, 0.52, 0.38);
+    grp.add(body, lid, band, band2, seam, lock);
     shadowify(grp);
     grp.position.set(ch.x, y, ch.z);
     grp.rotation.y = G.hash2(ch.x | 0, ch.z | 0) * Math.PI * 2;
@@ -2057,7 +2066,7 @@
     const darkF = 1 - G.clamp(s.hem * 1.7, 0, 1);
     rainPts.material.color.set(snowMode ? 0xffffff : 0xaec8dc);
     if (!snowMode) rainPts.material.color.lerp(_white, darkF * 0.85);
-    rainPts.material.opacity = rainOn < 0.06 ? 0 : rainOn * (snowMode ? 0.85 : 0.82 + darkF * 0.16);
+    rainPts.material.opacity = rainOn < 0.06 ? 0 : Math.min(1, rainOn * (snowMode ? 0.85 : 0.85 + darkF * 0.3));
     rainPts.visible = rainOn > 0.06;
     if (rainOn > 0.02) {
       const pa = rainPts.geometry.attributes.position;

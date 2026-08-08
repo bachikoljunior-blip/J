@@ -1428,7 +1428,8 @@
     P.state = 'roll'; P.stateT = 0;
     useStamina(18);
     G.Audio.sfx('roll');
-    G.FX.burst(P.pos.x, P.pos.y + 0.2, P.pos.z, { n: 8, color: 0xb0a58a, speed: 2, life: 0.4, up: 0.4 });
+    // 低FPS撮影でも1フレームは写る寿命 (回避が「転倒」に誤読されない動きの手掛かり)
+    G.FX.burst(P.pos.x, P.pos.y + 0.2, P.pos.z, { n: 10, color: 0x7e7460, speed: 2.2, life: 0.7, up: 0.4, spawnR: 0.4 });
     // 入力方向 or 前方
     const inp = G.Input;
     const cy = G.Camera.yaw;
