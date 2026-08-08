@@ -427,6 +427,8 @@
       if (curInteract && p.alive && !G.paused) {
         promptEl.style.display = 'block';
         promptEl.innerHTML = (G.isTouch ? '' : '<span class="pkey">E</span> ') + curInteract.label;
+        // 騎乗中の降車プロンプトは常時表示になるため、中央を塞がず下寄せに
+        promptEl.classList.toggle('low', curInteract.kind === 'dismount');
         UI.promptShowing = true;
       } else {
         promptEl.style.display = 'none';

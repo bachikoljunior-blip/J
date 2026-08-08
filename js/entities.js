@@ -819,8 +819,17 @@
     neck.add(neckM2);
     const headG = new THREE.Group();
     const headM = box(0.5, 0.45, 0.8, dark);
-    const jaw = box(0.4, 0.15, 0.6, belly);
-    jaw.position.set(0, -0.25, 0.1);
+    // 下顎は前へ突き出し、口の分かれ目が側面からも読めるように
+    const jaw = box(0.42, 0.16, 0.72, belly);
+    jaw.position.set(0, -0.26, 0.18);
+    jaw.rotation.x = 0.1;
+    // 眉弓 (眼窩の庇) — 箱頭の上面に段差を作り「竜の顔」の凹凸を出す
+    const brow = box(0.56, 0.12, 0.3, 0x2c2432);
+    brow.position.set(0, 0.24, 0.28);
+    brow.rotation.x = -0.18;
+    // 鼻先の隆起
+    const snoutRidge = box(0.24, 0.1, 0.34, 0x453a4a);
+    snoutRidge.position.set(0, 0.24, 0.62);
     // 大きく後方へ湾曲する対の角 (基部=黒曜石 / 先端=金 でテーパー)
     const hornMat = new THREE.MeshLambertMaterial({ color: 0x2b2334 });
     const hornTipMat = new THREE.MeshLambertMaterial({ color: 0xd8b96a });
@@ -850,8 +859,11 @@
       gl.scale.set(0.5, 0.4, 1);
       headG.add(gl);
     }
-    headG.add(headM, jaw, hornL, hornR, eyeL, eyeR);
+    headG.add(headM, jaw, brow, snoutRidge, hornL, hornR, eyeL, eyeR);
     headG.position.set(0, 1.05, 1.5);
+    headG.rotation.x = 0.22;   // 顎を引いた頭部姿勢 (直立積み木の解消)
+    // レストポーズからS字: 第1節は後傾、第2節(neckM2)は前傾済み
+    neckM.rotation.x = 0.3;
     neck.add(neckM, headG);
     neck.position.set(0, 1.5, 0.9);
     // 首の付け根と胸の隙間を埋める (正面から黒い内部面が見える指摘)

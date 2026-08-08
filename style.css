@@ -155,6 +155,8 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
   border: 1px solid rgba(255, 220, 130, 0.5); box-shadow: 0 2px 12px rgba(0,0,0,0.5);
   cursor: pointer;
 }
+/* 常時表示のプロンプト (騎乗中の降車など) は中央の視界を塞がない下寄せ */
+.prompt.low { bottom: calc(52px + env(safe-area-inset-bottom)); font-size: 13px; padding: 7px 16px; opacity: 0.9; }
 .pkey {
   display: inline-block; background: #3a4a62; border-radius: 4px; padding: 1px 7px;
   font-size: 12px; margin-right: 4px; color: #fff;

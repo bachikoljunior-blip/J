@@ -435,16 +435,25 @@
     const gh = G.World.heightAt(cx, cz);
     if (cy < gh + 0.5) cy = gh + 0.5;
     const eyeY = p.pos.y + 1.6;
-    let lift = 0;
+    let lift = 0, worstT = 1;
     for (let k = 0; k < 3; k++) {
       const t = 0.3 + k * 0.25;   // 0.3, 0.55, 0.8
       const sx = p.pos.x + (cx - p.pos.x) * t;
       const sz = p.pos.z + (cz - p.pos.z) * t;
       const sy = eyeY + (cy - eyeY) * t;
       const need = (G.World.heightAt(sx, sz) + 0.45 - sy) / t;
-      if (need > lift) lift = need;
+      if (need > lift) { lift = need; worstT = t; }
     }
-    if (lift > 0) cy += lift;
+    if (lift > 4.5) {
+      // 壁級の遮蔽 (崖・洞窟口) は持ち上げると崖上からの俯瞰になり画面が
+      // 岩肌で埋まる。持ち上げず、遮蔽の手前までカメラを寄せる
+      const f = Math.max(0.3, worstT - 0.18);
+      cx = p.pos.x + (cx - p.pos.x) * f;
+      cz = p.pos.z + (cz - p.pos.z) * f;
+      cy = eyeY + (cy - eyeY) * f;
+      const gh2 = G.World.heightAt(cx, cz);
+      if (cy < gh2 + 0.5) cy = gh2 + 0.5;
+    } else if (lift > 0) cy += lift;
 
     // 木や岩が視線を遮るならカメラを手前へ寄せる
     const occ = G.World.cameraOcclusion(p.pos.x, p.pos.z, cx, cz);
