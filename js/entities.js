@@ -148,6 +148,7 @@
       map: shadowTex, transparent: true, depthWrite: false
     }));
     m.scale.set(scale, 1, scale);
+    m.userData.baseS = scale;
     return m;
   };
 
@@ -862,17 +863,24 @@
       g.add(sp);
     }
     const mkWing = (side) => {
+      // 骨 (前縁+指骨3本) と膜パネル2枚の構造 — 平板プランク誤読の解消
       const grp = new THREE.Group();
-      const m1 = box(1.6, 0.08, 0.9, wingC);
-      m1.position.set(0.8 * side, 0, 0);
-      const m2 = box(1.2, 0.06, 0.7, wingC);
-      m2.position.set(1.9 * side, -0.1, -0.1);
-      // 翼膜: スパー間に暗色の膜パネル+深紅のエッジ (側面から棒に見えない)
-      const mem = box(2.4, 0.03, 0.78, 0x2c1e2e);
-      mem.position.set(1.25 * side, -0.05, -0.05);
-      const edge = box(2.4, 0.05, 0.1, 0x7a2430);
-      edge.position.set(1.25 * side, -0.05, -0.46);
-      grp.add(m1, m2, mem, edge);
+      const boneC = 0x2a2030;
+      const bone = box(2.6, 0.11, 0.14, boneC);
+      bone.position.set(1.3 * side, 0.02, 0.34);
+      const f1 = box(0.08, 0.07, 0.85, boneC);
+      f1.position.set(0.85 * side, -0.02, -0.08);
+      const f2 = f1.clone(); f2.position.x = 1.65 * side;
+      const f3 = f1.clone(); f3.position.x = 2.35 * side; f3.scale.z = 0.72;
+      const mem1 = box(0.82, 0.03, 0.74, 0x3a2438);
+      mem1.position.set(1.25 * side, -0.06, -0.06);
+      mem1.rotation.x = 0.09;
+      const mem2 = box(0.72, 0.03, 0.6, 0x2c1e2e);
+      mem2.position.set(2.02 * side, -0.09, -0.1);
+      mem2.rotation.x = 0.14;
+      const edge = box(2.5, 0.05, 0.1, 0x7a2430);
+      edge.position.set(1.3 * side, -0.1, -0.5);
+      grp.add(bone, f1, f2, f3, mem1, mem2, edge);
       grp.position.set(0.45 * side, 1.65, 0.2);
       return grp;
     };
@@ -1119,9 +1127,19 @@
   G.Actors.updateShadow = function (a) {
     if (!a.shadow) return;
     const gh = G.World.heightAt(a.pos.x, a.pos.z);
-    a.shadow.position.set(a.pos.x, gh + 0.06, a.pos.z);
     const k = G.clamp(1 - (a.pos.y - gh) * 0.15, 0.4, 1);
     a.shadow.material.opacity = k * (G.shadowsOn ? 0.5 : 1);
+    // 太陽が低いほど影を長く伸ばす (夕暮れの画作り)
+    const elv = (G.Sky && G.Sky.sunElev !== undefined) ? G.Sky.sunElev : 1;
+    const az = (G.Sky && G.Sky.sunAz) || 0;
+    const stretch = G.clamp(0.42 / Math.max(elv, 0.17), 1, 2.4);
+    const bs = a.shadow.userData.baseS || 1.3;
+    a.shadow.rotation.y = az;
+    a.shadow.scale.set(bs, 1, bs * stretch);
+    // 伸びた分は太陽と反対側へオフセット
+    const off = bs * (stretch - 1) * 0.4;
+    a.shadow.position.set(
+      a.pos.x - Math.sin(az) * off, gh + 0.06, a.pos.z - Math.cos(az) * off);
   };
 })();
 

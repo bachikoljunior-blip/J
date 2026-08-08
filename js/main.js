@@ -171,9 +171,10 @@
     tutPX = p.x; tutPZ = p.z;
     // 村を大きく離れたら「長老と話す」は押し付けない (次の戦闘ヒントへ)
     if (tutStage === 1 && G.dist2(p.x, p.z, 0, 0) > 120 * 120) tutAdvance(1);
-    // ボス交戦中はチップを隠す (演出を邪魔しない)
+    // ボス交戦中と、同内容のインタラクトプロンプト表示中はチップを隠す
     let bossOn = false;
     for (const b of G.Enemies.bosses) { if (b.alive && b.engaged) { bossOn = true; break; } }
+    if (tutStage === 1 && G.UI.promptShowing) bossOn = true;   // 「話す」の二重表示を防ぐ
     if (bossOn && !tutHidden) { tutHidden = true; G.UI.hideTutChip(); }
     else if (!bossOn && tutHidden && tutStage >= 0) {
       tutHidden = false;

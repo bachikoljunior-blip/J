@@ -1111,13 +1111,25 @@
     for (let i = 0; i < 5; i++) {
       addCrystal(cx + (i % 2 ? 5 : -5) + (rnd() - 0.5) * 3, 1170 + i * 8, 0.6 + rnd() * 0.3);
     }
-    // 宝箱の周りに水晶群 (報酬エリアの見せ場)
+    // 宝箱の周りに水晶群+石の台座+暖色の光 (報酬エリアの見せ場)
+    const pedMat = new THREE.MeshLambertMaterial({ color: 0x5c6172 });
+    const chestGlowMap = G.makeRadialTex(64, [[0, 'rgba(255,205,110,0.65)'], [1, 'rgba(255,160,50,0)']]);
     for (const ch of W.chests) {
       if (!W.inCaveRegion(ch.x, ch.z)) continue;
       for (let k = 0; k < 4; k++) {
         const a = rnd() * Math.PI * 2, r = 2.2 + rnd() * 2.5;
         addCrystal(ch.x + Math.cos(a) * r, ch.z + Math.sin(a) * r, 0.55 + rnd() * 0.5);
       }
+      const hy = caveHeight(ch.x, ch.z);
+      const ped = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.6, 0.32, 8), pedMat);
+      ped.position.set(ch.x, hy - 0.02, ch.z);
+      scene.add(ped);
+      const cg = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: chestGlowMap, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+      }));
+      cg.position.set(ch.x, hy + 1.3, ch.z);
+      cg.scale.set(2.6, 2.0, 1);
+      scene.add(cg);
     }
     // 青い光源 (中央 + 入口側)。床の高さ基準で置く (固定yだと地中に埋まり寄与しない)
     const pt = new THREE.PointLight(0x6699dd, 1.1, 70);
@@ -1466,8 +1478,8 @@
     [8.5, 0x4a86d0, 0xc8dcea, 0xfff0d4, 1.05, 0.62],
     [12, 0x4a86d0, 0xbcd8e8, 0xfff2dd, 1.32, 0.5],
     [16, 0x4d82c2, 0xd6c9a2, 0xffe2b2, 1.0, 0.6],
-    [17.5, 0x46639e, 0xe6a878, 0xffb070, 1.0, 0.56],
-    [18.7, 0x3a4a80, 0xe08a55, 0xff8a4a, 0.88, 0.5],
+    [17.5, 0x46639e, 0xe6a878, 0xffb070, 1.05, 0.62],
+    [18.7, 0x3a4a80, 0xe08a55, 0xff8a4a, 0.95, 0.56],
     [20, 0x141c3d, 0x33305c, 0x445, 0.05, 0.2],
     [24, 0x0a1026, 0x141c33, 0x223, 0.02, 0.16]
   ];
@@ -1681,6 +1693,7 @@
       rainPts.material.opacity = 0;
       const lightC = 0.6;
       Sky.lightLevel = lightC;
+      Sky.sunElev = 1;   // 洞窟では影を伸ばさない
       G.World.syncEnv(_fogC, scene.fog.near, scene.fog.far, lightC);
       return;
     }
@@ -1706,14 +1719,17 @@
     // 夕焼け空の下で真っ暗なオリーブ色に落ちる問題への対策)。
     // 見た目の太陽スプライトは実方向のまま沈む
     _lightDir.copy(_sunDir);
-    if (s.dir > 0.05 && _lightDir.y < 0.3) {
-      // 0.3 まで持ち上げると上向きの地形面にも夕陽の暖色が乗る
-      _lightDir.y = 0.3;
+    if (s.dir > 0.05 && _lightDir.y < 0.34) {
+      // 0.34 まで持ち上げると上向きの地形面にも夕陽の暖色が乗る
+      _lightDir.y = 0.34;
       _lightDir.normalize();
     }
     sun.position.copy(_lightDir).multiplyScalar(150).add(_camXZ);
     sun.target.position.set(cam.x, 0, cam.z);
     sun.target.updateMatrixWorld();
+    // ブロブ影の方位/伸び用 (夕暮れの長い影)
+    Sky.sunAz = Math.atan2(_lightDir.x, _lightDir.z);
+    Sky.sunElev = _lightDir.y;
 
     // ドーム (雨天のグレーは時間帯の明るさに追従して暗くなる)
     const gk = G.clamp(s.hem * 1.6, 0.18, 1);

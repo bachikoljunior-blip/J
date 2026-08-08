@@ -413,8 +413,10 @@
       if (curInteract && p.alive && !G.paused) {
         promptEl.style.display = 'block';
         promptEl.innerHTML = (G.isTouch ? '' : '<span class="pkey">E</span> ') + curInteract.label;
+        UI.promptShowing = true;
       } else {
         promptEl.style.display = 'none';
+        UI.promptShowing = false;
       }
     }
 
