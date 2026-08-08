@@ -40,6 +40,8 @@
   Inv.items = {};
   Inv.gold = 0;
   Inv.equip = { weapon: 'sword_traveler', armor: 'armor_cloth' };
+  Inv.upgrades = {};          // itemId -> 強化段階 (0-5)
+  Inv.upgLevel = id => Inv.upgrades[id] || 0;
 
   Inv.add = function (id, n) {
     Inv.items[id] = (Inv.items[id] || 0) + (n || 1);
@@ -82,11 +84,11 @@
   S.maxSta = () => 92 + S.level * 8;
   S.atk = function () {
     const w = G.Items.get(G.Inv.equip.weapon);
-    return (w ? w.atk : 5) + (S.level - 1) * 2;
+    return (w ? w.atk : 5) + (S.level - 1) * 2 + G.Inv.upgLevel(G.Inv.equip.weapon) * 2;
   };
   S.def = function () {
     const a = G.Items.get(G.Inv.equip.armor);
-    return (a ? a.def : 0) + Math.floor((S.level - 1) * 0.6);
+    return (a ? a.def : 0) + Math.floor((S.level - 1) * 0.6) + G.Inv.upgLevel(G.Inv.equip.armor);
   };
   S.addXP = function (n) {
     S.xp += n;
@@ -348,6 +350,19 @@
         opts.push({ label: '立ち去る', close: true });
         return { text: 'いらっしゃい! 旅の必需品ならなんでも揃うぜ。', options: opts };
       }
+      case 'smith': {
+        return {
+          text: 'おう、旅の人か。俺はドヴァン、鍛冶師だ。魔石と素材があれば装備を鍛えてやるぜ。+5まで強化できる。',
+          options: [
+            { label: '装備を強化する', action: () => G.UI.openForge(), close: true },
+            { label: 'コツを聞く', next: {
+              text: '魔石は岩の子鬼や骸骨がよく落とす。毛皮や骨も無駄にするなよ。強化は攻撃+2、防御+1ずつ効いてくる。',
+              options: [{ label: '参考になった', close: true }]
+            } },
+            { label: '立ち去る', close: true }
+          ]
+        };
+      }
       case 'hunter': {
         if (!Q.state['side_wolf'] && G.State.mainStage >= 1) {
           return {
@@ -374,6 +389,47 @@
   D.start = function (npc) {
     G.events.emit('talk', npc.id);
     G.UI.showDialogue(npc.name, D.build(npc.id));
+  };
+})();
+
+/* ======================= 鍛冶 (強化) ======================= */
+(function () {
+  const F = G.Forge = {};
+  /* 段階 lvl→lvl+1 のコスト */
+  F.cost = function (lvl) {
+    return {
+      gold: [80, 180, 320, 500, 750][lvl] || 9999,
+      mats: [
+        { magicstone: 1 },
+        { magicstone: 2 },
+        { magicstone: 3, bone: 2 },
+        { magicstone: 4, pelt: 3 },
+        { magicstone: 6, bone: 3, pelt: 3 }
+      ][lvl] || {}
+    };
+  };
+  F.canUpgrade = function (id) {
+    const lvl = G.Inv.upgLevel(id);
+    if (lvl >= 5) return { ok: false, reason: '最大強化済み' };
+    const c = F.cost(lvl);
+    if (G.Inv.gold < c.gold) return { ok: false, reason: 'ゴールド不足', cost: c };
+    for (const m in c.mats) {
+      if (G.Inv.count(m) < c.mats[m]) return { ok: false, reason: G.Items.get(m).name + ' 不足', cost: c };
+    }
+    return { ok: true, cost: c };
+  };
+  F.upgrade = function (id) {
+    const r = F.canUpgrade(id);
+    if (!r.ok) { G.UI.toast(r.reason); return false; }
+    G.Inv.gold -= r.cost.gold;
+    for (const m in r.cost.mats) G.Inv.remove(m, r.cost.mats[m]);
+    G.Inv.upgrades[id] = G.Inv.upgLevel(id) + 1;
+    G.Audio.sfx('clang');
+    G.Audio.sfx('levelup');
+    const it = G.Items.get(id);
+    G.UI.toast(it.name + ' を +' + G.Inv.upgrades[id] + ' に強化した', 'gold');
+    G.events.emit('invChange');
+    return true;
   };
 })();
 
@@ -426,6 +482,8 @@
         pos: { x: Math.round(p.pos.x * 10) / 10, z: Math.round(p.pos.z * 10) / 10 },
         inv: G.Inv.items, gold: G.Inv.gold, equip: G.Inv.equip,
         quests: G.Quests.state,
+        horse: { x: Math.round(G.Horse.pos.x), z: Math.round(G.Horse.pos.z) },
+        upg: G.Inv.upgrades,
         state: {
           tod: G.State.tod, day: G.State.day,
           bossKilled: G.State.bossKilled,
@@ -465,6 +523,8 @@
     if (data.pos) {
       p.pos.set(data.pos.x, G.World.heightAt(data.pos.x, data.pos.z), data.pos.z);
     }
+    if (data.horse) G.Horse.teleport(data.horse.x, data.horse.z);
+    G.Inv.upgrades = data.upg || {};
   };
 
   S.reset = function () {
@@ -476,6 +536,7 @@
     G.Inv.items = { potion: 3 };
     G.Inv.gold = 50;
     G.Inv.equip = { weapon: 'sword_traveler', armor: 'armor_cloth' };
+    G.Inv.upgrades = {};
     G.Quests.state = {};
     G.State.tod = 9.5; G.State.day = 1;
     G.State.bossKilled = {}; G.State.openedChests = {};

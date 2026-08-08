@@ -437,6 +437,7 @@
     geo.setIndex(indices);
     const mesh = new THREE.Mesh(geo, terrainMat);
     mesh.frustumCulled = true;
+    mesh.receiveShadow = true;
     scene.add(mesh);
 
     const chunk = {
@@ -493,6 +494,7 @@
         // 視錐台カリングすると植生が丸ごと誤って消える。チャンク単位で管理して
         // いるのでカリングは切る。
         im.frustumCulled = false;
+        im.castShadow = true;
         scene.add(im);
         chunk.trees.push(im);
       }
@@ -626,6 +628,13 @@
 
   function addStatic(x, z, r) { W.staticColliders.push({ x, z, r }); }
 
+  /* 建造物に影の設定を付与 */
+  function shadowify(o) {
+    o.traverse ? o.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } })
+               : null;
+    return o;
+  }
+
   function buildHouse(x, z, ry, big) {
     const w = big ? 7 : 5, d = big ? 6 : 4.5, hh = big ? 3.2 : 2.6;
     const y = W.heightAt(x, z);
@@ -638,7 +647,7 @@
       { geo: doorG, m: M4(0, 0.9, d / 2 + 0.05), color: 0x6b4a2f }
     ]);
     wall.dispose(); roofG.dispose(); doorG.dispose();
-    const mesh = new THREE.Mesh(geo, sharedTreeMat);
+    const mesh = shadowify(new THREE.Mesh(geo, sharedTreeMat));
     mesh.position.set(x, y, z);
     mesh.rotation.y = ry;
     scene.add(mesh);
@@ -675,7 +684,7 @@
       { geo: top, m: M4(0, 3.6, 0), color: 0x9d998f }
     ]);
     base.dispose(); p.dispose(); top.dispose();
-    const mesh = new THREE.Mesh(geo, sharedTreeMat);
+    const mesh = shadowify(new THREE.Mesh(geo, sharedTreeMat));
     mesh.position.set(x, y, z);
     scene.add(mesh);
     const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 0),
@@ -715,6 +724,7 @@
         new THREE.CylinderGeometry(0.55, 0.7, h, 6),
         new THREE.MeshLambertMaterial({ color: 0x9d998f })
       );
+      shadowify(pillar);
       pillar.position.set(px, py + h / 2 - 0.1, pz);
       pillar.rotation.y = rnd();
       if (broken) pillar.rotation.z = (rnd() - 0.5) * 0.16;
@@ -732,7 +742,7 @@
       { geo: roof, m: M4(0, 12.3, 0), color: 0x7d4437 }
     ]);
     body.dispose(); roof.dispose();
-    const mesh = new THREE.Mesh(geo, sharedTreeMat);
+    const mesh = shadowify(new THREE.Mesh(geo, sharedTreeMat));
     mesh.position.set(x, y, z);
     scene.add(mesh);
     addStatic(x, z, 2.9);
@@ -754,6 +764,7 @@
       new THREE.MeshLambertMaterial({ color: 0xc9a94a }));
     band.position.y = 0.31;
     grp.add(body, lid, band);
+    shadowify(grp);
     grp.position.set(ch.x, y, ch.z);
     grp.rotation.y = G.hash2(ch.x | 0, ch.z | 0) * Math.PI * 2;
     scene.add(grp);
@@ -790,7 +801,7 @@
       { geo: new THREE.BoxGeometry(0.16, 2.1, 0.16), m: M4(-1.3, 1.05, 0.7), color: 0x6b4a2f },
       { geo: new THREE.BoxGeometry(0.16, 2.1, 0.16), m: M4(1.3, 1.05, 0.7), color: 0x6b4a2f }
     ]);
-    const stallM = new THREE.Mesh(stall, sharedTreeMat);
+    const stallM = shadowify(new THREE.Mesh(stall, sharedTreeMat));
     stallM.position.set(13, sy, 4);
     scene.add(stallM);
     addStatic(13, 4, 1.6);
@@ -1041,7 +1052,19 @@
     scene.add(hemi);
     sun = new THREE.DirectionalLight(0xfff2dd, 1.0);
     sun.position.set(60, 100, 30);
+    if (G.shadowsOn) {
+      sun.castShadow = true;
+      const size = G.quality === 'high' ? 2048 : 1024;
+      sun.shadow.mapSize.set(size, size);
+      const c = sun.shadow.camera;
+      c.near = 20; c.far = 400;
+      c.left = -52; c.right = 52; c.top = 52; c.bottom = -52;
+      c.updateProjectionMatrix();
+      sun.shadow.bias = -0.0008;
+      sun.shadow.normalBias = 0.25;
+    }
     scene.add(sun);
+    scene.add(sun.target);
 
     // スカイドーム
     const geo = new THREE.SphereGeometry(700, 24, 12);

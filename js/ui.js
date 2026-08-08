@@ -13,13 +13,14 @@
   I.wheel = 0;
   const pressQ = [];             // ボタンイベントキュー
   const EMPTY = [];
+  I.held = { jump: false, attack: false };
   I.push = a => pressQ.push(a);
   I.poll = function () { return pressQ.length ? pressQ.splice(0, pressQ.length) : EMPTY; };
 
   const keys = {};
   let joyPtr = null, camPtr = null;
   let joyCX = 0, joyCY = 0;
-  let attackDownT = 0;
+  let fDownT = 0;
 
   I.init = function (canvas) {
     /* --- キーボード --- */
@@ -28,18 +29,26 @@
       keys[e.code] = true;
       switch (e.code) {
         case 'Space': I.push('roll'); e.preventDefault(); break;
-        case 'KeyF': I.push('attack'); break;
+        case 'KeyF': I.held.attack = true; fDownT = performance.now(); break;
         case 'KeyR': I.push('heavy'); break;
         case 'KeyE': I.push('interact'); break;
         case 'KeyQ': I.push('lock'); break;
-        case 'KeyC': I.push('jump'); break;
+        case 'KeyC': I.push('jump'); I.held.jump = true; break;
         case 'Digit1': I.push('potion'); break;
         case 'KeyI': case 'Tab': I.push('menu'); e.preventDefault(); break;
         case 'KeyM': I.push('map'); break;
         case 'Escape': I.push('back'); break;
       }
     });
-    window.addEventListener('keyup', e => { keys[e.code] = false; });
+    window.addEventListener('keyup', e => {
+      keys[e.code] = false;
+      if (e.code === 'KeyC') I.held.jump = false;
+      if (e.code === 'KeyF' && I.held.attack) {
+        I.held.attack = false;
+        const dur = (performance.now() - fDownT) / 1000;
+        I.push(dur < 0.28 ? 'attack' : dur < 0.8 ? 'heavy' : 'spin');
+      }
+    });
 
     /* --- ポインタ (タッチ & マウス) --- */
     const onDown = e => {
@@ -93,7 +102,7 @@
         // マウス: 動かさずクリック → 攻撃
         if (e.pointerType === 'mouse' && mouseMoved < 6) {
           const dur = (performance.now() - mouseDownT) / 1000;
-          I.push(dur > 0.28 ? 'heavy' : 'attack');
+          I.push(dur < 0.28 ? 'attack' : dur < 0.8 ? 'heavy' : 'spin');
         }
       }
     };
@@ -106,6 +115,7 @@
     // フォーカス喪失時は入力状態を全解除 (押しっぱなし・カメラ固着防止)
     window.addEventListener('blur', () => {
       joyPtr = null; camPtr = null;
+      I.held.jump = false; I.held.attack = false;
       I.moveX = 0; I.moveY = 0;
       for (const k in keys) keys[k] = false;
       hideJoy();
@@ -170,20 +180,26 @@
       G.Audio.init();
       downT = performance.now();
       b.classList.add('pressed');
-      if (!opts.holdable) { }
+      if (opts.heldKey) G.Input.held[opts.heldKey] = true;
+      if (opts.fireOnPress) G.Input.push(action);
     });
     const fire = e => {
       e.stopPropagation();
       b.classList.remove('pressed');
+      if (opts.heldKey) G.Input.held[opts.heldKey] = false;
+      if (opts.fireOnPress) return;
       if (opts.holdable) {
         const dur = (performance.now() - downT) / 1000;
-        G.Input.push(dur > 0.3 ? opts.holdAction : action);
+        G.Input.push(dur < 0.3 ? action : dur < 0.8 ? opts.holdAction : (opts.spinAction || opts.holdAction));
       } else {
         G.Input.push(action);
       }
     };
     b.addEventListener('pointerup', fire);
-    b.addEventListener('pointercancel', e => { e.stopPropagation(); b.classList.remove('pressed'); });
+    b.addEventListener('pointercancel', e => {
+      e.stopPropagation(); b.classList.remove('pressed');
+      if (opts.heldKey) G.Input.held[opts.heldKey] = false;
+    });
     return b;
   }
 
@@ -254,16 +270,16 @@
 
     // タッチボタン
     if (G.isTouch) {
-      actionBtn('b-attack', '<b>攻</b>', 'attack', { holdable: true, holdAction: 'heavy' });
+      actionBtn('b-attack', '<b>攻</b>', 'attack', { holdable: true, holdAction: 'heavy', spinAction: 'spin', heldKey: 'attack' });
       actionBtn('b-roll', '回避', 'roll');
-      actionBtn('b-jump', '跳', 'jump');
+      actionBtn('b-jump', '跳', 'jump', { fireOnPress: true, heldKey: 'jump' });
       actionBtn('b-lock', '◎', 'lock');
       potBtn = actionBtn('b-potion', '薬', 'potion');
       actionBtn('b-menu', '≡', 'menu');
       actionBtn('b-map', '地図', 'map');
     } else {
       const help = el('div', 'keyhelp', hudEl,
-        'WASD:移動 F/クリック:攻撃 R/長押し:強攻撃 Space:回避 C:跳躍 E:調べる Q:ロックオン 1:薬 I:メニュー M:地図 Shift:走る');
+        'WASD:移動 F/クリック:攻撃(長押し:強/回転) Space:回避 C:跳躍(空中長押し:滑空) E:調べる Q:ロックオン 1:薬 I:メニュー M:地図 Shift:走る');
       potBtn = null;
     }
 
@@ -743,8 +759,9 @@
       has = true;
       const equipped = G.Inv.equip.weapon === id || G.Inv.equip.armor === id;
       const row = el('div', 'irow' + (equipped ? ' equipped' : ''), list);
-      const st = it.type === 'weapon' ? `攻 ${it.atk}` : `防 ${it.def}`;
-      row.innerHTML = `<div class="iname">${it.name} <span class="istat">${st}</span></div><div class="idesc">${it.desc}</div>`;
+      const ul = G.Inv.upgLevel(id);
+      const st = it.type === 'weapon' ? `攻 ${it.atk + ul * 2}` : `防 ${it.def + ul}`;
+      row.innerHTML = `<div class="iname">${it.name}${ul ? ' +' + ul : ''} <span class="istat">${st}</span></div><div class="idesc">${it.desc}</div>`;
       if (!equipped) {
         const b = el('div', 'ibtn', row, '装備');
         b.addEventListener('pointerdown', e => { e.stopPropagation(); G.Inv.equipItem(id); });
@@ -756,9 +773,10 @@
     for (const id of [G.Inv.equip.weapon, G.Inv.equip.armor]) {
       if (ids.includes(id)) continue;
       const it = G.Items.get(id);
+      const ul = G.Inv.upgLevel(id);
       const row = el('div', 'irow equipped', list);
-      const st = it.type === 'weapon' ? `攻 ${it.atk}` : `防 ${it.def}`;
-      row.innerHTML = `<div class="iname">${it.name} <span class="istat">${st}</span></div><div class="idesc">${it.desc}</div>`;
+      const st = it.type === 'weapon' ? `攻 ${it.atk + ul * 2}` : `防 ${it.def + ul}`;
+      row.innerHTML = `<div class="iname">${it.name}${ul ? ' +' + ul : ''} <span class="istat">${st}</span></div><div class="idesc">${it.desc}</div>`;
       el('div', 'itag', row, '装備中');
     }
     if (!has) el('div', 'mnote', menuBody, '装備品は宝箱や店、ボス討伐で手に入る。');
@@ -958,6 +976,42 @@
       b.addEventListener('pointerdown', e => { e.stopPropagation(); if (G.Shop.sell(id)) UI.openShop(); });
     }
     if (!any) el('div', 'mnote', sell, '売れる物がない。');
+  };
+
+  /* ---------- 鍛冶 ---------- */
+  UI.openForge = function () {
+    G.paused = true;
+    menuOpen = true;
+    menuWrap.style.display = 'flex';
+    for (const t of menuTabs.children) t.classList.remove('on');
+    menuBody.innerHTML = '';
+    el('div', 'mnote', menuBody, `所持金: ${G.Inv.gold} G / 魔石×${G.Inv.count('magicstone')} 骨×${G.Inv.count('bone')} 毛皮×${G.Inv.count('pelt')}`);
+    el('div', 'shophead', menuBody, '― 装備強化 ―');
+    const list = el('div', 'ilist', menuBody);
+    for (const id of [G.Inv.equip.weapon, G.Inv.equip.armor]) {
+      const it = G.Items.get(id);
+      if (!it) continue;
+      const lvl = G.Inv.upgLevel(id);
+      const row = el('div', 'irow', list);
+      const stat = it.type === 'weapon'
+        ? `攻 ${it.atk + lvl * 2}` : `防 ${it.def + lvl}`;
+      let costTxt = '最大強化済み';
+      if (lvl < 5) {
+        const c = G.Forge.cost(lvl);
+        const mats = Object.keys(c.mats).map(m => `${G.Items.get(m).name}×${c.mats[m]}`).join(' ');
+        costTxt = `${c.gold}G + ${mats}`;
+      }
+      row.innerHTML = `<div class="iname">${it.name}${lvl ? ' +' + lvl : ''} <span class="istat">${stat}</span></div>
+        <div class="idesc">${lvl < 5 ? '次の強化: ' + costTxt : costTxt}</div>`;
+      if (lvl < 5) {
+        const b = el('div', 'ibtn', row, '強化');
+        b.addEventListener('pointerdown', e => {
+          e.stopPropagation();
+          if (G.Forge.upgrade(id)) UI.openForge();
+        });
+      }
+    }
+    el('div', 'mnote', menuBody, '強化は装備中の武器・防具に施される。素材は敵のドロップや売店で。');
   };
 
   /* ---------- 死亡/クリア ---------- */

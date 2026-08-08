@@ -28,9 +28,18 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, G.Q.dpr));
     renderer.setSize(window.innerWidth, window.innerHeight);
 
+    // リアルタイム影 (low品質と設定オフ以外)
+    G.shadowsOn = G.quality !== 'low' && G.settings.shadows !== 'off';
+    if (G.shadowsOn) {
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFShadowMap;
+    }
+
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 900);
     G.Camera.cam = camera;
+    G.renderer = renderer;
+    G.scene = scene;
 
     window.addEventListener('resize', () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -45,6 +54,7 @@
     G.Player.init(scene);
     G.Enemies.init(scene);
     G.NPCs.init(scene);
+    G.Horse.init(scene);
     G.Projectiles.init(scene);
     G.Pickups.init(scene);
     G.UI.init();
@@ -110,7 +120,11 @@
   function doInteract() {
     const it = G.findInteractable();
     if (!it) return;
-    if (it.kind === 'npc') {
+    if (it.kind === 'horse') {
+      G.Horse.mount();
+    } else if (it.kind === 'dismount') {
+      G.Horse.dismount();
+    } else if (it.kind === 'npc') {
       G.Dialogue.start(it.obj);
     } else if (it.kind === 'shrine') {
       const s = it.obj;
@@ -162,6 +176,7 @@
   };
 
   Game.travelTo = function (shrine) {
+    G.Horse.teleport(shrine.x - 4, shrine.z - 4);
     G.Player.pos.set(shrine.x + 3, G.World.heightAt(shrine.x + 3, shrine.z + 3), shrine.z + 3);
     G.Player.vy = 0;
     G.Player.target = null;
@@ -229,9 +244,10 @@
     const fx = Math.sin(C.yaw) * Math.cos(C.pitch);
     const fz = Math.cos(C.yaw) * Math.cos(C.pitch);
     const fy = Math.sin(C.pitch);
-    let cx = p.pos.x - fx * C.dist;
-    let cz = p.pos.z - fz * C.dist;
-    let cy = p.pos.y + 1.6 + fy * C.dist;
+    const dist = C.dist + (p.mounted ? 1.8 : 0);
+    let cx = p.pos.x - fx * dist;
+    let cz = p.pos.z - fz * dist;
+    let cy = p.pos.y + 1.6 + fy * dist;
 
     // 地形にめり込まない (視線上の複数点をサンプルして必要な持ち上げ量を求める)
     const gh = G.World.heightAt(cx, cz);
@@ -330,6 +346,7 @@
       if (started) {
         updateWorldState(dt);
         G.Player.update(dt);
+        G.Horse.update(dt);
         G.Enemies.update(dt);
         G.NPCs.update(dt);
         G.Projectiles.update(dt);

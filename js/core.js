@@ -125,7 +125,8 @@ G.settings = (function () {
     sfx: 0.9,
     sens: 1.0,         // カメラ感度
     invertY: false,
-    showDmg: true
+    showDmg: true,
+    shadows: 'auto'    // 'auto' | 'off'
   };
   let s;
   try { s = Object.assign({}, def, JSON.parse(localStorage.getItem(KEY) || '{}')); }

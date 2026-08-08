@@ -147,7 +147,11 @@
     return m;
   };
 
-  function box(w, h, d, c) { return new THREE.Mesh(boxGeo(w, h, d), lam(c)); }
+  function box(w, h, d, c) {
+    const m = new THREE.Mesh(boxGeo(w, h, d), lam(c));
+    m.castShadow = true;
+    return m;
+  }
 
   /* 人型。conf: {skin, cloth, cloth2, hair, scale, weapon:'sword'|'axe'|'bow'|'club'|null} */
   Rigs.humanoid = function (conf) {
@@ -234,10 +238,25 @@
       armL.add(weapon);
     }
 
+    let wing = null;
+    if (conf.glider) {
+      wing = new THREE.Group();
+      const wL = box(0.95, 0.05, 0.4, 0x6fb1c4);
+      wL.position.set(-0.5, 0, 0); wL.rotation.z = 0.28;
+      const wR = box(0.95, 0.05, 0.4, 0x6fb1c4);
+      wR.position.set(0.5, 0, 0); wR.rotation.z = -0.28;
+      const bar = box(0.08, 0.5, 0.08, 0x6b4a2f);
+      bar.position.y = -0.3;
+      wing.add(wL, wR, bar);
+      wing.position.set(0, 1.9, -0.05);
+      wing.visible = false;
+      g.add(wing);
+    }
+
     g.add(body, hips, head, armL, armR, legL, legR);
     g.scale.setScalar(s);
 
-    const parts = { body, hips, head, armL, armR, legL, legR, weapon };
+    const parts = { body, hips, head, armL, armR, legL, legR, weapon, wing };
 
     /* pose: 状態に応じて各部の回転を設定 */
     function pose(p) {
@@ -253,7 +272,23 @@
       g.rotation.x = 0; g.rotation.z = 0;
       g.position.y = p.baseY || 0;
 
+      if (parts.wing) parts.wing.visible = !!p.glide;
       const mv = p.moveAmt || 0;
+      if (p.ride) {
+        // 騎乗姿勢
+        legL.rotation.x = 0.7; legL.rotation.z = 0.4;
+        legR.rotation.x = 0.7; legR.rotation.z = -0.4;
+        armL.rotation.x = -0.7; armR.rotation.x = -0.7;
+        body.rotation.x = 0.12;
+        return;
+      }
+      if (p.glide) {
+        // 滑空姿勢
+        armL.rotation.x = -2.8; armR.rotation.x = -2.8;
+        legL.rotation.x = 0.3; legR.rotation.x = 0.3;
+        body.rotation.x = 0.4;
+        return;
+      }
       if (p.state === 'dead') {
         const k = G.clamp(p.t * 2.2, 0, 1);
         g.rotation.x = -k * Math.PI / 2 * 0.96;
@@ -280,6 +315,12 @@
       if (p.state === 'attack') {
         const k = p.atkT; // 0..1
         const c = p.combo || 0;
+        if (p.spin) {
+          body.rotation.y = k * Math.PI * 2;
+          armR.rotation.x = -1.5; armR.rotation.y = -1.1;
+          armL.rotation.x = -0.5; armL.rotation.z = 0.9;
+          return;
+        }
         if (p.heavy) {
           if (k < 0.45) { // 振りかぶり
             armR.rotation.x = -2.6 * (k / 0.45);
@@ -527,6 +568,54 @@
     return { group: g, parts: {}, pose };
   };
 
+  /* 馬 */
+  Rigs.horse = function () {
+    const g = new THREE.Group();
+    const coat = 0x8a7563, maneC = 0x3f332a;
+    const body = box(0.62, 0.72, 1.7, coat);
+    body.position.y = 1.12;
+    const neck = box(0.3, 0.75, 0.35, coat);
+    neck.position.set(0, 1.62, 0.72); neck.rotation.x = -0.45;
+    const headG = new THREE.Group();
+    const hm = box(0.26, 0.28, 0.6, coat);
+    hm.position.z = 0.1;
+    const maneM = box(0.1, 0.42, 0.3, maneC);
+    maneM.position.set(0, 0.1, -0.3);
+    const earL = box(0.06, 0.14, 0.05, coat); earL.position.set(-0.09, 0.24, -0.14);
+    const earR = earL.clone(); earR.position.x = 0.09;
+    headG.add(hm, maneM, earL, earR);
+    headG.position.set(0, 2.02, 1.02);
+    const tail = box(0.13, 0.62, 0.16, maneC);
+    tail.position.set(0, 1.22, -0.95); tail.rotation.x = 0.5;
+    const saddle = box(0.56, 0.15, 0.62, 0x5a3a28);
+    saddle.position.y = 1.53;
+    const mkLeg = (x, z) => {
+      const grp = new THREE.Group();
+      const l = box(0.16, 0.78, 0.16, coat);
+      l.position.y = -0.38;
+      grp.add(l);
+      grp.position.set(x, 0.78, z);
+      return grp;
+    };
+    const legFL = mkLeg(-0.22, 0.6), legFR = mkLeg(0.22, 0.6);
+    const legBL = mkLeg(-0.22, -0.6), legBR = mkLeg(0.22, -0.6);
+    g.add(body, neck, headG, tail, saddle, legFL, legFR, legBL, legBR);
+    const parts = { body, headG, tail, legFL, legFR, legBL, legBR };
+    function pose(p) {
+      const t = G.time;
+      const mv = p.moveAmt || 0;
+      g.position.y = p.baseY || 0;
+      const wt = t * (7 + mv * 5);
+      const sw = Math.sin(wt) * 0.85 * mv;
+      legFL.rotation.x = sw; legBR.rotation.x = sw;
+      legFR.rotation.x = -sw; legBL.rotation.x = -sw;
+      body.position.y = 1.12 + Math.abs(Math.sin(wt)) * 0.07 * mv;
+      tail.rotation.y = Math.sin(t * 1.5) * 0.25;
+      headG.rotation.x = mv > 0.05 ? -0.1 : Math.sin(t * 0.8 + (p.seed || 0)) * 0.18 + 0.12;
+    }
+    return { group: g, parts, pose };
+  };
+
   /* ドラゴン */
   Rigs.dragon = function () {
     const g = new THREE.Group();
@@ -654,7 +743,7 @@
     const gh = G.World.heightAt(a.pos.x, a.pos.z);
     a.shadow.position.set(a.pos.x, gh + 0.06, a.pos.z);
     const k = G.clamp(1 - (a.pos.y - gh) * 0.15, 0.4, 1);
-    a.shadow.material.opacity = k;
+    a.shadow.material.opacity = k * (G.shadowsOn ? 0.5 : 1);
   };
 })();
 
@@ -701,7 +790,8 @@
       hair: 0x4a3628,
       cloth: armor ? armor.color : 0x5d7a9a,
       cloth2: armor ? armor.color2 : 0x3e4f63,
-      weapon: wpn ? (wpn.kind || 'sword') : 'sword'
+      weapon: wpn ? (wpn.kind || 'sword') : 'sword',
+      glider: true
     });
     scene.add(rig.group);
   };
@@ -772,28 +862,32 @@
     P.potionCd = 1.2;
   };
 
-  P.tryAttack = function (heavy) {
+  P.tryAttack = function (kind) {
     if (!P.alive || P.state === 'roll' || P.state === 'dead') return;
-    const cost = heavy ? 22 : 11;
+    if (P.mounted) { G.Horse.dismount(); return; }
+    const heavy = kind === true;
+    const spin = kind === 'spin';
+    const cost = spin ? 30 : heavy ? 22 : 11;
     if (P.stamina < cost * 0.4) return;
     if (P.state === 'attack') {
       // 先行入力: 現在の振りが半ばまで進んでいれば次のコンボへ
-      if (P.atkT > 0.5 && P.combo < 2 && !heavy && !P.heavy) {
+      if (P.atkT > 0.5 && P.combo < 2 && !heavy && !spin && !P.heavy && !P.spin) {
         P.queued = true;
       }
       return;
     }
     // コンボ継続判定
-    if (!heavy && G.time - P.lastAtkEnd < 0.7) P.combo = (P.combo + 1) % 3;
+    if (!heavy && !spin && G.time - P.lastAtkEnd < 0.7) P.combo = (P.combo + 1) % 3;
     else P.combo = 0;
     P.state = 'attack';
     P.stateT = 0;
     P.atkT = 0;
-    P.heavy = !!heavy;
+    P.heavy = heavy;
+    P.spin = spin;
     P.atkDone = false;
     P.queued = false;
     useStamina(cost);
-    G.Audio.sfx(heavy ? 'swingHeavy' : 'swing');
+    G.Audio.sfx(heavy || spin ? 'swingHeavy' : 'swing');
     // ロックオン中は対象へ向く
     if (P.target && P.target.alive) {
       P.yaw = Math.atan2(P.target.pos.x - P.pos.x, P.target.pos.z - P.pos.z);
@@ -802,6 +896,7 @@
 
   P.tryRoll = function () {
     if (!P.alive || P.state === 'roll' || P.state === 'dead') return;
+    if (P.mounted) G.Horse.dismount();
     if (P.stamina < 8) return;
     P.state = 'roll'; P.stateT = 0;
     useStamina(18);
@@ -845,9 +940,9 @@
 
   /* 攻撃の当たり判定 */
   function doAttackHit() {
-    const reach = P.heavy ? 2.6 : 2.3;
+    const reach = P.spin ? 3.0 : P.heavy ? 2.6 : 2.3;
     const atk = G.Stats.atk();
-    const mult = P.heavy ? 1.9 : [1.0, 1.05, 1.3][P.combo];
+    const mult = P.spin ? 1.7 : P.heavy ? 1.9 : [1.0, 1.05, 1.3][P.combo];
     let hitAny = false;
     for (const e of G.Enemies.all()) {
       if (!e.alive) continue;
@@ -855,7 +950,7 @@
       const d = Math.hypot(dx, dz);
       if (d > reach + e.radius) continue;
       const ang = Math.atan2(dx, dz);
-      if (Math.abs(G.angDiff(P.yaw, ang)) > 1.25) continue;
+      if (!P.spin && Math.abs(G.angDiff(P.yaw, ang)) > 1.25) continue;
       const crit = Math.random() < 0.1;
       let dmg = Math.round(atk * mult * (0.92 + Math.random() * 0.16) * (crit ? 1.6 : 1));
       G.Enemies.damage(e, dmg, crit);
@@ -902,12 +997,12 @@
       G.Actors.groundMove(P, Math.sin(P.rollDir) * sp, Math.cos(P.rollDir) * sp, dt);
       if (P.stateT >= 0.45) { P.state = 'idle'; P.stateT = 0; }
     } else if (P.state === 'attack') {
-      const dur = P.heavy ? 0.75 : 0.42;
+      const dur = P.spin ? 0.85 : P.heavy ? 0.75 : 0.42;
       P.atkT = P.stateT / dur;
       // 踏み込み
-      const lunge = (P.atkT > 0.3 && P.atkT < 0.6) ? (P.heavy ? 2.6 : 2.0) : 0;
+      const lunge = (!P.spin && P.atkT > 0.3 && P.atkT < 0.6) ? (P.heavy ? 2.6 : 2.0) : 0;
       if (lunge) G.Actors.groundMove(P, Math.sin(P.yaw) * lunge, Math.cos(P.yaw) * lunge, dt);
-      if (!P.atkDone && P.atkT >= (P.heavy ? 0.55 : 0.45)) {
+      if (!P.atkDone && P.atkT >= (P.spin ? 0.5 : P.heavy ? 0.55 : 0.45)) {
         P.atkDone = true;
         doAttackHit();
       }
@@ -917,6 +1012,14 @@
         if (P.queued) { P.queued = false; P.tryAttack(false); }
       }
     }
+
+    // 滑空判定 (空中で跳躍ボタン長押し)
+    P.gliding = !P.grounded && P.vy < -0.5 && inp.held.jump &&
+                P.stamina > 1 && !P.mounted &&
+                P.state !== 'roll' && P.state !== 'dead';
+    if (P.gliding) useStamina(4 * dt);
+    // 落下速度の記録 (落下ダメージ用)
+    if (!P.grounded) P.fallVy = Math.min(P.fallVy || 0, P.vy);
 
     // 移動 (attack/roll 以外)
     let mv = 0;
@@ -929,28 +1032,53 @@
         const wx = (ix * Math.cos(cy) - iy * Math.sin(cy));
         const wz = (-iy * Math.cos(cy) - ix * Math.sin(cy));
         const dir = Math.atan2(wx, wz);
-        const sprint = inp.sprint && P.stamina > 1 && len > 0.5;
-        if (sprint) useStamina(11 * dt);
-        const spd = (4.6 + (sprint ? 3.2 : 0)) * Math.min(1, len);
+        const sprint = inp.sprint && (P.mounted || P.stamina > 1) && len > 0.5;
+        if (sprint && !P.mounted) useStamina(11 * dt);
+        let spd;
+        if (P.mounted) spd = (10.5 + (sprint ? 3.2 : 0)) * Math.min(1, len);
+        else if (P.gliding) spd = 7.5;
+        else spd = (4.6 + (sprint ? 3.2 : 0)) * Math.min(1, len);
         // ロックオン中は対象を向きつつ移動
-        if (P.target && P.target.alive && !sprint) {
+        if (P.target && P.target.alive && !sprint && !P.mounted && !P.gliding) {
           P.yaw = G.angLerp(P.yaw, Math.atan2(P.target.pos.x - P.pos.x, P.target.pos.z - P.pos.z), G.damp(12, dt));
         } else {
-          P.yaw = G.angLerp(P.yaw, dir, G.damp(11, dt));
+          P.yaw = G.angLerp(P.yaw, dir, G.damp(P.mounted ? 5 : 11, dt));
         }
         G.Actors.groundMove(P, Math.sin(dir) * spd, Math.cos(dir) * spd, dt);
-        mv = Math.min(1, spd / 7.8);
+        mv = Math.min(1, spd / (P.mounted ? 13 : 7.8));
         P.state = 'move';
         // 足音
         P.stepT = (P.stepT || 0) + dt * spd;
-        if (P.stepT > 2.2 && P.grounded) { P.stepT = 0; G.Audio.sfx('step'); }
+        if (P.stepT > (P.mounted ? 3.2 : 2.2) && P.grounded) { P.stepT = 0; G.Audio.sfx('step'); }
+      } else if (P.gliding) {
+        // 入力なしでも前方へ滑空
+        G.Actors.groundMove(P, Math.sin(P.yaw) * 6.5, Math.cos(P.yaw) * 6.5, dt);
+        mv = 0.5;
+        P.state = 'move';
       } else {
         P.state = 'idle';
         G.Actors.groundMove(P, 0, 0, dt);
       }
+      // 滑空中は落下速度を抑える
+      if (P.gliding) { P.vy = Math.max(P.vy, -2.2); P.fallVy = Math.max(P.fallVy || 0, -6); }
     } else if (P.state === 'attack' || P.state === 'hit') {
       G.Actors.groundMove(P, 0, 0, dt);
     }
+    // 落下ダメージ
+    if (P.grounded && P.alive && (P.fallVy || 0) < -19) {
+      const dmg = Math.round((-P.fallVy - 19) * 5);
+      P.hp -= dmg;
+      G.UI.dmgNum(P.pos.x, P.pos.y + 1.6, P.pos.z, dmg, { player: true });
+      G.Audio.sfx('hitPlayer');
+      G.events.emit('shake', 0.4);
+      if (P.hp <= 0) {
+        P.hp = 0; P.alive = false;
+        P.state = 'dead'; P.stateT = 0;
+        G.Audio.sfx('death');
+        G.events.emit('playerDead');
+      }
+    }
+    if (P.grounded) P.fallVy = 0;
     P.moveAmt += (mv - P.moveAmt) * G.damp(10, dt);
 
     // リグ更新
@@ -959,7 +1087,9 @@
     rig.pose({
       state: P.state === 'move' ? 'idle' : P.state,
       t: P.stateT, atkT: P.atkT || 0, combo: P.combo,
-      heavy: P.heavy, moveAmt: P.moveAmt, baseY: P.pos.y
+      heavy: P.heavy, spin: P.spin, moveAmt: P.mounted ? 0 : P.moveAmt,
+      baseY: P.pos.y + (P.mounted ? 0.92 : 0),
+      glide: P.gliding, ride: P.mounted
     });
     G.Actors.updateShadow(P);
   };
@@ -1563,7 +1693,8 @@
     { id: 'elder',    name: '長老ハルド',   x: 2,   z: -17, conf: { skin: 0xd8b090, hair: 0xcccccc, cloth: 0x7a6a8a, cloth2: 0x4a4058 } },
     { id: 'healer',   name: '薬師リナ',     x: -15, z: -5,  conf: { skin: 0xe8c0a0, hair: 0x8a4a2a, cloth: 0x5a8a6a, cloth2: 0x3a5a48 } },
     { id: 'merchant', name: '商人モーガン', x: 13,  z: 6,   conf: { skin: 0xd8a880, hair: 0x3a2a1a, cloth: 0x8a6a3a, cloth2: 0x5a452a } },
-    { id: 'hunter',   name: '狩人ガルド',   x: -3,  z: 17,  conf: { skin: 0xc89878, hair: 0x2a2a2a, cloth: 0x6a5a4a, cloth2: 0x4a3f33, weapon: 'bow' } }
+    { id: 'hunter',   name: '狩人ガルド',   x: -3,  z: 17,  conf: { skin: 0xc89878, hair: 0x2a2a2a, cloth: 0x6a5a4a, cloth2: 0x4a3f33, weapon: 'bow' } },
+    { id: 'smith',    name: '鍛冶屋ドヴァン', x: -6, z: 6,  conf: { skin: 0xc08868, hair: 0x6a3a1a, cloth: 0x55504a, cloth2: 0x38342e, weapon: 'club' } }
   ];
 
   N.init = function (sc) {
@@ -1618,6 +1749,71 @@
       n.rig.pose({ state: 'idle', t: 0, moveAmt: n.moveAmt, seed: n.seed, baseY: n.pos.y });
       G.Actors.updateShadow(n);
     }
+  };
+})();
+
+/* ======================= 騎乗馬 ======================= */
+(function () {
+  const H = G.Horse = {};
+  let scene, rig;
+  H.pos = new THREE.Vector3(-16, 0, 28);
+  H.yaw = 1.2;
+  H.mounted = false;
+  H.radius = 0.8;
+  H.name = 'アッシュ';
+
+  H.init = function (sc) {
+    scene = sc;
+    rig = G.Rigs.horse();
+    H.pos.y = G.World.heightAt(H.pos.x, H.pos.z);
+    rig.group.position.copy(H.pos);
+    rig.group.rotation.y = H.yaw;
+    scene.add(rig.group);
+    H.shadow = G.makeShadow(2.4);
+    scene.add(H.shadow);
+  };
+
+  H.mount = function () {
+    if (H.mounted) return;
+    H.mounted = true;
+    G.Player.mounted = true;
+    G.Player.target = null;
+    G.Player.pos.set(H.pos.x, H.pos.y, H.pos.z);
+    G.Player.yaw = H.yaw;
+    G.Audio.sfx('jump');
+    G.UI.toast('アッシュに乗った');
+  };
+
+  H.dismount = function () {
+    if (!H.mounted) return;
+    H.mounted = false;
+    G.Player.mounted = false;
+    const px = H.pos.x + Math.cos(H.yaw) * 1.3;
+    const pz = H.pos.z - Math.sin(H.yaw) * 1.3;
+    const c = G.World.collide(px, pz, 0.45);
+    G.Player.pos.set(c.x, G.World.heightAt(c.x, c.z), c.z);
+  };
+
+  H.teleport = function (x, z) {
+    if (H.mounted) return;
+    H.pos.set(x, G.World.heightAt(x, z), z);
+    if (rig) rig.group.position.copy(H.pos);
+  };
+
+  H.update = function (dt) {
+    if (!rig) return;
+    if (H.mounted) {
+      H.pos.copy(G.Player.pos);
+      H.yaw = G.Player.yaw;
+    }
+    rig.group.position.copy(H.pos);
+    rig.group.rotation.y = H.yaw;
+    rig.pose({
+      state: 'idle',
+      moveAmt: H.mounted ? G.Player.moveAmt : 0,
+      baseY: H.pos.y, seed: 3
+    });
+    G.Actors.updateShadow(H);
   };
 })();
 
@@ -1799,7 +1995,12 @@
   G.findInteractable = function () {
     const p = G.Player;
     if (!p.alive) return null;
+    if (p.mounted) return { kind: 'dismount', label: '馬から降りる', obj: null };
     const R2 = 2.6 * 2.6;
+    // 馬
+    if (G.Horse.pos && G.dist2(p.pos.x, p.pos.z, G.Horse.pos.x, G.Horse.pos.z) < 2.8 * 2.8) {
+      return { kind: 'horse', label: 'アッシュに乗る', obj: null };
+    }
     // NPC
     for (const n of G.NPCs.list) {
       if (G.dist2(p.pos.x, p.pos.z, n.pos.x, n.pos.z) < R2 + 1) {
