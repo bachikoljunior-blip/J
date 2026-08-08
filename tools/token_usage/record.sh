@@ -16,7 +16,8 @@ if [ "$DRYRUN" = "1" ]; then
   exit 0
 fi
 
-git add token_usage.md "$DIR/state.json"
+git add "$DIR/state.json"
+[ -f token_usage.md ] && git add token_usage.md
 git commit -q -m "トークン使用量の記録 @ $NOW" || { echo "no change"; exit 0; }
 for i in 1 2 3 4; do
   git push -q origin claude/mobile-open-world-action-rpg-8uw40p && { echo pushed; exit 0; }
