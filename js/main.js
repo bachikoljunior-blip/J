@@ -135,6 +135,7 @@
       G.Horse.dismount();
     } else if (it.kind === 'npc') {
       G.Dialogue.start(it.obj);
+      dialogueCam(it.obj);
     } else if (it.kind === 'shrine') {
       const s = it.obj;
       if (!G.State.shrines[s.id]) {
@@ -243,6 +244,22 @@
         case 'map': G.UI.openMenu('map'); break;
       }
     }
+  }
+
+  /* 会話用の肩越しカメラ (会話中はカメラ更新が止まるので一度だけ配置する) */
+  function dialogueCam(npc) {
+    const p = G.Player.pos, n = npc.pos;
+    const mx = (p.x + n.x) / 2, mz = (p.z + n.z) / 2;
+    // 二人を結ぶ線に対し横へオフセットし、両者を画面に収める
+    const a = Math.atan2(n.x - p.x, n.z - p.z);
+    const side = a + Math.PI / 2;
+    const cx = mx + Math.sin(side) * 3.4 - Math.sin(a) * 1.2;
+    const cz = mz + Math.cos(side) * 3.4 - Math.cos(a) * 1.2;
+    let cy = Math.max(p.y, n.y) + 1.9;
+    const gh = G.World.heightAt(cx, cz);
+    if (cy < gh + 0.6) cy = gh + 0.6;
+    camera.position.set(cx, cy, cz);
+    camera.lookAt(mx, Math.max(p.y, n.y) + 1.35, mz);
   }
 
   /* ---------------- カメラ ---------------- */

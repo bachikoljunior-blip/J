@@ -314,7 +314,9 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 .shophead { font-size: 13px; color: #cfe0f0; margin: 12px 0 6px; text-align: center; }
 .mapwrap { display: flex; justify-content: center; }
 .mapwrap canvas {
-  width: min(92vw, 76vh, 560px); height: min(92vw, 76vh, 560px);
+  /* タブ・凡例と合わせて1画面に収める (横持ちスマホで下端が見切れない) */
+  width: min(92vw, calc(100dvh - 225px), 560px); height: min(92vw, calc(100dvh - 225px), 560px);
+  min-width: 180px; min-height: 180px;
   border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
 }
 .qlist { display: flex; flex-direction: column; gap: 6px; max-width: 740px; margin: 0 auto; width: 100%; }
