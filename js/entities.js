@@ -864,7 +864,7 @@
     if (P.state === 'dead') {
       rig.group.position.copy(P.pos);
       rig.group.rotation.y = P.yaw;
-      rig.pose({ state: 'dead', t: P.stateT });
+      rig.pose({ state: 'dead', t: P.stateT, baseY: P.pos.y });
       G.Actors.updateShadow(P);
       return;
     }
@@ -935,7 +935,7 @@
     rig.pose({
       state: P.state === 'move' ? 'idle' : P.state,
       t: P.stateT, atkT: P.atkT || 0, combo: P.combo,
-      heavy: P.heavy, moveAmt: P.moveAmt
+      heavy: P.heavy, moveAmt: P.moveAmt, baseY: P.pos.y
     });
     G.Actors.updateShadow(P);
   };
@@ -1099,7 +1099,7 @@
 
     if (e.state === 'dead') {
       e.deadT += dt;
-      e.rig.pose({ state: 'dead', t: e.deadT, baseY: 0 });
+      e.rig.pose({ state: 'dead', t: e.deadT, baseY: e.pos.y });
       e.rig.group.position.copy(e.pos);
       if (e.deadT > 2.4) remove(e);
       return;
@@ -1210,7 +1210,8 @@
     e.rig.group.rotation.y = e.yaw;
     e.rig.pose({
       state: e.state === 'windup' ? 'windup' : e.state,
-      t: e.stateT, windup: T.windup, moveAmt: e.moveAmt, seed: e.seed
+      t: e.stateT, windup: T.windup, moveAmt: e.moveAmt, seed: e.seed,
+      baseY: e.pos.y
     });
     G.Actors.updateShadow(e);
   }
@@ -1340,7 +1341,7 @@
 
     if (b.state === 'dead') {
       b.deadT += dt;
-      b.rig.pose({ state: 'dead', t: b.deadT, fly: 0 });
+      b.rig.pose({ state: 'dead', t: b.deadT, fly: 0, baseY: b.pos.y });
       b.rig.group.position.copy(b.pos);
       if (b.deadT > 5 && b.rig.group.parent) {
         scene.remove(b.rig.group);
@@ -1442,7 +1443,7 @@
     b.rig.group.rotation.y = b.yaw;
     b.rig.pose({
       state: b.state, t: b.stateT, windup: b.windupDur || 0.8,
-      moveAmt: b.moveAmt, seed: b.seed, fly: b.fly || 0
+      moveAmt: b.moveAmt, seed: b.seed, fly: b.fly || 0, baseY: b.pos.y
     });
     G.Actors.updateShadow(b);
   };
@@ -1584,7 +1585,7 @@
       n.moveAmt += (mv - n.moveAmt) * G.damp(8, dt);
       n.rig.group.position.copy(n.pos);
       n.rig.group.rotation.y = n.yaw;
-      n.rig.pose({ state: 'idle', t: 0, moveAmt: n.moveAmt, seed: n.seed });
+      n.rig.pose({ state: 'idle', t: 0, moveAmt: n.moveAmt, seed: n.seed, baseY: n.pos.y });
       G.Actors.updateShadow(n);
     }
   };

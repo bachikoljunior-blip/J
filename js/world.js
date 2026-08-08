@@ -159,7 +159,8 @@
   };
 
   const _c = new THREE.Color();
-  function groundColor(x, z, h, out) {
+  /* ny: 事前計算済みの法線Y (省略時は計算する) */
+  function groundColor(x, z, h, out, ny) {
     const b = W.biomeAt(x, z, h);
     out.copy(BIOME_COL[b] || BIOME_COL.grass);
     if (b === 'grass') {
@@ -167,8 +168,8 @@
       out.lerp(BIOME_COL.grass2, t * 0.8);
     }
     // 斜面は岩肌に
-    const n = W.normalAt(x, z);
-    const slope = 1 - n.y; // 0=平坦
+    if (ny === undefined) ny = W.normalAt(x, z).y;
+    const slope = 1 - ny; // 0=平坦
     if (b !== 'desert' && b !== 'snow') {
       out.lerp(BIOME_COL.rock, G.smoothstep(0.22, 0.5, slope));
     }
@@ -191,7 +192,7 @@
       _c.setRGB(0.18 - d * 0.08, 0.38 - d * 0.14, 0.55 - d * 0.12);
       return _c;
     }
-    groundColor(x, z, h, _c);
+    groundColor(x, z, h, _c, 1);   // 地図は斜面の陰影を省略 (高速化)
     const l = G.clamp(0.75 + h * 0.006, 0.7, 1.25);
     _c.multiplyScalar(l);
     return _c;
@@ -291,16 +292,16 @@
     const pos = [], col = [];
     const blade = (rot) => {
       const c = Math.cos(rot), s = Math.sin(rot);
-      const w = 0.09;
+      const w = 0.13, hgt = 0.85;
       // 三角形: 根本2点 + 先端
       const v = [
-        [-w, 0, 0], [w, 0, 0], [0, 1.0, 0],
-        [w, 0, 0], [-w, 0, 0], [0, 1.0, 0]  // 裏面
+        [-w, 0, 0], [w, 0, 0], [0, hgt, 0],
+        [w, 0, 0], [-w, 0, 0], [0, hgt, 0]  // 裏面
       ];
       for (const p of v) {
         pos.push(p[0] * c - p[2] * s, p[1], p[0] * s + p[2] * c);
-        const t = p[1];
-        col.push(0.28 + t * 0.25, 0.45 + t * 0.3, 0.18 + t * 0.12);
+        const t = p[1] / hgt;
+        col.push(0.40 + t * 0.32, 0.62 + t * 0.30, 0.26 + t * 0.16);
       }
     };
     blade(0); blade(Math.PI / 2);
@@ -379,22 +380,37 @@
     if (chunks.has(key)) return chunks.get(key);
     const x0 = cx * CHUNK, z0 = cz * CHUNK;
 
-    /* --- 地形メッシュ --- */
+    /* --- 地形メッシュ (高さを一度だけグリッドで求め、法線もそこから算出) --- */
     const vertsW = SEG + 1;
     const positions = new Float32Array(vertsW * vertsW * 3);
     const colors = new Float32Array(vertsW * vertsW * 3);
     const normals = new Float32Array(vertsW * vertsW * 3);
     const step = CHUNK / SEG;
     const col = new THREE.Color();
+    // 法線の中央差分用に 1 頂点ぶん外側まで高さをサンプル
+    const gw = SEG + 3;
+    const H = new Float32Array(gw * gw);
+    for (let j = 0; j < gw; j++) {
+      for (let i = 0; i < gw; i++) {
+        H[j * gw + i] = W.heightAt(x0 + (i - 1) * step, z0 + (j - 1) * step);
+      }
+    }
     let vi = 0;
+    const inv = 1;
     for (let j = 0; j <= SEG; j++) {
       for (let i = 0; i <= SEG; i++) {
         const x = x0 + i * step, z = z0 + j * step;
-        const h = W.heightAt(x, z);
+        const gi = (j + 1) * gw + (i + 1);
+        const h = H[gi];
         positions[vi] = x; positions[vi + 1] = h; positions[vi + 2] = z;
-        const n = W.normalAt(x, z);
-        normals[vi] = n.x; normals[vi + 1] = n.y; normals[vi + 2] = n.z;
-        groundColor(x, z, h, col);
+        // 中央差分による法線
+        let nx = H[gi - 1] - H[gi + 1];
+        let nyv = 2 * step;
+        let nz = H[gi - gw] - H[gi + gw];
+        const nl = 1 / Math.sqrt(nx * nx + nyv * nyv + nz * nz);
+        nx *= nl; nyv *= nl; nz *= nl;
+        normals[vi] = nx; normals[vi + 1] = nyv; normals[vi + 2] = nz;
+        groundColor(x, z, h, col, nyv);
         colors[vi] = col.r; colors[vi + 1] = col.g; colors[vi + 2] = col.b;
         vi += 3;
       }
@@ -882,12 +898,15 @@
       built++;
     }
 
-    // 範囲外チャンク破棄 & 草の付け外し
+    // 範囲外チャンク破棄 & 草の付け外し (草の生成は1フレーム1チャンクまで)
+    let grassBuilt = false;
     for (const ch of Array.from(chunks.values())) {
       const dx = Math.abs(ch.cx - ccx), dz = Math.abs(ch.cz - ccz);
       const dist = Math.max(dx, dz);
       if (dist > R + 1) { destroyChunk(ch); continue; }
-      if (dist <= GR) addGrass(ch);
+      if (dist <= GR) {
+        if (!ch.grassMesh && !grassBuilt) { addGrass(ch); grassBuilt = true; }
+      }
       else if (ch.grassMesh) removeGrass(ch);
     }
 
@@ -1101,42 +1120,47 @@
 
   Sky.lightLevel = 1;
 
+  const _sunDir = new THREE.Vector3();
+  const _moonDir = new THREE.Vector3();
+  const _camXZ = new THREE.Vector3();
+  const _grey = new THREE.Color(0x8b98a5);
+  const _white = new THREE.Color(0xffffff);
+  const _fogC = new THREE.Color();
+
   /* tod: 0-24, weather: 0(晴)〜1(雨), cam: THREE.Vector3 */
   Sky.update = function (dt, tod, weather, cam) {
     const s = sample(tod);
+    _camXZ.set(cam.x, 0, cam.z);
     // 天候で暗く
     const wDim = 1 - weather * 0.45;
     hemi.intensity = s.hem * wDim;
-    hemi.color.copy(cTop).lerp(new THREE.Color(0xffffff), 0.5);
+    hemi.color.copy(cTop).lerp(_white, 0.5);
     hemi.groundColor.set(0x6a7a52);
     sun.intensity = s.dir * wDim;
     sun.color.copy(cSun);
 
     // 太陽の位置 (6時に東から昇り18時に西へ沈む)
     const sunA = ((tod - 6) / 12) * Math.PI; // 高度角パラメータ
-    const sunDir = new THREE.Vector3(
-      Math.cos(sunA) * 0.8, Math.sin(sunA), 0.45
-    ).normalize();
-    sun.position.copy(sunDir).multiplyScalar(150).add(new THREE.Vector3(cam.x, 0, cam.z));
+    _sunDir.set(Math.cos(sunA) * 0.8, Math.sin(sunA), 0.45).normalize();
+    sun.position.copy(_sunDir).multiplyScalar(150).add(_camXZ);
     sun.target.position.set(cam.x, 0, cam.z);
     sun.target.updateMatrixWorld();
 
     // ドーム
     const u = skyDome.material.uniforms;
-    const grey = new THREE.Color(0x8b98a5);
-    u.uTop.value.copy(cTop).lerp(grey, weather * 0.6);
-    u.uHor.value.copy(cHor).lerp(grey, weather * 0.7);
-    u.uSunDir.value.copy(sunDir);
+    u.uTop.value.copy(cTop).lerp(_grey, weather * 0.6);
+    u.uHor.value.copy(cHor).lerp(_grey, weather * 0.7);
+    u.uSunDir.value.copy(_sunDir);
     u.uSunCol.value.copy(cSun);
     u.uGlow.value = (0.25 + s.dir * 0.6) * (1 - weather * 0.8);
     skyDome.position.set(cam.x, 0, cam.z);
 
     // 太陽・月
-    sunSpr.position.copy(sunDir).multiplyScalar(640).add(new THREE.Vector3(cam.x, 0, cam.z));
-    sunSpr.material.opacity = G.clamp(sunDir.y + 0.15, 0, 1) * (1 - weather * 0.85);
-    const moonDir = sunDir.clone().negate();
-    moonSpr.position.copy(moonDir).multiplyScalar(620).add(new THREE.Vector3(cam.x, 0, cam.z));
-    moonSpr.material.opacity = G.clamp(moonDir.y + 0.1, 0, 0.9) * (1 - weather * 0.85);
+    sunSpr.position.copy(_sunDir).multiplyScalar(640).add(_camXZ);
+    sunSpr.material.opacity = G.clamp(_sunDir.y + 0.15, 0, 1) * (1 - weather * 0.85);
+    _moonDir.copy(_sunDir).negate();
+    moonSpr.position.copy(_moonDir).multiplyScalar(620).add(_camXZ);
+    moonSpr.material.opacity = G.clamp(_moonDir.y + 0.1, 0, 0.9) * (1 - weather * 0.85);
 
     // 星
     const night = G.smoothstep(19.3, 21, tod) + (1 - G.smoothstep(4, 6, tod));
@@ -1156,13 +1180,13 @@
     }
 
     // 霧
-    const fogC = new THREE.Color().copy(cHor).lerp(grey, weather * 0.7);
-    scene.fog.color.copy(fogC);
+    _fogC.copy(cHor).lerp(_grey, weather * 0.7);
+    scene.fog.color.copy(_fogC);
     const baseFar = G.Q.chunkRadius * 64 * 0.95;
     scene.fog.far = baseFar * (1 - weather * 0.35) * (0.75 + s.hem * 0.4);
     scene.fog.near = scene.fog.far * 0.22;
-    if (scene.background) scene.background.copy(fogC);
-    else scene.background = fogC.clone();
+    if (scene.background) scene.background.copy(_fogC);
+    else scene.background = _fogC.clone();
 
     // 雨パーティクル
     rainOn += ((weather > 0.5 ? 1 : 0) - rainOn) * G.damp(1.5, dt);
@@ -1185,6 +1209,6 @@
     // 光量 (草/水シェーダ用) と環境同期
     const light = G.clamp(0.25 + s.hem * 1.15, 0.28, 1.1) * wDim;
     Sky.lightLevel = light;
-    G.World.syncEnv(fogC, scene.fog.near, scene.fog.far, light);
+    G.World.syncEnv(_fogC, scene.fog.near, scene.fog.far, light);
   };
 })();

@@ -95,6 +95,7 @@
     G.Bosses.init(scene);
     G.UI.refreshTracker();
     G.UI.refreshHUDStatic();
+    G.UI.setHudVisible(true);
     G.Audio.setMusic('peace');
     warmupChunks();
     started = true;
@@ -292,6 +293,7 @@
       dt *= 0.12;
     }
 
+    const _t0 = performance.now();
     if (!G.paused) {
       G.time += dt;
       if (started) {
@@ -326,8 +328,14 @@
 
     updateMusic(dt);
     if (started) G.UI.update(dt);
+    const _t1 = performance.now();
     renderer.render(scene, camera);
+    const _t2 = performance.now();
+    // 移動平均の負荷計測 (デバッグ用)
+    G.perf.sim += (_t1 - _t0 - G.perf.sim) * 0.05;
+    G.perf.render += (_t2 - _t1 - G.perf.render) * 0.05;
   }
+  G.perf = { sim: 0, render: 0 };
 
   /* ---------------- 開始 ---------------- */
   if (document.readyState === 'loading') {

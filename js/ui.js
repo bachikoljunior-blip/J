@@ -290,6 +290,8 @@
     endEl = el('div', 'ending', root);
     endEl.style.display = 'none';
 
+    hudEl.style.display = 'none';   // タイトル中は隠す
+
     UI.refreshTracker();
     G.events.on('questChange', UI.refreshTracker);
     G.events.on('invChange', () => { UI.refreshHUDStatic(); if (menuOpen) UI.showTab(curTab); });
@@ -299,6 +301,8 @@
     G.events.on('playerDead', () => { setTimeout(() => { deathEl.style.display = 'flex'; }, 900); });
     G.events.on('gameClear', () => setTimeout(UI.showEnding, 2200));
   };
+
+  UI.setHudVisible = function (v) { hudEl.style.display = v ? '' : 'none'; };
 
   /* ---------- タイトル ---------- */
   UI.showTitle = function (onStart) {

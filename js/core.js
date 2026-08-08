@@ -152,9 +152,9 @@ G.quality = (function () {
 })();
 
 G.QUALITY = {
-  low:  { dpr: 1.0, chunkRadius: 3, grassRadius: 1, grassPerChunk: 260,  particles: 500 },
-  mid:  { dpr: 1.5, chunkRadius: 4, grassRadius: 2, grassPerChunk: 420,  particles: 900 },
-  high: { dpr: 2.0, chunkRadius: 5, grassRadius: 2, grassPerChunk: 700,  particles: 1400 }
+  low:  { dpr: 1.0, chunkRadius: 3, grassRadius: 1, grassPerChunk: 500,  particles: 500 },
+  mid:  { dpr: 1.5, chunkRadius: 4, grassRadius: 1, grassPerChunk: 1100, particles: 900 },
+  high: { dpr: 2.0, chunkRadius: 5, grassRadius: 2, grassPerChunk: 1100, particles: 1400 }
 };
 G.Q = G.QUALITY[G.quality] || G.QUALITY.mid;
 
