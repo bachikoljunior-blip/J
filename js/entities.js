@@ -25,6 +25,7 @@
     geo.setAttribute('psize', new THREE.BufferAttribute(sizes, 1));
     const mat = new THREE.ShaderMaterial({
       transparent: true, depthWrite: false,
+      blending: THREE.AdditiveBlending,   // 黒フェードのスマッジを防ぎ、光の粒として描く
       uniforms: { uTex: { value: G.makeRadialTex(32, [[0, 'rgba(255,255,255,1)'], [1, 'rgba(255,255,255,0)']]) } },
       vertexShader: `
         attribute float psize;
@@ -1646,6 +1647,13 @@
   }
 
   Pr.spawn = function (type, x, y, z, tx, ty, tz, speed, dmg) {
+    // 重力弾は落下ぶんを狙点に上乗せする簡易弾道補正 (補正無しだと必ず手前に落ちる)
+    const grav0 = type === 'rock' ? 6 : (type === 'arrow' ? 2 : 0);
+    if (grav0 > 0) {
+      const d = Math.hypot(tx - x, ty - y, tz - z);
+      const t = d / speed;
+      ty += 0.5 * grav0 * t * t;
+    }
     const dir = new THREE.Vector3(tx - x, ty - y, tz - z).normalize();
     const a = assets();
     let mesh;
@@ -1699,9 +1707,10 @@
       }
       // プレイヤー直撃
       if (!dead && p.alive) {
+        const hitR = pr.type === 'fire' ? 1.1 : 0.8;
         const d2 = G.dist2(p.pos.x, p.pos.z, pr.pos.x, pr.pos.z);
         const dy = Math.abs((p.pos.y + 0.9) - pr.pos.y);
-        if (d2 < 0.8 * 0.8 && dy < 1.3) {
+        if (d2 < hitR * hitR && dy < 1.4) {
           p.takeDamage(pr.dmg, pr.pos.x - pr.vel.x, pr.pos.z - pr.vel.z);
           dead = true;
           if (pr.type === 'fire') G.FX.burst(pr.pos.x, pr.pos.y, pr.pos.z, { n: 14, color: 0xff8833, speed: 4, life: 0.5 });
