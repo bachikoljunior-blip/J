@@ -1380,6 +1380,7 @@
     e.aggro = true;
     G.UI.dmgNum(e.pos.x, e.pos.y + (e.T && e.T.barH ? e.T.barH - 0.2 : 1.6), e.pos.z, dmg, { crit });
     G.FX.burst(e.pos.x, e.pos.y + 1, e.pos.z, { n: crit ? 8 : 5, color: 0xffd24a, speed: 3.2, life: 0.28, size: 1.6 });
+    G.FX.burst(e.pos.x, e.pos.y + 0.9, e.pos.z, { n: 1, color: 0xffffff, speed: 0.1, life: 0.14, size: 6, gravity: 0, drag: 0 });
     if (e.hp <= 0) { kill(e); return; }
     e.poiseC++;
     if (e.poiseC >= (e.T.poise || 1)) {

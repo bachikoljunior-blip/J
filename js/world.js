@@ -645,7 +645,8 @@
         uFogColor: { value: new THREE.Color(0xbccfdd) },
         uFogNear: { value: 60 },
         uFogFar: { value: 260 },
-        uLight: { value: 1.0 }
+        uLight: { value: 1.0 },
+        uSunTint: { value: new THREE.Color(0xffffff) }
       },
       vertexShader: `
         uniform float uTime;
@@ -664,13 +665,13 @@
           gl_Position = projectionMatrix * mv;
         }`,
       fragmentShader: `
-        uniform vec3 uColor, uColor2, uFogColor;
+        uniform vec3 uColor, uColor2, uFogColor, uSunTint;
         uniform float uFogNear, uFogFar, uLight;
         varying float vWave;
         varying float vDist;
         void main(){
           float k = smoothstep(-0.3, 0.4, vWave);
-          vec3 c = mix(uColor, uColor2, k) * uLight;
+          vec3 c = mix(uColor, uColor2 * uSunTint, k) * uLight;
           float f = smoothstep(uFogNear, uFogFar, vDist);
           c = mix(c, uFogColor, f);
           gl_FragColor = vec4(c, 0.82);
@@ -1227,7 +1228,7 @@
   let sparkleT = 0;
 
   /* 草・水のフォグ/明るさ同期 (Sky から呼ぶ) */
-  W.syncEnv = function (fogColor, fogNear, fogFar, light) {
+  W.syncEnv = function (fogColor, fogNear, fogFar, light, sunTint) {
     if (grassMat) {
       grassMat.uniforms.uFogColor.value.copy(fogColor);
       grassMat.uniforms.uFogNear.value = fogNear;
@@ -1240,6 +1241,7 @@
       u.uFogNear.value = fogNear;
       u.uFogFar.value = fogFar;
       u.uLight.value = light;
+      if (sunTint) u.uSunTint.value.copy(sunTint);
     }
   };
 })();
@@ -1435,6 +1437,7 @@
   const _grey = new THREE.Color(0x8b98a5);
   const _white = new THREE.Color(0xffffff);
   const _fogC = new THREE.Color();
+  const _tint = new THREE.Color();
 
   /* tod: 0-24, weather: 0(晴)〜1(雨), cam: THREE.Vector3, inCave: 洞窟内 */
   Sky.update = function (dt, tod, weather, cam, inCave) {
@@ -1517,8 +1520,12 @@
       c.material.opacity = (0.25 + weather * 0.5) * G.clamp(s.hem * 2, 0.25, 1);
     }
 
-    // 霧
+    // 霧 (雪原では少し濃い青に寄せて空と分離)
     _fogC.copy(cHor).lerp(_grey, weather * 0.7);
+    if (G.World.biomeAt(cam.x, cam.z) === 'snow') {
+      _fogC.multiplyScalar(0.88);
+      _fogC.b = Math.min(1, _fogC.b * 1.1);
+    }
     scene.fog.color.copy(_fogC);
     const baseFar = G.Q.chunkRadius * 64 * 0.95;
     const alt = Math.max(0, cam.y - G.World.heightAt(cam.x, cam.z));
@@ -1557,6 +1564,7 @@
     // 地形の Lambert 照明 (hemi+直射) に近い明るさを草/水にも与える
     const light = G.clamp(0.05 + s.hem * 1.4, 0.16, 1.15) * wDim;
     Sky.lightLevel = light;
-    G.World.syncEnv(_fogC, scene.fog.near, scene.fog.far, light);
+    _tint.set(0xffffff).lerp(cSun, sunLow * 0.85);
+    G.World.syncEnv(_fogC, scene.fog.near, scene.fog.far, light, _tint);
   };
 })();
