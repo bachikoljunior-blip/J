@@ -951,8 +951,8 @@
     const pt = new THREE.PointLight(0x6699dd, 1.1, 70);
     pt.position.set(cx, 66, cz);
     scene.add(pt);
-    const pt2 = new THREE.PointLight(0x88a8d8, 1.5, 60);
-    pt2.position.set(cx, 64, 1170);
+    const pt2 = new THREE.PointLight(0x9db8e0, 2.2, 55);
+    pt2.position.set(cx, 63.5, 1170);
     scene.add(pt2);
     // 出口の枠
     const arch = G.mergeGeo([
@@ -1081,6 +1081,14 @@
     const dx = bx - ax, dz = bz - az;
     const len2 = dx * dx + dz * dz;
     if (len2 < 1) return 1;
+    // 建造物 (遺跡の柱・塔など)
+    for (const c of W.staticColliders) {
+      if (Math.abs(c.x - ax) > 60 || Math.abs(c.z - az) > 60) continue;
+      const t = G.clamp(((c.x - ax) * dx + (c.z - az) * dz) / len2, 0.15, 0.95);
+      const px = ax + dx * t, pz = az + dz * t;
+      const rr = c.r * 0.9;
+      if (G.dist2(px, pz, c.x, c.z) < rr * rr) occ = Math.min(occ, Math.max(0.3, t - 0.08));
+    }
     const cx = Math.floor((ax + bx) / 2 / CHUNK), cz = Math.floor((az + bz) / 2 / CHUNK);
     for (let j = -1; j <= 1; j++) {
       for (let i = -1; i <= 1; i++) {
@@ -1451,7 +1459,7 @@
     stars.visible = skyVisible;
     for (const c of clouds) c.visible = skyVisible;
     if (inCave) {
-      hemi.intensity = 0.74;
+      hemi.intensity = 0.55;
       hemi.color.set(0x93a4d4);
       hemi.groundColor.set(0x46506a);
       sun.intensity = 0.02;

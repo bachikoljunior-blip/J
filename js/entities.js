@@ -431,6 +431,19 @@
     eyeL.position.set(-0.09, 0.05, 0.21);
     const eyeR = eyeL.clone(); eyeR.position.x = 0.09;
     head.add(hm, snout, earL, earR, eyeL, eyeR);
+    if (conf.mane) {
+      // 王の眼光 (氷青の発光)
+      const mkGlow = (x) => {
+        const gs = new THREE.Sprite(new THREE.SpriteMaterial({
+          map: G.makeRadialTex(32, [[0, 'rgba(140,230,255,1)'], [1, 'rgba(80,190,255,0)']]),
+          transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+        }));
+        gs.position.set(x, 0.06, 0.24);
+        gs.scale.set(0.3, 0.3, 1);
+        return gs;
+      };
+      head.add(mkGlow(-0.09), mkGlow(0.09));
+    }
     head.position.set(0, 0.78, 0.62);
     const tail = box(0.1, 0.1, 0.5, fur);
     tail.position.set(0, 0.72, -0.75);
