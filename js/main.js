@@ -51,6 +51,7 @@
     G.World.init(scene);
     G.Sky.init(scene);
     G.FX.init(scene);
+    G.TelegraphRing.init(scene);
     G.Player.init(scene);
     G.Enemies.init(scene);
     G.NPCs.init(scene);
@@ -257,17 +258,18 @@
     C.dist = G.clamp(C.dist + G.Input.wheel, 4, 13);
     G.Input.wheel = 0;
 
-    // ロックオン時は対象へ向く
+    // ロックオン時は対象へ向く (巨大ボスはカメラを引いて全身を映す)
+    const bigBoss = p.target && p.target.alive && p.target.D && (p.target.D.barH || 0) > 3;
     if (p.target && p.target.alive) {
       const ty = Math.atan2(p.target.pos.x - p.pos.x, p.target.pos.z - p.pos.z);
       C.yaw = G.angLerp(C.yaw, ty, G.damp(4, dt));
-      C.pitch = G.lerp(C.pitch, 0.35, G.damp(3, dt));
+      C.pitch = G.lerp(C.pitch, bigBoss ? 0.5 : 0.35, G.damp(3, dt));
     }
 
     const fx = Math.sin(C.yaw) * Math.cos(C.pitch);
     const fz = Math.cos(C.yaw) * Math.cos(C.pitch);
     const fy = Math.sin(C.pitch);
-    const dist = C.dist + (p.mounted ? 1.8 : 0);
+    const dist = C.dist + (p.mounted ? 1.8 : 0) + (bigBoss ? 4.5 : 0);
     let cx = p.pos.x - fx * dist;
     let cz = p.pos.z - fz * dist;
     let cy = p.pos.y + 1.6 + fy * dist;

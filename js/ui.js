@@ -207,7 +207,8 @@
   let hudEl, hpBar, hpFill, staFill, xpFill, lvlEl, goldEl, clockEl, weatherEl;
   let miniCanvas, miniCtx, mapCanvas = null;
   let bigMapCanvas = null;
-  let trackerEl, toastWrap, promptEl, bossWrap, bossFill, bossName;
+  let trackerEl, toastWrap, promptEl, bossWrap, bossFill, bossName, bossChip;
+  let bossChipW = 100;
   let dlgWrap, dlgName, dlgText, dlgOpts;
   let menuWrap, menuTabs, menuBody;
   let deathEl, endEl, titleEl, introEl;
@@ -256,6 +257,7 @@
     bossWrap = el('div', 'bosswrap', hudEl);
     bossName = el('div', 'bossname', bossWrap, '');
     const bb = el('div', 'bossbar', bossWrap);
+    bossChip = el('div', 'chip', bb);
     bossFill = el('div', 'fill', bb);
     bossWrap.style.display = 'none';
 
@@ -273,7 +275,7 @@
       actionBtn('b-attack', '<b>攻</b>', 'attack', { holdable: true, holdAction: 'heavy', spinAction: 'spin', heldKey: 'attack' });
       actionBtn('b-roll', '回避', 'roll');
       actionBtn('b-jump', '跳', 'jump', { fireOnPress: true, heldKey: 'jump' });
-      actionBtn('b-lock', '◎', 'lock');
+      actionBtn('b-lock', '◎<span class="blabel">注視</span>', 'lock');
       potBtn = actionBtn('b-potion', '薬', 'potion');
       actionBtn('b-menu', '≡', 'menu');
       actionBtn('b-map', '地図', 'map');
@@ -388,9 +390,13 @@
     clockEl.textContent = `${G.State.day}日目 ${hh}:${mm < 10 ? '0' : ''}${mm}`;
     weatherEl.textContent = G.State.weather > 0.5 ? '☂' : (tod > 19 || tod < 5 ? '☾' : '☀');
 
-    // ボスバー
+    // ボスバー (黄色の削り残像つき)
     if (curBoss) {
-      bossFill.style.width = (100 * Math.max(0, curBoss.hp) / curBoss.maxHp) + '%';
+      const w = 100 * Math.max(0, curBoss.hp) / curBoss.maxHp;
+      bossFill.style.width = w + '%';
+      bossChipW += (w - bossChipW) * G.damp(2.2, dt);
+      if (bossChipW < w) bossChipW = w;
+      bossChip.style.width = bossChipW + '%';
     }
 
     // インタラクトプロンプト (0.15秒間隔で再探索)
@@ -516,7 +522,7 @@
       if (dmgPool.length > 40) { }
     }
     d.active = true; d.t = 0;
-    d.x = x; d.y = y; d.z = z;
+    d.x = x + (Math.random() - 0.5) * 0.7; d.y = y; d.z = z;
     d.eln.textContent = n;
     d.eln.className = 'dmgnum' + (opts.crit ? ' crit' : '') + (opts.player ? ' onplayer' : '');
     d.eln.style.display = 'block';
@@ -582,7 +588,7 @@
   UI.toast = function (msg, kind) {
     const t = el('div', 'toast ' + (kind || ''), toastWrap, msg);
     toasts.push({ eln: t, t: 0 });
-    if (toasts.length > 5) {
+    if (toasts.length > 3) {
       const old = toasts.shift();
       old.eln.remove();
     }
@@ -591,8 +597,8 @@
     for (let i = toasts.length - 1; i >= 0; i--) {
       const t = toasts[i];
       t.t += dt;
-      if (t.t > 3.2) { t.eln.classList.add('fade'); }
-      if (t.t > 3.8) { t.eln.remove(); toasts.splice(i, 1); }
+      if (t.t > 2.4) { t.eln.classList.add('fade'); }
+      if (t.t > 3.0) { t.eln.remove(); toasts.splice(i, 1); }
     }
   }
 
@@ -609,6 +615,7 @@
   UI.showBoss = function (b) {
     const isNew = curBoss !== b;
     curBoss = b;
+    bossChipW = 100 * Math.max(0, b.hp) / b.maxHp;
     bossName.textContent = b.name;
     bossWrap.style.display = 'block';
     if (isNew) {
@@ -717,6 +724,8 @@
   UI.openMenu = function (tab) {
     menuOpen = true;
     G.paused = true;
+    hudEl.style.visibility = 'hidden';
+    menuTabs.style.display = '';
     menuWrap.style.display = 'flex';
     G.Audio.sfx('uiOpen');
     UI.showTab(tab || 'equip');
@@ -724,6 +733,7 @@
   UI.closeMenu = function () {
     menuOpen = false;
     G.paused = false;
+    hudEl.style.visibility = '';
     menuWrap.style.display = 'none';
     G.Audio.sfx('ui');
   };
@@ -948,10 +958,12 @@
       e.stopPropagation();
       if (G.Save.save()) UI.toast('セーブした', 'gold');
     });
-    const reset = el('div', 'bigbtn danger', wrap, 'データを消して最初から');
+    el('div', 'dangergap', wrap);
+    const reset = el('div', 'bigbtn danger small', wrap, 'データを消して最初から');
     reset.addEventListener('pointerdown', e => {
       e.stopPropagation();
-      if (confirm('本当にセーブデータを削除しますか?')) {
+      if (confirm('本当にセーブデータを削除しますか?') &&
+          confirm('全ての進行が失われます。最終確認: 削除しますか?')) {
         G.Save.reset();
         location.reload();
       }
@@ -963,9 +975,11 @@
   UI.openShop = function () {
     G.paused = true;
     menuOpen = true;
+    hudEl.style.visibility = 'hidden';
     menuWrap.style.display = 'flex';
-    for (const t of menuTabs.children) t.classList.remove('on');
+    menuTabs.style.display = 'none';
     menuBody.innerHTML = '';
+    el('div', 'shoptitle', menuBody, '🛒 モーガンの店');
     el('div', 'mnote', menuBody, `所持金: ${G.Inv.gold} G`);
     el('div', 'shophead', menuBody, '― 購入 ―');
     const buy = el('div', 'ilist', menuBody);
@@ -996,9 +1010,11 @@
   UI.openForge = function () {
     G.paused = true;
     menuOpen = true;
+    hudEl.style.visibility = 'hidden';
     menuWrap.style.display = 'flex';
-    for (const t of menuTabs.children) t.classList.remove('on');
+    menuTabs.style.display = 'none';
     menuBody.innerHTML = '';
+    el('div', 'shoptitle', menuBody, '⚒ ドヴァンの鍛冶場');
     el('div', 'mnote', menuBody, `所持金: ${G.Inv.gold} G / 魔石×${G.Inv.count('magicstone')} 骨×${G.Inv.count('bone')} 毛皮×${G.Inv.count('pelt')}`);
     el('div', 'shophead', menuBody, '― 装備強化 ―');
     const list = el('div', 'ilist', menuBody);

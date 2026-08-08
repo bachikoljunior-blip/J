@@ -247,14 +247,21 @@
     let wing = null;
     if (conf.glider) {
       wing = new THREE.Group();
-      const wL = box(0.95, 0.05, 0.4, 0x6fb1c4);
-      wL.position.set(-0.5, 0, 0); wL.rotation.z = 0.28;
-      const wR = box(0.95, 0.05, 0.4, 0x6fb1c4);
-      wR.position.set(0.5, 0, 0); wR.rotation.z = -0.28;
-      const bar = box(0.08, 0.5, 0.08, 0x6b4a2f);
-      bar.position.y = -0.3;
-      wing.add(wL, wR, bar);
-      wing.position.set(0, 1.9, -0.05);
+      // 中央から連続したアーチ状キャノピー (5枚の板を繋げる)
+      for (let i = 0; i < 5; i++) {
+        const t = (i - 2) / 2;             // -1..1
+        const seg = box(0.5, 0.045, 0.55, i % 2 ? 0x5f9fb4 : 0x74b7cc);
+        seg.position.set(t * 0.95, -Math.abs(t) * 0.22 + 0.1, 0);
+        seg.rotation.z = t * 0.42;
+        wing.add(seg);
+      }
+      const frame = box(0.06, 0.06, 0.5, 0x6b4a2f);
+      frame.position.y = -0.05;
+      const barL = box(0.05, 0.4, 0.05, 0x6b4a2f);
+      barL.position.set(-0.18, -0.3, 0.05);
+      const barR = barL.clone(); barR.position.x = 0.18;
+      wing.add(frame, barL, barR);
+      wing.position.set(0, 1.95, -0.05);
       wing.visible = false;
       g.add(wing);
     }
@@ -303,7 +310,7 @@
       }
       if (p.state === 'roll') {
         g.rotation.x = -(p.t / 0.45) * Math.PI * 2;
-        g.position.y = (p.baseY || 0) + 0.15;
+        g.position.y = (p.baseY || 0) + 0.5;
         legL.rotation.x = 0.9; legR.rotation.x = 0.9;
         armL.rotation.x = 0.8; armR.rotation.x = 0.8;
         return;
@@ -340,9 +347,10 @@
           }
         } else if (c % 2 === 0) { // 横薙ぎ
           if (k < 0.35) {
-            armR.rotation.x = -1.5 * (k / 0.35);
-            armR.rotation.y = -0.9 * (k / 0.35);
-            body.rotation.y = -0.4 * (k / 0.35);
+            armR.rotation.x = -2.1 * (k / 0.35);
+            armR.rotation.y = -1.2 * (k / 0.35);
+            body.rotation.y = -0.65 * (k / 0.35);
+            body.rotation.z = 0.12 * (k / 0.35);
           } else {
             const j = (k - 0.35) / 0.65;
             armR.rotation.x = -1.5 + j * 1.1;
@@ -657,8 +665,8 @@
       const t = G.time;
       const mv = p.moveAmt || 0;
       g.position.y = p.baseY || 0;
-      const wt = t * (7 + mv * 5);
-      const sw = Math.sin(wt) * 0.85 * mv;
+      const wt = t * (7 + mv * 6);
+      const sw = Math.sin(wt) * 1.15 * mv;
       legFL.rotation.x = sw; legBR.rotation.x = sw;
       legFR.rotation.x = -sw; legBL.rotation.x = -sw;
       body.position.y = 1.12 + Math.abs(Math.sin(wt)) * 0.07 * mv;
@@ -758,6 +766,46 @@
       }
     }
     return { group: g, parts, pose };
+  };
+})();
+
+/* ======================= 予兆リング ======================= */
+(function () {
+  const R = G.TelegraphRing = {};
+  const pool = [];
+  let scene;
+  R.init = function (sc) {
+    scene = sc;
+    for (let i = 0; i < 4; i++) {
+      const m = new THREE.Mesh(
+        new THREE.RingGeometry(0.8, 1.0, 24),
+        new THREE.MeshBasicMaterial({
+          color: 0xff4433, transparent: true, opacity: 0.55,
+          depthWrite: false, side: THREE.DoubleSide
+        })
+      );
+      m.rotation.x = -Math.PI / 2;
+      m.visible = false;
+      m.renderOrder = 2;
+      scene.add(m);
+      pool.push(m);
+    }
+  };
+  let used = 0;
+  R.begin = function () { used = 0; };
+  /* windup 中の敵の足元に出す。t: 0..1 進行度, r: 半径 */
+  R.show = function (x, z, r, t) {
+    if (used >= pool.length) return;
+    const m = pool[used++];
+    m.visible = true;
+    const gh = G.World.heightAt(x, z);
+    m.position.set(x, gh + 0.12, z);
+    const pulse = 1 + Math.sin(G.time * 14) * 0.06;
+    m.scale.setScalar(r * pulse);
+    m.material.opacity = 0.3 + t * 0.45;
+  };
+  R.end = function () {
+    for (let i = used; i < pool.length; i++) pool[i].visible = false;
   };
 })();
 
@@ -1222,7 +1270,7 @@
     e.hp -= dmg;
     e.aggro = true;
     G.UI.dmgNum(e.pos.x, e.pos.y + (e.T && e.T.barH ? e.T.barH - 0.2 : 1.6), e.pos.z, dmg, { crit });
-    G.FX.burst(e.pos.x, e.pos.y + 1, e.pos.z, { n: crit ? 14 : 8, color: 0xffdd66, speed: 3.5, life: 0.4, size: 2.5 });
+    G.FX.burst(e.pos.x, e.pos.y + 1, e.pos.z, { n: crit ? 8 : 5, color: 0xffd24a, speed: 3.2, life: 0.28, size: 1.6 });
     if (e.hp <= 0) { kill(e); return; }
     e.poiseC++;
     if (e.poiseC >= (e.T.poise || 1)) {
@@ -1279,7 +1327,10 @@
     if (spawnT > 0) return;
     spawnT = 0.8;
     const p = G.Player.pos;
-    if (list.length < 26) {
+    // ボス交戦中は雑魚の新規湧きを止める (ボスの召喚は例外)
+    let bossFight = false;
+    for (const b of bosses) if (b.alive && b.engaged) { bossFight = true; break; }
+    if (!bossFight && list.length < 26) {
       for (const s of FIXED_SPAWNS) {
         if (s.alive || G.time < s.deadUntil) continue;
         const d2 = G.dist2(p.x, p.z, s.x, s.z);
@@ -1451,9 +1502,22 @@
 
   E.update = function (dt) {
     manageSpawns(dt);
+    G.TelegraphRing.begin();
     // remove() が splice するので逆順走査 (毎フレームの配列複製を避ける)
-    for (let i = list.length - 1; i >= 0; i--) updateEnemy(list[i], dt);
-    for (const b of bosses) G.Bosses.update(b, dt);
+    for (let i = list.length - 1; i >= 0; i--) {
+      const e = list[i];
+      updateEnemy(e, dt);
+      if (e.alive && e.state === 'windup') {
+        G.TelegraphRing.show(e.pos.x, e.pos.z, (e.T.atkR > 5 ? 1.2 : e.T.atkR + 0.6), G.clamp(e.stateT / e.T.windup, 0, 1));
+      }
+    }
+    for (const b of bosses) {
+      G.Bosses.update(b, dt);
+      if (b.alive && b.state === 'windup') {
+        G.TelegraphRing.show(b.pos.x, b.pos.z, b.radius + 2.4, G.clamp(b.stateT / (b.windupDur || 0.8), 0, 1));
+      }
+    }
+    G.TelegraphRing.end();
   };
 
   E.anyAggro = function () {
@@ -1470,8 +1534,8 @@
   const DEFS = {
     fenrir: {
       name: '白狼王フェンリル', hp: 380, atk: 22, speed: 7.2, xp: 300, gold: 250,
-      x: -430, z: -140, arenaR: 34, radius: 0.9, barH: 2.6,
-      build: () => G.Rigs.wolf({ scale: 2.1, fur: 0xd8d8e0, snout: 0xb8b8c2, eye: 0x44ddff })
+      x: -430, z: -140, arenaR: 34, radius: 1.3, barH: 3.4,
+      build: () => G.Rigs.wolf({ scale: 2.9, fur: 0xd8d8e0, snout: 0xb8b8c2, eye: 0x44ddff })
     },
     golem: {
       name: '遺跡の巨像', hp: 700, atk: 34, speed: 2.9, xp: 600, gold: 500,
@@ -1527,7 +1591,7 @@
     b.engaged = true;
     const ny = b.pos.y + (b.D.barH || 2.5) + (b.fly || 0) * 2.4;
     G.UI.dmgNum(b.pos.x, ny, b.pos.z, dmg, { crit });
-    G.FX.burst(b.pos.x, b.pos.y + 1.5, b.pos.z, { n: 10, color: 0xffdd66, speed: 4, life: 0.4 });
+    G.FX.burst(b.pos.x, b.pos.y + 1.5, b.pos.z, { n: 6, color: 0xffd24a, speed: 3.5, life: 0.3, size: 1.7 });
     if (b.hp <= 0) {
       b.hp = 0; b.alive = false;
       b.state = 'dead'; b.stateT = 0; b.deadT = 0;
@@ -1912,6 +1976,15 @@
       moveAmt: H.mounted ? G.Player.moveAmt : 0,
       baseY: H.pos.y, seed: 3
     });
+    // 疾走時の砂埃
+    if (H.mounted && G.Player.moveAmt > 0.5 && G.Player.grounded) {
+      H.dustT = (H.dustT || 0) - dt;
+      if (H.dustT <= 0) {
+        H.dustT = 0.12;
+        G.FX.burst(H.pos.x - Math.sin(H.yaw) * 1.2, H.pos.y + 0.25, H.pos.z - Math.cos(H.yaw) * 1.2,
+          { n: 2, color: 0xb8a888, speed: 1.4, life: 0.5, size: 2.4, up: 0.6, gravity: 1 });
+      }
+    }
     G.Actors.updateShadow(H);
   };
 })();
@@ -2095,6 +2168,7 @@
     const p = G.Player;
     if (!p.alive) return null;
     if (p.mounted) return { kind: 'dismount', label: '馬から降りる', obj: null };
+    if (!p.grounded) return null;   // 空中 (滑空/跳躍) 中は調べられない
     const R2 = 2.6 * 2.6;
     // 馬
     if (G.Horse.pos && G.dist2(p.pos.x, p.pos.z, G.Horse.pos.x, G.Horse.pos.z) < 2.8 * 2.8) {

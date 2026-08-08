@@ -191,10 +191,33 @@
   };
 
   const _c = new THREE.Color();
+  const PATH_COL = new THREE.Color(0xb59f74);
+  /* 点と線分の距離^2 */
+  function segDist2(px, pz, ax, az, bx, bz) {
+    const dx = bx - ax, dz = bz - az;
+    const t = G.clamp(((px - ax) * dx + (pz - az) * dz) / (dx * dx + dz * dz), 0, 1);
+    const cx = ax + dx * t, cz = az + dz * t;
+    return G.dist2(px, pz, cx, cz);
+  }
+  /* 村の土の道 */
+  const PATHS = [
+    [6, 34, 0, 8], [0, 8, 2, -14], [0, 8, 12, 18], [0, 8, 11, 5], [0, 8, -4, 6]
+  ];
+  function pathBlend(x, z) {
+    if (x < -35 || x > 40 || z < -30 || z > 45) return 0;
+    let best = 1e9;
+    for (const [ax, az, bx, bz] of PATHS) {
+      const d2 = segDist2(x, z, ax, az, bx, bz);
+      if (d2 < best) best = d2;
+    }
+    return 1 - G.smoothstep(1.1, 2.6, Math.sqrt(best));
+  }
   /* ny: 事前計算済みの法線Y (省略時は計算する) */
   function groundColor(x, z, h, out, ny) {
     const b = W.biomeAt(x, z, h);
     out.copy(BIOME_COL[b] || BIOME_COL.grass);
+    const pb = pathBlend(x, z);
+    if (pb > 0) out.lerp(PATH_COL, pb * 0.85);
     if (b === 'grass') {
       const t = G.fbm(x * 0.012 + 55, z * 0.012 + 55, 2) * 0.5 + 0.5;
       out.lerp(BIOME_COL.grass2, t * 0.8);
@@ -561,6 +584,7 @@
     const m = new THREE.Matrix4();
     for (let i = 0; i < max; i++) {
       const x = x0 + rnd() * CHUNK, z = z0 + rnd() * CHUNK;
+      if (W.inCaveRegion(x, z)) continue;   // 洞窟内に草は生えない
       const h = W.heightAt(x, z);
       if (h < WATER_Y + 0.7) continue;
       const b = W.biomeAt(x, z, h);
@@ -858,6 +882,21 @@
     dark.position.set(x, y + 1.9, z - 0.2);
     scene.add(dark);
     addStatic(x - 2, z, 0.7); addStatic(x + 2, z, 0.7);
+    // 入口の周りに岩塊 (地形に埋まった洞窟らしさ)
+    const rrnd = G.srand(88);
+    for (let i = 0; i < 7; i++) {
+      const a = (i / 7) * Math.PI * 1.5 - 0.6;
+      const rx = x + Math.cos(a) * (4 + rrnd() * 3);
+      const rz = z + Math.sin(a) * (3 + rrnd() * 2.5) - 1.5;
+      const sc = 1.4 + rrnd() * 2.2;
+      const rock = shadowify(new THREE.Mesh(new THREE.IcosahedronGeometry(1, 0),
+        new THREE.MeshLambertMaterial({ color: 0x71717c })));
+      rock.position.set(rx, W.heightAt(rx, rz) + sc * 0.3, rz);
+      rock.scale.set(sc, sc * (0.75 + rrnd() * 0.5), sc);
+      rock.rotation.y = rrnd() * 3;
+      scene.add(rock);
+      addStatic(rx, rz, sc * 0.8);
+    }
   }
 
   function buildCaveInterior() {
@@ -898,10 +937,13 @@
       glow.scale.set(3.2, 3.2, 1);
       scene.add(glow);
     }
-    // 青い光源
+    // 青い光源 (中央 + 入口側)
     const pt = new THREE.PointLight(0x6699dd, 1.1, 70);
     pt.position.set(cx, 66, cz);
     scene.add(pt);
+    const pt2 = new THREE.PointLight(0x7799cc, 0.9, 45);
+    pt2.position.set(cx, 64, 1170);
+    scene.add(pt2);
     // 出口の枠
     const arch = G.mergeGeo([
       { geo: new THREE.BoxGeometry(0.8, 3.8, 0.8), m: M4(-1.8, 1.9, 0), color: 0x6a6a72 },
@@ -944,6 +986,14 @@
     // 松明
     buildTorch(-6, 0); buildTorch(8, -8); buildTorch(-14, 14); buildTorch(16, 8);
     buildTorch(4, 14);
+    // 夜の村を照らすポイントライト (2灯だけ)
+    W.villageLights = [];
+    for (const [lx, lz] of [[-6, 0], [16, 8]]) {
+      const pl = new THREE.PointLight(0xffa04a, 0, 26);
+      pl.position.set(lx, W.heightAt(lx, lz) + 2.4, lz);
+      scene.add(pl);
+      W.villageLights.push(pl);
+    }
   }
 
   /* 薬草 (収集物): 光る草 */
@@ -1094,7 +1144,15 @@
     }
     if (grassMat) grassMat.uniforms.uTime.value = G.time;
 
-    // 松明のゆらぎ
+    // 松明のゆらぎ + 村の灯り (夜のみ)
+    if (W.villageLights) {
+      const tod = G.State ? G.State.tod : 12;
+      const night = G.smoothstep(18.5, 20, tod) + (1 - G.smoothstep(4.5, 6.5, tod));
+      const k = G.clamp(night, 0, 1);
+      for (const pl of W.villageLights) {
+        pl.intensity = k * (0.9 + Math.sin(G.time * 8 + pl.position.x) * 0.12);
+      }
+    }
     torchT += dt;
     for (const t of W.torches) {
       const f = 0.9 + Math.sin(torchT * 9 + t.seed * 7) * 0.15 + Math.sin(torchT * 23 + t.seed) * 0.08;
@@ -1165,11 +1223,13 @@
   const KEYS = [
     [0,  0x0a1026, 0x141c33, 0x223, 0.02, 0.16],
     [4,  0x0a1026, 0x141c33, 0x223, 0.02, 0.16],
-    [5.5, 0x2c3e6b, 0xc47b52, 0xff9a55, 0.25, 0.3],
-    [7,  0x5d92c9, 0xeecfa0, 0xffd9a0, 0.85, 0.55],
+    [5.5, 0x2c3e6b, 0xc47b52, 0xff9a55, 0.3, 0.28],
+    [7,  0x6a95c4, 0xf0d3a4, 0xffd9a0, 0.95, 0.5],
+    [8.5, 0x4a86d0, 0xc8dcea, 0xfff0d4, 1.05, 0.62],
     [12, 0x4a86d0, 0xbcd8e8, 0xfff2dd, 1.1, 0.7],
-    [17, 0x4a7fc4, 0xd9c79e, 0xffe0b0, 0.9, 0.6],
-    [18.7, 0x3a4a80, 0xe08a55, 0xff8a4a, 0.4, 0.38],
+    [16, 0x4d82c2, 0xd6c9a2, 0xffe2b2, 1.0, 0.6],
+    [17.5, 0x46639e, 0xe6a878, 0xffb070, 0.85, 0.48],
+    [18.7, 0x3a4a80, 0xe08a55, 0xff8a4a, 0.6, 0.34],
     [20, 0x141c3d, 0x33305c, 0x445, 0.05, 0.2],
     [24, 0x0a1026, 0x141c33, 0x223, 0.02, 0.16]
   ];
@@ -1326,7 +1386,7 @@
     const rgeo = new THREE.BufferGeometry();
     rgeo.setAttribute('position', new THREE.BufferAttribute(rp, 3));
     rainPts = new THREE.Points(rgeo, new THREE.PointsMaterial({
-      color: 0x9db8cc, size: 0.08, transparent: true, opacity: 0, depthWrite: false
+      color: 0xaec8dc, size: 0.17, transparent: true, opacity: 0, depthWrite: false, fog: false
     }));
     rainPts.frustumCulled = false;
     scene.add(rainPts);
@@ -1385,7 +1445,9 @@
     sun.target.position.set(cam.x, 0, cam.z);
     sun.target.updateMatrixWorld();
 
-    // ドーム
+    // ドーム (雨天のグレーは時間帯の明るさに追従して暗くなる)
+    const gk = G.clamp(s.hem * 1.6, 0.18, 1);
+    _grey.setRGB(0.545 * gk, 0.596 * gk, 0.647 * gk);
     const u = skyDome.material.uniforms;
     u.uTop.value.copy(cTop).lerp(_grey, weather * 0.6);
     u.uHor.value.copy(cHor).lerp(_grey, weather * 0.7);
@@ -1422,7 +1484,9 @@
     _fogC.copy(cHor).lerp(_grey, weather * 0.7);
     scene.fog.color.copy(_fogC);
     const baseFar = G.Q.chunkRadius * 64 * 0.95;
-    scene.fog.far = baseFar * (1 - weather * 0.35) * (0.75 + s.hem * 0.4);
+    const alt = Math.max(0, cam.y - G.World.heightAt(cam.x, cam.z));
+    const altBoost = 1 + G.clamp((alt - 8) / 50, 0, 1) * 0.9;  // 高所ほど遠くまで見せる
+    scene.fog.far = baseFar * (1 - weather * 0.35) * (0.75 + s.hem * 0.4) * altBoost;
     scene.fog.near = scene.fog.far * 0.22;
     if (scene.background) scene.background.copy(_fogC);
     else scene.background = _fogC.clone();
