@@ -451,9 +451,9 @@
     const snout = box(0.17 * hw, 0.15 * hw, conf.mane ? 0.5 : 0.22, conf.snout !== undefined ? conf.snout : 0x4e463e);
     snout.position.set(0, -0.05 * hw, conf.mane ? 0.52 : 0.28);
     if (conf.mane) {
-      // 鼻先の黒い鼻ブロック (狼の記号)
-      const nose = box(0.12, 0.1, 0.08, 0x1a1a20);
-      nose.position.set(0, -0.04, 0.8);
+      // 鼻先の黒い鼻 (小さく、鼻筋の上端に — 大きいと顔全体が黒く見える)
+      const nose = box(0.09, 0.07, 0.06, 0x1a1a20);
+      nose.position.set(0, 0.02, 0.84);
       head.add(nose);
     }
     const earL = box(conf.mane ? 0.14 * hw : 0.1 * hw, 0.14 * hw * (conf.mane ? 2.1 : 1), conf.mane ? 0.07 : 0.05, fur);
@@ -466,8 +466,9 @@
       eyeL.material = eyeL.material.clone();
       eyeL.material.emissive.set(0x2288cc);   // 王狼の眼光
     }
-    eyeL.position.set(-0.09, 0.05, 0.21);
-    const eyeR = eyeL.clone(); eyeR.position.x = 0.09;
+    // 拡大した頭部の前面に出す (hw未反映だと頭の内部に埋まり見えない)
+    eyeL.position.set(-0.09 * hw, 0.05 * hw, 0.212 * hw);
+    const eyeR = eyeL.clone(); eyeR.position.x = 0.09 * hw;
     head.add(hm, snout, earL, earR, eyeL, eyeR);
     if (conf.mane) {
       // 王の眼光 (氷青の発光)
@@ -476,11 +477,11 @@
           map: G.makeRadialTex(32, [[0, 'rgba(140,230,255,1)'], [1, 'rgba(80,190,255,0)']]),
           transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
         }));
-        gs.position.set(x, 0.06, 0.34);
+        gs.position.set(x, 0.06 * hw, 0.36 * hw);
         gs.scale.set(0.55, 0.55, 1);
         return gs;
       };
-      head.add(mkGlow(-0.09), mkGlow(0.09));
+      head.add(mkGlow(-0.09 * hw), mkGlow(0.09 * hw));
     }
     head.position.set(0, 0.78, 0.62);
     const tail = box(conf.mane ? 0.2 : 0.1, conf.mane ? 0.2 : 0.1, conf.mane ? 0.78 : 0.5, fur);
@@ -882,8 +883,8 @@
       const mem1 = box(0.82, 0.03, 0.74, 0x3a2438);
       mem1.position.set(1.25 * side, -0.06, -0.06);
       mem1.rotation.x = 0.09;
-      const mem2 = box(0.72, 0.03, 0.6, 0x2c1e2e);
-      mem2.position.set(2.02 * side, -0.09, -0.1);
+      const mem2 = box(1.05, 0.03, 0.78, 0x2c1e2e);
+      mem2.position.set(2.05 * side, -0.09, -0.12);
       mem2.rotation.x = 0.14;
       const edge = box(2.5, 0.05, 0.1, 0x7a2430);
       edge.position.set(1.3 * side, -0.1, -0.5);

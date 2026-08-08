@@ -748,8 +748,9 @@
     bossName.textContent = b.name;
     bossWrap.style.display = 'block';
     if (isNew) {
-      // 登場演出: 通常トーストを消し、中央に大きく名前 (実時間で6秒保持)
+      // 登場演出: 通常トースト/クエストトラッカーを消し、中央に大きく名前
       UI.clearToasts();
+      trackerEl.style.opacity = '0';
       const intro = el('div', 'bossintro', root, b.name);
       setTimeout(() => { intro.classList.add('out'); }, 5600);
       setTimeout(() => { intro.remove(); }, 7000);
@@ -761,6 +762,7 @@
   UI.hideBoss = function () {
     curBoss = null;
     bossWrap.style.display = 'none';
+    trackerEl.style.opacity = '';
     const kh = hudEl.querySelector('.keyhelp');
     if (kh && !G.isTouch) kh.style.display = '';
   };
@@ -769,6 +771,7 @@
   UI.showDialogue = function (name, node) {
     G.paused = true;
     UI.hideTutChip();
+    hudEl.classList.add('dlgmode');
     const kh = hudEl.querySelector('.keyhelp');
     if (kh) kh.style.display = 'none';
     dlgWrap.style.display = 'block';
@@ -826,6 +829,7 @@
     dlgWrap.style.display = 'none';
     G.paused = false;
     typing = null;
+    hudEl.classList.remove('dlgmode');
     // チュートリアル中に非表示化されている場合は復元しない
     const kh = hudEl.querySelector('.keyhelp');
     if (kh && khWanted && !G.isTouch) kh.style.display = '';

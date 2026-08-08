@@ -176,7 +176,7 @@
     // ボス交戦中と、同内容のインタラクトプロンプト表示中はチップを隠す
     let bossOn = false;
     for (const b of G.Enemies.bosses) { if (b.alive && b.engaged) { bossOn = true; break; } }
-    if (tutStage === 1 && G.UI.promptShowing) bossOn = true;   // 「話す」の二重表示を防ぐ
+    if (G.UI.promptShowing) bossOn = true;   // プロンプト表示中はチップを出さず導線を1系統に
     if (bossOn && !tutHidden) { tutHidden = true; G.UI.hideTutChip(); }
     else if (!bossOn && tutHidden && tutStage >= 0) {
       tutHidden = false;
@@ -201,6 +201,9 @@
       G.Horse.dismount();
     } else if (it.kind === 'npc') {
       G.Dialogue.start(it.obj);
+      // 話者同士が向き合う
+      it.obj.yaw = Math.atan2(G.Player.pos.x - it.obj.pos.x, G.Player.pos.z - it.obj.pos.z);
+      G.Player.yaw = Math.atan2(it.obj.pos.x - G.Player.pos.x, it.obj.pos.z - G.Player.pos.z);
       dialogueCam(it.obj);
     } else if (it.kind === 'shrine') {
       const s = it.obj;

@@ -219,6 +219,7 @@
   const FROST_COL = new THREE.Color(0xc8dce6);
   const CHAR_COL = new THREE.Color(0x2e2824);
   const _dirtCol = new THREE.Color(0x6a5844);
+  const _winWarm = new THREE.Color(0xffd88a);
   function groundColor(x, z, h, out, ny) {
     if (W.inCaveRegion(x, z)) {
       // 洞窟の床: 青灰のまだら
@@ -824,6 +825,13 @@
     const cr = Math.max(w, d) * 0.62;
     addStatic(x, z, cr).fade = true;
     addFader(mesh, x, z, cr, y + hh + 2.6);
+    // 窓 (夜は暖色に灯り、村に生活感を出す)
+    if (!W._windowMat) W._windowMat = new THREE.MeshBasicMaterial({ color: 0x232630 });
+    for (const wx of [-w * 0.28, w * 0.28]) {
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), W._windowMat);
+      win.position.set(wx, hh * 0.55, d / 2 + 0.03);
+      mesh.add(win);
+    }
     return mesh;
   }
 
@@ -1413,6 +1421,10 @@
     torchT += dt;
     // 松明は暗い時間帯のみ灯す (真昼に燃えっぱなしにしない)
     const torchOn = G.clamp((0.62 - (G.Sky.lightLevel || 1)) * 3.2, 0, 1);
+    // 家の窓も夜は暖色に灯る
+    if (W._windowMat) {
+      W._windowMat.color.setHex(0x232630).lerp(_winWarm, torchOn);
+    }
     for (const t of W.torches) {
       const f = 0.9 + Math.sin(torchT * 9 + t.seed * 7) * 0.15 + Math.sin(torchT * 23 + t.seed) * 0.08;
       t.sprite.scale.set(1.1 * f, 1.4 * f, 1);
