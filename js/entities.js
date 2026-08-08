@@ -868,6 +868,41 @@
   };
 })();
 
+/* ======================= 焦げ跡デカール ======================= */
+(function () {
+  const S = G.Scorch = {};
+  const pool = [];
+  let scene, idx = 0;
+  S.init = function (sc) {
+    scene = sc;
+    const geo = new THREE.CircleGeometry(1.3, 12);
+    geo.rotateX(-Math.PI / 2);
+    for (let i = 0; i < 6; i++) {
+      const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+        color: 0x14100c, transparent: true, opacity: 0, depthWrite: false
+      }));
+      m.visible = false;
+      m.renderOrder = 1;
+      scene.add(m);
+      pool.push({ mesh: m, t: 1 });
+    }
+  };
+  S.add = function (x, z) {
+    const p = pool[idx++ % pool.length];
+    p.t = 0;
+    p.mesh.visible = true;
+    p.mesh.position.set(x, G.World.heightAt(x, z) + 0.08, z);
+    p.mesh.scale.setScalar(0.8 + Math.random() * 0.5);
+  };
+  S.update = function (dt) {
+    for (const p of pool) {
+      if (p.t >= 1) { p.mesh.visible = false; continue; }
+      p.t += dt / 6;
+      p.mesh.material.opacity = 0.5 * (1 - p.t);
+    }
+  };
+})();
+
 /* ======================= アクター共通 ======================= */
 (function () {
   G.Actors = {};
@@ -2055,7 +2090,7 @@
       if (H.dustT <= 0) {
         H.dustT = 0.12;
         G.FX.burst(H.pos.x - Math.sin(H.yaw) * 1.2, H.pos.y + 0.25, H.pos.z - Math.cos(H.yaw) * 1.2,
-          { n: 2, color: 0xb8a888, speed: 1.4, life: 0.5, size: 2.4, up: 0.6, gravity: 1 });
+          { n: 4, color: 0xc4b394, speed: 1.8, life: 0.65, size: 3.8, up: 0.8, gravity: 1 });
       }
     }
     G.Actors.updateShadow(H);
@@ -2141,6 +2176,7 @@
         dead = true;
         if (pr.type === 'fire' || pr.type === 'rock') {
           G.Audio.sfx('explode');
+          if (pr.type === 'fire') G.Scorch.add(pr.pos.x, pr.pos.z);
           G.FX.burst(pr.pos.x, gh + 0.3, pr.pos.z, { n: 20, color: pr.type === 'fire' ? 0xff8833 : 0x9a8a6a, speed: 6, life: 0.6, size: 4 });
           // 爆風
           if (p.alive && G.dist2(p.pos.x, p.pos.z, pr.pos.x, pr.pos.z) < 2.8 * 2.8) {

@@ -53,6 +53,7 @@
     G.FX.init(scene);
     G.TelegraphRing.init(scene);
     G.SwingArc.init(scene);
+    G.Scorch.init(scene);
     G.Player.init(scene);
     G.Enemies.init(scene);
     G.NPCs.init(scene);
@@ -310,6 +311,14 @@
     }
     if (lift > 0) cy += lift;
 
+    // 木や岩が視線を遮るならカメラを手前へ寄せる
+    const occ = G.World.cameraOcclusion(p.pos.x, p.pos.z, cx, cz);
+    if (occ < 1) {
+      cx = p.pos.x + (cx - p.pos.x) * occ;
+      cz = p.pos.z + (cz - p.pos.z) * occ;
+      cy = eyeY + (cy - eyeY) * occ;
+    }
+
     // 画面揺れ
     trauma = Math.max(0, trauma - dt * 1.8);
     const sh = trauma * trauma * 0.5;
@@ -417,6 +426,7 @@
       }
       G.FX.update(dt);
       G.SwingArc.update(dt);
+      G.Scorch.update(dt);
       G.World.update(dt, G.Player.pos.x, G.Player.pos.z);
       updateCamera(dt);
       G.inCave = G.World.inCaveRegion(G.Player.pos.x, G.Player.pos.z);

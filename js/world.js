@@ -758,7 +758,8 @@
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
     }));
     glow.position.copy(crystal.position);
-    glow.scale.set(2.6, 2.6, 1);
+    glow.scale.set(1.6, 1.6, 1);
+    glow.material.opacity = 0.75;
     scene.add(glow);
     addStatic(x - 1.3, z, 0.45); addStatic(x + 1.3, z, 0.45);
     // 遠くからでも見える光の柱
@@ -1071,6 +1072,30 @@
       }
     }
     return { x, z };
+  };
+
+  /* カメラ視線を遮る木/岩があれば、カメラを何割まで寄せるべきかを返す (1=遮蔽なし) */
+  W.cameraOcclusion = function (ax, az, bx, bz) {
+    let occ = 1;
+    const dx = bx - ax, dz = bz - az;
+    const len2 = dx * dx + dz * dz;
+    if (len2 < 1) return 1;
+    const cx = Math.floor((ax + bx) / 2 / CHUNK), cz = Math.floor((az + bz) / 2 / CHUNK);
+    for (let j = -1; j <= 1; j++) {
+      for (let i = -1; i <= 1; i++) {
+        const ch = chunks.get(chunkKey(cx + i, cz + j));
+        if (!ch) continue;
+        for (const c of ch.colliders) {
+          if (c.r < 0.45) continue;
+          const t = G.clamp(((c.x - ax) * dx + (c.z - az) * dz) / len2, 0.15, 0.95);
+          const px = ax + dx * t, pz = az + dz * t;
+          const d2 = G.dist2(px, pz, c.x, c.z);
+          const rr = c.r * 0.85;
+          if (d2 < rr * rr) occ = Math.min(occ, Math.max(0.3, t - 0.08));
+        }
+      }
+    }
+    return occ;
   };
 
   /* ======================= 初期化 / 更新 ======================= */
