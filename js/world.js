@@ -1563,7 +1563,7 @@
     rainOn += (wantPrecip - rainOn) * G.damp(1.5, dt);
     const snowMode = snowy && weather <= 0.5;
     rainPts.material.color.set(snowMode ? 0xffffff : 0xaec8dc);
-    rainPts.material.size = snowMode ? 0.22 : 0.17;
+    rainPts.material.size = snowMode ? 0.26 : 0.42;
     rainPts.material.opacity = rainOn * (snowMode ? 0.85 : 0.7);
     if (rainOn > 0.02) {
       const pa = rainPts.geometry.attributes.position;

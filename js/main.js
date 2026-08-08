@@ -67,6 +67,10 @@
     // ダメージ時の画面フラッシュ
     flashEl = G.UI.el('div', 'flash', document.getElementById('ui'));
 
+    // 夜間の自機視認用フィルライト
+    G.playerLight = new THREE.PointLight(0xffe8c8, 0, 11);
+    scene.add(G.playerLight);
+
     // 初期チャンクを同期的に確保 (プレイヤー周辺)
     warmupChunks();
 
@@ -310,7 +314,14 @@
     const fx = Math.sin(C.yaw) * Math.cos(C.pitch);
     const fz = Math.cos(C.yaw) * Math.cos(C.pitch);
     const fy = Math.sin(C.pitch);
-    const dist = C.dist + (p.mounted ? 1.8 : 0) + (bigBoss ? 4.5 : 0);
+    let bossBonus = 0;
+    if (bigBoss) {
+      bossBonus = 4.5;
+      for (const b of G.Enemies.bosses) {
+        if (b.alive && b.engaged && (b.D.barH || 0) > 5) { bossBonus = 7; break; }
+      }
+    }
+    const dist = C.dist + (p.mounted ? 1.8 : 0) + bossBonus;
     let cx = p.pos.x - fx * dist;
     let cz = p.pos.z - fz * dist;
     let cy = p.pos.y + 1.6 + fy * dist;
@@ -453,6 +464,9 @@
       updateCamera(dt);
       G.inCave = G.World.inCaveRegion(G.Player.pos.x, G.Player.pos.z);
       G.Sky.update(dt, G.State.tod, G.State.weather, camera.position, G.inCave);
+      // 暗いほど自機フィルライトを強く
+      G.playerLight.position.set(G.Player.pos.x, G.Player.pos.y + 2.2, G.Player.pos.z);
+      G.playerLight.intensity = G.clamp((0.5 - G.Sky.lightLevel) * 1.6, 0, 0.65);
 
       // ダメージフラッシュ
       if (started) {
