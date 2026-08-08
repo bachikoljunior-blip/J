@@ -747,6 +747,11 @@
     const neck = new THREE.Group();
     const neckM = box(0.5, 0.5, 0.9, dark);
     neckM.position.set(0, 0.25, 0.4);
+    // 首の第二節 (前方へ伸ばし竜らしいS字シルエットに)
+    const neckM2 = box(0.44, 0.44, 0.8, dark);
+    neckM2.position.set(0, 0.45, 0.95);
+    neckM2.rotation.x = -0.3;
+    neck.add(neckM2);
     const headG = new THREE.Group();
     const headM = box(0.5, 0.45, 0.8, dark);
     const jaw = box(0.4, 0.15, 0.6, belly);
@@ -758,16 +763,17 @@
     eyeL.position.set(-0.2, 0.1, 0.3);
     const eyeR = eyeL.clone(); eyeR.position.x = 0.2;
     headG.add(headM, jaw, hornL, hornR, eyeL, eyeR);
-    headG.position.set(0, 0.6, 0.9);
+    headG.position.set(0, 0.72, 1.45);
     neck.add(neckM, headG);
     neck.position.set(0, 1.5, 0.9);
+    // 尻尾は6節、先細り+緩い垂れ下がり
     const tail = new THREE.Group();
-    for (let i = 0; i < 4; i++) {
-      const t = box(0.4 - i * 0.08, 0.3 - i * 0.05, 0.7, dark);
-      t.position.set(0, 0, -0.6 - i * 0.62);
+    for (let i = 0; i < 6; i++) {
+      const t = box(Math.max(0.13, 0.4 - i * 0.055), Math.max(0.1, 0.3 - i * 0.04), 0.7, dark);
+      t.position.set(0, -i * i * 0.022, -0.6 - i * 0.62);
       tail.add(t);
-      const spike = box(0.08, 0.3 - i * 0.04, 0.12, 0xd8cfa8);
-      spike.position.set(0, 0.25 - i * 0.03, -0.6 - i * 0.62);
+      const spike = box(0.08, Math.max(0.1, 0.3 - i * 0.035), 0.12, i % 2 ? 0x241a26 : 0x7a2430);
+      spike.position.set(0, 0.22 - i * i * 0.022, -0.6 - i * 0.62);
       tail.add(spike);
     }
     tail.position.set(0, 1.15, -0.9);
@@ -2313,7 +2319,7 @@
       type, mesh, dmg,
       pos: new THREE.Vector3(x, y, z),
       vel: dir.multiplyScalar(speed),
-      life: 0, maxLife: 4,
+      life: 0, maxLife: type === 'fire' ? 2.2 : 4,
       grav: type === 'rock' ? 6 : (type === 'arrow' ? 2 : 0)
     });
   };

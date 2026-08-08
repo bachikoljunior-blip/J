@@ -1494,8 +1494,8 @@
       clouds.push(s);
     }
 
-    // 雨
-    const RN = 500;
+    // 雨 (サイズはピクセル固定 — 距離減衰ありだと至近の粒が巨大クアッド化する)
+    const RN = 700;
     const rp = new Float32Array(RN * 3);
     rainVel = new Float32Array(RN);
     const rrnd = G.srand(55);
@@ -1508,7 +1508,8 @@
     const rgeo = new THREE.BufferGeometry();
     rgeo.setAttribute('position', new THREE.BufferAttribute(rp, 3));
     rainPts = new THREE.Points(rgeo, new THREE.PointsMaterial({
-      color: 0xbdd4e6, size: 0.3, transparent: true, opacity: 0, depthWrite: false, fog: false
+      color: 0xbdd4e6, size: 2.4, sizeAttenuation: false,
+      transparent: true, opacity: 0, depthWrite: false, fog: false
     }));
     rainPts.frustumCulled = false;
     scene.add(rainPts);
@@ -1630,10 +1631,12 @@
     const snowMode = snowy && weather <= 0.5;
     // 夜間は雨粒を明るく・不透明にして暗背景でも見えるようにする
     const darkF = 1 - G.clamp(s.hem * 1.7, 0, 1);
+    const pr = G.renderer ? G.renderer.getPixelRatio() : 1;
     rainPts.material.color.set(snowMode ? 0xffffff : 0xaec8dc);
     if (!snowMode) rainPts.material.color.lerp(_white, darkF * 0.85);
-    rainPts.material.size = snowMode ? 0.26 : 0.42 + darkF * 0.12;
-    rainPts.material.opacity = rainOn * (snowMode ? 0.85 : 0.7 + darkF * 0.25);
+    rainPts.material.size = (snowMode ? 3.2 : 2.4 + darkF * 0.8) * pr;
+    rainPts.material.opacity = rainOn < 0.06 ? 0 : rainOn * (snowMode ? 0.85 : 0.7 + darkF * 0.25);
+    rainPts.visible = rainOn > 0.06;
     if (rainOn > 0.02) {
       const pa = rainPts.geometry.attributes.position;
       const fall = snowMode ? 0.12 : 1;

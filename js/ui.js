@@ -495,6 +495,15 @@
       if (dx < 4 || dx > S - 4 || dz < 4 || dz > S - 4) return;
       ctx.beginPath(); ctx.arc(dx, dz, 1.6, 0, Math.PI * 2); ctx.fill();
     };
+    // 村人など友好NPCは緑 (赤=敵の誤認を防ぐ)
+    ctx.fillStyle = '#7fe37f';
+    for (const n of G.NPCs.list) {
+      const dx = (n.pos.x - p.pos.x) / view * S + S / 2;
+      const dz = (n.pos.z - p.pos.z) / view * S + S / 2;
+      if (dx < 4 || dx > S - 4 || dz < 4 || dz > S - 4) continue;
+      ctx.beginPath(); ctx.arc(dx, dz, 1.8, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = '#ff5a5a';
     for (const e of G.Enemies.list) drawEnemy(e);
     // ボスは白縁の大きな菱形で明示
     for (const b of G.Enemies.bosses) {
@@ -640,16 +649,21 @@
     bossName.textContent = b.name;
     bossWrap.style.display = 'block';
     if (isNew) {
-      // 登場演出: 通常トーストを消し、中央に大きく名前
+      // 登場演出: 通常トーストを消し、中央に大きく名前 (実時間で6秒保持)
       UI.clearToasts();
       const intro = el('div', 'bossintro', root, b.name);
-      setTimeout(() => { intro.classList.add('out'); }, 3200);
-      setTimeout(() => { intro.remove(); }, 4400);
+      setTimeout(() => { intro.classList.add('out'); }, 5600);
+      setTimeout(() => { intro.remove(); }, 7000);
+      // ボス戦中は操作ヘルプを隠して緊張感を保つ
+      const kh = hudEl.querySelector('.keyhelp');
+      if (kh) kh.style.display = 'none';
     }
   };
   UI.hideBoss = function () {
     curBoss = null;
     bossWrap.style.display = 'none';
+    const kh = hudEl.querySelector('.keyhelp');
+    if (kh && !G.isTouch) kh.style.display = '';
   };
 
   /* ---------- 会話 ---------- */
