@@ -636,6 +636,8 @@
   /* ---------- 会話 ---------- */
   UI.showDialogue = function (name, node) {
     G.paused = true;
+    const kh = hudEl.querySelector('.keyhelp');
+    if (kh) kh.style.display = 'none';
     dlgWrap.style.display = 'block';
     dlgName.textContent = name;
     renderNode(node);
@@ -691,6 +693,8 @@
     dlgWrap.style.display = 'none';
     G.paused = false;
     typing = null;
+    const kh = hudEl.querySelector('.keyhelp');
+    if (kh) kh.style.display = '';
   };
 
   /* ---------- 祠メニュー ---------- */

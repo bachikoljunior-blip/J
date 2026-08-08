@@ -1156,6 +1156,19 @@
       }
     }
 
+    // ボス体内への侵入を押し出す
+    for (const b of G.Enemies.bosses) {
+      if (!b.alive) continue;
+      const dx = P.pos.x - b.pos.x, dz = P.pos.z - b.pos.z;
+      const rr = b.radius + P.radius;
+      const d2 = dx * dx + dz * dz;
+      if (d2 < rr * rr && d2 > 0.0001) {
+        const d = Math.sqrt(d2);
+        P.pos.x += dx / d * (rr - d);
+        P.pos.z += dz / d * (rr - d);
+      }
+    }
+
     // 滑空判定 (空中で跳躍ボタン長押し)
     P.gliding = !P.grounded && P.vy < -0.5 && inp.held.jump &&
                 P.stamina > 1 && !P.mounted &&

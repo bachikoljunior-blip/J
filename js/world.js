@@ -181,7 +181,7 @@
 
   const BIOME_COL = {
     grass:  new THREE.Color(0x6ba14b),
-    grass2: new THREE.Color(0x8db85a),
+    grass2: new THREE.Color(0x81ab55),
     forest: new THREE.Color(0x4c8a3e),
     desert: new THREE.Color(0xd9c37e),
     rock:   new THREE.Color(0x8b8b90),
@@ -213,7 +213,15 @@
     return 1 - G.smoothstep(1.1, 2.6, Math.sqrt(best));
   }
   /* ny: 事前計算済みの法線Y (省略時は計算する) */
+  const CAVE_FLOOR = new THREE.Color(0x4e5462);
+  const CAVE_FLOOR2 = new THREE.Color(0x39404f);
   function groundColor(x, z, h, out, ny) {
+    if (W.inCaveRegion(x, z)) {
+      // 洞窟の床: 青灰のまだら
+      const m = G.fbm(x * 0.11, z * 0.11, 2) * 0.5 + 0.5;
+      out.copy(CAVE_FLOOR).lerp(CAVE_FLOOR2, m);
+      return out;
+    }
     const b = W.biomeAt(x, z, h);
     out.copy(BIOME_COL[b] || BIOME_COL.grass);
     const pb = pathBlend(x, z);
@@ -1226,7 +1234,7 @@
     [5.5, 0x2c3e6b, 0xc47b52, 0xff9a55, 0.3, 0.28],
     [7,  0x6a95c4, 0xf0d3a4, 0xffd9a0, 0.95, 0.5],
     [8.5, 0x4a86d0, 0xc8dcea, 0xfff0d4, 1.05, 0.62],
-    [12, 0x4a86d0, 0xbcd8e8, 0xfff2dd, 1.1, 0.7],
+    [12, 0x4a86d0, 0xbcd8e8, 0xfff2dd, 1.15, 0.6],
     [16, 0x4d82c2, 0xd6c9a2, 0xffe2b2, 1.0, 0.6],
     [17.5, 0x46639e, 0xe6a878, 0xffb070, 0.85, 0.48],
     [18.7, 0x3a4a80, 0xe08a55, 0xff8a4a, 0.6, 0.34],
@@ -1386,7 +1394,7 @@
     const rgeo = new THREE.BufferGeometry();
     rgeo.setAttribute('position', new THREE.BufferAttribute(rp, 3));
     rainPts = new THREE.Points(rgeo, new THREE.PointsMaterial({
-      color: 0xaec8dc, size: 0.17, transparent: true, opacity: 0, depthWrite: false, fog: false
+      color: 0xbdd4e6, size: 0.3, transparent: true, opacity: 0, depthWrite: false, fog: false
     }));
     rainPts.frustumCulled = false;
     scene.add(rainPts);
@@ -1433,8 +1441,12 @@
     // 天候で暗く
     const wDim = 1 - weather * 0.45;
     hemi.intensity = s.hem * wDim;
-    hemi.color.copy(cTop).lerp(_white, 0.5);
+    // 太陽が低いときは環境光も暖色に (朝夕の空気感)
+    const sunLow = G.smoothstep(0.55, 0.12, Math.abs(Math.sin(((tod - 6) / 12) * Math.PI))) *
+                   G.smoothstep(4.5, 6, tod) * (1 - G.smoothstep(19.5, 21, tod));
+    hemi.color.copy(cTop).lerp(_white, 0.5).lerp(cSun, sunLow * 0.55);
     hemi.groundColor.set(0x6a7a52);
+    hemi.groundColor.lerp(cSun, sunLow * 0.4);
     sun.intensity = s.dir * wDim;
     sun.color.copy(cSun);
 
@@ -1465,7 +1477,7 @@
 
     // 星
     const night = G.smoothstep(19.3, 21, tod) + (1 - G.smoothstep(4, 6, tod));
-    stars.material.opacity = G.clamp(night, 0, 1) * (1 - weather * 0.9) * 0.9;
+    stars.material.opacity = G.clamp(night, 0, 1) * G.clamp(1 - weather * 1.4, 0, 1) * 0.9;
     stars.position.set(cam.x, 0, cam.z);
 
     // 雲

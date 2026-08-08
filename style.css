@@ -150,7 +150,7 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 .bossbar {
   position: relative; height: 13px; border-radius: 3px; overflow: hidden;
-  background: rgba(8, 6, 8, 0.8); border: 1px solid rgba(220, 170, 140, 0.55);
+  background: rgba(30, 28, 32, 0.85); border: 1px solid rgba(245, 220, 200, 0.75);
   box-shadow: 0 2px 10px rgba(0,0,0,0.6);
 }
 .bossbar .chip {
@@ -159,7 +159,7 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 .bossbar .fill {
   position: absolute; inset: 0 auto 0 0; height: 100%;
-  background: linear-gradient(90deg, #7a1a22, #c94a3a);
+  background: linear-gradient(90deg, #b32b30, #ef6350);
 }
 
 /* ボス登場演出 */
