@@ -1465,10 +1465,30 @@
     return e;
   };
 
+  /* 「!」アグロマーカーの共有マテリアル */
+  let markMat = null;
+  function getMarkMat() {
+    if (markMat) return markMat;
+    const c = document.createElement('canvas');
+    c.width = 64; c.height = 64;
+    const x = c.getContext('2d');
+    x.font = 'bold 54px sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.lineWidth = 9; x.strokeStyle = '#fff';
+    x.strokeText('!', 32, 34);
+    x.fillStyle = '#ff3030';
+    x.fillText('!', 32, 34);
+    markMat = new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false
+    });
+    return markMat;
+  }
+
   E.damage = function (e, dmg, crit) {
     if (!e.alive) return;
     e.hp -= dmg;
     e.aggro = true;
+    e.hurtT = 0.3;
     G.UI.dmgNum(e.pos.x, e.pos.y + (e.T && e.T.barH ? e.T.barH - 0.2 : 1.6), e.pos.z, dmg, { crit });
     G.FX.burst(e.pos.x, e.pos.y + 1, e.pos.z, { n: crit ? 8 : 5, color: 0xffd24a, speed: 3.2, life: 0.28, size: 1.6 });
     G.FX.burst(e.pos.x, e.pos.y + 0.9, e.pos.z, { n: 1, color: 0xfff0c8, speed: 0.05, life: 0.15, size: 4.2, gravity: 0, drag: 0 });
@@ -1607,6 +1627,14 @@
     if (!e.aggro && p.alive && dist < T.aggroR) {
       e.aggro = true;
       e.cool = 0.4 + Math.random() * 0.5;
+      // 気づき演出: 頭上に「!」
+      e.aggroMarkT = 1.4;
+      if (!e.mark) {
+        e.mark = new THREE.Sprite(getMarkMat());
+        e.mark.scale.set(0.62, 0.88, 1);
+        e.mark.position.y = (T.barH || 1.6) + 0.55;
+        e.rig.group.add(e.mark);
+      }
     }
     if (e.aggro && (!p.alive || dist > T.aggroR * 2.6)) {
       e.aggro = false;
@@ -1697,6 +1725,15 @@
     e.moveAmt += (mv - e.moveAmt) * G.damp(8, dt);
     e.rig.group.position.copy(e.pos);
     e.rig.group.rotation.y = e.yaw;
+    // 被弾の仰け反り (hurtT が残る間だけ後傾)
+    if (e.hurtT) e.hurtT = Math.max(0, e.hurtT - dt);
+    e.rig.group.rotation.x = -((e.hurtT || 0) / 0.3) * 0.24;
+    // 「!」マーカーの寿命と浮遊
+    if (e.mark) {
+      if (e.aggroMarkT > 0) e.aggroMarkT -= dt;
+      e.mark.visible = e.aggroMarkT > 0;
+      if (e.mark.visible) e.mark.position.y = (T.barH || 1.6) + 0.55 + Math.sin(G.time * 6) * 0.06;
+    }
     e.rig.pose({
       state: e.state === 'windup' ? 'windup' : e.state,
       t: e.stateT, windup: T.windup, moveAmt: e.moveAmt, seed: e.seed,

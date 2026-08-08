@@ -216,6 +216,7 @@
   const CAVE_FLOOR = new THREE.Color(0x646b7c);
   const CAVE_FLOOR2 = new THREE.Color(0x4a5265);
   const FROST_COL = new THREE.Color(0xc8dce6);
+  const CHAR_COL = new THREE.Color(0x2e2824);
   function groundColor(x, z, h, out, ny) {
     if (W.inCaveRegion(x, z)) {
       // 洞窟の床: 青灰のまだら
@@ -252,6 +253,11 @@
     const fd = G.dist2(x, z, -430, -140);
     if (fd < 38 * 38) {
       out.lerp(FROST_COL, (1 - G.smoothstep(26, 38, Math.sqrt(fd))) * 0.88);
+    }
+    // 竜の頂の焦土
+    const dd = G.dist2(x, z, -40, -640);
+    if (dd < 34 * 34) {
+      out.lerp(CHAR_COL, (1 - G.smoothstep(20, 34, Math.sqrt(dd))) * 0.8);
     }
     // 高度の微妙な明暗
     const shade = 0.92 + G.hash2((x * 7) | 0, (z * 7) | 0) * 0.08;
