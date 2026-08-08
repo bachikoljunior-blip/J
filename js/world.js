@@ -1988,12 +1988,14 @@
     // ドーム (雨天のグレーは時間帯の明るさに追従して暗くなる)
     const gk = G.clamp(s.hem * 1.6, 0.18, 1);
     _grey.setRGB(0.545 * gk, 0.596 * gk, 0.647 * gk);
+    // 空の灰色化は残存降雨も含める (雨が降っている間は晴天の空にしない)
+    const wet2 = Math.max(weather, rainOn);
     const u = skyDome.material.uniforms;
-    u.uTop.value.copy(cTop).lerp(_grey, weather * 0.6);
-    u.uHor.value.copy(cHor).lerp(_grey, weather * 0.7);
+    u.uTop.value.copy(cTop).lerp(_grey, wet2 * 0.6);
+    u.uHor.value.copy(cHor).lerp(_grey, wet2 * 0.7);
     u.uSunDir.value.copy(_sunDir);
     u.uSunCol.value.copy(cSun);
-    u.uGlow.value = (0.25 + s.dir * 0.6) * (1 - weather * 0.8);
+    u.uGlow.value = (0.25 + s.dir * 0.6) * (1 - wet2 * 0.8);
     skyDome.position.set(cam.x, 0, cam.z);
 
     // 太陽・月
@@ -2020,6 +2022,7 @@
     const night = G.smoothstep(19.3, 21, tod) + (1 - G.smoothstep(4, 6, tod));
     const wetSky = Math.max(weather, rainOn);
     stars.material.opacity = G.clamp(night, 0, 1) * G.clamp(1 - wetSky * 1.4, 0, 1) * 0.9;
+    Sky.starsOp = stars.material.opacity;   // 検証用の証跡
     stars.position.set(cam.x, 0, cam.z);
 
     // 雲

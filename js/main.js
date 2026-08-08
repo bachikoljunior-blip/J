@@ -603,9 +603,9 @@
       });
     }
 
-    // 夜の蛍 (雨天以外)
+    // 夜の蛍 (雨天以外 — 残存降雨粒子がある間も出さない)
     const night = S.tod > 20 || S.tod < 4.5;
-    if (night && S.weather < 0.3 && Math.random() < dt * 2.2) {
+    if (night && S.weather < 0.3 && (G.Sky.rainAmt || 0) < 0.2 && Math.random() < dt * 2.2) {
       const p = G.Player.pos;
       const a = Math.random() * Math.PI * 2, d = 4 + Math.random() * 16;
       const x = p.x + Math.cos(a) * d, z = p.z + Math.sin(a) * d;
