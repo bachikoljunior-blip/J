@@ -428,7 +428,7 @@
 
   function decorDensity(biome) {
     switch (biome) {
-      case 'forest': return { pine: 16, oak: 10, rock: 2, grass: 1.0 };
+      case 'forest': return { pine: 24, oak: 15, rock: 2, dead: 3, grass: 1.0 };
       case 'grass':  return { pine: 1, oak: 2, rock: 2, grass: 1.0 };
       case 'desert': return { cactus: 4, rock: 3, grass: 0 };
       case 'rock':   return { rock: 5, dead: 2, grass: 0.15 };
@@ -702,7 +702,37 @@
   W.chestMeshes = {};       // id -> {group, lid, opened}
   W.shrineMeshes = {};      // id -> {crystal, baseY}
 
-  function addStatic(x, z, r) { W.staticColliders.push({ x, z, r }); }
+  function addStatic(x, z, r) { const c = { x, z, r }; W.staticColliders.push(c); return c; }
+
+  /* 視線を遮る建造物はカメラを寄せず、半透明フェードで抜く */
+  W.faders = [];
+  function addFader(mesh, x, z, r, topY) {
+    const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    W.faders.push({ mats, x, z, r, topY, cur: 1 });
+  }
+  W.updateFaders = function (dt, ax, az, bx, bz, ay, by) {
+    const dx = bx - ax, dz = bz - az;
+    const len2 = Math.max(dx * dx + dz * dz, 0.01);
+    const k = G.damp(9, dt);
+    for (const f of W.faders) {
+      let target = 1;
+      if (Math.abs(f.x - ax) < 60 && Math.abs(f.z - az) < 60) {
+        const t = G.clamp(((f.x - ax) * dx + (f.z - az) * dz) / len2, 0.02, 0.98);
+        const px = ax + dx * t, pz = az + dz * t;
+        const rr = f.r + 0.55;
+        // 水平に視線と交差し、かつ視線がその高さを越えていない場合のみフェード
+        if (G.dist2(px, pz, f.x, f.z) < rr * rr && ay + (by - ay) * t < f.topY + 0.4) target = 0.24;
+      }
+      if (target === 1 && f.cur > 0.995) continue;
+      f.cur += (target - f.cur) * k;
+      if (f.cur > 0.995) {
+        f.cur = 1;
+        for (const m of f.mats) { m.transparent = false; m.opacity = 1; m.depthWrite = true; }
+      } else {
+        for (const m of f.mats) { m.transparent = true; m.opacity = f.cur; m.depthWrite = f.cur > 0.55; }
+      }
+    }
+  };
 
   /* 建造物に影の設定を付与 */
   function shadowify(o) {
@@ -723,11 +753,13 @@
       { geo: doorG, m: M4(0, 0.9, d / 2 + 0.05), color: 0x6b4a2f }
     ]);
     wall.dispose(); roofG.dispose(); doorG.dispose();
-    const mesh = shadowify(new THREE.Mesh(geo, sharedTreeMat));
+    const mesh = shadowify(new THREE.Mesh(geo, sharedTreeMat.clone()));
     mesh.position.set(x, y, z);
     mesh.rotation.y = ry;
     scene.add(mesh);
-    addStatic(x, z, Math.max(w, d) * 0.62);
+    const cr = Math.max(w, d) * 0.62;
+    addStatic(x, z, cr).fade = true;
+    addFader(mesh, x, z, cr, y + hh + 2.6);
     return mesh;
   }
 
@@ -806,7 +838,8 @@
       pillar.rotation.y = rnd();
       if (broken) pillar.rotation.z = (rnd() - 0.5) * 0.16;
       scene.add(pillar);
-      addStatic(px, pz, 0.8);
+      addStatic(px, pz, 0.8).fade = true;
+      addFader(pillar, px, pz, 0.8, py + h);
     }
   }
 
@@ -819,10 +852,11 @@
       { geo: roof, m: M4(0, 12.3, 0), color: 0x7d4437 }
     ]);
     body.dispose(); roof.dispose();
-    const mesh = shadowify(new THREE.Mesh(geo, sharedTreeMat));
+    const mesh = shadowify(new THREE.Mesh(geo, sharedTreeMat.clone()));
     mesh.position.set(x, y, z);
     scene.add(mesh);
-    addStatic(x, z, 2.9);
+    addStatic(x, z, 2.9).fade = true;
+    addFader(mesh, x, z, 2.9, y + 13.6);
   }
 
   function buildChest(ch) {
@@ -1094,8 +1128,9 @@
     const dx = bx - ax, dz = bz - az;
     const len2 = dx * dx + dz * dz;
     if (len2 < 1) return 1;
-    // 建造物 (遺跡の柱・塔など)
+    // 建造物 (フェード対象はカメラを寄せず updateFaders が半透明化する)
     for (const c of W.staticColliders) {
+      if (c.fade) continue;
       if (Math.abs(c.x - ax) > 60 || Math.abs(c.z - az) > 60) continue;
       const t = G.clamp(((c.x - ax) * dx + (c.z - az) * dz) / len2, 0.15, 0.95);
       const px = ax + dx * t, pz = az + dz * t;

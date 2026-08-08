@@ -361,6 +361,9 @@
 
     camera.position.set(cx, cy, cz);
     camera.lookAt(p.pos.x, p.pos.y + 1.5, p.pos.z);
+
+    // 視線を遮る建造物 (柱・塔・家屋) を半透明化
+    G.World.updateFaders(dt, p.pos.x, p.pos.z, cx, cz, eyeY, cy);
   }
 
   /* ---------------- 時間 / 天候 ---------------- */
