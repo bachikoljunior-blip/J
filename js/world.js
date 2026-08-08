@@ -671,7 +671,8 @@
         varying float vDist;
         void main(){
           float k = smoothstep(-0.3, 0.4, vWave);
-          vec3 c = mix(uColor, uColor2 * uSunTint, k) * uLight;
+          vec3 base = uColor * mix(vec3(1.0), uSunTint, 0.55);
+          vec3 c = mix(base, uColor2 * uSunTint, k) * uLight;
           float f = smoothstep(uFogNear, uFogFar, vDist);
           c = mix(c, uFogColor, f);
           gl_FragColor = vec4(c, 0.82);
@@ -1530,9 +1531,10 @@
 
     // 霧 (雪原では少し濃い青に寄せて空と分離)
     _fogC.copy(cHor).lerp(_grey, weather * 0.7);
-    if (G.World.biomeAt(cam.x, cam.z) === 'snow') {
-      _fogC.multiplyScalar(0.88);
-      _fogC.b = Math.min(1, _fogC.b * 1.1);
+    const camGh = G.World.heightAt(cam.x, cam.z);
+    if (G.World.biomeAt(cam.x, cam.z) === 'snow' || camGh > 46) {
+      _fogC.multiplyScalar(0.85);
+      _fogC.b = Math.min(1, _fogC.b * 1.14);
     }
     scene.fog.color.copy(_fogC);
     const baseFar = G.Q.chunkRadius * 64 * 0.95;

@@ -438,8 +438,8 @@
           map: G.makeRadialTex(32, [[0, 'rgba(140,230,255,1)'], [1, 'rgba(80,190,255,0)']]),
           transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
         }));
-        gs.position.set(x, 0.06, 0.24);
-        gs.scale.set(0.3, 0.3, 1);
+        gs.position.set(x, 0.06, 0.34);
+        gs.scale.set(0.55, 0.55, 1);
         return gs;
       };
       head.add(mkGlow(-0.09), mkGlow(0.09));
@@ -1393,8 +1393,13 @@
     e.aggro = true;
     G.UI.dmgNum(e.pos.x, e.pos.y + (e.T && e.T.barH ? e.T.barH - 0.2 : 1.6), e.pos.z, dmg, { crit });
     G.FX.burst(e.pos.x, e.pos.y + 1, e.pos.z, { n: crit ? 8 : 5, color: 0xffd24a, speed: 3.2, life: 0.28, size: 1.6 });
-    G.FX.burst(e.pos.x, e.pos.y + 0.9, e.pos.z, { n: 1, color: 0xffffff, speed: 0.1, life: 0.14, size: 6, gravity: 0, drag: 0 });
+    G.FX.burst(e.pos.x, e.pos.y + 0.9, e.pos.z, { n: 1, color: 0xffffff, speed: 0.05, life: 0.18, size: 9, gravity: 0, drag: 0 });
     if (e.hp <= 0) { kill(e); return; }
+    // ノックバック (プレイヤーから離れる方向へ)
+    const kdx = e.pos.x - G.Player.pos.x, kdz = e.pos.z - G.Player.pos.z;
+    const kd = Math.hypot(kdx, kdz) || 1;
+    const c2 = G.World.collide(e.pos.x + kdx / kd * 0.4, e.pos.z + kdz / kd * 0.4, e.radius);
+    e.pos.x = c2.x; e.pos.z = c2.z;
     e.poiseC++;
     if (e.poiseC >= (e.T.poise || 1)) {
       e.poiseC = 0;

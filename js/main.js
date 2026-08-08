@@ -281,7 +281,13 @@
     G.Input.wheel = 0;
 
     // ロックオン時は対象へ向く (巨大ボスはカメラを引いて全身を映す)
-    const bigBoss = p.target && p.target.alive && p.target.D && (p.target.D.barH || 0) > 3;
+    let bigBoss = p.target && p.target.alive && p.target.D && (p.target.D.barH || 0) > 3;
+    if (!bigBoss) {
+      for (const b of G.Enemies.bosses) {
+        if (b.alive && b.engaged && (b.D.barH || 0) > 3 &&
+            G.dist2(p.pos.x, p.pos.z, b.pos.x, b.pos.z) < 22 * 22) { bigBoss = true; break; }
+      }
+    }
     if (p.target && p.target.alive) {
       const ty = Math.atan2(p.target.pos.x - p.pos.x, p.target.pos.z - p.pos.z);
       C.yaw = G.angLerp(C.yaw, ty, G.damp(4, dt));
