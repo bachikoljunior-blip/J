@@ -418,9 +418,9 @@
         map: G.makeRadialTex(48, [[0, 'rgba(120,210,255,0.55)'], [1, 'rgba(80,180,255,0)']]),
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
       }));
-      glow.position.set(0, 0.85, 0.75);
-      glow.scale.set(0.7, 0.7, 1);
-      glow.material.opacity = 0.6;
+      glow.position.set(0, 0.9, 0.55);
+      glow.scale.set(0.45, 0.45, 1);
+      glow.material.opacity = 0.4;
       g.add(glow);
     }
     const head = new THREE.Group();
@@ -744,10 +744,11 @@
       tail.add(spike);
     }
     tail.position.set(0, 1.15, -0.9);
-    // 背びれの棘列
-    for (let i = 0; i < 3; i++) {
-      const sp = box(0.1, 0.42 - i * 0.06, 0.16, 0xd8cfa8);
-      sp.position.set(0, 1.75, 0.5 - i * 0.55);
+    // 背びれの棘列 (シルエットが遠目で竜と読める高さ)
+    for (let i = 0; i < 4; i++) {
+      const sp = box(0.14, 0.7 - i * 0.08, 0.2, 0xe4dcb4);
+      sp.position.set(0, 1.95, 0.65 - i * 0.5);
+      sp.rotation.x = -0.25;
       g.add(sp);
     }
     const mkWing = (side) => {
@@ -1370,7 +1371,7 @@
   function buildRig(type, T) {
     switch (T.rigFn) {
       case 'wolf': return G.Rigs.wolf({ scale: T.scale });
-      case 'goblin': return G.Rigs.humanoid({ scale: T.scale, skin: 0xb08d6a, hair: 0x3a4a2a, cloth: 0x7a4a3a, cloth2: 0x4a2f24, weapon: 'club' });
+      case 'goblin': return G.Rigs.humanoid({ scale: T.scale, skin: 0x4f8a72, hair: 0x223a30, cloth: 0x9a3a2e, cloth2: 0x5a221c, weapon: 'club' });
       case 'skeleton': return G.Rigs.humanoid({ scale: T.scale, skin: 0xd8d4c8, cloth: 0xb5b0a3, cloth2: 0x8a867c, skull: true, weapon: type === 'nightwisp' ? 'sword' : 'bow' });
       case 'golemling': return G.Rigs.golem({ scale: T.scale });
       case 'scorpion': return G.Rigs.scorpion({ scale: T.scale });
@@ -1817,6 +1818,15 @@
     const dist = G.dist(p.pos.x, p.pos.z, b.pos.x, b.pos.z);
     const toP = Math.atan2(p.pos.x - b.pos.x, p.pos.z - b.pos.z);
     const distHome = G.dist(b.pos.x, b.pos.z, D.x, D.z);
+
+    // 絶対リーシュ: 縄張りを大きく離れたら即座に帰還 (越境防止)
+    if (distHome > D.arenaR * 2) {
+      b.pos.set(D.x, G.World.heightAt(D.x, D.z), D.z);
+      b.hp = b.maxHp;
+      b.engaged = false;
+      b.state = 'idle'; b.stateT = 0;
+      G.events.emit('bossDisengage');
+    }
 
     // 交戦開始/離脱
     if (!b.engaged && p.alive && dist < 26) {
