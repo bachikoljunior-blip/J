@@ -952,8 +952,8 @@
     const pt = new THREE.PointLight(0x6699dd, 1.1, 70);
     pt.position.set(cx, 66, cz);
     scene.add(pt);
-    const pt2 = new THREE.PointLight(0x9db8e0, 2.2, 55);
-    pt2.position.set(cx, 63.5, 1170);
+    const pt2 = new THREE.PointLight(0xffe0b0, 2.6, 42);
+    pt2.position.set(cx, 62.5, 1164);
     scene.add(pt2);
     // 出口の枠
     const arch = G.mergeGeo([
@@ -1466,8 +1466,8 @@
       sun.intensity = 0.02;
       _fogC.set(0x0b0f1c);
       scene.fog.color.copy(_fogC);
-      scene.fog.near = 8;
-      scene.fog.far = 66;
+      scene.fog.near = 10;
+      scene.fog.far = 78;
       if (scene.background) scene.background.copy(_fogC);
       rainPts.material.opacity = 0;
       const lightC = 0.52;

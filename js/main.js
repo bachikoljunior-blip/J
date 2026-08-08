@@ -325,6 +325,11 @@
       cy = eyeY + (cy - eyeY) * occ;
     }
 
+    // カメラの水没防止
+    if (p.pos.y > G.World.WATER_Y - 0.2 && cy < G.World.WATER_Y + 0.5) {
+      cy = G.World.WATER_Y + 0.5;
+    }
+
     // 画面揺れ
     trauma = Math.max(0, trauma - dt * 1.8);
     const sh = trauma * trauma * 0.5;

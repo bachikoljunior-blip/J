@@ -525,7 +525,7 @@
       if (dmgPool.length > 40) { }
     }
     d.active = true; d.t = 0;
-    d.x = x + (Math.random() - 0.5) * 0.7; d.y = y; d.z = z;
+    d.x = x + (Math.random() - 0.5) * 1.6; d.y = y + Math.random() * 0.5; d.z = z;
     d.eln.textContent = n;
     d.eln.className = 'dmgnum' + (opts.crit ? ' crit' : '') + (opts.player ? ' onplayer' : '');
     d.eln.style.display = 'block';

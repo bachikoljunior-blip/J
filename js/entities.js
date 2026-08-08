@@ -1661,7 +1661,7 @@
 
   const DEFS = {
     fenrir: {
-      name: '白狼王フェンリル', hp: 380, atk: 22, speed: 7.2, xp: 300, gold: 250,
+      name: '白狼王フェンリル', hp: 300, atk: 22, speed: 7.2, xp: 300, gold: 250,
       x: -430, z: -140, arenaR: 34, radius: 1.3, pushR: 2.1, barH: 3.4,
       build: () => G.Rigs.wolf({ scale: 2.9, fur: 0xd8d8e0, snout: 0xb8b8c2, eye: 0x44ddff, mane: true })
     },
