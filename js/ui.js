@@ -602,8 +602,8 @@
           b.addEventListener('pointerdown', ev => {
             ev.stopPropagation();
             G.Audio.sfx('ui');
-            if (op.action) op.action();
             if (op.closeText) {
+              if (op.action) op.action();
               dlgOpts.innerHTML = '';
               typeText(op.closeText);
               setTimeout(() => {
@@ -611,9 +611,12 @@
                 c.addEventListener('pointerdown', e2 => { e2.stopPropagation(); UI.closeDialogue(); });
               }, 350);
             } else if (op.next) {
+              if (op.action) op.action();
               renderNode(op.next);
             } else {
+              // 会話を閉じてからアクション (商店などが paused を管理できるように)
               UI.closeDialogue();
+              if (op.action) op.action();
             }
           });
         }
