@@ -732,7 +732,9 @@
         trackerMark = { x: l.mx, z: l.mz };
         dist = ' <span class="tdist"></span>';
       }
-      return `<div class="tline ${l.main ? 'main' : ''} ${l.ready ? 'ready' : ''}">${l.line}${dist}</div>`;
+      // 先頭クエストは名前だけでなく「今やること」(desc) を添えて目標を明示
+      const sub = (i === 0 && l.desc) ? `<div class="tsub">${l.desc}</div>` : '';
+      return `<div class="tline ${l.main ? 'main' : ''} ${l.ready ? 'ready' : ''}">${l.line}${dist}${sub}</div>`;
     }).join('');
   };
   let tdistT = 0;

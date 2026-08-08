@@ -26,6 +26,30 @@
     return t;
   };
 
+  /* 月ディスク: 実体円盤+海(暗斑)+縁の減光。ぼやけた光球ではなく「月」と読める形 */
+  G.makeMoonTex = function (size) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const g = c.getContext('2d');
+    const h = size / 2, r = h * 0.86;
+    g.beginPath(); g.arc(h, h, r, 0, Math.PI * 2);
+    g.fillStyle = '#dfe7f4'; g.fill();
+    g.save();
+    g.beginPath(); g.arc(h, h, r, 0, Math.PI * 2); g.clip();
+    g.fillStyle = 'rgba(168,182,205,0.55)';
+    const maria = [[-0.28, -0.22, 0.3], [0.18, -0.05, 0.24], [-0.05, 0.3, 0.2], [0.32, 0.28, 0.13], [-0.38, 0.12, 0.11]];
+    for (const [mx, my, mr] of maria) {
+      g.beginPath(); g.arc(h + mx * r, h + my * r, mr * r, 0, Math.PI * 2); g.fill();
+    }
+    const sh = g.createRadialGradient(h - r * 0.3, h - r * 0.3, r * 0.2, h, h, r);
+    sh.addColorStop(0, 'rgba(0,0,0,0)');
+    sh.addColorStop(0.75, 'rgba(30,40,70,0.08)');
+    sh.addColorStop(1, 'rgba(30,40,70,0.4)');
+    g.fillStyle = sh; g.fillRect(0, 0, size, size);
+    g.restore();
+    return new THREE.CanvasTexture(c);
+  };
+
   /* ======================= ランドマーク定義 ======================= */
   /* y: その地点の固定標高。r: 完全平坦半径, R: ブレンド終端半径 */
   W.landmarks = [
@@ -1502,7 +1526,7 @@
  * ========================================================================== */
 (function () {
   const Sky = G.Sky = {};
-  let scene, hemi, sun, skyDome, sunSpr, sunHalo, moonSpr, stars, clouds = [];
+  let scene, hemi, sun, skyDome, sunSpr, sunHalo, moonSpr, moonHalo, stars, clouds = [];
   let rainPts = null, rainVel = null, rainPos = null, rainN = 0, rainOn = 0;
 
   /* 時刻キーフレーム: [時, 天頂色, 地平色, 太陽色, 直射光強度, 半球光強度] */
@@ -1612,11 +1636,19 @@
     sunHalo.scale.set(150, 150, 1);
     scene.add(sunHalo);
     moonSpr = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: G.makeRadialTex(128, [[0, 'rgba(230,238,255,1)'], [0.18, 'rgba(210,225,255,0.85)'], [0.3, 'rgba(190,210,255,0.2)'], [1, 'rgba(180,200,255,0)']]),
+      map: G.makeMoonTex(128),
+      transparent: true, depthWrite: false, fog: false
+    }));
+    moonSpr.scale.set(48, 48, 1);
+    scene.add(moonSpr);
+    moonHalo = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: G.makeRadialTex(128, [[0, 'rgba(190,210,255,0.3)'], [1, 'rgba(180,200,255,0)']]),
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
     }));
-    moonSpr.scale.set(70, 70, 1);
-    scene.add(moonSpr);
+    moonHalo.scale.set(95, 95, 1);
+    scene.add(moonHalo);
+    // 計測ハーネスから位置・不透明度を検分するための参照 (デバッグ用)
+    Sky._spr = { sunSpr, sunHalo, moonSpr, moonHalo };
 
     // 星
     const N = 450, sp = [];
@@ -1714,6 +1746,7 @@
     sunSpr.visible = skyVisible;
     sunHalo.visible = skyVisible;
     moonSpr.visible = skyVisible;
+    moonHalo.visible = skyVisible;
     stars.visible = skyVisible;
     for (const c of clouds) c.visible = skyVisible;
     if (inCave) {
@@ -1786,8 +1819,17 @@
     sunHalo.position.copy(sunSpr.position);
     sunHalo.material.opacity = sunSpr.material.opacity * 0.8;
     _moonDir.copy(_sunDir).negate();
+    const moonRawY = _moonDir.y;   // 不透明度は実軌道の高さで決める (低空クランプ前)
+    // 月は天頂まで上げず低空の弧に留める (通常カメラの仰角で画面に入る高さ。
+    // 実軌道どおり真夜中に天頂へ置くと、誰の目にも触れないまま夜が終わる)
+    if (_moonDir.y > 0.42) {
+      const hs = Math.sqrt((1 - 0.42 * 0.42) / Math.max(1e-4, _moonDir.x * _moonDir.x + _moonDir.z * _moonDir.z));
+      _moonDir.x *= hs; _moonDir.z *= hs; _moonDir.y = 0.42;
+    }
     moonSpr.position.copy(_moonDir).multiplyScalar(525).add(_camXZ);
-    moonSpr.material.opacity = G.clamp(_moonDir.y + 0.1, 0, 0.9) * (1 - weather * 0.85);
+    moonSpr.material.opacity = G.clamp(moonRawY * 1.4 + 0.1, 0, 0.95) * (1 - weather * 0.85);
+    moonHalo.position.copy(moonSpr.position);
+    moonHalo.material.opacity = moonSpr.material.opacity * 0.4;
 
     // 星
     const night = G.smoothstep(19.3, 21, tod) + (1 - G.smoothstep(4, 6, tod));

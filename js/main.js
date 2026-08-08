@@ -504,10 +504,12 @@
       const a = Math.random() * Math.PI * 2, d = 4 + Math.random() * 16;
       const x = p.x + Math.cos(a) * d, z = p.z + Math.sin(a) * d;
       const h = G.World.heightAt(x, z);
-      if (h > G.World.WATER_Y) {
+      // カメラ至近の加算スプライトは画面全体を覆う巨大グローになるため湧かせない
+      const cp = G.Camera.cam ? G.Camera.cam.position : p;
+      if (h > G.World.WATER_Y && G.dist2(x, z, cp.x, cp.z) > 6 * 6) {
         G.FX.burst(x, h + 0.6 + Math.random() * 1.2, z, {
           n: 1, color: 0xaaffcc, speed: 0.4, up: 0.35, gravity: -0.15,
-          life: 2.6, size: 1.6, drag: 0.4, spread: 1
+          life: 2.6, size: 1.3, drag: 0.4, spread: 1
         });
       }
     }

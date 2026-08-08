@@ -118,6 +118,9 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 .tline.main { border-left-color: #ffd35a; color: #ffe9b0; }
 .tline.ready { border-left-color: #7ec95e; color: #c9f0b0; }
+.tsub { font-size: 10.5px; color: #a9b6c6; font-weight: 400; margin-top: 1px; }
+.tline.main .tsub { color: #d8c58f; }
+.tline.ready .tsub { color: #a8d890; }
 
 /* トースト (左サイド、トラッカーの下) */
 .toasts {
@@ -282,7 +285,8 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 .dlgtext { font-size: 14px; line-height: 1.75; color: #e8f0f8; min-height: 0; overflow-y: auto; flex: 1 1 auto; }
 .dlgopts { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
 /* 会話中は探索系HUDを沈めて話者に集中させる */
-.hud.dlgmode .mmwrap, .hud.dlgmode .tracker, .hud.dlgmode .gold { opacity: 0.12; transition: opacity 0.3s; }
+.mmwrap, .tracker, .gold { transition: opacity 0.3s, visibility 0s; }
+.hud.dlgmode .mmwrap, .hud.dlgmode .tracker, .hud.dlgmode .gold { opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0s 0.3s; }
 .dlgopt {
   padding: 9px 14px; border-radius: 8px; background: rgba(50, 66, 92, 0.55);
   border: 1px solid rgba(160, 180, 210, 0.3); font-size: 14px; cursor: pointer;

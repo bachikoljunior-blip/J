@@ -220,6 +220,7 @@
       // 目標地点 (ready なら村へ報告)
       const mk = st.status === 'ready' ? { x: 0, z: 0 } : (D.mark || null);
       out.push({ id, line, main: !!D.main, ready: st.status === 'ready',
+                 desc: st.status === 'ready' ? '依頼主に報告しよう' : D.desc,
                  mx: mk ? mk.x : null, mz: mk ? mk.z : null });
     }
     out.sort((a, b) => (b.main ? 1 : 0) - (a.main ? 1 : 0));
