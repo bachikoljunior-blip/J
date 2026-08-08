@@ -642,15 +642,32 @@
     let used = 0;
     const p = G.Player;
     const placedBars = [];
+    // ロック対象を最優先 (常に頭上固定)、次いで近距離順。
+    // 重なり回避のずらしは最大2段までとし、それ以上は描かない
+    // (ずらし続けると所有者から離れた「浮いたバー」になる)
+    const ents = [];
     for (const e of G.Enemies.list) {
       if (!e.alive || !e.aggro) continue;
-      if (G.dist2(p.pos.x, p.pos.z, e.pos.x, e.pos.z) > 40 * 40) continue;
+      const d2 = G.dist2(p.pos.x, p.pos.z, e.pos.x, e.pos.z);
+      if (d2 > 40 * 40) continue;
+      ents.push({ e, d2, locked: p.target === e });
+    }
+    ents.sort((a, b) => (b.locked ? 1 : 0) - (a.locked ? 1 : 0) || a.d2 - b.d2);
+    for (const { e, locked } of ents) {
       const pr = UI.project(e.pos.x, e.pos.y + (e.T.barH || 1.9), e.pos.z);
       if (!pr.visible) continue;
-      // 密集時はスクリーン空間で縦にずらして重なりを避ける
-      for (let k = 0; k < placedBars.length; k++) {
-        const q = placedBars[k];
-        if (Math.abs(pr.x - q.x) < 58 && Math.abs(pr.y - q.y) < 10) pr.y = q.y - 11;
+      if (!locked) {
+        let ok = false;
+        for (let step = 0; step < 3 && !ok; step++) {
+          const y = pr.y - step * 11;
+          let hit = false;
+          for (let k = 0; k < placedBars.length; k++) {
+            const q = placedBars[k];
+            if (Math.abs(pr.x - q.x) < 58 && Math.abs(y - q.y) < 10) { hit = true; break; }
+          }
+          if (!hit) { pr.y = y; ok = true; }
+        }
+        if (!ok) continue;
       }
       placedBars.push({ x: pr.x, y: pr.y });
       let b = ebarPool[used];

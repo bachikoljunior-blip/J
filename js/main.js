@@ -317,7 +317,9 @@
     }
   }
 
-  /* 会話用の肩越しカメラ (会話中はカメラ更新が止まるので一度だけ配置する) */
+  /* 会話用の肩越しカメラ。切替はスナップではなく0.55秒のイーズで寄る */
+  let dlgTween = null, camBlend = 0;
+  const _lookTmp = new THREE.Vector3();
   function dialogueCam(npc) {
     const p = G.Player.pos, n = npc.pos;
     const mx = (p.x + n.x) / 2, mz = (p.z + n.z) / 2;
@@ -329,14 +331,22 @@
     let cy = Math.max(p.y, n.y) + 1.9;
     const gh = G.World.heightAt(cx, cz);
     if (cy < gh + 0.6) cy = gh + 0.6;
-    camera.position.set(cx, cy, cz);
-    camera.lookAt(mx, Math.max(p.y, n.y) + 1.35, mz);
+    dlgTween = {
+      k: 0,
+      p0: camera.position.clone(),
+      p1: new THREE.Vector3(cx, cy, cz),
+      l0: new THREE.Vector3(p.x, p.y + 1.5, p.z),
+      l1: new THREE.Vector3(mx, Math.max(p.y, n.y) + 1.35, mz)
+    };
   }
+  G.events.on('dialogueClosed', () => { dlgTween = null; camBlend = 0.45; });
 
   /* ---------------- カメラ ---------------- */
+  const _lastCam = new THREE.Vector3();
   function updateCamera(dt) {
     const C = G.Camera;
     const p = G.Player;
+    _lastCam.copy(camera.position);
     if (!started) {
       // タイトル画面: 村をゆっくり旋回
       C.yaw += dt * 0.06;
@@ -480,6 +490,11 @@
     framePull = G.clamp(framePull + (overAng > 0 ? overAng * 26 : -6) * dt, 0, 12);
 
     camera.position.set(cx, cy, cz);
+    // 会話終了直後は前フレーム位置からなだらかに復帰 (スナップバック防止)
+    if (camBlend > 0) {
+      camBlend -= dt;
+      camera.position.lerp(_lastCam, G.clamp(camBlend / 0.45, 0, 1) * 0.85);
+    }
     camera.lookAt(p.pos.x, p.pos.y + 1.5 + lookUp, p.pos.z);
 
     // 視線を遮る建造物 (柱・塔・家屋) を半透明化
@@ -589,6 +604,15 @@
     if (hitstop > 0) {
       hitstop -= dt;
       dt *= 0.12;
+    }
+
+    // 会話カメラのトゥイーン (会話中は G.paused で通常カメラが止まるためここで駆動)
+    if (G.paused && dlgTween) {
+      dlgTween.k = Math.min(1, dlgTween.k + dt / 0.55);
+      const e = 1 - Math.pow(1 - dlgTween.k, 3);   // easeOutCubic
+      camera.position.lerpVectors(dlgTween.p0, dlgTween.p1, e);
+      _lookTmp.lerpVectors(dlgTween.l0, dlgTween.l1, e);
+      camera.lookAt(_lookTmp.x, _lookTmp.y, _lookTmp.z);
     }
 
     const _t0 = performance.now();
