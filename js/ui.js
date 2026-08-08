@@ -355,12 +355,15 @@
   };
 
   UI.showIntro = function () {
+    UI.setHudVisible(false);
     introEl = el('div', 'intro', root,
+      '<div class="iname">E L D R I A</div>' +
       '<div class="itext">霧深き大地エルドリア。<br><br>北の頂に黒竜ヴァルドレクが目覚めしとき、<br>大地は魔物で溢れ、人々は小さな村に身を寄せた。<br><br>――旅人よ。風がお前を呼んでいる。</div>');
     const skip = el('div', 'bigbtn', introEl, '旅を始める');
     skip.addEventListener('pointerdown', e => {
       e.stopPropagation();
       introEl.remove(); introEl = null;
+      UI.setHudVisible(true);
       G.Audio.sfx('uiOpen');
     });
   };
@@ -404,7 +407,7 @@
     if (promptT <= 0) {
       promptT = 0.15;
       curInteract = G.findInteractable();
-      if (curInteract && p.alive) {
+      if (curInteract && p.alive && !G.paused) {
         promptEl.style.display = 'block';
         promptEl.innerHTML = (G.isTouch ? '' : '<span class="pkey">E</span> ') + curInteract.label;
       } else {
@@ -631,7 +634,6 @@
   };
 
   /* ---------- 会話 ---------- */
-  let dlgTyping = null;
   UI.showDialogue = function (name, node) {
     G.paused = true;
     dlgWrap.style.display = 'block';
@@ -639,9 +641,7 @@
     renderNode(node);
     function renderNode(nd) {
       dlgOpts.innerHTML = '';
-      typeText(nd.text);
-      // 選択肢はテキスト表示後に出す
-      setTimeout(() => {
+      typeText(nd.text, () => {
         for (const op of nd.options) {
           const b = el('div', 'dlgopt', dlgOpts, op.label);
           b.addEventListener('pointerdown', ev => {
@@ -650,11 +650,10 @@
             if (op.closeText) {
               if (op.action) op.action();
               dlgOpts.innerHTML = '';
-              typeText(op.closeText);
-              setTimeout(() => {
+              typeText(op.closeText, () => {
                 const c = el('div', 'dlgopt', dlgOpts, '（会話を終える）');
                 c.addEventListener('pointerdown', e2 => { e2.stopPropagation(); UI.closeDialogue(); });
-              }, 350);
+              });
             } else if (op.next) {
               if (op.action) op.action();
               renderNode(op.next);
@@ -665,23 +664,33 @@
             }
           });
         }
-      }, 260);
+      });
     }
   };
-  function typeText(text) {
-    if (dlgTyping) clearInterval(dlgTyping);
+  /* ゲームループ (dt) 駆動のタイプライター — タイマースロットルの影響を受けない */
+  let typing = null;   // {text, i, done}
+  function typeText(text, done) {
+    typing = { text, i: 0, done };
     dlgText.textContent = '';
-    let i = 0;
-    dlgTyping = setInterval(() => {
-      i += 2;
-      dlgText.textContent = text.slice(0, i);
-      if (i >= text.length) { clearInterval(dlgTyping); dlgTyping = null; }
-    }, 18);
+    // タップで全文表示スキップ
+    dlgText.onpointerdown = e => { e.stopPropagation(); finishTyping(); };
   }
+  function finishTyping() {
+    if (!typing) return;
+    const t = typing; typing = null;
+    dlgText.textContent = t.text;
+    if (t.done) t.done();
+  }
+  UI.updateTyping = function (dt) {
+    if (!typing) return;
+    typing.i += dt * 110;                      // 110文字/秒
+    if (typing.i >= typing.text.length) { finishTyping(); return; }
+    dlgText.textContent = typing.text.slice(0, typing.i | 0);
+  };
   UI.closeDialogue = function () {
     dlgWrap.style.display = 'none';
     G.paused = false;
-    if (dlgTyping) { clearInterval(dlgTyping); dlgTyping = null; }
+    typing = null;
   };
 
   /* ---------- 祠メニュー ---------- */

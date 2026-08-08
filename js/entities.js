@@ -809,6 +809,48 @@
   };
 })();
 
+/* ======================= 剣筋トレイル ======================= */
+(function () {
+  const SA = G.SwingArc = {};
+  let scene;
+  const pool = [];
+  SA.init = function (sc) {
+    scene = sc;
+    const sector = new THREE.RingGeometry(1.1, 2.3, 18, 1, -1.2, 2.4);
+    const full = new THREE.RingGeometry(1.2, 2.9, 24);
+    for (let i = 0; i < 3; i++) {
+      const m = new THREE.Mesh(i === 2 ? full : sector, new THREE.MeshBasicMaterial({
+        color: 0xcfe8ff, transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+      }));
+      m.rotation.x = -Math.PI / 2;
+      m.visible = false;
+      m.renderOrder = 3;
+      scene.add(m);
+      pool.push({ mesh: m, t: 1 });
+    }
+  };
+  /* kind: 0=弱 1=強 2=回転 */
+  SA.show = function (x, y, z, yaw, kind) {
+    const p = pool[kind === 2 ? 2 : (pool[0].t < 1 ? 1 : 0)];
+    p.t = 0;
+    p.mesh.visible = true;
+    p.mesh.position.set(x, y + 1.05, z);
+    p.mesh.rotation.z = -yaw + Math.PI / 2 - 1.2;
+    p.mesh.material.color.set(kind === 1 ? 0xffd27a : kind === 2 ? 0xa8ffd0 : 0xcfe8ff);
+    const s = kind === 1 ? 1.2 : 1;
+    p.mesh.scale.set(s, s, s);
+  };
+  SA.update = function (dt) {
+    for (const p of pool) {
+      if (p.t >= 1) { p.mesh.visible = false; continue; }
+      p.t += dt * 6.5;
+      p.mesh.material.opacity = Math.max(0, 0.55 * (1 - p.t));
+      if (p.t >= 1) p.mesh.visible = false;
+    }
+  };
+})();
+
 /* ======================= アクター共通 ======================= */
 (function () {
   G.Actors = {};
@@ -1104,6 +1146,7 @@
       if (lunge) G.Actors.groundMove(P, Math.sin(P.yaw) * lunge, Math.cos(P.yaw) * lunge, dt);
       if (!P.atkDone && P.atkT >= (P.spin ? 0.5 : P.heavy ? 0.55 : 0.45)) {
         P.atkDone = true;
+        G.SwingArc.show(P.pos.x, P.pos.y, P.pos.z, P.yaw, P.spin ? 2 : P.heavy ? 1 : 0);
         doAttackHit();
       }
       if (P.atkT >= 1) {

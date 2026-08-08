@@ -52,6 +52,7 @@
     G.Sky.init(scene);
     G.FX.init(scene);
     G.TelegraphRing.init(scene);
+    G.SwingArc.init(scene);
     G.Player.init(scene);
     G.Enemies.init(scene);
     G.NPCs.init(scene);
@@ -114,6 +115,8 @@
 
   /* ---------------- イベント ---------------- */
   G.events.on('shake', v => { trauma = Math.min(1, trauma + v); });
+  let bossCine = 0, cineBoss = null;
+  G.events.on('bossEngage', b => { bossCine = 2.1; cineBoss = b; });
   G.events.on('hitstop', v => { hitstop = Math.max(hitstop, v); });
   G.events.on('gameClear', () => { G.Save.save(); });
 
@@ -249,6 +252,24 @@
       const cy = Math.max(G.World.heightAt(cx, cz) + 2.5, p.pos.y + 5);
       camera.position.set(cx, cy, cz);
       camera.lookAt(p.pos.x, p.pos.y + 2, p.pos.z);
+      return;
+    }
+    // ボス遭遇: 2秒だけ全身を映すカメラ
+    if (bossCine > 0 && cineBoss && cineBoss.alive) {
+      bossCine -= dt;
+      const b = cineBoss;
+      const dx = p.pos.x - b.pos.x, dz = p.pos.z - b.pos.z;
+      const d = Math.hypot(dx, dz) || 1;
+      const back = b.radius * 3 + 9;
+      const h = (b.D.barH || 3);
+      camera.position.set(
+        b.pos.x + (dx / d) * back,
+        b.pos.y + h * 1.15 + 1.5,
+        b.pos.z + (dz / d) * back
+      );
+      camera.lookAt(b.pos.x, b.pos.y + h * 0.55, b.pos.z);
+      if (bossCine <= 0) cineBoss = null;
+      G.Input.camDX = 0; G.Input.camDY = 0;
       return;
     }
     C.yaw -= G.Input.camDX;
@@ -395,6 +416,7 @@
         G.Pickups.update(dt);
       }
       G.FX.update(dt);
+      G.SwingArc.update(dt);
       G.World.update(dt, G.Player.pos.x, G.Player.pos.z);
       updateCamera(dt);
       G.inCave = G.World.inCaveRegion(G.Player.pos.x, G.Player.pos.z);
@@ -419,6 +441,7 @@
 
     updateMusic(dt);
     updateAmbient(dt);
+    G.UI.updateTyping(dt);   // 会話送りはポーズ中も進める
     if (started) G.UI.update(dt);
     const _t1 = performance.now();
     renderer.render(scene, camera);

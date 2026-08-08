@@ -135,7 +135,7 @@
   const Q = G.Quests = {};
 
   const DEFS = {
-    main1: { name: '目覚めの村',   desc: '長老ハルドと話す', main: true },
+    main1: { name: '目覚めの村',   desc: '長老ハルドと話す', main: true, mark: { x: 2, z: -17 } },
     main2: { name: '森の脅威',     desc: '西の森の白狼王フェンリルを討つ', main: true, boss: 'fenrir',
              reward: { gold: 200, items: { sword_fang: 1 } }, mark: { x: -430, z: -140 } },
     main3: { name: '遺跡の巨像',   desc: '東の遺跡に眠る巨像を倒す', main: true, boss: 'golem',

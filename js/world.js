@@ -410,7 +410,7 @@
 
   function decorDensity(biome) {
     switch (biome) {
-      case 'forest': return { pine: 10, oak: 7, rock: 2, grass: 1.0 };
+      case 'forest': return { pine: 16, oak: 10, rock: 2, grass: 1.0 };
       case 'grass':  return { pine: 1, oak: 2, rock: 2, grass: 1.0 };
       case 'desert': return { cactus: 4, rock: 3, grass: 0 };
       case 'rock':   return { rock: 5, dead: 2, grass: 0.15 };
@@ -1491,13 +1491,20 @@
     if (scene.background) scene.background.copy(_fogC);
     else scene.background = _fogC.clone();
 
-    // 雨パーティクル
-    rainOn += ((weather > 0.5 ? 1 : 0) - rainOn) * G.damp(1.5, dt);
-    rainPts.material.opacity = rainOn * 0.7;
+    // 雨 / 雪パーティクル (雪原バイオームでは常時ゆっくり降る雪に)
+    const snowy = G.World.biomeAt(cam.x, cam.z) === 'snow';
+    const wantPrecip = weather > 0.5 ? 1 : (snowy ? 0.7 : 0);
+    rainOn += (wantPrecip - rainOn) * G.damp(1.5, dt);
+    const snowMode = snowy && weather <= 0.5;
+    rainPts.material.color.set(snowMode ? 0xffffff : 0xaec8dc);
+    rainPts.material.size = snowMode ? 0.22 : 0.17;
+    rainPts.material.opacity = rainOn * (snowMode ? 0.85 : 0.7);
     if (rainOn > 0.02) {
       const pa = rainPts.geometry.attributes.position;
+      const fall = snowMode ? 0.12 : 1;
       for (let i = 0; i < pa.count; i++) {
-        let y = pa.getY(i) - rainVel[i] * dt;
+        let y = pa.getY(i) - rainVel[i] * dt * fall;
+        if (snowMode) pa.setX(i, pa.getX(i) + Math.sin(G.time * 1.3 + i) * dt * 0.6);
         if (y < -2) {
           y = 25 + Math.random() * 8;
           pa.setX(i, (Math.random() - 0.5) * 60);
