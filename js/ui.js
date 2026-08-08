@@ -605,15 +605,21 @@
       let b = ebarPool[used];
       if (!b) {
         const wrap = el('div', 'ebar', dmgLayer);
+        const chip = el('div', 'chip', wrap);
         const fill = el('div', 'fill', wrap);
-        b = { wrap, fill };
+        b = { wrap, fill, chip };
         ebarPool.push(b);
       }
       used++;
       b.wrap.style.display = 'block';
       b.wrap.style.left = pr.x + 'px';
       b.wrap.style.top = pr.y + 'px';
-      b.fill.style.width = (100 * Math.max(0, e.hp) / e.maxHp) + '%';
+      const hpPct = 100 * Math.max(0, e.hp) / e.maxHp;
+      b.fill.style.width = hpPct + '%';
+      // 遅延チップ: 直前の被弾量を黄で見せてから追従 (強撃の手応え)
+      if (e._chipW === undefined || e._chipW < hpPct) e._chipW = hpPct;
+      e._chipW += (hpPct - e._chipW) * 0.09;
+      b.chip.style.width = e._chipW + '%';
       // ロックオン対象マーク
       b.wrap.classList.toggle('locked', G.Player.target === e);
       if (used >= 12) break;
@@ -880,7 +886,8 @@
       const row = el('div', 'irow' + (equipped ? ' equipped' : ''), list);
       const ul = G.Inv.upgLevel(id);
       const st = it.type === 'weapon' ? `攻 ${it.atk + ul * 2}` : `防 ${it.def + ul}`;
-      row.innerHTML = `<div class="iname">${it.name}${ul ? ' +' + ul : ''} <span class="istat">${st}</span></div><div class="idesc">${it.desc}</div>`;
+      const glyph = it.type === 'weapon' ? '⚔️' : '🛡️';
+      row.innerHTML = `<div class="iname"><span class="rowicon">${glyph}</span>${it.name}${ul ? ' +' + ul : ''} <span class="istat">${st}</span></div><div class="idesc">${it.desc}</div>`;
       if (!equipped) {
         const b = el('div', 'ibtn', row, '装備');
         b.addEventListener('pointerdown', e => { e.stopPropagation(); G.Inv.equipItem(id); });

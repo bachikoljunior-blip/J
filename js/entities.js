@@ -837,6 +837,10 @@
     headG.position.set(0, 1.05, 1.5);
     neck.add(neckM, headG);
     neck.position.set(0, 1.5, 0.9);
+    // 首の付け根と胸の隙間を埋める (正面から黒い内部面が見える指摘)
+    const chestPlug = box(0.8, 0.7, 0.6, dark);
+    chestPlug.position.set(0, 1.35, 0.85);
+    g.add(chestPlug);
     // 尻尾は6節、先細り+緩やかに持ち上がるカーブ (俯瞰でも胴体からはみ出す)
     const tail = new THREE.Group();
     for (let i = 0; i < 6; i++) {
@@ -1786,7 +1790,7 @@
       e.state = 'idle';
     }
     // 村の中心部は安全地帯: 追跡してきた敵はアグロを解いて巣へ帰る
-    if (e.aggro && G.dist2(e.pos.x, e.pos.z, 0, 0) < 22 * 22) {
+    if (e.aggro && G.dist2(e.pos.x, e.pos.z, 0, 0) < 26 * 26) {
       e.aggro = false;
       e.state = 'idle';
       e.wanderT = 0;

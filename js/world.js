@@ -627,7 +627,9 @@
       if (h < WATER_Y + 0.7) continue;
       const b = W.biomeAt(x, z, h);
       const d = decorDensity(b).grass || 0;
-      if (rnd() > d) continue;
+      // 密度の濃淡マスク: 草原に濃い茂みと開けた地面のむらを作る
+      const mask = 0.3 + (G.fbm(x * 0.016, z * 0.016, 2) * 0.5 + 0.5) * 0.95;
+      if (rnd() > d * mask) continue;
       if (W.slopeYAt(x, z) < 0.8) continue;
       m.makeRotationY(rnd() * Math.PI * 2);
       const s = 0.7 + rnd() * 0.8;
