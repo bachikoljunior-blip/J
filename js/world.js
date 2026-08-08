@@ -852,11 +852,10 @@
           vec2 toFrag = normalize(vWorld.xz - cameraPosition.xz);
           float azRaw = max(dot(toFrag, normalize(sd.xz)), 0.0);
           float az = pow(azRaw, 42.0);
-          // 鋭い芯にも方位整列を掛け、さらにピーク輝度を上限クランプ —
-          // 純白の円形ブロブが湖面を支配するのを防ぎ、常に「筋」として読む
-          float coreAniso = 0.1 + 0.9 * pow(azRaw, 10.0);
+          // スペキュラ全体を方位整列でゲートする — 輝度クランプでは形が
+          // 丸いままなので、太陽方位の細い帯以外では発光させない (筋の強制)
           float sparkle = 0.35 + 0.65 * smoothstep(0.0, 0.28, abs(vWave));
-          float spec = min(pow(ndh, 160.0) * 0.9 * coreAniso, 0.5) + az * sparkle * 0.75 * lowSun;
+          float spec = (min(pow(ndh, 160.0) * 0.9, 0.5) + sparkle * 0.6 * lowSun) * az;
           // 光条は太陽が傾き始めた時点から太陽色へ寄せる (無彩色の白灰にしない)
           vec3 specTint = mix(uSunTint, vec3(1.0, 0.62, 0.3), clamp((lowSun - 0.7) * 0.8, 0.0, 0.6));
           c += specTint * spec * uSunI;
@@ -1717,8 +1716,9 @@
       c.near = 20; c.far = 400;
       c.left = -52; c.right = 52; c.top = 52; c.bottom = -52;
       c.updateProjectionMatrix();
-      sun.shadow.bias = -0.0008;
-      sun.shadow.normalBias = 0.25;
+      sun.shadow.bias = -0.0005;
+      sun.shadow.normalBias = 0.6;   // 近接カメラでの壁面クロスハッチ縞 (アクネ) の抑制
+      sun.shadow.radius = 4;
     }
     scene.add(sun);
     scene.add(sun.target);
@@ -2006,7 +2006,7 @@
       _moonDir.x *= hs; _moonDir.z *= hs; _moonDir.y = 0.42;
     }
     moonSpr.position.copy(_moonDir).multiplyScalar(525).add(_camXZ);
-    moonSpr.material.opacity = G.clamp(moonRawY * 1.4 + 0.1, 0, 0.95) * (1 - Math.max(weather, rainOn) * 0.85);
+    moonSpr.material.opacity = G.clamp(moonRawY * 1.4 + 0.1, 0, 0.95) * G.clamp(1 - Math.max(weather, rainOn) * 1.3, 0, 1);
     moonHalo.position.copy(moonSpr.position);
     moonHalo.material.opacity = moonSpr.material.opacity * 0.4;
 

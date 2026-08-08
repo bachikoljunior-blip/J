@@ -1536,15 +1536,33 @@
         P.target = best;
       }
     }
-    // ロックオン対象の頭上に金のマーカー (予兆の赤と別の記号体系)
+    // ロックオン対象の頭上に金のマーカー+足元に金リング (予兆の赤と別の記号体系。
+    // 至近で敵と自機が重なっても足元リングで対象が読める)
     const lm = lockMark();
+    if (!P._tgtRing) {
+      P._tgtRing = new THREE.Mesh(
+        new THREE.RingGeometry(0.78, 0.9, 24),
+        new THREE.MeshBasicMaterial({
+          color: 0xffd35a, transparent: true, opacity: 0.55,
+          depthWrite: false, side: THREE.DoubleSide, fog: false
+        })
+      );
+      P._tgtRing.rotation.x = -Math.PI / 2;
+      P._tgtRing.renderOrder = 3;
+      scene.add(P._tgtRing);
+    }
     if (P.target && P.target.alive) {
       const th = (P.target.T && P.target.T.barH) || (P.target.D && P.target.D.barH) || 2;
       lm.visible = true;
       lm.position.set(P.target.pos.x,
         P.target.pos.y + th + 0.45 + Math.sin(G.time * 5) * 0.07, P.target.pos.z);
+      P._tgtRing.visible = true;
+      const tr = (P.target.radius || 0.5) + 0.35;
+      P._tgtRing.scale.setScalar(tr);
+      P._tgtRing.position.set(P.target.pos.x, P.target.pos.y + 0.1, P.target.pos.z);
     } else {
       lm.visible = false;
+      P._tgtRing.visible = false;
     }
 
     if (P.state === 'dead') {
@@ -2078,6 +2096,7 @@
   function setOccFade(e, on) {
     if (e._faded === !!on) return;
     e._faded = !!on;
+    if (G.dmgLog) console.log('[dbg] occluder fade', on ? 'on' : 'off', e.bossId || (e.T && e.T.name) || '');
     e.rig.group.traverse(o => {
       if (o === e.mark) return;
       if ((o.isMesh || o.isSprite) && o.material) {
@@ -2086,7 +2105,7 @@
           o.userData._tr0 = o.material.transparent;
         }
         o.material.transparent = on ? true : o.userData._tr0;
-        o.material.opacity = on ? Math.min(0.35, o.userData._op0) : o.userData._op0;
+        o.material.opacity = on ? Math.min(0.3, o.userData._op0) : o.userData._op0;
       }
     });
   }
@@ -2134,13 +2153,15 @@
         if (segLen2 <= 1) return false;
         const ex = e.pos.x - camP.x, ey = e.pos.y + 1 - camP.y, ez = e.pos.z - camP.z;
         const t = (ex * sx + ey * sy + ez * sz) / segLen2;
-        if (t <= 0.15 || t >= 0.92) return false;
+        if (t <= 0.15 || t >= 0.95) return false;
         const ox = ex - sx * t, oy = ey - sy * t, oz = ez - sz * t;
         return (ox * ox + oy * oy + oz * oz) < r2;
       };
       for (const e of list) {
         if (!e.alive || !e.rig) continue;
-        setOccFade(e, occTest(e, 1.2));
+        // 判定半径は敵の体格+余裕 (狭すぎて下半身遮蔽で不発だった)
+        const rr = e.radius + 1.1;
+        setOccFade(e, occTest(e, rr * rr));
       }
       // ボスも同様 (ボス戦中に自機がボス胴体に完全遮蔽される指摘)。
       // 判定半径はボスの体格に合わせて広めに

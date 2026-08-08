@@ -36,7 +36,8 @@
     G.shadowsOn = G.quality !== 'low' && G.settings.shadows !== 'off';
     if (G.shadowsOn) {
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFShadowMap;
+      // ソフトPCF: ジャギーのスクリブル影・壁面のクロスハッチ縞の緩和
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     }
 
     scene = new THREE.Scene();
@@ -455,8 +456,9 @@
       cx = p.pos.x + (cx - p.pos.x) * f;
       cz = p.pos.z + (cz - p.pos.z) * f;
       cy = eyeY + (cy - eyeY) * f;
+      // 地表すれすれだと斜面の稜が自機下半身を隠す — 十分な余裕で持ち上げる
       const gh2 = G.World.heightAt(cx, cz);
-      if (cy < gh2 + 0.5) cy = gh2 + 0.5;
+      if (cy < gh2 + 1.4) cy = gh2 + 1.4;
     } else if (lift > 0) cy += lift;
 
     // 木や岩が視線を遮るならカメラを手前へ寄せる
@@ -689,6 +691,7 @@
     // 移動平均の負荷計測 (デバッグ用)
     G.perf.sim += (_t1 - _t0 - G.perf.sim) * 0.05;
     G.perf.render += (_t2 - _t1 - G.perf.render) * 0.05;
+    G.perf.calls = renderer.info.render.calls;   // ドローコール削減の指標
 
     // 動的解像度スケーリング: 低スペック端末では描画解像度を下げて
     // フレームレートを守る (render時間のEMAで調整)。

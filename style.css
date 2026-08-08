@@ -261,7 +261,8 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 .b-roll { width: 60px; height: 60px; right: calc(102px + env(safe-area-inset-right)); bottom: calc(30px + env(safe-area-inset-bottom)); background: rgba(40, 80, 60, 0.6); }
 .b-jump { width: 52px; height: 52px; right: calc(34px + env(safe-area-inset-right)); bottom: calc(142px + env(safe-area-inset-bottom)); }
-.b-lock { width: 54px; height: 54px; right: calc(112px + env(safe-area-inset-right)); bottom: calc(112px + env(safe-area-inset-bottom)); font-size: 18px; border-color: rgba(255,255,255,0.45); }
+.b-lock { width: 54px; height: 54px; right: calc(112px + env(safe-area-inset-right)); bottom: calc(112px + env(safe-area-inset-bottom)); font-size: 18px; border-color: rgba(255,255,255,0.45); color: #fff; }
+.b-lock .blabel { font-size: 11px; color: #fff; }
 .b-lock.on {
   background: rgba(190, 150, 40, 0.7); border-color: #ffd35a; color: #fff;
   box-shadow: 0 0 10px rgba(255, 211, 90, 0.6);
