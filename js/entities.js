@@ -846,18 +846,29 @@
   R.init = function (sc) {
     scene = sc;
     for (let i = 0; i < 4; i++) {
+      // 2層構造: 外周リング=攻撃範囲、内側フィル=着弾タイミングゲージ
       const m = new THREE.Mesh(
-        new THREE.RingGeometry(0.8, 1.0, 24),
+        new THREE.RingGeometry(0.92, 1.0, 24),
         new THREE.MeshBasicMaterial({
-          color: 0xff2020, transparent: true, opacity: 0.6,
+          color: 0xff2020, transparent: true, opacity: 0.55,
           depthWrite: false, side: THREE.DoubleSide
         })
       );
       m.rotation.x = -Math.PI / 2;
       m.visible = false;
       m.renderOrder = 2;
-      scene.add(m);
-      pool.push(m);
+      const d = new THREE.Mesh(
+        new THREE.CircleGeometry(1, 24),
+        new THREE.MeshBasicMaterial({
+          color: 0xff5030, transparent: true, opacity: 0.22,
+          depthWrite: false, side: THREE.DoubleSide
+        })
+      );
+      d.rotation.x = -Math.PI / 2;
+      d.visible = false;
+      d.renderOrder = 2;
+      scene.add(m); scene.add(d);
+      pool.push({ m, d });
     }
   };
   let used = 0;
@@ -865,16 +876,20 @@
   /* windup 中の敵の足元に出す。t: 0..1 進行度, r: 半径 */
   R.show = function (x, z, r, t) {
     if (used >= pool.length) return;
-    const m = pool[used++];
-    m.visible = true;
+    const s = pool[used++];
     const gh = G.World.heightAt(x, z);
-    m.position.set(x, gh + 0.12, z);
-    const pulse = 1 + Math.sin(G.time * 14) * 0.06;
-    m.scale.setScalar(r * pulse);
-    m.material.opacity = 0.3 + t * 0.45;
+    s.m.visible = true;
+    s.m.position.set(x, gh + 0.12, z);
+    s.m.scale.setScalar(r);
+    s.m.material.opacity = 0.4 + t * 0.35;
+    // 内側フィルが t=1 で外周に到達する = 避けるタイミングが読める
+    s.d.visible = true;
+    s.d.position.set(x, gh + 0.1, z);
+    s.d.scale.setScalar(Math.max(0.05, r * t));
+    s.d.material.opacity = 0.16 + t * 0.2;
   };
   R.end = function () {
-    for (let i = used; i < pool.length; i++) pool[i].visible = false;
+    for (let i = used; i < pool.length; i++) { pool[i].m.visible = false; pool[i].d.visible = false; }
   };
 })();
 
@@ -1456,7 +1471,7 @@
     e.aggro = true;
     G.UI.dmgNum(e.pos.x, e.pos.y + (e.T && e.T.barH ? e.T.barH - 0.2 : 1.6), e.pos.z, dmg, { crit });
     G.FX.burst(e.pos.x, e.pos.y + 1, e.pos.z, { n: crit ? 8 : 5, color: 0xffd24a, speed: 3.2, life: 0.28, size: 1.6 });
-    G.FX.burst(e.pos.x, e.pos.y + 0.9, e.pos.z, { n: 1, color: 0xffffff, speed: 0.05, life: 0.18, size: 9, gravity: 0, drag: 0 });
+    G.FX.burst(e.pos.x, e.pos.y + 0.9, e.pos.z, { n: 1, color: 0xfff0c8, speed: 0.05, life: 0.15, size: 4.2, gravity: 0, drag: 0 });
     if (e.hp <= 0) { kill(e); return; }
     // ノックバック (プレイヤーから離れる方向へ、強/回転は大きく)
     const kb = (G.Player.spin || G.Player.heavy) && G.Player.state === 'attack' ? 1.1 : 0.4;

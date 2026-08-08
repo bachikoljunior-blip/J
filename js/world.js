@@ -227,11 +227,6 @@
     out.copy(BIOME_COL[b] || BIOME_COL.grass);
     const pb = pathBlend(x, z);
     if (pb > 0) out.lerp(PATH_COL, pb * 0.85);
-    // フェンリルの凍土アリーナ
-    const fd = G.dist2(x, z, -430, -140);
-    if (fd < 34 * 34) {
-      out.lerp(FROST_COL, (1 - G.smoothstep(24, 34, Math.sqrt(fd))) * 0.75);
-    }
     // 雪面の起伏まだら
     if (b === 'snow') {
       out.multiplyScalar(0.92 + (G.fbm(x * 0.05, z * 0.05, 2) * 0.5 + 0.5) * 0.1);
@@ -252,6 +247,11 @@
     // 水中は砂色へ
     if (h < WATER_Y + 0.4) {
       out.lerp(BIOME_COL.under, G.smoothstep(WATER_Y + 0.4, WATER_Y - 2.5, h));
+    }
+    // フェンリルの凍土アリーナ (バイオームまだらの後に適用しないと緑に戻される)
+    const fd = G.dist2(x, z, -430, -140);
+    if (fd < 38 * 38) {
+      out.lerp(FROST_COL, (1 - G.smoothstep(26, 38, Math.sqrt(fd))) * 0.88);
     }
     // 高度の微妙な明暗
     const shade = 0.92 + G.hash2((x * 7) | 0, (z * 7) | 0) * 0.08;
@@ -603,6 +603,7 @@
     for (let i = 0; i < max; i++) {
       const x = x0 + rnd() * CHUNK, z = z0 + rnd() * CHUNK;
       if (W.inCaveRegion(x, z)) continue;   // 洞窟内に草は生えない
+      if (G.dist2(x, z, -430, -140) < 30 * 30) continue;   // フェンリルの凍土に緑草は生えない
       const h = W.heightAt(x, z);
       if (h < WATER_Y + 0.7) continue;
       const b = W.biomeAt(x, z, h);
@@ -842,7 +843,7 @@
     W.shrineMeshes[sh.id] = { crystal, glow, beam, baseY: y + 2.0 };
   }
 
-  function buildRuinCircle(x, z, radius, n, seed) {
+  function buildRuinCircle(x, z, radius, n, seed, tint) {
     const rnd = G.srand(seed);
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2;
@@ -852,7 +853,7 @@
       const h = broken ? 1.2 + rnd() * 1.5 : 4.5 + rnd() * 1.5;
       const pillar = new THREE.Mesh(
         new THREE.CylinderGeometry(0.55, 0.7, h, 6),
-        new THREE.MeshLambertMaterial({ color: 0x9d998f })
+        new THREE.MeshLambertMaterial({ color: tint || 0x9d998f })
       );
       shadowify(pillar);
       pillar.position.set(px, py + h / 2 - 0.1, pz);
@@ -1186,9 +1187,9 @@
     buildWater();
     buildVillage();
     for (const sh of W.shrines) buildShrine(sh);
-    buildRuinCircle(-430, -140, 18, 9, 11);     // 狼ボス闘技場
-    buildRuinCircle(430, -80, 20, 11, 22);      // ゴーレム闘技場
-    buildRuinCircle(-40, -640, 22, 12, 33);     // 竜の頂
+    buildRuinCircle(-430, -140, 18, 9, 11, 0xa9c6d6);   // 狼ボス闘技場 (氷を纏う柱)
+    buildRuinCircle(430, -80, 20, 11, 22);              // ゴーレム闘技場
+    buildRuinCircle(-40, -640, 22, 12, 33, 0x4a4250);   // 竜の頂 (黒曜石の柱)
     buildRuinCircle(150, 430, 13, 7, 44);       // 南の廃墟
     buildTower(-200, 200);
     buildTower(180, -320);

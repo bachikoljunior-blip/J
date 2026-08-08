@@ -496,7 +496,20 @@
       ctx.beginPath(); ctx.arc(dx, dz, 1.6, 0, Math.PI * 2); ctx.fill();
     };
     for (const e of G.Enemies.list) drawEnemy(e);
-    for (const b of G.Enemies.bosses) drawEnemy(b);
+    // ボスは白縁の大きな菱形で明示
+    for (const b of G.Enemies.bosses) {
+      if (!b.alive) continue;
+      const dx = (b.pos.x - p.pos.x) / view * S + S / 2;
+      const dz = (b.pos.z - p.pos.z) / view * S + S / 2;
+      if (dx < 5 || dx > S - 5 || dz < 5 || dz > S - 5) continue;
+      ctx.fillStyle = '#ff3030';
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(dx, dz - 5); ctx.lineTo(dx + 5, dz); ctx.lineTo(dx, dz + 5); ctx.lineTo(dx - 5, dz);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ff5a5a';
+    }
     // プレイヤー矢印
     ctx.save();
     ctx.translate(S / 2, S / 2);
