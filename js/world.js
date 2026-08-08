@@ -306,8 +306,9 @@
     // 大きな帯単位で色そのものを変えると粗い頂点密度でも層が読める
     const steep = G.smoothstep(0.3, 0.55, slope);
     if (steep > 0.01) {
-      const bi = ((Math.floor((h + G.noise2(x * 0.045, z * 0.045) * 5) / 8) % 3) + 3) % 3;
-      out.lerp(bi === 0 ? _strata1 : bi === 1 ? _strata2 : _strata3, steep * 0.6);
+      // 帯高14m: 遠景LODの巨大三角形でも1帯が複数頂点にまたがり層が残る
+      const bi = ((Math.floor((h + G.noise2(x * 0.045, z * 0.045) * 6) / 14) % 3) + 3) % 3;
+      out.lerp(bi === 0 ? _strata1 : bi === 1 ? _strata2 : _strata3, steep * 0.65);
     }
     // 水中は砂色へ
     if (h < WATER_Y + 0.4) {
@@ -758,7 +759,9 @@
     chunks.delete(chunk.key);
   }
 
-  const terrainMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  // フラットシェーディング: 面ごとの法線で陰影が立ち、崖・起伏が
+  // 「無構造のぼかしスミア」にならない (ローポリ美術の様式とも一致)
+  const terrainMat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
   // 雨天の濡れ表現: 地形アルベドを暗く沈める uniform を注入
   terrainMat.onBeforeCompile = sh => {
     sh.uniforms.uWet = { value: 0 };
@@ -847,10 +850,18 @@
           float ndh = max(dot(n, h), 0.0);
           float lowSun = clamp(1.7 - sd.y * 2.4, 0.5, 1.7);
           vec2 toFrag = normalize(vWorld.xz - cameraPosition.xz);
-          float az = pow(max(dot(toFrag, normalize(sd.xz)), 0.0), 42.0);
+          float azRaw = max(dot(toFrag, normalize(sd.xz)), 0.0);
+          float az = pow(azRaw, 42.0);
+          // 鋭い芯にも方位整列を掛ける (太陽が高い時間帯に画面幅1/4の
+          // 白い拡散ブロブになるのを抑え、常に太陽方位の帯に限定する)
+          float coreAniso = 0.15 + 0.85 * pow(azRaw, 8.0);
           float sparkle = 0.35 + 0.65 * smoothstep(0.0, 0.28, abs(vWave));
-          float spec = pow(ndh, 110.0) * 0.9 + az * sparkle * 0.5 * lowSun;
-          c += uSunTint * spec * uSunI;
+          float spec = pow(ndh, 110.0) * 0.9 * coreAniso + az * sparkle * 0.75 * lowSun;
+          // 光条は低太陽時に太陽色へ寄せる (無彩色の白灰にしない)
+          vec3 specTint = mix(uSunTint, vec3(1.0, 0.62, 0.3), clamp((lowSun - 0.9) * 0.8, 0.0, 0.55));
+          c += specTint * spec * uSunI;
+          // 夕刻は水面ベースにも空の暖色を薄く乗せる (空との色乖離の解消)
+          c = mix(c, skyRef, clamp((lowSun - 1.0) * 0.28, 0.0, 0.35));
           // 波頭の白泡: 光量に殆ど依存しない自己発光的な白
           // (夕刻・曇天でuLightに比例させると泡が一度も見えない)
           c += vec3(0.88, 0.92, 0.96) * smoothstep(0.14, 0.36, vWave) * (0.2 + 0.2 * uLight);

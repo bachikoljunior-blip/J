@@ -830,8 +830,8 @@
     const jaw = box(0.42, 0.16, 0.72, belly);
     jaw.position.set(0, -0.26, 0.18);
     jaw.rotation.x = 0.1;
-    // 口内は暗色 (正面から薄ピンクの平板矩形に見える指摘)。牙で輪郭を崩す
-    const mouth = box(0.36, 0.1, 0.6, 0x1a0e12);
+    // 口内は暗赤 (頭部の黒と同化せず、開口が読める)。牙で輪郭を崩す
+    const mouth = box(0.36, 0.1, 0.6, 0x4a1010);
     mouth.position.set(0, -0.17, 0.22);
     mouth.rotation.x = 0.1;
     const fangMat = new THREE.MeshLambertMaterial({ color: 0xd8d2c4 });
@@ -976,7 +976,9 @@
       const flap = fly > 0.05 ? Math.sin(t * 6) * (0.5 + fly * 0.4) : Math.sin(t * 1.2) * 0.06;
       wingL.rotation.z = -flap - 0.15;
       wingR.rotation.z = flap + 0.15;
-      neck.rotation.x = -0.2 + Math.sin(t * 1.1) * 0.05;
+      // 飛行/立ち上がり時は首を前傾させS字を保つ (垂直ブロック+水平翼の
+      // 十字型シルエットにならない)
+      neck.rotation.x = -0.2 + Math.sin(t * 1.1) * 0.05 + fly * 0.3;
       tail.rotation.y = Math.sin(t * 0.9) * 0.45;
       if (p.state === 'dead') {
         const k = G.clamp(p.t * 1.2, 0, 1);
@@ -1012,11 +1014,12 @@
     scene = sc;
     for (let i = 0; i < 4; i++) {
       // 2層構造: 外周リング=攻撃範囲、内側フィル=着弾タイミングゲージ
+      // fog:false — 竜の頂の地表フォグ等に予兆が埋もれない
       const m = new THREE.Mesh(
         new THREE.RingGeometry(0.9, 1.0, 24),
         new THREE.MeshBasicMaterial({
           color: 0xd01818, transparent: true, opacity: 0.6,
-          depthWrite: false, side: THREE.DoubleSide
+          depthWrite: false, side: THREE.DoubleSide, fog: false
         })
       );
       m.rotation.x = -Math.PI / 2;
@@ -1027,7 +1030,7 @@
         new THREE.CircleGeometry(1, 24),
         new THREE.MeshBasicMaterial({
           color: 0xb31414, transparent: true, opacity: 0.3,
-          depthWrite: false, side: THREE.DoubleSide
+          depthWrite: false, side: THREE.DoubleSide, fog: false
         })
       );
       d.rotation.x = -Math.PI / 2;
@@ -1038,7 +1041,7 @@
         new THREE.CircleGeometry(1, 24),
         new THREE.MeshBasicMaterial({
           color: 0x8a1010, transparent: true, opacity: 0.17,
-          depthWrite: false, side: THREE.DoubleSide
+          depthWrite: false, side: THREE.DoubleSide, fog: false
         })
       );
       f.rotation.x = -Math.PI / 2;
@@ -1275,13 +1278,13 @@
     const idRing = new THREE.Mesh(
       new THREE.RingGeometry(0.5, 0.62, 24),
       new THREE.MeshBasicMaterial({
-        color: 0x8fd0ff, transparent: true, opacity: 0.28,
-        depthWrite: false, side: THREE.DoubleSide
+        color: 0xc8ecff, transparent: true, opacity: 0.5,
+        depthWrite: false, depthTest: false, side: THREE.DoubleSide, fog: false
       })
     );
     idRing.rotation.x = -Math.PI / 2;
     idRing.position.y = 0.09;
-    idRing.renderOrder = 1;
+    idRing.renderOrder = 3;   // 予兆フィルより上 — 乱戦時こそ自機が読める
     rig.group.add(idRing);
     scene.add(rig.group);
   };

@@ -410,7 +410,7 @@
     clockEl.textContent = `${G.State.day}日目 ${hh}:${mm < 10 ? '0' : ''}${mm}`;
     // アイコンは実際の降雨粒子量と同期 (状態値だけ見ると、粒子が残っている
     // のに晴れアイコンになる desync が起きる)
-    const raining = G.State.weather > 0.5 || (G.Sky.rainAmt || 0) > 0.25;
+    const raining = G.State.weather > 0.5 || (G.Sky.rainAmt || 0) > 0.08;
     weatherEl.textContent = raining ? '☂' : (tod > 19 || tod < 5 ? '☾' : '☀');
 
     // ボスバー (黄色の削り残像つき)
@@ -1076,7 +1076,7 @@
     drawBigMap();
     // 凡例は横に並べて地図を大きく取る
     el('div', 'maplegend', wrap,
-      '<div>◆ 任務</div><div>● 祠(灯)<br><span class="mlsub">タップで<br>ファストトラベル</span></div><div>○ 祠(未灯)</div><div>▲ 現在地</div>');
+      '<div><span style="color:#ffd35a">◆</span> 任務</div><div><span style="color:#6fe3ff">●</span> 祠(灯)<br><span class="mlsub">タップで<br>ファストトラベル</span></div><div><span style="color:#c8d4e6">○</span> 祠(未灯)</div><div>▲ 現在地</div>');
     // 祠タップでファストトラベル
     bigMapCanvas.onpointerdown = e => {
       e.stopPropagation();
@@ -1320,7 +1320,7 @@
         // 不足している素材/所持金を赤字で強調
         const mats = Object.keys(c.mats).map(m => {
           const lack = G.Inv.count(m) < c.mats[m];
-          const t = `${G.Items.get(m).name}×${c.mats[m]}`;
+          const t = `${itemIcon(m, G.Items.get(m))[0]}${G.Items.get(m).name}×${c.mats[m]}`;
           return lack ? `<span class="lack">${t}</span>` : t;
         }).join(' ');
         // 強化後の数値を予告して費用対効果を判断できるように

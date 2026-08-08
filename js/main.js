@@ -469,6 +469,10 @@
     // カメラは常に水面より上 (いかなる場合も水没しない)
     if (cy < G.World.WATER_Y + 0.45) cy = G.World.WATER_Y + 0.45;
 
+    // 洞窟内: 入口付近でカメラが外郭の崖上に持ち上がり、自機が豆粒の
+    // 高所俯瞰になるのを防ぐ (目線からの上方超過を制限)
+    if (G.inCave && cy > eyeY + 5) cy = eyeY + 5;
+
     // 画面揺れ
     trauma = Math.max(0, trauma - dt * 1.8);
     const sh = trauma * trauma * 0.5;
@@ -701,7 +705,9 @@
       let want = resScale;
       // 60fps予算 (16.6ms) を基準に、50fps相当を割ったら降下・十分軽ければ復帰。
       // 大幅超過 (閾値1.5倍) は2段降下で素早く収束させる
-      if (perfEMA > 26 && resScale > 0.6) want = Math.max(0.6, resScale - (perfEMA > 39 ? 0.4 : 0.2));
+      // 持続的な大幅超過 (>45ms) では床0.5まで許容する追加ティア
+      const floor2 = perfEMA > 45 ? 0.5 : 0.6;
+      if (perfEMA > 26 && resScale > floor2) want = Math.max(floor2, resScale - (perfEMA > 39 ? 0.4 : 0.2));
       else if (perfEMA < 16 && resScale < 1) want = Math.min(1, resScale + 0.1);
       if (want !== resScale) {
         resScale = want;
