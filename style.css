@@ -232,8 +232,8 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 /* 仮想スティック */
 .joy {
   position: absolute; width: 128px; height: 128px; border-radius: 50%;
-  background: rgba(10,16,26,0.18); border: 2px solid rgba(255,255,255,0.45);
-  box-shadow: 0 0 0 2px rgba(10,16,26,0.4), inset 0 0 14px rgba(10,16,26,0.3);
+  background: rgba(10,16,26,0.18); border: 2px solid rgba(255,255,255,0.6);
+  box-shadow: 0 0 0 3px rgba(10,16,26,0.5), inset 0 0 14px rgba(10,16,26,0.3);
   pointer-events: none; z-index: 20;
 }
 .joythumb {
@@ -266,9 +266,9 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 .b-potion { width: 50px; height: 50px; right: calc(170px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); background: rgba(120, 50, 80, 0.55); flex-direction: column; }
 .pcount { font-size: 10px; color: #ffd0d8; }
-.b-menu { width: 42px; height: 42px; right: calc(18px + env(safe-area-inset-right)); top: calc(130px + env(safe-area-inset-top)); font-size: 20px; }
-/* 地図は≡の左隣 (縦積みだと低い画面で跳ボタンと重なる) */
-.b-map { width: 42px; height: 42px; right: calc(66px + env(safe-area-inset-right)); top: calc(130px + env(safe-area-inset-top)); font-size: 11px; }
+.b-menu { width: 42px; height: 42px; right: calc(18px + env(safe-area-inset-right)); top: calc(154px + env(safe-area-inset-top)); font-size: 20px; }
+/* 地図は≡の左隣 (縦積みだと低い画面で跳ボタンと重なる)。単字グリフで円形ボタンに揃える */
+.b-map { width: 42px; height: 42px; right: calc(66px + env(safe-area-inset-right)); top: calc(154px + env(safe-area-inset-top)); font-size: 17px; }
 
 .keyhelp {
   position: absolute; bottom: calc(6px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
@@ -335,9 +335,9 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 .mbody::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); }
 /* スクロール可能であることを示す下端フェード */
 .mbody::after {
-  content: ''; position: sticky; bottom: -34px; display: block; height: 30px;
-  margin-top: -30px; pointer-events: none;
-  background: linear-gradient(180deg, rgba(10,14,20,0), rgba(10,14,20,0.85));
+  content: ''; position: sticky; bottom: 0; display: block; height: 44px;
+  margin-top: -44px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10,14,20,0), rgba(10,14,20,0.92));
 }
 .diffup { color: #7ee08a; }
 .diffdown { color: #f08a7a; }

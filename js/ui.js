@@ -281,7 +281,7 @@
       lockBtn = actionBtn('b-lock', '◎<span class="blabel">注視</span>', 'lock');
       potBtn = actionBtn('b-potion', '薬', 'potion');
       actionBtn('b-menu', '≡', 'menu');
-      actionBtn('b-map', '地図', 'map');
+      actionBtn('b-map', '図', 'map');
     } else {
       const help = el('div', 'keyhelp', hudEl,
         'WASD:移動 F/クリック:攻撃(長押し:強/回転) Space:回避 C:跳躍(空中長押し:滑空) E:調べる Q:ロックオン 1:薬 I:メニュー M:地図 Shift:走る');
@@ -500,13 +500,19 @@
       const wpx = Math.max(4, 14 / view * S);
       const ez = (C.z0 - 18 - p.pos.z) / view * S + S / 2;
       ctx.fillRect(fx - wpx / 2, Math.min(ez, fz), wpx, Math.abs(fz - ez));
-      ctx.strokeStyle = '#8a9cc8'; ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#b8c8ea'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(fx, fz, fr, 0, Math.PI * 2); ctx.stroke();
     } else {
       const scale = (256 / (MAP_R * 2));
       const sw = view * scale;
       const [mx, mz] = worldToMap(p.pos.x, p.pos.z, 256);
       ctx.drawImage(mapCanvas, mx - sw / 2, mz - sw / 2, sw, sw, 0, 0, S, S);
+      // 夜間は減光 (昼の明るい緑のままだと夜のトーンから浮く)
+      const night = G.clamp((0.42 - (G.Sky.lightLevel || 1)) * 2.2, 0, 0.55);
+      if (night > 0.02) {
+        ctx.fillStyle = `rgba(10, 16, 32, ${night})`;
+        ctx.fillRect(0, 0, S, S);
+      }
     }
     // 祠
     for (const s of G.World.shrines) {
@@ -665,6 +671,8 @@
     for (const { e, locked } of ents) {
       const pr = UI.project(e.pos.x, e.pos.y + (e.T.barH || 1.9), e.pos.z);
       if (!pr.visible) continue;
+      // 左上のHUD (HP/スタミナ/所持金) 領域には重ねない
+      if (pr.y < 92 && pr.x < 360) continue;
       if (!locked) {
         let ok = false;
         for (let step = 0; step < 3 && !ok; step++) {
@@ -776,11 +784,10 @@
       return `<div class="tline ${l.main ? 'main' : ''} ${l.ready ? 'ready' : ''}">${l.line}${dist}${sub}</div>`;
     }).join('');
   };
-  let tdistT = 0;
   function updateTrackerDist(dt) {
-    tdistT -= dt;
-    if (tdistT > 0 || !trackerMark) return;
-    tdistT = 0.5;
+    // 毎フレーム更新 (dist計算1回は安価。スロットルすると低fps環境で
+    // テレポート後も数秒古い距離が残る)
+    if (!trackerMark) return;
     const eln = trackerEl.querySelector('.tdist');
     if (!eln) return;
     const d = G.dist(G.Player.pos.x, G.Player.pos.z, trackerMark.x, trackerMark.z);

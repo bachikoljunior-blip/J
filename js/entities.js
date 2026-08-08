@@ -218,12 +218,17 @@
     if (conf.weapon === 'sword' || conf.weapon === 'axe' || conf.weapon === 'club' || conf.weapon === 'spear') {
       weapon = new THREE.Group();
       if (conf.weapon === 'sword') {
-        const blade = box(0.07, 0.85, 0.02, 0xc9d2da);
+        // 刀身は太め+中央の樋 (ゲームプレイ距離で細い白棒に見えない厚み)
+        const blade = box(0.1, 0.85, 0.035, 0xc9d2da);
         blade.position.y = 0.55;
-        const guard = box(0.22, 0.05, 0.05, 0x8f7a3a);
+        const fuller = box(0.032, 0.7, 0.04, 0x9aa6b2);
+        fuller.position.y = 0.5;
+        const tip = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.14, 4), new THREE.MeshLambertMaterial({ color: 0xc9d2da }));
+        tip.position.y = 1.02; tip.rotation.y = Math.PI / 4;
+        const guard = box(0.24, 0.055, 0.06, 0x8f7a3a);
         guard.position.y = 0.12;
         const grip = box(0.05, 0.18, 0.05, 0x5a4630);
-        weapon.add(blade, guard, grip);
+        weapon.add(blade, fuller, tip, guard, grip);
       } else if (conf.weapon === 'axe') {
         const pole = box(0.06, 0.9, 0.06, 0x6b4a2f);
         pole.position.y = 0.35;
@@ -823,6 +828,17 @@
     const jaw = box(0.42, 0.16, 0.72, belly);
     jaw.position.set(0, -0.26, 0.18);
     jaw.rotation.x = 0.1;
+    // 口内は暗色 (正面から薄ピンクの平板矩形に見える指摘)。牙で輪郭を崩す
+    const mouth = box(0.36, 0.1, 0.6, 0x1a0e12);
+    mouth.position.set(0, -0.17, 0.22);
+    mouth.rotation.x = 0.1;
+    const fangMat = new THREE.MeshLambertMaterial({ color: 0xd8d2c4 });
+    for (const fx of [-0.14, 0.14]) {
+      const fang = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.14, 4), fangMat);
+      fang.position.set(fx, -0.12, 0.52);
+      fang.rotation.x = Math.PI;
+      headG.add(fang);
+    }
     // 眉弓 (眼窩の庇) — 箱頭の上面に段差を作り「竜の顔」の凹凸を出す
     const brow = box(0.56, 0.12, 0.3, 0x2c2432);
     brow.position.set(0, 0.24, 0.28);
@@ -859,7 +875,7 @@
       gl.scale.set(0.5, 0.4, 1);
       headG.add(gl);
     }
-    headG.add(headM, jaw, brow, snoutRidge, hornL, hornR, eyeL, eyeR);
+    headG.add(headM, jaw, mouth, brow, snoutRidge, hornL, hornR, eyeL, eyeR);
     headG.position.set(0, 1.05, 1.5);
     headG.rotation.x = 0.22;   // 顎を引いた頭部姿勢 (直立積み木の解消)
     // レストポーズからS字: 第1節は後傾、第2節(neckM2)は前傾済み
@@ -874,11 +890,14 @@
     // フェーズ変化が体表から読めるようにする)
     const crackMat = new THREE.MeshBasicMaterial({ color: 0x2e2430 });
     g.userData.crackMat = crackMat;
+    // ジグザグの割れ目: 各体側に短いセグメントを交互の傾きで連結し、
+    // 均一な矩形パッチではなく「亀裂」として読める形に
     for (const side of [-1, 1]) {
-      for (let i = 0; i < 3; i++) {
-        const cr = new THREE.Mesh(boxGeo(0.06, 0.3 - i * 0.06, 0.5 + i * 0.15), crackMat);
-        cr.position.set(0.51 * side, 1.25 + (i % 2) * 0.18, 0.45 - i * 0.55);
-        cr.rotation.x = (i - 1) * 0.3;
+      for (let i = 0; i < 5; i++) {
+        const cr = new THREE.Mesh(boxGeo(0.055, 0.34, 0.16), crackMat);
+        cr.position.set(0.51 * side, 1.18 + (i % 2) * 0.22, 0.75 - i * 0.36);
+        cr.rotation.x = (i % 2 ? 0.7 : -0.7);
+        cr.rotation.y = side * 0.08;
         g.add(cr);
       }
     }
@@ -1040,7 +1059,9 @@
       s.m.visible = true;
       s.m.position.set(q.x, gh + 0.12, q.z);
       s.m.scale.setScalar(q.r);
-      s.m.material.opacity = 0.45 + q.t * 0.35;
+      // 非切迫のリングは薄い輪郭のみ — 濃い輪郭が2つ並ぶと両方フィル済みに
+      // 見え、どちらを避けるべきか読めない
+      s.m.material.opacity = i === 0 ? 0.5 + q.t * 0.35 : 0.22;
       // フィル (タイミングゲージ+全域) は最も切迫した1つだけ。
       // 2つ以上に出すと「どれを避けるべきか」が読めなくなる
       const fill = i === 0;
@@ -1982,10 +2003,10 @@
     // 被弾の仰け反り (hurtT が残る間だけ後傾)
     if (e.hurtT) e.hurtT = Math.max(0, e.hurtT - dt);
     e.rig.group.rotation.x = -((e.hurtT || 0) / 0.3) * 0.24;
-    // 「!」マーカーの寿命と浮遊
+    // 「!」マーカーの寿命と浮遊 (ロックオン対象は金▼と重なるため出さない)
     if (e.mark) {
       if (e.aggroMarkT > 0) e.aggroMarkT -= dt;
-      e.mark.visible = e.aggroMarkT > 0;
+      e.mark.visible = e.aggroMarkT > 0 && G.Player.target !== e;
       if (e.mark.visible) e.mark.position.y = (T.barH || 1.6) + 0.55 + Math.sin(G.time * 6) * 0.06;
     }
     e.rig.pose({
@@ -2221,6 +2242,7 @@
     // フェーズ2移行の一回演出 (咆哮+シェイク+バースト+残留デカール)
     if (phase2 && !b.phase2Cued && b.engaged && b.alive) {
       b.phase2Cued = true;
+      console.log('[dbg] phase2 burst:', b.bossId);   // 2FPS計測で写らない演出の証跡
       G.Audio.sfx('roar');
       G.events.emit('shake', 0.6);
       // 白飽和を避けるため彩度のある色で (氷=青 / 竜=橙)
@@ -2234,7 +2256,7 @@
         b.bossId === 'fenrir' ? 0x6e9cc4 : b.bossId === 'dragon' ? 0x241d18 : 0x4a4030, 3.2);
       // 竜は体側の亀裂を赤熱させる (黒い体表でもフェーズ変化が体から読める)
       const cm = b.rig && b.rig.group && b.rig.group.userData.crackMat;
-      if (cm) cm.color.set(0xff5a1a);
+      if (cm) { cm.color.set(0xff5a1a); b._crackHot = true; }
     }
 
     // スコルグ: 半減で子サソリ召喚
@@ -2328,6 +2350,14 @@
       state: b.state, t: b.stateT, windup: b.windupDur || 0.8,
       moveAmt: b.moveAmt, seed: b.seed, fly: b.fly || 0, baseY: b.pos.y
     });
+    // フェーズ2の赤熱亀裂は明滅させ、距離があっても「熱」と読めるように
+    if (b._crackHot) {
+      const cm2 = b.rig.group.userData.crackMat;
+      if (cm2) {
+        const k = 0.72 + Math.sin(G.time * 6 + 1) * 0.28;
+        cm2.color.setRGB(k, 0.36 * k, 0.09 * k);
+      }
+    }
     G.Actors.updateShadow(b);
   };
 

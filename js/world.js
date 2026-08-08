@@ -241,7 +241,7 @@
   const CAVE_FLOOR = new THREE.Color(0x565d6f);
   const CAVE_FLOOR2 = new THREE.Color(0x3d4456);
   const CAVE_WALL = new THREE.Color(0x262b3a);
-  const FROST_COL = new THREE.Color(0xc8dce6);
+  const FROST_COL = new THREE.Color(0xafccdf);   // 白狼が床に溶けない淡青
   const CHAR_COL = new THREE.Color(0x2e2824);
   const _dirtCol = new THREE.Color(0x6a5844);
   const _snowShade = new THREE.Color(0xb4c4da);
@@ -256,9 +256,10 @@
       out.lerp(CAVE_WALL, wr);
       return out;
     }
-    // バイオーム境界は座標を揺らしてディザ (定規で引いた直線帯の解消)
-    const jx = G.noise2(x * 0.09 + 31, z * 0.09) * 9;
-    const jz = G.noise2(x * 0.09, z * 0.09 + 77) * 9;
+    // バイオーム境界は座標を揺らしてディザ (定規で引いた直線帯の解消)。
+    // 振幅は広め — 草原⇔凍土などの遷移が遠景でハードカットに見えない幅
+    const jx = G.noise2(x * 0.09 + 31, z * 0.09) * 14;
+    const jz = G.noise2(x * 0.09, z * 0.09 + 77) * 14;
     const b = W.biomeAt(x + jx, z + jz, h);
     out.copy(BIOME_COL[b] || BIOME_COL.grass);
     const pb = pathBlend(x, z);
@@ -269,9 +270,10 @@
       const bl = G.fbm(x * 0.02 + 41, z * 0.02, 2) * 0.5 + 0.5;
       out.lerp(_snowShade, G.smoothstep(0.55, 0.85, bl) * 0.3);
     }
-    // 岩肌の縞ムラ+土の帯 (滑空時の眼下が無地のスメアにならないように)
+    // 岩肌の縞ムラ+土の帯 (滑空時の眼下が無地のスメアにならないように)。
+    // 暗側の下限を上げる — 多重の暗化が重なると崖全体が煤けたスミアになる
     if (b === 'rock') {
-      out.multiplyScalar(0.68 + (G.fbm(x * 0.07, z * 0.07, 2) * 0.5 + 0.5) * 0.52);
+      out.multiplyScalar(0.78 + (G.fbm(x * 0.07, z * 0.07, 2) * 0.5 + 0.5) * 0.42);
       const dirt = G.fbm(x * 0.035 + 17, z * 0.035, 2) * 0.5 + 0.5;
       out.lerp(_dirtCol, G.smoothstep(0.6, 0.85, dirt) * 0.4);
     }
@@ -824,19 +826,24 @@
           vec3 c = mix(base, uColor2 * uSunTint, k) * uLight;
           vec3 n = normalize(vNorm);
           vec3 vd = normalize(cameraPosition - vWorld);
-          // 角度依存フレネル: 浅い角度ほど空 (フォグ色) を強く映す。
-          // ベース反射は高め — 見下ろしでも空色 (夕刻の暖色) が水面に乗る
-          float fr = 0.24 + 0.62 * pow(1.0 - max(dot(vd, n), 0.0), 3.0);
+          // 角度依存フレネル: 浅い角度ほど空を強く映す。反射色は空色に
+          // 青バイアスを混ぜる — 夕刻に純粋な暖色フォグを映すと水面が
+          // 砂浜と同化して水と読めなくなる
+          vec3 skyRef = mix(uFogColor, uFogColor * vec3(0.55, 0.78, 1.1), 0.5);
+          float fr = 0.2 + 0.62 * pow(1.0 - max(dot(vd, n), 0.0), 3.0);
           fr += smoothstep(12.0, 140.0, vDist) * 0.3;
-          c = mix(c, uFogColor, clamp(fr, 0.0, 0.85));
-          // 太陽のスペキュラ: 鋭い芯 + 広いサンパス帯の2ローブ
-          // (斜め視点でも太陽方位に沿ったギラつきの筋が読める)
-          vec3 h = normalize(vd + normalize(uSunDir));
+          c = mix(c, skyRef, clamp(fr, 0.0, 0.85));
+          // 太陽のスペキュラ: 鋭い芯 + 広いサンパス帯の2ローブ。
+          // 太陽が低いほど広帯を増幅 (夕刻の湖面に長い光条が伸びる)
+          vec3 sd = normalize(uSunDir);
+          vec3 h = normalize(vd + sd);
           float ndh = max(dot(n, h), 0.0);
-          float spec = pow(ndh, 110.0) * 0.9 + pow(ndh, 16.0) * 0.22;
+          float lowSun = clamp(1.6 - sd.y * 2.2, 0.6, 1.6);
+          float spec = pow(ndh, 110.0) * 0.9 + pow(ndh, 10.0) * 0.5 * lowSun;
           c += uSunTint * spec * uSunI;
-          // 波頭の白泡 (単色の平面に見えないよう頂部だけ砕けさせる)
-          c += vec3(0.85, 0.9, 0.95) * smoothstep(0.2, 0.42, vWave) * 0.3 * uLight;
+          // 波頭の白泡: 光量に殆ど依存しない自己発光的な白
+          // (夕刻・曇天でuLightに比例させると泡が一度も見えない)
+          c += vec3(0.88, 0.92, 0.96) * smoothstep(0.14, 0.36, vWave) * (0.2 + 0.2 * uLight);
           float f = smoothstep(uFogNear, uFogFar, vDist);
           c = mix(c, uFogColor, f);
           gl_FragColor = vec4(c, 0.82 + fr * 0.1);
@@ -1724,6 +1731,14 @@
         m.rotation.y = rr() * Math.PI;
         m.position.set(Math.cos(a) * dist, h * 0.28, Math.sin(a) * dist);
         grp.add(m);
+        // 副峰を重ねて完全な二等辺三角形の書き割り感を崩す
+        const h2 = h * (0.5 + rr() * 0.35);
+        const m2 = new THREE.Mesh(new THREE.ConeGeometry(w * (0.5 + rr() * 0.3), h2, 4, 1), mat2);
+        m2.scale.z = 0.22;
+        m2.rotation.y = rr() * Math.PI;
+        const a2 = a + (rr() - 0.5) * 0.16;
+        m2.position.set(Math.cos(a2) * dist, h2 * 0.3, Math.sin(a2) * dist);
+        grp.add(m2);
       }
       grp.renderOrder = -9;
       grp.userData.mat = mat2;
@@ -1759,7 +1774,7 @@
       map: G.makeRadialTex(128, [[0, 'rgba(190,210,255,0.3)'], [1, 'rgba(180,200,255,0)']]),
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
     }));
-    moonHalo.scale.set(95, 95, 1);
+    moonHalo.scale.set(68, 68, 1);   // 締まったハロー (広すぎるとぼやけた光斑に見える)
     scene.add(moonHalo);
     // 計測ハーネスから位置・不透明度を検分するための参照 (デバッグ用)
     Sky._spr = { sunSpr, sunHalo, moonSpr, moonHalo };
@@ -1865,7 +1880,7 @@
     stars.visible = skyVisible;
     for (const c of clouds) c.visible = skyVisible;
     if (inCave) {
-      hemi.intensity = 0.78;
+      hemi.intensity = 0.9;
       hemi.color.set(0x9fb0dd);
       hemi.groundColor.set(0x525d7d);
       sun.intensity = 0.02;
@@ -1883,11 +1898,11 @@
     }
     // 天候で暗く
     const wDim = 1 - weather * 0.45;
-    hemi.intensity = s.hem * wDim;
-    // 太陽が低いときは環境光も暖色に (朝夕の空気感)
+    // 太陽が低いときは環境光も暖色に+少し落とす (朝夕は世界全体が夕色に沈む)
     const sunLow = G.smoothstep(0.55, 0.12, Math.abs(Math.sin(((tod - 6) / 12) * Math.PI))) *
                    G.smoothstep(4.5, 6, tod) * (1 - G.smoothstep(19.5, 21, tod));
-    hemi.color.copy(cTop).lerp(_white, 0.5).lerp(cSun, sunLow * 0.7);
+    hemi.intensity = s.hem * wDim * (1 - sunLow * 0.2);
+    hemi.color.copy(cTop).lerp(_white, 0.5).lerp(cSun, sunLow * 0.85);
     hemi.groundColor.set(0x6a7a52);
     // 朝夕は地面にも暖色を強くバウンスさせ、空と前景の乖離を防ぐ
     hemi.groundColor.lerp(cSun, sunLow * 0.7);

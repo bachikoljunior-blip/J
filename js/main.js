@@ -489,7 +489,7 @@
         }
       }
       if (fb) {
-        lookUp = Math.min(6, Math.max(0, fb.pos.y - p.pos.y) * 0.45);
+        lookUp = Math.min(7, Math.max(0, fb.pos.y - p.pos.y) * 0.6);
         // 立ち上がりモーション中は頭部が barH より上に出るため 1.5倍で見積もる
         const headY = fb.pos.y + (fb.D.barH || 3) * 1.5 + 1.0;
         const headAng = Math.atan2(headY - cy, Math.hypot(fb.pos.x - cx, fb.pos.z - cz));
@@ -498,7 +498,9 @@
         overAng = (headAng - ctrAng) - 0.4;
       }
     }
-    framePull = G.clamp(framePull + (overAng > 0 ? overAng * 26 : -6) * dt, 0, 14);
+    // 引き量は控えめに上限 — 引き一辺倒だとボスもプレイヤーも豆粒になる。
+    // 収まらない分は注視点の上方バイアス (lookUp) が仰角で吸収する
+    framePull = G.clamp(framePull + (overAng > 0 ? overAng * 26 : -6) * dt, 0, 9);
 
     camera.position.set(cx, cy, cz);
     // 会話終了直後は前フレーム位置からなだらかに復帰 (スナップバック防止)
@@ -693,8 +695,9 @@
     if (perfAdjustT > 1.2 && started && (lastRawGap < 150 || G.forceDRS)) {
       perfAdjustT = 0;
       let want = resScale;
-      if (perfEMA > 36 && resScale > 0.6) want = Math.max(0.6, resScale - 0.2);
-      else if (perfEMA < 20 && resScale < 1) want = Math.min(1, resScale + 0.1);
+      // 60fps予算 (16.6ms) を基準に、50fps相当を割ったら降下・十分軽ければ復帰
+      if (perfEMA > 26 && resScale > 0.6) want = Math.max(0.6, resScale - 0.2);
+      else if (perfEMA < 16 && resScale < 1) want = Math.min(1, resScale + 0.1);
       if (want !== resScale) {
         resScale = want;
         renderer.setPixelRatio(basePixelRatio * resScale);
