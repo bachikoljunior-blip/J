@@ -488,15 +488,16 @@
         }
       }
       if (fb) {
-        lookUp = Math.min(4.5, Math.max(0, fb.pos.y - p.pos.y) * 0.4);
-        const headY = fb.pos.y + (fb.D.barH || 3) + 1.0;
+        lookUp = Math.min(6, Math.max(0, fb.pos.y - p.pos.y) * 0.45);
+        // 立ち上がりモーション中は頭部が barH より上に出るため 1.5倍で見積もる
+        const headY = fb.pos.y + (fb.D.barH || 3) * 1.5 + 1.0;
         const headAng = Math.atan2(headY - cy, Math.hypot(fb.pos.x - cx, fb.pos.z - cz));
         const ctrAng = Math.atan2((p.pos.y + 1.5 + lookUp) - cy, Math.hypot(p.pos.x - cx, p.pos.z - cz));
         // 視野上半分 (FOV60の半分=0.52rad) に対する余白付き限界
         overAng = (headAng - ctrAng) - 0.4;
       }
     }
-    framePull = G.clamp(framePull + (overAng > 0 ? overAng * 26 : -6) * dt, 0, 12);
+    framePull = G.clamp(framePull + (overAng > 0 ? overAng * 26 : -6) * dt, 0, 14);
 
     camera.position.set(cx, cy, cz);
     // 会話終了直後は前フレーム位置からなだらかに復帰 (スナップバック防止)
@@ -646,9 +647,10 @@
       G.Sky.update(dt, G.State.tod, G.State.weather, camera.position, G.inCave);
       // 暗いほど自機フィルライトを強く。洞窟では携行光として常時強めに灯す
       G.playerLight.position.set(G.Player.pos.x, G.Player.pos.y + 2.2, G.Player.pos.z);
-      G.playerLight.intensity = G.inCave ? 1.25
-        : G.clamp((0.45 - G.Sky.lightLevel) * 1.6, 0, 0.55);
-      G.playerLight.distance = G.inCave ? 16 : 11;
+      // 夜間は自機が背景に溶けないだけの補助光を保証する (夜でも自機は必ず読める)
+      G.playerLight.intensity = G.inCave ? 1.6
+        : G.clamp((0.5 - G.Sky.lightLevel) * 2.0, 0, 0.8);
+      G.playerLight.distance = G.inCave ? 19 : 11;
 
       // ダメージフラッシュ
       if (started) {
@@ -679,8 +681,11 @@
     G.perf.render += (_t2 - _t1 - G.perf.render) * 0.05;
 
     // 動的解像度スケーリング: 低スペック端末では描画解像度を下げて
-    // フレームレートを守る (render時間のEMAで2.5秒ごとに調整)
-    perfEMA += (_t2 - _t0 - perfEMA) * 0.04;
+    // フレームレートを守る (render時間のEMAで調整)。
+    // EMAは実経過時間基準 (τ≈0.8s): フレームレートが低いほど1フレームの
+    // 寄与を大きくし、低fps環境でも数秒で実負荷に収束させる
+    const emaA = 1 - Math.exp(-Math.min(lastRawGap, 1000) / 800);
+    perfEMA += (_t2 - _t0 - perfEMA) * emaA;
     perfAdjustT += dt;
     // RAF間隔が異常に長い環境 (バックグラウンド/ヘッドレス計測) では調整しない。
     // ?drs=1 でガードを無効化 (ヘッドレスでDRS動作そのものを検証するテスト用フック)

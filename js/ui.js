@@ -485,18 +485,23 @@
     ctx.arc(S / 2, S / 2, S / 2 - 1, 0, Math.PI * 2);
     ctx.clip();
     if (G.inCave) {
-      // 洞窟内は岩盤(暗)の上に歩行可能な床(明)を描き、空間の形が読めるように
-      ctx.fillStyle = '#1d2230';
+      // 洞窟内は岩盤(暗)の上に歩行可能な床(明)を描き、空間の形が読めるように。
+      // 床と岩盤の明度差は大きく取り、縁線で輪郭を立てる (110px円では
+      // 微差だと一様な暗色ディスクにしか見えない)
+      ctx.fillStyle = '#10131d';
       ctx.fillRect(0, 0, S, S);
       const C = G.World.CAVE;
       const fx = (C.cx - p.pos.x) / view * S + S / 2;
       const fz = (C.cz - p.pos.z) / view * S + S / 2;
-      ctx.fillStyle = '#3d4560';
-      ctx.beginPath(); ctx.arc(fx, fz, 46 / view * S, 0, Math.PI * 2); ctx.fill();
+      const fr = 46 / view * S;
+      ctx.fillStyle = '#55628a';
+      ctx.beginPath(); ctx.arc(fx, fz, fr, 0, Math.PI * 2); ctx.fill();
       // 入口通路 (北側の縁から主洞へ)
-      const wpx = Math.max(3, 12 / view * S);
+      const wpx = Math.max(4, 14 / view * S);
       const ez = (C.z0 - 18 - p.pos.z) / view * S + S / 2;
       ctx.fillRect(fx - wpx / 2, Math.min(ez, fz), wpx, Math.abs(fz - ez));
+      ctx.strokeStyle = '#8a9cc8'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(fx, fz, fr, 0, Math.PI * 2); ctx.stroke();
     } else {
       const scale = (256 / (MAP_R * 2));
       const sw = view * scale;
@@ -594,6 +599,7 @@
       if (ex) {
         ex.val += n;
         ex.eln.textContent = ex.val;
+        if (G.dmgLog) console.log('[dmg] merge +' + n + ' -> ' + ex.val);
         // 合算中はフェードをリセット (合計値を読み切れる寿命を保証)
         ex.born = Math.max(ex.born, now - 300);
         // 対象が動いた場合は現在位置へ緩やかに寄せる
@@ -613,6 +619,7 @@
     }
     d.active = true; d.t = 0; d.born = performance.now();
     d.firstBorn = d.born; d.riseBorn = d.born;
+    if (G.dmgLog) console.log('[dmg] spawn ' + n + (opts.crit ? ' crit' : ''));
     d.val = n; d.tgt = opts.tgt || null; d.crit = !!opts.crit;
     // ▼ロックオンマーカー/HPバーと重ならないよう、頭上さらに上へ
     d.x = x + (Math.random() - 0.5) * 1.6; d.y = y + 0.7 + Math.random() * 0.5; d.z = z;
@@ -626,7 +633,7 @@
     for (const d of dmgPool) {
       if (!d.active) continue;
       d.t = (now - (d.born || now)) / 1000;
-      if (d.t > 0.9) { d.active = false; d.eln.style.display = 'none'; continue; }
+      if (d.t > 1.25) { d.active = false; d.eln.style.display = 'none'; continue; }
       // 上昇は合算でリセットされない専用タイマーで (数字が下に跳ねない)
       const riseT = (now - (d.riseBorn || d.born)) / 1000;
       const pr = UI.project(d.x, d.y + Math.min(riseT, 1.2) * 1.2, d.z);
@@ -634,7 +641,7 @@
       d.eln.style.display = 'block';
       d.eln.style.left = pr.x + 'px';
       d.eln.style.top = pr.y + 'px';
-      d.eln.style.opacity = d.t > 0.6 ? String(1 - (d.t - 0.6) / 0.3) : '1';
+      d.eln.style.opacity = d.t > 0.95 ? String(1 - (d.t - 0.95) / 0.3) : '1';
     }
   }
 
@@ -765,7 +772,7 @@
         dist = ' <span class="tdist"></span>';
       }
       // 先頭クエストは名前だけでなく「今やること」(desc) を添えて目標を明示
-      const sub = (i === 0 && l.desc) ? `<div class="tsub">${l.desc}</div>` : '';
+      const sub = (i === 0 && l.desc) ? `<div class="tgoal">${l.desc}</div>` : '';
       return `<div class="tline ${l.main ? 'main' : ''} ${l.ready ? 'ready' : ''}">${l.line}${dist}${sub}</div>`;
     }).join('');
   };

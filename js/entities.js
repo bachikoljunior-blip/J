@@ -1518,10 +1518,12 @@
       const rr = e.radius + P.radius - 0.1;
       const d2 = dx * dx + dz * dz;
       if (d2 < rr * rr && d2 > 0.0001) {
+        // 低フレームレートでも1フレームで解決する強い押し出し
+        // (攻撃の踏み込みで敵の内部まで入り、モデルが完全に重なる指摘)
         const d = Math.sqrt(d2);
-        const push = (rr - d) * 0.5;
-        P.pos.x += dx / d * push; P.pos.z += dz / d * push;
-        e.pos.x -= dx / d * push; e.pos.z -= dz / d * push;
+        const push = (rr - d) * 0.95;
+        P.pos.x += dx / d * push * 0.6; P.pos.z += dz / d * push * 0.6;
+        e.pos.x -= dx / d * push * 0.4; e.pos.z -= dz / d * push * 0.4;
       }
     }
 

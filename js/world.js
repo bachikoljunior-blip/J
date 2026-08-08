@@ -299,7 +299,7 @@
     const steep = G.smoothstep(0.3, 0.55, slope);
     if (steep > 0.01) {
       const band = Math.sin(h * 0.85 + G.noise2(x * 0.05, z * 0.05) * 2.4) * 0.5 + 0.5;
-      out.multiplyScalar(1 - steep * (0.08 + band * 0.2));
+      out.multiplyScalar(1 - steep * (0.1 + band * 0.3));
     }
     // 水中は砂色へ
     if (h < WATER_Y + 0.4) {
@@ -455,7 +455,8 @@
         uFogColor: { value: new THREE.Color(0xbccfdd) },
         uFogNear: { value: 60 },
         uFogFar: { value: 260 },
-        uLight: { value: 1.0 }
+        uLight: { value: 1.0 },
+        uTint: { value: new THREE.Color(0xffffff) }
       },
       vertexShader: `
         attribute vec3 color;
@@ -475,11 +476,13 @@
       fragmentShader: `
         varying vec3 vColor;
         varying float vDist;
-        uniform vec3 uFogColor;
+        uniform vec3 uFogColor, uTint;
         uniform float uFogNear, uFogFar, uLight;
         void main(){
           float f = smoothstep(uFogNear, uFogFar, vDist);
-          vec3 c = mix(vColor * uLight, uFogColor, f);
+          // 朝夕の暖色ティントを草にも乗せる (木々だけ暗く沈み草が自己発光
+          // して見える乖離の解消)
+          vec3 c = mix(vColor * uLight * uTint, uFogColor, f);
           gl_FragColor = vec4(c, 1.0);
         }`,
       side: THREE.DoubleSide
@@ -784,8 +787,9 @@
           vec3 c = mix(base, uColor2 * uSunTint, k) * uLight;
           vec3 n = normalize(vNorm);
           vec3 vd = normalize(cameraPosition - vWorld);
-          // 角度依存フレネル: 浅い角度ほど空 (フォグ色) を強く映す
-          float fr = 0.1 + 0.7 * pow(1.0 - max(dot(vd, n), 0.0), 3.0);
+          // 角度依存フレネル: 浅い角度ほど空 (フォグ色) を強く映す。
+          // ベース反射は高め — 見下ろしでも空色 (夕刻の暖色) が水面に乗る
+          float fr = 0.24 + 0.62 * pow(1.0 - max(dot(vd, n), 0.0), 3.0);
           fr += smoothstep(12.0, 140.0, vDist) * 0.3;
           c = mix(c, uFogColor, clamp(fr, 0.0, 0.85));
           // 太陽のスペキュラ: 鋭い芯 + 広いサンパス帯の2ローブ
@@ -795,7 +799,7 @@
           float spec = pow(ndh, 110.0) * 0.9 + pow(ndh, 16.0) * 0.22;
           c += uSunTint * spec * uSunI;
           // 波頭の白泡 (単色の平面に見えないよう頂部だけ砕けさせる)
-          c += vec3(0.85, 0.9, 0.95) * smoothstep(0.34, 0.5, vWave) * 0.2 * uLight;
+          c += vec3(0.85, 0.9, 0.95) * smoothstep(0.2, 0.42, vWave) * 0.3 * uLight;
           float f = smoothstep(uFogNear, uFogFar, vDist);
           c = mix(c, uFogColor, f);
           gl_FragColor = vec4(c, 0.82 + fr * 0.1);
@@ -1186,7 +1190,9 @@
     }
     for (let i = 0; i < 3; i++) addShrooms(cx + (i % 2 ? 7 : -7), 1168 + i * 12);
     // 光る水晶
-    const crystalMat = new THREE.MeshLambertMaterial({ color: 0x77ccff, emissive: 0x3377bb });
+    // エミッシブは控えめに: 強すぎるとファセット陰影が消え、近接時に
+    // 白飛びした均一シアンのビルボードに見える
+    const crystalMat = new THREE.MeshLambertMaterial({ color: 0x77ccff, emissive: 0x255e8c });
     const glowMap = G.makeRadialTex(64, [[0, 'rgba(130,200,255,0.8)'], [1, 'rgba(80,150,255,0)']]);
     const addCrystal = (px, pz, s) => {
       const c = new THREE.Mesh(new THREE.OctahedronGeometry(0.7 * s, 0), crystalMat);
@@ -1542,12 +1548,14 @@
   let sparkleT = 0;
 
   /* 草・水のフォグ/明るさ同期 (Sky から呼ぶ) */
+  const _gwhite = new THREE.Color(0xffffff);
   W.syncEnv = function (fogColor, fogNear, fogFar, light, sunTint, sunDir, sunI) {
     if (grassMat) {
       grassMat.uniforms.uFogColor.value.copy(fogColor);
       grassMat.uniforms.uFogNear.value = fogNear;
       grassMat.uniforms.uFogFar.value = fogFar;
       grassMat.uniforms.uLight.value = light;
+      if (sunTint) grassMat.uniforms.uTint.value.copy(sunTint).lerp(_gwhite, 0.35);
     }
     if (waterMesh) {
       const u = waterMesh.material.uniforms;
