@@ -121,7 +121,7 @@
   /* ---------------- イベント ---------------- */
   G.events.on('shake', v => { trauma = Math.min(1, trauma + v); });
   let bossCine = 0, cineBoss = null;
-  G.events.on('bossEngage', b => { bossCine = 2.1; cineBoss = b; });
+  G.events.on('bossEngage', b => { bossCine = 2.1; cineBoss = b; G.events.emit('shake', 0.55); });
   G.events.on('hitstop', v => { hitstop = Math.max(hitstop, v); });
   G.events.on('gameClear', () => { G.Save.save(); });
 
@@ -467,9 +467,11 @@
       updateCamera(dt);
       G.inCave = G.World.inCaveRegion(G.Player.pos.x, G.Player.pos.z);
       G.Sky.update(dt, G.State.tod, G.State.weather, camera.position, G.inCave);
-      // 暗いほど自機フィルライトを強く
+      // 暗いほど自機フィルライトを強く。洞窟では携行光として常時強めに灯す
       G.playerLight.position.set(G.Player.pos.x, G.Player.pos.y + 2.2, G.Player.pos.z);
-      G.playerLight.intensity = G.clamp((0.5 - G.Sky.lightLevel) * 1.6, 0, 0.65);
+      G.playerLight.intensity = G.inCave ? 1.25
+        : G.clamp((0.5 - G.Sky.lightLevel) * 1.6, 0, 0.65);
+      G.playerLight.distance = G.inCave ? 16 : 11;
 
       // ダメージフラッシュ
       if (started) {

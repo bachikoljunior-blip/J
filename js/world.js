@@ -213,8 +213,8 @@
     return 1 - G.smoothstep(1.1, 2.6, Math.sqrt(best));
   }
   /* ny: 事前計算済みの法線Y (省略時は計算する) */
-  const CAVE_FLOOR = new THREE.Color(0x4e5462);
-  const CAVE_FLOOR2 = new THREE.Color(0x39404f);
+  const CAVE_FLOOR = new THREE.Color(0x646b7c);
+  const CAVE_FLOOR2 = new THREE.Color(0x4a5265);
   const FROST_COL = new THREE.Color(0xc8dce6);
   function groundColor(x, z, h, out, ny) {
     if (W.inCaveRegion(x, z)) {
@@ -656,12 +656,16 @@
         uFogNear: { value: 60 },
         uFogFar: { value: 260 },
         uLight: { value: 1.0 },
-        uSunTint: { value: new THREE.Color(0xffffff) }
+        uSunTint: { value: new THREE.Color(0xffffff) },
+        uSunDir: { value: new THREE.Vector3(0.4, 0.8, 0.45) },
+        uSunI: { value: 1.0 }
       },
       vertexShader: `
         uniform float uTime;
         varying float vWave;
         varying float vDist;
+        varying vec3 vNorm;
+        varying vec3 vWorld;
         void main(){
           // メッシュはカメラ追従で動くため、波はワールド座標で評価する
           vec4 wp = modelMatrix * vec4(position, 1.0);
@@ -670,24 +674,41 @@
                   + sin((wp.x + wp.z) * 0.05 + uTime * 0.5) * 0.1;
           wp.y += w;
           vWave = w;
+          // 波形の偏微分から解析的な法線 (傾きは誇張してハイライトを出す)
+          float dwx = cos(wp.x * 0.08 + uTime * 1.1) * 0.0144
+                    + cos((wp.x + wp.z) * 0.05 + uTime * 0.5) * 0.005;
+          float dwz = cos(wp.z * 0.11 + uTime * 0.8) * 0.0154
+                    + cos((wp.x + wp.z) * 0.05 + uTime * 0.5) * 0.005;
+          vNorm = normalize(vec3(-dwx * 7.0, 1.0, -dwz * 7.0));
+          vWorld = wp.xyz;
           vec4 mv = viewMatrix * wp;
           vDist = -mv.z;
           gl_Position = projectionMatrix * mv;
         }`,
       fragmentShader: `
-        uniform vec3 uColor, uColor2, uFogColor, uSunTint;
-        uniform float uFogNear, uFogFar, uLight;
+        uniform vec3 uColor, uColor2, uFogColor, uSunTint, uSunDir;
+        uniform float uFogNear, uFogFar, uLight, uSunI;
         varying float vWave;
         varying float vDist;
+        varying vec3 vNorm;
+        varying vec3 vWorld;
         void main(){
           float k = smoothstep(-0.3, 0.4, vWave);
           vec3 base = uColor * mix(vec3(1.0), uSunTint, 0.55);
           vec3 c = mix(base, uColor2 * uSunTint, k) * uLight;
-          float fr = 0.14 + smoothstep(12.0, 140.0, vDist) * 0.62;
-          c = mix(c, uFogColor, fr);   // 擬似フレネル: 遠いほど空を映す
+          vec3 n = normalize(vNorm);
+          vec3 vd = normalize(cameraPosition - vWorld);
+          // 角度依存フレネル: 浅い角度ほど空 (フォグ色) を強く映す
+          float fr = 0.07 + 0.7 * pow(1.0 - max(dot(vd, n), 0.0), 3.0);
+          fr += smoothstep(12.0, 140.0, vDist) * 0.2;
+          c = mix(c, uFogColor, clamp(fr, 0.0, 0.85));
+          // 太陽のスペキュラ (波の法線でギラつく光帯)
+          vec3 h = normalize(vd + normalize(uSunDir));
+          float spec = pow(max(dot(n, h), 0.0), 110.0) * uSunI;
+          c += uSunTint * spec * 0.9;
           float f = smoothstep(uFogNear, uFogFar, vDist);
           c = mix(c, uFogColor, f);
-          gl_FragColor = vec4(c, 0.82);
+          gl_FragColor = vec4(c, 0.82 + fr * 0.1);
         }`
     });
     waterMesh = new THREE.Mesh(geo, mat);
@@ -805,14 +826,14 @@
     }));
     glow.position.copy(crystal.position);
     glow.scale.set(1.6, 1.6, 1);
-    glow.material.opacity = 0.75;
+    glow.material.opacity = 0.55;
     scene.add(glow);
     addStatic(x - 1.3, z, 0.45); addStatic(x + 1.3, z, 0.45);
     // 遠くからでも見える光の柱
     const beam = new THREE.Mesh(
       new THREE.CylinderGeometry(0.55, 0.85, 70, 6, 1, true),
       new THREE.MeshBasicMaterial({
-        color: 0x55bbff, transparent: true, opacity: 0.16,
+        color: 0x55bbff, transparent: true, opacity: 0.1,
         blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
       })
     );
@@ -994,12 +1015,12 @@
       glow.scale.set(3.2, 3.2, 1);
       scene.add(glow);
     }
-    // 青い光源 (中央 + 入口側)
+    // 青い光源 (中央 + 入口側)。床の高さ基準で置く (固定yだと地中に埋まり寄与しない)
     const pt = new THREE.PointLight(0x6699dd, 1.1, 70);
-    pt.position.set(cx, 66, cz);
+    pt.position.set(cx, caveHeight(cx, cz) + 9, cz);
     scene.add(pt);
     const pt2 = new THREE.PointLight(0xffe0b0, 2.6, 42);
-    pt2.position.set(cx, 62.5, 1164);
+    pt2.position.set(cx, caveHeight(cx, 1164) + 3.2, 1164);
     scene.add(pt2);
     // 出口の枠
     const arch = G.mergeGeo([
@@ -1147,7 +1168,8 @@
           const t = G.clamp(((c.x - ax) * dx + (c.z - az) * dz) / len2, 0.15, 0.95);
           const px = ax + dx * t, pz = az + dz * t;
           const d2 = G.dist2(px, pz, c.x, c.z);
-          const rr = c.r * 0.85;
+          // 幹の衝突円より広めに取り、樹冠が視界を塞ぐ前にカメラを寄せる
+          const rr = Math.max(c.r * 0.85, 1.15);
           if (d2 < rr * rr) occ = Math.min(occ, Math.max(0.3, t - 0.08));
         }
       }
@@ -1284,7 +1306,7 @@
   let sparkleT = 0;
 
   /* 草・水のフォグ/明るさ同期 (Sky から呼ぶ) */
-  W.syncEnv = function (fogColor, fogNear, fogFar, light, sunTint) {
+  W.syncEnv = function (fogColor, fogNear, fogFar, light, sunTint, sunDir, sunI) {
     if (grassMat) {
       grassMat.uniforms.uFogColor.value.copy(fogColor);
       grassMat.uniforms.uFogNear.value = fogNear;
@@ -1298,6 +1320,8 @@
       u.uFogFar.value = fogFar;
       u.uLight.value = light;
       if (sunTint) u.uSunTint.value.copy(sunTint);
+      if (sunDir) u.uSunDir.value.copy(sunDir);
+      if (sunI !== undefined) u.uSunI.value = sunI;
     }
   };
 })();
@@ -1507,17 +1531,17 @@
     stars.visible = skyVisible;
     for (const c of clouds) c.visible = skyVisible;
     if (inCave) {
-      hemi.intensity = 0.55;
-      hemi.color.set(0x93a4d4);
-      hemi.groundColor.set(0x46506a);
+      hemi.intensity = 0.78;
+      hemi.color.set(0x9fb0dd);
+      hemi.groundColor.set(0x525d7d);
       sun.intensity = 0.02;
-      _fogC.set(0x0b0f1c);
+      _fogC.set(0x10152a);
       scene.fog.color.copy(_fogC);
-      scene.fog.near = 10;
-      scene.fog.far = 78;
+      scene.fog.near = 12;
+      scene.fog.far = 96;
       if (scene.background) scene.background.copy(_fogC);
       rainPts.material.opacity = 0;
-      const lightC = 0.52;
+      const lightC = 0.6;
       Sky.lightLevel = lightC;
       G.World.syncEnv(_fogC, scene.fog.near, scene.fog.far, lightC);
       return;
@@ -1597,9 +1621,12 @@
     const wantPrecip = weather > 0.5 ? 1 : (snowy ? 0.7 : 0);
     rainOn += (wantPrecip - rainOn) * G.damp(1.5, dt);
     const snowMode = snowy && weather <= 0.5;
+    // 夜間は雨粒を明るく・不透明にして暗背景でも見えるようにする
+    const darkF = 1 - G.clamp(s.hem * 1.7, 0, 1);
     rainPts.material.color.set(snowMode ? 0xffffff : 0xaec8dc);
-    rainPts.material.size = snowMode ? 0.26 : 0.42;
-    rainPts.material.opacity = rainOn * (snowMode ? 0.85 : 0.7);
+    if (!snowMode) rainPts.material.color.lerp(_white, darkF * 0.85);
+    rainPts.material.size = snowMode ? 0.26 : 0.42 + darkF * 0.12;
+    rainPts.material.opacity = rainOn * (snowMode ? 0.85 : 0.7 + darkF * 0.25);
     if (rainOn > 0.02) {
       const pa = rainPts.geometry.attributes.position;
       const fall = snowMode ? 0.12 : 1;
@@ -1622,6 +1649,7 @@
     const light = G.clamp(0.05 + s.hem * 1.4, 0.16, 1.15) * wDim;
     Sky.lightLevel = light;
     _tint.set(0xffffff).lerp(cSun, sunLow * 0.85);
-    G.World.syncEnv(_fogC, scene.fog.near, scene.fog.far, light, _tint);
+    G.World.syncEnv(_fogC, scene.fog.near, scene.fog.far, light, _tint,
+      _sunDir, G.clamp(_sunDir.y * 2.2, 0, 1) * s.dir * wDim);
   };
 })();

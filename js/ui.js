@@ -590,18 +590,23 @@
   const toasts = [];
   UI.toast = function (msg, kind) {
     const t = el('div', 'toast ' + (kind || ''), toastWrap, msg);
-    toasts.push({ eln: t, t: 0 });
+    toasts.push({ eln: t, born: performance.now() });
     if (toasts.length > 3) {
       const old = toasts.shift();
       old.eln.remove();
     }
   };
-  function updateToasts(dt) {
+  UI.clearToasts = function () {
+    for (const t of toasts) t.eln.remove();
+    toasts.length = 0;
+  };
+  function updateToasts() {
+    // 実時間で寿命管理 (低FPS環境でゲームdtが縮んでも残留させない)
+    const now = performance.now();
     for (let i = toasts.length - 1; i >= 0; i--) {
-      const t = toasts[i];
-      t.t += dt;
-      if (t.t > 2.4) { t.eln.classList.add('fade'); }
-      if (t.t > 3.0) { t.eln.remove(); toasts.splice(i, 1); }
+      const age = (now - toasts[i].born) / 1000;
+      if (age > 2.6) { toasts[i].eln.classList.add('fade'); }
+      if (age > 3.4) { toasts[i].eln.remove(); toasts.splice(i, 1); }
     }
   }
 
@@ -622,10 +627,11 @@
     bossName.textContent = b.name;
     bossWrap.style.display = 'block';
     if (isNew) {
-      // 登場演出: 中央に大きく名前
+      // 登場演出: 通常トーストを消し、中央に大きく名前
+      UI.clearToasts();
       const intro = el('div', 'bossintro', root, b.name);
-      setTimeout(() => { intro.classList.add('out'); }, 2200);
-      setTimeout(() => { intro.remove(); }, 3400);
+      setTimeout(() => { intro.classList.add('out'); }, 3200);
+      setTimeout(() => { intro.remove(); }, 4400);
     }
   };
   UI.hideBoss = function () {
