@@ -15,6 +15,8 @@ let ui = null;
 let running = false;
 let lastTime = 0;
 let pausedForVisibility = false;
+let frameRequest = 0;
+let contextLost = false;
 
 const LOAD_TIPS = [
   '左側をドラッグして移動。右側をスワイプして視点を動かせます。',
@@ -316,7 +318,11 @@ function startGame(opts) {
     document.body.classList.add('playing');
     game.paused = false;
     game.input.enabled = true;
-    if (!running) { running = true; lastTime = performance.now(); requestAnimationFrame(frame); }
+    if (!running && !contextLost) {
+      running = true;
+      lastTime = performance.now();
+      frameRequest = requestAnimationFrame(frame);
+    }
   });
 }
 
@@ -325,7 +331,7 @@ function startGame(opts) {
 // ---------------------------------------------------------------------------
 
 function frame(now) {
-  requestAnimationFrame(frame);
+  if (!running || contextLost) return;
   let dt = (now - lastTime) / 1000;
   lastTime = now;
   // A long stall (tab switch, GC pause) must not teleport the world.
@@ -337,9 +343,12 @@ function frame(now) {
     if (game.started) ui.update(dt);
   } catch (err) {
     console.error(err);
-    showFatal(err);
     running = false;
+    frameRequest = 0;
+    showFatal(err);
+    return;
   }
+  frameRequest = requestAnimationFrame(frame);
 }
 
 function showFatal(err) {
@@ -382,6 +391,33 @@ function init() {
     if (ui && ui.screen === 'map') ui._drawWorldMap();
   });
   window.addEventListener('orientationchange', () => setTimeout(() => game && game.resize(), 250));
+
+  // iOS may reclaim the GPU context when memory is tight or the app is sent
+  // to the background. Rebuilding every renderer resource in-place is more
+  // fragile than restoring from the small autosave, so save first and reload
+  // once the browser confirms that a context is available again.
+  canvas.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault();
+    contextLost = true;
+    game?.autosave('描画復旧前', true);
+    game && (game.paused = true);
+    running = false;
+    if (frameRequest) cancelAnimationFrame(frameRequest);
+    frameRequest = 0;
+    const overlay = $('overlay');
+    overlay.className = 'overlay open';
+    overlay.innerHTML = `
+      <div class="panel">
+        <div class="panel-head"><h2>描画を復旧しています</h2></div>
+        <div class="panel-body center">
+          <p>進行状況は保存済みです。数秒で安全に再開します。</p>
+          <button class="btn primary" onclick="location.reload()">今すぐ再開</button>
+        </div>
+      </div>`;
+  });
+  canvas.addEventListener('webglcontextrestored', () => {
+    setTimeout(() => location.reload(), 80);
+  });
 
   // Any first touch unlocks audio on mobile.
   const unlock = () => { game.audio.init(); game.audio.resume(); };
@@ -427,14 +463,15 @@ function init() {
   if (!running) {
     running = true;
     lastTime = performance.now();
-    requestAnimationFrame(titleFrame);
+    frameRequest = requestAnimationFrame(titleFrame);
   }
 }
 
 /** Before a world exists there is nothing to draw; just keep the clock alive. */
 function titleFrame(now) {
-  if (game && game.started) { lastTime = now; requestAnimationFrame(frame); return; }
-  requestAnimationFrame(titleFrame);
+  if (!running || contextLost) return;
+  if (game && game.started) { lastTime = now; frameRequest = requestAnimationFrame(frame); return; }
+  frameRequest = requestAnimationFrame(titleFrame);
   lastTime = now;
 }
 

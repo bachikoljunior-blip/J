@@ -62,3 +62,19 @@ test('all touch actions retain an accessible label', async () => {
     assert.match(attrs, /aria-label="[^"]+"/, `${id} has no aria-label`);
   }
 });
+
+test('the frame loop stops after a fatal error and WebGL loss is recoverable', async () => {
+  const source = await readFile(resolve(root, 'src/main.js'), 'utf8');
+  const frame = source.match(/function frame\(now\) \{([\s\S]*?)\n\}/)?.[1] || '';
+  assert.ok(frame.indexOf('try {') < frame.indexOf('requestAnimationFrame(frame)'),
+    'the next frame must only be queued after a successful update');
+  assert.match(source, /webglcontextlost/);
+  assert.match(source, /webglcontextrestored/);
+  assert.match(source, /autosave\('描画復旧前'/);
+});
+
+test('mobile controls never shrink below a 44px touch target', async () => {
+  const css = await readFile(resolve(root, 'style.css'), 'utf8');
+  assert.match(css, /--btn-sm:\s*clamp\(44px,/);
+  assert.match(css, /button\s*\{\s*min-width:\s*44px;\s*min-height:\s*44px;/);
+});
