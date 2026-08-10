@@ -34,7 +34,7 @@ import { resolveMeleeHits, Projectile, AreaEffect } from './combat.js';
 import { QuestLog, QUESTS, QUEST_BY_ID, NPCS, DIALOGUE } from './quests.js';
 import { getItem, getSpell, ITEM_BY_ID, UPGRADE_COST, UPGRADE_MATERIAL, UPGRADE_MUL } from './items.js';
 
-import { Input, ACTION, haptic } from '../core/input.js';
+import { Input, ACTION, haptic, setHapticsEnabled } from '../core/input.js';
 import { AudioEngine } from '../core/audio.js';
 import { makeRng, hash2 } from '../core/rng.js';
 import { clamp, lerp, saturate, damp, v3distXZ, angleDelta, TAU, sphereInFrustum } from '../core/math.js';
@@ -141,6 +141,14 @@ export class Game {
       master: 0.8, music: 0.5, sfx: 0.9,
       showDamage: true,
       cameraAssist: true,
+      autoLock: true,
+      haptics: true,
+      leftHanded: false,
+      uiScale: 1,
+      reducedMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false,
+      showObjectives: true,
+      trackedQuest: 'main_1',
+      tutorialVersion: 0,
       language: 'ja',
     }, loadSettings() || {});
 
@@ -149,8 +157,10 @@ export class Game {
     this.input = new Input(document.getElementById('touch-layer'));
     this.input.sensitivity = this.settings.sensitivity;
     this.input.invertY = this.settings.invertY;
+    this.input.leftHanded = this.settings.leftHanded;
     this.audio = new AudioEngine();
     this.audio.setVolumes({ master: this.settings.master, music: this.settings.music, sfx: this.settings.sfx });
+    this.applyPreferences();
 
     this.actors = [];
     this.enemies = [];
@@ -191,6 +201,9 @@ export class Game {
     /** Whether the resolution is allowed to hunt. See _updatePerf. */
     this.autoResolution = true;
     this._perfTimer = 0;
+    this.activeSaveSlot = 0;
+    this._autosaveClock = 0;
+    this._lastAutosave = 0;
   }
 
   _guessQuality() {
@@ -200,6 +213,18 @@ export class Game {
     if (mem <= 3 || cores <= 4 || small) return 'low';
     if (mem <= 6 || cores <= 6) return 'medium';
     return 'high';
+  }
+
+  applyPreferences() {
+    if (this.input) {
+      this.input.sensitivity = this.settings.sensitivity;
+      this.input.invertY = this.settings.invertY;
+      this.input.leftHanded = !!this.settings.leftHanded;
+    }
+    setHapticsEnabled(this.settings.haptics);
+    document.documentElement.style.setProperty('--ui-scale', String(clamp(this.settings.uiScale || 1, 0.82, 1.2)));
+    document.body.classList.toggle('left-handed', !!this.settings.leftHanded);
+    document.body.classList.toggle('reduce-motion', !!this.settings.reducedMotion);
   }
 
   // -------------------------------------------------------------------------
@@ -743,6 +768,8 @@ export class Game {
     this.renderer.hour = 8.5;
     this.started = true;
     this._afterPlayerReady();
+    this.autosave('旅の開始', true);
+    this.ui?.startOnboarding();
   }
 
   loadFromData(data) {
@@ -803,6 +830,7 @@ export class Game {
     this.playtime = data.meta?.playtime || 0;
     this.started = true;
     this._afterPlayerReady();
+    this.autosave('再開', true);
   }
 
   _afterPlayerReady() {
@@ -851,6 +879,31 @@ export class Game {
     this.ui?.pushNotification(text, kind);
   }
 
+  /** Route quest events through one place so progression is never silent. */
+  questEvent(event) {
+    const progressed = this.quests.notify(event);
+    for (const entry of progressed) {
+      const q = entry.quest;
+      const result = entry.result || {};
+      if (result.failed) {
+        this.notify(`失敗：${q.name}`, 'bad');
+      } else if (result.ready) {
+        this.notify(`報告可能：${q.name}`, 'good');
+      } else if (result.completed) {
+        this.notify(`使命完了：${q.name}`, 'good');
+        if (q.main && q.next) this.settings.trackedQuest = q.next;
+      } else if (result.step) {
+        this.notify(`使命更新：${result.step.text}`, 'discovery');
+      }
+    }
+    if (progressed.length) {
+      saveSettings(this.settings);
+      this.ui?.pulseObjective();
+      this.autosave('使命更新');
+    }
+    return progressed;
+  }
+
   shake(amp, dur) {
     this.player?.camera.shake(amp, dur);
   }
@@ -875,6 +928,9 @@ export class Game {
       this.input.endFrame(dt);
       return;
     }
+
+    this._autosaveClock += dt;
+    if (this._autosaveClock >= 60) this.autosave('定期保存');
 
     const p = this.player;
 
@@ -1139,7 +1195,7 @@ export class Game {
           this.notify(`${poi.name} を発見`, 'discovery');
           this.audio.playDiscovery();
         }
-        this.quests.notify({ type: 'reach', poi: poi.id });
+        this.questEvent({ type: 'reach', poi: poi.id });
       }
     }
 
@@ -1175,6 +1231,7 @@ export class Game {
     this.audio.playGrace();
     this.ui?.openGrace(poi);
     this.notify(`${poi.name} で休息した`);
+    this.autosave('篝火');
   }
 
   onLeaveGrace() {
@@ -1202,7 +1259,7 @@ export class Game {
     this.audio.playPickup();
     haptic(20);
     this.ui?.showLoot(lines);
-    this.quests.notify({ type: 'inventory', has: (id) => p.countItem(id) > 0 });
+    this.questEvent({ type: 'inventory', has: (id) => p.countItem(id) > 0 });
   }
 
   useShrine(poi) {
@@ -1217,7 +1274,7 @@ export class Game {
     p.recomputeDerived();
     this.audio.playLevelUp();
     this.notify(`古き祠の加護：${statLabel(stat)} +1`, 'good');
-    this.quests.notify({ type: 'shrine' });
+    this.questEvent({ type: 'shrine' });
     this.particles.burst(poi.x, poi.y + 1.2, poi.z, 30, {
       r: 0.6, g: 0.8, b: 1.0, size: 0.2, life: 1.2, spread: 1.6, up: 2.6,
       blend: BLEND.ADDITIVE, alpha: 0.9, drag: 1.2, gravity: 0.6,
@@ -1228,7 +1285,7 @@ export class Game {
     this.dialogue = { npc, node: 'start', tree: DIALOGUE[npc.npcDef.dialogue] };
     npc.faceTowards(this.player.x, this.player.z, 1, 20);
     this.player.faceTowards(npc.x, npc.z, 1, 20);
-    this.quests.notify({ type: 'talk', npc: npc.npcId });
+    this.questEvent({ type: 'talk', npc: npc.npcId });
     this.ui?.openDialogue(this.dialogue);
     this.audio.playUI('confirm');
   }
@@ -1452,11 +1509,11 @@ export class Game {
           }
         }
       }
-      this.quests.notify({ type: 'kill', archetype: actor.archetypeId });
+      this.questEvent({ type: 'kill', archetype: actor.archetypeId });
       if (actor.isMiniBoss && actor.spawnRef) {
         this.minisKilled.add(actor.spawnRef.key);
         const kind = actor.spawnRef.mini;
-        this.quests.notify({ type: 'kill', archetype: kind });
+        this.questEvent({ type: 'kill', archetype: kind });
       }
     }
 
@@ -1484,12 +1541,13 @@ export class Game {
     const gained = this.player.gainSouls(reward.souls || boss.soulsValue);
     if (reward.item) this.player.addItem(reward.item, 1);
     for (const [id, n] of reward.extra || []) this.player.addItem(id, n);
-    this.quests.notify({ type: 'boss', boss: boss.bossId });
-    this.quests.notify({ type: 'inventory', has: (id) => this.player.countItem(id) > 0 });
+    this.questEvent({ type: 'boss', boss: boss.bossId });
+    this.questEvent({ type: 'inventory', has: (id) => this.player.countItem(id) > 0 });
     this.audio.playVictory();
     this.ui?.showBossVictory(def, gained, reward);
     this.schedule(0.4, () => { this.ui?.hideBossBar(); });
     this.bossActive = null;
+    this.autosave('王の撃破', true);
     if (reward.ending) this.schedule(4.0, () => this.ui?.showEnding());
   }
 
@@ -1497,14 +1555,14 @@ export class Game {
   //  Queries used by the player and UI
   // -------------------------------------------------------------------------
 
-  findLockTarget(from, current = null, dir = 0) {
+  findLockTarget(from, current = null, dir = 0, maxDist = 30) {
     const cam = from.camera;
     let best = null, bestScore = -Infinity;
     for (const a of this.actors) {
       if (a === from || a.dead || a.faction === from.faction) continue;
       if (a.faction === FACTION.NEUTRAL) continue;
       const d = v3distXZ(from, a);
-      if (d > 30) continue;
+      if (d > maxDist) continue;
       // Prefer targets near the centre of the screen.
       const ang = Math.atan2(a.x - from.x, a.z - from.z);
       const off = angleDelta(cam.yaw, ang);
@@ -1856,10 +1914,27 @@ export class Game {
 
   // -------------------------------------------------------------------------
 
-  save(slot) {
-    const ok = saveGame(slot, this);
-    if (ok) this.notify('セーブしました');
-    else this.notify('セーブに失敗しました', 'bad');
+  save(slot, opts = {}) {
+    const target = clamp(Number.isFinite(slot) ? Math.floor(slot) : this.activeSaveSlot, 0, 2);
+    this.activeSaveSlot = target;
+    const ok = saveGame(target, this);
+    if (ok) {
+      this._lastAutosave = Date.now();
+      this._autosaveClock = 0;
+      if (opts.silent) this.ui?.showSavePulse();
+      else this.notify(`スロット${target + 1}にセーブしました`);
+    } else if (!opts.silent) {
+      this.notify('セーブに失敗しました', 'bad');
+    }
+    return ok;
+  }
+
+  autosave(reason = '自動保存', force = false) {
+    if (!this.started || !this.player || this.player.dead) return false;
+    const now = Date.now();
+    if (!force && now - this._lastAutosave < 15000) return false;
+    const ok = this.save(this.activeSaveSlot, { silent: true });
+    if (!ok) this.notify(`${reason}に失敗しました`, 'bad');
     return ok;
   }
 }
