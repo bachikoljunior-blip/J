@@ -1,3 +1,4 @@
-commit 704588a12adacf75e24b1df95bd1f1f731cd2c81
-branch claude/mobile-open-world-action-rpg-kbf2zt
-built  2026-08-10 15:55 UTC
+release quality-reforged-v3
+base 704588a12adacf75e24b1df95bd1f1f731cd2c81
+branch codex/quality-reforge-v3
+built 2026-08-11

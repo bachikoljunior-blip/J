@@ -13,7 +13,13 @@ const VERSION = 3;
 export function listSaves() {
   const out = [];
   for (let i = 0; i < 3; i++) {
-    const raw = localStorage.getItem(PREFIX + i);
+    let raw = null;
+    try {
+      raw = localStorage.getItem(PREFIX + i);
+    } catch (e) {
+      out.push(null);
+      continue;
+    }
     if (!raw) { out.push(null); continue; }
     try {
       const data = JSON.parse(raw);
@@ -99,9 +105,9 @@ export function saveGame(slot, game) {
 }
 
 export function loadGameData(slot) {
-  const raw = localStorage.getItem(PREFIX + slot);
-  if (!raw) return null;
   try {
+    const raw = localStorage.getItem(PREFIX + slot);
+    if (!raw) return null;
     const data = JSON.parse(raw);
     if (!data.version || data.version > VERSION) return null;
     return data;
@@ -111,7 +117,12 @@ export function loadGameData(slot) {
 }
 
 export function deleteSave(slot) {
-  localStorage.removeItem(PREFIX + slot);
+  try {
+    localStorage.removeItem(PREFIX + slot);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 const SETTINGS_KEY = 'kurogane.settings';

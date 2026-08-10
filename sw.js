@@ -1,7 +1,7 @@
 // Offline cache. The whole game is a handful of source files, so a simple
 // cache-first strategy with a versioned bucket is enough — bump CACHE on
 // release and the old bucket is dropped on activate.
-const CACHE = 'kurogane-v1';
+const CACHE = 'kurogane-v3-quality-reforged';
 
 const ASSETS = [
   './',
@@ -9,6 +9,9 @@ const ASSETS = [
   './style.css',
   './manifest.json',
   './icon.svg',
+  './icon-180.png',
+  './icon-192.png',
+  './icon-512.png',
   './src/main.js',
   './src/core/math.js',
   './src/core/rng.js',
@@ -58,6 +61,18 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).then((res) => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put('./index.html', copy));
+        }
+        return res;
+      }).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then((hit) => hit || fetch(e.request).then((res) => {
       if (res && res.status === 200 && res.type === 'basic') {
