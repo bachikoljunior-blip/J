@@ -1,7 +1,7 @@
 // Offline cache. The whole game is a handful of source files, so a simple
 // cache-first strategy with a versioned bucket is enough — bump CACHE on
 // release and the old bucket is dropped on activate.
-const CACHE = 'kurogane-v2-quality-reforged';
+const CACHE = 'kurogane-v3-quality-reforged';
 
 const ASSETS = [
   './',
@@ -9,6 +9,9 @@ const ASSETS = [
   './style.css',
   './manifest.json',
   './icon.svg',
+  './icon-180.png',
+  './icon-192.png',
+  './icon-512.png',
   './src/main.js',
   './src/core/math.js',
   './src/core/rng.js',
