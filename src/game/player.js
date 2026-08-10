@@ -469,11 +469,6 @@ export class Player extends Actor {
     this.blocking = wantGuard && !this.busy;
 
     // --- action inputs, with a short buffer so presses during recovery land --
-    if ((input.pressed(ACTION.ATTACK) || input.pressed(ACTION.HEAVY))
-      && !this.lockTarget && this.game.settings.autoLock) {
-      const assist = this.game.findLockTarget(this, null, 0, 14);
-      if (assist) this.lockTarget = assist;
-    }
     if (input.pressed(ACTION.ATTACK)) this._buffer('light');
     if (input.pressed(ACTION.HEAVY)) this._buffer('heavy');
     if (input.pressed(ACTION.DODGE) && this.sprintHeld < 0.22) this._buffer('dodge');

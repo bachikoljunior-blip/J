@@ -25,12 +25,6 @@ export const ACTION = {
   TWOHAND: 'twohand',
 };
 
-let hapticsEnabled = true;
-
-export function setHapticsEnabled(enabled) {
-  hapticsEnabled = enabled !== false;
-}
-
 const KEY_MAP = {
   KeyW: 'up', ArrowUp: 'up',
   KeyS: 'down', ArrowDown: 'down',
@@ -69,14 +63,8 @@ export class Input {
     this.pointerLocked = false;
     this.sensitivity = 1.0;
     this.invertY = false;
-    this.leftHanded = false;
     this.enabled = true;
     this.usingTouch = false;
-
-    // Tiny, local usage counters drive the first-run tutorial. They contain no
-    // personal data and never leave the device.
-    this.usage = { move: 0, look: 0 };
-    this.actionCounts = new Map();
 
     this._keys = new Set();
     this._bindings = [];
@@ -94,7 +82,6 @@ export class Input {
       this.down.add(action);
       this.justPressed.add(action);
       this.holdTime.set(action, 0);
-      this.actionCounts.set(action, (this.actionCounts.get(action) || 0) + 1);
     }
   }
 
@@ -109,7 +96,6 @@ export class Input {
   pressed(action) { return this.justPressed.has(action); }
   released(action) { return this.justReleased.has(action); }
   heldFor(action) { return this.holdTime.get(action) || 0; }
-  used(action) { return (this.actionCounts.get(action) || 0) > 0; }
 
   /** Consume a press so one tap cannot trigger two systems. */
   consume(action) { this.justPressed.delete(action); }
@@ -179,10 +165,8 @@ export class Input {
       if (!this.enabled) return;
       this.usingTouch = true;
       for (const t of e.changedTouches) {
-        const movementSide = this.leftHanded
-          ? t.clientX > window.innerWidth * 0.56
-          : t.clientX < window.innerWidth * 0.44;
-        if (movementSide && !this.stick) {
+        const half = window.innerWidth * 0.44;
+        if (t.clientX < half && !this.stick) {
           this.stick = { id: t.identifier, ox: t.clientX, oy: t.clientY, x: 0, y: 0 };
           this._showStick(t.clientX, t.clientY);
         } else if (!this.camTouch) {
@@ -219,7 +203,6 @@ export class Input {
           this.camTouch.lastX = t.clientX;
           this.camTouch.lastY = t.clientY;
           this.camTouch.moved += Math.abs(dx) + Math.abs(dy);
-          this.usage.look += Math.abs(dx) + Math.abs(dy);
           this.lookAccum.x += dx * 0.0055 * this.sensitivity;
           this.lookAccum.y += dy * 0.0045 * this.sensitivity * (this.invertY ? -1 : 1);
         }
@@ -326,7 +309,6 @@ export class Input {
     window.addEventListener('mousemove', (e) => {
       if (!this.enabled) return;
       if (this.pointerLocked) {
-        this.usage.look += Math.abs(e.movementX) + Math.abs(e.movementY);
         this.lookAccum.x += e.movementX * 0.0022 * this.sensitivity;
         this.lookAccum.y += e.movementY * 0.0020 * this.sensitivity * (this.invertY ? -1 : 1);
       }
@@ -357,7 +339,6 @@ export class Input {
       if (Math.abs(ax) > 0.18) mx += ax;
       if (Math.abs(ay) > 0.18) my += ay;
       const rx = pad.axes[2] || 0, ry = pad.axes[3] || 0;
-      this.usage.look += Math.abs(rx) + Math.abs(ry);
       if (Math.abs(rx) > 0.15) this.lookAccum.x += rx * 0.045 * this.sensitivity;
       if (Math.abs(ry) > 0.15) this.lookAccum.y += ry * 0.035 * this.sensitivity * (this.invertY ? -1 : 1);
       this._padButton(pad, 0, ACTION.DODGE);
@@ -377,7 +358,6 @@ export class Input {
     this.move.x = mx;
     this.move.y = my;
     this.moveMag = Math.min(1, mag);
-    if (this.moveMag > 0.08) this.usage.move += this.moveMag;
     return this.move;
   }
 
@@ -390,7 +370,7 @@ export class Input {
 }
 
 export function haptic(ms) {
-  if (hapticsEnabled && navigator.vibrate) {
+  if (navigator.vibrate) {
     try { navigator.vibrate(ms); } catch (e) { /* ignore */ }
   }
 }

@@ -1340,10 +1340,7 @@ export class QuestLog {
         // reward is handed over in conversation, which is also the only place
         // the giver gets to react to what the player actually did.
         const isFinal = s.step === q.steps.length - 1;
-        if (isFinal && q.turnIn) {
-          progressed.push({ quest: q, result: { ready: true, quest: q, step } });
-          continue;
-        }
+        if (isFinal && q.turnIn) continue;
         const r = this.advance(q.id);
         progressed.push({ quest: q, result: r });
       }

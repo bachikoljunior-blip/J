@@ -46,11 +46,6 @@ export class UI {
     this._cache = {};
     this._damageLayer = $('damage-layer');
     this._damagePool = [];
-    this._objectiveTarget = null;
-    this._objectiveKey = '';
-    this._objectivePulse = 0;
-    this._tutorialActive = false;
-    this._tutorialStage = 0;
   }
 
   attach(game) {
@@ -147,8 +142,6 @@ export class UI {
     }
     if (st.innerHTML !== statusHtml) st.innerHTML = statusHtml;
 
-    this._updateObjective(p, dt);
-    this._updateOnboarding();
     this._updateCompass(p);
     this._updateBossBar(dt);
     this._updateNotifications(dt);
@@ -174,7 +167,6 @@ export class UI {
 
     // Enemy health bars for anything currently engaged with the player.
     this._updateEnemyBars(p);
-    document.body.classList.toggle('low-health', !p.dead && p.hp / p.maxHp <= 0.26);
   }
 
   _projectToScreen(x, y, z) {
@@ -238,112 +230,14 @@ export class UI {
       if (d > 600) continue;
       pois.push({ a: Math.atan2(q.x - p.x, q.z - p.z), t: q.kind === 'grace' ? '◆' : q.kind === 'boss' ? '☠' : '⌂', d });
     }
-    if (this._objectiveTarget) {
-      pois.push({
-        a: Math.atan2(this._objectiveTarget.x - p.x, this._objectiveTarget.z - p.z),
-        t: '◇', objective: true,
-      });
-    }
     let html = '';
     for (const m of marks.concat(pois)) {
       const off = angleDelta(yaw, m.a);
       if (Math.abs(off) > 1.15) continue;
       const x = 50 + (off / 1.15) * 50;
-      html += `<span${m.objective ? ' class="objective"' : ''} style="left:${x}%">${m.t}</span>`;
+      html += `<span style="left:${x}%">${m.t}</span>`;
     }
     if (strip.innerHTML !== html) strip.innerHTML = html;
-  }
-
-  _trackedQuest() {
-    const g = this.game;
-    const isActive = (q) => g.quests.get(q.id)?.status === QUEST_STATE.ACTIVE;
-    let q = QUEST_BY_ID.get(g.settings.trackedQuest);
-    if (!q || !isActive(q)) q = QUESTS.find((candidate) => candidate.main && isActive(candidate));
-    if (!q) q = QUESTS.find(isActive);
-    if (q && g.settings.trackedQuest !== q.id) g.settings.trackedQuest = q.id;
-    return q || null;
-  }
-
-  _objectivePosition(q, step, p) {
-    if (!step) return null;
-    const nearest = (list) => {
-      let best = null, bestD = Infinity;
-      for (const point of list) {
-        if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.z)) continue;
-        const d = Math.hypot(point.x - p.x, point.z - p.z);
-        if (d < bestD) { best = point; bestD = d; }
-      }
-      return best;
-    };
-
-    if (step.type === 'talk' || step.type === 'deliver') {
-      const id = step.type === 'talk' ? step.target : (q.turnIn || q.giver);
-      return this.game.npcs.find((npc) => npc.npcId === id) || null;
-    }
-    if (step.type === 'reach') return this.game.world.pois.find((poi) => poi.id === step.target) || null;
-    if (step.type === 'boss') return this.game.world.pois.find((poi) => poi.boss === step.target) || null;
-    if (step.type === 'shrine') {
-      return nearest(this.game.world.pois.filter((poi) => poi.kind === 'shrine' && !this.game.usedShrines.has(poi.id)));
-    }
-    if (step.type === 'explore') {
-      return nearest(this.game.world.pois.filter((poi) => poi.id.startsWith(step.prefix) && !poi.discovered));
-    }
-    if (step.type === 'kill' || step.type === 'kill_any') {
-      const ids = Array.isArray(step.target) ? step.target : [step.target];
-      const live = this.game.enemies.filter((enemy) => ids.includes(enemy.archetypeId) && !enemy.dead);
-      const spawn = this.game.spawnPoints.filter((point) => ids.includes(point.archetype) || ids.includes(point.mini));
-      return nearest(live.length ? live : spawn);
-    }
-    return null;
-  }
-
-  _updateObjective(p, dt) {
-    const tracker = $('objective-tracker');
-    const marker = $('objective-marker');
-    const q = this.game.settings.showObjectives ? this._trackedQuest() : null;
-    const state = q ? this.game.quests.get(q.id) : null;
-    const step = q && state ? q.steps[state.step] : null;
-    if (!q || !step) {
-      tracker.classList.remove('show', 'pulse');
-      marker.classList.remove('show');
-      this._objectiveTarget = null;
-      return;
-    }
-
-    const counter = state.counters[`${step.id}_count`];
-    const progress = counter !== undefined ? ` ${Math.min(counter, step.count || 1)}/${step.count || 1}` : '';
-    const target = this._objectivePosition(q, step, p);
-    this._objectiveTarget = target;
-    $('objective-name').textContent = `${q.main ? '【主】' : ''}${q.name}`;
-    $('objective-step').textContent = `${step.text}${progress}`;
-
-    if (target) {
-      const distance = Math.round(Math.hypot(target.x - p.x, target.z - p.z));
-      const angle = Math.atan2(target.x - p.x, target.z - p.z);
-      const off = angleDelta(p.camera.yaw, angle);
-      const arrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
-      const index = ((Math.round(off / (Math.PI / 4)) % 8) + 8) % 8;
-      $('objective-distance').textContent = `${arrows[index]} ${distance}m`;
-
-      const projected = this._projectToScreen(target.x, this.game.world.heightAt(target.x, target.z) + 3.2, target.z);
-      if (projected && distance < 240) {
-        marker.style.left = `${projected.x}px`;
-        marker.style.top = `${projected.y}px`;
-        marker.querySelector('span').textContent = `${distance}m`;
-        marker.classList.add('show');
-      } else marker.classList.remove('show');
-    } else {
-      $('objective-distance').textContent = '';
-      marker.classList.remove('show');
-    }
-
-    this._objectivePulse = Math.max(0, this._objectivePulse - dt);
-    tracker.classList.toggle('pulse', this._objectivePulse > 0);
-    tracker.classList.add('show');
-  }
-
-  pulseObjective() {
-    this._objectivePulse = 1.2;
   }
 
   _updateDamageNumbers() {
@@ -443,25 +337,6 @@ export class UI {
       ctx.arc(px, py, q.kind === 'boss' ? 4 : 3, 0, Math.PI * 2);
       ctx.fill();
     }
-    // The tracked objective is clamped to the rim when it is outside the map,
-    // preserving direction without pretending it is nearby.
-    if (this._objectiveTarget) {
-      let dx = (this._objectiveTarget.x - p.x) / worldSpan * S;
-      let dz = (this._objectiveTarget.z - p.z) / worldSpan * S;
-      const mag = Math.hypot(dx, dz);
-      const limit = S / 2 - 9;
-      if (mag > limit) { dx *= limit / mag; dz *= limit / mag; }
-      const px = S / 2 + dx, py = S / 2 + dz;
-      ctx.save();
-      ctx.translate(px, py);
-      ctx.rotate(Math.PI / 4);
-      ctx.fillStyle = '#ffd06f';
-      ctx.strokeStyle = 'rgba(30,18,5,.9)';
-      ctx.lineWidth = 1.5;
-      ctx.fillRect(-4, -4, 8, 8);
-      ctx.strokeRect(-4, -4, 8, 8);
-      ctx.restore();
-    }
     if (p.deathDrop) {
       const dx = (p.deathDrop.x - p.x) / worldSpan * S;
       const dz = (p.deathDrop.z - p.z) / worldSpan * S;
@@ -519,64 +394,6 @@ export class UI {
     this._soulsPop = 1.6;
   }
 
-  showSavePulse() {
-    const node = $('save-indicator');
-    node.classList.add('show');
-    clearTimeout(this._saveTO);
-    this._saveTO = setTimeout(() => node.classList.remove('show'), 1050);
-  }
-
-  startOnboarding(force = false) {
-    if (!force && (this.game.settings.tutorialVersion || 0) >= 2) return;
-    this._tutorialActive = false;
-    this._tutorialStage = 0;
-    this._openScreen('onboarding', `
-      <div class="onboarding">
-        <div class="sigil"></div>
-        <h1>刻印者よ、目を覚ませ</h1>
-        <p class="lead">最初の灯はすぐ近くにある。四つの基本操作だけを確かめれば、あとは自由だ。</p>
-        <div class="onboarding-grid">
-          <div class="onboarding-step"><i>Ⅰ</i><b>歩く</b><span>画面の移動側をドラッグ</span></div>
-          <div class="onboarding-step"><i>Ⅱ</i><b>見渡す</b><span>反対側をスワイプ</span></div>
-          <div class="onboarding-step"><i>Ⅲ</i><b>生き残る</b><span>攻撃と回避を使い分ける</span></div>
-        </div>
-        <button class="btn primary" data-action="tutorial-start">操作を確かめる</button>
-        <button class="skip" data-action="tutorial-skip">説明を省いて始める</button>
-      </div>`);
-  }
-
-  _updateOnboarding() {
-    const node = $('tutorial-card');
-    if (!this._tutorialActive || this.screen) { node.classList.remove('show'); return; }
-    const input = this.game.input;
-    const steps = [
-      ['左側をドラッグして歩く', '指を置いた場所に移動スティックが現れる'],
-      ['右側をスワイプして見渡す', '敵や道標を画面の中央へ'],
-      ['「攻撃」を一度使う', '近い敵には自動で照準を補助する'],
-      ['「回避」を一度使う', '長押ししながら移動するとダッシュ'],
-    ];
-    if (this._tutorialStage === 0 && input.usage.move >= 4) this._tutorialStage = 1;
-    else if (this._tutorialStage === 1 && input.usage.look >= 70) this._tutorialStage = 2;
-    else if (this._tutorialStage === 2 && input.used(ACTION.ATTACK)) this._tutorialStage = 3;
-    else if (this._tutorialStage === 3 && input.used(ACTION.DODGE)) {
-      this._finishTutorial();
-      return;
-    }
-    const current = steps[this._tutorialStage];
-    const dots = steps.map((_, i) => i < this._tutorialStage ? '●' : i === this._tutorialStage ? '◉' : '○').join(' ');
-    node.innerHTML = `<b>${current[0]}</b><span>${current[1]}</span><span class="tutorial-progress">${dots}</span>`;
-    node.classList.add('show');
-  }
-
-  _finishTutorial() {
-    this._tutorialActive = false;
-    this.game.settings.tutorialVersion = 2;
-    saveSettings(this.game.settings);
-    $('tutorial-card').classList.remove('show');
-    this.game.notify('基本操作を習得した。灯火の村へ向かおう。', 'good');
-    this.game.autosave('操作習得');
-  }
-
   showRegionTitle(name, blurb) {
     const node = $('region-title');
     node.innerHTML = `<h2>${escapeHtml(name)}</h2><p>${escapeHtml(blurb || '')}</p>`;
@@ -586,23 +403,10 @@ export class UI {
 
   setInteractPrompt(text) {
     const node = $('interact-prompt');
-    const button = $('btn-interact');
-    const buttonLabel = button?.querySelector('.btn-label');
-    if (!text) {
-      node.classList.remove('show');
-      if (buttonLabel) buttonLabel.textContent = '調べる';
-      return;
-    }
-    const action = text.includes('話す') ? '話す'
-      : text.includes('休息') ? '休む'
-        : text.includes('開ける') ? '開ける'
-          : text.includes('触れる') ? '触れる'
-            : text.includes('くぐる') ? '入る' : '調べる';
-    if (buttonLabel) buttonLabel.textContent = action;
-    if (button) button.setAttribute('aria-label', text);
+    if (!text) { node.classList.remove('show'); return; }
     if (node.dataset.text !== text) {
       node.dataset.text = text;
-      node.innerHTML = `<span class="key">${action}</span> ${escapeHtml(text)}`;
+      node.innerHTML = `<span class="key">調べる</span> ${escapeHtml(text)}`;
     }
     node.classList.add('show');
   }
@@ -678,7 +482,7 @@ export class UI {
         <p>王冠は再び形を取り、灰は静かに降りやんだ。<br>
         だが刻印は消えない。次に目を覚ますのは、いつになるだろう。</p>
         <p class="stats">
-          討伐した王・異形：${this.game.bossesKilled.size} / ${this.game.spawnPoints.filter((s) => s.kind === 'boss').length}<br>
+          討伐した王：${this.game.bossesKilled.size} / 6<br>
           討った者：${this.game.killCount}<br>
           死んだ回数：${this.game.deaths}<br>
           旅の時間：${formatPlaytime(this.game.playtime)}
@@ -727,9 +531,6 @@ export class UI {
       if (key === 'invertY') this.game.input.invertY = v;
       if (['master', 'music', 'sfx'].includes(key)) {
         this.game.audio.setVolumes({ [key]: v });
-      }
-      if (['uiScale', 'leftHanded', 'haptics', 'reducedMotion'].includes(key)) {
-        this.game.applyPreferences();
       }
       saveSettings(this.game.settings);
       const out = t.parentElement.querySelector('.range-value');
@@ -791,29 +592,6 @@ export class UI {
         this.openSettings();
         break;
       }
-      case 'track-quest': {
-        g.settings.trackedQuest = btn.dataset.quest;
-        saveSettings(g.settings);
-        this._objectivePulse = 1.2;
-        this._pauseTab = 'quests';
-        this.openPause();
-        break;
-      }
-      case 'tutorial-start':
-        this.closeAll();
-        this._tutorialActive = true;
-        this._tutorialStage = 0;
-        break;
-      case 'tutorial-skip':
-        g.settings.tutorialVersion = 2;
-        saveSettings(g.settings);
-        this.closeAll();
-        break;
-      case 'tutorial-reset':
-        g.settings.tutorialVersion = 0;
-        saveSettings(g.settings);
-        this.startOnboarding(true);
-        break;
       case 'to-title': location.reload(); break;
       case 'continue-after-ending': this.closeAll(); break;
       case 'open-map': this.openMap(); break;
@@ -998,12 +776,10 @@ export class UI {
       const counterKey = step ? `${step.id}_count` : null;
       const count = counterKey && s.counters[counterKey] !== undefined
         ? ` (${s.counters[counterKey]}/${step.count || 1})` : '';
-      const tracked = g.settings.trackedQuest === q.id;
-      return `<div class="quest${q.main ? ' main' : ''}${tracked ? ' tracked' : ''}">
+      return `<div class="quest${q.main ? ' main' : ''}">
         <h4>${q.main ? '【主】' : ''}${escapeHtml(q.name)}</h4>
         <p>${escapeHtml(q.summary)}</p>
         ${step ? `<div class="quest-step">▸ ${escapeHtml(step.text)}${count}</div>` : '<div class="quest-step done">完了</div>'}
-        <div class="quest-actions"><button class="mini-btn" data-action="track-quest" data-quest="${q.id}">${tracked ? '追跡中' : '画面に表示'}</button></div>
       </div>`;
     };
     return `<div class="scroll-body">
@@ -1027,7 +803,7 @@ export class UI {
       <button class="btn" data-action="open-map">地図を開く</button>
       <button class="btn" data-action="open-settings">設定</button>
       <button class="btn danger" data-action="to-title">タイトルへ戻る</button>
-      <div class="hint">進行状況は60秒ごと、篝火、使命更新、王の撃破、画面を閉じる前にスロット${g.activeSaveSlot + 1}へ自動保存される。</div>
+      <div class="hint">進行状況は篝火での休息時に自動保存されない。手動で保存すること。</div>
     </div>`;
   }
 
@@ -1236,12 +1012,8 @@ export class UI {
       if (g.quests.start(id)) {
         const q = QUEST_BY_ID.get(id);
         g.notify(`クエスト受注：${q ? q.name : id}`, 'good');
-        if (q?.main || !this._trackedQuest()) g.settings.trackedQuest = id;
-        saveSettings(g.settings);
-        this.pulseObjective();
-        g.autosave('使命受注');
       }
-      g.questEvent({ type: 'talk', npc: g.dialogue.npc.npcId });
+      g.quests.notify({ type: 'talk', npc: g.dialogue.npc.npcId });
       g.closeDialogue();
       this.closeAll();
       return;
@@ -1286,10 +1058,7 @@ export class UI {
     }
     g.audio.playLevelUp();
     g.notify(`クエスト達成：${q.name}`, 'good');
-    if (q.main && q.next) g.settings.trackedQuest = q.next;
-    saveSettings(g.settings);
-    this.pulseObjective();
-    g.autosave('使命達成', true);
+    if (q.next) g.quests.start(q.next);
   }
 
   openShop(npc, sellMode = false) {
@@ -1455,24 +1224,13 @@ export class UI {
           <div class="chips">${qBtn('low', '低')}${qBtn('medium', '中')}${qBtn('high', '高')}</div>
           <div class="hint">端末の性能に応じて描画解像度は自動調整されます（現在 ${Math.round(g.dynamicScale * 100)}%）。</div>
 
-          <h3>表示</h3>
-          <label class="range">UIの大きさ
-            <input type="range" min="0.82" max="1.2" step="0.02" value="${s.uiScale}" data-input="setting" data-key="uiScale">
-            <span class="range-value">${s.uiScale.toFixed(2)}</span>
-          </label>
-          <label class="check"><input type="checkbox" ${s.showObjectives ? 'checked' : ''} data-input="setting" data-key="showObjectives"> 現在の使命と目的地を表示</label>
-          <label class="check"><input type="checkbox" ${s.showDamage ? 'checked' : ''} data-input="setting" data-key="showDamage"> ダメージ表示</label>
-          <label class="check"><input type="checkbox" ${s.reducedMotion ? 'checked' : ''} data-input="setting" data-key="reducedMotion"> UIアニメーションを減らす</label>
-
           <h3>操作</h3>
           <label class="range">カメラ感度
             <input type="range" min="0.3" max="2.5" step="0.05" value="${s.sensitivity}" data-input="setting" data-key="sensitivity">
             <span class="range-value">${s.sensitivity.toFixed(2)}</span>
           </label>
           <label class="check"><input type="checkbox" ${s.invertY ? 'checked' : ''} data-input="setting" data-key="invertY"> Y軸反転</label>
-          <label class="check"><input type="checkbox" ${s.autoLock ? 'checked' : ''} data-input="setting" data-key="autoLock"> 近距離攻撃時の自動ロック</label>
-          <label class="check"><input type="checkbox" ${s.leftHanded ? 'checked' : ''} data-input="setting" data-key="leftHanded"> 左利き用配置（移動を右側へ）</label>
-          <label class="check"><input type="checkbox" ${s.haptics ? 'checked' : ''} data-input="setting" data-key="haptics"> 振動フィードバック</label>
+          <label class="check"><input type="checkbox" ${s.showDamage ? 'checked' : ''} data-input="setting" data-key="showDamage"> ダメージ表示</label>
 
           <h3>音量</h3>
           <label class="range">全体
@@ -1490,8 +1248,8 @@ export class UI {
 
           <h3>操作説明</h3>
           <div class="help">
-            <p><b>移動</b>：画面${s.leftHanded ? '右' : '左'}側をドラッグ／WASD</p>
-            <p><b>視点</b>：画面${s.leftHanded ? '左' : '右'}側をスワイプ／マウス</p>
+            <p><b>移動</b>：画面左半分をドラッグ／WASD</p>
+            <p><b>視点</b>：画面右側をスワイプ／マウス</p>
             <p><b>ダッシュ</b>：回避ボタンを押し続ける／Shift</p>
             <p><b>回避</b>：回避ボタンを短く押す／Space</p>
             <p><b>攻撃</b>：R1／左クリック　<b>強攻撃</b>：R2</p>
@@ -1499,7 +1257,6 @@ export class UI {
             <p><b>ロックオン</b>：ロックボタン／Q</p>
             <p><b>調べる</b>：手のアイコン／E</p>
           </div>
-          <button class="btn" data-action="tutorial-reset">基本操作ガイドをもう一度見る</button>
         </div>
       </div>`);
   }
