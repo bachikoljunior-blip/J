@@ -5,7 +5,7 @@
 import { Game } from './game/game.js';
 import { UI } from './ui/ui.js';
 import { CLASSES } from './game/player.js';
-import { listSaves, loadGameData, deleteSave, formatPlaytime, loadSettings } from './core/save.js';
+import { listSaves, loadGameData, deleteSave, formatPlaytime, saveSettings } from './core/save.js';
 import { clamp, MAX_DT } from './core/math.js';
 
 const $ = (id) => document.getElementById(id);
@@ -14,6 +14,16 @@ let game = null;
 let ui = null;
 let running = false;
 let lastTime = 0;
+let pausedForVisibility = false;
+
+const LOAD_TIPS = [
+  '左側をドラッグして移動。右側をスワイプして視点を動かせます。',
+  '回避は短押し、ダッシュは回避を押したまま移動します。',
+  '黄色い◇と画面上部の使命表示が、次の目的地を示します。',
+  '篝火・使命更新・王の撃破・60秒ごとに自動保存されます。',
+  '敵の攻撃直前にパリィすると、致命の一撃の機会が生まれます。',
+];
+let loadTipIndex = -1;
 
 // ---------------------------------------------------------------------------
 //  Loading
@@ -23,6 +33,11 @@ function setLoading(p, label) {
   $('load-bar').style.width = `${Math.round(p * 100)}%`;
   $('load-label').textContent = label || '';
   $('load-percent').textContent = `${Math.round(p * 100)}%`;
+  const nextTip = Math.min(LOAD_TIPS.length - 1, Math.floor(p * LOAD_TIPS.length));
+  if (nextTip !== loadTipIndex && $('load-tip')) {
+    loadTipIndex = nextTip;
+    $('load-tip').textContent = LOAD_TIPS[nextTip];
+  }
 }
 
 function showLoading(show) {
@@ -32,6 +47,7 @@ function showLoading(show) {
 /** Drive the boot coroutine across frames so the bar actually animates. */
 function runBoot(seed, onDone) {
   showLoading(true);
+  loadTipIndex = -1;
   setLoading(0, '目を覚ましている');
   const gen = game.boot(seed);
   const step = () => {
@@ -60,28 +76,36 @@ function runBoot(seed, onDone) {
 function showTitle() {
   const saves = listSaves();
   const hasSave = saves.some(Boolean);
+  const latest = saves.filter(Boolean).sort((a, b) => b.savedAt - a.savedAt)[0] || null;
   const overlay = $('overlay');
   overlay.className = 'overlay open screen-title';
   overlay.innerHTML = `
     <div class="title-screen">
+      <div class="title-sigil" aria-hidden="true"></div>
       <div class="title-mark">
         <h1>黒鉄の刻印</h1>
         <p class="sub">KUROGANE — Mark of Black Iron</p>
       </div>
       <p class="tagline">残り火の王冠は砕けた。<br>刻印を負う者だけが、まだ歩いている。</p>
+      ${latest ? `<div class="save-preview"><b>${escapeHtml(latest.name)} — Lv.${latest.level} ${escapeHtml(latest.className)}</b><span>${escapeHtml(latest.region || '名もなき地')} / ${formatPlaytime(latest.playtime)} / 王 ${latest.bosses}体</span></div>` : ''}
       <div class="title-menu">
-        <button class="btn primary" data-t="new">新しい旅</button>
-        ${hasSave ? '<button class="btn" data-t="load">続きから</button>' : ''}
+        ${hasSave ? '<button class="btn primary" data-t="load">続きから</button>' : ''}
+        <button class="btn${hasSave ? '' : ' primary'}" data-t="new">新しい旅</button>
         <button class="btn" data-t="settings">設定</button>
       </div>
       <p class="title-foot">端末を横向きにすると広く表示されます。ヘッドホン推奨。</p>
+      <span class="title-version">QUALITY REFORGED 2026.08</span>
     </div>`;
   document.body.classList.add('menu-open');
 
   overlay.onclick = (e) => {
     const b = e.target.closest('[data-t]');
     if (!b) return;
-    if (b.dataset.t === 'new') showClassSelect();
+    if (b.dataset.t === 'new') {
+      const empty = saves.findIndex((save) => !save);
+      creation.slot = empty >= 0 ? empty : 0;
+      showClassSelect();
+    }
     else if (b.dataset.t === 'load') showLoadMenu();
     else if (b.dataset.t === 'settings') showTitleSettings();
   };
@@ -121,6 +145,7 @@ function showTitleSettings() {
     const v = parseFloat(e.target.value);
     game.settings[k] = v;
     game.audio.setVolumes({ [k]: v });
+    saveSettings(game.settings);
     const out = e.target.parentElement.querySelector('.range-value');
     if (out) out.textContent = v.toFixed(2);
   };
@@ -156,7 +181,7 @@ function showLoadMenu() {
     if (!b) return;
     const data = loadGameData(parseInt(b.dataset.slot, 10));
     if (!data) return;
-    startGame({ load: data });
+    startGame({ load: data, slot: parseInt(b.dataset.slot, 10) });
   };
 }
 
@@ -164,7 +189,7 @@ function showLoadMenu() {
 //  Character creation
 // ---------------------------------------------------------------------------
 
-let creation = { classId: 'knight', skin: 0, hair: 0, cape: 0, name: '刻印者' };
+let creation = { classId: 'knight', skin: 0, hair: 0, cape: 0, name: '刻印者', slot: 0 };
 
 const CAPE_COLORS = [
   [0.30, 0.09, 0.09], [0.11, 0.14, 0.28], [0.14, 0.22, 0.13],
@@ -174,6 +199,7 @@ const CAPE_COLORS = [
 function showClassSelect() {
   const overlay = $('overlay');
   const cls = CLASSES.find((c) => c.id === creation.classId) || CLASSES[0];
+  const saves = listSaves();
   overlay.className = 'overlay open screen-create';
   overlay.innerHTML = `
     <div class="panel wide">
@@ -182,12 +208,16 @@ function showClassSelect() {
         <div class="col scroll">
           ${CLASSES.map((c) => `
             <button class="item-row${c.id === creation.classId ? ' equipped' : ''}" data-cls="${c.id}">
-              <span class="name">${c.name}</span>
+              <span class="name">${c.name}${c.id === 'knight' ? '　<small>初心者向け</small>' : ''}</span>
               <span class="meta">Lv.${c.level}</span>
               <span class="desc">${c.blurb}</span>
             </button>`).join('')}
         </div>
         <div class="col">
+          <h3>セーブ先</h3>
+          <div class="chips">
+            ${saves.map((save, i) => `<button class="chip${creation.slot === i ? ' active' : ''}" data-new-slot="${i}">スロット${i + 1}${save ? `：${escapeHtml(save.name)}` : '：空き'}</button>`).join('')}
+          </div>
           <h3>${cls.name}</h3>
           <div class="stat-grid small">
             ${Object.entries(cls.stats).map(([k, v]) => `<div class="stat-row"><span>${statLabel(k)}</span><b>${v}</b></div>`).join('')}
@@ -216,24 +246,51 @@ function showClassSelect() {
     if (e.target.id === 'create-name') creation.name = e.target.value.slice(0, 12) || '刻印者';
   };
   overlay.onclick = (e) => {
-    const b = e.target.closest('[data-cls],[data-skin],[data-hair],[data-cape],[data-t]');
+    const b = e.target.closest('[data-cls],[data-skin],[data-hair],[data-cape],[data-new-slot],[data-t]');
     if (!b) return;
     if (b.dataset.t === 'back') { showTitle(); return; }
     if (b.dataset.t === 'start') {
-      startGame({
-        create: {
-          classId: creation.classId,
-          appearance: { skin: creation.skin, hair: creation.hair, cape: CAPE_COLORS[creation.cape] },
-          name: creation.name,
-        },
-      });
+      const existing = listSaves()[creation.slot];
+      if (existing) showOverwriteConfirm(existing);
+      else beginNewGame();
       return;
     }
+    if (b.dataset.newSlot !== undefined) creation.slot = parseInt(b.dataset.newSlot, 10);
     if (b.dataset.cls) creation.classId = b.dataset.cls;
     if (b.dataset.skin) creation.skin = parseInt(b.dataset.skin, 10);
     if (b.dataset.hair) creation.hair = parseInt(b.dataset.hair, 10);
     if (b.dataset.cape) creation.cape = parseInt(b.dataset.cape, 10);
     showClassSelect();
+  };
+}
+
+function beginNewGame() {
+  startGame({
+    slot: creation.slot,
+    create: {
+      classId: creation.classId,
+      appearance: { skin: creation.skin, hair: creation.hair, cape: CAPE_COLORS[creation.cape] },
+      name: creation.name,
+    },
+  });
+}
+
+function showOverwriteConfirm(existing) {
+  const overlay = $('overlay');
+  overlay.innerHTML = `
+    <div class="panel">
+      <div class="panel-head"><h2>スロット${creation.slot + 1}を上書き</h2></div>
+      <div class="panel-body center">
+        <p class="flavor">${escapeHtml(existing.name)}（Lv.${existing.level} / ${formatPlaytime(existing.playtime)}）の記録を、新しい旅で上書きします。</p>
+        <button class="btn danger" data-t="confirm-overwrite">上書きして始める</button>
+        <button class="btn" data-t="cancel-overwrite">戻る</button>
+      </div>
+    </div>`;
+  overlay.onclick = (e) => {
+    const button = e.target.closest('[data-t]');
+    if (!button) return;
+    if (button.dataset.t === 'confirm-overwrite') beginNewGame();
+    else showClassSelect();
   };
 }
 
@@ -247,6 +304,9 @@ function startGame(opts) {
   overlay.innerHTML = '';
   document.body.classList.remove('menu-open');
   game.audio.init();
+  game.activeSaveSlot = Number.isFinite(opts.slot) ? opts.slot : 0;
+  const persistenceRequest = navigator.storage?.persist?.();
+  persistenceRequest?.catch(() => {});
 
   const seed = opts.load?.meta?.seed || 'aldrath';
   runBoot(seed, () => {
@@ -330,7 +390,23 @@ function init() {
   window.addEventListener('keydown', unlock, { once: true });
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && game && game.started) game.paused = true;
+    if (!game || !game.started) return;
+    if (document.hidden) {
+      game.autosave('画面終了前', true);
+      if (!game.paused) {
+        pausedForVisibility = true;
+        game.paused = true;
+      }
+    } else if (pausedForVisibility && !ui.isOpen) {
+      pausedForVisibility = false;
+      game.paused = false;
+      game.audio.resume();
+      lastTime = performance.now();
+    }
+  });
+  window.addEventListener('pagehide', () => game?.autosave('画面終了前', true));
+  window.addEventListener('kurogane-update-ready', () => {
+    if (game?.started) game.notify('最新版を取得しました。次の起動時に反映されます。', 'good');
   });
 
   // Escape / menu button toggles the pause screen during play.
