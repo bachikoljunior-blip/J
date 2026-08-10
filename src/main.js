@@ -138,6 +138,7 @@ function showTitleSettings() {
     if (b.dataset.q) {
       game.settings.quality = b.dataset.q;
       game.renderer.setQuality(b.dataset.q);
+      saveSettings(game.settings);
       showTitleSettings();
     }
   };
@@ -227,15 +228,15 @@ function showClassSelect() {
           <h3>外見</h3>
           <div class="chips">
             <span class="chip-label">肌</span>
-            ${[0, 1, 2, 3].map((i) => `<button class="chip swatch${creation.skin === i ? ' active' : ''}" data-skin="${i}" style="background:${skinCss(i)}"></button>`).join('')}
+            ${[0, 1, 2, 3].map((i) => `<button class="chip swatch${creation.skin === i ? ' active' : ''}" data-skin="${i}" aria-label="肌の色 ${i + 1}" style="background:${skinCss(i)}"></button>`).join('')}
           </div>
           <div class="chips">
             <span class="chip-label">髪</span>
-            ${[0, 1, 2, 3].map((i) => `<button class="chip swatch${creation.hair === i ? ' active' : ''}" data-hair="${i}" style="background:${hairCss(i)}"></button>`).join('')}
+            ${[0, 1, 2, 3].map((i) => `<button class="chip swatch${creation.hair === i ? ' active' : ''}" data-hair="${i}" aria-label="髪の色 ${i + 1}" style="background:${hairCss(i)}"></button>`).join('')}
           </div>
           <div class="chips">
             <span class="chip-label">外套</span>
-            ${CAPE_COLORS.map((c, i) => `<button class="chip swatch${creation.cape === i ? ' active' : ''}" data-cape="${i}" style="background:${rgbCss(c)}"></button>`).join('')}
+            ${CAPE_COLORS.map((c, i) => `<button class="chip swatch${creation.cape === i ? ' active' : ''}" data-cape="${i}" aria-label="外套の色 ${i + 1}" style="background:${rgbCss(c)}"></button>`).join('')}
           </div>
           <h3>名前</h3>
           <input class="text-input" id="create-name" maxlength="12" value="${escapeHtml(creation.name)}">
@@ -259,9 +260,9 @@ function showClassSelect() {
     }
     if (b.dataset.newSlot !== undefined) creation.slot = parseInt(b.dataset.newSlot, 10);
     if (b.dataset.cls) creation.classId = b.dataset.cls;
-    if (b.dataset.skin) creation.skin = parseInt(b.dataset.skin, 10);
-    if (b.dataset.hair) creation.hair = parseInt(b.dataset.hair, 10);
-    if (b.dataset.cape) creation.cape = parseInt(b.dataset.cape, 10);
+    if (b.dataset.skin !== undefined) creation.skin = parseInt(b.dataset.skin, 10);
+    if (b.dataset.hair !== undefined) creation.hair = parseInt(b.dataset.hair, 10);
+    if (b.dataset.cape !== undefined) creation.cape = parseInt(b.dataset.cape, 10);
     showClassSelect();
   };
 }

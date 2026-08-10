@@ -4,6 +4,7 @@ import { readFile, access } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { QuestLog, QUEST_STATE } from '../src/game/quests.js';
+import { listSaves, loadGameData, deleteSave } from '../src/core/save.js';
 
 const root = resolve(import.meta.dirname, '..');
 
@@ -77,4 +78,36 @@ test('mobile controls never shrink below a 44px touch target', async () => {
   const css = await readFile(resolve(root, 'style.css'), 'utf8');
   assert.match(css, /--btn-sm:\s*clamp\(44px,/);
   assert.match(css, /button\s*\{\s*min-width:\s*44px;\s*min-height:\s*44px;/);
+});
+
+test('character appearance can return to swatch zero', async () => {
+  const source = await readFile(resolve(root, 'src/main.js'), 'utf8');
+  for (const key of ['skin', 'hair', 'cape']) {
+    assert.match(source, new RegExp(`dataset\\.${key} !== undefined`));
+    assert.match(source, new RegExp(`data-${key}="\\$\\{i\\}" aria-label=`));
+  }
+});
+
+test('save UI degrades safely when browser storage is unavailable', () => {
+  const previous = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem() { throw new Error('storage blocked'); },
+    removeItem() { throw new Error('storage blocked'); },
+  };
+  try {
+    assert.deepEqual(listSaves(), [null, null, null]);
+    assert.equal(loadGameData(0), null);
+    assert.equal(deleteSave(0), false);
+  } finally {
+    if (previous === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previous;
+  }
+});
+
+test('install manifest includes raster icons for iPhone and Android', async () => {
+  const manifest = JSON.parse(await readFile(resolve(root, 'manifest.json'), 'utf8'));
+  const pngSizes = new Set(manifest.icons.filter((icon) => icon.type === 'image/png').map((icon) => icon.sizes));
+  assert.ok(pngSizes.has('192x192'));
+  assert.ok(pngSizes.has('512x512'));
+  await Promise.all(['icon-180.png', 'icon-192.png', 'icon-512.png'].map((name) => access(resolve(root, name))));
 });
