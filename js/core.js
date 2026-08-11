@@ -116,6 +116,19 @@ G.events = (function () {
   };
 })();
 
+/* ---------------- 例外を外へ漏らさない端末ストレージ ---------------- */
+G.storage = {
+  get(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
+  },
+  remove(key) {
+    try { localStorage.removeItem(key); return true; } catch (e) { return false; }
+  }
+};
+
 /* ---------------- 設定 (localStorage 永続化) ---------------- */
 G.settings = (function () {
   const KEY = 'eldria_settings_v1';
@@ -128,15 +141,24 @@ G.settings = (function () {
     showDmg: true,
     shadows: 'auto'    // 'auto' | 'off'
   };
-  let s;
-  try { s = Object.assign({}, def, JSON.parse(localStorage.getItem(KEY) || '{}')); }
-  catch (e) { s = Object.assign({}, def); }
+  let raw = {};
+  try { raw = JSON.parse(G.storage.get(KEY) || '{}'); } catch (e) { raw = {}; }
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) raw = {};
+  const s = Object.assign({}, def, raw);
+  if (!['auto', 'low', 'mid', 'high'].includes(s.quality)) s.quality = def.quality;
+  if (!Number.isFinite(s.music)) s.music = def.music;
+  if (!Number.isFinite(s.sfx)) s.sfx = def.sfx;
+  if (!Number.isFinite(s.sens)) s.sens = def.sens;
+  s.music = G.clamp(s.music, 0, 1);
+  s.sfx = G.clamp(s.sfx, 0, 1);
+  s.sens = G.clamp(s.sens, 0.25, 2);
+  s.invertY = !!s.invertY;
+  s.showDmg = s.showDmg !== false;
+  if (!['auto', 'off'].includes(s.shadows)) s.shadows = def.shadows;
   s.save = function () {
-    try {
-      const o = {};
-      for (const k in def) o[k] = s[k];
-      localStorage.setItem(KEY, JSON.stringify(o));
-    } catch (e) { /* プライベートモード等 */ }
+    const o = {};
+    for (const k in def) o[k] = s[k];
+    G.storage.set(KEY, JSON.stringify(o));
   };
   return s;
 })();
@@ -157,7 +179,57 @@ G.QUALITY = {
   mid:  { dpr: 1.5, chunkRadius: 4, grassRadius: 1, grassPerChunk: 1100, particles: 900 },
   high: { dpr: 2.0, chunkRadius: 5, grassRadius: 2, grassPerChunk: 1100, particles: 1400 }
 };
-G.Q = G.QUALITY[G.quality] || G.QUALITY.mid;
+// 実行時の負荷制御で値を調整してもプリセット定義を壊さないよう複製する。
+G.Q = Object.assign({}, G.QUALITY[G.quality] || G.QUALITY.mid);
+
+/* ---------------- 30fps基準のモバイル負荷制御 ---------------- */
+G.PerformanceGovernor = (function () {
+  const FLOORS = { low: 0.72, mid: 0.64, high: 0.58 };
+  const round = v => Math.round(v * 1000) / 1000;
+  return {
+    initial() {
+      return { resolution: 1, detail: 1, slow: 0, critical: 0, fast: 0 };
+    },
+    step(previous, frameMs, quality) {
+      const p = previous || this.initial();
+      const n = {
+        resolution: Number.isFinite(p.resolution) ? p.resolution : 1,
+        detail: Number.isFinite(p.detail) ? p.detail : 1,
+        slow: p.slow || 0,
+        critical: p.critical || 0,
+        fast: p.fast || 0
+      };
+      if (!Number.isFinite(frameMs) || frameMs <= 0 || frameMs >= 150) return n;
+      const floor = FLOORS[quality] || FLOORS.mid;
+
+      // 33.3ms (30fps) は快適域として維持。2回続けて28fpsを下回った時だけ
+      // 解像度を落とし、瞬間的な戦闘エフェクトで画質が揺れないようにする。
+      n.slow = frameMs > 36 ? n.slow + 1 : 0;
+      if (n.slow >= 2) {
+        n.resolution = Math.max(floor, n.resolution - 0.12);
+        n.slow = 0;
+      }
+
+      // GPU解像度を下げ切っても24fpsを割るならCPU/ドローコール側が律速。
+      // 遠景・草・粒子を二段目として絞り、最低でも世界の輪郭は残す。
+      n.critical = frameMs > 42 && n.resolution <= floor + 0.001 ? n.critical + 1 : 0;
+      if (n.critical >= 2) {
+        n.detail = Math.max(0.72, n.detail - 0.12);
+        n.critical = 0;
+      }
+
+      n.fast = frameMs < 24 ? n.fast + 1 : 0;
+      if (n.fast >= 4) {
+        if (n.resolution < 1) n.resolution = Math.min(1, n.resolution + 0.08);
+        else if (n.detail < 1) n.detail = Math.min(1, n.detail + 0.08);
+        n.fast = 0;
+      }
+      n.resolution = round(n.resolution);
+      n.detail = round(n.detail);
+      return n;
+    }
+  };
+})();
 
 G.isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 

@@ -521,6 +521,11 @@
   const chunks = new Map();     // "cx,cz" -> chunk
   let scene = null;
   const buildQueue = [];
+  let runtimeDetail = 1;
+
+  function effectiveChunkRadius() {
+    return Math.max(3, Math.round(G.Q.chunkRadius * runtimeDetail));
+  }
 
   function chunkKey(cx, cz) { return cx + ',' + cz; }
 
@@ -716,7 +721,7 @@
     if (chunk.grassMesh || !grassGeo) return;
     const x0 = chunk.cx * CHUNK, z0 = chunk.cz * CHUNK;
     const rnd = G.srand((chunk.cx * 31337) ^ (chunk.cz * 271) ^ 5);
-    const max = G.Q.grassPerChunk;
+    const max = Math.max(240, Math.floor(G.Q.grassPerChunk * runtimeDetail));
     const mats = [];
     const m = new THREE.Matrix4();
     for (let i = 0; i < max; i++) {
@@ -1533,11 +1538,20 @@
     return out;
   };
 
+  W.setRuntimeDetail = function (value) {
+    const next = G.clamp(Number.isFinite(value) ? value : 1, 0.72, 1);
+    if (Math.abs(next - runtimeDetail) < 0.035) return;
+    runtimeDetail = next;
+    // 草だけを段階的に再構築。地形・衝突・敵配置は維持するためプレイ感は変えない。
+    for (const ch of chunks.values()) removeGrass(ch);
+  };
+  W.runtimeChunkRadius = effectiveChunkRadius;
+
   let torchT = 0;
   W.update = function (dt, camX, camZ) {
     const ccx = Math.floor(camX / CHUNK), ccz = Math.floor(camZ / CHUNK);
-    const R = G.Q.chunkRadius;
-    const GR = G.Q.grassRadius;
+    const R = effectiveChunkRadius();
+    const GR = runtimeDetail < 0.85 ? Math.max(0, G.Q.grassRadius - 1) : G.Q.grassRadius;
 
     // 必要チャンクをキューへ
     for (let j = -R; j <= R; j++) {
@@ -2047,7 +2061,7 @@
       _fogC.b = Math.min(1, _fogC.b * 1.14);
     }
     scene.fog.color.copy(_fogC);
-    const baseFar = G.Q.chunkRadius * 64 * 0.95;
+    const baseFar = (G.World.runtimeChunkRadius ? G.World.runtimeChunkRadius() : G.Q.chunkRadius) * 64 * 0.95;
     const alt = Math.max(0, cam.y - G.World.heightAt(cam.x, cam.z));
     const altBoost = 1 + G.clamp((alt - 8) / 50, 0, 1) * 1.5;  // 高所 (滑空中) は大きく視界を広げる
     scene.fog.far = baseFar * (1 - weather * 0.35) * (0.75 + s.hem * 0.4) * altBoost;

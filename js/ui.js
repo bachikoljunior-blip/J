@@ -22,6 +22,22 @@
   let joyCX = 0, joyCY = 0;
   let fDownT = 0;
 
+  // アプリ切替・通知・メニュー遷移で pointerup が失われても、移動や攻撃を
+  // 押しっぱなしにしないための単一リセット経路。
+  I.reset = function () {
+    joyPtr = null; camPtr = null;
+    I.moveX = 0; I.moveY = 0;
+    I.camDX = 0; I.camDY = 0;
+    I.sprint = false; I.wheel = 0;
+    I.held.jump = false; I.held.attack = false;
+    pressQ.length = 0;
+    for (const k in keys) keys[k] = false;
+    if (typeof document !== 'undefined') {
+      document.querySelectorAll('.abtn.pressed').forEach(b => b.classList.remove('pressed'));
+    }
+    hideJoy();
+  };
+
   I.init = function (canvas) {
     /* --- キーボード --- */
     window.addEventListener('keydown', e => {
@@ -113,13 +129,7 @@
     window.addEventListener('wheel', e => { I.wheel += e.deltaY * 0.01; }, { passive: true });
     window.addEventListener('contextmenu', e => e.preventDefault());
     // フォーカス喪失時は入力状態を全解除 (押しっぱなし・カメラ固着防止)
-    window.addEventListener('blur', () => {
-      joyPtr = null; camPtr = null;
-      I.held.jump = false; I.held.attack = false;
-      I.moveX = 0; I.moveY = 0;
-      for (const k in keys) keys[k] = false;
-      hideJoy();
-    });
+    window.addEventListener('blur', I.reset);
   };
 
   I.updateFromKeys = function () {
@@ -182,10 +192,22 @@
   }
   UI.el = el;
 
+  function button(cls, parent, html, label) {
+    const b = el('button', cls, parent, html);
+    b.type = 'button';
+    if (label) b.setAttribute('aria-label', label);
+    return b;
+  }
+
   /* タッチボタン生成 */
   function actionBtn(cls, label, action, opts) {
     opts = opts || {};
-    const b = el('div', 'abtn ' + cls, hudEl, label);
+    const labels = {
+      attack: '攻撃。長押しで強攻撃、さらに長押しで回転斬り',
+      roll: '回避', jump: 'ジャンプ。空中で長押しして滑空',
+      lock: '敵を注視', potion: '回復薬を使う', menu: 'メニュー', map: '地図'
+    };
+    const b = button('abtn ' + cls, hudEl, label, labels[action] || action);
     let downT = 0;
     b.addEventListener('pointerdown', e => {
       e.stopPropagation();
@@ -212,6 +234,10 @@
       e.stopPropagation(); b.classList.remove('pressed');
       if (opts.heldKey) G.Input.held[opts.heldKey] = false;
     });
+    // スイッチコントロールや外付けキーボードの click でも基本操作を実行。
+    b.addEventListener('click', e => {
+      if (e.detail === 0) G.Input.push(action);
+    });
     return b;
   }
 
@@ -220,7 +246,7 @@
   let hpChipW = 100, hpChipHold = 0;
   let miniCanvas, miniCtx, mapCanvas = null;
   let bigMapCanvas = null;
-  let trackerEl, toastWrap, promptEl, bossWrap, bossFill, bossName, bossChip;
+  let trackerEl, toastWrap, promptEl, bossWrap, bossFill, bossName, bossChip, saveHint;
   let bossChipW = 100;
   let dlgWrap, dlgName, dlgText, dlgOpts;
   let menuWrap, menuTabs, menuBody, menuFade;
@@ -261,9 +287,9 @@
     toastWrap = el('div', 'toasts', hudEl);
 
     // インタラクトプロンプト
-    promptEl = el('div', 'prompt', hudEl);
+    promptEl = button('prompt', hudEl, '', '調べる');
     promptEl.style.display = 'none';
-    promptEl.addEventListener('pointerdown', e => {
+    promptEl.addEventListener('click', e => {
       e.stopPropagation();
       G.Input.push('interact');
     });
@@ -275,6 +301,10 @@
     bossChip = el('div', 'chip', bb);
     bossFill = el('div', 'fill', bb);
     bossWrap.style.display = 'none';
+
+    saveHint = el('div', 'savehint', hudEl, '◆ 保存しました');
+    saveHint.setAttribute('role', 'status');
+    saveHint.setAttribute('aria-live', 'polite');
 
     // ダメージ数字レイヤ
     dmgLayer = el('div', 'dmglayer', hudEl);
@@ -311,9 +341,10 @@
     menuWrap = el('div', 'menu', root);
     const mHead = el('div', 'mhead', menuWrap);
     el('div', 'mtitle', mHead, 'ELDRIA');
-    const closeB = el('div', 'mclose', mHead, '✕');
-    closeB.addEventListener('pointerdown', e => { e.stopPropagation(); UI.closeMenu(); });
+    const closeB = button('mclose', mHead, '✕', 'メニューを閉じる');
+    closeB.addEventListener('click', e => { e.stopPropagation(); UI.closeMenu(); });
     menuTabs = el('div', 'mtabs', menuWrap);
+    menuTabs.setAttribute('role', 'tablist');
     menuBody = el('div', 'mbody', menuWrap);
     // 下端フェードはスクロールコンテナの外のオーバーレイ (sticky ::after は
     // コンテナのpadding分だけ上にずれ、最終行がフェードの下に露出していた)
@@ -321,15 +352,17 @@
     menuWrap.style.display = 'none';
     const tabs = [['equip', '装備'], ['items', '持ち物'], ['map', '地図'], ['quests', '任務'], ['settings', '設定']];
     for (const [id, label] of tabs) {
-      const t = el('div', 'mtab', menuTabs, label);
+      const t = button('mtab', menuTabs, label, label + 'タブ');
+      t.setAttribute('role', 'tab');
       t.dataset.tab = id;
-      t.addEventListener('pointerdown', e => { e.stopPropagation(); G.Audio.sfx('ui'); UI.showTab(id); });
+      t.setAttribute('aria-selected', 'false');
+      t.addEventListener('click', e => { e.stopPropagation(); G.Audio.sfx('ui'); UI.showTab(id); });
     }
 
     /* 死亡画面 */
     deathEl = el('div', 'death', root, '<div class="dtext">力尽きた…</div>');
-    const respawnB = el('div', 'bigbtn', deathEl, '祠から再開');
-    respawnB.addEventListener('pointerdown', e => { e.stopPropagation(); G.Game.respawn(); });
+    const respawnB = button('bigbtn', deathEl, '祠から再開');
+    respawnB.addEventListener('click', e => { e.stopPropagation(); G.Game.respawn(); });
     deathEl.style.display = 'none';
 
     /* クリア画面 */
@@ -346,6 +379,15 @@
     G.events.on('bossKilled', () => UI.hideBoss());
     G.events.on('playerDead', () => { setTimeout(() => { deathEl.style.display = 'flex'; }, 900); });
     G.events.on('gameClear', () => setTimeout(UI.showEnding, 2200));
+    let saveHintTimer = 0;
+    G.events.on('saved', () => {
+      saveHint.classList.remove('show');
+      void saveHint.offsetWidth;
+      saveHint.classList.add('show');
+      clearTimeout(saveHintTimer);
+      saveHintTimer = setTimeout(() => saveHint.classList.remove('show'), 1500);
+    });
+    window.addEventListener('eldria-update-ready', () => UI.toast('更新があります。次回起動で反映されます', 'gold'));
   };
 
   UI.setHudVisible = function (v) { hudEl.style.display = v ? '' : 'none'; };
@@ -359,11 +401,11 @@
     el('div', 'tsub', inner, '風と遺跡の大地');
     const btns = el('div', 'tbtns', inner);
     if (G.Save.exists()) {
-      const c = el('div', 'bigbtn', btns, 'つづきから');
-      c.addEventListener('pointerdown', e => { e.stopPropagation(); G.Audio.init(); G.Audio.sfx('uiOpen'); close(); onStart(false); });
+      const c = button('bigbtn', btns, 'つづきから');
+      c.addEventListener('click', e => { e.stopPropagation(); G.Audio.init(); G.Audio.sfx('uiOpen'); close(); onStart(false); });
     }
-    const n = el('div', 'bigbtn' + (G.Save.exists() ? ' sub' : ''), btns, 'はじめから');
-    n.addEventListener('pointerdown', e => {
+    const n = button('bigbtn' + (G.Save.exists() ? ' sub' : ''), btns, 'はじめから');
+    n.addEventListener('click', e => {
       e.stopPropagation(); G.Audio.init();
       if (G.Save.exists() && !confirm('セーブデータを消して最初から始めますか?')) return;
       G.Audio.sfx('uiOpen'); close(); onStart(true);
@@ -378,8 +420,8 @@
       '<div class="imist"></div><div class="imist m2"></div>' +
       '<div class="iname">E L D R I A</div>' +
       '<div class="itext">霧深き大地エルドリア。<br><br>北の頂に黒竜ヴァルドレクが目覚めしとき、<br>大地は魔物で溢れ、人々は小さな村に身を寄せた。<br><br>――旅人よ。風がお前を呼んでいる。</div>');
-    const skip = el('div', 'bigbtn', introEl, '旅を始める');
-    skip.addEventListener('pointerdown', e => {
+    const skip = button('bigbtn', introEl, '旅を始める');
+    skip.addEventListener('click', e => {
       e.stopPropagation();
       introEl.remove(); introEl = null;
       UI.setHudVisible(true);
@@ -846,6 +888,7 @@
 
   /* ---------- 会話 ---------- */
   UI.showDialogue = function (name, node) {
+    G.Input.reset();
     G.paused = true;
     UI.hideTutChip();
     hudEl.classList.add('dlgmode');
@@ -858,16 +901,16 @@
       dlgOpts.innerHTML = '';
       typeText(nd.text, () => {
         for (const op of nd.options) {
-          const b = el('div', 'dlgopt', dlgOpts, op.label);
-          b.addEventListener('pointerdown', ev => {
+          const b = button('dlgopt', dlgOpts, op.label);
+          b.addEventListener('click', ev => {
             ev.stopPropagation();
             G.Audio.sfx('ui');
             if (op.closeText) {
               if (op.action) op.action();
               dlgOpts.innerHTML = '';
               typeText(op.closeText, () => {
-                const c = el('div', 'dlgopt', dlgOpts, '（会話を終える）');
-                c.addEventListener('pointerdown', e2 => { e2.stopPropagation(); UI.closeDialogue(); });
+                const c = button('dlgopt', dlgOpts, '（会話を終える）');
+                c.addEventListener('click', e2 => { e2.stopPropagation(); UI.closeDialogue(); });
               });
             } else if (op.next) {
               if (op.action) op.action();
@@ -903,6 +946,7 @@
     dlgText.textContent = typing.text.slice(0, typing.i | 0);
   };
   UI.closeDialogue = function () {
+    G.Input.reset();
     dlgWrap.style.display = 'none';
     G.paused = false;
     typing = null;
@@ -915,14 +959,15 @@
 
   /* ---------- 祠メニュー ---------- */
   UI.shrineMenu = function (shrine) {
+    G.Input.reset();
     G.paused = true;
     dlgWrap.style.display = 'block';
     dlgName.textContent = shrine.name;
     dlgText.textContent = '祠の温かな光が体を包む。どうする?';
     dlgOpts.innerHTML = '';
     const mk = (label, fn) => {
-      const b = el('div', 'dlgopt', dlgOpts, label);
-      b.addEventListener('pointerdown', e => { e.stopPropagation(); G.Audio.sfx('ui'); fn(); });
+      const b = button('dlgopt', dlgOpts, label);
+      b.addEventListener('click', e => { e.stopPropagation(); G.Audio.sfx('ui'); fn(); });
     };
     mk('休む (全回復・再開地点に設定)', () => {
       G.Player.heal(9999);
@@ -951,6 +996,7 @@
   let menuOpen = false, curTab = 'equip';
   UI.isMenuOpen = () => menuOpen;
   UI.openMenu = function (tab) {
+    G.Input.reset();
     menuOpen = true;
     G.paused = true;
     hudEl.style.visibility = 'hidden';
@@ -960,6 +1006,7 @@
     UI.showTab(tab || 'equip');
   };
   UI.closeMenu = function () {
+    G.Input.reset();
     menuOpen = false;
     G.paused = false;
     hudEl.style.visibility = '';
@@ -972,7 +1019,11 @@
 
   UI.showTab = function (tab) {
     curTab = tab;
-    for (const t of menuTabs.children) t.classList.toggle('on', t.dataset.tab === tab);
+    for (const t of menuTabs.children) {
+      const selected = t.dataset.tab === tab;
+      t.classList.toggle('on', selected);
+      t.setAttribute('aria-selected', String(selected));
+    }
     menuBody.innerHTML = '';
     if (tab === 'equip') renderEquip();
     else if (tab === 'items') renderItems();
@@ -1012,8 +1063,8 @@
       const glyph = it.type === 'weapon' ? '⚔️' : '🛡️';
       row.innerHTML = `<div class="iname"><span class="rowicon">${glyph}</span>${it.name}${ul ? ' +' + ul : ''} <span class="istat">${st}</span></div><div class="idesc">${it.desc}</div>`;
       if (!equipped) {
-        const b = el('div', 'ibtn', row, '装備');
-        b.addEventListener('pointerdown', e => { e.stopPropagation(); G.Inv.equipItem(id); });
+        const b = button('ibtn', row, '装備');
+        b.addEventListener('click', e => { e.stopPropagation(); G.Inv.equipItem(id); });
       } else {
         el('div', 'itag', row, '装備中');
       }
@@ -1059,8 +1110,8 @@
       tile.classList.add('on');
       detail.innerHTML = `<div class="itext"><div class="iname">${it.name} ×${G.Inv.count(id)}</div><div class="idesc">${it.desc}</div></div>`;
       if (it.type === 'consumable') {
-        const b = el('div', 'ibtn', detail, '使う');
-        b.addEventListener('pointerdown', e => {
+        const b = button('ibtn', detail, '使う');
+        b.addEventListener('click', e => {
           e.stopPropagation();
           if (id === 'potion' || id === 'hipotion') { G.Player.potionCd = 0; G.Player.usePotion(id); }
           else if (id === 'herb') {
@@ -1075,10 +1126,10 @@
       const it = G.Items.get(id);
       if (!it) continue;
       const [glyph, tint] = itemIcon(id, it);
-      const tile = el('div', 'itile', grid);
+      const tile = button('itile', grid, '', it.name + 'を選択');
       tile.style.background = tint;
       tile.innerHTML = `<div class="iglyph">${glyph}</div><div class="icount">×${G.Inv.count(id)}</div><div class="itname">${it.name}</div>`;
-      tile.addEventListener('pointerdown', e => { e.stopPropagation(); G.Audio.sfx('ui'); select(id, it, tile); });
+      tile.addEventListener('click', e => { e.stopPropagation(); G.Audio.sfx('ui'); select(id, it, tile); });
       if (!first) first = [id, it, tile];
     }
     // 空きスロットのプレースホルダー (所持枠のグリッド構造を可視化)
@@ -1093,6 +1144,8 @@
       bigMapCanvas.width = bigMapCanvas.height = 512;
     }
     wrap.appendChild(bigMapCanvas);
+    bigMapCanvas.setAttribute('role', 'button');
+    bigMapCanvas.setAttribute('aria-label', 'エルドリア全体地図。灯した祠をタップして移動');
     drawBigMap();
     // 凡例は横に並べて地図を大きく取る
     el('div', 'maplegend', wrap,
@@ -1244,14 +1297,18 @@
     sel.addEventListener('pointerdown', e => e.stopPropagation());
     qrow.appendChild(sel);
 
-    const save = el('div', 'bigbtn sub', wrap, '手動セーブ');
-    save.addEventListener('pointerdown', e => {
+    const perf = G.perf || { resScale: 1, detail: 1 };
+    el('div', 'runtimeinfo', wrap,
+      `現在: ${G.quality.toUpperCase()} / 解像度 ${Math.round((perf.resScale || 1) * 100)}% / 遠景 ${Math.round((perf.detail || 1) * 100)}% / 30fps優先`);
+
+    const save = button('bigbtn sub', wrap, '手動セーブ');
+    save.addEventListener('click', e => {
       e.stopPropagation();
       if (G.Save.save()) UI.toast('セーブした', 'gold');
     });
     el('div', 'dangergap', wrap);
-    const reset = el('div', 'bigbtn danger small', wrap, 'データを消して最初から');
-    reset.addEventListener('pointerdown', e => {
+    const reset = button('bigbtn danger small', wrap, 'データを消して最初から');
+    reset.addEventListener('click', e => {
       e.stopPropagation();
       if (confirm('本当にセーブデータを削除しますか?') &&
           confirm('全ての進行が失われます。最終確認: 削除しますか?')) {
@@ -1259,11 +1316,12 @@
         location.reload();
       }
     });
-    el('div', 'mnote', wrap, 'ELDRIA v1.0 — 完全プロシージャル・オープンワールドARPG。データは端末内に保存されます。');
+    el('div', 'mnote', wrap, 'ELDRIA MOBILE MASTER 2026.08 — 完全プロシージャル・オープンワールドARPG。進行は端末内に自動保存されます。');
   }
 
   /* ---------- 商店 ---------- */
   UI.openShop = function () {
+    G.Input.reset();
     G.paused = true;
     menuOpen = true;
     hudEl.style.visibility = 'hidden';
@@ -1292,10 +1350,10 @@
       }
       row.innerHTML = `<div class="iname"><span class="rowicon">${itemIcon(id, it)[0]}</span>${it.name} <span class="istat">${it.price}G${st}</span></div><div class="idesc">${it.desc}</div>`;
       if (G.Inv.gold >= it.price) {
-        const b = el('div', 'ibtn', row, '買う');
-        b.addEventListener('pointerdown', e => { e.stopPropagation(); if (G.Shop.buy(id)) UI.openShop(); });
+        const b = button('ibtn', row, '買う');
+        b.addEventListener('click', e => { e.stopPropagation(); if (G.Shop.buy(id)) UI.openShop(); });
       } else {
-        el('div', 'ibtn off', row, 'G不足');
+        const off = button('ibtn off', row, 'G不足'); off.disabled = true;
       }
     }
     el('div', 'shophead', menuBody, '― 売却 ―');
@@ -1307,8 +1365,8 @@
       any = true;
       const row = el('div', 'irow', sell);
       row.innerHTML = `<div class="iname"><span class="rowicon">${itemIcon(id, it)[0]}</span>${it.name} ×${G.Inv.count(id)} <span class="istat">${it.sell}G</span></div>`;
-      const b = el('div', 'ibtn', row, '売る');
-      b.addEventListener('pointerdown', e => { e.stopPropagation(); if (G.Shop.sell(id)) UI.openShop(); });
+      const b = button('ibtn', row, '売る');
+      b.addEventListener('click', e => { e.stopPropagation(); if (G.Shop.sell(id)) UI.openShop(); });
     }
     if (!any) el('div', 'mnote', sell, '売れる物がない。');
     updateScrollHint();
@@ -1316,6 +1374,7 @@
 
   /* ---------- 鍛冶 ---------- */
   UI.openForge = function () {
+    G.Input.reset();
     G.paused = true;
     menuOpen = true;
     hudEl.style.visibility = 'hidden';
@@ -1355,13 +1414,13 @@
         <div class="idesc">${lvl < 5 ? '次の強化: ' + costTxt : costTxt}</div>`;
       if (lvl < 5) {
         if (can) {
-          const b = el('div', 'ibtn', row, '強化');
-          b.addEventListener('pointerdown', e => {
+          const b = button('ibtn', row, '強化');
+          b.addEventListener('click', e => {
             e.stopPropagation();
             if (G.Forge.upgrade(id)) UI.openForge();
           });
         } else {
-          el('div', 'ibtn off', row, '素材不足');
+          const off = button('ibtn off', row, '素材不足'); off.disabled = true;
         }
       }
     }
@@ -1382,11 +1441,26 @@
         あなたは伝説となった。<br><br>
         ―― 旅はまだ続く。世界は自由だ。</div>
       </div>`;
-    const b = el('div', 'bigbtn', endEl, '旅を続ける');
-    b.addEventListener('pointerdown', e => {
+    const b = button('bigbtn', endEl, '旅を続ける');
+    b.addEventListener('click', e => {
       e.stopPropagation();
       endEl.style.display = 'none';
       G.Save.save();
     });
+  };
+
+  UI.showFatal = function (title, detail) {
+    root = root || document.getElementById('ui');
+    G.Input.reset();
+    G.paused = true;
+    let wrap = document.querySelector('.fatal');
+    if (wrap) wrap.remove();
+    wrap = el('div', 'fatal', root);
+    const card = el('div', 'fatalcard', wrap);
+    el('div', 'fataltitle', card, title || 'ゲームを安全に停止しました');
+    const body = el('div', 'fatalbody', card);
+    body.textContent = detail || '進行は保存されています。再読み込みして続けてください。';
+    const reload = button('bigbtn', card, '再読み込み');
+    reload.addEventListener('click', () => location.reload());
   };
 })();

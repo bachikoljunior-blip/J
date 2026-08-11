@@ -1,11 +1,14 @@
 /* ELDRIA service worker — オフラインでも遊べるようにキャッシュする */
-const CACHE = 'eldria-v1';
+const CACHE = 'eldria-v2-mobile-master';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './manifest.json',
   './icon.svg',
+  './icon-180.png',
+  './icon-192.png',
+  './icon-512.png',
   './js/lib/three.min.js',
   './js/core.js',
   './js/audio.js',
@@ -29,13 +32,24 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
-      if (e.request.method === 'GET' && res.ok && new URL(e.request.url).origin === location.origin) {
-        const clone = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
-      }
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;
+
+  // ナビゲーションはネットワーク優先。クエリ付きURLやホーム画面起動でも、
+  // オフライン時は必ず事前キャッシュしたゲーム本体へ戻す。
+  if (e.request.mode === 'navigate') {
+    e.respondWith(fetch(e.request).then(res => {
+      if (res.ok) caches.open(CACHE).then(c => c.put('./index.html', res.clone()));
       return res;
-    }).catch(() => hit))
-  );
+    }).catch(() => caches.match('./index.html')));
+    return;
+  }
+
+  e.respondWith(caches.match(e.request, { ignoreSearch: true }).then(hit => hit ||
+    fetch(e.request).then(res => {
+      if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+      return res;
+    })
+  ));
 });

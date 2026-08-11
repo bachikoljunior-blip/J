@@ -9,13 +9,15 @@
 (function () {
   const FX = G.FX = {};
   let pts, pos, col, sizes, alive;
-  const MAX = () => G.Q.particles;
+  const BASE_MAX = G.Q.particles;
+  const MAX = () => Math.max(240, Math.min(BASE_MAX,
+    Math.floor(BASE_MAX * ((G.perf && G.perf.detail) || 1))));
   let P = [];   // {x,y,z,vx,vy,vz,life,max,size,r,g,b,grav,drag}
   let scene;
 
   FX.init = function (sc) {
     scene = sc;
-    const n = MAX();
+    const n = BASE_MAX;
     pos = new Float32Array(n * 3);
     col = new Float32Array(n * 3);
     sizes = new Float32Array(n);

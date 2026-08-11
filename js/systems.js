@@ -565,9 +565,28 @@
 (function () {
   const S = G.Save = {};
   const KEY = 'eldria_save_v1';
+  const BACKUP = 'eldria_save_backup_v1';
+
+  const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
+  function validate(data) {
+    return isObj(data) && data.v === 1 && isObj(data.stats) &&
+      Number.isFinite(data.stats.level) && data.stats.level >= 1 &&
+      Number.isFinite(data.stats.xp) && isObj(data.pos) &&
+      Number.isFinite(data.pos.x) && Number.isFinite(data.pos.z) &&
+      isObj(data.inv) && isObj(data.quests);
+  }
+  function parse(raw) {
+    if (!raw) return null;
+    try {
+      const data = JSON.parse(raw);
+      return validate(data) ? data : null;
+    } catch (e) { return null; }
+  }
+  function read(key) { return parse(G.storage.get(key)); }
+  S.validate = validate;
 
   S.exists = function () {
-    try { return !!localStorage.getItem(KEY); } catch (e) { return false; }
+    return !!(read(KEY) || read(BACKUP));
   };
 
   S.save = function () {
@@ -596,39 +615,97 @@
           killCount: G.State.killCount
         }
       };
-      localStorage.setItem(KEY, JSON.stringify(data));
+      const json = JSON.stringify(data);
+      const previous = G.storage.get(KEY);
+      if (parse(previous)) G.storage.set(BACKUP, previous);
+      if (!G.storage.set(KEY, json)) return false;
+      G.events.emit('saved');
       return true;
     } catch (e) { return false; }
   };
 
   S.load = function () {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
-    } catch (e) { return null; }
+    const primary = read(KEY);
+    if (primary) return primary;
+    const backup = read(BACKUP);
+    if (backup) backup._recovered = true;
+    return backup;
   };
 
   S.apply = function (data) {
-    G.Stats.level = data.stats.level;
-    G.Stats.xp = data.stats.xp;
-    G.Inv.items = data.inv || {};
-    G.Inv.gold = data.gold || 0;
-    G.Inv.equip = data.equip || { weapon: 'sword_traveler', armor: 'armor_cloth' };
-    G.Quests.state = data.quests || {};
-    Object.assign(G.State, data.state || {});
-    const p = G.Player;
-    p.hp = Math.min(data.hp || G.Stats.maxHp(), G.Stats.maxHp());
-    p.stamina = Math.min(data.sta || G.Stats.maxSta(), G.Stats.maxSta());
-    if (data.pos) {
-      p.pos.set(data.pos.x, G.World.heightAt(data.pos.x, data.pos.z), data.pos.z);
+    if (!validate(data)) return false;
+    G.Stats.level = G.clamp(Math.floor(data.stats.level), 1, 99);
+    G.Stats.xp = G.clamp(Math.floor(data.stats.xp), 0, 1000000000);
+
+    const items = {};
+    for (const id in data.inv) {
+      const n = data.inv[id];
+      if (G.Items.get(id) && Number.isFinite(n) && n > 0) items[id] = Math.min(9999, Math.floor(n));
     }
-    if (data.horse) G.Horse.teleport(data.horse.x, data.horse.z);
-    G.Inv.upgrades = data.upg || {};
+    G.Inv.items = items;
+    G.Inv.gold = Number.isFinite(data.gold) ? G.clamp(Math.floor(data.gold), 0, 1000000000) : 0;
+    const equip = { weapon: 'sword_traveler', armor: 'armor_cloth' };
+    if (isObj(data.equip)) {
+      const weapon = G.Items.get(data.equip.weapon);
+      const armor = G.Items.get(data.equip.armor);
+      if (weapon && weapon.type === 'weapon') equip.weapon = data.equip.weapon;
+      if (armor && armor.type === 'armor') equip.armor = data.equip.armor;
+    }
+    G.Inv.equip = equip;
+
+    const quests = {};
+    for (const id in data.quests) {
+      const q = data.quests[id];
+      if (!G.Quests.DEFS[id] || !isObj(q) || !['active', 'ready', 'done'].includes(q.status)) continue;
+      quests[id] = { status: q.status, progress: Number.isFinite(q.progress) ? Math.max(0, Math.floor(q.progress)) : 0 };
+    }
+    G.Quests.state = quests;
+
+    const st = isObj(data.state) ? data.state : {};
+    G.State.tod = Number.isFinite(st.tod) ? G.clamp(st.tod, 0, 23.999) : 9.5;
+    G.State.day = Number.isFinite(st.day) ? G.clamp(Math.floor(st.day), 1, 9999) : 1;
+    G.State.mainStage = Number.isFinite(st.mainStage) ? G.clamp(Math.floor(st.mainStage), 0, 4) : 0;
+    G.State.playtime = Number.isFinite(st.playtime) ? G.clamp(st.playtime, 0, 1000000000) : 0;
+    G.State.killCount = Number.isFinite(st.killCount) ? G.clamp(Math.floor(st.killCount), 0, 1000000000) : 0;
+    G.State.cleared = !!st.cleared;
+    const cleanFlags = source => {
+      const out = {};
+      if (!isObj(source)) return out;
+      for (const key in source) if (source[key]) out[key] = true;
+      return out;
+    };
+    G.State.bossKilled = cleanFlags(st.bossKilled);
+    G.State.openedChests = cleanFlags(st.openedChests);
+    G.State.herbs = cleanFlags(st.herbs);
+    G.State.shrines = cleanFlags(st.shrines);
+    G.State.titles = cleanFlags(st.titles);
+    const respawn = typeof st.respawn === 'string' && G.World.shrines.some(sh => sh.id === st.respawn)
+      ? st.respawn : 'shrine1';
+    G.State.respawn = respawn;
+
+    const p = G.Player;
+    p.hp = Number.isFinite(data.hp) ? G.clamp(data.hp, 1, G.Stats.maxHp()) : G.Stats.maxHp();
+    p.stamina = Number.isFinite(data.sta) ? G.clamp(data.sta, 0, G.Stats.maxSta()) : G.Stats.maxSta();
+    const px = G.clamp(data.pos.x, -1300, 1300), pz = G.clamp(data.pos.z, -1300, 1300);
+    const py = G.World.heightAt(px, pz);
+    p.pos.set(px, Number.isFinite(py) ? py : G.World.heightAt(6, 34), pz);
+    if (isObj(data.horse) && Number.isFinite(data.horse.x) && Number.isFinite(data.horse.z)) {
+      G.Horse.teleport(G.clamp(data.horse.x, -1300, 1300), G.clamp(data.horse.z, -1300, 1300));
+    }
+    const upgrades = {};
+    if (isObj(data.upg)) {
+      for (const id in data.upg) {
+        if (G.Items.get(id) && Number.isFinite(data.upg[id])) upgrades[id] = G.clamp(Math.floor(data.upg[id]), 0, 5);
+      }
+    }
+    G.Inv.upgrades = upgrades;
+    return true;
   };
 
   S.reset = function () {
-    try { localStorage.removeItem(KEY); } catch (e) {}
+    const a = G.storage.remove(KEY);
+    const b = G.storage.remove(BACKUP);
+    return a && b;
   };
 
   S.newGame = function () {
