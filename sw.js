@@ -1,22 +1,16 @@
 /* ELDRIA service worker — オフラインでも遊べるようにキャッシュする */
-const CACHE = 'eldria-v3-mobile-master';
+const CACHE = 'eldria-v4-mobile-master';
 const ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './manifest.json',
+  './style-v4.css',
+  './manifest-v4.json',
   './icon.svg',
   './icon-180.png',
   './icon-192.png',
   './icon-512.png',
   './js/lib/three.min.js',
-  './js/core.js',
-  './js/audio.js',
-  './js/world.js',
-  './js/systems.js',
-  './js/entities.js',
-  './js/ui.js',
-  './js/main.js'
+  './eldria-v4.js'
 ];
 
 self.addEventListener('install', e => {
