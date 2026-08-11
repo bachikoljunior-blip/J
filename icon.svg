@@ -1,22 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <defs>
-    <radialGradient id="g" cx="50%" cy="38%" r="62%">
-      <stop offset="0%" stop-color="#2a2320"/>
-      <stop offset="100%" stop-color="#0a0908"/>
-    </radialGradient>
-    <linearGradient id="b" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f0dcb4"/>
-      <stop offset="100%" stop-color="#8a7a5c"/>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a5a8a"/>
+      <stop offset="1" stop-color="#141c30"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" fill="url(#g)"/>
-  <circle cx="256" cy="196" r="118" fill="none" stroke="#e9a44c" stroke-width="6" opacity="0.35"/>
-  <circle cx="256" cy="196" r="60" fill="#e9a44c" opacity="0.16"/>
-  <!-- a sword driven into a low dais: the game's checkpoint mark -->
-  <path d="M244 96 L268 96 L268 330 L256 356 L244 330 Z" fill="url(#b)"/>
-  <rect x="196" y="318" width="120" height="16" rx="4" fill="#c8b48a"/>
-  <rect x="246" y="334" width="20" height="46" rx="4" fill="#54432c"/>
-  <circle cx="256" cy="390" r="16" fill="#c8b48a"/>
-  <ellipse cx="256" cy="424" rx="126" ry="26" fill="#1a1714"/>
-  <ellipse cx="256" cy="418" rx="126" ry="26" fill="#2b2620"/>
+  <rect width="128" height="128" rx="24" fill="url(#sky)"/>
+  <circle cx="92" cy="34" r="12" fill="#ffe9a0" opacity="0.9"/>
+  <path d="M0 96 L34 56 L52 80 L74 44 L104 84 L128 68 L128 128 L0 128 Z" fill="#2c4a38"/>
+  <path d="M60 100 L64 40 L68 100 Z" fill="#cfd8e4"/>
+  <rect x="56" y="56" width="16" height="5" rx="2" fill="#8f7a3a"/>
+  <text x="64" y="122" font-family="serif" font-size="14" fill="#cfe0f0" text-anchor="middle" letter-spacing="4">ELDRIA</text>
 </svg>
