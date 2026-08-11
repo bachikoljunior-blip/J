@@ -114,6 +114,8 @@ test('HTMLとモバイルUIに公開品質の基礎要件がある', () => {
   assert.match(ui, /I\.reset = function/);
   assert.match(ui, /el\('button'/);
   assert.match(ui, /aria-selected/);
+  assert.match(ui, /classList\.add\('fatalmode'\)/);
+  assert.match(css, /#ui\.fatalmode \{ z-index: 120; \}/);
 });
 
 test('中断・描画喪失・実行時例外を安全に処理する', () => {
