@@ -1,35 +1,13 @@
 {
-  "name": "黒鉄の刻印 — KUROGANE",
-  "short_name": "黒鉄の刻印",
-  "description": "スマートフォンで遊べる、探索・戦闘・成長・物語を備えたフル3Dオープンワールド・アクションRPG。",
-  "id": "./",
-  "start_url": "./index.html",
-  "scope": "./",
-  "lang": "ja",
+  "name": "ELDRIA — 風と遺跡の大地",
+  "short_name": "ELDRIA",
+  "description": "スマホで遊べるオープンワールド・アクションRPG",
+  "start_url": ".",
   "display": "fullscreen",
-  "display_override": ["fullscreen", "standalone"],
-  "orientation": "any",
-  "background_color": "#080706",
-  "theme_color": "#0a0908",
-  "categories": ["games"],
+  "orientation": "landscape",
+  "background_color": "#101622",
+  "theme_color": "#1a2436",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }

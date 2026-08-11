@@ -1,0 +1,9 @@
+{
+ "claude-fable-5": {
+  "input": 8493,
+  "output": 1774642,
+  "cache_write": 8888779,
+  "cache_read": 653347502
+ },
+ "_time": "2026-08-09 06:09 JST"
+}
