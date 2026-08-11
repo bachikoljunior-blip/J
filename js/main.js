@@ -9,7 +9,9 @@
   let running = false;
   let prevT = 0;
   let hitstop = 0, trauma = 0;
-  let basePixelRatio = 1, resScale = 1, perfEMA = 16, perfAdjustT = 0, lastRawGap = 16;
+  let basePixelRatio = 1, perfAdjustT = 0, lastRawGap = 16;
+  let frameEMA = 16, workEMA = 16;
+  let perfState = G.PerformanceGovernor.initial();
   let autosaveT = 30;
   let musicT = 0;
   let prevHp = null;
@@ -19,6 +21,24 @@
   // ?drs=1: ヘッドレス計測でも動的解像度スケーリングを作動させる検証フック
   G.forceDRS = /[?&]drs=1/.test(location.search);
   G.Camera = { yaw: Math.PI, pitch: 0.42, dist: 7.5, cam: null };
+  G.perf = { sim: 0, render: 0, calls: 0, resScale: 1, detail: 1, frameMs: 16 };
+
+  function fatalStop(error, title) {
+    running = false;
+    try { if (started && G.Player && G.Player.alive) G.Save.save(); } catch (e) {}
+    try { if (G.Input && G.Input.reset) G.Input.reset(); } catch (e) {}
+    console.error('[ELDRIA] fatal', error);
+    const detail = '進行は保存されています。再読み込みして続けてください。';
+    if (G.UI && G.UI.showFatal) {
+      G.UI.showFatal(title || 'ゲームを安全に停止しました', detail);
+    } else {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.style.display = 'flex';
+        loading.textContent = (title || '起動できませんでした') + ' — 再読み込みしてください';
+      }
+    }
+  }
 
   /* ---------------- 起動 ---------------- */
   Game.boot = function () {
@@ -69,6 +89,29 @@
     G.Input.init(canvas);
     G.UI.buildMap();
 
+    let visibilityPaused = false;
+    document.addEventListener('visibilitychange', () => {
+      G.Input.reset();
+      if (document.hidden) {
+        if (started && G.Player.alive) G.Save.save();
+        visibilityPaused = started && !G.paused;
+        if (visibilityPaused) G.paused = true;
+      } else {
+        prevT = performance.now();
+        if (visibilityPaused) G.paused = false;
+        visibilityPaused = false;
+      }
+    });
+    window.addEventListener('pagehide', () => {
+      G.Input.reset();
+      if (started && G.Player.alive) G.Save.save();
+    });
+    canvas.addEventListener('webglcontextlost', e => {
+      e.preventDefault();
+      fatalStop(e, '描画機能を復旧しています');
+    });
+    canvas.addEventListener('webglcontextrestored', () => location.reload());
+
     // ダメージ時の画面フラッシュ
     flashEl = G.UI.el('div', 'flash', document.getElementById('ui'));
 
@@ -98,6 +141,7 @@
 
   let started = false;
   Game.start = function (newGame) {
+    let recovered = false;
     if (newGame) {
       G.Save.reset();
       G.Save.newGame();
@@ -105,7 +149,7 @@
       tutStart();
     } else {
       const data = G.Save.load();
-      if (data) G.Save.apply(data);
+      if (data && G.Save.apply(data)) recovered = !!data._recovered;
       else G.Save.newGame();
     }
     G.Player.buildRig();
@@ -118,6 +162,10 @@
     G.Bosses.init(scene);
     G.UI.refreshTracker();
     G.UI.refreshHUDStatic();
+    if (recovered) {
+      G.Save.save();
+      G.UI.toast('予備保存から進行を復旧しました', 'gold');
+    }
     // 新規開始時は導入オーバーレイが閉じた時にHUDを出す (半透明の導入越しに
     // HUDが透けるのを防ぐ)
     G.UI.setHudVisible(!newGame);
@@ -136,7 +184,7 @@
   ];
   let tutStage = -1, tutMove = 0, tutPX = null, tutPZ = null, tutHidden = false;
   function tutStart() {
-    if (localStorage.getItem('eldria_tut') === 'done') { G.UI.setKeyhelpVisible(true); return; }
+    if (G.storage.get('eldria_tut') === 'done') { G.UI.setKeyhelpVisible(true); return; }
     tutStage = 0; tutMove = 0;
     G.UI.setKeyhelpVisible(false);
     G.UI.showTutChip(G.isTouch ? TUT[0].t : TUT[0].k);
@@ -147,7 +195,7 @@
     G.Audio.sfx('ui');
     if (tutStage >= TUT.length) {
       tutStage = -1;
-      localStorage.setItem('eldria_tut', 'done');
+      G.storage.set('eldria_tut', 'done');
       G.UI.hideTutChip();
       G.UI.setKeyhelpVisible(true);
       G.UI.toast('基本操作を覚えた', 'gold');
@@ -161,7 +209,7 @@
   /* チュートリアルを外部からスキップ (計測ハーネス・デバッグ用) */
   G.tutSkip = function () {
     tutStage = -1;
-    localStorage.setItem('eldria_tut', 'done');
+    G.storage.set('eldria_tut', 'done');
     G.UI.hideTutChip();
     G.UI.setKeyhelpVisible(true);
   };
@@ -655,12 +703,20 @@
 
   /* ---------------- メインループ ---------------- */
   function loop(now) {
-    requestAnimationFrame(loop);
+    if (!running) return;
+    try {
+      frame(now);
+      if (running) requestAnimationFrame(loop);
+    } catch (error) {
+      fatalStop(error);
+    }
+  }
+
+  function frame(now) {
     const rawGap = now - prevT;
     let dt = Math.min(rawGap / 1000, 0.05);
     prevT = now;
     lastRawGap = rawGap;
-    if (!running) return;
 
     handleActions();
     G.Input.updateFromKeys();
@@ -735,42 +791,36 @@
     G.perf.render += (_t2 - _t1 - G.perf.render) * 0.05;
     G.perf.calls = renderer.info.render.calls;   // ドローコール削減の指標
 
-    // 動的解像度スケーリング: 低スペック端末では描画解像度を下げて
-    // フレームレートを守る (render時間のEMAで調整)。
-    // EMAは実経過時間基準 (τ≈0.8s): フレームレートが低いほど1フレームの
-    // 寄与を大きくし、低fps環境でも数秒で実負荷に収束させる
-    const emaA = 1 - Math.exp(-Math.min(lastRawGap, 1000) / 800);
-    perfEMA += (_t2 - _t0 - perfEMA) * emaA;
-    // 調整間隔も実経過時間で計る (ゲームdtはクランプされるため低fps環境では
-    // 1.2秒分の蓄積に十数秒かかり、段階降下が事実上進まない)
-    perfAdjustT += Math.min(lastRawGap, 1000) / 1000;
-    // RAF間隔が異常に長い環境 (バックグラウンド/ヘッドレス計測) では調整しない。
-    // ?drs=1 でガードを無効化 (ヘッドレスでDRS動作そのものを検証するテスト用フック)
-    if (perfAdjustT > 1.2 && started && (lastRawGap < 150 || G.forceDRS)) {
+    // RAF間隔も含めて観測する。GPU待ちで JS 計測だけが軽く見える端末でも
+    // 30fpsを守れる一方、33.3msは快適域として画質を落とさない。
+    const sampleGap = Math.min(Math.max(lastRawGap, 1), 150);
+    const emaA = 1 - Math.exp(-sampleGap / 800);
+    if (lastRawGap > 0 && lastRawGap < 150) frameEMA += (lastRawGap - frameEMA) * emaA;
+    workEMA += (_t2 - _t0 - workEMA) * emaA;
+    G.perf.frameMs = Math.max(frameEMA, workEMA);
+    perfAdjustT += Math.min(lastRawGap, 150) / 1000;
+    if (perfAdjustT > 1.5 && started && (lastRawGap < 150 || G.forceDRS)) {
       perfAdjustT = 0;
-      let want = resScale;
-      // 60fps予算 (16.6ms) を基準に、50fps相当を割ったら降下・十分軽ければ復帰。
-      // 大幅超過 (閾値1.5倍) は2段降下で素早く収束させる
-      // 持続的な大幅超過 (>45ms) では床0.5まで許容する追加ティア
-      const floor2 = perfEMA > 45 ? 0.5 : 0.6;
-      if (perfEMA > 26 && resScale > floor2) want = Math.max(floor2, resScale - (perfEMA > 39 ? 0.4 : 0.2));
-      else if (perfEMA < 16 && resScale < 1) want = Math.min(1, resScale + 0.1);
-      if (want !== resScale) {
-        resScale = want;
-        renderer.setPixelRatio(basePixelRatio * resScale);
-        // 実バッファへの適用証跡 (resScaleが数値だけでないことの検証用)
-        console.log('[dbg] DRS resScale', resScale, 'buffer',
-          renderer.domElement.width + 'x' + renderer.domElement.height);
+      const next = G.PerformanceGovernor.step(perfState, G.perf.frameMs, G.quality);
+      if (next.resolution !== perfState.resolution) {
+        renderer.setPixelRatio(basePixelRatio * next.resolution);
       }
-      G.perf.resScale = resScale;   // 計測ハーネスからDRSの実動作を検分できるように
+      if (next.detail !== perfState.detail && G.World.setRuntimeDetail) {
+        G.World.setRuntimeDetail(next.detail);
+      }
+      perfState = next;
+      G.perf.resScale = next.resolution;
+      G.perf.detail = next.detail;
     }
   }
-  G.perf = { sim: 0, render: 0 };
 
   /* ---------------- 開始 ---------------- */
+  function safeBoot() {
+    try { Game.boot(); } catch (error) { fatalStop(error, 'ELDRIAを起動できませんでした'); }
+  }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', Game.boot);
+    document.addEventListener('DOMContentLoaded', safeBoot);
   } else {
-    Game.boot();
+    safeBoot();
   }
 })();

@@ -4,15 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ELDRIA">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1a2436">
+<meta name="description" content="スマホ横持ちで遊べる、2kmの大地を旅するオープンワールド・アクションRPG。">
+<meta property="og:title" content="ELDRIA — 風と遺跡の大地">
+<meta property="og:description" content="剣戟、騎乗、滑空、ダンジョン、4体のボス。インストール不要で冒険へ。">
+<meta property="og:type" content="website">
 <title>ELDRIA — 風と遺跡の大地</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="game"></canvas>
+<canvas id="game" aria-label="ELDRIA 3Dゲーム画面。横向きでプレイします"></canvas>
 <div id="ui"></div>
 <div id="rotate-hint">📱 横向きにすると遊びやすくなります</div>
 <div id="loading">
@@ -29,7 +36,17 @@
 <script src="js/main.js"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js').catch(function () {});
+  navigator.serviceWorker.register('sw.js').then(function (reg) {
+    reg.addEventListener('updatefound', function () {
+      var worker = reg.installing;
+      if (!worker) return;
+      worker.addEventListener('statechange', function () {
+        if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+          window.dispatchEvent(new Event('eldria-update-ready'));
+        }
+      });
+    });
+  }).catch(function () {});
 }
 </script>
 </body>

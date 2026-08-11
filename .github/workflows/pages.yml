@@ -1,81 +1,29 @@
-# ============================================================================
-#  Pages — 検証済みスナップショットを公開する
-#
-#  作業ブランチを検査し、通った場合だけ main (Pages 配信ブランチ) へ
-#  コピーして公開する。壊れた中間状態が公開されるのを防ぐ。
-#  スケジュールに加え、workflow_dispatch で任意のタイミングでも公開できる。
-# ============================================================================
-name: Pages
+name: ELDRIA Quality
 
 on:
-  schedule:
-    - cron: '0 3,15 * * *'
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
-
-env:
-  DEV_BRANCH: claude/mobile-open-world-action-rpg-8uw40p
-  PAGES_BRANCH: main
+  group: eldria-quality-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  publish:
+  verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: 作業ブランチを取得
-        uses: actions/checkout@v4
-        with:
-          ref: claude/mobile-open-world-action-rpg-8uw40p
-          path: src-branch
-
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
-      # 全スクリプトの構文検査。落ちたら公開せず、前回の良品が残る。
-      - name: 検査
-        working-directory: src-branch
+      - name: 品質テスト
+        run: npm test
+      - name: 全スクリプト構文検査
         run: sh tools/parsecheck.sh
-
-      - name: 公開物を組む
-        run: |
-          mkdir -p site
-          cd src-branch
-          cp index.html style.css manifest.json icon.svg sw.js README.md ../site/
-          cp -r js ../site/
-          cd ..
-          {
-            printf 'commit %s\n' "$(git -C src-branch rev-parse HEAD)"
-            printf 'branch %s\n' "$DEV_BRANCH"
-            date -u '+built  %Y-%m-%d %H:%M UTC'
-          } > site/BUILD.txt
-          cat site/BUILD.txt
-
-      - name: 公開ブランチを取得
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          path: pages-branch
-
-      - name: 差し替えて commit
-        working-directory: pages-branch
-        run: |
-          set -eu
-          find . -mindepth 1 -maxdepth 1 \
-            ! -name .git ! -name .github -exec rm -rf {} +
-          cp -r ../site/. .
-
-          git config user.name  'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add -A
-          if git diff --cached --quiet; then
-            echo '変更なし — 公開済みのものと同じ'
-            exit 0
-          fi
-          git commit -m "公開: $(git -C ../src-branch rev-parse --short HEAD) の検証済みスナップショット"
-          git push origin HEAD:main
