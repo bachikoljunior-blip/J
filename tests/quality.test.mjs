@@ -101,6 +101,8 @@ test('HTMLとモバイルUIに公開品質の基礎要件がある', () => {
   assert.match(html, /apple-touch-icon/);
   assert.match(html, /<canvas[^>]+aria-label=/);
   assert.match(html, /meta name="description"/);
+  assert.match(html, /style\.css\?v=\d+/);
+  assert.match(html, /js\/main\.js\?v=\d+/);
 
   const css = read('style.css');
   assert.match(css, /\.b-menu \{[^}]*width: 44px; height: 44px/s);
