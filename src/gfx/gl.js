@@ -181,6 +181,15 @@ export class GL {
     return prog;
   }
 
+  deleteProgram(prog) {
+    if (!prog?.handle) return;
+    if (this._program === prog) {
+      this._program = null;
+      this.gl.useProgram(null);
+    }
+    this.gl.deleteProgram(prog.handle);
+  }
+
   // Uniform setters that silently no-op when the uniform was optimised out.
   u1f(p, n, v) { const l = p.uniforms[n]; if (l) this.gl.uniform1f(l, v); }
   u1i(p, n, v) { const l = p.uniforms[n]; if (l) this.gl.uniform1i(l, v); }
@@ -360,15 +369,26 @@ export class GL {
 
     if (status !== gl.FRAMEBUFFER_COMPLETE && useDepthTex) {
       // Depth-texture path unsupported in practice — retry as packed RGBA.
+      this.deleteTarget({ fbo, color, depthTex, depthBuf });
       this.depthTexture = false;
       return this.createShadowTarget(size);
     }
     return {
-      fbo, size,
+      fbo, size, color, depthTex, depthBuf,
       texture: useDepthTex ? depthTex : color,
       packed: !useDepthTex,
       ok: status === gl.FRAMEBUFFER_COMPLETE,
     };
+  }
+
+  /** Release every attachment owned by a render or shadow target. */
+  deleteTarget(target) {
+    if (!target) return;
+    const gl = this.gl;
+    const textures = new Set([target.color, target.depthTex, target.texture].filter(Boolean));
+    for (const texture of textures) gl.deleteTexture(texture);
+    if (target.depthBuf) gl.deleteRenderbuffer(target.depthBuf);
+    if (target.fbo) gl.deleteFramebuffer(target.fbo);
   }
 
   bindTexture(unit, tex) {

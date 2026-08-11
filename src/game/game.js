@@ -848,7 +848,10 @@ export class Game {
     this.renderer.setQuality(name);
     const q = this.renderer.quality;
     this.grass.configure(q.grassRadius, q.grassCell, q.grassBlades);
-    this.particles.cap = Math.min(this.particles.cap, q.particleCap);
+    // Quality changes must be reversible. The previous min() permanently kept
+    // a phone at the low preset's 700 particles even after selecting high.
+    this.particles.cap = q.particleCap;
+    while (this.particles.count > this.particles.cap) this.particles._remove(0);
     this.terrain.chunkBudgetPerFrame = name === 'low' ? 1 : 2;
     saveSettings(this.settings);
     this.resize();

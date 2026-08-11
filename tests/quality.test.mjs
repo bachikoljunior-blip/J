@@ -4,7 +4,9 @@ import { readFile, access } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { QuestLog, QUEST_STATE } from '../src/game/quests.js';
-import { listSaves, loadGameData, deleteSave } from '../src/core/save.js';
+import {
+  listSaves, loadGameData, deleteSave, createBackup, restoreBackup,
+} from '../src/core/save.js';
 
 const root = resolve(import.meta.dirname, '..');
 
@@ -110,4 +112,62 @@ test('install manifest includes raster icons for iPhone and Android', async () =
   assert.ok(pngSizes.has('192x192'));
   assert.ok(pngSizes.has('512x512'));
   await Promise.all(['icon-180.png', 'icon-192.png', 'icon-512.png'].map((name) => access(resolve(root, name))));
+});
+
+test('all save slots can be backed up and restored transactionally', () => {
+  const previous = globalThis.localStorage;
+  const values = new Map();
+  globalThis.localStorage = {
+    getItem(key) { return values.has(key) ? values.get(key) : null; },
+    setItem(key, value) { values.set(key, String(value)); },
+    removeItem(key) { values.delete(key); },
+  };
+  try {
+    const save = {
+      version: 3,
+      meta: { savedAt: 1, playtime: 2, seed: 'test' },
+      player: { name: '刻印者', level: 4 },
+      world: { bossesKilled: [] },
+      quests: {},
+    };
+    values.set('kurogane.save.1', JSON.stringify(save));
+    values.set('kurogane.settings', JSON.stringify({ quality: 'low' }));
+    const backup = createBackup();
+    values.clear();
+    assert.equal(restoreBackup(backup), 1);
+    assert.deepEqual(JSON.parse(values.get('kurogane.save.1')), save);
+    assert.deepEqual(JSON.parse(values.get('kurogane.settings')), { quality: 'low' });
+    assert.throws(() => restoreBackup('{"format":"wrong"}'));
+    assert.deepEqual(JSON.parse(values.get('kurogane.save.1')), save,
+      'invalid restore must not alter existing saves');
+  } finally {
+    if (previous === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previous;
+  }
+});
+
+test('service worker only activates after a complete precache and never serves HTML for missing modules', async () => {
+  const source = await readFile(resolve(root, 'sw.js'), 'utf8');
+  const install = source.match(/self\.addEventListener\('install'[\s\S]*?\n\}\);/)?.[0] || '';
+  assert.doesNotMatch(install, /\.catch\([^)]*=>\s*self\.skipWaiting/);
+  const assetFetch = source.slice(source.lastIndexOf("caches.match(e.request)"));
+  assert.doesNotMatch(assetFetch, /catch\(\(\) => caches\.match\('\.\/index\.html'\)\)/);
+});
+
+test('quality changes can raise the particle budget again', async () => {
+  const source = await readFile(resolve(root, 'src/game/game.js'), 'utf8');
+  const apply = source.match(/applyQuality\(name\) \{([\s\S]*?)\n  \}/)?.[1] || '';
+  assert.match(apply, /this\.particles\.cap\s*=\s*q\.particleCap/);
+  assert.doesNotMatch(apply, /Math\.min\(this\.particles\.cap/);
+});
+
+test('quality preset swaps dispose replaced GPU resources', async () => {
+  const renderer = await readFile(resolve(root, 'src/gfx/renderer.js'), 'utf8');
+  const gl = await readFile(resolve(root, 'src/gfx/gl.js'), 'utf8');
+  assert.match(renderer, /this\.glw\.deleteTarget\(previous\)/);
+  assert.match(renderer, /this\.glw\.deleteProgram\(program\)/);
+  assert.match(gl, /deleteProgram\(prog\)/);
+  assert.match(gl, /deleteTarget\(target\)/);
+  assert.match(gl, /this\.deleteTarget\(\{ fbo, color, depthTex, depthBuf \}\)/,
+    'failed shadow target allocations must be released before fallback');
 });

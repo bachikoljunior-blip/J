@@ -9,6 +9,8 @@
 
 const PREFIX = 'kurogane.save.';
 const VERSION = 3;
+const BACKUP_FORMAT = 'kurogane-save-backup';
+const BACKUP_VERSION = 1;
 
 export function listSaves() {
   const out = [];
@@ -122,6 +124,91 @@ export function deleteSave(slot) {
     return true;
   } catch (e) {
     return false;
+  }
+}
+
+/**
+ * Create a portable, human-readable backup of all three slots and settings.
+ * Safari may evict site storage under pressure; this gives a long-running
+ * mobile RPG an escape hatch that does not depend on an account or server.
+ */
+export function createBackup() {
+  const slots = [];
+  for (let i = 0; i < 3; i++) {
+    let value = null;
+    try {
+      const raw = localStorage.getItem(PREFIX + i);
+      value = raw ? JSON.parse(raw) : null;
+    } catch (e) { /* a damaged slot is represented as empty */ }
+    slots.push(value);
+  }
+
+  let settings = null;
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    settings = raw ? JSON.parse(raw) : null;
+  } catch (e) { /* settings are optional */ }
+
+  return JSON.stringify({
+    format: BACKUP_FORMAT,
+    backupVersion: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    slots,
+    settings,
+  }, null, 2);
+}
+
+/** Restore a backup transactionally: failed writes put the old data back. */
+export function restoreBackup(text) {
+  const backup = JSON.parse(String(text));
+  assertSafeData(backup);
+  if (backup.format !== BACKUP_FORMAT || backup.backupVersion !== BACKUP_VERSION) {
+    throw new Error('対応していないバックアップ形式です');
+  }
+  if (!Array.isArray(backup.slots) || backup.slots.length !== 3) {
+    throw new Error('セーブスロットの構成が壊れています');
+  }
+
+  const encoded = backup.slots.map((data) => {
+    if (data === null) return null;
+    if (!data || typeof data !== 'object' || !data.player || !data.meta || !data.world ||
+        !Number.isInteger(data.version) || data.version < 1 || data.version > VERSION) {
+      throw new Error('セーブデータの内容が壊れています');
+    }
+    return JSON.stringify(data);
+  });
+  const encodedSettings = backup.settings && typeof backup.settings === 'object'
+    ? JSON.stringify(backup.settings) : null;
+
+  const keys = [PREFIX + 0, PREFIX + 1, PREFIX + 2, SETTINGS_KEY];
+  const previous = keys.map((key) => localStorage.getItem(key));
+  try {
+    for (let i = 0; i < 3; i++) {
+      if (encoded[i] === null) localStorage.removeItem(PREFIX + i);
+      else localStorage.setItem(PREFIX + i, encoded[i]);
+    }
+    if (encodedSettings === null) localStorage.removeItem(SETTINGS_KEY);
+    else localStorage.setItem(SETTINGS_KEY, encodedSettings);
+  } catch (error) {
+    for (let i = 0; i < keys.length; i++) {
+      try {
+        if (previous[i] === null) localStorage.removeItem(keys[i]);
+        else localStorage.setItem(keys[i], previous[i]);
+      } catch (e) { /* best effort rollback when storage itself is unavailable */ }
+    }
+    throw error;
+  }
+  return encoded.filter(Boolean).length;
+}
+
+function assertSafeData(value, depth = 0) {
+  if (depth > 40) throw new Error('バックアップの階層が深すぎます');
+  if (!value || typeof value !== 'object') return;
+  for (const key of Object.keys(value)) {
+    if (key === '__proto__' || key === 'prototype' || key === 'constructor') {
+      throw new Error('安全でないバックアップです');
+    }
+    assertSafeData(value[key], depth + 1);
   }
 }
 

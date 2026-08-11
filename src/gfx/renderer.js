@@ -233,7 +233,14 @@ export class Renderer {
     this.qualityName = QUALITY[name] ? name : 'medium';
     this.quality = q;
     if (this.shadow && this.shadow.size !== q.shadowSize) {
-      this.shadow = null;
+      const previous = this.shadow;
+      const replacement = this.glw.createShadowTarget(q.shadowSize);
+      if (replacement.ok) {
+        this.shadow = replacement;
+        this.glw.deleteTarget(previous);
+      } else {
+        this.glw.deleteTarget(replacement);
+      }
     }
     if (!this.shadow) this.shadow = this.glw.createShadowTarget(q.shadowSize);
     // Triplanar sampling is a compile-time switch, so dropping to the cheap
@@ -241,9 +248,14 @@ export class Renderer {
     const cheap = !!q.cheapSurface;
     if (this.progTerrain && cheap !== this._cheapSurface) {
       this._cheapSurface = cheap;
-      this.progTerrain = this.glw.program(TERRAIN_VS, this._define(TERRAIN_FS), 'terrain');
-      this.progInstance = this.glw.program(INSTANCE_VS, this._define(INSTANCE_FS), 'instance');
-      this.progGrass = this.glw.program(GRASS_VS, this._define(GRASS_FS), 'grass');
+      const old = [this.progTerrain, this.progInstance, this.progGrass];
+      const next = [
+        this.glw.program(TERRAIN_VS, this._define(TERRAIN_FS), 'terrain'),
+        this.glw.program(INSTANCE_VS, this._define(INSTANCE_FS), 'instance'),
+        this.glw.program(GRASS_VS, this._define(GRASS_FS), 'grass'),
+      ];
+      [this.progTerrain, this.progInstance, this.progGrass] = next;
+      for (const program of old) this.glw.deleteProgram(program);
     }
     this._sizeDirty = true;
   }

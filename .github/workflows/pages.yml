@@ -77,6 +77,7 @@ jobs:
       - name: 検査
         working-directory: src-branch
         run: |
+          npm run quality
           sh tools/parsecheck.sh
           node tools/unit-continuity.mjs
           node tools/unit-camera.mjs
@@ -91,7 +92,7 @@ jobs:
         run: |
           mkdir -p site
           cd src-branch
-          cp index.html style.css manifest.json icon.svg sw.js ../site/
+          cp index.html style.css manifest.json icon.svg icon-180.png icon-192.png icon-512.png sw.js ../site/
           cp -r src ../site/
           cp -r docs ../site/
           cd ..

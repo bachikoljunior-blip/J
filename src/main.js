@@ -5,7 +5,10 @@
 import { Game } from './game/game.js';
 import { UI } from './ui/ui.js';
 import { CLASSES } from './game/player.js';
-import { listSaves, loadGameData, deleteSave, formatPlaytime, saveSettings } from './core/save.js';
+import {
+  listSaves, loadGameData, deleteSave, formatPlaytime, saveSettings,
+  createBackup, restoreBackup,
+} from './core/save.js';
 import { clamp, MAX_DT } from './core/math.js';
 
 const $ = (id) => document.getElementById(id);
@@ -94,6 +97,8 @@ function showTitle() {
         ${hasSave ? '<button class="btn primary" data-t="load">続きから</button>' : ''}
         <button class="btn${hasSave ? '' : ' primary'}" data-t="new">新しい旅</button>
         <button class="btn" data-t="settings">設定</button>
+        ${hasSave ? '<button class="btn compact" data-t="backup">セーブを端末へバックアップ</button>' : ''}
+        <button class="btn compact" data-t="restore">バックアップから復元</button>
       </div>
       <p class="title-foot">端末を横向きにすると広く表示されます。ヘッドホン推奨。</p>
       <span class="title-version">QUALITY REFORGED 2026.08</span>
@@ -110,7 +115,46 @@ function showTitle() {
     }
     else if (b.dataset.t === 'load') showLoadMenu();
     else if (b.dataset.t === 'settings') showTitleSettings();
+    else if (b.dataset.t === 'backup') downloadBackup();
+    else if (b.dataset.t === 'restore') chooseBackup();
   };
+}
+
+function downloadBackup() {
+  try {
+    const blob = new Blob([createBackup()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    a.href = url;
+    a.download = `kurogane-save-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) {
+    alert(`バックアップを作成できませんでした。\n${error.message || error}`);
+  }
+}
+
+function chooseBackup() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      if (!confirm('現在の3つのセーブスロットと設定を、選んだバックアップで置き換えます。')) return;
+      const count = restoreBackup(text);
+      alert(`${count}件のセーブを復元しました。`);
+      location.reload();
+    } catch (error) {
+      alert(`復元できませんでした。\n${error.message || error}`);
+    }
+  };
+  input.click();
 }
 
 function showTitleSettings() {

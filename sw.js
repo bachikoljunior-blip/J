@@ -1,7 +1,7 @@
 // Offline cache. The whole game is a handful of source files, so a simple
 // cache-first strategy with a versioned bucket is enough — bump CACHE on
 // release and the old bucket is dropped on activate.
-const CACHE = 'kurogane-v3-quality-reforged';
+const CACHE = 'kurogane-v4-quality-reforged';
 
 const ASSETS = [
   './',
@@ -46,8 +46,9 @@ self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE)
       .then((c) => c.addAll(ASSETS))
+      // Only activate a complete offline build. If any asset is unavailable,
+      // rejecting install keeps the previous known-good worker and cache.
       .then(() => self.skipWaiting())
-      .catch(() => self.skipWaiting())
   );
 });
 
@@ -80,6 +81,6 @@ self.addEventListener('fetch', (e) => {
         caches.open(CACHE).then((c) => c.put(e.request, copy));
       }
       return res;
-    }).catch(() => caches.match('./index.html')))
+    }))
   );
 });

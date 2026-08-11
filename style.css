@@ -789,6 +789,7 @@ h3:first-child { margin-top: 0; }
 .btn.primary { border-color: var(--amber-dim); color: #f4e2bc; background: rgba(233, 164, 76, 0.10); }
 .btn.danger { border-color: rgba(180, 60, 60, 0.45); color: #e0a0a0; }
 .btn.wide-btn { margin-top: 14px; }
+.btn.compact { min-height: 44px; padding: 7px 12px; margin: 3px 0; font-size: 0.62rem; color: var(--text-dim); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
 .chip-label { font-size: 0.62rem; color: var(--text-dim); width: 2.6em; }
