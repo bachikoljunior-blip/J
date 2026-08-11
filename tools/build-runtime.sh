@@ -11,3 +11,4 @@ for file in js/core.js js/audio.js js/world.js js/systems.js js/entities.js js/u
 done
 cp style.css style-v5.css
 cp manifest.json manifest-v5.json
+rm -f eldria-v4.js style-v4.css manifest-v4.json

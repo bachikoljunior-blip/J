@@ -213,6 +213,7 @@
     b.addEventListener('pointerdown', e => {
       e.stopPropagation();
       G.Audio.init();
+      G.haptic(action === 'attack' ? 12 : 8);
       downT = performance.now();
       b.classList.add('pressed');
       if (opts.heldKey) G.Input.held[opts.heldKey] = true;
@@ -1338,7 +1339,10 @@
     };
     mkSlider('音楽', () => G.settings.music, v => { G.settings.music = v; G.Audio.setMusicVol(v); G.settings.save(); });
     mkSlider('効果音', () => G.settings.sfx, v => { G.settings.sfx = v; G.Audio.setSfxVol(v); G.settings.save(); });
-    mkSlider('カメラ感度', () => G.settings.sens / 2, v => { G.settings.sens = v * 2; G.settings.save(); });
+    mkSlider('カメラ感度', () => (G.settings.sens - 0.25) / 1.75, v => {
+      G.settings.sens = 0.25 + v * 1.75;
+      G.settings.save();
+    });
     mkSlider('画面の揺れ', () => G.settings.shake, v => { G.settings.shake = v; G.settings.save(); });
 
     const mkToggle = (label, get, set) => {
@@ -1352,12 +1356,23 @@
         const next = !get(); set(next);
         b.textContent = next ? 'オン' : 'オフ';
         b.classList.toggle('on', next); b.setAttribute('aria-pressed', String(next));
-        if (next && label === '振動') G.haptic(18);
+        if (next && label.startsWith('触覚')) G.haptic(18);
       });
       row.appendChild(b);
     };
-    mkToggle('振動', () => G.settings.haptics, v => { G.settings.haptics = v; G.settings.save(); });
+    mkToggle('触覚（対応端末のみ）', () => G.settings.haptics, v => { G.settings.haptics = v; G.settings.save(); });
     mkToggle('ダメージ数値', () => G.settings.showDmg, v => { G.settings.showDmg = v; G.settings.save(); });
+    mkToggle('上下反転', () => G.settings.invertY, v => { G.settings.invertY = v; G.settings.save(); });
+    mkToggle('点滅・動きの軽減', () => G.settings.reduceMotion, v => {
+      G.settings.reduceMotion = v;
+      document.body.classList.toggle('reduced-motion', G.prefersReducedMotion());
+      G.settings.save();
+    });
+    mkToggle('リアルタイム影', () => G.settings.shadows !== 'off', v => {
+      G.settings.shadows = v ? 'auto' : 'off';
+      G.settings.save();
+      UI.toast('影の変更はリロードで反映されます');
+    });
 
     const qrow = el('div', 'srow', wrap);
     el('div', 'slabel', qrow, '描画品質 (要リロード)');
@@ -1407,6 +1422,12 @@
       file.value = '';
     });
     portable.appendChild(file);
+    const replayTut = button('bigbtn sub small', wrap, '基本操作ガイドを再表示');
+    replayTut.addEventListener('click', e => {
+      e.stopPropagation();
+      G.storage.remove('eldria_tut');
+      UI.toast('次の「はじめから」で操作ガイドを表示します', 'gold');
+    });
     el('div', 'dangergap', wrap);
     const reset = button('bigbtn danger small', wrap, 'データを消して最初から');
     reset.addEventListener('click', e => {

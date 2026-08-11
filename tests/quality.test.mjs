@@ -46,6 +46,39 @@ test('ストレージが拒否されても設定初期化は落ちない', () =>
   const G = loadCore(blocked);
   assert.equal(G.settings.quality, 'auto');
   assert.doesNotThrow(() => G.settings.save());
+  assert.equal(G.haptic(20), false);
+  assert.equal(G.prefersReducedMotion(), false);
+});
+
+test('3世代目の予備保存から復旧でき、不正なインポートを拒否する', () => {
+  const data = {
+    v: 1,
+    stats: { level: 7, xp: 88 },
+    pos: { x: 14, z: -9 },
+    inv: {}, quests: {}
+  };
+  const store = new Map([
+    ['eldria_save_v1', '{broken'],
+    ['eldria_save_backup_v1', '{also-broken'],
+    ['eldria_save_backup2_v1', JSON.stringify(data)]
+  ]);
+  const G = {
+    storage: {
+      get: key => store.get(key) ?? null,
+      set: (key, value) => { store.set(key, value); return true; },
+      remove: key => { store.delete(key); return true; }
+    }
+  };
+  const systems = read('js/systems.js');
+  const saveSection = systems.slice(systems.indexOf('/* ======================= セーブ / ロード'));
+  vm.runInNewContext(saveSection, { G }, { filename: 'save-section.js' });
+  const recovered = G.Save.load();
+  assert.equal(recovered.stats.level, 7);
+  assert.equal(recovered._recovered, true);
+  assert.equal(G.Save.importData('{invalid'), false);
+  const pack = { format: 'eldria-save', version: 1, data: { ...data, stats: { level: 8, xp: 0 } } };
+  assert.equal(G.Save.importData(JSON.stringify(pack)), true);
+  assert.equal(G.Save.load().stats.level, 8);
 });
 
 test('壊れた主保存から有効な予備保存へ復旧できる', () => {
@@ -57,7 +90,9 @@ test('壊れた主保存から有効な予備保存へ復旧できる', () => {
   };
   const store = new Map([
     ['eldria_save_v1', '{broken'],
-    ['eldria_save_backup_v1', JSON.stringify(data)]
+    ['eldria_save_backup_v1', JSON.stringify(data)],
+    ['eldria_save_backup2_v1', JSON.stringify(data)],
+    ['eldria_save_backup3_v1', JSON.stringify(data)]
   ]);
   const G = {
     storage: {
@@ -114,6 +149,9 @@ test('HTMLとモバイルUIに公開品質の基礎要件がある', () => {
   assert.match(ui, /I\.reset = function/);
   assert.match(ui, /el\('button'/);
   assert.match(ui, /aria-selected/);
+  assert.match(ui, /点滅・動きの軽減/);
+  assert.match(ui, /基本操作ガイドを再表示/);
+  assert.match(ui, /G\.settings\.sens = 0\.25 \+ v \* 1\.75/);
   assert.match(ui, /classList\.add\('fatalmode'\)/);
   assert.match(css, /#ui\.fatalmode \{ z-index: 120; \}/);
 });
@@ -126,6 +164,9 @@ test('中断・描画喪失・実行時例外を安全に処理する', () => {
   assert.match(main, /webglcontextrestored/);
   assert.match(main, /fatalStop\(error\)/);
   assert.match(main, /if \(running\) requestAnimationFrame\(loop\)/);
+  assert.match(main, /warmupChunks\(6\)/);
+  assert.match(main, /warmupChunks\(8\)/);
+  assert.doesNotMatch(main, /for \(let i = 0; i < 60; i\+\+\)/);
   assert.doesNotMatch(main, /function loop\(now\) \{\s*requestAnimationFrame\(loop\)/);
 });
 
@@ -147,7 +188,7 @@ test('モバイル完結機能が設定・保存・更新導線まで揃う', ()
   assert.match(core, /haptics: true/);
   assert.match(core, /shake: 0\.8/);
   assert.match(core, /G\.haptic = function/);
-  assert.match(main, /v \* G\.settings\.shake/);
+  assert.match(main, /G\.settings\.shake \*/);
   assert.match(systems, /S\.summary = function/);
   assert.match(systems, /S\.exportData = function/);
   assert.match(systems, /S\.importData = function/);

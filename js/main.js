@@ -42,6 +42,7 @@
 
   /* ---------------- 起動 ---------------- */
   Game.boot = function () {
+    document.body.classList.toggle('reduced-motion', G.prefersReducedMotion());
     const canvas = document.getElementById('game');
     renderer = new THREE.WebGLRenderer({
       canvas,
@@ -120,7 +121,9 @@
     scene.add(G.playerLight);
 
     // 初期チャンクを同期的に確保 (プレイヤー周辺)
-    warmupChunks();
+    // 画面が固まる長い同期生成は避け、近傍だけ先に作る。残りはタイトル背景の
+    // 通常フレームで2チャンクずつ生成されるため、見た目を保ったまま起動が速い。
+    warmupChunks(6);
 
     document.getElementById('loading').style.display = 'none';
 
@@ -132,15 +135,16 @@
     requestAnimationFrame(loop);
   };
 
-  function warmupChunks() {
-    // プレイヤー初期位置周辺のチャンクを即時生成
-    for (let i = 0; i < 60; i++) {
+  function warmupChunks(steps) {
+    // 足元とカメラ周辺だけを同期生成し、長いメインスレッド停止を防ぐ。
+    for (let i = 0; i < (steps || 6); i++) {
       G.World.update(0.016, G.Player.pos.x, G.Player.pos.z);
     }
   }
 
   let started = false;
   Game.start = function (newGame) {
+    G.Save.requestPersistence();
     let recovered = false;
     if (newGame) {
       G.Save.reset();
@@ -170,7 +174,7 @@
     // HUDが透けるのを防ぐ)
     G.UI.setHudVisible(!newGame);
     G.Audio.setMusic('peace');
-    warmupChunks();
+    warmupChunks(8);
     started = true;
   };
 
@@ -237,7 +241,8 @@
 
   /* ---------------- イベント ---------------- */
   G.events.on('shake', v => {
-    trauma = Math.min(1, trauma + v * G.settings.shake);
+    const scale = G.settings.shake * (G.prefersReducedMotion() ? 0.18 : 1);
+    trauma = Math.min(1, trauma + v * scale);
   });
   let bossCine = 0, cineBoss = null, framePull = 0;
   G.events.on('bossEngage', b => { bossCine = 2.1; cineBoss = b; G.events.emit('shake', 0.55); });
@@ -767,7 +772,7 @@
       // ダメージフラッシュ
       if (started) {
         if (prevHp !== null && G.Player.hp < prevHp) {
-          flashEl.style.opacity = '0.45';
+          flashEl.style.opacity = G.prefersReducedMotion() ? '0.16' : '0.45';
         }
         prevHp = G.Player.hp;
         flashEl.style.opacity = String(Math.max(0, parseFloat(flashEl.style.opacity || '0') - dt * 1.8));
