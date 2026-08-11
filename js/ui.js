@@ -1451,6 +1451,9 @@
 
   UI.showFatal = function (title, detail) {
     root = root || document.getElementById('ui');
+    root.classList.add('fatalmode');
+    const loading = document.getElementById('loading');
+    if (loading) loading.style.display = 'none';
     G.Input.reset();
     G.paused = true;
     let wrap = document.querySelector('.fatal');

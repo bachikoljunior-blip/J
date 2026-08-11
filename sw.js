@@ -1,5 +1,5 @@
 /* ELDRIA service worker — オフラインでも遊べるようにキャッシュする */
-const CACHE = 'eldria-v2-mobile-master';
+const CACHE = 'eldria-v3-mobile-master';
 const ASSETS = [
   './',
   './index.html',
