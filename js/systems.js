@@ -589,6 +589,18 @@
     return !!(read(KEY) || read(BACKUP));
   };
 
+  S.summary = function () {
+    const data = read(KEY) || read(BACKUP);
+    if (!data) return null;
+    const st = isObj(data.state) ? data.state : {};
+    return {
+      level: Math.max(1, Math.floor(data.stats.level)),
+      chapter: G.clamp(Math.floor(st.mainStage || 0) + 1, 1, 4),
+      playtime: Math.max(0, Number(st.playtime) || 0),
+      recovered: !read(KEY) && !!read(BACKUP)
+    };
+  };
+
   S.save = function () {
     try {
       const p = G.Player;
@@ -630,6 +642,25 @@
     const backup = read(BACKUP);
     if (backup) backup._recovered = true;
     return backup;
+  };
+
+  S.exportData = function () {
+    const data = read(KEY) || read(BACKUP);
+    if (!data) return null;
+    return JSON.stringify({
+      format: 'eldria-save', version: 1,
+      exportedAt: new Date().toISOString(), data
+    }, null, 2);
+  };
+
+  S.importData = function (raw) {
+    try {
+      const pack = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!isObj(pack) || pack.format !== 'eldria-save' || pack.version !== 1 || !validate(pack.data)) return false;
+      const previous = G.storage.get(KEY);
+      if (parse(previous)) G.storage.set(BACKUP, previous);
+      return G.storage.set(KEY, JSON.stringify(pack.data));
+    } catch (e) { return false; }
   };
 
   S.apply = function (data) {

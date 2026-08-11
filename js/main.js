@@ -236,7 +236,9 @@
   }
 
   /* ---------------- イベント ---------------- */
-  G.events.on('shake', v => { trauma = Math.min(1, trauma + v); });
+  G.events.on('shake', v => {
+    trauma = Math.min(1, trauma + v * G.settings.shake);
+  });
   let bossCine = 0, cineBoss = null, framePull = 0;
   G.events.on('bossEngage', b => { bossCine = 2.1; cineBoss = b; G.events.emit('shake', 0.55); });
   G.events.on('hitstop', v => { hitstop = Math.max(hitstop, v); });

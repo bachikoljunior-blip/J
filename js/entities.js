@@ -1323,7 +1323,7 @@
     P.iframe = 0.55;
     G.Audio.sfx('hitPlayer');
     G.events.emit('shake', 0.35);
-    if (navigator.vibrate) navigator.vibrate(45);
+    G.haptic(45);
     G.UI.dmgNum(P.pos.x, P.pos.y + 1.6, P.pos.z, real, { player: true });
     G.FX.burst(P.pos.x, P.pos.y + 1, P.pos.z, { n: 10, color: 0xcc3333, speed: 3, life: 0.5 });
     if (P.hp <= 0) {
@@ -1509,6 +1509,7 @@
       G.Audio.sfx('hit');
       G.events.emit('hitstop', P.heavy ? 0.09 : 0.05);
       G.events.emit('shake', P.heavy ? 0.25 : 0.12);
+      G.haptic(P.heavy ? 24 : 12);
     }
   }
 
@@ -2366,7 +2367,6 @@
     // フェーズ2移行の一回演出 (咆哮+シェイク+バースト+残留デカール)
     if (phase2 && !b.phase2Cued && b.engaged && b.alive) {
       b.phase2Cued = true;
-      console.log('[dbg] phase2 burst:', b.bossId);   // 2FPS計測で写らない演出の証跡
       G.Audio.sfx('roar');
       G.events.emit('shake', 0.6);
       // 白飽和を避けるため彩度のある色で (氷=青 / 竜=橙)

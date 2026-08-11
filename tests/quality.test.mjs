@@ -101,8 +101,8 @@ test('HTMLとモバイルUIに公開品質の基礎要件がある', () => {
   assert.match(html, /apple-touch-icon/);
   assert.match(html, /<canvas[^>]+aria-label=/);
   assert.match(html, /meta name="description"/);
-  assert.match(html, /style-v4\.css/);
-  assert.match(html, /eldria-v4\.js/);
+  assert.match(html, /style-v5\.css/);
+  assert.match(html, /eldria-v5\.js/);
 
   const css = read('style.css');
   assert.match(css, /\.b-menu \{[^}]*width: 44px; height: 44px/s);
@@ -132,9 +132,31 @@ test('中断・描画喪失・実行時例外を安全に処理する', () => {
 test('不変ファイル名の公開ランタイムが正規ソースと一致する', () => {
   const sourceFiles = ['js/core.js', 'js/audio.js', 'js/world.js', 'js/systems.js', 'js/entities.js', 'js/ui.js', 'js/main.js'];
   const expected = sourceFiles.map(file => `\n/* ===== ${file} ===== */\n${read(file)}`).join('');
-  assert.equal(read('eldria-v4.js'), expected);
-  assert.equal(read('style-v4.css'), read('style.css'));
-  assert.deepEqual(JSON.parse(read('manifest-v4.json')), JSON.parse(read('manifest.json')));
+  assert.equal(read('eldria-v5.js'), expected);
+  assert.equal(read('style-v5.css'), read('style.css'));
+  assert.deepEqual(JSON.parse(read('manifest-v5.json')), JSON.parse(read('manifest.json')));
+});
+
+test('モバイル完結機能が設定・保存・更新導線まで揃う', () => {
+  const core = read('js/core.js');
+  const systems = read('js/systems.js');
+  const ui = read('js/ui.js');
+  const main = read('js/main.js');
+  const css = read('style.css');
+
+  assert.match(core, /haptics: true/);
+  assert.match(core, /shake: 0\.8/);
+  assert.match(core, /G\.haptic = function/);
+  assert.match(main, /v \* G\.settings\.shake/);
+  assert.match(systems, /S\.summary = function/);
+  assert.match(systems, /S\.exportData = function/);
+  assert.match(systems, /S\.importData = function/);
+  assert.match(ui, /beforeinstallprompt/);
+  assert.match(ui, /UI\.showUpdatePrompt/);
+  assert.match(ui, /セーブを書き出す/);
+  assert.match(ui, /セーブを読み込む/);
+  assert.match(css, /\.updatebar/);
+  assert.match(css, /\.saveactions/);
 });
 
 test('CIはmainを書き換えず、古い作業ブランチを再公開しない', () => {
