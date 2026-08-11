@@ -3,7 +3,7 @@
 set -eu
 cd "$(dirname "$0")/.."
 status=0
-for f in js/core.js js/audio.js js/world.js js/systems.js js/entities.js js/ui.js js/main.js sw.js; do
+for f in js/core.js js/audio.js js/world.js js/systems.js js/entities.js js/ui.js js/main.js eldria-v4.js sw.js; do
   if node --check "$f"; then
     echo "OK   $f"
   else

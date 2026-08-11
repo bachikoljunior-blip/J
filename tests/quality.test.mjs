@@ -101,8 +101,8 @@ test('HTMLとモバイルUIに公開品質の基礎要件がある', () => {
   assert.match(html, /apple-touch-icon/);
   assert.match(html, /<canvas[^>]+aria-label=/);
   assert.match(html, /meta name="description"/);
-  assert.match(html, /style\.css\?v=\d+/);
-  assert.match(html, /js\/main\.js\?v=\d+/);
+  assert.match(html, /style-v4\.css/);
+  assert.match(html, /eldria-v4\.js/);
 
   const css = read('style.css');
   assert.match(css, /\.b-menu \{[^}]*width: 44px; height: 44px/s);
@@ -127,6 +127,14 @@ test('中断・描画喪失・実行時例外を安全に処理する', () => {
   assert.match(main, /fatalStop\(error\)/);
   assert.match(main, /if \(running\) requestAnimationFrame\(loop\)/);
   assert.doesNotMatch(main, /function loop\(now\) \{\s*requestAnimationFrame\(loop\)/);
+});
+
+test('不変ファイル名の公開ランタイムが正規ソースと一致する', () => {
+  const sourceFiles = ['js/core.js', 'js/audio.js', 'js/world.js', 'js/systems.js', 'js/entities.js', 'js/ui.js', 'js/main.js'];
+  const expected = sourceFiles.map(file => `\n/* ===== ${file} ===== */\n${read(file)}`).join('');
+  assert.equal(read('eldria-v4.js'), expected);
+  assert.equal(read('style-v4.css'), read('style.css'));
+  assert.deepEqual(JSON.parse(read('manifest-v4.json')), JSON.parse(read('manifest.json')));
 });
 
 test('CIはmainを書き換えず、古い作業ブランチを再公開しない', () => {
