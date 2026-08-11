@@ -182,6 +182,7 @@
 (function () {
   const UI = G.UI = {};
   let root;
+  let installPrompt = null;
 
   function el(tag, cls, parent, html) {
     const e = document.createElement(tag);
@@ -257,6 +258,19 @@
 
   UI.init = function () {
     root = document.getElementById('ui');
+
+    /* 回線断と更新を、ゲームを邪魔しない小さな状態表示で知らせる。 */
+    const netState = el('div', 'netstate', root, 'オフライン — 保存済みの世界でプレイ中');
+    netState.setAttribute('role', 'status');
+    const updateNet = () => netState.classList.toggle('show', navigator.onLine === false);
+    window.addEventListener('online', updateNet);
+    window.addEventListener('offline', updateNet);
+    updateNet();
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      installPrompt = e;
+      if (titleEl) addInstallButton(titleEl.querySelector('.tbtns'));
+    });
 
     /* HUD */
     hudEl = el('div', 'hud');
@@ -387,7 +401,7 @@
       clearTimeout(saveHintTimer);
       saveHintTimer = setTimeout(() => saveHint.classList.remove('show'), 1500);
     });
-    window.addEventListener('eldria-update-ready', () => UI.toast('更新があります。次回起動で反映されます', 'gold'));
+    window.addEventListener('eldria-update-ready', UI.showUpdatePrompt);
   };
 
   UI.setHudVisible = function (v) { hudEl.style.display = v ? '' : 'none'; };
@@ -401,6 +415,14 @@
     el('div', 'tsub', inner, '風と遺跡の大地');
     const btns = el('div', 'tbtns', inner);
     if (G.Save.exists()) {
+      const s = G.Save.summary();
+      if (s) {
+        const mins = Math.floor(s.playtime / 60);
+        const time = mins >= 60 ? `${Math.floor(mins / 60)}時間${mins % 60}分` : `${mins}分`;
+        const progress = el('div', 'tprogress', inner,
+          `<span>Lv ${s.level}</span><span>第${s.chapter}章</span><span>${time}</span>${s.recovered ? '<b>予備保存あり</b>' : ''}`);
+        inner.insertBefore(progress, btns);
+      }
       const c = button('bigbtn', btns, 'つづきから');
       c.addEventListener('click', e => { e.stopPropagation(); G.Audio.init(); G.Audio.sfx('uiOpen'); close(); onStart(false); });
     }
@@ -410,8 +432,42 @@
       if (G.Save.exists() && !confirm('セーブデータを消して最初から始めますか?')) return;
       G.Audio.sfx('uiOpen'); close(); onStart(true);
     });
-    el('div', 'tfoot', inner, G.isTouch ? '左半分: 移動スティック / 右半分: カメラ / ボタン: 攻撃・回避' : 'WASD移動 / マウスでカメラ / クリック攻撃');
+    addInstallButton(btns);
+    el('div', 'tfoot', inner, G.isTouch
+      ? '左: 移動 / 右: カメラ　・　Safariの共有 →「ホーム画面に追加」で全画面・オフライン対応'
+      : 'WASD移動 / マウスでカメラ / クリック攻撃');
     function close() { titleEl.remove(); titleEl = null; }
+  };
+
+  function addInstallButton(parent) {
+    if (!parent || parent.querySelector('.installbtn') || window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) return;
+    if (installPrompt) {
+      const b = button('installbtn', parent, 'アプリとして追加');
+      b.addEventListener('click', async e => {
+        e.stopPropagation();
+        const prompt = installPrompt; installPrompt = null;
+        await prompt.prompt();
+        b.remove();
+      });
+    } else if (document.documentElement.requestFullscreen) {
+      const b = button('installbtn', parent, '全画面で遊ぶ');
+      b.addEventListener('click', async e => {
+        e.stopPropagation();
+        try {
+          await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+          if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape');
+        } catch (err) {}
+        b.remove();
+      });
+    }
+  }
+
+  UI.showUpdatePrompt = function () {
+    if (!root || root.querySelector('.updatebar')) return;
+    const bar = el('div', 'updatebar', root);
+    el('span', '', bar, '新しい冒険データを利用できます');
+    const b = button('', bar, '今すぐ更新');
+    b.addEventListener('click', () => location.reload());
   };
 
   UI.showIntro = function () {
@@ -1283,6 +1339,25 @@
     mkSlider('音楽', () => G.settings.music, v => { G.settings.music = v; G.Audio.setMusicVol(v); G.settings.save(); });
     mkSlider('効果音', () => G.settings.sfx, v => { G.settings.sfx = v; G.Audio.setSfxVol(v); G.settings.save(); });
     mkSlider('カメラ感度', () => G.settings.sens / 2, v => { G.settings.sens = v * 2; G.settings.save(); });
+    mkSlider('画面の揺れ', () => G.settings.shake, v => { G.settings.shake = v; G.settings.save(); });
+
+    const mkToggle = (label, get, set) => {
+      const row = el('div', 'srow', wrap);
+      el('div', 'slabel', row, label);
+      const b = button('toggle', row, get() ? 'オン' : 'オフ', label);
+      b.setAttribute('aria-pressed', String(get()));
+      b.classList.toggle('on', get());
+      b.addEventListener('click', e => {
+        e.stopPropagation();
+        const next = !get(); set(next);
+        b.textContent = next ? 'オン' : 'オフ';
+        b.classList.toggle('on', next); b.setAttribute('aria-pressed', String(next));
+        if (next && label === '振動') G.haptic(18);
+      });
+      row.appendChild(b);
+    };
+    mkToggle('振動', () => G.settings.haptics, v => { G.settings.haptics = v; G.settings.save(); });
+    mkToggle('ダメージ数値', () => G.settings.showDmg, v => { G.settings.showDmg = v; G.settings.save(); });
 
     const qrow = el('div', 'srow', wrap);
     el('div', 'slabel', qrow, '描画品質 (要リロード)');
@@ -1306,6 +1381,32 @@
       e.stopPropagation();
       if (G.Save.save()) UI.toast('セーブした', 'gold');
     });
+    const portable = el('div', 'saveactions', wrap);
+    const exportB = button('bigbtn sub small', portable, 'セーブを書き出す');
+    exportB.addEventListener('click', e => {
+      e.stopPropagation();
+      G.Save.save();
+      const data = G.Save.exportData();
+      if (!data) { UI.toast('書き出せるセーブがありません'); return; }
+      const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+      const a = document.createElement('a');
+      a.href = url; a.download = `eldria-save-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      UI.toast('セーブを書き出しました', 'gold');
+    });
+    const importB = button('bigbtn sub small', portable, 'セーブを読み込む');
+    const file = document.createElement('input');
+    file.type = 'file'; file.accept = 'application/json,.json'; file.hidden = true;
+    importB.addEventListener('click', e => { e.stopPropagation(); file.click(); });
+    file.addEventListener('change', async () => {
+      const picked = file.files && file.files[0];
+      if (!picked) return;
+      const ok = G.Save.importData(await picked.text());
+      if (ok && confirm('セーブを読み込みました。今すぐ再起動しますか?')) location.reload();
+      else if (!ok) UI.toast('ELDRIAの有効なセーブではありません');
+      file.value = '';
+    });
+    portable.appendChild(file);
     el('div', 'dangergap', wrap);
     const reset = button('bigbtn danger small', wrap, 'データを消して最初から');
     reset.addEventListener('click', e => {
