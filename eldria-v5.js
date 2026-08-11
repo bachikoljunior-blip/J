@@ -143,7 +143,8 @@ G.settings = (function () {
     showDmg: true,
     haptics: true,
     shake: 0.8,
-    shadows: 'auto'    // 'auto' | 'off'
+    shadows: 'auto',   // 'auto' | 'off'
+    reduceMotion: false
   };
   let raw = {};
   try { raw = JSON.parse(G.storage.get(KEY) || '{}'); } catch (e) { raw = {}; }
@@ -161,6 +162,7 @@ G.settings = (function () {
   s.haptics = s.haptics !== false;
   if (!Number.isFinite(s.shake)) s.shake = def.shake;
   s.shake = G.clamp(s.shake, 0, 1);
+  s.reduceMotion = !!s.reduceMotion;
   if (!['auto', 'off'].includes(s.shadows)) s.shadows = def.shadows;
   s.save = function () {
     const o = {};
@@ -170,10 +172,14 @@ G.settings = (function () {
   return s;
 })();
 
-/* ---------------- モバイル触覚フィードバック ---------------- */
+/* ---------------- アクセシビリティ / 触覚 ---------------- */
+G.prefersReducedMotion = function () {
+  const system = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return !!(G.settings.reduceMotion || system);
+};
 G.haptic = function (pattern) {
   if (!G.settings.haptics || !navigator.vibrate) return false;
-  try { return navigator.vibrate(pattern); } catch (e) { return false; }
+  try { return !!navigator.vibrate(pattern); } catch (e) { return false; }
 };
 
 /* 実効品質: 'auto' は端末から推定 */
@@ -3283,6 +3289,8 @@ G.time = 0;
   const S = G.Save = {};
   const KEY = 'eldria_save_v1';
   const BACKUP = 'eldria_save_backup_v1';
+  const BACKUP2 = 'eldria_save_backup2_v1';
+  const BACKUP3 = 'eldria_save_backup3_v1';
 
   const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
   function validate(data) {
@@ -3303,26 +3311,36 @@ G.time = 0;
   S.validate = validate;
 
   S.exists = function () {
-    return !!(read(KEY) || read(BACKUP));
+    return !!(read(KEY) || read(BACKUP) || read(BACKUP2) || read(BACKUP3));
   };
 
   S.summary = function () {
-    const data = read(KEY) || read(BACKUP);
+    const data = S.load();
     if (!data) return null;
     const st = isObj(data.state) ? data.state : {};
     return {
       level: Math.max(1, Math.floor(data.stats.level)),
       chapter: G.clamp(Math.floor(st.mainStage || 0) + 1, 1, 4),
       playtime: Math.max(0, Number(st.playtime) || 0),
-      recovered: !read(KEY) && !!read(BACKUP)
+      recovered: !!data._recovered
     };
   };
+
+  // 有効な直前保存だけを3世代ローテーションする。書きかけや破損JSONを
+  // バックアップへ押し流さないため、各世代を検証してから移動する。
+  function rotateBackups(previous) {
+    const b1 = G.storage.get(BACKUP);
+    const b2 = G.storage.get(BACKUP2);
+    if (parse(b2)) G.storage.set(BACKUP3, b2);
+    if (parse(b1)) G.storage.set(BACKUP2, b1);
+    if (parse(previous)) G.storage.set(BACKUP, previous);
+  }
 
   S.save = function () {
     try {
       const p = G.Player;
       const data = {
-        v: 1,
+        v: 1, savedAt: Date.now(),
         stats: { level: G.Stats.level, xp: G.Stats.xp },
         hp: p.hp, sta: p.stamina,
         pos: { x: Math.round(p.pos.x * 10) / 10, z: Math.round(p.pos.z * 10) / 10 },
@@ -3346,7 +3364,7 @@ G.time = 0;
       };
       const json = JSON.stringify(data);
       const previous = G.storage.get(KEY);
-      if (parse(previous)) G.storage.set(BACKUP, previous);
+      rotateBackups(previous);
       if (!G.storage.set(KEY, json)) return false;
       G.events.emit('saved');
       return true;
@@ -3354,16 +3372,29 @@ G.time = 0;
   };
 
   S.load = function () {
-    const primary = read(KEY);
-    if (primary) return primary;
-    const backup = read(BACKUP);
-    if (backup) backup._recovered = true;
-    return backup;
+    const slots = [KEY, BACKUP, BACKUP2, BACKUP3];
+    for (let i = 0; i < slots.length; i++) {
+      const data = read(slots[i]);
+      if (!data) continue;
+      if (i > 0) data._recovered = true;
+      return data;
+    }
+    return null;
+  };
+
+  S.requestPersistence = function () {
+    if (G.storage.get('eldria_storage_persisted') === 'yes') return Promise.resolve(true);
+    if (!navigator.storage || typeof navigator.storage.persist !== 'function') return Promise.resolve(false);
+    return navigator.storage.persist().then(ok => {
+      if (ok) G.storage.set('eldria_storage_persisted', 'yes');
+      return !!ok;
+    }).catch(() => false);
   };
 
   S.exportData = function () {
-    const data = read(KEY) || read(BACKUP);
+    const data = S.load();
     if (!data) return null;
+    delete data._recovered;
     return JSON.stringify({
       format: 'eldria-save', version: 1,
       exportedAt: new Date().toISOString(), data
@@ -3375,7 +3406,7 @@ G.time = 0;
       const pack = typeof raw === 'string' ? JSON.parse(raw) : raw;
       if (!isObj(pack) || pack.format !== 'eldria-save' || pack.version !== 1 || !validate(pack.data)) return false;
       const previous = G.storage.get(KEY);
-      if (parse(previous)) G.storage.set(BACKUP, previous);
+      rotateBackups(previous);
       return G.storage.set(KEY, JSON.stringify(pack.data));
     } catch (e) { return false; }
   };
@@ -3453,7 +3484,9 @@ G.time = 0;
   S.reset = function () {
     const a = G.storage.remove(KEY);
     const b = G.storage.remove(BACKUP);
-    return a && b;
+    const c = G.storage.remove(BACKUP2);
+    const d = G.storage.remove(BACKUP3);
+    return a && b && c && d;
   };
 
   S.newGame = function () {
@@ -6661,6 +6694,7 @@ G.time = 0;
     b.addEventListener('pointerdown', e => {
       e.stopPropagation();
       G.Audio.init();
+      G.haptic(action === 'attack' ? 12 : 8);
       downT = performance.now();
       b.classList.add('pressed');
       if (opts.heldKey) G.Input.held[opts.heldKey] = true;
@@ -7786,7 +7820,10 @@ G.time = 0;
     };
     mkSlider('音楽', () => G.settings.music, v => { G.settings.music = v; G.Audio.setMusicVol(v); G.settings.save(); });
     mkSlider('効果音', () => G.settings.sfx, v => { G.settings.sfx = v; G.Audio.setSfxVol(v); G.settings.save(); });
-    mkSlider('カメラ感度', () => G.settings.sens / 2, v => { G.settings.sens = v * 2; G.settings.save(); });
+    mkSlider('カメラ感度', () => (G.settings.sens - 0.25) / 1.75, v => {
+      G.settings.sens = 0.25 + v * 1.75;
+      G.settings.save();
+    });
     mkSlider('画面の揺れ', () => G.settings.shake, v => { G.settings.shake = v; G.settings.save(); });
 
     const mkToggle = (label, get, set) => {
@@ -7800,12 +7837,23 @@ G.time = 0;
         const next = !get(); set(next);
         b.textContent = next ? 'オン' : 'オフ';
         b.classList.toggle('on', next); b.setAttribute('aria-pressed', String(next));
-        if (next && label === '振動') G.haptic(18);
+        if (next && label.startsWith('触覚')) G.haptic(18);
       });
       row.appendChild(b);
     };
-    mkToggle('振動', () => G.settings.haptics, v => { G.settings.haptics = v; G.settings.save(); });
+    mkToggle('触覚（対応端末のみ）', () => G.settings.haptics, v => { G.settings.haptics = v; G.settings.save(); });
     mkToggle('ダメージ数値', () => G.settings.showDmg, v => { G.settings.showDmg = v; G.settings.save(); });
+    mkToggle('上下反転', () => G.settings.invertY, v => { G.settings.invertY = v; G.settings.save(); });
+    mkToggle('点滅・動きの軽減', () => G.settings.reduceMotion, v => {
+      G.settings.reduceMotion = v;
+      document.body.classList.toggle('reduced-motion', G.prefersReducedMotion());
+      G.settings.save();
+    });
+    mkToggle('リアルタイム影', () => G.settings.shadows !== 'off', v => {
+      G.settings.shadows = v ? 'auto' : 'off';
+      G.settings.save();
+      UI.toast('影の変更はリロードで反映されます');
+    });
 
     const qrow = el('div', 'srow', wrap);
     el('div', 'slabel', qrow, '描画品質 (要リロード)');
@@ -7855,6 +7903,12 @@ G.time = 0;
       file.value = '';
     });
     portable.appendChild(file);
+    const replayTut = button('bigbtn sub small', wrap, '基本操作ガイドを再表示');
+    replayTut.addEventListener('click', e => {
+      e.stopPropagation();
+      G.storage.remove('eldria_tut');
+      UI.toast('次の「はじめから」で操作ガイドを表示します', 'gold');
+    });
     el('div', 'dangergap', wrap);
     const reset = button('bigbtn danger small', wrap, 'データを消して最初から');
     reset.addEventListener('click', e => {
@@ -8062,6 +8116,7 @@ G.time = 0;
 
   /* ---------------- 起動 ---------------- */
   Game.boot = function () {
+    document.body.classList.toggle('reduced-motion', G.prefersReducedMotion());
     const canvas = document.getElementById('game');
     renderer = new THREE.WebGLRenderer({
       canvas,
@@ -8140,7 +8195,9 @@ G.time = 0;
     scene.add(G.playerLight);
 
     // 初期チャンクを同期的に確保 (プレイヤー周辺)
-    warmupChunks();
+    // 画面が固まる長い同期生成は避け、近傍だけ先に作る。残りはタイトル背景の
+    // 通常フレームで2チャンクずつ生成されるため、見た目を保ったまま起動が速い。
+    warmupChunks(6);
 
     document.getElementById('loading').style.display = 'none';
 
@@ -8152,15 +8209,16 @@ G.time = 0;
     requestAnimationFrame(loop);
   };
 
-  function warmupChunks() {
-    // プレイヤー初期位置周辺のチャンクを即時生成
-    for (let i = 0; i < 60; i++) {
+  function warmupChunks(steps) {
+    // 足元とカメラ周辺だけを同期生成し、長いメインスレッド停止を防ぐ。
+    for (let i = 0; i < (steps || 6); i++) {
       G.World.update(0.016, G.Player.pos.x, G.Player.pos.z);
     }
   }
 
   let started = false;
   Game.start = function (newGame) {
+    G.Save.requestPersistence();
     let recovered = false;
     if (newGame) {
       G.Save.reset();
@@ -8190,7 +8248,7 @@ G.time = 0;
     // HUDが透けるのを防ぐ)
     G.UI.setHudVisible(!newGame);
     G.Audio.setMusic('peace');
-    warmupChunks();
+    warmupChunks(8);
     started = true;
   };
 
@@ -8257,7 +8315,8 @@ G.time = 0;
 
   /* ---------------- イベント ---------------- */
   G.events.on('shake', v => {
-    trauma = Math.min(1, trauma + v * G.settings.shake);
+    const scale = G.settings.shake * (G.prefersReducedMotion() ? 0.18 : 1);
+    trauma = Math.min(1, trauma + v * scale);
   });
   let bossCine = 0, cineBoss = null, framePull = 0;
   G.events.on('bossEngage', b => { bossCine = 2.1; cineBoss = b; G.events.emit('shake', 0.55); });
@@ -8787,7 +8846,7 @@ G.time = 0;
       // ダメージフラッシュ
       if (started) {
         if (prevHp !== null && G.Player.hp < prevHp) {
-          flashEl.style.opacity = '0.45';
+          flashEl.style.opacity = G.prefersReducedMotion() ? '0.16' : '0.45';
         }
         prevHp = G.Player.hp;
         flashEl.style.opacity = String(Math.max(0, parseFloat(flashEl.style.opacity || '0') - dt * 1.8));

@@ -566,6 +566,8 @@
   const S = G.Save = {};
   const KEY = 'eldria_save_v1';
   const BACKUP = 'eldria_save_backup_v1';
+  const BACKUP2 = 'eldria_save_backup2_v1';
+  const BACKUP3 = 'eldria_save_backup3_v1';
 
   const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
   function validate(data) {
@@ -586,26 +588,36 @@
   S.validate = validate;
 
   S.exists = function () {
-    return !!(read(KEY) || read(BACKUP));
+    return !!(read(KEY) || read(BACKUP) || read(BACKUP2) || read(BACKUP3));
   };
 
   S.summary = function () {
-    const data = read(KEY) || read(BACKUP);
+    const data = S.load();
     if (!data) return null;
     const st = isObj(data.state) ? data.state : {};
     return {
       level: Math.max(1, Math.floor(data.stats.level)),
       chapter: G.clamp(Math.floor(st.mainStage || 0) + 1, 1, 4),
       playtime: Math.max(0, Number(st.playtime) || 0),
-      recovered: !read(KEY) && !!read(BACKUP)
+      recovered: !!data._recovered
     };
   };
+
+  // 有効な直前保存だけを3世代ローテーションする。書きかけや破損JSONを
+  // バックアップへ押し流さないため、各世代を検証してから移動する。
+  function rotateBackups(previous) {
+    const b1 = G.storage.get(BACKUP);
+    const b2 = G.storage.get(BACKUP2);
+    if (parse(b2)) G.storage.set(BACKUP3, b2);
+    if (parse(b1)) G.storage.set(BACKUP2, b1);
+    if (parse(previous)) G.storage.set(BACKUP, previous);
+  }
 
   S.save = function () {
     try {
       const p = G.Player;
       const data = {
-        v: 1,
+        v: 1, savedAt: Date.now(),
         stats: { level: G.Stats.level, xp: G.Stats.xp },
         hp: p.hp, sta: p.stamina,
         pos: { x: Math.round(p.pos.x * 10) / 10, z: Math.round(p.pos.z * 10) / 10 },
@@ -629,7 +641,7 @@
       };
       const json = JSON.stringify(data);
       const previous = G.storage.get(KEY);
-      if (parse(previous)) G.storage.set(BACKUP, previous);
+      rotateBackups(previous);
       if (!G.storage.set(KEY, json)) return false;
       G.events.emit('saved');
       return true;
@@ -637,16 +649,29 @@
   };
 
   S.load = function () {
-    const primary = read(KEY);
-    if (primary) return primary;
-    const backup = read(BACKUP);
-    if (backup) backup._recovered = true;
-    return backup;
+    const slots = [KEY, BACKUP, BACKUP2, BACKUP3];
+    for (let i = 0; i < slots.length; i++) {
+      const data = read(slots[i]);
+      if (!data) continue;
+      if (i > 0) data._recovered = true;
+      return data;
+    }
+    return null;
+  };
+
+  S.requestPersistence = function () {
+    if (G.storage.get('eldria_storage_persisted') === 'yes') return Promise.resolve(true);
+    if (!navigator.storage || typeof navigator.storage.persist !== 'function') return Promise.resolve(false);
+    return navigator.storage.persist().then(ok => {
+      if (ok) G.storage.set('eldria_storage_persisted', 'yes');
+      return !!ok;
+    }).catch(() => false);
   };
 
   S.exportData = function () {
-    const data = read(KEY) || read(BACKUP);
+    const data = S.load();
     if (!data) return null;
+    delete data._recovered;
     return JSON.stringify({
       format: 'eldria-save', version: 1,
       exportedAt: new Date().toISOString(), data
@@ -658,7 +683,7 @@
       const pack = typeof raw === 'string' ? JSON.parse(raw) : raw;
       if (!isObj(pack) || pack.format !== 'eldria-save' || pack.version !== 1 || !validate(pack.data)) return false;
       const previous = G.storage.get(KEY);
-      if (parse(previous)) G.storage.set(BACKUP, previous);
+      rotateBackups(previous);
       return G.storage.set(KEY, JSON.stringify(pack.data));
     } catch (e) { return false; }
   };
@@ -736,7 +761,9 @@
   S.reset = function () {
     const a = G.storage.remove(KEY);
     const b = G.storage.remove(BACKUP);
-    return a && b;
+    const c = G.storage.remove(BACKUP2);
+    const d = G.storage.remove(BACKUP3);
+    return a && b && c && d;
   };
 
   S.newGame = function () {

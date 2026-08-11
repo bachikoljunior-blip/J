@@ -141,7 +141,8 @@ G.settings = (function () {
     showDmg: true,
     haptics: true,
     shake: 0.8,
-    shadows: 'auto'    // 'auto' | 'off'
+    shadows: 'auto',   // 'auto' | 'off'
+    reduceMotion: false
   };
   let raw = {};
   try { raw = JSON.parse(G.storage.get(KEY) || '{}'); } catch (e) { raw = {}; }
@@ -159,6 +160,7 @@ G.settings = (function () {
   s.haptics = s.haptics !== false;
   if (!Number.isFinite(s.shake)) s.shake = def.shake;
   s.shake = G.clamp(s.shake, 0, 1);
+  s.reduceMotion = !!s.reduceMotion;
   if (!['auto', 'off'].includes(s.shadows)) s.shadows = def.shadows;
   s.save = function () {
     const o = {};
@@ -168,10 +170,14 @@ G.settings = (function () {
   return s;
 })();
 
-/* ---------------- モバイル触覚フィードバック ---------------- */
+/* ---------------- アクセシビリティ / 触覚 ---------------- */
+G.prefersReducedMotion = function () {
+  const system = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return !!(G.settings.reduceMotion || system);
+};
 G.haptic = function (pattern) {
   if (!G.settings.haptics || !navigator.vibrate) return false;
-  try { return navigator.vibrate(pattern); } catch (e) { return false; }
+  try { return !!navigator.vibrate(pattern); } catch (e) { return false; }
 };
 
 /* 実効品質: 'auto' は端末から推定 */
