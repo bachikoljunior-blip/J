@@ -23,7 +23,7 @@ jobs:
       - name: Expand verified J source bundle
         run: python bootstrap_agi.py
       - name: Remove one-time bootstrap
-        run: rm bootstrap_agi.py
+        run: rm -rf bootstrap_agi.py bootstrap_parts
       - name: Install J
         run: pip install -e ".[openai]"
       - name: Acceptance tests
