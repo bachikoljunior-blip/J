@@ -1,25 +1,47 @@
-name: J AGI Loop
+name: Bootstrap J AGI
+
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-    inputs:
-      goal:
-        description: Goal for J
-        required: true
-        default: Improve the agent toward broader autonomous problem solving
+
+permissions:
+  contents: write
+
+concurrency:
+  group: j-bootstrap-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  run:
+  bootstrap:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -e .
-      - name: Run autonomous loop
+      - name: Expand verified J source bundle
+        run: python bootstrap_agi.py
+      - name: Remove one-time bootstrap
+        run: rm bootstrap_agi.py
+      - name: Install J
+        run: pip install -e ".[openai]"
+      - name: Acceptance tests
+        run: python -m unittest discover -v
+      - name: Critical proxy benchmarks
+        run: python -m j_agent --benchmark
+      - name: Run bounded autonomous iteration
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          J_GOAL: ${{ github.event.inputs.goal || 'Improve J toward broader autonomous problem solving; identify limitations, test alternatives, and iteratively improve within this repository only' }}
-        run: python -m j_agent --goal "$J_GOAL"
+        run: python -m j_agent --goal "Improve general problem solving, identify limitations, test alternatives, and preserve reproducible evidence inside this repository only" --provider auto --max-steps 8
+      - name: Commit verified source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No source changes to commit"
+          else
+            git commit -m "install bounded AGI research agent"
+            git push origin HEAD:main
+          fi
