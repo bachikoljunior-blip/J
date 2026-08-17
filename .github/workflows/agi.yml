@@ -1,5 +1,7 @@
 name: J AGI Loop
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       goal:
@@ -19,4 +21,5 @@ jobs:
       - name: Run autonomous loop
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python -m j_agent --goal "${{ github.event.inputs.goal }}"
+          J_GOAL: ${{ github.event.inputs.goal || 'Improve J toward broader autonomous problem solving; identify limitations, test alternatives, and iteratively improve within this repository only' }}
+        run: python -m j_agent --goal "$J_GOAL"
