@@ -1,18 +1,33 @@
-name: Bootstrap J AGI
+name: J AGI Loop
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      goal:
+        description: Goal for this bounded J iteration
+        required: true
+        default: Improve general problem solving and preserve reproducible evidence
+      provider:
+        description: Planner provider
+        required: true
+        type: choice
+        options:
+          - auto
+          - offline
+          - openai
+        default: auto
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: j-bootstrap-${{ github.ref }}
+  group: j-agi-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  bootstrap:
+  verify-and-run:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -20,12 +35,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Expand verified J source bundle
-        run: python bootstrap_agi.py
-      - name: Remove one-time bootstrap
-        run: rm -rf bootstrap_agi.py bootstrap_parts
       - name: Install J
         run: pip install -e ".[openai]"
+      - name: Environment doctor
+        run: python -m j_agent --doctor
       - name: Acceptance tests
         run: python -m unittest discover -v
       - name: Critical proxy benchmarks
@@ -33,18 +46,17 @@ jobs:
       - name: Run bounded autonomous iteration
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python -m j_agent --goal "Improve general problem solving, identify limitations, test alternatives, and preserve reproducible evidence inside this repository only" --provider auto --max-steps 8
-      - name: Commit verified source
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -- .github/workflows/agi.yml
-          rm -rf j_agent.egg-info
-          grep -qxF '*.egg-info/' .gitignore || printf '\n*.egg-info/\n' >> .gitignore
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No source changes to commit"
-          else
-            git commit -m "install bounded AGI research agent"
-            git push origin HEAD:main
-          fi
+          J_PROVIDER: ${{ github.event.inputs.provider || 'auto' }}
+          J_GOAL: ${{ github.event.inputs.goal || 'Improve general problem solving, identify limitations, test alternatives, and preserve reproducible evidence inside this repository only' }}
+        run: python -m j_agent --goal "$J_GOAL" --provider "$J_PROVIDER" --max-steps 8
+      - name: Preserve run evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: j-evidence-${{ github.run_number }}
+          path: |
+            state/
+            reports/
+            workspace/
+          if-no-files-found: warn
+          retention-days: 14
