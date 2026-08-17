@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.venv/
+state/*.jsonl
+reports/offline-latest.md
+workspace/*
+!workspace/.gitkeep
+
+*.egg-info/
