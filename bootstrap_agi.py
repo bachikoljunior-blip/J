@@ -11,15 +11,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 PARTS = ROOT / "bootstrap_parts"
 EXPECTED_SHA256 = "4eb4db9ae731f0cbb926c70ad7e06a10c3b1bc1ac262f0471bce7be3919f3790"
+PART_LAYOUT = (
+    ("part0.txt", 6000),
+    ("part1.txt", 6000),
+    ("part2a.txt", 3000),
+    ("part2b.txt", 3000),
+    ("part3.txt", 4536),
+)
 
 
 def main() -> None:
-    part_paths = sorted(PARTS.glob("part*.txt"))
-    if [path.name for path in part_paths] != [f"part{i}.txt" for i in range(4)]:
-        raise RuntimeError("bootstrap payload is incomplete")
+    encoded_parts: list[str] = []
+    for name, expected_size in PART_LAYOUT:
+        path = PARTS / name
+        text = path.read_text(encoding="ascii").strip()
+        if len(text) != expected_size:
+            raise RuntimeError(f"invalid payload size for {name}: {len(text)}")
+        encoded_parts.append(text)
 
-    encoded = "".join(path.read_text(encoding="ascii").strip() for path in part_paths)
-    archive = base64.b64decode(encoded, validate=True)
+    archive = base64.b64decode("".join(encoded_parts), validate=True)
     actual = hashlib.sha256(archive).hexdigest()
     if actual != EXPECTED_SHA256:
         raise RuntimeError(f"bootstrap checksum mismatch: {actual}")
