@@ -1,0 +1,22 @@
+name: J AGI Loop
+on:
+  workflow_dispatch:
+    inputs:
+      goal:
+        description: Goal for J
+        required: true
+        default: Improve the agent toward broader autonomous problem solving
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -e .
+      - name: Run autonomous loop
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python -m j_agent --goal "${{ github.event.inputs.goal }}"
