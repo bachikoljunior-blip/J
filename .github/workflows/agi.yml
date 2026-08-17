@@ -38,6 +38,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -- .github/workflows/agi.yml
+          rm -rf j_agent.egg-info
+          grep -qxF '*.egg-info/' .gitignore || printf '\n*.egg-info/\n' >> .gitignore
           git add -A
           if git diff --cached --quiet; then
             echo "No source changes to commit"
