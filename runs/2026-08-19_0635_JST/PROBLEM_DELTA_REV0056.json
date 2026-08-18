@@ -1,0 +1,29 @@
+{
+  "revision": 56,
+  "base_revision": 55,
+  "base_active_nodes": 363,
+  "new_nodes": 20,
+  "actual_active_nodes": 383,
+  "predicted_total_active_nodes": 384,
+  "prediction_exceeded": false,
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "solved_in_revision": [
+    "D1b2b2c3c3a",
+    "D1b2b2c3c3b1",
+    "D1b2b2c3c3c1",
+    "D1b2b2c3c3c2",
+    "D1b2b2c3c3c3a",
+    "D1b2b2c3c3c4",
+    "D1b2b2c3c3d1",
+    "D1b2b2c3c3d2a",
+    "D1b2b2c3c3d3",
+    "D1b2b2c3c3d4"
+  ],
+  "known_failure": "generic shared variogram neural embedding did not transfer 1D->2D at required accuracy; strict xfail retained; declared exponential-kernel-family estimator passed instead",
+  "next_leaf": {
+    "id": "D1b2b2c3c3b2",
+    "problem": "learn predictive representation itself under capacity controls",
+    "status": "unresolved"
+  }
+}
