@@ -1,0 +1,20 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 59,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 386,
+  "prediction_exceeded": false,
+  "current_leaf": {
+    "id": "D1b2b2c3d2b3b2c2",
+    "status": "decomposed_unresolved"
+  },
+  "result": "Exact linear-Gaussian continuous latent-cardinality nonidentifiability witness established under observational, do(X), and do(Y) moments; broad nonlinear/nonparametric equivalence remains unresolved.",
+  "next_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b",
+    "problem": "nonlinear continuous latent confounder equivalence beyond Gaussian moment closure",
+    "status": "unresolved"
+  },
+  "focused_test": "2 passed"
+}
