@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 82,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 451,
+  "prediction_exceeded": false,
+  "current_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3a","status":"solved_v0_1"},
+  "result": "Validated the fixed-node simple-undirected edge-toggle stability theorem exhaustively over all 1,024 labeled five-node graphs and all 10 single-edge toggles each (10,240 cases). Cumulative local pytest count: 36 passed.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b","problem":"handle node insertion/deletion with explicit or inferred alignment while preserving fail-closed semantics","status":"unresolved"}
+}
