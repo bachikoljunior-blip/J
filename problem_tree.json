@@ -8,15 +8,20 @@
     {"id":"P1.1","parent":"P1","status":"resolved"},{"id":"P1.2","parent":"P1","status":"resolved"},{"id":"P1.3","parent":"P1","status":"resolved"},{"id":"P1.4","parent":"P1","status":"resolved"},{"id":"P1.5","parent":"P1","status":"resolved"},
     {"id":"P2.1","parent":"P2","status":"resolved"},{"id":"P2.2","parent":"P2","status":"resolved"},{"id":"P2.3","parent":"P2","status":"unresolved"},{"id":"P2.4","parent":"P2","status":"unresolved"},{"id":"P2.5","parent":"P2","status":"unresolved"},{"id":"P2.6","parent":"P2","status":"unresolved"},
     {"id":"P2.3.1","parent":"P2.3","status":"unresolved"},{"id":"P2.3.2","parent":"P2.3","status":"unresolved"},{"id":"P2.3.3","parent":"P2.3","status":"unresolved"},{"id":"P2.3.4","parent":"P2.3","status":"unresolved"},{"id":"P2.3.5","parent":"P2.3","status":"unresolved"},{"id":"P2.3.6","parent":"P2.3","status":"unresolved"},
+    {"id":"P2.3.1","parent":"P2.3","status":"unresolved"},
     {"id":"P2.3.1a","parent":"P2.3.1","status":"resolved"},{"id":"P2.3.1b","parent":"P2.3.1","status":"resolved"},{"id":"P2.3.1c","parent":"P2.3.1","status":"unresolved"},
     {"id":"P2.3.1c1","parent":"P2.3.1c","status":"resolved"},{"id":"P2.3.1c2","parent":"P2.3.1c","status":"resolved"},{"id":"P2.3.1c3","parent":"P2.3.1c","status":"resolved"},{"id":"P2.3.1c4","parent":"P2.3.1c","status":"unresolved"},
     {"id":"P2.3.1c4a","parent":"P2.3.1c4","status":"resolved"},{"id":"P2.3.1c4b","parent":"P2.3.1c4","status":"resolved"},{"id":"P2.3.1c4c","parent":"P2.3.1c4","status":"resolved"},{"id":"P2.3.1c4d","parent":"P2.3.1c4","status":"unresolved"},
-    {"id":"P2.3.1c4d1","parent":"P2.3.1c4d","title":"Provide an evaluator-facing sealed micro-domain task format and scoring runner that does not expose answers to the candidate","status":"resolved","evidence":["src/jagi_eval/microdomain.py","tests/test_microdomain.py","54 local mirror pytest tests passed after integration"]},
-    {"id":"P2.3.1c4d2","parent":"P2.3.1c4d","title":"Freeze and hash the candidate-side rule-learning package before evaluator task generation","status":"in_progress"},
-    {"id":"P2.3.1c4d3","parent":"P2.3.1c4d","title":"Run an independently custodied post-freeze sealed evaluation and meet the adaptation gate","status":"unresolved"}
+    {"id":"P2.3.1c4d1","parent":"P2.3.1c4d","status":"resolved"},
+    {"id":"P2.3.1c4d2","parent":"P2.3.1c4d","title":"Freeze and hash the candidate-side rule-learning package before evaluator task generation","status":"resolved","evidence":["tools/freeze_candidate.py","tests/test_freeze_candidate.py","candidate_rule_learning_manifest.json","bundle sha256 876af2e4cba318951eae3ab391b29518516cf8a633804790c2a90c57b1ffb3f1","56 local mirror pytest tests passed"]},
+    {"id":"P2.3.1c4d3","parent":"P2.3.1c4d","title":"Run an independently custodied post-freeze sealed evaluation and meet the adaptation gate","status":"unresolved"},
+    {"id":"P2.3.1c4d3a","parent":"P2.3.1c4d3","title":"Prepare a candidate-boundary-preserving evaluator handoff and evidence contract","status":"resolved","evidence":["docs/independent_microdomain_handoff.md"]},
+    {"id":"P2.3.1c4d3b","parent":"P2.3.1c4d3","title":"Have an independent custodian generate and seal at least 40 post-freeze micro-domains without developer access","status":"in_progress"},
+    {"id":"P2.3.1c4d3c","parent":"P2.3.1c4d3","title":"Execute the frozen candidate under custody and return signed G0/G2 metrics including transfer and regression","status":"unresolved"},
+    {"id":"P2.3.1c4d3d","parent":"P2.3.1c4d3","title":"Verify the independent evidence meets the preregistered adaptation thresholds","status":"unresolved"}
   ],
-  "current_leaf":"P2.3.1c4d2",
-  "actual_active_problem_count":41,
+  "current_leaf":"P2.3.1c4d3b",
+  "actual_active_problem_count":45,
   "history":[
     {"event":"initial_prediction","predicted_total":271,"active_count":15},
     {"event":"parent_resolved","problem":"P1"},
@@ -26,6 +31,8 @@
     {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c","children":["P2.3.1c1","P2.3.1c2","P2.3.1c3","P2.3.1c4"]},
     {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c4","children":["P2.3.1c4a","P2.3.1c4b","P2.3.1c4c","P2.3.1c4d"]},
     {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c4d","children":["P2.3.1c4d1","P2.3.1c4d2","P2.3.1c4d3"]},
-    {"event":"leaf_resolved","problem":"P2.3.1c4d1","note":"Evaluator API passes demonstrations/operator descriptions only; hidden cases stay evaluator-side and are scored after the candidate returns a predictor."}
+    {"event":"leaf_resolved","problem":"P2.3.1c4d1"},{"event":"leaf_resolved","problem":"P2.3.1c4d2"},
+    {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c4d3","children":["P2.3.1c4d3a","P2.3.1c4d3b","P2.3.1c4d3c","P2.3.1c4d3d"],"note":"The project cannot truthfully self-certify independent custody, so the empirical leaf was decomposed into handoff, independent suite custody, execution, and evidence verification rather than being marked solved."},
+    {"event":"leaf_resolved","problem":"P2.3.1c4d3a"}
   ]
 }
