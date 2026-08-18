@@ -1,0 +1,20 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 63,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 397,
+  "prediction_exceeded": false,
+  "current_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b2b2",
+    "status": "decomposed_unresolved"
+  },
+  "result": "Operational equivalence was reformulated as equality of observable push-forward law families, requiring neither latent-space isomorphism nor a declared shared sufficient summary. A bounded finite-regime Euclidean child received a three-valued Gaussian-kernel audit; focused tests: 4 passed. Infinite/adaptive intervention families remain unresolved.",
+  "next_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b2b2b",
+    "problem": "construct a countable/learnable separating intervention basis for infinite or adaptive intervention families, or characterize when none exists",
+    "status": "unresolved"
+  },
+  "focused_test": "4 passed"
+}
