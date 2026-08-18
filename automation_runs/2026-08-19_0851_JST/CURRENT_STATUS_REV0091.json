@@ -1,0 +1,11 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 91,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 469,
+  "prediction_exceeded": false,
+  "result": "Replaced per-matched-edge maximum-matching recomputation with one residual-network SCC analysis. Across 1,200 random small bipartite graphs, maximum size and essential-edge sets exactly matched exhaustive enumeration.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b2c","problem":"incorporate the total remaining disagreement budget into assignment lower bounds rather than only per-pair anchor screening","status":"unresolved"}
+}
