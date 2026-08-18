@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "root": {
+    "id": "R0",
+    "title": "Deliver practically usable AGI without lowering the achievement bar",
+    "status": "unresolved"
+  },
+  "prediction": {
+    "predicted_total_problems": 271,
+    "basis": {
+      "root": 1,
+      "top_level_parents": 9,
+      "projected_intermediate_problems": 45,
+      "projected_technical_leaves": 180,
+      "projected_integration_and_validation_problems": 36
+    },
+    "reforecast_rule": "If instantiated non-replaced problems exceed the prediction, traverse all active problems, introduce shared/higher-order problems that subsume multiple branches, rewrite affected branches without duplicating completed work, then re-estimate."
+  },
+  "rules": {
+    "selection": "Attempt exactly one unresolved leaf at a time unless integration requires a small atomic bundle.",
+    "failed_attempt": "Decompose the unresolved leaf into child problems whose integration would solve it.",
+    "success": "Record evidence and move to another unresolved leaf.",
+    "parent_resolution": "Resolve a parent only after all required children are resolved and integration is verified.",
+    "truthfulness": "Never mark a capability or AGI achievement as solved without empirical evidence.",
+    "separation": "The recursive project-management/problem-solving mechanism is not part of the AGI candidate and is excluded from AGI evaluation."
+  },
+  "problems": [
+    {"id":"P1","parent":"R0","title":"Make AGI achievement falsifiable and attribution-correct","status":"unresolved"},
+    {"id":"P2","parent":"R0","title":"Build a general learning and representation substrate","status":"unresolved"},
+    {"id":"P3","parent":"R0","title":"Achieve robust reasoning, planning, and problem solving across domains","status":"unresolved"},
+    {"id":"P4","parent":"R0","title":"Achieve reliable memory and continual adaptation without catastrophic interference","status":"unresolved"},
+    {"id":"P5","parent":"R0","title":"Achieve multimodal perception, tool use, and environment interaction","status":"unresolved"},
+    {"id":"P6","parent":"R0","title":"Achieve long-horizon autonomy, self-monitoring, and recovery","status":"unresolved"},
+    {"id":"P7","parent":"R0","title":"Meet robustness, safety, security, and controllability requirements","status":"unresolved"},
+    {"id":"P8","parent":"R0","title":"Turn the system into an efficient, maintainable, practically deployable product","status":"unresolved"},
+    {"id":"P9","parent":"R0","title":"Integrate and independently validate the frozen AGI candidate in real use","status":"unresolved"},
+
+    {"id":"P1.1","parent":"P1","title":"Define the candidate boundary so cognition cannot be delegated to the project solver or an undisclosed external general model","status":"unresolved"},
+    {"id":"P1.2","parent":"P1","title":"Define sealed, post-freeze, contamination-resistant task generation and custody","status":"unresolved"},
+    {"id":"P1.3","parent":"P1","title":"Define non-compensatory pass gates for generality, performance, autonomy, safety/reliability, and practical delivery","status":"in_progress"},
+    {"id":"P1.4","parent":"P1","title":"Define statistical decision rules, uncertainty, replication, and failure handling","status":"unresolved"},
+    {"id":"P1.5","parent":"P1","title":"Define independent evaluator reproducibility and signed evidence packaging","status":"unresolved"}
+  ],
+  "current_leaf": "P1.3",
+  "actual_active_problem_count": 15,
+  "history": [
+    {
+      "event": "initial_prediction",
+      "predicted_total": 271,
+      "active_count": 15,
+      "note": "Only the root, top-level structure, and the first evaluation branch are instantiated; remaining problems are created recursively as attempts expose concrete blockers."
+    }
+  ]
+}
