@@ -1,0 +1,20 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 60,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 388,
+  "prediction_exceeded": false,
+  "current_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b",
+    "status": "decomposed_unresolved"
+  },
+  "result": "Exact nonlinear continuous latent-coordinate push-forward equivalence established pathwise under observation and do(X); non-isomorphic nonlinear and fully nonparametric equivalences remain unresolved.",
+  "next_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b2",
+    "problem": "nonlinear latent-confounder equivalences not reducible to invertible reparameterization",
+    "status": "unresolved"
+  },
+  "focused_test": "2 passed"
+}
