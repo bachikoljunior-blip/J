@@ -1,0 +1,11 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 87,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 460,
+  "prediction_exceeded": false,
+  "result": "Solved the bounded exact-consensus validation leaf, then implemented and tested a fail-closed 1-WL singleton/direct-verification fast path for scalable full exact graph alignment. The general scalable partial-edit leaf remains decomposed and unresolved.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2","problem":"scalable partial-edit forced-pair certificates that remain sound with insertions/deletions","status":"unresolved"}
+}
