@@ -1,0 +1,15 @@
+{
+  "authoritative_file": "PROBLEM_TREE.json",
+  "revision": 2,
+  "sha256": "30a5142da160e71d9259eb1c064b44007ff9217ee1836be2fe98c88a1894124d",
+  "snapshot": "PROBLEM_TREE_REV0002_30a5142da160.json",
+  "active_nodes": 140,
+  "predicted_total_active_nodes": 170,
+  "prediction_exceeded": false,
+  "next_leaf": {
+    "id": "C2.2b2b2b5b3s2b2b2",
+    "parent": "C2.2b2b2b5b3s2b2b",
+    "problem": "certified triangular/Rosenblatt transport for known dependent non-Gaussian densities",
+    "status": "unresolved"
+  }
+}
