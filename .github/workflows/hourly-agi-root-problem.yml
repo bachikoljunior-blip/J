@@ -1,0 +1,278 @@
+name: Hourly AGI root-problem run
+
+on:
+  schedule:
+    # The request was created at xx:53. UTC and JST have the same minute value.
+    - cron: "53 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/hourly-agi-root-problem.yml"
+      - "automation/PROMPT_JA.txt"
+      - "automation/COPILOT_INSTRUCTIONS.md"
+
+concurrency:
+  group: hourly-agi-root-problem
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate automation files without sending the prompt
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out J
+        uses: actions/checkout@v6
+
+      - name: Verify unchanged prompt and required files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s automation/PROMPT_JA.txt
+          test -s automation/COPILOT_INSTRUCTIONS.md
+          test -s .github/workflows/hourly-agi-root-problem.yml
+          printf '%s  %s\n' \
+            '765c10ee919b3b975260918810f3aa5e0637eba21be68146ec057c8535c2a610' \
+            'automation/PROMPT_JA.txt' | sha256sum --check --strict
+
+  agent:
+    if: github.event_name != 'push'
+    name: Run the unchanged prompt in an isolated workspace
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    permissions:
+      contents: read
+      copilot-requests: write
+    outputs:
+      run_id: ${{ steps.meta.outputs.run_id }}
+      artifact_name: ${{ steps.meta.outputs.artifact_name }}
+    steps:
+      - name: Check out J
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
+      - name: Define run identity
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id="$(TZ=Asia/Tokyo date +'%Y-%m-%d_%H%M%S_JST')_github_actions_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          artifact_name="agi-run-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          printf 'run_id=%s\n' "$run_id" >> "$GITHUB_OUTPUT"
+          printf 'artifact_name=%s\n' "$artifact_name" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare isolated workspace
+        id: prepare
+        shell: bash
+        env:
+          RUN_ID: ${{ steps.meta.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          work_root="$RUNNER_TEMP/$RUN_ID"
+          mkdir -p "$work_root/context/J" "$work_root/artifacts"
+          rsync -a --delete --exclude='.git/' "$GITHUB_WORKSPACE/" "$work_root/context/J/"
+          cp "$GITHUB_WORKSPACE/automation/COPILOT_INSTRUCTIONS.md" "$work_root/AGENTS.md"
+          cp "$GITHUB_WORKSPACE/automation/PROMPT_JA.txt" "$work_root/EXACT_USER_PROMPT.txt"
+          python3 - <<'PY' "$work_root" "$RUN_ID" "$GITHUB_REPOSITORY" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_EVENT_NAME"
+          import datetime as dt
+          import hashlib
+          import json
+          import pathlib
+          import sys
+
+          work_root, run_id, repository, sha, run_number, run_attempt, event_name = sys.argv[1:]
+          root = pathlib.Path(work_root)
+          prompt = (root / "EXACT_USER_PROMPT.txt").read_bytes()
+          now = dt.datetime.now(dt.timezone(dt.timedelta(hours=9)))
+          metadata = {
+              "run_id": run_id,
+              "repository": repository,
+              "source_commit": sha,
+              "github_run_id": run_number,
+              "github_run_attempt": run_attempt,
+              "event_name": event_name,
+              "started_at_jst": now.isoformat(),
+              "prompt_sha256": hashlib.sha256(prompt).hexdigest(),
+              "prompt_bytes": len(prompt),
+              "prompt_delivery": "stdin, unchanged",
+              "model": "gpt-5.4",
+          }
+          (root / "artifacts" / "RUN_METADATA.json").write_text(
+              json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          printf 'work_root=%s\n' "$work_root" >> "$GITHUB_OUTPUT"
+
+      - name: Install GitHub Copilot CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global @github/copilot@latest
+          copilot version
+
+      - name: Run exact prompt
+        id: copilot
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          WORK_ROOT: ${{ steps.prepare.outputs.work_root }}
+        run: |
+          set -uo pipefail
+          cd "$WORK_ROOT"
+          start_epoch="$(date +%s)"
+          set +e
+          timeout --signal=TERM --kill-after=30s 60m \
+            copilot \
+              --silent \
+              --model gpt-5.4 \
+              --available-tools='bash,edit,view,grep,glob' \
+              --allow-tool='read,write,shell' \
+              --no-ask-user \
+              --secret-env-vars=GITHUB_TOKEN \
+            < EXACT_USER_PROMPT.txt \
+            > artifacts/FINAL_RESPONSE.md \
+            2> artifacts/COPILOT_STDERR.log
+          exit_code=$?
+          set -e
+          end_epoch="$(date +%s)"
+          printf '%s\n' "$exit_code" > artifacts/COPILOT_EXIT_CODE.txt
+          printf '%s\n' "$((end_epoch - start_epoch))" > artifacts/DURATION_SECONDS.txt
+          TZ=Asia/Tokyo date '+%Y-%m-%dT%H:%M:%S%z minute=%M' > artifacts/FINISHED_AT_JST.txt
+          # Preserve the run even when Copilot is unavailable or exits non-zero.
+          exit 0
+
+      - name: Ensure minimum audit artifacts
+        if: always()
+        shell: bash
+        env:
+          WORK_ROOT: ${{ steps.prepare.outputs.work_root }}
+        run: |
+          set -euo pipefail
+          cd "$WORK_ROOT"
+          if [[ ! -s artifacts/RUN_SUMMARY.md ]]; then
+            cat > artifacts/RUN_SUMMARY.md <<'SUMMARY'
+          # Automated run did not produce a structured summary
+
+          Review `FINAL_RESPONSE.md`, `COPILOT_STDERR.log`, and `COPILOT_EXIT_CODE.txt` for the available evidence. No AGI or root-problem completion is certified by this fallback record.
+          SUMMARY
+          fi
+          if [[ ! -s artifacts/CURRENT_STATUS.json ]]; then
+            cat > artifacts/CURRENT_STATUS.json <<'JSON'
+          {
+            "root_problem_solved": false,
+            "agi_certified": false,
+            "status_source": "workflow fallback; inspect run logs"
+          }
+          JSON
+          fi
+          if [[ ! -s artifacts/PROBLEM_DELTA.json ]]; then
+            cat > artifacts/PROBLEM_DELTA.json <<'JSON'
+          {
+            "result": "undetermined",
+            "decomposition_changed": false,
+            "status_source": "workflow fallback; inspect run logs"
+          }
+          JSON
+          fi
+          {
+            find artifacts -type f ! -name 'RECORD_SHA256.txt' -print0
+            printf '%s\0' EXACT_USER_PROMPT.txt AGENTS.md
+          } | sort -z | xargs -0 sha256sum > artifacts/RECORD_SHA256.txt
+
+      - name: Package auditable run record
+        if: always()
+        id: package
+        shell: bash
+        env:
+          WORK_ROOT: ${{ steps.prepare.outputs.work_root }}
+          RUN_ID: ${{ steps.meta.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          record_root="$RUNNER_TEMP/${RUN_ID}-record"
+          mkdir -p "$record_root"
+          cp "$GITHUB_WORKSPACE/automation/PROMPT_JA.txt" "$record_root/PROMPT_JA.txt"
+          cp "$GITHUB_WORKSPACE/automation/COPILOT_INSTRUCTIONS.md" "$record_root/RUNNER_INSTRUCTIONS.md"
+          cp -a "$WORK_ROOT/artifacts" "$record_root/artifacts"
+
+          # Preserve unexpected work without recursively embedding the J snapshot.
+          mkdir -p "$record_root/UNSCOPED_WORKSPACE"
+          rsync -a \
+            --exclude='context/' \
+            --exclude='artifacts/' \
+            --exclude='AGENTS.md' \
+            --exclude='EXACT_USER_PROMPT.txt' \
+            "$WORK_ROOT/" "$record_root/UNSCOPED_WORKSPACE/"
+          if [[ -z "$(find "$record_root/UNSCOPED_WORKSPACE" -mindepth 1 -print -quit)" ]]; then
+            rmdir "$record_root/UNSCOPED_WORKSPACE"
+          fi
+          printf 'record_root=%s\n' "$record_root" >> "$GITHUB_OUTPUT"
+
+      - name: Upload complete run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.artifact_name }}
+          path: ${{ steps.package.outputs.record_root }}
+          if-no-files-found: error
+          retention-days: 30
+
+  persist:
+    name: Persist run in J
+    needs: agent
+    if: ${{ always() && needs.agent.outputs.run_id != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download run artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.agent.outputs.artifact_name }}
+          path: .incoming-hourly-run
+
+      - name: Record and push run
+        shell: bash
+        env:
+          RUN_ID: ${{ needs.agent.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          destination="runs/$RUN_ID"
+          if [[ -e "$destination" ]]; then
+            destination="${destination}_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          fi
+          mkdir -p "$destination"
+          cp -a .incoming-hourly-run/. "$destination/"
+          rm -rf .incoming-hourly-run
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$destination"
+          git commit -m "record hourly AGI run $RUN_ID"
+
+          for attempt in 1 2 3 4; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 3))
+          done
+          echo "Failed to push the run after retries" >&2
+          exit 1
