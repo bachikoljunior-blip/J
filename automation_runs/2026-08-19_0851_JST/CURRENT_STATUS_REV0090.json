@@ -1,0 +1,11 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 90,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 469,
+  "prediction_exceeded": false,
+  "result": "Extended duplicate-attribute structural forcing to positive edge-disagreement budgets using a conservative anchor-mismatch candidate superset, essential-edge checks, and direct full-witness verification. A 400-case random exhaustive-oracle audit found no unsound releases.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b2b","problem":"scalable essential-edge detection without per-matched-edge recomputation","status":"unresolved"}
+}
