@@ -1,0 +1,21 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "predicted_total_active_nodes": 384,
+  "actual_active_nodes": 383,
+  "prediction_exceeded": false,
+  "revision": 56,
+  "current_leaf": {
+    "id": "D1b2b2c3c3",
+    "status": "decomposed_unresolved",
+    "evidence": "fixed-memory/selection/shift/conformal/asynchronous bounded children implemented; generic relational transfer failure retained"
+  },
+  "next_leaf": {
+    "id": "D1b2b2c3c3b2",
+    "problem": "learn predictive representation itself under capacity controls",
+    "status": "unresolved"
+  },
+  "focused_regression": "16 passed, 1 strict xfailed for known generic cross-dimensional relational transfer failure",
+  "full_suite_note": "suite was chunked due per-call timeout; completed chunks 1-220 passed (172+166+151+168 tests). Later generic relational transfer failure was made an explicit strict xfail after reproducing it; remaining tail did not complete as one clean aggregate process within call timeout."
+}
