@@ -34,14 +34,13 @@
     {"id":"P7","parent":"R0","title":"Meet robustness, safety, security, and controllability requirements","status":"unresolved"},
     {"id":"P8","parent":"R0","title":"Turn the system into an efficient, maintainable, practically deployable product","status":"unresolved"},
     {"id":"P9","parent":"R0","title":"Integrate and independently validate the frozen AGI candidate in real use","status":"unresolved"},
-
     {"id":"P1.1","parent":"P1","title":"Define the candidate boundary so cognition cannot be delegated to the project solver or an undisclosed external general model","status":"unresolved"},
     {"id":"P1.2","parent":"P1","title":"Define sealed, post-freeze, contamination-resistant task generation and custody","status":"unresolved"},
-    {"id":"P1.3","parent":"P1","title":"Define non-compensatory pass gates for generality, performance, autonomy, safety/reliability, and practical delivery","status":"in_progress"},
-    {"id":"P1.4","parent":"P1","title":"Define statistical decision rules, uncertainty, replication, and failure handling","status":"unresolved"},
+    {"id":"P1.3","parent":"P1","title":"Define non-compensatory pass gates for generality, performance, autonomy, safety/reliability, and practical delivery","status":"resolved","evidence":["docs/achievement_protocol.md","src/jagi_eval/gates.py","tests/test_gates.py","local mirror: 6 pytest tests passed"]},
+    {"id":"P1.4","parent":"P1","title":"Define statistical decision rules, uncertainty, replication, and failure handling","status":"in_progress"},
     {"id":"P1.5","parent":"P1","title":"Define independent evaluator reproducibility and signed evidence packaging","status":"unresolved"}
   ],
-  "current_leaf": "P1.3",
+  "current_leaf": "P1.4",
   "actual_active_problem_count": 15,
   "history": [
     {
@@ -49,6 +48,11 @@
       "predicted_total": 271,
       "active_count": 15,
       "note": "Only the root, top-level structure, and the first evaluation branch are instantiated; remaining problems are created recursively as attempts expose concrete blockers."
+    },
+    {
+      "event": "leaf_resolved",
+      "problem": "P1.3",
+      "note": "Non-compensatory capability/product gates were specified and an executable aggregate evidence checker was tested. This resolves only the gate-definition leaf, not any AGI capability claim."
     }
   ]
 }
