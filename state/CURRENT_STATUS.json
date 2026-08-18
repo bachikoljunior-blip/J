@@ -1,0 +1,45 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI; current candidate contains bounded components and evaluation infrastructure, not a demonstrated AGI",
+  "predicted_total_active_nodes": 218,
+  "actual_active_nodes": 154,
+  "prediction_exceeded": false,
+  "node_status_counts": {
+    "unresolved": 39,
+    "in_progress": 1,
+    "solved_v0_1": 92,
+    "decomposed_unresolved": 22
+  },
+  "current_leaf": {
+    "id": "C2.2b2b2b5b3b2b2b3c4b",
+    "problem": "未知のcomponentwise-monotone numeric response sensorをaction対応なしで較正し、独立anchorで介入意味を検証する",
+    "status": "solved_v0_1",
+    "evidence": [
+      "../agi_candidate_v0/monotone_response_action_alignment.py",
+      "../agi_candidate_v0/tests/test_monotone_response_action_alignment.py",
+      "../agi_candidate_v0/C2_2B2B2B5B3B2B2B3C4_ATTEMPT.md",
+      "../agi_candidate_v0/GENERALIZATION_STRESS_2026-08-19.json"
+    ]
+  },
+  "next_leaf": {
+    "id": "C2.2b2b2b5b3b2b2b3c4c",
+    "problem": "共通feature名や較正anchorを前提にせず、raw heterogeneous perceptionからtask/outcome semanticsをgroundする",
+    "status": "unresolved"
+  },
+  "known_empirical_failures": [
+    {"id": "KF-CONCEPT-TRANSITIVITY", "expected_scope": "unresolved"},
+    {"id": "KF-HIDDEN-CONFOUNDER", "expected_scope": "unresolved"},
+    {"id": "KF-MODEL-MISCALIBRATION", "expected_scope": "unresolved"},
+    {"id": "KF-UNPAIRED-MAP-NONIDENTIFIABILITY", "expected_scope": "unresolved"},
+    {"id": "KF-MULTIVIEW-SAMPLE-STARVATION", "expected_scope": "abstain below declared sample coverage"}
+  ],
+  "latest_regression": "candidate 195 passed; root/evaluation 28 passed",
+  "latest_stress": {
+    "linear_multiview_n3200": "20/20 pass",
+    "componentwise_monotone_multiview": "20/20 pass",
+    "nonlinear_transport_outside_linear_st_family": "10/10 pass",
+    "monotone_response_action_semantics": "50/50 positive pass; 50/50 nonmonotone negatives rejected"
+  },
+  "problem_tree_note": "PROBLEM_TREE.json has been reconciled to the current 154-node branch and passes tree_integrity.py."
+}

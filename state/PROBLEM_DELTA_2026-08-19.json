@@ -1,0 +1,22 @@
+{
+  "base_active_nodes": 144,
+  "predicted_total_active_nodes": 218,
+  "active_nodes_after_delta": 154,
+  "prediction_exceeded": false,
+  "changes": [
+    {"node":"C2.2b2b2b5b3b2b2b2c","result":"decomposed_unresolved","children":3},
+    {"node":"C2.2b2b2b5b3b2b2b2c1","parent":"C2.2b2b2b5b3b2b2b2c","result":"solved_v0_1","problem":"nonlinear exact-invertible learner outside earlier linear s/t transport family"},
+    {"node":"C2.2b2b2b5b3b2b2b2c2","parent":"C2.2b2b2b5b3b2b2b2c","result":"solved_v0_1","problem":"finite orthogonal symmetry stress gate with sampling-noise floor"},
+    {"node":"C2.2b2b2b5b3b2b2b2c3","parent":"C2.2b2b2b5b3b2b2b2c","result":"unresolved","problem":"generalize beyond bounded synthetic families and reject arbitrary nonlinear/non-orthogonal distribution-preserving maps"},
+    {"node":"C2.2b2b2b5b3b2b2b3c","result":"decomposed_unresolved","children":4},
+    {"node":"C2.2b2b2b5b3b2b2b3c1","parent":"C2.2b2b2b5b3b2b2b3c","result":"solved_v0_1","problem":"linear invertible multi-view mixing with non-Gaussian factors and distinct condition variance signatures; explicit sample-coverage gate"},
+    {"node":"C2.2b2b2b5b3b2b2b3c2","parent":"C2.2b2b2b5b3b2b2b3c","result":"solved_v0_1","problem":"componentwise monotone nonlinear multi-view sensors with distinctive condition rank signatures"},
+    {"node":"C2.2b2b2b5b3b2b2b3c3","parent":"C2.2b2b2b5b3b2b2b3c","result":"solved_v0_1","problem":"construct exact arbitrary nonlinear latent reparameterization ambiguity witness"},
+    {"node":"C2.2b2b2b5b3b2b2b3c4","parent":"C2.2b2b2b5b3b2b2b3c","result":"decomposed_unresolved","children":3,"problem":"replace coordinate uniqueness by task/causal semantics under additional grounding structure"},
+    {"node":"C2.2b2b2b5b3b2b2b3c4a","parent":"C2.2b2b2b5b3b2b2b3c4","result":"solved_v0_1","problem":"held-out intervention-response fingerprint semantics, reusing existing cross-environment action matcher"},
+    {"node":"C2.2b2b2b5b3b2b2b3c4b","parent":"C2.2b2b2b5b3b2b2b3c4","result":"solved_v0_1","problem":"unpaired empirical-quantile calibration of componentwise monotone numeric response sensors plus independent action-semantic validation"},
+    {"node":"C2.2b2b2b5b3b2b2b3c4c","parent":"C2.2b2b2b5b3b2b2b3c4","result":"unresolved","problem":"ground common task/outcome semantics from raw heterogeneous perception without pre-shared feature names or calibrated anchors"}
+  ],
+  "known_failure_added": "KF-MULTIVIEW-SAMPLE-STARVATION",
+  "certification": "NOT_AGI"
+}
