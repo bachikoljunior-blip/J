@@ -1,0 +1,29 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI; current candidate directory contains infrastructure/components and a negative-control runtime only",
+  "predicted_total_active_nodes": 218,
+  "actual_active_nodes": 120,
+  "prediction_exceeded": false,
+  "node_status_counts": {
+    "unresolved": 33,
+    "in_progress": 1,
+    "solved_v0_1": 77,
+    "decomposed_unresolved": 9
+  },
+  "current_leaf": {
+    "id": "C2.2b2b2b5b2d",
+    "problem": "生の知覚観測・介入から環境を跨ぐアンカー実体同一性を発見・保持する",
+    "status": "solved_v0_1"
+  },
+  "next_leaf": {
+    "id": "C2.2b2b2b5b3",
+    "problem": "非線形・分散表現の特徴対応を環境間で同定する",
+    "status": "unresolved"
+  },
+  "known_empirical_failures": [
+    {"id": "KF-CONCEPT-TRANSITIVITY", "expected_scope": "unresolved"},
+    {"id": "KF-HIDDEN-CONFOUNDER", "expected_scope": "unresolved"},
+    {"id": "KF-MODEL-MISCALIBRATION", "expected_scope": "unresolved"}
+  ]
+}
