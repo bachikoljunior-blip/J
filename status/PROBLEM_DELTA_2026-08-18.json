@@ -1,0 +1,25 @@
+{
+  "base_active_nodes": 120,
+  "predicted_total_active_nodes": 218,
+  "final_active_nodes": 138,
+  "prediction_exceeded": false,
+  "certification": "NOT_AGI",
+  "changes": [
+    {"node":"C2.2b2b2b5b2c3","result":"solved_v0_1","note":"partial assignment fixed missing-row distractor failure"},
+    {"node":"C2.2b2b2b5b2d","result":"solved_v0_1","note":"bounded raw perceptual intervention-response anchors"},
+    {"node":"C2.2b2b2b5b3","result":"decomposed_unresolved","children":5},
+    {"node":"C2.2b2b2b5b3a","result":"solved_v0_1","note":"paired nonlinear distributed alignment"},
+    {"node":"C2.2b2b2b5b3b","result":"decomposed_unresolved","children":3},
+    {"node":"C2.2b2b2b5b3b1","result":"solved_v0_1","note":"unpaired shared-condition orthogonal alignment"},
+    {"node":"C2.2b2b2b5b3b2","result":"decomposed_unresolved","children":3},
+    {"node":"C2.2b2b2b5b3b2a","result":"solved_v0_1","note":"1D monotone low-degree transport"},
+    {"node":"C2.2b2b2b5b3b2b","result":"decomposed_unresolved","children":2},
+    {"node":"C2.2b2b2b5b3b2b1","result":"solved_v0_1","note":"separable multivariate nonlinear alignment"},
+    {"node":"C2.2b2b2b5b3b2b2","result":"decomposed_unresolved","children":2},
+    {"node":"C2.2b2b2b5b3b2b2a","result":"solved_v0_1","note":"low-dimensional mixed quadratic diffeomorphism"},
+    {"node":"C2.2b2b2b5b3b2b2b","result":"decomposed_unresolved","children":3},
+    {"node":"C2.2b2b2b5b3b2b2b1","result":"solved_v0_1","note":"exact-invertible scalable coupling architecture; full regression 150/150"},
+    {"node":"C2.2b2b2b5b3b2b2b2","result":"unresolved","note":"learn mapping from unpaired shared-condition distributions"},
+    {"node":"C2.2b2b2b5b3b2b2b3","result":"unresolved","note":"identifiability/equivalence classes and independent domain shift"}
+  ]
+}
