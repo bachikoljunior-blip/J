@@ -1,0 +1,11 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 81,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 451,
+  "prediction_exceeded": false,
+  "result": "Derived a finite-depth support bound for WL/RFF feature change under simple undirected edge toggles with fixed node identities and attributes; cumulative local regression rev75-81: 35 passed. Broader structural-edit child decomposed into four cases.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3a","problem":"dedicated validation and theorem check for the fixed-node simple-undirected edge-toggle stability certificate","status":"unresolved"}
+}
