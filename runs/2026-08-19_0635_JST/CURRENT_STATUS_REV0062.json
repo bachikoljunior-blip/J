@@ -1,0 +1,20 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 62,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 392,
+  "prediction_exceeded": false,
+  "current_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b2b",
+    "status": "decomposed_unresolved"
+  },
+  "result": "A useful partial quotient classification was implemented for declared Gaussian sufficient-summary hidden models. The first focused run exposed a scalar covariance shape bug; it was fixed, then 2 tests passed. General non-summary nonlinear equivalence remains unresolved.",
+  "next_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b2b2",
+    "problem": "non-isomorphic nonlinear equivalences without declared shared sufficient summary",
+    "status": "unresolved"
+  },
+  "focused_test": "2 passed after 2-test initial failure was fixed"
+}
