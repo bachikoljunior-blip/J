@@ -9,17 +9,13 @@
     {"id":"P2.1","parent":"P2","status":"resolved"},{"id":"P2.2","parent":"P2","status":"resolved"},{"id":"P2.3","parent":"P2","status":"unresolved"},{"id":"P2.4","parent":"P2","status":"unresolved"},{"id":"P2.5","parent":"P2","status":"unresolved"},{"id":"P2.6","parent":"P2","status":"unresolved"},
     {"id":"P2.3.1","parent":"P2.3","status":"unresolved"},{"id":"P2.3.2","parent":"P2.3","status":"unresolved"},{"id":"P2.3.3","parent":"P2.3","status":"unresolved"},{"id":"P2.3.4","parent":"P2.3","status":"unresolved"},{"id":"P2.3.5","parent":"P2.3","status":"unresolved"},{"id":"P2.3.6","parent":"P2.3","status":"unresolved"},
     {"id":"P2.3.1a","parent":"P2.3.1","status":"resolved"},{"id":"P2.3.1b","parent":"P2.3.1","status":"resolved"},{"id":"P2.3.1c","parent":"P2.3.1","status":"unresolved"},
-    {"id":"P2.3.1c1","parent":"P2.3.1c","status":"resolved"},{"id":"P2.3.1c2","parent":"P2.3.1c","status":"resolved"},{"id":"P2.3.1c3","parent":"P2.3.1c","status":"resolved"},
-    {"id":"P2.3.1c4","parent":"P2.3.1c","status":"unresolved"},
-    {"id":"P2.3.1c4a","parent":"P2.3.1c4","status":"resolved"},
-    {"id":"P2.3.1c4b","parent":"P2.3.1c4","title":"Dynamically promote learned subprograms into reusable primitives so the effective rule language can grow","status":"resolved","evidence":["src/jagi/learning/primitives.py","tests/test_primitives.py","48 local pytest tests passed after integration"]},
-    {"id":"P2.3.1c4c","parent":"P2.3.1c4","title":"Evaluate learned rule induction across multiple data types and generated rule grammars unknown at implementation time","status":"resolved","evidence":["src/jagi/learning/runtime_grammar.py","tests/test_runtime_grammar.py","51 local pytest tests passed after integration"],"scope_note":"runtime grammar mechanism works on generated numeric and text tests; decisive sealed evaluation is separate"},
-    {"id":"P2.3.1c4d","parent":"P2.3.1c4","title":"Pass a sealed post-freeze micro-domain rule-learning evaluation","status":"unresolved"},
-    {"id":"P2.3.1c4d1","parent":"P2.3.1c4d","title":"Provide an evaluator-facing sealed micro-domain task format and scoring runner that does not expose answers to the candidate","status":"in_progress"},
-    {"id":"P2.3.1c4d2","parent":"P2.3.1c4d","title":"Freeze and hash the candidate-side rule-learning package before evaluator task generation","status":"unresolved"},
+    {"id":"P2.3.1c1","parent":"P2.3.1c","status":"resolved"},{"id":"P2.3.1c2","parent":"P2.3.1c","status":"resolved"},{"id":"P2.3.1c3","parent":"P2.3.1c","status":"resolved"},{"id":"P2.3.1c4","parent":"P2.3.1c","status":"unresolved"},
+    {"id":"P2.3.1c4a","parent":"P2.3.1c4","status":"resolved"},{"id":"P2.3.1c4b","parent":"P2.3.1c4","status":"resolved"},{"id":"P2.3.1c4c","parent":"P2.3.1c4","status":"resolved"},{"id":"P2.3.1c4d","parent":"P2.3.1c4","status":"unresolved"},
+    {"id":"P2.3.1c4d1","parent":"P2.3.1c4d","title":"Provide an evaluator-facing sealed micro-domain task format and scoring runner that does not expose answers to the candidate","status":"resolved","evidence":["src/jagi_eval/microdomain.py","tests/test_microdomain.py","54 local mirror pytest tests passed after integration"]},
+    {"id":"P2.3.1c4d2","parent":"P2.3.1c4d","title":"Freeze and hash the candidate-side rule-learning package before evaluator task generation","status":"in_progress"},
     {"id":"P2.3.1c4d3","parent":"P2.3.1c4d","title":"Run an independently custodied post-freeze sealed evaluation and meet the adaptation gate","status":"unresolved"}
   ],
-  "current_leaf":"P2.3.1c4d1",
+  "current_leaf":"P2.3.1c4d2",
   "actual_active_problem_count":41,
   "history":[
     {"event":"initial_prediction","predicted_total":271,"active_count":15},
@@ -29,7 +25,7 @@
     {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1","children":["P2.3.1a","P2.3.1b","P2.3.1c"]},
     {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c","children":["P2.3.1c1","P2.3.1c2","P2.3.1c3","P2.3.1c4"]},
     {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c4","children":["P2.3.1c4a","P2.3.1c4b","P2.3.1c4c","P2.3.1c4d"]},
-    {"event":"leaf_resolved","problem":"P2.3.1c4b"},{"event":"leaf_resolved","problem":"P2.3.1c4c"},
-    {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c4d","children":["P2.3.1c4d1","P2.3.1c4d2","P2.3.1c4d3"],"note":"A genuine sealed result cannot be self-certified by the development process. Preparation is decomposed into evaluator runner, candidate freeze, and independent execution; only the last can resolve the empirical claim."}
+    {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c4d","children":["P2.3.1c4d1","P2.3.1c4d2","P2.3.1c4d3"]},
+    {"event":"leaf_resolved","problem":"P2.3.1c4d1","note":"Evaluator API passes demonstrations/operator descriptions only; hidden cases stay evaluator-side and are scored after the candidate returns a predictor."}
   ]
 }
