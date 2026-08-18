@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 84,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 454,
+  "prediction_exceeded": false,
+  "current_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b1","status":"solved_v0_1"},
+  "result": "Certified the explicit-alignment vertex insertion/deletion feature-displacement bound and exhaustively stress-tested 2,048 insertion/deletion certificate directions on all four-node base graphs and all one-vertex neighborhoods. Cumulative local pytest count: 42 passed.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2","problem":"infer a partial common-node alignment without assuming the answer and fail closed under ambiguity","status":"unresolved"}
+}
