@@ -1,0 +1,20 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 61,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 390,
+  "prediction_exceeded": false,
+  "current_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b2",
+    "status": "decomposed_unresolved"
+  },
+  "result": "Exact nonlinear observational/do(X) equivalence constructed between explicit 1D and 2D continuous hidden spaces; this is not reducible to a homeomorphic latent-coordinate change, but general classification remains unresolved.",
+  "next_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b2b",
+    "problem": "complete/useful partial classification of non-isomorphic nonlinear latent-confounder equivalence classes",
+    "status": "unresolved"
+  },
+  "focused_test": "2 passed"
+}
