@@ -1,0 +1,11 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 77,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 443,
+  "prediction_exceeded": false,
+  "result": "rev75 added a polynomial-time PSD attributed-graph invariant surrogate (5 tests); rev76 added explicit detection of important 1-WL collision witnesses and fail-closed equality handling (cumulative 10 tests); rev77 added budgeted exact escalation after cheap screening (cumulative 15 tests), including exact certification of a relabeled 180-node attributed graph and explicit budget exhaustion.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d","problem":"establish approximation/stability bounds for continuous attributes and validate under independent distribution shift","status":"unresolved"}
+}
