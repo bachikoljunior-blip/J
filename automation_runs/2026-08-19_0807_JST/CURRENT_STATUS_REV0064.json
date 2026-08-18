@@ -1,0 +1,13 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 64,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 404,
+  "prediction_exceeded": false,
+  "current_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b","status":"decomposed_unresolved"},
+  "result": "For separable intervention spaces with continuous observable-law maps, a countable dense intervention basis separates laws. For compact domains with a supplied Lipschitz/modulus bound, a finite covering-net certificate was implemented. The unrestricted uncountable discontinuous case was classified as admitting no countable separator. Focused tests: 6 passed.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3","problem":"learn and independently validate a useful continuity modulus for intervention-to-observable-law discrepancy instead of assuming it","status":"unresolved"},
+  "focused_test": "6 passed"
+}
