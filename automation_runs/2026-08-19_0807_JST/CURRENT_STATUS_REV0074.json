@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 74,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 439,
+  "prediction_exceeded": false,
+  "current_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c","status":"decomposed_unresolved"},
+  "result": "Implemented an exact finite-group orbit-averaged smooth kernel for small attributed graphs with discrete skeleton semantics and continuous node attributes. Enumeration fails closed above the declared limit. Current aggregate local regression: 50 passed.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2","problem":"scale attributed-graph invariant kernels beyond factorial orbit averaging","status":"unresolved"}
+}
