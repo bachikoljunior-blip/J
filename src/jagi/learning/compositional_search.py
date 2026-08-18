@@ -88,6 +88,7 @@ def synthesize_numeric_expression(
     constants: Sequence[int | Fraction] = (-2, -1, 0, 1, 2, 3),
     max_cost: int = 7,
     beam_per_cost: int = 2_000,
+    primitives: Sequence[Expr] = (),
 ) -> SearchResult:
     """Bottom-up typed synthesis with behavioral-equivalence pruning."""
     if not examples:
@@ -97,7 +98,7 @@ def synthesize_numeric_expression(
 
     inputs = tuple(x for x, _ in examples)
     target = tuple(_compact(_fraction(y)) for _, y in examples)
-    by_cost: dict[int, list[Expr]] = {1: [Input()] + [NumberConst(Fraction(c)) for c in constants]}
+    by_cost: dict[int, list[Expr]] = {1: [Input()] + [NumberConst(Fraction(c)) for c in constants] + list(primitives)}
     behavior_best: dict[tuple[Hashable, ...], Expr] = {}
     explored = 0
 
@@ -126,8 +127,8 @@ def synthesize_numeric_expression(
             right_cost = cost - left_cost - 1
             if right_cost < 1:
                 continue
-            for left in by_cost.get(left_cost, ()): 
-                for right in by_cost.get(right_cost, ()): 
+            for left in by_cost.get(left_cost, ()):
+                for right in by_cost.get(right_cost, ()):
                     pair = sorted((left, right), key=lambda e: e.render())
                     for expr in (Add(pair[0], pair[1]), Multiply(pair[0], pair[1])):
                         generated.setdefault(expr.render(), expr)
