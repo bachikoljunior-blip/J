@@ -1,0 +1,31 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI; current candidate directory contains infrastructure/components and a negative-control runtime only",
+  "predicted_total_active_nodes": 170,
+  "actual_active_nodes": 140,
+  "prediction_exceeded": false,
+  "node_status_counts": {
+    "unresolved": 44,
+    "in_progress": 1,
+    "solved_v0_1": 79,
+    "decomposed_unresolved": 16
+  },
+  "current_leaf": {
+    "id": "C2.2b2b2b5b3s2b2b1",
+    "problem": "exact conjugated residual-symmetry witness for known full-rank multivariate Gaussian distributions",
+    "status": "solved_v0_1",
+    "evidence": [
+      "../agi_candidate_v0/gaussian_density_residual_symmetry.py",
+      "../agi_candidate_v0/tests/test_gaussian_density_residual_symmetry.py"
+    ]
+  },
+  "next_leaf": {
+    "id": "C2.2b2b2b5b3s2b2b2",
+    "parent": "C2.2b2b2b5b3s2b2b",
+    "problem": "certified triangular/Rosenblatt transport for known dependent non-Gaussian densities",
+    "status": "unresolved"
+  },
+  "tree_state_revision": 2,
+  "tree_state_reconciliation": "Rebuilt mandatory 219->127 consolidation, replayed post-consolidation s2 evidence, rejected duplicate stale total-correlation children, and integrated their already-solved parent. Advanced dependent-density residual-symmetry branch with exact known-Gaussian subcase; broad parent remains decomposed."
+}
