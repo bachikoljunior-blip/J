@@ -8,23 +8,27 @@
     {"id":"P1.1","parent":"P1","status":"resolved"},{"id":"P1.2","parent":"P1","status":"resolved"},{"id":"P1.3","parent":"P1","status":"resolved"},{"id":"P1.4","parent":"P1","status":"resolved"},{"id":"P1.5","parent":"P1","status":"resolved"},
     {"id":"P2.1","parent":"P2","status":"resolved"},{"id":"P2.2","parent":"P2","status":"resolved"},{"id":"P2.3","parent":"P2","status":"unresolved"},{"id":"P2.4","parent":"P2","status":"unresolved"},{"id":"P2.5","parent":"P2","status":"unresolved"},{"id":"P2.6","parent":"P2","status":"unresolved"},
     {"id":"P2.3.1","parent":"P2.3","status":"unresolved"},{"id":"P2.3.2","parent":"P2.3","status":"unresolved"},{"id":"P2.3.3","parent":"P2.3","status":"unresolved"},{"id":"P2.3.4","parent":"P2.3","status":"unresolved"},{"id":"P2.3.5","parent":"P2.3","status":"unresolved"},{"id":"P2.3.6","parent":"P2.3","status":"unresolved"},
-    {"id":"P2.3.1a","parent":"P2.3.1","status":"resolved","evidence":["src/jagi/learning/version_space.py","tests/test_version_space.py"]},
-    {"id":"P2.3.1b","parent":"P2.3.1","title":"Generate candidate symbolic programs/rules from demonstrations instead of assuming the hypothesis set is supplied","status":"resolved","evidence":["src/jagi/learning/program_synthesis.py","tests/test_program_synthesis.py","39 local pytest tests passed after integration"]},
-    {"id":"P2.3.1c","parent":"P2.3.1","title":"Scale rule induction and composition beyond a small enumerated program space","status":"unresolved"},
-    {"id":"P2.3.1c1","parent":"P2.3.1c","title":"Represent typed compositional programs that can reuse simpler rules","status":"in_progress"},
-    {"id":"P2.3.1c2","parent":"P2.3.1c","title":"Search compositional program space with cost and behavioral-equivalence pruning","status":"unresolved"},
-    {"id":"P2.3.1c3","parent":"P2.3.1c","title":"Learn proposal priors that focus search on plausible abstractions in open domains","status":"unresolved"},
-    {"id":"P2.3.1c4","parent":"P2.3.1c","title":"Empirically verify scaling to post-freeze rule families substantially larger than the hand-built DSL","status":"unresolved"}
+    {"id":"P2.3.1a","parent":"P2.3.1","status":"resolved"},{"id":"P2.3.1b","parent":"P2.3.1","status":"resolved"},{"id":"P2.3.1c","parent":"P2.3.1","status":"unresolved"},
+    {"id":"P2.3.1c1","parent":"P2.3.1c","title":"Represent typed compositional programs that can reuse simpler rules","status":"resolved","evidence":["src/jagi/learning/compositional_search.py","tests/test_compositional_search.py"]},
+    {"id":"P2.3.1c2","parent":"P2.3.1c","title":"Search compositional program space with cost and behavioral-equivalence pruning","status":"resolved","evidence":["src/jagi/learning/compositional_search.py","tests/test_compositional_search.py","42 local pytest tests passed after integration"]},
+    {"id":"P2.3.1c3","parent":"P2.3.1c","title":"Learn proposal priors that focus search on plausible abstractions in open domains","status":"resolved","evidence":["src/jagi/learning/proposal_prior.py","tests/test_proposal_prior.py","45 local pytest tests passed after integration"],"scope_note":"mechanism implemented; open-domain adequacy remains under empirical scaling child"},
+    {"id":"P2.3.1c4","parent":"P2.3.1c","title":"Empirically verify scaling to post-freeze rule families substantially larger than the hand-built DSL","status":"unresolved"},
+    {"id":"P2.3.1c4a","parent":"P2.3.1c4","title":"Measure in-grammar scaling and identify the first bounded-search failure","status":"resolved","evidence":["benchmarks/generated_program_scaling.py","docs/development_rule_search_benchmark.md","cost-11 development sample: 9/10 found and generalized"]},
+    {"id":"P2.3.1c4b","parent":"P2.3.1c4","title":"Dynamically promote learned subprograms into reusable primitives so the effective rule language can grow","status":"in_progress"},
+    {"id":"P2.3.1c4c","parent":"P2.3.1c4","title":"Evaluate learned rule induction across multiple data types and generated rule grammars unknown at implementation time","status":"unresolved"},
+    {"id":"P2.3.1c4d","parent":"P2.3.1c4","title":"Pass a sealed post-freeze micro-domain rule-learning evaluation","status":"unresolved"}
   ],
-  "current_leaf":"P2.3.1c1",
-  "actual_active_problem_count":34,
+  "current_leaf":"P2.3.1c4b",
+  "actual_active_problem_count":38,
   "history":[
     {"event":"initial_prediction","predicted_total":271,"active_count":15},
     {"event":"parent_resolved","problem":"P1"},
     {"event":"attempt_unresolved_and_decomposed","problem":"P2","children":["P2.1","P2.2","P2.3","P2.4","P2.5","P2.6"]},
     {"event":"attempt_unresolved_and_decomposed","problem":"P2.3","children":["P2.3.1","P2.3.2","P2.3.3","P2.3.4","P2.3.5","P2.3.6"]},
     {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1","children":["P2.3.1a","P2.3.1b","P2.3.1c"]},
-    {"event":"leaf_resolved","problem":"P2.3.1a"},{"event":"leaf_resolved","problem":"P2.3.1b"},
-    {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c","children":["P2.3.1c1","P2.3.1c2","P2.3.1c3","P2.3.1c4"],"note":"The compact DSL synthesizer is intentionally bounded; scaling requires compositional representation, pruned search, learned proposal priors, and empirical scale validation."}
+    {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c","children":["P2.3.1c1","P2.3.1c2","P2.3.1c3","P2.3.1c4"]},
+    {"event":"leaf_resolved","problem":"P2.3.1c1"},{"event":"leaf_resolved","problem":"P2.3.1c2"},{"event":"leaf_resolved","problem":"P2.3.1c3"},
+    {"event":"attempt_unresolved_and_decomposed","problem":"P2.3.1c4","children":["P2.3.1c4a","P2.3.1c4b","P2.3.1c4c","P2.3.1c4d"],"note":"The development benchmark succeeded in its own grammar through most tested cost-11 cases but cannot establish open-domain scaling; the next blockers are learned primitives, cross-grammar evaluation, and sealed post-freeze validation."},
+    {"event":"leaf_resolved","problem":"P2.3.1c4a"}
   ]
 }
