@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 75,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 443,
+  "prediction_exceeded": false,
+  "current_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2","status":"decomposed_unresolved"},
+  "result": "Implemented a polynomial-time PSD permutation-invariant attributed-graph kernel surrogate using deterministic 1-WL structural colors plus continuous random-Fourier attribute features. Focused regression: 5 passed, including a 650-node graph. This is not a complete invariant.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2b","problem":"detect/certify important collision classes of the scalable attributed-graph surrogate and fail closed when distinction is required","status":"unresolved"}
+}
