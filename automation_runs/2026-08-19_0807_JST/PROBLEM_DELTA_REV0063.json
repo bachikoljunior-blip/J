@@ -1,0 +1,18 @@
+{
+  "revision": 63,
+  "base_revision": 62,
+  "selected_leaf": "D1b2b2c3d2b3b2c2b2b2",
+  "action": "direct_attempt_then_decompose",
+  "added_children": [
+    {"id":"D1b2b2c3d2b3b2c2b2b2a","status":"solved_v0_1","problem":"finite declared intervention families / finite-dimensional Euclidean observables: representation-independent operational quotient and conservative three-valued empirical audit"},
+    {"id":"D1b2b2c3d2b3b2c2b2b2b","status":"unresolved","problem":"infinite/adaptive intervention family: separating intervention basis"},
+    {"id":"D1b2b2c3d2b3b2c2b2b2c","status":"unresolved","problem":"mixed discrete/continuous/relational trajectories and variable-length observations"},
+    {"id":"D1b2b2c3d2b3b2c2b2b2d","status":"unresolved","problem":"safe substitution of operationally equivalent models for planning/counterfactuals/out-of-support interventions"},
+    {"id":"D1b2b2c3d2b3b2c2b2b2e","status":"unresolved","problem":"minimal/canonical representative selection without false latent-ontology identification"}
+  ],
+  "active_nodes_before": 392,
+  "active_nodes_after": 397,
+  "predicted_total_active_nodes": 512,
+  "prediction_exceeded": false,
+  "tests": "4 passed"
+}
