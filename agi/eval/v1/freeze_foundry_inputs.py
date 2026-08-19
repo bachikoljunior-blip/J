@@ -39,6 +39,8 @@ def freeze_foundry_inputs(
     matrix_errors = validate_family_matrix(family_matrix, required_domains=set(REQUIRED_DOMAINS))
     if matrix_errors:
         raise ValueError("family matrix invalid: " + "; ".join(matrix_errors))
+    if family_matrix.get("status") != "frozen":
+        raise ValueError("final foundry input lock requires family_matrix.status=frozen")
     expected = required_family_map(family_matrix)
     actual = registry.get("required_families")
     if canonical_json(actual) != canonical_json(expected):
