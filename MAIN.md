@@ -4,11 +4,11 @@ J の正本・主系列は **AGI-GI rev系列** とする。
 
 この系列は `automation_runs/2026-08-19_0851_JST/AGI_GI_REV_SERIES.md` に定義された、rev91 から継続する graph alignment / symmetry / graph isomorphism / permutation-group / canonical-labeling 系である。
 
-現在の継続点は **rev143**。rev139 で既存世界解の包含監査を行い、一般 nonregular primitive/coherent obstruction を Babai 型 recurrence と独立 differential-oracle 問題へ再編。rev140〜rev142 で candidate 実装に依存しない graph6 interchange、nauty `labelg` fail-closed adapter、実在 adapter API へ接続した no-skip differential suite、Ubuntu の `nauty-labelg` 名対応、complete bipartite / paired cliques / hypercube を含む高対称 adversarial families、実 nauty を導入する CI gate を整備した。
+現在の継続点は **rev144**。rev139 で既存世界解の包含監査を行い、一般 nonregular primitive/coherent obstruction を Babai 型 recurrence と独立 differential-oracle 問題へ再編。rev140〜rev143 で candidate 実装に依存しない graph6 interchange、nauty `labelg` fail-closed adapter、no-skip differential suite、高対称 adversarial families、実 nauty CI gate を整備し、workflow run 32249609772 / run #17 の実行で oracle install・既存 master integration・labelg differential gate の全 step success を観測・永続化したため B1 は解決済み。
 
-rev143 では PR #17 の pull-request validation を実際に観測し、workflow run 32249609772 / run #17 の `validate-rev-series` job が success。`Install independent canonical oracle`、既存 master integration、`Run labelg-backed differential gate` の全 step が success だったことを永続化した。これにより B1a.3 と親 B1（独立 executable canonical-label differential oracle integration）は現行 audit boundary について解決済み。これは個別アルゴリズム基盤の検証であり AGI 証拠ではない。
+rev144 では次の B2 を直接試行した。既存 `primitive_orbital_relation_unresolved` は finer orbital/design structure が必要という fail-closed 状態を返すが、再帰 child の canonicality、strict measure decrease、branch bound、complexity charge を機械検証する契約を持たない。そこで B2 を B2.1〜B2.4 に分解し、B2.1 として `babai_recurrence_contract_v1.py` を実装。非 canonical step、非縮小 child、不正 partition、branch budget 超過をすべて fail-closed にし、正当な local recurrence step のみ progress verified とするテストを追加し、AGI-GI CI に組み込んだ。これは局所契約であり Babai の quasipolynomial theorem 実装を主張しない。
 
-予測問題数は **512**、現在の有効問題数は **504** で予測超過なし。次の未解決末端は **B2: 残る nonregular primitive/coherent branch に対して、Babai 型 local-certificate / canonical-partition recurrence の明示的 contract を実装し、各再帰で progress と complexity を fail-closed に証明可能にする**。
+予測問題数は **512**。B2 を4子問題へ分解したため現在の有効問題数は **508** で予測超過なし。次の未解決末端は **B2.2: unresolved primitive/coherent branch から恣意的 orbital naming を使わず label-invariant local certificates を抽出し、その canonical partition を rev144 contract へ入力する**。B2.3 は canonical child recurrence、B2.4 は global quasipolynomial accounting と fail-closed certification。
 
 AGI 状態は **NOT_AGI** のまま。
 
