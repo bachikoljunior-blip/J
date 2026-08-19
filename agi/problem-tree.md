@@ -1,6 +1,6 @@
 # AGI root problem — problem tree
 
-Updated: 2026-08-19 12:45 JST
+Updated: 2026-08-19 12:50 JST
 
 ## Root
 Deliver AGI without lowering the achievement criteria, not merely as a prototype/research artifact, but in a form that is actually usable.
@@ -43,7 +43,7 @@ Reforecast total parent+child problems: **36**. X2.1's first direct implementati
       - X2.1b [open-parent] Provision real non-public sealed generator images and seed schedules under at least two genuinely independent custodians/implementation lineages for every preregistered required family. Public toy labels or self-asserted independence do not satisfy this leaf.
         - X2.1b1 [open] Source and qualify genuinely independent custodians for every required family, including conflict-of-interest and non-sharing constraints; a candidate list or public precedent is not a commitment to participate.
         - X2.1b2 [open] Have each accepted custodian construct substantive non-public generator content plus committed final seed schedules independently, with no candidate-specific tuning or shared private templates across lineages.
-        - X2.1b3 [framework-pending-CI] Privately receive/stage the immutable bank images and run reserved offline structural qualification without publishing generated tasks. PR #14 implements the contributor protocol, staged-digest check, reserved qualification namespace, every-family structural validation, and hash-only qualification evidence; real bank staging remains outstanding even if CI passes.
+        - X2.1b3 [framework-validated/open-real] Privately receive/stage immutable bank images and run reserved offline structural qualification without publishing generated tasks. PR #14 merged after GitHub Actions run `32213459308`: 39 tests passed, existing final-container and broker/provider integrations passed, and a new toy sealed-bank Docker integration froze an 18-family preregistered matrix, exercised 36 bank/family assignments across two toy lineages, verified staged digests, and confirmed raw toy qualification content was absent from hash-only qualification evidence. This validates the admission/qualification mechanism only; real third-party bank staging is still absent and this leaf is therefore not resolved as real evidence.
       - X2.1c [open] Obtain and freeze auditable custody/lineage/content commitments before final candidate trials, then verify the staged image digests and registry lock without exposing generator content.
     - X2.2 [open] Build contamination/leakage auditing plus adversarial/metamorphic variant generation that can invalidate compromised families fail-closed rather than silently substitute them.
     - X2.3 [open] Collect competent-human reference distributions on generated families and freeze statistically justified thresholds/sample sizes before candidate final trials.
@@ -75,7 +75,7 @@ The exact evaluated candidate must be runnable by a third party from a documente
 Final evaluation uses held-out or freshly generated task instances, records seeds/configuration/tool traces/results, separates development from final evaluation, reports failures as well as successes, and requires independent rerun of a statistically meaningful sample. Any material benchmark contamination or unverifiable result invalidates that result rather than being silently substituted.
 
 ## Current leaf selection
-X2.1b3 remains selected until PR #14's CI result is known. After the mechanical qualification path is validated, the unresolved real-world bottlenecks are X2.1b1 and X2.1b2: actual independent custodians and their substantive non-public bank images. No self-created duplicate banks may be counted as independent merely to close the tree.
+X2.1b1 is selected because X2.1b3's remaining real staging work depends on obtaining actual independent custodians and substantive bank images first. The next work item is to make acceptance of a custodian cryptographically bound and fail-closed—participation, identity/conflict declarations, assigned families, and non-sharing commitments must be verifiable records rather than labels—while continuing to treat public evaluation organizations only as feasibility precedents unless they explicitly participate.
 
 ## Evidence status
-**No AGI achievement is claimed.** P3 and X2.1a are evaluation-infrastructure evidence only. X1, X2 and X3 remain open, so no claim is made that generality, performance, autonomy, robustness, practical delivery or independent reproduction has passed.
+**No AGI achievement is claimed.** P3, X2.1a, and the framework portion of X2.1b3 are evaluation-infrastructure evidence only. X1, X2 and X3 remain open, so no claim is made that generality, performance, autonomy, robustness, practical delivery or independent reproduction has passed.
