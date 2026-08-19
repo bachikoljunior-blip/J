@@ -2,7 +2,9 @@
 
 Candidate containers keep IP networking disabled. They may connect only to this
 AF_UNIX endpoint, whose allowed tools, request budget, timeouts and output sizes
-are evaluator controlled. The protocol is newline-delimited JSON.
+are evaluator controlled. The protocol is newline-delimited JSON. Additional
+handlers can be evaluator-owned isolated providers; their implementation and
+credentials never cross the candidate boundary.
 """
 from __future__ import annotations
 
@@ -19,6 +21,7 @@ from typing import Any, Callable
 
 MAX_LINE_BYTES = 256 * 1024
 MAX_RESULT_BYTES = 512 * 1024
+ToolHandler = Callable[[Any, dict[str, Any]], Any]
 
 
 class PolicyViolation(Exception):
@@ -88,7 +91,7 @@ def builtin_kv_put(args: Any, state: dict[str, Any]) -> Any:
     return {"stored": True}
 
 
-BUILTINS: dict[str, Callable[[Any, dict[str, Any]], Any]] = {
+BUILTINS: dict[str, ToolHandler] = {
     "calculator": builtin_calculator,
     "kv.get": builtin_kv_get,
     "kv.put": builtin_kv_put,
@@ -101,32 +104,46 @@ class BrokerPolicy:
     max_requests: int = 100
     max_wall_s: float = 300.0
     max_result_bytes: int = MAX_RESULT_BYTES
+    cost_per_call: dict[str, float] = field(default_factory=dict)
 
     @classmethod
-    def from_public(cls, arena: dict) -> "BrokerPolicy":
+    def from_public(cls, arena: dict, *, extra_tools: set[str] | None = None) -> "BrokerPolicy":
         cfg = (arena or {}).get("broker") or {}
         tools = cfg.get("tools", [])
         if not isinstance(tools, list) or not all(isinstance(x, str) for x in tools):
             raise ValueError("arena.broker.tools must be a list of strings")
-        unknown = sorted(set(tools) - set(BUILTINS))
+        supported = set(BUILTINS) | set(extra_tools or set())
+        unknown = sorted(set(tools) - supported)
         if unknown:
-            raise ValueError(f"unsupported built-in broker tools: {unknown}")
+            raise ValueError(f"unsupported broker tools: {unknown}")
         max_requests = int(cfg.get("max_requests", 100))
         max_wall_s = float(cfg.get("max_wall_s", 300.0))
         max_result_bytes = int(cfg.get("max_result_bytes", MAX_RESULT_BYTES))
+        raw_costs = cfg.get("cost_per_call") or {}
+        if not isinstance(raw_costs, dict):
+            raise ValueError("broker cost_per_call must be a mapping")
+        costs: dict[str, float] = {}
+        for name, raw in raw_costs.items():
+            if name not in set(tools):
+                raise ValueError(f"cost declared for unavailable tool {name}")
+            value = float(raw)
+            if value < 0 or value > 1_000_000:
+                raise ValueError(f"invalid broker cost for {name}")
+            costs[str(name)] = value
         if not (0 < max_requests <= 10_000):
             raise ValueError("broker max_requests outside (0,10000]")
         if not (0 < max_wall_s <= 86_400):
             raise ValueError("broker max_wall_s outside (0,86400]")
         if not (0 < max_result_bytes <= 10 * 1024 * 1024):
             raise ValueError("broker max_result_bytes outside allowed range")
-        return cls(set(tools), max_requests, max_wall_s, max_result_bytes)
+        return cls(set(tools), max_requests, max_wall_s, max_result_bytes, costs)
 
 
 @dataclass
 class BrokerServer:
     socket_path: Path
     policy: BrokerPolicy
+    handlers: dict[str, ToolHandler] = field(default_factory=dict)
     events: list[dict[str, Any]] = field(default_factory=list)
     state: dict[str, Any] = field(default_factory=dict)
     _server: socket.socket | None = field(default=None, init=False, repr=False)
@@ -134,6 +151,14 @@ class BrokerServer:
     _stop: threading.Event = field(default_factory=threading.Event, init=False, repr=False)
     _started: float = field(default=0.0, init=False, repr=False)
     _count: int = field(default=0, init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        overlap = set(self.handlers) & set(BUILTINS)
+        if overlap:
+            raise ValueError(f"external handlers cannot replace built-ins: {sorted(overlap)}")
+        missing = self.policy.allowed_tools - (set(BUILTINS) | set(self.handlers))
+        if missing:
+            raise ValueError(f"policy references missing handlers: {sorted(missing)}")
 
     def start(self) -> None:
         self.socket_path.parent.mkdir(parents=True, exist_ok=True)
@@ -170,7 +195,7 @@ class BrokerServer:
     def __exit__(self, exc_type, exc, tb):
         self.close()
 
-    def _log(self, *, request: Any, response: Any, violation: bool, elapsed_s: float) -> None:
+    def _log(self, *, request: Any, response: Any, violation: bool, elapsed_s: float, cost: float) -> None:
         payload = json.dumps({"request": request, "response": response}, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         self.events.append({
             "seq": len(self.events),
@@ -178,12 +203,15 @@ class BrokerServer:
             "request_id": request.get("id") if isinstance(request, dict) else None,
             "violation": violation,
             "elapsed_s": elapsed_s,
+            "cost": cost,
             "exchange_sha256": hashlib.sha256(payload.encode()).hexdigest(),
         })
 
     def _handle(self, req: Any) -> dict[str, Any]:
         started = time.monotonic()
         violation = False
+        tool: str | None = None
+        cost = 0.0
         try:
             if time.monotonic() - self._started > self.policy.max_wall_s:
                 raise PolicyViolation("broker wall-clock budget exhausted")
@@ -195,15 +223,24 @@ class BrokerServer:
             tool = req["tool"]
             if tool not in self.policy.allowed_tools:
                 raise PolicyViolation(f"tool not allowed: {tool}")
-            result = BUILTINS[tool](req.get("args"), self.state)
+            handler = self.handlers.get(tool) or BUILTINS.get(tool)
+            if handler is None:
+                raise PolicyViolation(f"tool handler unavailable: {tool}")
+            result = handler(req.get("args"), self.state)
             encoded = json.dumps(result, ensure_ascii=False).encode()
             if len(encoded) > self.policy.max_result_bytes:
                 raise PolicyViolation("tool result exceeds output limit")
+            cost = float(self.policy.cost_per_call.get(tool, 0.0))
             resp = {"id": req["id"], "ok": True, "result": result}
         except Exception as e:
             violation = isinstance(e, PolicyViolation)
-            resp = {"id": req.get("id") if isinstance(req, dict) else None, "ok": False, "error": type(e).__name__, "detail": str(e)}
-        self._log(request=req, response=resp, violation=violation, elapsed_s=time.monotonic() - started)
+            resp = {
+                "id": req.get("id") if isinstance(req, dict) else None,
+                "ok": False,
+                "error": type(e).__name__,
+                "detail": str(e),
+            }
+        self._log(request=req, response=resp, violation=violation, elapsed_s=time.monotonic() - started, cost=cost)
         return resp
 
     def _serve(self) -> None:
@@ -228,7 +265,7 @@ class BrokerServer:
                         except json.JSONDecodeError:
                             req = {"id": None, "tool": None, "args": None}
                             resp = {"id": None, "ok": False, "error": "PolicyViolation", "detail": "invalid JSON"}
-                            self._log(request=req, response=resp, violation=True, elapsed_s=0.0)
+                            self._log(request=req, response=resp, violation=True, elapsed_s=0.0, cost=0.0)
                             f.write(json.dumps(resp).encode() + b"\n")
                             f.flush()
                             continue
