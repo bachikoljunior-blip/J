@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 import random
-import shutil
 
-import pytest
-
-from nauty_labelg_oracle import canonical_graph6_with_labelg, encode_graph6
+from canonical_oracle_adapter_v1 import canonicalize_with_external_oracle, graph6_text
 
 
 def relabel_edges(n, edges, p):
@@ -13,36 +10,58 @@ def relabel_edges(n, edges, p):
 
 
 def families():
-    # deterministic ordinary + symmetry-heavy cases; labelg remains the independent oracle.
+    # Ordinary and symmetry-heavy families.
     for n in range(1, 13):
-        yield n, []
-        yield n, [(i, (i + 1) % n) for i in range(n)] if n >= 3 else []
-        yield n, [(i, j) for i in range(n) for j in range(i + 1, n)]
-    rng = random.Random(141)
-    for n in range(4, 13):
-        for _ in range(20):
-            yield n, [(i, j) for i in range(n) for j in range(i + 1, n) if rng.random() < 0.5]
+        yield f"empty-{n}", n, []
+        yield f"cycle-{n}", n, [(i, (i + 1) % n) for i in range(n)] if n >= 3 else []
+        yield f"complete-{n}", n, [(i, j) for i in range(n) for j in range(i + 1, n)]
+
+    # Adversarial structural families: large automorphism groups and repeated local views.
+    for m in range(2, 7):
+        n = 2 * m
+        yield f"complete-bipartite-{m}-{m}", n, [(i, j) for i in range(m) for j in range(m, n)]
+        yield f"two-cliques-{m}", n, ([(i, j) for i in range(m) for j in range(i + 1, m)] +
+                                      [(i, j) for i in range(m, n) for j in range(i + 1, n)])
+    for d in range(2, 5):
+        n = 1 << d
+        edges = []
+        for u in range(n):
+            for bit in range(d):
+                v = u ^ (1 << bit)
+                if u < v:
+                    edges.append((u, v))
+        yield f"hypercube-{d}", n, edges
+
+    rng = random.Random(142)
+    for n in range(4, 17):
+        for k in range(16):
+            p = 0.15 if k < 8 else 0.5
+            yield f"random-{n}-{k}", n, [(i, j) for i in range(n) for j in range(i + 1, n) if rng.random() < p]
 
 
-@pytest.mark.skipif(shutil.which('labelg') is None, reason='independent nauty labelg executable unavailable')
+def require_canonical(n, edges):
+    out = canonicalize_with_external_oracle(n, edges)
+    assert out.status == 'canonical', out
+    assert out.canonical_text is not None
+    return out.canonical_text
+
+
 def test_labelg_is_invariant_under_arbitrary_relabeling():
-    rng = random.Random(14101)
+    rng = random.Random(14201)
     checked = 0
-    for n, edges in families():
-        base = canonical_graph6_with_labelg(n, edges)
-        assert base.status == 'ok', base
+    for name, n, edges in families():
+        base = require_canonical(n, edges)
         for _ in range(8):
             p = list(range(n))
             rng.shuffle(p)
-            got = canonical_graph6_with_labelg(n, relabel_edges(n, edges, p))
-            assert got.status == 'ok', got
-            assert got.canonical_graph6 == base.canonical_graph6
+            got = require_canonical(n, relabel_edges(n, edges, p))
+            assert got == base, name
             checked += 1
-    assert checked >= 1000
+    assert checked >= 1500
 
 
 def test_interchange_encoding_does_not_depend_on_edge_order_or_duplicates():
     n = 8
     edges = [(0, 7), (1, 4), (2, 5), (3, 6), (0, 3)]
     noisy = list(reversed(edges)) + [(7, 0), (4, 1), (0, 3)]
-    assert encode_graph6(n, noisy) == encode_graph6(n, edges)
+    assert graph6_text(n, noisy) == graph6_text(n, edges)
