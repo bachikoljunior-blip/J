@@ -8,6 +8,7 @@ from coset_stabilizer_primitives import RightCoset
 from orbit_action_preimage_coset_v1 import orbit_action_preimage_coset
 from orbit_factored_string_coset_intersection_v1 import _group_orbits, _image_chain
 from permutation_group_schreier import compose, inverse
+from primitive_johnson_ground_terminal_v1 import primitive_johnson_ground_string_isomorphism_terminal
 from proof_carrying_si_v1 import ProofCarryingCoset
 from proof_carrying_small_order_candidate_v1 import exact_small_order_candidate_string_isomorphism
 from quasipoly_recurrence_accounting_v1 import AccountingChild, RecurrenceAccountingNode
@@ -47,13 +48,6 @@ def _parent(*, root_n, degree, status, coset, exact, children, cost_certified=Tr
 
 
 def _translate_subgroup_si_back_to_candidate(inner, representative, *, degree):
-    """Translate an exact H-string-isomorphism result back to H*r.
-
-    Under this repository's right-action convention, elements of H*r are
-    h∘r = compose(r, h).  Solving H on source∘r^{-1} versus target therefore
-    gives exactly the candidate-fiber solutions.  The subgroup is unchanged and
-    only the returned representative is right-translated by r.
-    """
     if not inner.exact:
         raise ValueError("translation requires an exact subgroup SI result")
     extra_bound = 4.0 * log2(max(2, degree)) + 12.0
@@ -82,7 +76,7 @@ def _translate_subgroup_si_back_to_candidate(inner, representative, *, degree):
         inner.children,
         accounting,
         inner.permutation_candidates_checked,
-        "exact subgroup SI on source∘r^{-1} was translated back to the original candidate right coset H*r",
+        "exact subgroup SI on source composed with r^-1 was translated back to the original candidate right coset H*r",
     )
 
 
@@ -98,16 +92,14 @@ def candidate_coset_string_isomorphism_u2(
     max_group_order: int = 256,
     max_depth: int = 64,
 ) -> ProofCarryingCoset:
-    """Candidate-coset SI with exact small-order and structural recursion.
+    """Candidate-coset SI with proof-carrying structural recursion.
 
-    First enumerate H*r directly when Schreier certifies H as small.  If H is
-    larger and intransitive, recurse over its canonical orbits, using S1v2 on
-    each induced image.  If H is larger and transitive but has one unique
-    canonical nontrivial block system, reduce H*r to an H string-isomorphism
-    instance by the exact source∘r^{-1} coordinate change and invoke the V2
-    imprimitive small-certified-image quotient/kernel recursion.  Primitive
-    non-giant/giant and canonical block-family cases remain typed fail-closed
-    structural leaves rather than falling back to generic node-capped search.
+    Exact terminals are tried by represented group order first.  Intransitive H
+    recurses over canonical orbits.  Large transitive H is classified: unique
+    canonical imprimitive cases reuse V2 quotient/kernel recursion; primitive
+    non-giant cases try the certified small-ground J(v,2) special terminal;
+    primitive giant and unresolved Johnson/block-family cases remain typed
+    fail-closed, with no generic node-capped SI fallback.
     """
     H0 = candidate.subgroup
     n = H0.degree
@@ -133,19 +125,8 @@ def candidate_coset_string_isomorphism_u2(
                 reason="global source/target value multiplicities differ",
             )
             return ProofCarryingCoset(
-                "exact_empty_value_multiplicity",
-                None,
-                "value_multiplicity_terminal",
-                root_n,
-                n,
-                True,
-                True,
-                True,
-                local_bound,
-                True,
-                (),
-                accounting,
-                0,
+                "exact_empty_value_multiplicity", None, "value_multiplicity_terminal",
+                root_n, n, True, True, True, local_bound, True, (), accounting, 0,
                 "global value multiplicity mismatch proves this candidate fiber empty",
             )
     except TypeError as exc:
@@ -170,13 +151,12 @@ def candidate_coset_string_isomorphism_u2(
             polylog_power=polylog_power,
             max_explicit_degree=max_explicit_degree,
         )
+        rinv = inverse(candidate.representative)
+        subgroup_source = tuple(source[rinv[j]] for j in range(n))
+
         if classification.status == "canonical_imprimitive_block_system":
-            # Local import avoids a module-import cycle: the V2 imprimitive
-            # executor itself uses this candidate operator for quotient fibers.
             from v2_imprimitive_small_image_v2 import imprimitive_small_image_string_isomorphism_v2_recursive
 
-            rinv = inverse(candidate.representative)
-            subgroup_source = tuple(source[rinv[j]] for j in range(n))
             inner = imprimitive_small_image_string_isomorphism_v2_recursive(
                 H0,
                 subgroup_source,
@@ -190,20 +170,28 @@ def candidate_coset_string_isomorphism_u2(
                 max_candidate_group_order=max_group_order,
             )
             if inner.exact:
-                return _translate_subgroup_si_back_to_candidate(
-                    inner,
-                    candidate.representative,
-                    degree=n,
-                )
+                return _translate_subgroup_si_back_to_candidate(inner, candidate.representative, degree=n)
             return _parent(
-                root_n=root_n,
-                degree=n,
-                status=inner.status,
-                coset=None,
-                exact=False,
-                children=(inner,),
-                cost_certified=False,
+                root_n=root_n, degree=n, status=inner.status, coset=None,
+                exact=False, children=(inner,), cost_certified=False,
                 reason="unique canonical imprimitive candidate was structurally dispatched, but its V2 quotient/kernel child remains unresolved",
+            )
+
+        if classification.status == "primitive_non_giant":
+            johnson = primitive_johnson_ground_string_isomorphism_terminal(
+                H0,
+                subgroup_source,
+                target,
+                root_n=root_n,
+                polylog_power=polylog_power,
+                max_ground_degree=max_explicit_degree,
+            )
+            if johnson.exact:
+                return _translate_subgroup_si_back_to_candidate(johnson, candidate.representative, degree=n)
+            return _parent(
+                root_n=root_n, degree=n, status=johnson.status, coset=None,
+                exact=False, children=(johnson,), cost_certified=False,
+                reason="primitive non-giant candidate reached the Johnson structural path but requires a larger/higher-arity relational ground recursion",
             )
 
         status = classification.status
@@ -242,47 +230,29 @@ def candidate_coset_string_isomorphism_u2(
         children.append(child)
         if not child.exact:
             return _parent(
-                root_n=root_n,
-                degree=n,
-                status=child.status,
-                coset=None,
-                exact=False,
-                children=tuple(children),
-                cost_certified=False,
+                root_n=root_n, degree=n, status=child.status, coset=None,
+                exact=False, children=tuple(children), cost_certified=False,
                 reason="candidate fiber reached an unresolved large-order structural orbit child; exact parent result withheld",
             )
         if child.coset is None:
             return _parent(
-                root_n=root_n,
-                degree=n,
-                status="exact_empty_candidate_orbit_partition_v2",
-                coset=None,
-                exact=True,
-                children=tuple(children),
+                root_n=root_n, degree=n, status="exact_empty_candidate_orbit_partition_v2",
+                coset=None, exact=True, children=tuple(children),
                 reason="one exact S1v2 subgroup-orbit child is empty, proving this candidate fiber empty",
             )
 
         lifted = orbit_action_preimage_coset(H, orbit, child.coset)
         if lifted.status != "exact_orbit_action_coset_preimage" or lifted.coset is None:
             return _parent(
-                root_n=root_n,
-                degree=n,
-                status="undetermined_candidate_child_preimage_v2",
-                coset=None,
-                exact=False,
-                children=tuple(children),
-                cost_certified=False,
+                root_n=root_n, degree=n, status="undetermined_candidate_child_preimage_v2",
+                coset=None, exact=False, children=tuple(children), cost_certified=False,
                 reason="an exact S1v2 child could not be lifted through the subgroup orbit action",
             )
         H = lifted.subgroup
         r = compose(r, lifted.representative)
 
     return _parent(
-        root_n=root_n,
-        degree=n,
-        status="exact_candidate_coset_string_isomorphism_v2",
-        coset=RightCoset(H, r),
-        exact=True,
-        children=tuple(children),
+        root_n=root_n, degree=n, status="exact_candidate_coset_string_isomorphism_v2",
+        coset=RightCoset(H, r), exact=True, children=tuple(children),
         reason="all candidate-subgroup invariant orbit children were solved with S1v2 and exactly lifted; the returned coset is precisely the fiber string intersection",
     )
