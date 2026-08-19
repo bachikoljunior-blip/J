@@ -75,5 +75,6 @@ jobs:
           test_johnson_ground_relational_lift_rev175.py
           test_signed_johnson_ground_relational_si_rev176.py
           test_johnson_pair_ground_coherent_si_rev177.py
+          test_signed_subset_incidence_partition_rev178.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
