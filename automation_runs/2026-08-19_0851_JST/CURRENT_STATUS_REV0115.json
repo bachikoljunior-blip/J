@@ -1,0 +1,19 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 115,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 503,
+  "prediction_exceeded": false,
+  "result": "Solved the local test-set fullness primitive at an exact global level. Aut_G(string) is computed as G intersect the color-preserving Young subgroup using rev110 exact coset intersection; its quotient image is tested for containment of the embedded alternating group A(T). Positive certificates are backed by global automorphism generators, while negative certificates return a concrete missing even 3-cycle. All k=5 three-point test sets matched full explicit source-group enumeration; k=12/20 giant actions produced correct full/non-full certificates without group enumeration.",
+  "solved_leaf": {
+    "problem": "exact global fullness/non-fullness certificates for quotient test sets",
+    "status": "solved_v0_1"
+  },
+  "next_leaf": {
+    "problem": "aggregate local certificates into canonical quotient structure and implement a split-or-Johnson-style reduction that guarantees significant progress or exposes the Johnson obstruction",
+    "status": "unresolved"
+  }
+}
