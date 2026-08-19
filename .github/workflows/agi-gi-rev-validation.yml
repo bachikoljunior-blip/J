@@ -47,6 +47,7 @@ jobs:
           test_colored_subset_design_witness_rev186.py
           test_colored_subset_design_branch_plan_rev187.py
           test_design_branch_tuple_transport_rev188.py
+          test_design_branch_string_union_rev189.py
 
   validate-rev-series:
     runs-on: ubuntu-latest
@@ -115,6 +116,7 @@ jobs:
           test_colored_subset_design_witness_rev186.py
           test_colored_subset_design_branch_plan_rev187.py
           test_design_branch_tuple_transport_rev188.py
+          test_design_branch_string_union_rev189.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
