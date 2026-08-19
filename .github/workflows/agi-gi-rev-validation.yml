@@ -43,6 +43,7 @@ jobs:
           test_signed_johnson_relation_arity_selector_rev182.py
           test_signed_johnson_joint_relation_candidate_si_rev183.py
           test_signed_johnson_log_certificate_design_descent_rev184.py
+          test_signed_johnson_symmetry_defect_gate_rev186.py
 
   validate-rev-series:
     runs-on: ubuntu-latest
@@ -107,6 +108,7 @@ jobs:
           test_signed_johnson_relation_arity_selector_rev182.py
           test_signed_johnson_joint_relation_candidate_si_rev183.py
           test_signed_johnson_log_certificate_design_descent_rev184.py
+          test_signed_johnson_symmetry_defect_gate_rev186.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
