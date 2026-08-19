@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 94,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 472,
+  "prediction_exceeded": false,
+  "result": "Added an anchorless partial-edit certificate using min-cost assignment over exact attribute-neighborhood histograms and the sound global bound S <= k*U + 2*E. An 800-case full exhaustive oracle audit released 137 pairs with no unsound identity release.",
+  "solved_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3b","status":"solved_v0_1"},
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c","problem":"intrinsic-symmetry/orbit certificates that can prove no identity is forced (or isolate forced orbits) without arbitrary symmetry breaking","status":"unresolved"}
+}
