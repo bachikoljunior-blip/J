@@ -72,5 +72,6 @@ jobs:
           test_candidate_transitive_imprimitive_rev172.py
           test_primitive_johnson_ground_terminal_rev173.py
           test_johnson_k_ground_rev174.py
+          test_johnson_incidence_discrete_rev175.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
