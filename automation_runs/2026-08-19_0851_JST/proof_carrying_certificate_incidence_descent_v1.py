@@ -6,6 +6,7 @@ from math import log2
 from typing import Hashable, Iterable
 
 from babai_local_certificate_parameter_gate_v1 import babai_local_certificate_parameter_gate
+from permutation_group_schreier import StabilizerChain, identity
 
 
 @dataclass(frozen=True)
@@ -44,7 +45,7 @@ def certificate_incidence_descent(
     test_size: int,
     certificates: Iterable[tuple[Iterable[int], Hashable]],
     *,
-    test_family_canonical: bool,
+    canonical_action_group: StabilizerChain,
     certificate_tokens_canonical: bool,
     max_class_fraction: float = 0.9,
     max_certificates: int = 200000,
@@ -52,18 +53,21 @@ def certificate_incidence_descent(
 ) -> CertificateIncidenceDescent:
     """Aggregate proof-carrying local certificates into a canonical H5 descent.
 
-    ``certificates`` is a family of ``(test_set, canonical_certificate_token)``
-    pairs.  The routine deliberately does *not* manufacture canonicity: callers
-    must certify both that the selected test family is label-invariant and that
-    the certificate tokens are themselves canonical.  It also checks the exact
-    Babai local-certificate theorem parameter window before using the family as
-    H5 evidence.
+    ``certificates`` is a colored t-uniform test family.  Unlike a caller-supplied
+    Boolean claim of test-family canonicity, this routine mechanically verifies
+    that the complete colored family is invariant under every generator of the
+    supplied certified giant-domain action.  The certificate tokens themselves
+    must come from an upstream canonical certificate construction; their claimed
+    canonicity remains an explicit proof boundary rather than being inferred from
+    arbitrary Python values.  The exact Babai local-certificate theorem parameter
+    window is checked before any H5 progress is promoted.
 
-    A stable 1-WL refinement of the colored point/test incidence graph is then
-    computed.  A sufficiently balanced point partition is a certified split.
-    If points remain homogeneous while certificate colors are nontrivial, the
-    output is instead an exact canonical higher-arity relation ready for the
-    Design-Lemma-style branch.  All other cases fail closed.
+    Stable 1-WL refinement of the colored point/test incidence graph then yields
+    either a sufficiently balanced invariant point partition or, when the point
+    side remains homogeneous but certificate colors are nontrivial, an exact
+    higher-arity colored relation for the Design-Lemma-style branch.  All missing
+    proof boundaries, theorem-window failures, size overflows and malformed input
+    fail closed.
 
     The local accounting certificate is a conservative explicit operation bound
     on this aggregation only; it is not a claim that the remaining SI recurrence
@@ -85,10 +89,16 @@ def certificate_incidence_descent(
             "theorem_parameter_gate_failed", n, m, t, 0,
             "local-certificate theorem parameter window is not certified: " + gate.reason,
         )
-    if not test_family_canonical or not certificate_tokens_canonical:
+    if not certificate_tokens_canonical:
         return _fail(
-            "uncertified_canonical_inputs", n, m, t, 0,
-            "H5 aggregation requires a label-invariant test family and canonical certificate tokens",
+            "uncertified_certificate_tokens", n, m, t, 0,
+            "H5 aggregation requires upstream canonical certificate tokens",
+            gate=True,
+        )
+    if canonical_action_group is None or canonical_action_group.degree != m:
+        return _fail(
+            "invalid_canonical_action_group", n, m, t, 0,
+            "a certified permutation action of the full giant domain is required",
             gate=True,
         )
 
@@ -101,13 +111,13 @@ def certificate_incidence_descent(
                 return _fail(
                     "malformed_test_set", n, m, t, len(rows),
                     "every certificate test must be a distinct t-subset of the giant domain",
-                    gate=True, canonical=True,
+                    gate=True,
                 )
             if T in seen:
                 return _fail(
                     "duplicate_test_set", n, m, t, len(rows),
-                    "a canonical test family may contain each test set at most once",
-                    gate=True, canonical=True,
+                    "a colored canonical test family may contain each test set at most once",
+                    gate=True,
                 )
             hash(token)
             seen.add(T)
@@ -116,13 +126,13 @@ def certificate_incidence_descent(
                 return _fail(
                     "certificate_limit_exceeded", n, m, t, len(rows),
                     "certificate family exceeds configured exact aggregation limit",
-                    gate=True, canonical=True,
+                    gate=True,
                 )
     except (TypeError, ValueError):
         return _fail(
             "malformed_certificate_token", n, m, t, len(rows),
             "certificate tokens must be hashable canonical values and tests must contain integer points",
-            gate=True, canonical=True,
+            gate=True,
         )
 
     count = len(rows)
@@ -130,18 +140,41 @@ def certificate_incidence_descent(
         return _fail(
             "empty_certificate_family", n, m, t, 0,
             "no local certificates were supplied",
-            gate=True, canonical=True,
+            gate=True,
         )
     if count > n ** certificate_count_poly_power:
         return _fail(
             "uncertified_certificate_count_cost", n, m, t, count,
             "certificate count exceeds configured polynomial local-work envelope",
-            gate=True, canonical=True,
+            gate=True,
         )
 
-    # Canonicalize certificate colors by token representation.  Tokens are already
-    # caller-certified canonical; repr is used only to choose deterministic color
-    # identifiers, never to infer semantic equivalence.
+    # Mechanical proof that the colored test family is invariant under the full
+    # supplied action: checking a generating set suffices because preservation is
+    # closed under composition and inverse.  This prevents an arbitrary sampled
+    # family from being promoted merely because a caller labels it canonical.
+    row_tokens = {T: token for T, token in rows}
+    action_generators = canonical_action_group.original_generators or (identity(m),)
+    missing = object()
+    for g in action_generators:
+        if len(g) != m or tuple(sorted(g)) != tuple(range(m)):
+            return _fail(
+                "malformed_canonical_action_generator", n, m, t, count,
+                "canonical action contains a non-permutation generator",
+                gate=True,
+            )
+        for T, token in rows:
+            image = tuple(sorted(g[x] for x in T))
+            if row_tokens.get(image, missing) != token:
+                return _fail(
+                    "colored_test_family_not_invariant", n, m, t, count,
+                    "one canonical-action generator does not preserve the complete colored test family",
+                    gate=True,
+                )
+
+    # Canonicalize certificate colors by token representation. Tokens are already
+    # upstream-certified canonical and generator-equivariance was checked above;
+    # repr only supplies deterministic internal color identifiers.
     token_keys = {token: (type(token).__qualname__, repr(token)) for _, token in rows}
     key_order = sorted(set(token_keys.values()))
     key_to_color = {key: i for i, key in enumerate(key_order)}
@@ -186,18 +219,15 @@ def certificate_incidence_descent(
     significant = len(color_classes) > 1 and largest <= float(max_class_fraction) * m + 1e-12
     homogeneous_relation = len(color_classes) == 1 and certificate_rank > 1
 
-    # One refinement round inspects each incidence edge plus all point/test nodes;
-    # sorting/signature bookkeeping is conservatively charged by an extra factor
-    # of (m+count+1).  This deliberately overcharges rather than underclaims.
     work_units = max(1, rounds * (incidence_edges + m + count + 1) * (m + count + 1))
     local_log2 = log2(work_units)
 
     if significant:
         status = "certified_significant_point_split"
-        reason = "canonical certificate-incidence refinement yields a balanced nontrivial point partition"
+        reason = "mechanically action-invariant certificate incidence yields a balanced nontrivial point partition"
     elif homogeneous_relation:
         status = "certified_homogeneous_nontrivial_relation"
-        reason = "point incidence remains homogeneous but canonical certificate colors define a nontrivial higher-arity relation"
+        reason = "point incidence remains homogeneous but the mechanically invariant certificate coloring defines a nontrivial higher-arity relation"
     elif len(color_classes) > 1:
         status = "canonical_nonsignificant_point_partition"
         reason = "canonical incidence refinement splits points, but the largest class does not satisfy the configured significant-split bound"
