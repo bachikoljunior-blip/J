@@ -9,6 +9,7 @@ from orbit_action_preimage_coset_v1 import orbit_action_preimage_coset
 from orbit_factored_string_coset_intersection_v1 import _group_orbits, _image_chain
 from permutation_group_schreier import compose, inverse
 from primitive_johnson_ground_terminal_v1 import primitive_johnson_ground_string_isomorphism_terminal
+from primitive_johnson_incidence_discrete_v1 import primitive_johnson_incidence_discrete_terminal
 from proof_carrying_si_v1 import ProofCarryingCoset
 from proof_carrying_small_order_candidate_v1 import exact_small_order_candidate_string_isomorphism
 from quasipoly_recurrence_accounting_v1 import AccountingChild, RecurrenceAccountingNode
@@ -30,20 +31,11 @@ def _parent(*, root_n, degree, status, coset, exact, children, cost_certified=Tr
         reason=reason,
     )
     return ProofCarryingCoset(
-        status,
-        coset,
+        status, coset,
         "orbit_partition" if cost_certified else "unresolved_candidate_coset",
-        root_n,
-        degree,
-        True,
-        exact,
-        cost_certified,
-        local_bound,
-        False,
-        tuple(children),
-        accounting,
-        sum(c.permutation_candidates_checked for c in children),
-        reason,
+        root_n, degree, True, exact, cost_certified, local_bound, False,
+        tuple(children), accounting,
+        sum(c.permutation_candidates_checked for c in children), reason,
     )
 
 
@@ -63,18 +55,10 @@ def _translate_subgroup_si_back_to_candidate(inner, representative, *, degree):
             compose(representative, inner.coset.representative),
         )
     return ProofCarryingCoset(
-        "exact_translated_" + inner.status,
-        result_coset,
-        inner.operation_kind,
-        inner.root_n,
-        inner.domain_size,
-        inner.canonical,
-        True,
-        inner.local_cost_certified,
-        inner.local_log2_cost_bound + extra_bound,
-        inner.terminal_certified,
-        inner.children,
-        accounting,
+        "exact_translated_" + inner.status, result_coset, inner.operation_kind,
+        inner.root_n, inner.domain_size, inner.canonical, True,
+        inner.local_cost_certified, inner.local_log2_cost_bound + extra_bound,
+        inner.terminal_certified, inner.children, accounting,
         inner.permutation_candidates_checked,
         "exact subgroup SI on source composed with r^-1 was translated back to the original candidate right coset H*r",
     )
@@ -94,12 +78,13 @@ def candidate_coset_string_isomorphism_u2(
 ) -> ProofCarryingCoset:
     """Candidate-coset SI with proof-carrying structural recursion.
 
-    Exact terminals are tried by represented group order first.  Intransitive H
-    recurses over canonical orbits.  Large transitive H is classified: unique
-    canonical imprimitive cases reuse V2 quotient/kernel recursion; primitive
-    non-giant cases try the certified small-ground J(v,2) special terminal;
-    primitive giant and unresolved Johnson/block-family cases remain typed
-    fail-closed, with no generic node-capped SI fallback.
+    After exact small-order and intransitive paths, large transitive candidates
+    use the S1 structural classifier.  Unique imprimitive cases reuse quotient/
+    kernel recursion.  Primitive non-giant cases first try complete small-ground
+    Johnson enumeration; if the Johnson ground exceeds that window, canonical
+    subset-color incidence signatures are used as a polynomial exact terminal
+    whenever they discretize the ground.  Remaining block-family, non-discrete
+    relational, and primitive giant cases stay typed fail-closed.
     """
     H0 = candidate.subgroup
     n = H0.degree
@@ -114,14 +99,9 @@ def candidate_coset_string_isomorphism_u2(
         if Counter(source) != Counter(target):
             local_bound = 8.0 * log2(max(2, n)) + 10.0
             accounting = RecurrenceAccountingNode(
-                n=root_n,
-                m=max(1, n),
-                operation_kind="value_multiplicity_terminal",
-                canonical=True,
-                cost_certified=True,
-                local_log2_cost_bound=local_bound,
-                children=(),
-                terminal_certified=True,
+                n=root_n, m=max(1, n), operation_kind="value_multiplicity_terminal",
+                canonical=True, cost_certified=True, local_log2_cost_bound=local_bound,
+                children=(), terminal_certified=True,
                 reason="global source/target value multiplicities differ",
             )
             return ProofCarryingCoset(
@@ -133,10 +113,7 @@ def candidate_coset_string_isomorphism_u2(
         raise ValueError("string values must be hashable") from exc
 
     small = exact_small_order_candidate_string_isomorphism(
-        candidate,
-        source,
-        target,
-        root_n=root_n,
+        candidate, source, target, root_n=root_n,
         group_order_poly_power=group_order_poly_power,
         max_group_order=max_group_order,
     )
@@ -146,9 +123,7 @@ def candidate_coset_string_isomorphism_u2(
     initial_orbits = _group_orbits(H0)
     if len(initial_orbits) <= 1 and n > 1:
         classification = classify_s1_structure(
-            H0,
-            root_n=root_n,
-            polylog_power=polylog_power,
+            H0, root_n=root_n, polylog_power=polylog_power,
             max_explicit_degree=max_explicit_degree,
         )
         rinv = inverse(candidate.representative)
@@ -156,12 +131,8 @@ def candidate_coset_string_isomorphism_u2(
 
         if classification.status == "canonical_imprimitive_block_system":
             from v2_imprimitive_small_image_v2 import imprimitive_small_image_string_isomorphism_v2_recursive
-
             inner = imprimitive_small_image_string_isomorphism_v2_recursive(
-                H0,
-                subgroup_source,
-                target,
-                root_n=root_n,
+                H0, subgroup_source, target, root_n=root_n,
                 polylog_power=polylog_power,
                 max_explicit_degree=max_explicit_degree,
                 quotient_order_poly_power=group_order_poly_power,
@@ -179,32 +150,37 @@ def candidate_coset_string_isomorphism_u2(
 
         if classification.status == "primitive_non_giant":
             johnson = primitive_johnson_ground_string_isomorphism_terminal(
-                H0,
-                subgroup_source,
-                target,
-                root_n=root_n,
+                H0, subgroup_source, target, root_n=root_n,
                 polylog_power=polylog_power,
                 max_ground_degree=max_explicit_degree,
             )
             if johnson.exact:
                 return _translate_subgroup_si_back_to_candidate(johnson, candidate.representative, degree=n)
+            if johnson.status == "undetermined_johnson_ground_cap":
+                incidence = primitive_johnson_incidence_discrete_terminal(
+                    H0, subgroup_source, target, root_n=root_n,
+                )
+                if incidence.exact:
+                    return _translate_subgroup_si_back_to_candidate(
+                        incidence, candidate.representative, degree=n
+                    )
+                return _parent(
+                    root_n=root_n, degree=n, status=incidence.status, coset=None,
+                    exact=False, children=(incidence,), cost_certified=False,
+                    reason="large Johnson ground exposed a canonical incidence coloring but still requires relation-level recursion because the coloring is not discrete",
+                )
             return _parent(
                 root_n=root_n, degree=n, status=johnson.status, coset=None,
                 exact=False, children=(johnson,), cost_certified=False,
-                reason="primitive non-giant candidate reached the Johnson structural path but requires a larger/higher-arity relational ground recursion",
+                reason="primitive non-giant candidate did not reach an exact Johnson terminal and remains on the relational Split-or-Johnson path",
             )
 
         status = classification.status
         if not status.startswith("undetermined_"):
             status = "undetermined_" + status
         return _parent(
-            root_n=root_n,
-            degree=n,
-            status=status,
-            coset=None,
-            exact=False,
-            children=(),
-            cost_certified=False,
+            root_n=root_n, degree=n, status=status, coset=None,
+            exact=False, children=(), cost_certified=False,
             reason=classification.reason,
         )
 
@@ -217,10 +193,7 @@ def candidate_coset_string_isomorphism_u2(
         local_source = tuple(source[rinv[j]] for j in orbit)
         local_target = tuple(target[j] for j in orbit)
         child = s1_string_isomorphism_v2(
-            image,
-            local_source,
-            local_target,
-            root_n=root_n,
+            image, local_source, local_target, root_n=root_n,
             polylog_power=polylog_power,
             max_explicit_degree=max_explicit_degree,
             group_order_poly_power=group_order_poly_power,
@@ -240,7 +213,6 @@ def candidate_coset_string_isomorphism_u2(
                 coset=None, exact=True, children=tuple(children),
                 reason="one exact S1v2 subgroup-orbit child is empty, proving this candidate fiber empty",
             )
-
         lifted = orbit_action_preimage_coset(H, orbit, child.coset)
         if lifted.status != "exact_orbit_action_coset_preimage" or lifted.coset is None:
             return _parent(
