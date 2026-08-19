@@ -53,5 +53,6 @@ jobs:
           test_affected_kernel_recurrence_plan_v1.py
           test_orbit_action_preimage_coset_v1.py
           test_orbit_factored_string_coset_intersection_v1.py
+          test_kernel_lifted_local_fullness_v2.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
