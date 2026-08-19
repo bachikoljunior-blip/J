@@ -1,0 +1,124 @@
+schema: agi-family-matrix-v1
+version: 1
+status: draft
+policy:
+  minimum_families_per_required_domain: 3
+  minimum_independent_custodies_per_family: 2
+  family_removal_after_freeze: forbidden
+  failed_family_can_be_averaged_away: false
+required_domains:
+  language_knowledge:
+    - family_id: evidence_synthesis
+      task_shape: artifact
+      success_evidence: workspace
+      capability_tags: [source_comprehension, synthesis, citation_grounding]
+      description: Synthesize a decision-useful artifact from multiple sealed source documents while preserving provenance and resolving conflicts.
+    - family_id: constrained_knowledge_work
+      task_shape: artifact
+      success_evidence: workspace
+      capability_tags: [instruction_following, knowledge_application, revision]
+      description: Produce and revise a knowledge-work deliverable under interacting factual, structural, and policy constraints.
+    - family_id: ambiguity_resolution
+      task_shape: interactive
+      success_evidence: json
+      capability_tags: [disambiguation, information_gain, calibrated_answering]
+      description: Resolve underspecified requests using bounded evidence or permitted questions/tools and avoid unsupported assumptions.
+  mathematics:
+    - family_id: multistep_symbolic_numeric
+      task_shape: solution
+      success_evidence: json
+      capability_tags: [algebra, quantitative_reasoning, verification]
+      description: Solve generated multi-stage symbolic and numerical problems with cross-checkable final values or expressions.
+    - family_id: proof_counterexample
+      task_shape: artifact
+      success_evidence: workspace
+      capability_tags: [formal_reasoning, proof, counterexample]
+      description: Establish a generated claim or refute it with a valid counterexample under a sealed verifier or rubric.
+    - family_id: applied_modeling_estimation
+      task_shape: solution
+      success_evidence: json
+      capability_tags: [modeling, estimation, uncertainty]
+      description: Translate novel quantitative scenarios into models, compute decisions, and report uncertainty or sensitivity where required.
+  software_engineering:
+    - family_id: repo_bugfix
+      task_shape: artifact
+      success_evidence: workspace
+      capability_tags: [debugging, code_navigation, regression_safety]
+      description: Diagnose and repair a nontrivial defect in a sealed repository while preserving hidden behavioral requirements.
+    - family_id: feature_implementation
+      task_shape: artifact
+      success_evidence: workspace
+      capability_tags: [design, implementation, integration]
+      description: Implement a new cross-file feature against public requirements and hidden integration tests in a sealed repository.
+    - family_id: test_and_hardening
+      task_shape: artifact
+      success_evidence: workspace
+      capability_tags: [testing, edge_cases, maintainability]
+      description: Identify weak behavior, add meaningful tests, and harden an implementation against generated edge cases without overfitting exposed examples.
+  data_analysis:
+    - family_id: messy_data_investigation
+      task_shape: artifact
+      success_evidence: workspace
+      capability_tags: [data_cleaning, diagnosis, reproducibility]
+      description: Inspect a sealed messy dataset, detect quality issues, perform justified cleaning, and produce a reproducible analysis artifact.
+    - family_id: statistical_inference
+      task_shape: solution
+      success_evidence: json
+      capability_tags: [statistics, uncertainty, causal_caution]
+      description: Select and execute appropriate statistical analyses on generated data while respecting uncertainty and identification limits.
+    - family_id: data_pipeline_artifact
+      task_shape: artifact
+      success_evidence: workspace
+      capability_tags: [transformation, validation, automation]
+      description: Build a robust transformation/validation pipeline from sealed inputs to specified outputs with hidden edge-case checks.
+  planning_decision:
+    - family_id: constraint_planning
+      task_shape: solution
+      success_evidence: json
+      capability_tags: [planning, constraints, optimization]
+      description: Produce feasible high-quality plans under interacting temporal, resource, precedence, and exclusion constraints.
+    - family_id: resource_tradeoff_decision
+      task_shape: artifact
+      success_evidence: workspace
+      capability_tags: [decision_analysis, tradeoffs, sensitivity]
+      description: Choose and justify actions under uncertain costs/benefits, explicit objectives, and bounded resources using sealed scenario data.
+    - family_id: dynamic_replanning
+      task_shape: interactive
+      success_evidence: json
+      capability_tags: [replanning, monitoring, recovery]
+      description: Adapt a plan after evaluator-injected changes or failures while preserving satisfied constraints and minimizing unnecessary rework.
+  novel_task_induction:
+    - family_id: hidden_rule_induction
+      task_shape: solution
+      success_evidence: json
+      capability_tags: [few_shot_learning, abstraction, generalization]
+      description: Infer a previously unseen transformation or rule system from sparse generated examples and apply it to held-out cases.
+    - family_id: interactive_system_identification
+      task_shape: interactive
+      success_evidence: json
+      capability_tags: [exploration, hypothesis_testing, sample_efficiency]
+      description: Learn the dynamics/goals of a novel interactive system through bounded actions and then achieve generated target states efficiently.
+    - family_id: transfer_under_rule_shift
+      task_shape: interactive
+      success_evidence: json
+      capability_tags: [transfer, change_detection, adaptation]
+      description: Reuse prior structure when a hidden rule system changes, detect invalid assumptions, and adapt without exhaustive relearning.
+optional_domains:
+  multimodal_interpretation:
+    activation_rule: required_if_X1_exposes_image_audio_or_video_inputs
+    families:
+      - family_id: multimodal_evidence_synthesis
+        task_shape: artifact
+        success_evidence: workspace
+        capability_tags: [vision_or_audio, grounding, synthesis]
+        description: Integrate sealed non-text observations with textual context into a grounded deliverable under hidden checks.
+      - family_id: multimodal_troubleshooting
+        task_shape: interactive
+        success_evidence: json
+        capability_tags: [perception, diagnosis, action_selection]
+        description: Diagnose a generated practical problem from multimodal observations and choose effective next actions.
+      - family_id: multimodal_rule_induction
+        task_shape: interactive
+        success_evidence: json
+        capability_tags: [perception, induction, adaptation]
+        description: Infer and apply novel rules whose relevant state is available through non-text observations.
