@@ -1,0 +1,29 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 156,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "active_leaf": "Q1",
+  "implemented": "orbit_action_preimage_coset_v1.py generalizes the rev152 paired-Schreier preimage mechanism from designated block quotients to any invariant orbit action. It lifts an exact child action coset to the exact full-domain preimage, including the exact action kernel and lifted child subgroup generators, and checks the homomorphism order theorem.",
+  "validation": {
+    "pull_request": 26,
+    "workflow_run_id": 32253982085,
+    "workflow_run_number": 84,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "covered": [
+      "rev154 affected-kernel recurrence child plan",
+      "exact invariant-orbit child coset preimage",
+      "kernel-times-child-subgroup order identity",
+      "child coset membership preservation after lifting",
+      "outside-image and non-invariant-subset fail-closed paths",
+      "all earlier recurrence/canonical-oracle gates"
+    ]
+  },
+  "Q1_status": "open",
+  "next_action": "execute the actual kernel/string intersection as invariant-orbit child SI cosets, lift each child exactly with rev156, and differential-check the composed result against the old full-domain exact intersection on tractable cases"
+}
