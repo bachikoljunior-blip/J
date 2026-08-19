@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 99,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 481,
+  "prediction_exceeded": false,
+  "result": "Added an exact integer distance-profile invariant alignment path. A flawed initial fixture was rejected and replaced by a verified 140-node repeated-attribute tree whose 140 profiles are all distinct; symmetric cycles still abstain.",
+  "solved_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3c1","status":"solved_v0_1"},
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3c2","problem":"scalable one/few-vertex individualization-refinement orbit enumeration when refinement becomes discrete","status":"unresolved"}
+}
