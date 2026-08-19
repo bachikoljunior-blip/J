@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 104,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 491,
+  "prediction_exceeded": false,
+  "result": "Implemented a Schreier stabilizer-chain permutation-group core. Across 400 random groups of degree <=6, group order, sampled membership, and every point orbit matched independent exhaustive closure.",
+  "solved_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3c3c2a","status":"solved_v0_1"},
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3c3c2b","problem":"explicit coset arithmetic plus arbitrary point/pointwise stabilizer generators and validated coset membership","status":"unresolved"}
+}
