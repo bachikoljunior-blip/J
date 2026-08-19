@@ -1,0 +1,11 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 96,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 478,
+  "prediction_exceeded": false,
+  "result": "Anchorless exact attributed isomorphisms are globally enumerated with fail-closed cutoff; forced pairs are the intersection of all isomorphisms. 4 focused tests passed, including independent-oracle agreement.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3b","problem":"scalable anchorless global symmetry reasoning without factorial enumeration on typical large graphs","status":"unresolved"}
+}
