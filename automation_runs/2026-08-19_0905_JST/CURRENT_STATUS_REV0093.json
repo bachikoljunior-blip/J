@@ -1,0 +1,11 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 93,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 475,
+  "prediction_exceeded": false,
+  "result": "Added a partial-matching-safe selected-degree interval lower bound for remaining-to-remaining edge disagreement. Combined rev92/rev93 regression: 7 passed; random partial oracle audit found no false forced pair.",
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b2cbb","problem":"add higher-order structural lower bounds that remain informative when selected-degree intervals overlap","status":"unresolved"}
+}
