@@ -47,11 +47,12 @@ def bounded_string_transporter(chain:StabilizerChain,source:Iterable[object],tar
     if elements is None: return TransporterResult('undetermined_group_too_large',None,0,'group order exceeds explicit enumeration limit')
     hits=tuple(g for g in elements if act_string(source,g)==target)
     if not hits: return TransporterResult('empty_transporter',None,0,'no enumerated group element transports source string to target')
-    rep=hits[0]; stabilizer_elems=[g for g in elements if act_string(source,g)==source]
+    rep=hits[0]
+    # With act(source, p*q) = act(act(source,p),q), the transporter is rep*H_t
+    # where H_t stabilizes the target string.
+    stabilizer_elems=[g for g in elements if act_string(target,g)==target]
     stab=schreier_stabilizer_chain(stabilizer_elems or [identity(chain.degree)])
     cos=RightCoset(stab,rep)
-    # Under the chosen action/convention, every hit must lie in the represented
-    # coset and the coset size must equal the transporter size.
     if stab.order!=len(hits) or not all(cos.contains(g) for g in hits):
         raise AssertionError('transporter coset construction failed internal consistency')
     return TransporterResult('exact_transporter_coset',cos,len(hits),'bounded exhaustive transporter represented as one exact right coset')
