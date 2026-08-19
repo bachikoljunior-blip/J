@@ -47,6 +47,27 @@ def test_relabelled_fano_bipartite_states_certify_same_nonconstant_v2_relation_p
     assert sum(got.target_colors) == 7
 
 
+def test_generator_edge_streams_survive_both_exact_pipeline_stages():
+    source = _fano_edges()
+    target = _fano_edges(
+        right_perm=(3, 0, 6, 2, 5, 1, 4),
+        left_perm=(6, 2, 4, 0, 5, 1, 3),
+    )
+    got = certify_paired_uniform_neighborhood_provenance(
+        7,
+        7,
+        (edge for edge in source),
+        (edge for edge in target),
+    )
+    assert got.status == "certified_paired_uniform_neighborhood_test_relation_provenance"
+    assert got.source_hypergraph is not None
+    assert got.target_hypergraph is not None
+    assert got.source_hypergraph.test_relation_nonconstant
+    assert got.target_hypergraph.test_relation_nonconstant
+    assert sum(got.source_colors) == 7
+    assert sum(got.target_colors) == 7
+
+
 def test_complete_uniform_neighborhoods_certify_paired_johnson_provenance():
     neighborhoods = tuple(combinations(range(4), 2))
     source = tuple((a, b) for a, pair in enumerate(neighborhoods) for b in pair)
