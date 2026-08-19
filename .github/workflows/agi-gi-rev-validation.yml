@@ -71,5 +71,6 @@ jobs:
           test_candidate_small_order_recursive_v2.py
           test_canonical_cartesian_block_family_v1.py
           test_cartesian_block_family_action_v1.py
+          test_cartesian_string_marginal_filter_v1.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
