@@ -91,7 +91,7 @@ def test_theorem_window_and_canonical_input_proofs_fail_closed():
 
 
 def test_duplicate_tests_and_polynomial_count_accounting_fail_closed():
-    duplicate = [((tuple(range(10))), "a"), ((tuple(range(10))), "b")]
+    duplicate = [(tuple(range(10)), "a"), (tuple(range(10)), "b")]
     got = certificate_incidence_descent(
         64, 100, 10, duplicate,
         test_family_canonical=True,
@@ -104,11 +104,11 @@ def test_duplicate_tests_and_polynomial_count_accounting_fail_closed():
         for i in range(100)
     ]
     capped = certificate_incidence_descent(
-        2, 100, 10, many,
+        64, 100, 10, many,
         test_family_canonical=True,
         certificate_tokens_canonical=True,
         certificate_count_poly_power=1,
     )
-    # The theorem gate is stricter than the synthetic accounting cap here and
-    # must fail first; this prevents using accounting-only evidence to bypass it.
-    assert capped.status == "theorem_parameter_gate_failed"
+    assert capped.status == "uncertified_certificate_count_cost"
+    assert capped.theorem_gate_certified and capped.canonical_inputs_certified
+    assert not capped.exact_invariant and not capped.local_cost_certified
