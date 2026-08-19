@@ -1,0 +1,31 @@
+name: rev184 H5 smoke
+
+on:
+  push:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/signed_johnson_log_certificate_design_descent_si_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_signed_johnson_log_certificate_design_descent_rev184.py'
+      - '.github/workflows/rev184-smoke.yml'
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/signed_johnson_log_certificate_design_descent_si_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_signed_johnson_log_certificate_design_descent_rev184.py'
+      - '.github/workflows/rev184-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  rev184-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: python -m pytest -q test_signed_johnson_log_certificate_design_descent_rev184.py
