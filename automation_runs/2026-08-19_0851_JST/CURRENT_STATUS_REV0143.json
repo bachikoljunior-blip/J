@@ -1,0 +1,30 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 143,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 504,
+  "prediction_exceeded": false,
+  "resolved_leaf": "B1a.3 observed real nauty/labelg-backed execution",
+  "evidence": {
+    "pull_request": 17,
+    "head_sha": "7e626de5a9d0264b9ef132b37412e534d59c07be",
+    "workflow": "AGI-GI rev validation",
+    "workflow_run_id": 32249609772,
+    "workflow_run_number": 17,
+    "job": "validate-rev-series",
+    "job_conclusion": "success",
+    "oracle_install_step": "success",
+    "existing_master_integration_step": "success",
+    "labelg_differential_gate_step": "success"
+  },
+  "result": "The repaired rev142 path was executed on GitHub Actions with a real Ubuntu nauty installation. The independent canonical oracle installed successfully, existing regular-prime/master integration tests passed, and the no-skip labelg differential gate over ordinary, random and adversarial high-symmetry families passed. B1a.3 is resolved empirically; this is algorithm infrastructure evidence only, not AGI evidence.",
+  "parent_update": "B1 independent executable canonical-label differential oracle integration is now resolved for the current exact-output audit boundary.",
+  "next_leaf": {
+    "id": "B2",
+    "problem": "encode an explicit Babai-style local-certificate and canonical-partition recurrence contract for the remaining nonregular primitive/coherent branch, preserving fail-closed complexity/progress certification",
+    "status": "unresolved"
+  }
+}
