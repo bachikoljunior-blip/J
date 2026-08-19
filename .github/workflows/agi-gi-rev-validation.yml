@@ -67,5 +67,6 @@ jobs:
           test_s1_string_isomorphism_v1.py
           test_u2_imprimitive_small_quotient_v1.py
           test_v2_imprimitive_small_image_v1.py
+          test_proof_carrying_small_order_si_v1.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
