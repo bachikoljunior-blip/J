@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 93,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 472,
+  "prediction_exceeded": false,
+  "result": "Added a fail-closed joint 2-WL fallback for exact/full anchorless duplicate-attribute alignment. It resolves a 12-node regular case where 1-WL remains fully ambiguous, while symmetric cycles still abstain and every released mapping is directly verified.",
+  "solved_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3a","status":"solved_v0_1"},
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3b","problem":"anchorless partial-edit alignment/forced-pair certificates under insertion/deletion and edge-disagreement budgets using higher-order/global constraints","status":"unresolved"}
+}
