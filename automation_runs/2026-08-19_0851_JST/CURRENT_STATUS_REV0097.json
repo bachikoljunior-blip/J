@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 97,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 478,
+  "prediction_exceeded": false,
+  "result": "Added a polynomial complete dihedral-orbit certificate for single cycles. Large uniform cycles certify no forced identities without bounded backtracking, while attribute-asymmetric cycles can certify an exact forced mapping.",
+  "solved_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3a","status":"solved_v0_1"},
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3b","problem":"scalable twin/module quotient automorphism generators","status":"unresolved"}
+}
