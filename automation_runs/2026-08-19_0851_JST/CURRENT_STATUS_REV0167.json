@@ -1,0 +1,35 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 167,
+  "predicted_total_active_nodes_before_attempt": 512,
+  "actual_active_nodes_before_attempt": 512,
+  "attempted_leaf": "U2 transitive self-certifying SI closure — canonical imprimitive small/polylog quotient path",
+  "world_existing_solution_check": "Luks/Babai imprimitive String-Isomorphism recursion separates quotient action from kernel work. The exact reusable J analogues are paired-Schreier block-action preimages and orbit-action preimages; rev167 combines them with U1 proof objects so quotient fibers are algebraically exact and kernel work is exposed as smaller SI children rather than hidden in generic exact intersection.",
+  "implemented": [
+    "candidate-coset U1 executor that intersects an exact quotient fiber with two strings by recursively solving its intransitive subgroup orbits and paired-Schreier lifting the actual child proof objects",
+    "U2 imprimitive operator for a unique canonical minimum block system when quotient degree is inside the configured polylog/explicit window: complete S_q scan, exact quotient-image filter, exact block-action preimage lift per image element, U1 fiber recursion, and cardinality-audited reassembly of all successful disjoint fibers",
+    "quasipolynomial accounting verifier v3 whose imprimitive_small_quotient rule permits same-size quotient-fiber wrappers only when every fiber immediately exposes an orbit_partition with strictly smaller actual kernel-orbit children"
+  ],
+  "validation": {
+    "pr": 35,
+    "workflow_run_id": 32263656085,
+    "workflow_run_number": 162,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "new_U2_tests": "success",
+    "whole_domain_exact_differential_oracle": "matched on deterministic wreath-like fixtures",
+    "labelg_differential_gate": "success",
+    "merged_main_sha": "44f4a262175233b985f20764c6af12cbb04fc5be"
+  },
+  "direct_attempt_result": "U2 remains unresolved. One canonical transitive-imprimitive path is exact and proof-carrying, but large quotient, canonical block-family ambiguity, primitive non-giant and primitive giant/local-certificates continuations remain open.",
+  "required_decomposition_if_kept_naively": [
+    {"id": "U2.a", "status": "resolved-rev167", "problem": "unique canonical imprimitive small/polylog quotient exact recursion"},
+    {"id": "U2.b", "status": "open", "problem": "large/small-order quotient, block-family, primitive non-giant and giant transitive closure"}
+  ],
+  "temporary_active_count_if_naively_decomposed": 513,
+  "prediction_exceeded": true,
+  "next_action": "mandatory transversal rewrite before ordinary child expansion"
+}
