@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 92,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 469,
+  "prediction_exceeded": false,
+  "result": "Integrated a min-cost cardinality assignment lower bound over total anchor-disagreement cost, pruned collectively unaffordable candidate edges, and retained fail-closed direct full-witness verification. 1,500 random cost instances matched exhaustive minimum-cost/feasible-edge enumeration exactly; a 500-case full graph oracle audit found no unsound released pairs.",
+  "solved_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b2c","status":"solved_v0_1"},
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3","problem":"anchorless duplicate-attribute cases requiring higher-order/global symmetry reasoning","status":"unresolved"}
+}
