@@ -1,0 +1,29 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 157,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "active_leaf": "Q1",
+  "implemented": "orbit_factored_string_coset_intersection_v1.py executes an exact candidate-coset/string intersection orbit by orbit: solve the exact small action-image SI child, lift the child coset to its exact full-domain preimage with rev156 paired-Schreier machinery, then compose it into the current candidate before continuing. It never falls back to the old full-domain point-image search.",
+  "validation": {
+    "pull_request": 27,
+    "workflow_run_id": 32254322882,
+    "workflow_run_number": 90,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "differential_oracle": "recursive_point_image_coset_intersection on the full domain, used only on tractable tests",
+    "covered": [
+      "exact coset equality with the full-domain oracle for a nontrivial quotient-lift coset",
+      "exact empty-intersection agreement when a distinguished block is moved incompatibly",
+      "six actual two-point kernel-orbit SI children for the S6 wreath fixture",
+      "child node-budget exhaustion fails closed without global-search fallback",
+      "all earlier AGI-GI validation gates"
+    ]
+  },
+  "Q1_status": "open",
+  "next_action": "route rev153 local fullness through this orbit-factored executor and distinguish exact correctness from recurrence-cost certification when unaffected children remain"
+}
