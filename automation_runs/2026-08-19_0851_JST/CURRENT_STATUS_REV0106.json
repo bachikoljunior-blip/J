@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 106,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 494,
+  "prediction_exceeded": false,
+  "result": "Added a bounded exact correctness baseline for string transporters and right-coset intersections. The transporter coset convention was corrected before validation; random exhaustive audits matched exact element sets.",
+  "solved_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3c3c2c1","status":"solved_v0_1"},
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3c3c2c2","problem":"non-enumerative set/string stabilizer and transporter via Schreier action on state orbits","status":"unresolved"}
+}
