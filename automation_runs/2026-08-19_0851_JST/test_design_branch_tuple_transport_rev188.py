@@ -62,8 +62,9 @@ def test_identity_ground_action_keeps_only_equal_singleton_tuple_pairs():
     )
     ident = identity(v)
     group = schreier_stabilizer_chain([ident])
+    lifted = tuple((g, False) for g in group.original_generators)
     got = transport_complete_design_tuple_branches(
-        group, ((ident, False),), branch_plan, max_partition_states=8
+        group, lifted, branch_plan, max_partition_states=8
     )
     assert got.status == "certified_complete_design_tuple_transport_cover"
     assert got.surviving_branch_count == v
