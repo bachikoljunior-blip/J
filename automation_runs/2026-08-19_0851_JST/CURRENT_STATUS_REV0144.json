@@ -1,0 +1,25 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 144,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 508,
+  "prediction_exceeded": false,
+  "attempted_leaf": "B2 Babai-style local-certificate/canonical-partition recurrence contract",
+  "direct_attempt_result": "The existing primitive_orbital_relation_unresolved path exposes no explicit recurrence certificate or complexity/progress accounting contract, so B2 is not solved by wiring alone.",
+  "decomposition": {
+    "B2.1": "define a mechanically checkable fail-closed recurrence-step certificate for canonicality, strict measure decrease, branch bounds and explicit complexity charge — implemented in rev144",
+    "B2.2": "extract canonical local certificates from the remaining nonregular primitive/coherent structure — unresolved",
+    "B2.3": "turn those certificates into canonical partitions/children accepted by the recurrence contract — unresolved",
+    "B2.4": "compose local charges into a proved global quasipolynomial recurrence bound and reject uncertified paths — unresolved"
+  },
+  "implemented": "babai_recurrence_contract_v1.py plus fail-closed tests; CI now runs the recurrence contract tests alongside the existing master and external labelg gates.",
+  "validation_boundary": "B2.1 is framework progress only until its test run is observed and, more importantly, B2.2-B2.4 supply real local certificates and global complexity accounting. No Babai theorem implementation is claimed.",
+  "next_leaf": {
+    "id": "B2.2",
+    "problem": "extract label-invariant local certificates from the unresolved primitive/coherent branch without naming arbitrary orbitals, then feed their canonical partition into the rev144 contract",
+    "status": "unresolved"
+  }
+}
