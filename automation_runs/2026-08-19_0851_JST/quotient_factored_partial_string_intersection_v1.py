@@ -39,6 +39,20 @@ class _LeafLimit(Exception):
     pass
 
 
+def _conjugate_chain(chain: StabilizerChain, t):
+    """Return t K t^-1 in ordinary function-composition notation.
+
+    `compose(a,b)` in this repository applies a then b, so
+    compose(compose(inverse(t), k), t) represents t o k o t^-1.
+    """
+    e = identity(chain.degree)
+    gens = chain.original_generators or (e,)
+    conjugates = tuple(
+        compose(compose(inverse(t), k), t) for k in gens
+    )
+    return schreier_stabilizer_chain(conjugates or (e,))
+
+
 def quotient_factored_partial_string_intersection(
     group: StabilizerChain,
     quotient_blocks,
@@ -55,6 +69,14 @@ def quotient_factored_partial_string_intersection(
     to the full domain; its subgroup is then exactly the quotient kernel.  The
     string segment is imposed only at that kernel leaf, where rev161's partial
     orbit executor sends the actual affected kernel orbits to exact child SI.
+
+    The repository's RightCoset(H,r) represents {h o r : h in H}.  If K is the
+    stabilizer of a quotient base point and t_y maps the base to y, then
+    A = union_y t_y K in ordinary notation.  Therefore a parent H*r is partitioned
+    by right-coset objects (t_y K t_y^-1) * (t_y r), not by K*(t_y r).
+    Conjugating the child stabilizer is essential; omitting it creates overlapping
+    or incomplete branches and is detected by the exact reassembly cardinality
+    check below.
 
     Successful quotient branches are reassembled into one exact right coset.  The
     reassembly is checked by cardinality: the resulting subgroup order must equal
@@ -139,8 +161,10 @@ def quotient_factored_partial_string_intersection(
         stab = schreier_stabilizer_chain(stab_gens)
         children = []
         for y in orbit:
-            child_rep = compose(qcoset.representative, trans[y])
-            child = solve(RightCoset(stab, child_rep))
+            ty = trans[y]
+            child_subgroup = _conjugate_chain(stab, ty)
+            child_rep = compose(qcoset.representative, ty)
+            child = solve(RightCoset(child_subgroup, child_rep))
             if child is not None:
                 children.append(child)
         if not children:
