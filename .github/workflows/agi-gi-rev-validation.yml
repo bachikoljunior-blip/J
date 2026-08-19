@@ -50,11 +50,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install independent canonical oracle
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y nauty
-          command -v nauty-labelg || command -v labelg
       - name: Install test dependencies
         run: python -m pip install --disable-pip-version-check pytest numpy
       - name: Validate current regular-prime terminal and master integration
@@ -106,5 +101,10 @@ jobs:
           test_signed_johnson_relation_image_candidate_si_rev181.py
           test_signed_johnson_relation_arity_selector_rev182.py
           test_signed_johnson_joint_relation_candidate_si_rev183.py
+      - name: Install independent canonical oracle
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nauty
+          command -v nauty-labelg || command -v labelg
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
