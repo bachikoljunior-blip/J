@@ -27,43 +27,52 @@ def _classes_as_sets(result):
     return {frozenset(xs) for xs in result.color_classes}
 
 
-def _half_cycle_group(m=100):
+def _half_cycle_group(m=200):
+    half = m // 2
     g = tuple(
-        ((x + 1) % 50) if x < 50 else 50 + ((x - 50 + 1) % 50)
+        ((x + 1) % half) if x < half else half + ((x - half + 1) % half)
         for x in range(m)
     )
     return g, schreier_stabilizer_chain([g])
 
 
-def _step_two_group(m=100):
+def _step_two_group(m=200):
     g = tuple((x + 2) % m for x in range(m))
     return g, schreier_stabilizer_chain([g])
 
 
+def _alternating_windows(m=200, t=20):
+    return [
+        (tuple((i + j) % m for j in range(t)), i % 2)
+        for i in range(m)
+    ]
+
+
 def test_certificate_incidence_finds_label_invariant_significant_split():
-    m = 100
-    t = 10
+    n = m = 200
+    t = 20
     certificates = (
-        _cyclic_windows(range(0, 50), t, "left-certificate")
-        + _cyclic_windows(range(50, 100), t, "right-certificate")
+        _cyclic_windows(range(0, 100), t, "left-certificate")
+        + _cyclic_windows(range(100, 200), t, "right-certificate")
     )
     g, action = _half_cycle_group(m)
     got = certificate_incidence_descent(
-        64, m, t, certificates,
+        n, m, t, certificates,
         canonical_action_group=action,
         certificate_tokens_canonical=True,
     )
     assert got.status == "certified_significant_point_split", got
     assert got.significant_split and got.exact_invariant and got.local_cost_certified
     assert got.canonical_inputs_certified
-    assert sorted(map(len, got.color_classes)) == [50, 50]
+    assert sorted(map(len, got.color_classes)) == [100, 100]
     assert got.certificate_rank == 2
+    assert got.local_log2_cost_bound <= got.allowed_local_log2_work
 
     p = list(range(m))
     random.Random(184).shuffle(p)
     relabeled_action = schreier_stabilizer_chain([_conjugate(g, p)])
     relabeled = certificate_incidence_descent(
-        64, m, t, _relabel(certificates, p),
+        n, m, t, _relabel(certificates, p),
         canonical_action_group=relabeled_action,
         certificate_tokens_canonical=True,
     )
@@ -73,15 +82,12 @@ def test_certificate_incidence_finds_label_invariant_significant_split():
 
 
 def test_homogeneous_points_preserve_nontrivial_higher_arity_relation():
-    m = 100
-    t = 10
-    certificates = [
-        (tuple((i + j) % m for j in range(t)), i % 2)
-        for i in range(m)
-    ]
+    n = m = 200
+    t = 20
+    certificates = _alternating_windows(m, t)
     _, action = _step_two_group(m)
     got = certificate_incidence_descent(
-        64, m, t, certificates,
+        n, m, t, certificates,
         canonical_action_group=action,
         certificate_tokens_canonical=True,
     )
@@ -92,23 +98,27 @@ def test_homogeneous_points_preserve_nontrivial_higher_arity_relation():
     assert got.certificate_rank == 2
 
 
-def test_theorem_window_and_action_invariance_fail_closed():
-    certificates = [
-        (tuple((i + j) % 100 for j in range(10)), i % 2)
-        for i in range(100)
-    ]
-    _, step_two = _step_two_group(100)
+def test_theorem_window_measure_and_action_invariance_fail_closed():
+    certificates = _alternating_windows()
+    _, step_two = _step_two_group()
     too_large_n = certificate_incidence_descent(
-        2 ** 20, 100, 10, certificates,
+        2 ** 20, 200, 20, certificates,
         canonical_action_group=step_two,
         certificate_tokens_canonical=True,
     )
     assert too_large_n.status == "theorem_parameter_gate_failed"
     assert not too_large_n.exact_invariant and not too_large_n.local_cost_certified
 
-    step_one = schreier_stabilizer_chain([tuple((x + 1) % 100 for x in range(100))])
+    invalid_measure = certificate_incidence_descent(
+        199, 200, 20, certificates,
+        canonical_action_group=step_two,
+        certificate_tokens_canonical=True,
+    )
+    assert invalid_measure.status == "invalid_recurrence_measure"
+
+    step_one = schreier_stabilizer_chain([tuple((x + 1) % 200 for x in range(200))])
     noninvariant = certificate_incidence_descent(
-        64, 100, 10, certificates,
+        200, 200, 20, certificates,
         canonical_action_group=step_one,
         certificate_tokens_canonical=True,
     )
@@ -118,7 +128,7 @@ def test_theorem_window_and_action_invariance_fail_closed():
     assert not noninvariant.exact_invariant
 
     uncertified_tokens = certificate_incidence_descent(
-        64, 100, 10, certificates,
+        200, 200, 20, certificates,
         canonical_action_group=step_two,
         certificate_tokens_canonical=False,
     )
@@ -126,27 +136,32 @@ def test_theorem_window_and_action_invariance_fail_closed():
     assert not uncertified_tokens.exact_invariant
 
 
-def test_duplicate_tests_and_polynomial_count_accounting_fail_closed():
-    trivial_action = schreier_stabilizer_chain([identity(100)])
-    duplicate = [(tuple(range(10)), "a"), (tuple(range(10)), "b")]
+def test_duplicate_resource_and_qpoly_accounting_fail_closed():
+    trivial_action = schreier_stabilizer_chain([identity(200)])
+    duplicate = [(tuple(range(20)), "a"), (tuple(range(20)), "b")]
     got = certificate_incidence_descent(
-        64, 100, 10, duplicate,
+        200, 200, 20, duplicate,
         canonical_action_group=trivial_action,
         certificate_tokens_canonical=True,
     )
     assert got.status == "duplicate_test_set"
 
-    many = [
-        (tuple((i + j) % 100 for j in range(10)), i % 2)
-        for i in range(100)
-    ]
-    _, step_two = _step_two_group(100)
-    capped = certificate_incidence_descent(
-        64, 100, 10, many,
+    certificates = _alternating_windows()
+    _, step_two = _step_two_group()
+    resource = certificate_incidence_descent(
+        200, 200, 20, certificates,
         canonical_action_group=step_two,
         certificate_tokens_canonical=True,
-        certificate_count_poly_power=1,
+        max_certificates=100,
     )
-    assert capped.status == "uncertified_certificate_count_cost"
-    assert capped.theorem_gate_certified
-    assert not capped.exact_invariant and not capped.local_cost_certified
+    assert resource.status == "certificate_resource_limit_exceeded"
+
+    overcharged = certificate_incidence_descent(
+        200, 200, 20, certificates,
+        canonical_action_group=step_two,
+        certificate_tokens_canonical=True,
+        quasipoly_power=1,
+        quasipoly_constant=0.01,
+    )
+    assert overcharged.status == "quasipolynomial_local_bound_exceeded"
+    assert overcharged.exact_invariant and not overcharged.local_cost_certified
