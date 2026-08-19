@@ -1,0 +1,2 @@
+{"task_id":"dev-math-001","domain":"mathematics","family":"closed_arithmetic","prompt":"Return only the integer result of 19*23.","budget":{"wall_s":10},"development_only":true}
+{"task_id":"dev-induction-001","domain":"novel_task_induction","family":"local_rule_induction","prompt":"A blip(x) operation is defined only here as x*2+3. Return only blip(11).","budget":{"wall_s":10},"development_only":true}
