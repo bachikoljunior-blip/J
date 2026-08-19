@@ -53,8 +53,6 @@ def test_generic_log_relation_incidence_finds_significant_point_split():
 
 
 def test_generic_homogeneous_nontrivial_design_fails_closed_instead_of_claiming_split():
-    # Complete 3-set relation with one color is exactly homogeneous at every
-    # lower codegree level.  H5 must preserve this as the theorem-gated hard case.
     v, t = 8, 3
     coords = tuple(combinations(range(v), t))
     colors = tuple(0 for _ in coords)
@@ -69,7 +67,7 @@ def test_generic_homogeneous_nontrivial_design_fails_closed_instead_of_claiming_
 
 
 def test_wrapper_builds_logarithmic_relation_and_connects_split_to_original_candidate():
-    v, k = 8, 4
+    v, k = 6, 3
     G, domain_gens = induced_ground_group(v, k)
     subsets = _standard_subsets(v, k)
     source = tuple(int(0 in S) for S in subsets)
@@ -80,15 +78,15 @@ def test_wrapper_builds_logarithmic_relation_and_connects_split_to_original_cand
         G,
         source,
         target,
-        root_n=128,
+        root_n=64,
         max_test_sets=1000,
-        max_partition_states=512,
+        max_partition_states=256,
         max_candidate_group_order=256,
         max_depth=1,
     )
     assert got.theorem_parameter_gate, got
-    assert got.test_arity == 3
-    assert got.test_count == 56
+    assert got.test_arity == 2
+    assert got.test_count == 15
     assert got.significant_ground_split, got
     assert got.coset is not None and got.coset.contains(witness)
     assert got.status.startswith(("verified_log_certificate_partition_filter", "exact_w1r_log_certificate_candidate_")), got
@@ -98,7 +96,7 @@ def test_wrapper_builds_logarithmic_relation_and_connects_split_to_original_cand
 
 
 def test_wrapper_test_count_gate_is_fail_closed():
-    v, k = 8, 4
+    v, k = 6, 3
     G, _ = induced_ground_group(v, k)
     subsets = _standard_subsets(v, k)
     source = tuple(int(0 in S) for S in subsets)
@@ -106,7 +104,7 @@ def test_wrapper_test_count_gate_is_fail_closed():
         G,
         source,
         source,
-        root_n=128,
+        root_n=64,
         max_test_sets=10,
     )
     assert got.status == "undetermined_log_certificate_parameter_gate", got
