@@ -1,0 +1,36 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 163,
+  "predicted_total_active_nodes_before_attempt": 512,
+  "actual_active_nodes_before_attempt": 512,
+  "attempted_leaf": "R1 self-recursive proof-carrying SI engine",
+  "world_existing_solution_check": "Babai's SI framework treats String Isomorphism as coset recursion and permits brute force on an auxiliary domain only after that domain is polylogarithmic in the primary input size; the affected-orbit step recursively reduces to smaller SI instances rather than using an unaccounted generic exact terminal. This is the containing architecture used as the correctness/complexity target, not as evidence that J already implements the full theorem.",
+  "implemented": [
+    "ProofCarryingCoset typed result whose exact coset/emptiness, operation tag, canonical/exact flags, execution-derived local multiplicative charge, terminal certification and rev150 RecurrenceAccountingNode live in one object",
+    "explicit small-domain SI terminal that enumerates the full S_m exactly, reconstructs the exact intersection coset, performs a second complete S_m scan to prove no extra reconstructed elements, and records the same execution as its terminal accounting evidence",
+    "proof-carrying affected kernel-orbit executor v2 that routes each actual active orbit child through R1 and retains the returned proof object",
+    "non-polylog child boundary that performs zero fallback permutation enumeration/node-capped exact SI and returns a typed unresolved R1 object instead"
+  ],
+  "validation": {
+    "pr": 33,
+    "workflow_run_id": 32262075028,
+    "workflow_run_number": 141,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "new_r1_tests": "success",
+    "existing_recurrence_tests": "success",
+    "labelg_differential_gate": "success",
+    "merged_main_sha": "42bf25050e321e139dc2e37821d89d604f683f11"
+  },
+  "direct_attempt_result": "R1 is still unresolved. The first opaque-terminal boundary is removed and a mechanically charged small terminal exists, but a genuine non-polylog transitive child now correctly stops at structural R1 dispatch. Completing R1 therefore requires structural recursion rather than enlarging a node cap.",
+  "required_decomposition_if_kept_naively": [
+    {"id": "R1.a", "status": "resolved-rev163", "problem": "typed proof object + exact small/polylog terminal + no opaque fallback"},
+    {"id": "R1.b", "status": "open", "problem": "structural recursion for non-polylog SI children, returning proof objects recursively"}
+  ],
+  "temporary_active_count_if_naively_decomposed": 513,
+  "prediction_exceeded": true,
+  "next_action": "mandatory transversal rewrite before adding R1.a/R1.b as ordinary extra branches"
+}
