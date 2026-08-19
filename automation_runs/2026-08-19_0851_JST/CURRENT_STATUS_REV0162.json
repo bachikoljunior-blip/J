@@ -1,0 +1,43 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 162,
+  "rewrite_trigger": {
+    "predicted_total_active_nodes": 512,
+    "active_before_Q1_required_decomposition": 512,
+    "temporary_active_after_Q1_required_children": 515,
+    "prediction_exceeded": true
+  },
+  "transversal_audit": "Traversed the current non-replaced AGI-GI obligations, including resolved infrastructure retained in the count. The recurring evidence boundary is not specific to one Q1 child: rev157/rev161 exact SI execution, rev144-149 canonical coset plumbing, rev150 global accounting, Q1 child dispatch, and Q2 canonical/differential closure all need the same facts about one recursive operation: the exact output coset, the actual executed children, canonicality/equivariance, strict measure progress, and a mechanically justified local work bound. Maintaining a plain RightCoset execution result plus a separately reconstructed accounting tree duplicates these facts and permits proof/execution drift.",
+  "low_probability_high_leverage_rewrite": "Promote a proof-carrying coset result to the primary SI execution object. Every recursive operation must return its exact coset (or exact emptiness), canonical operation tag, the exact child proof objects it actually executed, a recurrence measure transition, and a mechanically certified local cost. Canonical aggregation and the rev150 verifier consume this same object directly; no post-hoc complexity tree may be invented. Exact legacy terminals remain only differential oracles unless their domain is small enough for a closed-form mechanically charged terminal bound.",
+  "replaced_problems": ["Q1", "Q2", "Q1.a", "Q1.b", "Q1.c"],
+  "replacement_solution_problems": [
+    {
+      "id": "R1",
+      "status": "open",
+      "problem": "Self-recursive proof-carrying SI engine. Define and execute one typed ProofCarryingCoset/emptiness object for quotient point-image recursion, kernel-orbit SI, intransitive/imprimitive decomposition, Split/Johnson reductions and certified terminals. A non-polylog child may not call an opaque exact node-capped terminal; it must recursively dispatch through R1 and return the exact child proof object. Execution and recurrence/cost trace are therefore identical by construction."
+    },
+    {
+      "id": "R2",
+      "status": "open",
+      "problem": "Canonical proof closure over R1 objects. Aggregate local certificates and Split/Johnson outcomes using only R1 proof objects, feed their embedded accounting nodes directly to rev150 global verification, and independently differential-check exact cosets, relabeling equivariance, labelg/canonical-oracle behavior where applicable, and claimed closed-form terminal/local costs. R2 may not rerun a separate opaque SI path to manufacture proof evidence."
+    }
+  ],
+  "cross_problem_reuse": {
+    "rev144_149_correctness_plumbing": "becomes R1 exact-coset operation adapters rather than a separate proof layer",
+    "rev150_accounting": "becomes a verifier over accounting nodes embedded in the R1 execution objects",
+    "rev157_rev161_orbit_and_beard_execution": "becomes R1 recursive operators; their already observed exact cosets remain differential baselines",
+    "B1_labelg_oracle": "remains an independent canonical-output oracle consumed by R2; it is not an algorithmic complexity witness"
+  },
+  "world_existing_solution_check": "Babai's quasipolynomial String Isomorphism framework already supplies the containing architecture: Luks-style coset recursion, local certificates based on the affected/unaffected dichotomy, and canonical partitioning are parts of one SI algorithm rather than independent post-hoc proofs. The remaining R1/R2 work is therefore a faithful proof-carrying implementation/verification problem inside a known complete quasipolynomial solution architecture, not evidence that J has already achieved that complexity. Existing Schreier-chain/preimage machinery in J supplies exact group/coset algebra; nauty labelg remains the independent canonical differential oracle already validated in B1.",
+  "reforecast_total_active_nodes": 512,
+  "actual_active_nodes_after_rewrite": 512,
+  "prediction_exceeded_after_rewrite": false,
+  "next_leaf": {
+    "id": "R1",
+    "status": "open",
+    "problem": "introduce the typed proof-carrying result and replace the first actual non-polylog kernel-orbit child terminal with recursive dispatch or a mechanically charged small-domain terminal; fail closed if neither applies"
+  }
+}
