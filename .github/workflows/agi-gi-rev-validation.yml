@@ -45,6 +45,7 @@ jobs:
           test_signed_johnson_log_certificate_design_descent_rev184.py
           test_colored_subset_symmetry_defect_rev185.py
           test_colored_subset_design_witness_rev186.py
+          test_colored_subset_design_branch_plan_rev187.py
 
   validate-rev-series:
     runs-on: ubuntu-latest
@@ -111,6 +112,7 @@ jobs:
           test_signed_johnson_log_certificate_design_descent_rev184.py
           test_colored_subset_symmetry_defect_rev185.py
           test_colored_subset_design_witness_rev186.py
+          test_colored_subset_design_branch_plan_rev187.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
