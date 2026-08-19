@@ -1,0 +1,15 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 112,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 508,
+  "prediction_exceeded": false,
+  "result": "Replaced caller-guessed attribute tolerance with finite-sample conformal calibration contracts; added heteroscedastic normalization, group-conditional and likelihood-ratio shift handling, bounded-contamination protection, mixed-schema/missingness calibration, paired and unpaired fail-closed schema inference, and linear/nonlinear precomputed-embedding alignment. Local regression: 25 tests passed. No AGI criterion is claimed solved.",
+  "next_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2c2c2b2b",
+    "problem": "continuous/high-dimensional density-ratio uncertainty with finite-sample coverage guarantees",
+    "status": "unresolved"
+  }
+}
