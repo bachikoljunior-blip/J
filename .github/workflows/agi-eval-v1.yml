@@ -5,6 +5,10 @@ on:
     paths:
       - 'agi/eval/v1/**'
       - '.github/workflows/agi-eval-v1.yml'
+  pull_request:
+    paths:
+      - 'agi/eval/v1/**'
+      - '.github/workflows/agi-eval-v1.yml'
   workflow_dispatch:
 
 permissions:
