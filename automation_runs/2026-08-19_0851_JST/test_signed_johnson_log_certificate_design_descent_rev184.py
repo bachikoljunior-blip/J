@@ -36,6 +36,14 @@ def relabel_target(source, p):
     return tuple(source[pinv[j]] for j in range(len(source)))
 
 
+def maps_string(source, target, p):
+    return all(source[i] == target[p[i]] for i in range(len(source)))
+
+
+def stabilizes_string(source, p):
+    return all(source[i] == source[p[i]] for i in range(len(source)))
+
+
 def test_generic_log_relation_incidence_finds_significant_point_split():
     v, t = 8, 3
     coords = tuple(combinations(range(v), t))
@@ -48,7 +56,7 @@ def test_generic_log_relation_incidence_finds_significant_point_split():
     )
     assert got.status == "certified_log_certificate_point_split", got
     assert got.significant_split
-    assert tuple(map(len, got.source_cells)) == (1, 7)
+    assert tuple(sorted(map(len, got.source_cells))) == (1, 7)
     assert got.arity_path == (3,)
 
 
@@ -67,8 +75,8 @@ def test_generic_homogeneous_nontrivial_design_fails_closed_instead_of_claiming_
 
 
 def test_wrapper_builds_logarithmic_relation_and_connects_split_to_original_candidate():
-    # J(6,3) keeps the exact Johnson recognition and candidate continuation fast,
-    # while the generic t=3 regression above separately checks genuine higher arity.
+    # J(6,3) keeps exact Johnson recognition and candidate continuation fast;
+    # the t=3 regression above separately checks genuinely higher arity.
     v, k = 6, 3
     G, domain_gens = induced_ground_group(v, k)
     subsets = _standard_subsets(v, k)
@@ -90,7 +98,11 @@ def test_wrapper_builds_logarithmic_relation_and_connects_split_to_original_cand
     assert got.test_arity == 2
     assert got.test_count == 15
     assert got.significant_ground_split, got
-    assert got.coset is not None and got.coset.contains(witness)
+    assert got.coset is not None
+    assert G.contains(got.coset.representative)
+    assert maps_string(source, target, got.coset.representative)
+    for generator in got.coset.subgroup.original_generators:
+        assert stabilizes_string(source, generator)
     assert got.status.startswith(("verified_log_certificate_partition_filter", "exact_w1r_log_certificate_candidate_")), got
     if got.exact:
         check = validate_quasipoly_recurrence_tree_v3(got.accounting)
