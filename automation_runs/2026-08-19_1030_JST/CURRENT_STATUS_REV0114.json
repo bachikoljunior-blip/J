@@ -1,0 +1,15 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 114,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "result": "Attempted to remove the externally supplied smoothness constant. Built a finite-sample conditional certificate for product exponential tilts on [0,1]^d, an audited finite-model catalog certificate, and a constructive bump/dip witness showing finite observations can be arbitrarily close in total variation to alternatives with unboundedly larger global log-ratio slope. Fit diagnostics therefore do not silently certify global smoothness; unsupported model membership abstains. Full local regression: 41 passed after two recorded test-threshold/string expectation fixes.",
+  "next_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2c2c2b2b3a",
+    "problem": "construct an extensible evidence-contract mechanism that certifies a global log-density-ratio derivative envelope for supported function classes and otherwise abstains, with empirically checkable contract provenance",
+    "status": "unresolved"
+  }
+}
