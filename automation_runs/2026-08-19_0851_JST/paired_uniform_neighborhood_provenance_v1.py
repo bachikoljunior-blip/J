@@ -35,11 +35,10 @@ class PairedUniformNeighborhoodProvenance:
 
 
 def _degree_inventory(stage: BipartiteDegreePartition):
-    return tuple(
-        sorted(
-            ((repr(signature), len(cell)) for signature, cell in zip(stage.cell_signatures, stage.color_cells)),
-            key=repr,
-        )
+    """Exact multiset of (existing-color, degree, cell-size) invariants."""
+    return Counter(
+        (signature, len(cell))
+        for signature, cell in zip(stage.cell_signatures, stage.color_cells)
     )
 
 
@@ -73,6 +72,12 @@ def certify_paired_uniform_neighborhood_provenance(
     n2 = int(right_size)
     if n1 < 1 or n2 < 2:
         raise ValueError("paired uniform-neighborhood provenance requires positive left_size and right_size>=2")
+
+    # Both exact stages below consume the edge iterable. Materialize once so callers
+    # may safely provide generators without silently feeding an exhausted stream to
+    # the rev204 hypergraph construction.
+    source_edges = tuple(source_edges)
+    target_edges = tuple(target_edges)
 
     source_degree = bipartite_degree_alpha_partition(
         n1, n2, source_edges, alpha=alpha, left_colors=source_left_colors
