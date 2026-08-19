@@ -1,0 +1,25 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 142,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 504,
+  "prediction_exceeded": false,
+  "attempted_leaf": "B1a actual labelg-backed differential audit",
+  "direct_attempt_result": "rev141 was not directly executable as committed: the test imported a nonexistent nauty_labelg_oracle API while the committed adapter was canonical_oracle_adapter_v1; the adapter searched only labelg, while Ubuntu packages nauty's executable as nauty-labelg.",
+  "world_existing_solution_check": "Ubuntu 24.04 provides the nauty package and nauty-labelg executable; the rev142 path uses that independent implementation rather than treating candidate output as its own oracle.",
+  "decomposition": {
+    "B1a.1": "normalize external executable discovery across upstream labelg and distro-prefixed nauty-labelg — resolved in rev142",
+    "B1a.2": "repair the differential test to use the committed external-oracle adapter and fail if the oracle is unavailable — resolved in rev142",
+    "B1a.3": "run the suite in CI with a real nauty installation and preserve an observed result — unresolved pending observed run",
+    "B1a.4": "extend the suite beyond ordinary/random graphs to high-symmetry adversarial families — resolved in rev142 with complete bipartite, paired cliques and hypercubes"
+  },
+  "implemented": "canonical_oracle_adapter_v1 now discovers labelg or nauty-labelg; the differential test uses the actual adapter API, has no skip-on-unavailable path, requires at least 1500 relabeling comparisons, and includes adversarial high-symmetry families; AGI-GI CI installs Ubuntu nauty and runs the differential gate.",
+  "validation_boundary": "No passing labelg-backed CI result is claimed until an actual run is observed. B1a.3 remains open.",
+  "next_leaf": {
+    "problem": "B1a.3 observe the triggered AGI-GI rev validation run, inspect the labelg-backed gate, and persist the concrete result; if passing, connect the oracle differential gate to the master canonical reduction path.",
+    "status": "unresolved"
+  }
+}
