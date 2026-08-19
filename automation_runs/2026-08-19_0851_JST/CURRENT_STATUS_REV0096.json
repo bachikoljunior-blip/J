@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 96,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 475,
+  "prediction_exceeded": false,
+  "result": "Added bounded exact and partial symmetry/orbit certificates based on intersections of directly valid mappings. Empty intersection certifies no forced identity without complete enumeration; nonempty forced sets are released only after complete bounded search.",
+  "solved_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c2","status":"solved_v0_1"},
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3","problem":"scalable symmetry/orbit reasoning beyond bounded backtracking","status":"unresolved"}
+}
