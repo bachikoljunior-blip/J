@@ -1,0 +1,19 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 114,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 503,
+  "prediction_exceeded": false,
+  "result": "Decomposed the remaining worst-case leaf into giant-quotient primitives, local certificates, certificate aggregation/canonical partitioning, and master quasipolynomial recursion. Solved the first layer for supplied invariant block actions: exact quotient image, non-enumerative paired-Schreier kernel, affected/unaffected orbit classification, and machine checks of the Unaffected Stabilizer and Affected Orbits conclusions when applicable. A synthetic k=20 giant action certified source order 2^20*20!, quotient 20!, and kernel 2^20 using 20 kernel generators without quotient enumeration.",
+  "solved_leaf": {
+    "problem": "giant quotient, kernel, affected/unaffected group-theoretic primitives for the quasipolynomial path",
+    "status": "solved_v0_1"
+  },
+  "next_leaf": {
+    "problem": "implement local fullness/non-fullness certificates on logarithmic test sets using the giant representation and exact restricted-string/coset machinery",
+    "status": "unresolved"
+  }
+}
