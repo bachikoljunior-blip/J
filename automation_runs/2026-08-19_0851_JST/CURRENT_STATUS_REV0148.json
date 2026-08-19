@@ -1,0 +1,33 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 148,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "B2.3c exact recurrence inside the canonical partition-restricted candidate set",
+  "implemented": "canonical_partition_guided_string_iso_v1.py intersects the exact rev147 partition-respecting G-coset with the exact Young-group coset of all source-to-target value-preserving permutations. Because every true isomorphism transports the canonical partition, this exact intersection is the full G-string-isomorphism coset on the significant-split branch. The largest canonical cell supplies a strictly smaller quotient child measure; no-split and all resource exhaustion remain fail-closed.",
+  "validation": {
+    "pull_request": 21,
+    "workflow_run_id": 32251777569,
+    "workflow_run_number": 44,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "covered": [
+      "guided exact coset contains a known isomorphism",
+      "guided exact coset equals an independent direct exact G intersection with the value-mapping coset on a small fixture",
+      "same-multiplicity nonisomorphism produces no coset",
+      "uniform canonical no-split remains no-progress",
+      "exact intersection node limit fails closed"
+    ]
+  },
+  "resolved": ["B2.3c"],
+  "next_leaf": {
+    "id": "B2.3d",
+    "problem": "validate semantic no-loss/no-invention and full-coset relabeling invariance end to end",
+    "status": "unresolved"
+  },
+  "important_boundary": "The current exact local relation, partition orbit, and coset intersection can still be exponential. rev148 resolves correctness of the reduced recurrence branch, not B2.4 complexity."
+}
