@@ -8,6 +8,8 @@ def tilt_mean(theta: float) -> float:
     t=float(theta)
     if abs(t)<1e-6:
         return 0.5 + t/12.0 - t**3/720.0
+    if t > 0:
+        return 1.0/(-math.expm1(-t)) - 1.0/t
     return math.exp(t)/math.expm1(t) - 1.0/t
 
 
@@ -64,8 +66,15 @@ def sample_box_exponential_tilt(rng, n: int, theta):
     if theta.ndim==0:theta=theta[None]
     u=rng.random((int(n),len(theta)));x=np.empty_like(u)
     for j,t in enumerate(theta):
-        if abs(t)<1e-10:x[:,j]=u[:,j]
-        else:x[:,j]=np.log1p(u[:,j]*math.expm1(float(t)))/float(t)
+        t=float(t)
+        if abs(t)<1e-10:
+            x[:,j]=u[:,j]
+        elif t > 50.0:
+            a=np.log1p(-u[:,j])
+            b=np.log(u[:,j])+t
+            x[:,j]=np.logaddexp(a,b)/t
+        else:
+            x[:,j]=np.log1p(u[:,j]*math.expm1(t))/t
     return x
 
 @dataclass(frozen=True)
