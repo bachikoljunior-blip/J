@@ -1,0 +1,18 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 141,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 500,
+  "prediction_exceeded": false,
+  "attempted_leaf": "B1a executable labelg-backed differential audit",
+  "world_existing_solution_check": "nauty/Traces 2.9.3 remains an independent canonical-label implementation; its official site also publishes difficult benchmark families including CFI/Furer constructions. This audit uses labelg only as an external oracle, not as evidence for the candidate algorithm's complexity.",
+  "implemented": "deterministic pytest differential suite over empty, complete, cycle and random graph families; each graph is compared with eight arbitrary relabelings through the fail-closed labelg adapter, with >=1000 canonical comparisons required when labelg is installed",
+  "validation_boundary": "the suite is committed but this execution environment has not produced an observed labelg-backed run result. Skip/unavailable is not success. B1a remains unresolved until an actual external executable run is observed and persisted.",
+  "next_leaf": {
+    "problem": "obtain and persist an actual labelg-backed run of rev141 (including adversarial benchmark families where available); if clean, wire the oracle gate to master canonical reduction and proceed to Babai-style recurrence B2",
+    "status": "unresolved"
+  }
+}
