@@ -50,6 +50,7 @@ jobs:
           test_paired_quotient_factored_partial_string_intersection_rev184.py
           test_paired_affected_segment_automorphism_rev184.py
           test_paired_local_certificate_beard_rev184.py
+          test_signed_johnson_local_certificate_relation_rev184.py
 
   validate-rev-series:
     runs-on: ubuntu-latest
@@ -121,6 +122,7 @@ jobs:
           test_paired_quotient_factored_partial_string_intersection_rev184.py
           test_paired_affected_segment_automorphism_rev184.py
           test_paired_local_certificate_beard_rev184.py
+          test_signed_johnson_local_certificate_relation_rev184.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
