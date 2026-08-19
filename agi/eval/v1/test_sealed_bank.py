@@ -2,7 +2,8 @@ import hashlib
 import json
 
 import sealed_bank
-from eval_core import REQUIRED_DOMAINS
+from eval_core import REQUIRED_DOMAINS, canonical_json
+from freeze_sealed_banks import freeze
 from sealed_bank import SealedBankProvider, coverage_summary, validate_registry
 
 
@@ -95,3 +96,18 @@ def test_sealed_bank_container_is_offline_and_has_no_host_secret_surface(monkeyp
     assert "--env" not in cmd
     assert "--mount" not in cmd
     assert bank["provider"]["digest"] in serialized
+
+
+def test_freeze_records_only_commitments_and_identity_surface():
+    registry = valid_registry()
+    manifest = {"domains": sorted(REQUIRED_DOMAINS), "schema": "test-manifest"}
+    lock = freeze(registry, manifest)
+    assert lock["schema"] == "agi-sealed-bank-lock-v1"
+    assert len(lock["bank_identities"]) == 2 * len(REQUIRED_DOMAINS)
+    payload = dict(lock)
+    recorded = payload.pop("payload_sha256")
+    assert recorded == hashlib.sha256(canonical_json(payload).encode()).hexdigest()
+    serialized = json.dumps(lock)
+    assert "private.invalid" not in serialized  # image repository names are deliberately omitted from the lock
+    assert "prompt_template" not in serialized
+    assert "credential" not in serialized
