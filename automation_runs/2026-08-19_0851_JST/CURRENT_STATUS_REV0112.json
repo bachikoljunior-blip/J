@@ -1,0 +1,19 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 112,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 497,
+  "prediction_exceeded": false,
+  "result": "Solved the second rev111 child with exact isomorphism-invariant canonical labeling. Exact Aut(G) pointwise stabilizers prune equivalent IR branches by verified group orbits. On 120 deterministic attributed graphs n<=8 and 5 independent relabelings each, all canonical codes and emitted canonicalized adjacency/attribute arrays agreed. K6/K9/K12 and C5/C8/C12 collapsed to one verified canonical leaf under symmetry pruning.",
+  "solved_leaf": {
+    "problem": "exact isomorphism-invariant canonical labeling using exact automorphism-stabilizer orbit pruning",
+    "status": "solved_v0_1"
+  },
+  "next_leaf": {
+    "problem": "adversarial independent-oracle validation and then the missing worst-case quasipolynomial general-GI/canonical-labeling ceiling",
+    "status": "unresolved"
+  }
+}
