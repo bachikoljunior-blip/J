@@ -20,16 +20,19 @@ class PrimitiveJohnsonGroundProof(ProofCarryingCoset):
     recognition_search_nodes: int = 0
 
 
-def _induced_pair_permutation(coordinate, ground_perm, ground_size):
-    standard = tuple(combinations(range(ground_size), 2))
-    index = {edge: i for i, edge in enumerate(standard)}
+def _induced_subset_permutation(coordinate, ground_perm, ground_size, subset_size, *, complement=False):
+    standard = tuple(combinations(range(ground_size), subset_size))
+    index = {subset: i for i, subset in enumerate(standard)}
     cinv = [0] * len(coordinate)
     for original, standard_index in enumerate(coordinate):
         cinv[standard_index] = original
+    universe = set(range(ground_size))
     out = []
     for original in range(len(coordinate)):
-        edge = standard[coordinate[original]]
-        moved = tuple(sorted((ground_perm[edge[0]], ground_perm[edge[1]])))
+        subset = standard[coordinate[original]]
+        moved = tuple(sorted(ground_perm[x] for x in subset))
+        if complement:
+            moved = tuple(sorted(universe.difference(moved)))
         out.append(cinv[index[moved]])
     return tuple(out)
 
@@ -44,19 +47,20 @@ def primitive_johnson_ground_string_isomorphism_terminal(
     max_ground_degree: int = 8,
     max_recognition_nodes: int = 500000,
 ) -> PrimitiveJohnsonGroundProof:
-    """Exact SI terminal for a certified J(v,2) primitive action with small v.
+    """Exact SI terminal for a certified J(v,k) action with small ground v.
 
-    The orbital-size relation is canonical.  Its Johnson recognizer returns a
-    complete coordinate-isomorphism coset from the current domain to the
-    standard J(v,2).  We may use any returned representative because this
-    terminal enumerates every ground permutation in S_v; changing the chosen
-    Johnson coordinates only conjugates/reorders that complete enumeration.
+    A canonical orbital-size color is recognized against J(v,k), giving a full
+    coordinate-isomorphism coset from the current m=C(v,k) points to standard
+    k-subsets.  We enumerate the complete automorphism family of the Johnson
+    graph on the smaller ground: induced S_v, plus the complement coset when
+    v=2k.  Every induced current-domain permutation is then filtered by exact
+    membership in the supplied ambient group and tested on the two strings.
 
-    For v inside both the polylog(root_n) window and the explicit implementation
-    cap, every sigma in S_v is induced on the current domain, filtered by exact
-    Schreier membership in the supplied ambient group, and tested against the two
-    strings.  Thus the returned right coset/emptiness is exact without enumerating
-    S_m on the much larger Johnson vertex domain m=C(v,2).
+    Therefore coordinate-representative ambiguity is harmless: changing Johnson
+    coordinates composes with a Johnson automorphism, and the complete Johnson
+    automorphism family is enumerated before ambient membership filtering.  This
+    is an exact special terminal only when v lies inside the explicit/polylog
+    window; larger grounds fail closed for recursive relational treatment.
     """
     source = tuple(source_values)
     target = tuple(target_values)
@@ -81,31 +85,14 @@ def primitive_johnson_ground_string_isomorphism_terminal(
             else johnson.reason
         )
         accounting = RecurrenceAccountingNode(
-            n=root_n,
-            m=max(1, m),
-            operation_kind="primitive_johnson_unresolved",
-            canonical=True,
-            cost_certified=False,
-            local_log2_cost_bound=0.0,
-            children=(),
-            terminal_certified=False,
-            reason=reason,
+            n=root_n, m=max(1, m), operation_kind="primitive_johnson_unresolved",
+            canonical=True, cost_certified=False, local_log2_cost_bound=0.0,
+            children=(), terminal_certified=False, reason=reason,
         )
         return PrimitiveJohnsonGroundProof(
-            "undetermined_primitive_non_giant_not_johnson",
-            None,
-            "primitive_johnson_unresolved",
-            root_n,
-            m,
-            True,
-            False,
-            False,
-            0.0,
-            False,
-            (),
-            accounting,
-            0,
-            reason,
+            "undetermined_primitive_non_giant_not_johnson", None,
+            "primitive_johnson_unresolved", root_n, m, True, False, False, 0.0,
+            False, (), accounting, 0, reason,
             johnson_ground_size=int(johnson.ground_size or 0),
             johnson_subset_size=int(johnson.subset_size or 0),
             ground_permutations_checked=0,
@@ -114,70 +101,20 @@ def primitive_johnson_ground_string_isomorphism_terminal(
 
     v = int(johnson.ground_size)
     k = int(johnson.subset_size)
-    # k=2 and v>=5 avoid the exceptional extra complement automorphism of J(4,2).
-    if k != 2 or v < 5:
-        accounting = RecurrenceAccountingNode(
-            n=root_n,
-            m=max(1, m),
-            operation_kind="primitive_johnson_unresolved",
-            canonical=True,
-            cost_certified=False,
-            local_log2_cost_bound=0.0,
-            children=(),
-            terminal_certified=False,
-            reason="v1 terminal supports only certified J(v,2) coordinates with v>=5",
-        )
-        return PrimitiveJohnsonGroundProof(
-            "undetermined_johnson_parameter_family",
-            None,
-            "primitive_johnson_unresolved",
-            root_n,
-            m,
-            True,
-            False,
-            False,
-            0.0,
-            False,
-            (),
-            accounting,
-            0,
-            "higher-k/exceptional Johnson actions require the general relational ground recursion",
-            johnson_ground_size=v,
-            johnson_subset_size=k,
-            ground_permutations_checked=0,
-            recognition_search_nodes=johnson.search_nodes,
-        )
-
     threshold = max(1.0, log2(max(2, root_n)) ** polylog_power)
     if v > max_ground_degree or v > threshold + 1e-12:
         accounting = RecurrenceAccountingNode(
-            n=root_n,
-            m=max(1, m),
-            operation_kind="primitive_johnson_ground_cap",
-            canonical=True,
-            cost_certified=False,
-            local_log2_cost_bound=0.0,
-            children=(),
-            terminal_certified=False,
+            n=root_n, m=max(1, m), operation_kind="primitive_johnson_ground_cap",
+            canonical=True, cost_certified=False, local_log2_cost_bound=0.0,
+            children=(), terminal_certified=False,
             reason="Johnson ground is larger than the explicit/polylog terminal window",
         )
         return PrimitiveJohnsonGroundProof(
-            "undetermined_johnson_ground_cap",
-            None,
-            "primitive_johnson_ground_cap",
-            root_n,
-            m,
-            True,
-            False,
-            False,
-            0.0,
-            False,
-            (),
-            accounting,
-            0,
+            "undetermined_johnson_ground_cap", None,
+            "primitive_johnson_ground_cap", root_n, m, True, False, False, 0.0,
+            False, (), accounting, 0,
             "the Johnson structure is certified, but its ground domain must recurse rather than be brute-forced",
-            johnson_ground_size=v,
-            johnson_subset_size=k,
+            johnson_ground_size=v, johnson_subset_size=k,
             ground_permutations_checked=0,
             recognition_search_nodes=johnson.search_nodes,
         )
@@ -188,48 +125,39 @@ def primitive_johnson_ground_string_isomorphism_terminal(
 
     matches = []
     ground_checked = 0
+    complement_modes = (False, True) if v == 2 * k else (False,)
     for sigma in permutations(range(v)):
-        ground_checked += 1
-        q = _induced_pair_permutation(coordinate, sigma, v)
-        if not group.contains(q):
-            continue
-        if all(source[i] == target[q[i]] for i in range(m)):
-            matches.append(q)
+        for use_complement in complement_modes:
+            ground_checked += 1
+            q = _induced_subset_permutation(
+                coordinate, sigma, v, k, complement=use_complement
+            )
+            if not group.contains(q):
+                continue
+            if all(source[i] == target[q[i]] for i in range(m)):
+                matches.append(q)
 
     execution_units = max(1, johnson.search_nodes + ground_checked)
-    local_bound = log2(execution_units) + 18.0 * log2(max(2, m)) + 36.0
-    if local_bound + 1e-12 < log2(max(1, factorial(v))):
-        raise AssertionError("Johnson terminal charge does not dominate S_v enumeration")
+    local_bound = log2(execution_units) + 18.0 * log2(max(2, m)) + 38.0
+    expected_automorphisms_scanned = factorial(v) * len(complement_modes)
+    if ground_checked != expected_automorphisms_scanned:
+        raise AssertionError("incomplete Johnson automorphism enumeration")
+    if local_bound + 1e-12 < log2(max(1, expected_automorphisms_scanned)):
+        raise AssertionError("Johnson terminal charge does not dominate automorphism enumeration")
 
     if not matches:
         accounting = RecurrenceAccountingNode(
-            n=root_n,
-            m=max(1, m),
-            operation_kind="primitive_johnson_ground_terminal",
-            canonical=True,
-            cost_certified=True,
-            local_log2_cost_bound=local_bound,
-            children=(),
-            terminal_certified=True,
-            reason="certified J(v,2) coordinates; complete S_v scan filtered by exact ambient-group membership found no SI witness",
+            n=root_n, m=max(1, m), operation_kind="primitive_johnson_ground_terminal",
+            canonical=True, cost_certified=True, local_log2_cost_bound=local_bound,
+            children=(), terminal_certified=True,
+            reason="certified J(v,k) coordinates; complete small-ground Johnson automorphism scan filtered by exact ambient membership found no SI witness",
         )
         return PrimitiveJohnsonGroundProof(
-            "exact_empty_primitive_johnson_ground",
-            None,
-            "primitive_johnson_ground_terminal",
-            root_n,
-            m,
-            True,
-            True,
-            True,
-            local_bound,
-            True,
-            (),
-            accounting,
-            ground_checked,
-            "every ground permutation was induced, ambient-membership filtered, and string-tested",
-            johnson_ground_size=v,
-            johnson_subset_size=k,
+            "exact_empty_primitive_johnson_ground", None,
+            "primitive_johnson_ground_terminal", root_n, m, True, True, True,
+            local_bound, True, (), accounting, ground_checked,
+            "every induced Johnson automorphism was ambient-membership filtered and string-tested",
+            johnson_ground_size=v, johnson_subset_size=k,
             ground_permutations_checked=ground_checked,
             recognition_search_nodes=johnson.search_nodes,
         )
@@ -244,33 +172,17 @@ def primitive_johnson_ground_string_isomorphism_terminal(
         raise AssertionError("Johnson terminal reconstructed coset lost an exact match")
 
     accounting = RecurrenceAccountingNode(
-        n=root_n,
-        m=max(1, m),
-        operation_kind="primitive_johnson_ground_terminal",
-        canonical=True,
-        cost_certified=True,
-        local_log2_cost_bound=local_bound,
-        children=(),
-        terminal_certified=True,
-        reason="certified J(v,2) coordinates; complete small-ground S_v enumeration and exact coset reconstruction",
+        n=root_n, m=max(1, m), operation_kind="primitive_johnson_ground_terminal",
+        canonical=True, cost_certified=True, local_log2_cost_bound=local_bound,
+        children=(), terminal_certified=True,
+        reason="certified J(v,k) coordinates; complete small-ground Johnson automorphism enumeration and exact coset reconstruction",
     )
     return PrimitiveJohnsonGroundProof(
-        "exact_primitive_johnson_ground_coset",
-        result,
-        "primitive_johnson_ground_terminal",
-        root_n,
-        m,
-        True,
-        True,
-        True,
-        local_bound,
-        True,
-        (),
-        accounting,
-        ground_checked,
+        "exact_primitive_johnson_ground_coset", result,
+        "primitive_johnson_ground_terminal", root_n, m, True, True, True,
+        local_bound, True, (), accounting, ground_checked,
         "the complete SI subset inside the represented primitive Johnson action was reconstructed as one right coset",
-        johnson_ground_size=v,
-        johnson_subset_size=k,
+        johnson_ground_size=v, johnson_subset_size=k,
         ground_permutations_checked=ground_checked,
         recognition_search_nodes=johnson.search_nodes,
     )
