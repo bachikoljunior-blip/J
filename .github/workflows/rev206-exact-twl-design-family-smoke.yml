@@ -1,0 +1,26 @@
+name: rev206 exact twl design family smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/uniform_neighborhood_twl_design_family_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_uniform_neighborhood_twl_design_family_rev206.py'
+      - '.github/workflows/rev206-exact-twl-design-family-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  rev206-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: python -m pytest -q test_uniform_neighborhood_twl_design_family_rev206.py
