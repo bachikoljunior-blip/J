@@ -54,6 +54,10 @@ def _normalize_matrix(signatures):
     return tuple(tuple(labels[x] for x in row) for row in signatures)
 
 
+def _color_count(matrix):
+    return len({x for row in matrix for x in row})
+
+
 def _incidence_two_wl(
     vertex_count: int,
     arity: int,
@@ -70,6 +74,11 @@ def _incidence_two_wl(
     individualized by distinct point colors. This construction is canonical
     relative to that tuple and retains the complete higher-arity relation rather
     than only its codegrees.
+
+    Refinement includes the previous pair color in every new signature, so color
+    classes can only split. We therefore detect stabilization by color-class
+    count, not by numeric color IDs: canonical normalization may rename every
+    stable color between rounds even when the partition itself is unchanged.
     """
     v = int(vertex_count)
     t = int(arity)
@@ -107,6 +116,7 @@ def _incidence_two_wl(
 
     rounds = 0
     while True:
+        previous_count = _color_count(current)
         signatures = []
         for i in range(m):
             row = []
@@ -116,7 +126,11 @@ def _incidence_two_wl(
             signatures.append(tuple(row))
         refined = _normalize_matrix(tuple(signatures))
         rounds += 1
-        if refined == current:
+        refined_count = _color_count(refined)
+        if refined_count < previous_count:
+            raise AssertionError("2-WL refinement unexpectedly merged pair-color classes")
+        current = refined
+        if refined_count == previous_count:
             break
         if rounds >= max_rounds:
             return IndividualizedWLOutcome(
@@ -129,7 +143,6 @@ def _incidence_two_wl(
                 rounds,
                 "2-WL on the explicit incidence structure did not stabilize within max_rounds",
             )
-        current = refined
 
     buckets = defaultdict(list)
     for u in range(v):
@@ -272,8 +285,6 @@ def find_colored_subset_design_witness_family(
                 kinds.append(outcome.status)
 
         if witnesses:
-            # We completed the whole first successful level, so the branch family
-            # and the minimal length are invariant under every relation isomorphism.
             local_bound = (
                 log2(max(2, states_checked))
                 + 4.0 * log2(max(2, auxiliary_vertices))
