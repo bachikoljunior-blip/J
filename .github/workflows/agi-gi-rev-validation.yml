@@ -34,6 +34,7 @@ jobs:
           test_signed_johnson_ground_pair_relation_si_rev178.py
           test_signed_johnson_ground_pair_orbit_si_rev178.py
           test_paired_action_coset_preimage_rev179.py
+          test_signed_johnson_complement_safe_image_si_rev180.py
 
   validate-rev-series:
     runs-on: ubuntu-latest
@@ -98,5 +99,6 @@ jobs:
           test_signed_johnson_ground_pair_relation_si_rev178.py
           test_signed_johnson_ground_pair_orbit_si_rev178.py
           test_paired_action_coset_preimage_rev179.py
+          test_signed_johnson_complement_safe_image_si_rev180.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
