@@ -40,7 +40,22 @@ def _canonical_symmetric_pair_weights(vertices, pair_colors):
         tokens.append((tuple(sorted((pair_colors[a][b], pair_colors[b][a]))), index[a], index[b]))
     palette = sorted({token for token, _a, _b in tokens}, key=repr)
     labels = {token: i for i, token in enumerate(palette)}
-    return tuple((((a, b)), labels[token]) for token, a, b in tokens)
+    return tuple(((a, b), labels[token]) for token, a, b in tokens)
+
+
+def _unresolved_measure_child(root_n: int, size: int, reason: str):
+    """Record a proved child measure without pretending the child SI is terminal."""
+    return RecurrenceAccountingNode(
+        n=root_n,
+        m=max(1, int(size)),
+        operation_kind="unresolved_design_measure_child",
+        canonical=True,
+        cost_certified=False,
+        local_log2_cost_bound=0.0,
+        children=(),
+        terminal_certified=False,
+        reason=reason,
+    )
 
 
 def certify_design_twl_recurrence_progress(
@@ -60,7 +75,7 @@ def certify_design_twl_recurrence_progress(
 
     Alpha-coloring and imprimitive Split-or-UPCC outcomes directly expose an
     auxiliary-domain partition whose cells are at most ``alpha*v``. These are
-    mechanical ``aux_shrink`` children for the global recurrence contract.
+    mechanical ``aux_shrink`` measures for the global recurrence contract.
 
     A UPCC is not itself called progress. Its exact directed 2-skeleton is first
     symmetrized canonically and handed to the existing coherent/Johnson reducer.
@@ -68,6 +83,10 @@ def certify_design_twl_recurrence_progress(
     auxiliary shrink. A stable non-Johnson coherent relation remains a typed
     ``requires_full_split_or_johnson`` child. This prevents theorem incompleteness
     from being hidden behind an optimistic recurrence flag.
+
+    The returned accounting child nodes are deliberately *uncertified* measure
+    placeholders. Global recurrence validation must replace each one with the
+    actual exact downstream SI proof; otherwise the existing validator rejects it.
     """
     v = int(vertex_count)
     k = int(arity)
@@ -103,16 +122,10 @@ def certify_design_twl_recurrence_progress(
         if not shrink:
             raise AssertionError("certified Design split failed its recorded alpha bound")
         children = tuple(
-            RecurrenceAccountingNode(
-                n=root_n,
-                m=max(1, size),
-                operation_kind="design_aux_shrink_child",
-                canonical=True,
-                cost_certified=True,
-                local_log2_cost_bound=0.0,
-                children=(),
-                terminal_certified=True,
-                reason="measure-only child placeholder: exact downstream SI proof must replace this before global recurrence validation",
+            _unresolved_measure_child(
+                root_n,
+                size,
+                "Design Split-or-UPCC proved this auxiliary measure; exact downstream SI/accounting is still required",
             )
             for size in sizes
         )
@@ -131,7 +144,7 @@ def certify_design_twl_recurrence_progress(
             local_bound,
             True,
             True,
-            "exact k-WL Split-or-UPCC output is an alpha-bounded canonical partition, certifying auxiliary-domain shrink on every structural child",
+            "exact k-WL Split-or-UPCC output is an alpha-bounded canonical partition, certifying auxiliary-domain shrink on every structural child without claiming those children solved",
         )
 
     if outcome.status == "certified_twl_upcc":
@@ -147,16 +160,10 @@ def certify_design_twl_recurrence_progress(
             reduced = int(reduction.reduced_domain_size)
             shrink = reduced <= alpha * len(vertices) + 1e-12 and reduced < len(vertices)
             if shrink:
-                child = RecurrenceAccountingNode(
-                    n=root_n,
-                    m=max(1, reduced),
-                    operation_kind="design_upcc_reduction_child",
-                    canonical=True,
-                    cost_certified=True,
-                    local_log2_cost_bound=0.0,
-                    children=(),
-                    terminal_certified=True,
-                    reason="measure-only child placeholder: exact downstream SI proof must replace this before global recurrence validation",
+                child = _unresolved_measure_child(
+                    root_n,
+                    reduced,
+                    "coherent/Johnson reduction proved this smaller auxiliary measure; exact downstream SI/accounting is still required",
                 )
                 return DesignTWLRecurrenceProgress(
                     "certified_design_upcc_split_or_johnson_progress",
@@ -173,7 +180,7 @@ def certify_design_twl_recurrence_progress(
                     local_bound + 16.0 * log2(max(2, len(vertices))) + 32.0,
                     True,
                     True,
-                    "the exact UPCC 2-skeleton is reduced by existing coherent/Johnson machinery to a strictly alpha-smaller auxiliary domain",
+                    "the exact UPCC 2-skeleton is reduced by existing coherent/Johnson machinery to a strictly alpha-smaller auxiliary domain; the reduced child itself remains unsolved here",
                 )
         return DesignTWLRecurrenceProgress(
             "requires_full_split_or_johnson",
