@@ -1,0 +1,21 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 138,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 494,
+  "prediction_exceeded": false,
+  "resume_basis": "latest actual AGI-GI rev-series commits were rev135 even though MAIN.md still pointed to rev109; continuation resumed from rev135 and MAIN.md was advanced",
+  "verified_result": "rev136 implemented an exact relabeling-invariant terminal for prime-degree regular cyclic actions by minimizing a complete fixed-size subset relation over every origin and every nonidentity cyclic step. An independent local oracle check verified the same construction under all 120 relabelings of an arbitrary C5 3-subset relation, 100 deterministic arbitrary relabelings of a C7 relation, and the C29 812-coordinate-system case. Resource limits fail closed without a canonical code.",
+  "implemented_pending_repository_ci": "rev137 binds the affine terminal to the exact quotient/local-certificate relation; rev138 integrates it into master_canonical_reduction_v5 and adds C29 relabeling, Johnson-regression, and fail-closed tests. A dedicated GitHub Actions workflow was added, but its completed run result was not independently observed in this execution, so rev137-rev138 are not yet claimed solved.",
+  "solved_leaf": {
+    "problem": "construct a relabeling-invariant exact terminal for prime-degree regular cyclic primitive actions without arbitrarily choosing an origin, generator, or orientation",
+    "status": "solved_v0_1"
+  },
+  "next_leaf": {
+    "problem": "independently confirm the rev137-rev138 end-to-end repository CI for C29 master integration; on success mark the regular-prime primitive obstruction solved and continue to the remaining nonregular primitive/coherent obstruction",
+    "status": "unresolved"
+  }
+}
