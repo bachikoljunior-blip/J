@@ -1,0 +1,35 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 165,
+  "predicted_total_active_nodes_before_attempt": 512,
+  "actual_active_nodes_before_attempt": 512,
+  "attempted_leaf": "S1 self-certifying structural SI closure",
+  "world_existing_solution_check": "The containing Babai/Luks SI architecture structurally separates intransitive, imprimitive and primitive actions before the giant local-certificates branch; disjoint orbit decomposition is exact additive recursion, while imprimitive quotient/kernel and primitive/giant cases require their own structural continuation. This run implements that separation as an executable classifier rather than using generic exact SI as a substitute.",
+  "implemented": [
+    "canonical S1 structural classifier distinguishing T1 small terminal, canonical intransitive orbit partition, unique/multiple canonical minimum block systems, primitive non-giant, and primitive giant continuation without invoking legacy node-capped SI",
+    "exact two-string intransitive S1 recursion whose actual invariant-orbit child proof objects are recursively executed, lifted through paired-Schreier orbit preimages, and composed into the exact parent coset/emptiness",
+    "rev150-compatible accounting verifier v2 with a mechanically checked orbit_partition rule: fixed primary measure, strictly smaller child auxiliary domains, and multiplicity-weighted child domains not exceeding the parent"
+  ],
+  "validation": {
+    "pr": 34,
+    "workflow_run_id": 32263105570,
+    "workflow_run_number": 153,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "existing_master_tests": "success",
+    "new_S1_tests": "success",
+    "labelg_differential_gate": "success",
+    "merged_main_sha": "9a5f1593447582f14bbf341ae70870b03a38c3dd"
+  },
+  "direct_attempt_result": "S1 remains unresolved: the intransitive structural operator is now exact and proof-carrying, while transitive imprimitive, primitive non-giant and primitive giant/local-certificates continuations remain explicit unresolved proof states and do not fall back to node-capped exact SI.",
+  "required_decomposition_if_kept_naively": [
+    {"id": "S1.a", "status": "resolved-rev165", "problem": "canonical structural classifier + exact intransitive proof-carrying recursion + disjoint-orbit accounting"},
+    {"id": "S1.b", "status": "open", "problem": "transitive imprimitive/primitive/giant self-certifying structural closure"}
+  ],
+  "temporary_active_count_if_naively_decomposed": 513,
+  "prediction_exceeded": true,
+  "next_action": "mandatory transversal rewrite before adding S1.a/S1.b as ordinary extra branches"
+}
