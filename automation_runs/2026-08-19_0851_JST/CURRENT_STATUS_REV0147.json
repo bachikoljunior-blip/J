@@ -1,0 +1,33 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 147,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "B2.3b paired canonical local-certificate partitions and exact G-coset",
+  "implemented": "canonical_local_partition_iso_coset_v1.py independently derives the rev116 canonical relation/partition for source and target strings, rejects invariant mismatch, leaves symmetric no-split cases unresolved, and otherwise uses rev146 partition transport to return the exact ambient G-coset mapping each ordered source canonical cell to its target cell. The coset subgroup is the conjugated target partition stabilizer, matching the repository RightCoset convention.",
+  "validation": {
+    "pull_request": 20,
+    "workflow_run_id": 32251444748,
+    "workflow_run_number": 39,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "covered": [
+      "known block-shift is contained in the candidate coset",
+      "candidate subgroup preserves target canonical cells setwise",
+      "broken-vs-uniform canonical invariant mismatch rejects safely",
+      "uniform-vs-uniform remains no-progress rather than false success",
+      "partition transport budget fails closed"
+    ]
+  },
+  "resolved": ["B2.3b"],
+  "next_leaf": {
+    "id": "B2.3c",
+    "problem": "intersect the partition-respecting G-coset with the exact source-to-target value-preserving coset and execute the reduced recurrence without losing isomorphisms",
+    "status": "unresolved"
+  },
+  "important_boundary": "The returned rev147 coset is a partition-respecting candidate set, not by itself the final string-isomorphism coset."
+}
