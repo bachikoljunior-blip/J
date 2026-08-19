@@ -1,0 +1,2 @@
+{"task_id":"dev-math-001","grader":{"type":"exact_match","expected":"437"},"human_reference_lower_bound":0.8,"seed":"example-1"}
+{"task_id":"dev-induction-001","grader":{"type":"exact_match","expected":"25"},"human_reference_lower_bound":0.8,"seed":"example-2"}
