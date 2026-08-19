@@ -1,0 +1,37 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 168,
+  "rewrite_trigger": {
+    "predicted_total_active_nodes": 512,
+    "active_before_U2_decomposition": 512,
+    "temporary_active_after_replacing_U2_with_U2a_U2b": 513,
+    "prediction_exceeded": true
+  },
+  "transversal_audit": "Traversed U1, U2 and the older quotient/kernel executors after rev167. The now-resolved small-quotient imprimitive path is not a separate conceptual child from U1: it extends the same proof-object protocol with one exact quotient-fiber composition operator. The unresolved quotient cases should therefore not be represented by appending another sibling to U2; doing so duplicates candidate-coset recursion, preimage lifting, and accounting closure.",
+  "low_probability_high_leverage_rewrite": "Absorb all resolved base/intransitive/small-quotient mechanics into V1 and replace the remaining U2 frontier by V2. V2 is organized by quotient *complexity* rather than quotient degree: first enumerate an exact quotient image whenever its Schreier-certified image order is polynomial/quasipolynomial-small enough, even if the quotient degree is large; only genuinely large-order quotient images proceed to primitive/giant structural recursion. This can solve cyclic/small-order large-degree quotient families without factorial S_q enumeration and removes an artificial degree-based branch.",
+  "replaced_problems": ["U1", "U2"],
+  "replacement_solution_problems": [
+    {
+      "id": "V1",
+      "status": "resolved-rev167",
+      "problem": "Proof-carrying SI substrate including exact small terminal, canonical structural classifier, exact intransitive/candidate-coset recursion, and exact unique-block small/polylog quotient fiber composition with mechanical accounting."
+    },
+    {
+      "id": "V2",
+      "status": "open",
+      "problem": "Remaining transitive closure organized by certified quotient complexity: exact-enumerate polynomial/small-order quotient images regardless of degree; for large-order images continue via canonical block-family resolution, primitive non-giant/Split-Johnson-special terminals, or theorem-gated giant local-certificates/growing-beard, always returning V1-compatible proof objects."
+    }
+  ],
+  "world_existing_solution_check": "Permutation-group algorithms represent quotient images compactly by generators/Schreier chains; a quotient of large degree can still have small group order (for example cyclic regular actions). Enumerating the certified image itself rather than S_q is therefore an exact structural shortcut consistent with Luks-style group recursion and strictly stronger than rev167's degree-only small-quotient gate.",
+  "reforecast_total_active_nodes": 512,
+  "actual_active_nodes_after_rewrite": 512,
+  "prediction_exceeded_after_rewrite": false,
+  "next_leaf": {
+    "id": "V2",
+    "status": "open",
+    "problem": "replace S_q scanning by exact generator-BFS/Schreier-certified quotient-image enumeration when image order is within a mechanical polynomial/implementation cap; reuse the same exact fiber lift/U1 recursion/reassembly and record enumeration count in the proof object"
+  }
+}
