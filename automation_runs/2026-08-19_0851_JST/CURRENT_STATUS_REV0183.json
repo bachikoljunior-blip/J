@@ -1,0 +1,29 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 183,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "W1R-H4 joint complement-safe lower-arity relation image closure",
+  "world_existing_solution_check": "Babai's quasipolynomial SI/GI framework explicitly uses significant auxiliary shrink, local certificates, canonical relational aggregation and Design-Lemma descent; GAP Action/ActionHomomorphism plus PreImages provides the established finite-set action/preimage architecture corresponding to J's generator-paired image/preimage construction. These are containment checks and implementation precedents, not AGI evidence.",
+  "implemented": "combined several informative complement-safe lower-arity Johnson relations into one generator-paired disjoint-union action under a strict 0.9*C(v,k) auxiliary-degree budget; solved exact joint image string/coset intersection; reconstructed the complete original-domain preimage with paired Schreier kernel/image certification; then restricted the full colored k-subset string with the existing U2/S1/V2 candidate machinery. Added J(10,4) pair+triple selection, exact small joint-image/preimage closure, and fail-closed budget regressions. CI now cancels stale runs for newer heads and performs Python integration before the external nauty install so external package latency cannot hide code-regression evidence.",
+  "validation": {
+    "pull_request": 56,
+    "workflow_run_id": 32289134006,
+    "workflow_run_number": 357,
+    "fast_w1r_job": "success",
+    "regular_prime_and_master_integration": "success",
+    "babai_recurrence_contract_suite": "success",
+    "real_nauty_labelg_gate": "success",
+    "merged_main_sha": "7e3902f46ae278fc72ef7ac4993c39f9efce2184"
+  },
+  "mandatory_transversal_rewrite": "The active tree was already 512/512 before this leaf. rev183 therefore does not append a new active branch: W1R-H4 is resolved as internal shared substrate and the single active W1R-H leaf is replaced in place by W1R-H5, preserving the 512/512 forecast.",
+  "next_leaf": {
+    "id": "W1R-H5",
+    "status": "unresolved",
+    "problem": "for cases where no sufficiently strong joint lower-arity image closes the candidate, aggregate logarithmic test-set local certificates into a canonical higher-arity relational structure; first derive any label-invariant significant point split from certificate incidence profiles, otherwise feed the homogeneous nontrivial relation into a proof-carrying Design-Lemma-style descent toward existing split/Johnson/candidate machinery; enforce theorem parameter gates, exactness, and quasipolynomial accounting fail-closed"
+  }
+}
