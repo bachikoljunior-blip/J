@@ -1,0 +1,29 @@
+name: rev199 bipartite Split-or-Johnson gate smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_split_or_johnson_gate_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_bipartite_split_or_johnson_gate_rev199.py'
+      - '.github/workflows/rev199-bipartite-soj-gate-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-rev199:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Validate exact bipartite Split-or-Johnson input gate
+        run: python -m pytest -q test_bipartite_split_or_johnson_gate_rev199.py
