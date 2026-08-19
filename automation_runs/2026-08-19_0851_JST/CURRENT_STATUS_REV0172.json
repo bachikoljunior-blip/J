@@ -1,0 +1,30 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 172,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "V2 remaining large-order transitive candidate-coset closure",
+  "world_existing_solution_check": "Babai's quasipolynomial SI framework (arXiv:1512.03547) treats transitive instances structurally: canonical imprimitivity reduction precedes the primitive barrier, while giant primitive images proceed through local certificates. rev172 reuses the already-implemented exact quotient/kernel machinery for the imprimitive candidate-coset subcase rather than introducing a duplicate search branch.",
+  "implemented": "candidate H*r with large transitive H is now structurally classified. For one unique canonical nontrivial block system, the exact coordinate identity H*r SI(source,target) = H SI(source composed with r^{-1}, target) is used; the subgroup instance is sent through the existing certified small-order quotient-image / kernel-orbit proof recursion and an exact result is translated back to H*r. Primitive non-giant, primitive giant and canonical block-family cases remain typed fail-closed.",
+  "validation": {
+    "pull_request": 40,
+    "workflow_run_id": 32267660987,
+    "workflow_run_number": 212,
+    "result": "success",
+    "validated_steps": [
+      "regular-prime terminal and master integration",
+      "Babai recurrence contract including rev172 candidate transitive-imprimitive regression",
+      "real nauty labelg differential gate"
+    ]
+  },
+  "result": "The unique-canonical-imprimitive large-order transitive candidate subcase is resolved without enumerating the whole candidate subgroup. V2 remains open only for canonical block-system families and genuinely primitive large-order structural cases.",
+  "next_leaf": {
+    "id": "V2-primitive-nongiant",
+    "status": "unresolved",
+    "problem": "for a large-order primitive non-giant candidate subgroup, construct a proof-carrying canonical Split-or-Johnson / special-terminal structural reduction with mechanically checked strict progress and no generic exact-search fallback; then translate any exact subgroup SI result back to the original candidate coset"
+  }
+}
