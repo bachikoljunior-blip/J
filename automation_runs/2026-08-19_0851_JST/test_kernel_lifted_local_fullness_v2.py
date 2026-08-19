@@ -23,6 +23,26 @@ def wreath_block_action(k, s):
     ), blocks
 
 
+def giant_with_independent_unaffected_orbit():
+    n = 10
+    e = list(range(n))
+    swap01 = e.copy()
+    swap01[0], swap01[1] = 1, 0
+    cycle6 = e.copy()
+    for i in range(6):
+        cycle6[i] = (i + 1) % 6
+    swap67 = e.copy()
+    swap67[6], swap67[7] = 7, 6
+    cycle4 = e.copy()
+    for i in range(4):
+        cycle4[6 + i] = 6 + ((i + 1) % 4)
+    G = schreier_stabilizer_chain(
+        [tuple(swap01), tuple(cycle6), tuple(swap67), tuple(cycle4)]
+    )
+    blocks = [tuple([i]) for i in range(6)]
+    return G, blocks
+
+
 def test_fullness_matches_rev153_but_executes_on_small_kernel_orbit_children():
     G, blocks = wreath_block_action(6, 2)
     values = [0] * G.degree
@@ -62,6 +82,19 @@ def test_nonfullness_matches_rev153_and_preserves_exact_missing_generator():
     assert new.missing_generator == old.missing_generator
     assert new.largest_recursive_child_domain == 2
     assert new.recurrence_child_bound_verified
+
+
+def test_unaffected_kernel_orbit_keeps_exact_answer_but_blocks_complexity_claim():
+    G, blocks = giant_with_independent_unaffected_orbit()
+    values = [0] * G.degree
+    new = kernel_lifted_local_fullness_v2(G, blocks, values, (0, 1, 2))
+
+    assert new.status == "certified_full_orbit_factored"
+    assert new.full is True
+    assert new.largest_recursive_child_domain == 4
+    assert new.certified_affected_child_bound == 1
+    assert not new.all_recursive_children_affected
+    assert not new.recurrence_child_bound_verified
 
 
 def test_child_budget_fails_closed_without_global_intersection_fallback():
