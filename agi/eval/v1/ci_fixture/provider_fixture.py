@@ -2,6 +2,8 @@
 import json
 import os
 import sys
+import time
+import urllib.error
 import urllib.request
 
 request = json.load(sys.stdin)
@@ -21,8 +23,20 @@ req = urllib.request.Request(
         "Content-Type": "application/json",
     },
 )
-with urllib.request.urlopen(req, timeout=5) as response:
-    service = json.load(response)
+service = None
+last_error = None
+for attempt in range(10):
+    try:
+        with urllib.request.urlopen(req, timeout=5) as response:
+            service = json.load(response)
+        break
+    except (urllib.error.URLError, ConnectionError) as e:
+        last_error = e
+        if attempt == 9:
+            raise
+        time.sleep(0.2)
+if service is None:
+    raise RuntimeError(f"service unavailable: {type(last_error).__name__}")
 json.dump(
     {
         "credential_present": True,
