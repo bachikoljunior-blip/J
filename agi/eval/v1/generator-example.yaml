@@ -1,0 +1,8 @@
+schema: agi-taskgen-v1
+generators:
+  - name: dev-multiply
+    domain: mathematics
+    family: generated_arithmetic
+    command: [python, example_generator.py]
+    seeds: [alpha, beta, gamma]
+    human_reference_lower_bound: 0.70
