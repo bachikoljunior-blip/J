@@ -1,0 +1,77 @@
+import pytest
+
+from paired_giant_action_certificates_v1 import analyze_paired_giant_action
+from permutation_group_schreier import identity, schreier_stabilizer_chain
+
+
+def transposition(n, a, b):
+    p = list(range(n))
+    p[a], p[b] = p[b], p[a]
+    return tuple(p)
+
+
+def cycle(n, points):
+    p = list(range(n))
+    pts = tuple(points)
+    for a, b in zip(pts, pts[1:] + pts[:1]):
+        p[a] = b
+    return tuple(p)
+
+
+def restrict(p, m):
+    return tuple(p[i] for i in range(m))
+
+
+def test_identity_projection_marks_moving_orbit_affected_and_fixed_point_unaffected():
+    # S5 acts on points 0..4 and fixes point 5.  The paired image is its natural
+    # S5 action.  Stabilizing a moving point leaves S4, which does not contain A5;
+    # stabilizing point 5 leaves the entire S5 image.
+    s = transposition(6, 0, 1)
+    c = cycle(6, (0, 1, 2, 3, 4))
+    G = schreier_stabilizer_chain((s, c))
+    got = analyze_paired_giant_action(G, (restrict(s, 5), restrict(c, 5)))
+    assert got.status == "exact_paired_giant_action_certificate", got
+    assert got.giant_type == "S_m"
+    assert got.image_order == 120
+    assert got.kernel_order == 1
+    assert got.affected_points == (0, 1, 2, 3, 4)
+    assert got.unaffected_points == (5,)
+    assert got.affected_orbit_lemma_verified
+
+
+def test_nontrivial_kernel_is_certified_without_changing_affected_classification():
+    # Add an independent swap on two points invisible in the S5 image.
+    s = transposition(7, 0, 1)
+    c = cycle(7, (0, 1, 2, 3, 4))
+    z = transposition(7, 5, 6)
+    G = schreier_stabilizer_chain((s, c, z))
+    got = analyze_paired_giant_action(
+        G, (restrict(s, 5), restrict(c, 5), identity(5))
+    )
+    assert got.giant_type == "S_m"
+    assert got.group_order == 240
+    assert got.image_order == 120
+    assert got.kernel_order == 2
+    assert got.affected_points == (0, 1, 2, 3, 4)
+    assert got.unaffected_points == (5, 6)
+    assert got.affected_orbit_lemma_verified
+
+
+def test_nongiant_image_is_exact_but_not_promoted():
+    # The cyclic C5 image is exact but is neither A5 nor S5.
+    c = cycle(6, (0, 1, 2, 3, 4))
+    G = schreier_stabilizer_chain((c,))
+    got = analyze_paired_giant_action(G, (restrict(c, 5),))
+    assert got.status == "exact_paired_nongiant_action", got
+    assert got.giant_type is None
+    assert got.image_order == 5
+
+
+def test_inconsistent_generator_pairing_fails_homomorphism_order_check():
+    s = transposition(5, 0, 1)
+    c = cycle(5, (0, 1, 2, 3, 4))
+    G = schreier_stabilizer_chain((s, c))
+    # Sending the 5-cycle to identity while retaining a transposition image does
+    # not define a homomorphism S5 -> C2 because A5 is the unique index-2 kernel.
+    with pytest.raises(ValueError, match="well-defined homomorphism"):
+        analyze_paired_giant_action(G, (s, identity(5)))
