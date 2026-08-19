@@ -42,6 +42,17 @@ jobs:
           test_signed_johnson_relation_image_candidate_si_rev181.py
           test_signed_johnson_relation_arity_selector_rev182.py
           test_signed_johnson_joint_relation_candidate_si_rev183.py
+          test_local_certificate_higher_arity_relation_rev184.py
+          test_paired_giant_action_certificates_rev184.py
+          test_paired_action_subgroup_preimage_rev184.py
+          test_paired_local_certificate_test_preimage_rev184.py
+          test_paired_action_element_image_rev184.py
+          test_paired_quotient_factored_partial_string_intersection_rev184.py
+          test_paired_affected_segment_automorphism_rev184.py
+          test_paired_local_certificate_beard_rev184.py
+          test_signed_johnson_local_certificate_relation_rev184.py
+          test_paired_partition_transporter_rev184.py
+          test_signed_johnson_local_certificate_split_filter_rev184.py
 
   validate-rev-series:
     runs-on: ubuntu-latest
@@ -105,6 +116,17 @@ jobs:
           test_signed_johnson_relation_image_candidate_si_rev181.py
           test_signed_johnson_relation_arity_selector_rev182.py
           test_signed_johnson_joint_relation_candidate_si_rev183.py
+          test_local_certificate_higher_arity_relation_rev184.py
+          test_paired_giant_action_certificates_rev184.py
+          test_paired_action_subgroup_preimage_rev184.py
+          test_paired_local_certificate_test_preimage_rev184.py
+          test_paired_action_element_image_rev184.py
+          test_paired_quotient_factored_partial_string_intersection_rev184.py
+          test_paired_affected_segment_automorphism_rev184.py
+          test_paired_local_certificate_beard_rev184.py
+          test_signed_johnson_local_certificate_relation_rev184.py
+          test_paired_partition_transporter_rev184.py
+          test_signed_johnson_local_certificate_split_filter_rev184.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
