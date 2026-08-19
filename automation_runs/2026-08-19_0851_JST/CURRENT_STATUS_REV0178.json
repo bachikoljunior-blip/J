@@ -1,0 +1,42 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 178,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "W1R higher-order signed-ground relational closure after rev177 point-profile exhaustion",
+  "world_existing_solution_check": "Babai's quasipolynomial SI/GI framework explicitly uses local certificates plus canonical partitioning; its Design Lemma reduces bounded/polylog-arity relational structure toward canonical partitions, and Split-or-Johnson treats the remaining high-symmetry obstruction. rev178 implements only a proof-carrying second-order special case and a bounded relational-orbit terminal, not the full theorem.",
+  "direct_attempt_result": "Added complement-safe unordered-ground-pair signatures from the actual colored k-subset relation. For each ground pair, exact color histograms are recorded by intersection sizes 0/1/2; when v=2k complement belongs to the signed image, the 0/2 histograms are canonically unordered. The resulting pair relation is coherently refined. A significant diagonal split is lifted through the original signed Johnson generators to an exact original-domain partition-transporter candidate coset; a homogeneous but nontrivial relation is retained as an explicit strictly smaller v-ground recurrence target. Added a second terminal that explores distinct canonical pair-relation images rather than represented-group elements and Schreier-carries original-domain transporters. For k=2 without complement, pair equality determines the source string, so a complete bounded relation orbit yields the exact SI right coset; cap exhaustion remains fail-closed.",
+  "validation": {
+    "pull_request": 51,
+    "passing_workflow_run_id": 32282814320,
+    "workflow_run_number": 313,
+    "result": "success",
+    "validated_jobs": ["validate-w1r-fast", "validate-rev-series"],
+    "validated_steps": [
+      "first-order-uniform K3 disjoint C5 relation obtains a canonical 3/5 second-order ground split",
+      "C9 on J(9,2) exposes a homogeneous nontrivial smaller pair relation",
+      "C9 exact pair-relation orbit terminal explores 20160 relation images below represented S9 order 362880 and reconstructs stabilizer order 18",
+      "pair-relation orbit cap exhaustion fails closed",
+      "v=2k signed-complement pair signature is invariant under complement parity",
+      "116 integrated Babai recurrence/master regressions",
+      "real nauty-labelg differential gate"
+    ],
+    "merged_main_sha": "3e6656a4ec86ad5f0777677754ac88b28369bbc4"
+  },
+  "resolved_internal_fast_paths": [
+    "second-order coherent split when rev177 point star/anti-star profiles are uniform",
+    "exact signed partition-transporter filtering from the canonical pair relation",
+    "explicit strictly smaller canonical pair-relation recurrence target when coherent diagonal fibers remain homogeneous",
+    "exact k=2 SI terminal when the complete pair-relation orbit stays within the certified cap, without represented-group enumeration"
+  ],
+  "mandatory_rewrite": "The active forecast was already full at 512. Counting the new pair-split, pair-recurrence, relation-orbit, and residual higher-order cases as separate children would exceed the forecast. They are therefore rewritten transversally as internal fast paths of the existing W1R node, while W1R itself is replaced in place by one residual W1R-H node. Reforecast remains 512 active non-replaced problems.",
+  "next_leaf": {
+    "id": "W1R-H",
+    "status": "unresolved",
+    "problem": "for signed Johnson relations where the pair relation does not determine the full k-subset string (especially k>=3) or its relation orbit exceeds the certified cap, aggregate logarithmic-size local certificates / higher-arity canonical relations on the smaller Johnson ground, obtain a canonical significant split or structural recurrence, solve those proof-carrying SI children, and lift their exact image cosets through the signed-ground homomorphism back to the original J(v,k) domain while preserving complement parity and quasipolynomial accounting"
+  }
+}
