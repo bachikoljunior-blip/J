@@ -51,9 +51,8 @@ def verify_lock(registry: dict, manifest: dict, lock: dict) -> list[str]:
     return errors
 
 
-def _qualification_rows(bank: dict, generated: dict) -> tuple[dict, dict]:
-    family = str(bank["families"][0])
-    tid = f"qualification-{bank['bank_id']}"
+def _qualification_rows(bank: dict, family: str, generated: dict) -> tuple[dict, dict]:
+    tid = f"qualification-{bank['bank_id']}-{family}"
     pub = dict(generated["public"])
     priv = dict(generated["private"])
     pub.pop("task_id", None)
@@ -63,33 +62,48 @@ def _qualification_rows(bank: dict, generated: dict) -> tuple[dict, dict]:
     return pub, priv
 
 
-def qualify_one(bank: dict, *, manifest: dict, nonce: str) -> dict[str, Any]:
+def qualify_bank(bank: dict, *, manifest: dict, nonce: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     image = str(bank["provider"]["image"])
     declared_digest = str(bank["provider"]["digest"]).lower()
     staged = _staged_image_id(image)
     if staged != declared_digest:
         raise RuntimeError(f"bank {bank['bank_id']} staged image digest mismatch")
-    family = str(bank["families"][0])
     provider = SealedBankProvider.from_bank(bank)
-    generated = provider.generate(
-        domain=str(bank["domain"]),
-        family=family,
-        seed=f"{QUALIFICATION_PREFIX}{bank['bank_id']}",
-        nonce=nonce,
-    )
-    pub, priv = _qualification_rows(bank, generated)
-    task_errors = validate_taskpacks([pub], [priv], manifest, final=False)
-    if task_errors:
-        raise RuntimeError("qualification task invalid: " + "; ".join(task_errors))
-    return {
-        "bank_id": bank["bank_id"],
-        "domain": bank["domain"],
-        "family": family,
-        "provider_digest": declared_digest,
-        "public_sha256": hashlib.sha256(canonical_json(generated["public"]).encode()).hexdigest(),
-        "private_sha256": hashlib.sha256(canonical_json(generated["private"]).encode()).hexdigest(),
-        "structural_validation": "passed",
-    }
+    results: list[dict[str, Any]] = []
+    failures: list[dict[str, Any]] = []
+    for family in sorted(str(x) for x in bank["families"]):
+        try:
+            generated = provider.generate(
+                domain=str(bank["domain"]),
+                family=family,
+                seed=f"{QUALIFICATION_PREFIX}{bank['bank_id']}:{family}",
+                nonce=nonce,
+            )
+            pub, priv = _qualification_rows(bank, family, generated)
+            task_errors = validate_taskpacks([pub], [priv], manifest, final=False)
+            if task_errors:
+                raise RuntimeError("qualification task invalid: " + "; ".join(task_errors))
+            results.append(
+                {
+                    "bank_id": bank["bank_id"],
+                    "domain": bank["domain"],
+                    "family": family,
+                    "provider_digest": declared_digest,
+                    "public_sha256": hashlib.sha256(canonical_json(generated["public"]).encode()).hexdigest(),
+                    "private_sha256": hashlib.sha256(canonical_json(generated["private"]).encode()).hexdigest(),
+                    "structural_validation": "passed",
+                }
+            )
+        except Exception as e:
+            failures.append(
+                {
+                    "bank_id": bank.get("bank_id"),
+                    "domain": bank.get("domain"),
+                    "family": family,
+                    "error": f"{type(e).__name__}: {e}",
+                }
+            )
+    return results, failures
 
 
 def qualify(registry: dict, manifest: dict, lock: dict, *, nonce: str) -> dict[str, Any]:
@@ -97,21 +111,32 @@ def qualify(registry: dict, manifest: dict, lock: dict, *, nonce: str) -> dict[s
     errors += verify_lock(registry, manifest, lock)
     if errors:
         raise ValueError("prequalification invalid: " + "; ".join(errors))
-    results = []
-    failures = []
+    results: list[dict[str, Any]] = []
+    failures: list[dict[str, Any]] = []
+    expected_assignments = sum(len(bank["families"]) for bank in registry["banks"])
     for bank in sorted(registry["banks"], key=lambda row: str(row["bank_id"])):
         try:
-            results.append(qualify_one(bank, manifest=manifest, nonce=nonce))
+            passed, failed = qualify_bank(bank, manifest=manifest, nonce=nonce)
+            results.extend(passed)
+            failures.extend(failed)
         except Exception as e:
-            failures.append({"bank_id": bank.get("bank_id"), "error": f"{type(e).__name__}: {e}"})
+            failures.append(
+                {
+                    "bank_id": bank.get("bank_id"),
+                    "domain": bank.get("domain"),
+                    "family": None,
+                    "error": f"{type(e).__name__}: {e}",
+                }
+            )
     report = {
         "schema": REPORT_SCHEMA,
         "registry_sha256": lock["registry_sha256"],
         "bank_lock_payload_sha256": lock["payload_sha256"],
         "qualification_nonce_sha256": hashlib.sha256(nonce.encode()).hexdigest(),
+        "expected_family_assignments": expected_assignments,
         "qualified": results,
         "failures": failures,
-        "passed": not failures and len(results) == len(registry["banks"]),
+        "passed": not failures and len(results) == expected_assignments,
     }
     payload = dict(report)
     report["payload_sha256"] = hashlib.sha256(canonical_json(payload).encode()).hexdigest()
@@ -139,7 +164,7 @@ def main() -> int:
     except Exception as e:
         print(json.dumps({"qualified": False, "error": f"{type(e).__name__}: {e}"}, ensure_ascii=False, sort_keys=True))
         return 2
-    print(json.dumps({"qualified": report["passed"], "banks": len(report["qualified"]), "failures": len(report["failures"]), "payload_sha256": report["payload_sha256"]}, sort_keys=True))
+    print(json.dumps({"qualified": report["passed"], "assignments": len(report["qualified"]), "failures": len(report["failures"]), "payload_sha256": report["payload_sha256"]}, sort_keys=True))
     return 0 if report["passed"] else 3
 
 
