@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
-from itertools import combinations
 from math import ceil, comb, log2
 from typing import Hashable, Iterable, Tuple
 
@@ -32,6 +31,7 @@ class HigherArityCertificateRelation:
     relative_strong_symmetry_defect: float
     design_alpha: float
     design_lemma_parameter_gate: bool
+    theorem_scale_recurrence_evidence: bool
     relation: Tuple[Tuple[Tuple[int, ...], Hashable], ...]
     reason: str
 
@@ -95,13 +95,7 @@ def _incidence_refinement(m: int, relation):
 
 
 def _strong_twin_classes(m: int, relation):
-    """Compute exact strong-twin classes of a complete colored subset relation.
-
-    A transposition (u,v) is an automorphism exactly when every k-subset keeps its
-    certificate color after swapping u and v.  For a complete test family this is
-    a direct exact test of the strong-twin relation from Babai Sec. 2.4; connected
-    components are therefore the maximal strongly symmetric classes.
-    """
+    """Compute exact strong-twin classes of a complete colored subset relation."""
     colors = {T: token for T, token in relation}
     parent = list(range(m))
 
@@ -149,18 +143,19 @@ def aggregate_local_certificate_relation(
 ) -> HigherArityCertificateRelation:
     """Aggregate a complete family of canonical local-certificate tokens.
 
-    The input is the colored k-uniform subset relation produced by local
-    certificates on every k-subset of the giant ground.  This routine does not
-    manufacture local certificates: it verifies exact family coverage, the
-    theorem-side local-certificate window, an explicit O(log n) engineering gate,
-    canonical point-incidence refinement, and the Design-Lemma symmetry-defect
-    hypothesis.  If incidence already gives a significant split, that split is
-    returned.  Otherwise a nontrivial relation is exposed for the subsequent
-    proof-carrying Design-Lemma descent.
+    The intended caller supplies one canonical token for every k-subset of the
+    giant ground.  Exact family coverage is required: a sparse sample is not
+    relabeling-invariant unless a separate orbit/coverage proof is supplied.  The
+    routine keeps three logically separate claims:
 
-    Requiring the complete k-subset family is deliberate.  An arbitrary sparse
-    sample is not invariant under relabeling and therefore cannot be promoted to
-    a canonical relation without an additional orbit/coverage certificate.
+    * exactness/canonicality of the colored complete k-subset relation;
+    * an incidence-derived significant point split, or a Design-Lemma symmetry
+      defect gate for a homogeneous nontrivial relation;
+    * theorem-scale recurrence evidence, which additionally requires Babai's
+      local-certificate parameter window and an explicit O(log n) test-size cap.
+
+    This separation prevents a small synthetic regression or a resource-limited
+    exact relation from being promoted to full quasipolynomial evidence.
     """
     n = int(primary_domain_size)
     m = int(ground_size)
@@ -176,28 +171,28 @@ def aggregate_local_certificate_relation(
     if max_log_test_factor <= 0:
         raise ValueError("max_log_test_factor must be positive")
 
-    relation = _normalize_relation(m, k, certificate_relation)
     expected = comb(m, k)
-    complete = len(relation) == expected
     gate = babai_local_certificate_parameter_gate(n, m, k)
     log_cap = max(1, ceil(float(max_log_test_factor) * max(1.0, log2(max(2, n)))))
     log_certified = k <= log_cap
 
+    if expected > max_test_sets:
+        return HigherArityCertificateRelation(
+            "undetermined_certificate_family_limit", m, k, expected, 0, False,
+            gate, log_certified, (), (), m, False, 0, (), m, 0.0,
+            float(design_alpha), False, False, (),
+            "the complete k-subset certificate family exceeds max_test_sets; no sparse or compressed surrogate was accepted without a separate canonical coverage proof",
+        )
+
+    relation = _normalize_relation(m, k, certificate_relation)
+    complete = len(relation) == expected
     if not complete:
         return HigherArityCertificateRelation(
             "undetermined_incomplete_certificate_family", m, k, len(relation),
             len({token for _, token in relation}), False, gate, log_certified,
             (), (), m, False, 0, (), m, 0.0, float(design_alpha), False,
-            relation,
+            False, relation,
             "not every k-subset has a certificate token; sparse sampling is not promoted to a canonical relation",
-        )
-    if expected > max_test_sets:
-        return HigherArityCertificateRelation(
-            "undetermined_certificate_family_limit", m, k, expected,
-            len({token for _, token in relation}), True, gate, log_certified,
-            (), (), m, False, 0, (), m, 0.0, float(design_alpha), False,
-            relation,
-            "the complete certificate family exceeds max_test_sets; no unverified compressed representation was substituted",
         )
 
     point_colors, color_classes, rounds = _incidence_refinement(m, relation)
@@ -210,6 +205,7 @@ def aggregate_local_certificate_relation(
     alpha = float(design_alpha)
     design_gate = bool(2 <= k <= m / 2 and defect + 1e-12 >= 1.0 - alpha)
     rank = len({token for _, token in relation})
+    theorem_scale = bool(gate.certified and log_certified and (significant or (rank > 1 and design_gate)))
 
     if significant:
         status = "certified_significant_point_split"
@@ -224,13 +220,12 @@ def aggregate_local_certificate_relation(
         status = "higher_arity_relation_without_design_gate"
         reason = "complete nontrivial certificate relation was built, but its arity/symmetry defect does not certify the Design-Lemma hypothesis"
 
-    if status.startswith("certified_") and (not gate.certified or not log_certified):
-        status = "exact_relation_outside_local_certificate_theorem_window"
-        reason += "; relation exactness is retained, but theorem-scale local-certificate recurrence is not claimed"
+    if not theorem_scale:
+        reason += "; theorem-scale recurrence evidence remains false unless the local-certificate parameter window, logarithmic test-size gate, and a certified split/Design input all hold"
 
     return HigherArityCertificateRelation(
         status, m, k, expected, rank, True, gate, log_certified,
         point_colors, color_classes, largest_color, significant, rounds,
         strong_classes, largest_strong, defect, alpha, design_gate,
-        relation, reason,
+        theorem_scale, relation, reason,
     )
