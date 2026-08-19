@@ -23,6 +23,7 @@ class StructuralRecurrenceAccountingNode:
     operation_kind: str
     canonical: bool
     cost_certified: bool
+    progress_certified: bool
     local_log2_cost_bound: float
     children: tuple[StructuralAccountingChild, ...] = ()
     terminal_certified: bool = False
@@ -50,6 +51,8 @@ def _log2_sum_exp(values):
 
 
 def _log2_factorial(k: int) -> float:
+    if k < 0:
+        raise ValueError("factorial input must be nonnegative")
     return lgamma(k + 1) / log(2.0)
 
 
@@ -61,20 +64,26 @@ def validate_structural_quasipoly_recurrence_tree(
     quasipoly_power: int = 5,
     quasipoly_constant: float = 64.0,
 ) -> StructuralQuasipolyValidation:
-    """Validate Babai-style numeric shrink plus finite structural progress.
+    """Validate numeric shrink plus separately certified finite structural progress.
 
-    Besides the existing constant-factor auxiliary shrink and small-auxiliary reset,
-    Section 7.6 of the Split-or-Johnson argument has two nonshrinking progress
-    transitions: clique -> UPCC and UPCC -> Johnson.  They cannot repeat forever;
-    the phase is an integer in {0,1,2} and every ``structural_upgrade`` edge must
-    strictly increase it while never increasing the auxiliary size.
+    The original recurrence checker only accepts constant-factor auxiliary shrink
+    and small-auxiliary reset.  Some Split-or-Johnson implementations also expose
+    structural transformations that do not immediately decrease the numeric
+    auxiliary size.  This validator can account for such a transformation only
+    when the caller has *independently* certified that exact algorithmic step and
+    marks ``progress_certified=True``.  The phase integer is merely a well-founded
+    accounting rank; it is not itself a proof that a clique->UPCC or UPCC->Johnson
+    transformation exists for a given instance.
 
-    Numeric-shrink edges may reset the phase because they create a genuinely
-    smaller structural instance.  As before, every node is canonical and carries
-    a mechanically justified local multiplicative cost, all branch multiplicities
-    are composed by log-sum-exp, and the resulting complete tree must fit the
-    configured quasipolynomial envelope.  This validator accepts evidence; it does
-    not create missing recursive children or cost certificates.
+    A ``structural_upgrade`` edge must preserve or reduce m and strictly increase
+    the finite phase rank. Numeric-shrink/reset edges may restart the phase on a
+    genuinely smaller instance. Every nonterminal node also needs canonicality,
+    a certified local multiplicative cost, and an independently certified progress
+    step. Branch multiplicities are composed by log-sum-exp and the complete tree
+    must remain inside the configured quasipolynomial envelope.
+
+    This validator accepts proof evidence; it never manufactures a missing
+    Split-or-Johnson step, recursive child, or cost certificate.
     """
     if not 0.0 < shrink_fraction < 1.0:
         raise ValueError("shrink_fraction must be in (0,1)")
@@ -124,7 +133,12 @@ def validate_structural_quasipoly_recurrence_tree(
             active.remove(oid)
             return float(node.local_log2_cost_bound)
         if node.terminal_certified:
-            raise Invalid("terminal_with_children", "a certified terminal may not recurse")
+            raise Invalid("terminal_with_children", "a certified terminal may not also recurse")
+        if not node.progress_certified:
+            raise Invalid(
+                "uncertified_progress_step",
+                "a nonterminal recurrence node must carry an independent proof of the algorithmic progress step",
+            )
 
         threshold = max(1.0, log2(max(2, node.n)) ** polylog_power)
         terms = []
@@ -142,7 +156,7 @@ def validate_structural_quasipoly_recurrence_tree(
                 if child.m > node.m:
                     raise Invalid("structural_upgrade_measure_increase", "structural upgrade may not increase the auxiliary domain")
                 if child.structural_phase <= node.structural_phase:
-                    raise Invalid("nonprogressing_structural_upgrade", "structural upgrade must strictly advance clique -> UPCC -> Johnson")
+                    raise Invalid("nonprogressing_structural_upgrade", "structural upgrade must strictly increase the finite phase rank")
                 upgrades += 1
             elif node.operation_kind == "small_aux_reset":
                 if node.m > threshold + 1e-12:
@@ -177,5 +191,5 @@ def validate_structural_quasipoly_recurrence_tree(
     return StructuralQuasipolyValidation(
         "certified_structural_quasipolynomial_recurrence", True, work, allowed,
         nodes_checked, max_depth, upgrades,
-        "all paths use constant-factor shrink, finite clique/UPCC/Johnson structural upgrades, or certified small-auxiliary reset and the complete branching tree fits the quasipolynomial envelope",
+        "all paths use independently certified constant-factor shrink, finite structural-rank progress, or certified small-auxiliary reset and the complete branching tree fits the quasipolynomial envelope",
     )
