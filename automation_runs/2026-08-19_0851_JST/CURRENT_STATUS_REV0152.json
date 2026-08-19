@@ -1,0 +1,28 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 152,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "active_leaf": "K1",
+  "attempt": "paired-Schreier quotient preimage coset",
+  "implemented": "block_action_preimage_coset_v1.py extends rev114's paired quotient Schreier recursion. It sifts one requested quotient permutation while carrying full-domain words, returning one exact lift and the exact quotient kernel, so the full preimage is represented as a RightCoset without enumerating the quotient group.",
+  "validation": {
+    "pull_request": 24,
+    "workflow_run_id": 32252494660,
+    "workflow_run_number": 63,
+    "conclusion": "success",
+    "covered": [
+      "S5 quotient lift for a known block cycle",
+      "S5 quotient lift for a known transposition",
+      "kernel order 2^5 and image order 5! with exact order theorem",
+      "kernel generators have identity quotient image",
+      "nonmember quotient permutation is rejected without a fake lift"
+    ]
+  },
+  "K1_status": "open",
+  "next_action_within_K1": "use these lift cosets to certify logarithmic local fullness/non-fullness by exact intersection with string-preserving permutations, avoiding prior construction of the full global automorphism group"
+}
