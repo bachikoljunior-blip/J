@@ -19,7 +19,7 @@ def _lifted(group):
     return tuple((g, False) for g in group.original_generators)
 
 
-def test_cycle5_complete_subconstituent_cover_recovers_constant_string_cyclic_coset():
+def test_cycle5_canonical_root_cover_recovers_constant_string_cyclic_coset():
     v, k = 5, 2
     relation = _cycle_relation(v)
     cycle, group = _cyclic_group(v)
@@ -43,14 +43,14 @@ def test_cycle5_complete_subconstituent_cover_recovers_constant_string_cyclic_co
     )
     assert got.status == "exact_upcc_subconstituent_full_string_coset"
     assert got.exact and got.complete
-    assert got.partition_pair_count == 50
+    assert got.partition_pair_count == v * v == 25
     assert got.full_string_result is not None and got.full_string_result.coset is not None
     assert got.full_string_result.coset.subgroup.order == group.order == v
     assert got.full_string_result.coset.contains(identity(v))
     assert got.full_string_result.coset.contains(cycle)
 
 
-def test_cycle5_complete_subconstituent_cover_filters_distinct_string_to_identity():
+def test_cycle5_canonical_root_cover_filters_distinct_string_to_identity():
     v, k = 5, 2
     relation = _cycle_relation(v)
     _cycle, group = _cyclic_group(v)
@@ -78,7 +78,7 @@ def test_cycle5_complete_subconstituent_cover_filters_distinct_string_to_identit
     assert got.full_string_result.coset.contains(identity(v))
 
 
-def test_partition_pair_materialization_cap_fails_closed_before_partial_cover():
+def test_root_pair_materialization_cap_fails_closed_before_partial_cover():
     v, k = 5, 2
     relation = _cycle_relation(v)
     _cycle, group = _cyclic_group(v)
