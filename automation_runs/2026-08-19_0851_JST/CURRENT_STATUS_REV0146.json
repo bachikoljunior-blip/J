@@ -1,0 +1,36 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 146,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "B2.3 canonical child recurrence",
+  "direct_attempt_result": "rev145 proved a smaller canonical partition measure but had no exact ambient subgroup/transporter construction, so recursing directly could discard valid isomorphisms or admit invalid ones. B2.3 therefore remained unresolved and was decomposed.",
+  "new_children": [
+    {"id":"B2.3a","problem":"construct the exact bounded ambient preimage stabilizer/transporter for ordered canonical quotient partitions","status":"resolved-rev146"},
+    {"id":"B2.3b","problem":"derive source/target canonical local-certificate partitions for two strings and expose the exact G-coset of partition-respecting candidates","status":"unresolved"},
+    {"id":"B2.3c","problem":"execute recursion on reduced canonical cells/cosets with strict progress and resource accounting","status":"unresolved"},
+    {"id":"B2.3d","problem":"compose child cosets/results and validate end-to-end relabeling invariance without losing or inventing isomorphisms","status":"unresolved"}
+  ],
+  "world_existing_solution_check": "Babai/Luks-style String Isomorphism recurrence is coset-valued: canonical structures may reduce the ambient group only through subgroup/coset operations that preserve the full isomorphism set. This is why a partition-size certificate alone is insufficient.",
+  "implemented": "canonical_partition_transporter_v1.py explores the quotient orbit of an ordered colored partition while recording full-domain transporters, then uses Schreier generators to return the exact preimage subgroup preserving each source cell setwise. Shape mismatch, unreachable target, and state-budget exhaustion fail closed.",
+  "validation": {
+    "pull_request": 19,
+    "workflow_run_id": 32251164264,
+    "workflow_run_number": 33,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "covered": [
+      "exact S4 two-cell stabilizer order",
+      "source-to-target partition transporter",
+      "quotient block renumbering invariance of orbit/stabilizer structure",
+      "partition-orbit resource-limit fail-closed behavior",
+      "ordered color-shape mismatch rejection"
+    ]
+  },
+  "next_leaf": {"id":"B2.3b","status":"unresolved"},
+  "important_boundary": "The exact partition-orbit search can be exponential. rev146 proves correctness plumbing, not the B2.4 quasipolynomial complexity obligation."
+}
