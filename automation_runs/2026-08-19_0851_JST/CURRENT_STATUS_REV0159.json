@@ -1,0 +1,29 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 159,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "active_leaf": "Q1",
+  "implemented": "unaffected_stabilizer_reduction_v1.py materializes the pointwise stabilizer of all rev114-classified unaffected points only when the numerical Unaffected Stabilizers theorem gate is applicable and independently re-verifies that the resulting quotient image is still A_k/S_k. It explicitly does not discard unaffected string constraints by itself.",
+  "validation": {
+    "pull_request": 29,
+    "workflow_run_id": 32254852923,
+    "workflow_run_number": 103,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "covered": [
+      "S9 quotient with an independent two-point unaffected orbit",
+      "exact pointwise fixation of all unaffected points",
+      "retained S9 quotient image after stabilization",
+      "small-giant theorem-hypothesis failure returns no subgroup",
+      "all earlier AGI-GI gates"
+    ]
+  },
+  "Q1_status": "open",
+  "remaining_gap": "The exact subgroup gate now exists, but the proof-preserving composition that uses it to replace large unaffected child SI work by affected-domain recursive calls is not yet implemented. Large affected child SI calls also still need a proof-carrying general dispatcher rather than opaque exact terminals.",
+  "next_action": "enforce the exact Babai local-certificate theorem parameter window and then connect the unaffected-stabilizer subgroup plus affected child SI calls into one self-recursive proof-carrying dispatcher"
+}
