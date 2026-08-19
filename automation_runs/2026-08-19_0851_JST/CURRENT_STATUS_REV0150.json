@@ -1,0 +1,28 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 150,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes_before_b2_4_decomposition": 512,
+  "attempted_leaf": "B2.4 global quasipolynomial accounting and fail-closed certification",
+  "world_existing_solution_check": "Babai's primary quasipolynomial SI analysis uses double recursion on primary domain n and auxiliary giant domain m: constant-factor reduction of m at quasipolynomial multiplicative cost, brute-force only after m is polylogarithmic in n, then constant-factor reduction of n. Locality uses logarithmic-size test sets, affected/unaffected kernel reductions, and canonical Design/Split-or-Johnson structure. Seppelt's detailed local-certificate treatment confirms the resulting quasipolynomial complexity framework.",
+  "implemented": "quasipoly_recurrence_accounting_v1.py validates an explicit recurrence tree fail-closed: every step must be canonical, carry a certified local log2 cost upper bound, perform either constant-factor auxiliary shrink or polylog-threshold reset with primary shrink, correctly charge S_m enumeration, compose all child multiplicities with log-sum-exp, and remain inside a configured C(log n)^c global envelope.",
+  "validation": {
+    "pull_request": 23,
+    "workflow_run_id": 32252161450,
+    "workflow_run_number": 56,
+    "job": "validate-rev-series",
+    "conclusion": "success"
+  },
+  "direct_attempt_result": "The verifier is valid, but the current exact rev115-rev149 primitives do not emit proven quasipolynomial local cost bounds. Therefore B2.4 is not resolved and no complexity claim is made.",
+  "required_children_after_failed_attempt": [
+    {"id":"B2.4a","problem":"replace exact-global local fullness with logarithmic test-set / affected-kernel reductions carrying proven local cost bounds"},
+    {"id":"B2.4b","problem":"connect positive-certificate aggregation and Design/Split-or-Johnson outcomes to certified constant-factor auxiliary/primary measure reduction"},
+    {"id":"B2.4c","problem":"emit the actual full recurrence cost trace from implemented primitives and close it with the rev150 accounting verifier"}
+  ],
+  "active_nodes_if_appended_normally": 515,
+  "prediction_exceeded": true,
+  "mandatory_next_action": "perform transversal rewrite before treating B2.4a-c as ordinary permanent children"
+}
