@@ -1,0 +1,19 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 111,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 497,
+  "prediction_exceeded": false,
+  "result": "Decomposed the remaining broad canonical-integration leaf into three children and solved the first: exact end-to-end GI isomorphism-set certification as one right coset p*Aut(B). Exact automorphism groups are reconstructed by verified orbit-stabilizer recursion rather than automorphism enumeration. 160 deterministic random n<=7 graph pairs matched brute-force all-permutation GI oracles; high-symmetry complete/empty graphs through n=12 and cycles through C12 produced exact known automorphism orders.",
+  "solved_leaf": {
+    "problem": "exact end-to-end isomorphism-coset and automorphism-generator certificate",
+    "status": "solved_v0_1"
+  },
+  "next_leaf": {
+    "problem": "derive exact isomorphism-invariant canonical labeling using automorphism-stabilizer orbit pruning, then validate relabeling invariance and emitted permutation certificates",
+    "status": "unresolved"
+  }
+}
