@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 import sealed_bank
@@ -5,33 +6,32 @@ from eval_core import REQUIRED_DOMAINS
 from sealed_bank import SealedBankProvider, coverage_summary, validate_registry
 
 
-def h(ch: str) -> str:
-    return ch * 64
+def h(label: str) -> str:
+    return hashlib.sha256(label.encode()).hexdigest()
 
 
 def valid_registry():
     families = {domain: [f"{domain}_heldout"] for domain in sorted(REQUIRED_DOMAINS)}
     banks = []
-    alphabet = iter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
     for domain in sorted(REQUIRED_DOMAINS):
         family = families[domain][0]
         for lineage in ("alpha", "beta"):
-            c1, c2, c3 = next(alphabet), next(alphabet), next(alphabet)
+            prefix = f"{domain}-{lineage}"
             banks.append(
                 {
-                    "bank_id": f"{domain}-{lineage}",
+                    "bank_id": prefix,
                     "domain": domain,
                     "families": [family],
                     "custody_group": f"custody-{lineage}-{domain}",
                     "implementation_lineage": f"impl-{lineage}-{domain}",
                     "visibility": "sealed_nonpublic",
                     "protocol": "agi-taskgen-request-v1",
-                    "sealed_content_commitment": h(c1),
-                    "seed_schedule_commitment": h(c2),
+                    "sealed_content_commitment": h(prefix + "-content"),
+                    "seed_schedule_commitment": h(prefix + "-seeds"),
                     "provider": {
                         "type": "container",
                         "image": f"private.invalid/{domain}-{lineage}",
-                        "digest": "sha256:" + h(c3),
+                        "digest": "sha256:" + h(prefix + "-image"),
                         "network": "none",
                     },
                 }
