@@ -1,6 +1,6 @@
 # AGI root problem — problem tree
 
-Updated: 2026-08-19 12:20 JST
+Updated: 2026-08-19 12:24 JST
 
 ## Root
 Deliver AGI without lowering the achievement criteria, not merely as a prototype/research artifact, but in a form that is actually usable.
@@ -8,7 +8,7 @@ Deliver AGI without lowering the achievement criteria, not merely as a prototype
 AGI itself is distinct from this problem-solving mechanism. Achievement must not be claimed without empirical evidence.
 
 ## Total problem-count prediction
-Predicted total parent+child problems: **31**. The currently enumerated non-replaced tree is now **31**, exactly at the prediction. The mandatory cross-tree rewrite/consolidation rule has therefore **not** triggered yet; it triggers only if the active count exceeds 31.
+Predicted total parent+child problems: **31**. The currently enumerated non-replaced tree is **31**, exactly at the prediction. The mandatory cross-tree rewrite/consolidation rule has therefore **not** triggered; it triggers only if the active count exceeds 31.
 
 ## Tree v1
 
@@ -24,11 +24,11 @@ Predicted total parent+child problems: **31**. The currently enumerated non-repl
     - P3.1 [resolved-v1] Anti-weakening, fail-closed acceptance-manifest validation.
     - P3.2 [resolved-v1] Physically separated public/private task packs plus cryptographic freeze lock for manifest, packs, provenance, and immutable candidate identity.
     - P3.3 [open-parent] Execute candidates in evaluator-controlled task environments.
-      - P3.3.1 [resolved-implementation] Isolated final container protocol: no candidate network, read-only root, dropped capabilities, no-new-privileges, PID/resource controls, immutable candidate digest. Mechanical final-path execution still requires independent CI/runtime verification under P3.3.2.
-      - P3.3.2 [open/pending-runtime-evidence] Empirically verify the final container execution/isolation path on an environment with Docker; record the run rather than inferring success from code.
+      - P3.3.1 [resolved-v1] Isolated final container protocol: no candidate network, read-only root, dropped capabilities, no-new-privileges, PID/resource controls, immutable candidate digest.
+      - P3.3.2 [resolved-runtime-v1] Final container mechanics were executed on GitHub Actions run `32211831216`: 16 tests passed, the isolated toy candidate image built, and `ci_container_integration.py` completed its final-mode path successfully. This is execution evidence for the harness mechanism only, explicitly not AGI evidence.
       - P3.3.3 [open-parent] Support nontrivial software/data/planning artifacts and evaluator-controlled tools.
         - P3.3.3a [resolved-v1] Writable `/work` arena with pristine read-only inputs, bounded no-symlink workspace snapshots, and hidden data-only artifact graders.
-        - P3.3.3b [open] Build an evaluator-controlled tool/network broker so final tasks can use bounded external services without granting unrestricted candidate networking or exposing grader secrets.
+        - P3.3.3b [open/partial-v1] Evaluator-controlled AF_UNIX broker now supports a bounded allowlisted tool channel while candidate IP networking remains disabled, with request budgets and violation logs. Remaining work is to add independently isolated external-service providers without exposing credentials/grader secrets.
       - P3.3.4 [resolved-framework] Evaluator-owned, hash-chained autonomy telemetry and derivation of completion, intervention, recovery, elapsed-time, resource-cost, policy-violation, and state-persistence metrics. This is instrumentation only; it does not establish the P6 autonomy gate.
     - P3.4 [resolved-v1] Conservative per-family/per-domain scoring with Wilson lower confidence bounds, equal required-domain weighting, and no averaging away a required family/domain failure.
     - P3.5 [resolved-framework] Deterministic fresh-task generator adapter interface with seed and generator/file provenance hashes.
@@ -64,7 +64,7 @@ The exact evaluated candidate must be runnable by a third party from a documente
 Final evaluation uses held-out or freshly generated task instances, records seeds/configuration/tool traces/results, separates development from final evaluation, reports failures as well as successes, and requires independent rerun of a statistically meaningful sample. Any material benchmark contamination or unverifiable result invalidates that result rather than being silently substituted.
 
 ## Current leaf selection
-P3.3.2 is the next unresolved leaf with the smallest integration gap: verify the implemented final container path empirically. If external runtime evidence remains unavailable, proceed to P3.3.3b rather than treating implementation as execution evidence.
+P3.3.3b remains unresolved after the first broker implementation because real external providers still need isolated execution and credential separation. Continue that leaf before moving to P3.7.2.
 
 ## Evidence status
 **No AGI achievement is claimed.** Current work establishes and hardens evaluation infrastructure only. Development fixtures, toy CI fixtures, and framework-level resolutions are explicitly not evidence that P4–P9 pass.
