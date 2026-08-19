@@ -11,6 +11,10 @@ on:
       - '.github/workflows/agi-gi-rev-validation.yml'
   workflow_dispatch:
 
+concurrency:
+  group: agi-gi-rev-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
