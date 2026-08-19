@@ -1,0 +1,32 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 149,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "B2.3d end-to-end no-loss/no-invention and relabeling invariance",
+  "implemented": "test_partition_guided_end_to_end_rev149.py independently checks that the returned representative is genuinely in G and maps source values to target values, every returned subgroup generator lies in G and preserves the target string, and the entire returned coset is equivariant under a nontrivial physical-domain relabeling by comparing it with the conjugated original coset.",
+  "validation": {
+    "pull_request": 22,
+    "workflow_run_id": 32251905397,
+    "workflow_run_number": 49,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "successful_steps": [
+      "Validate current regular-prime terminal and master integration",
+      "Validate Babai recurrence contract",
+      "Run labelg-backed differential gate"
+    ]
+  },
+  "resolved": ["B2.3d", "B2.3"],
+  "integration_result": "B2.3a-d now provide exact correctness plumbing from canonical local partition through ambient partition transport, paired candidate coset, exact string-isomorphism intersection, and end-to-end semantic/relabeling verification.",
+  "next_leaf": {
+    "id": "B2.4",
+    "problem": "establish global quasipolynomial accounting and fail-closed certification for the actual recurrence primitives rather than only their exact correctness",
+    "status": "unresolved"
+  },
+  "important_boundary": "B2.3 correctness does not imply quasipolynomial complexity; current exact local stabilizer, partition-orbit, and coset-intersection implementations can be exponential."
+}
