@@ -54,6 +54,10 @@ def _normalize_matrix(signatures):
     return tuple(tuple(labels[x] for x in row) for row in signatures)
 
 
+def _matrix_color_class_count(matrix) -> int:
+    return len({c for row in matrix for c in row})
+
+
 def _incidence_two_wl(
     vertex_count: int,
     arity: int,
@@ -70,6 +74,12 @@ def _incidence_two_wl(
     individualized by distinct point colors. This construction is canonical
     relative to that tuple and retains the complete higher-arity relation rather
     than only its codegrees.
+
+    Stabilization is tested on the induced partition, not on the incidental
+    integer IDs assigned to color classes. Each refinement signature contains
+    the previous color, so classes can split but never merge. Consequently the
+    partition is stable exactly when the number of color classes stops growing;
+    numeric color IDs may still be canonically renumbered between rounds.
     """
     v = int(vertex_count)
     t = int(arity)
@@ -106,6 +116,7 @@ def _incidence_two_wl(
     current = _normalize_matrix(tuple(initial))
 
     rounds = 0
+    current_class_count = _matrix_color_class_count(current)
     while True:
         signatures = []
         for i in range(m):
@@ -116,7 +127,11 @@ def _incidence_two_wl(
             signatures.append(tuple(row))
         refined = _normalize_matrix(tuple(signatures))
         rounds += 1
-        if refined == current:
+        refined_class_count = _matrix_color_class_count(refined)
+        if refined_class_count < current_class_count:
+            raise AssertionError("2-WL refinement merged an existing color class")
+        if refined_class_count == current_class_count:
+            current = refined
             break
         if rounds >= max_rounds:
             return IndividualizedWLOutcome(
@@ -130,6 +145,7 @@ def _incidence_two_wl(
                 "2-WL on the explicit incidence structure did not stabilize within max_rounds",
             )
         current = refined
+        current_class_count = refined_class_count
 
     buckets = defaultdict(list)
     for u in range(v):
