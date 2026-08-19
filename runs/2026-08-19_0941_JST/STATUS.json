@@ -1,0 +1,31 @@
+{
+  "root_problem": "AGIを、達成基準を下げず、試作・研究用で終わらせず、実際に使える形で提供する",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "certification": "NOT_AGI",
+  "predicted_total_active_nodes": 218,
+  "actual_active_nodes": 110,
+  "prediction_exceeded": false,
+  "current_leaf": {
+    "id": "C2.2b2b2b3b3c2b3b3c3b4",
+    "status": "solved_v0_1",
+    "problem": "学習分布外の環境・介入shift下で独立化写像の妥当性を検証し失敗時に棄却する"
+  },
+  "next_leaf": {
+    "id": "C2.2b2b2b3b3c2b3b3c3b3",
+    "status": "unresolved",
+    "problem": "任意の条件付き分布形状・multimodal・離散/連続混在・特異supportでも独立化できる表現変換を実装する"
+  },
+  "verified_test_groups": {
+    "multivariate_total_correlation": "5 passed",
+    "density_ratio_tc": "4 passed",
+    "invertible_tc_controller": "2 passed",
+    "sequential_adversarial_instability_witness": "1 passed (negative regression witness)",
+    "residualizing_tc_controller": "1 passed",
+    "conditional_affine_tc_controller": "1 passed",
+    "likelihood_coupling_tc_controller": "1 passed",
+    "tc_reproducibility_gate": "2 passed",
+    "tc_shift_robustness_gate": "2 passed"
+  },
+  "known_failure": "A deterministic six-dimensional sequential adversarial TC-control schedule increased independently re-estimated TC despite exact invertibility; general high-dimensional minimax stability remains unresolved."
+}
