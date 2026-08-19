@@ -59,7 +59,9 @@ jobs:
           test_kernel_lifted_local_fullness_v3.py
           test_orbit_factored_partial_string_coset_intersection_v1.py
           test_affected_segment_automorphism_v1.py
-          test_quotient_factored_partial_string_intersection_v1.py
+          test_quotient_factored_partial_string_coset_intersection_v1.py
           test_local_certificate_beard_v1.py
+          test_proof_carrying_string_child_dispatch_v1.py
+          test_orbit_factored_partial_string_coset_intersection_v2.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
