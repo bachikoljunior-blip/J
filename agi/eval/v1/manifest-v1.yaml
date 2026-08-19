@@ -1,0 +1,70 @@
+schema: agi-eval-v1
+version: 1
+status: draft
+claim: "practically usable AGI"
+
+required_gates:
+  - generality
+  - performance
+  - autonomy
+  - practical_delivery
+  - evidence_integrity
+domains:
+  - language_knowledge
+  - mathematics
+  - software_engineering
+  - data_analysis
+  - planning_decision
+  - novel_task_induction
+
+rules:
+  max_domain_weight: 0.25
+  aggregation: equal_weight_required_domains
+  failed_required_domain_can_be_averaged_away: false
+  failed_required_family_can_be_averaged_away: false
+  report_uncertainty: true
+  fail_closed: true
+  uncertainty:
+    method: wilson_lower_bound
+    confidence: 0.95
+
+autonomy_metrics:
+  - completion_rate
+  - intervention_count
+  - recovery_rate
+  - elapsed_time
+  - resource_cost
+  - policy_violations
+  - state_persistence_success
+
+candidate_protocol:
+  transport: stdin_json_stdout_json
+  candidate_receives_private_grader_data: false
+  final_adapter: isolated_container
+  default_network: none
+  read_only_candidate_root: true
+
+freeze_policy:
+  final_run_requires_lock: true
+  candidate_digest_required: true
+  sealed_private_pack_required: true
+  lock_hash_algorithm: sha256
+  thresholds_preregistered_before_final_run: true
+  task_generator_versions_frozen_before_final_run: true
+
+sample_size_plan:
+  minimum_trials_per_family: null
+  justification: "Must be frozen before final evaluation from a power/precision analysis; draft intentionally cannot run as final."
+
+evidence_integrity:
+  record_failures: true
+  record_hash_chain: true
+  record_candidate_digest: true
+  record_manifest_hash: true
+  record_public_pack_hash: true
+  record_private_pack_hash: true
+  record_generator_provenance: true
+  independent_rerun_required: true
+  contamination_invalidates_affected_result: true
+
+final_claim_rule: "No AGI claim unless every required gate passes on a frozen candidate under a frozen manifest with auditable evidence and independent rerun."
