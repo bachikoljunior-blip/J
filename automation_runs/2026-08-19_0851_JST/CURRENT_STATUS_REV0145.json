@@ -1,0 +1,37 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 145,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 508,
+  "prediction_exceeded": false,
+  "attempted_leaf": "B2.2 label-invariant local-certificate extraction and canonical partition connection",
+  "world_existing_solution_check": "Babai's quasipolynomial GI framework aggregates negative local certificates into a canonical k-ary relational structure and then applies canonical partitioning via the Design Lemma and Split-or-Johnson. J's own AGI-GI rev115-116 already contains an exact fullness/non-fullness relation and canonical incidence refinement, so rev145 reuses that existing same-series solution instead of duplicating it.",
+  "implemented": [
+    "local_certificate_recurrence_adapter_v1.py converts only rev116 certified significant canonical splits into rev144 RecurrenceCertificate objects",
+    "child accounting uses the label-invariant multiset of canonical partition cell sizes; no-split and resource-limit cases remain fail-closed",
+    "tests cover a verified 1+9 split, uniform no-split, quotient relabeling invariance of the accounting signature, and test-set resource exhaustion"
+  ],
+  "validation": {
+    "pull_request": 18,
+    "workflow_run_id": 32250857762,
+    "workflow_run_number": 27,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "successful_steps": [
+      "Install independent canonical oracle",
+      "Validate current regular-prime terminal and master integration",
+      "Validate Babai recurrence contract",
+      "Run labelg-backed differential gate"
+    ]
+  },
+  "resolved": ["B2.2"],
+  "important_boundary": "rev115-116 currently computes exact global string stabilizers to derive the local relation; rev145 therefore certifies canonical recurrence plumbing, not Babai's quasipolynomial local-certificates complexity. Complexity remains an explicit B2.4 obligation.",
+  "next_leaf": {
+    "id": "B2.3",
+    "problem": "construct canonical child recurrence from a verified partition, including the correct subgroup/coset transport needed to recurse without losing or inventing isomorphisms",
+    "status": "unresolved"
+  }
+}
