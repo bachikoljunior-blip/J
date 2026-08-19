@@ -1,0 +1,19 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 154,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes_before_K1_decomposition": 512,
+  "attempted_leaf": "K1 kernel-lifted logarithmic local certificates with certified cost/measure",
+  "direct_attempt_result": "affected_kernel_recurrence_plan_v1.py extracts the exact quotient kernel, partitions affected points into exact kernel orbits, and mechanically converts the rev114 affected-orbit lemma into strict smaller child domains. However the current generic exact coset-intersection implementation does not execute by those children, so its asymptotic execution cost remains uncertified and K1 is unresolved.",
+  "implemented_progress": "affected_kernel_recurrence_plan_v1.py plus tests; the plan explicitly keeps execution_cost_certified=false until the real intersection follows the certified orbit recursion.",
+  "required_children_after_failed_attempt": [
+    {"id":"K1a","problem":"factor exact kernel/value-preserving coset intersection over the certified affected-kernel child orbits without losing or inventing isomorphisms"},
+    {"id":"K1b","problem":"emit the actual recursive work/measure trace from that orbit-factored intersection as locally checkable cost evidence rather than an uncertified flat node cap"}
+  ],
+  "active_nodes_if_appended_normally": 514,
+  "prediction_exceeded": true,
+  "mandatory_next_action": "transversally rewrite K1/K1a/K1b together with K2 because K1b and K2 duplicate proof-carrying recurrence/cost-closure obligations"
+}
