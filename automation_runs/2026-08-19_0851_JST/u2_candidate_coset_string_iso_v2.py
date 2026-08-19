@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from dataclasses import replace
 from math import log2
 
 from coset_stabilizer_primitives import RightCoset
@@ -11,6 +12,7 @@ from proof_carrying_si_v1 import ProofCarryingCoset
 from proof_carrying_small_order_candidate_v1 import exact_small_order_candidate_string_isomorphism
 from quasipoly_recurrence_accounting_v1 import AccountingChild, RecurrenceAccountingNode
 from s1_string_isomorphism_v2 import s1_string_isomorphism_v2
+from s1_structural_classifier_v1 import classify_s1_structure
 
 
 def _parent(*, root_n, degree, status, coset, exact, children, cost_certified=True, reason):
@@ -44,6 +46,46 @@ def _parent(*, root_n, degree, status, coset, exact, children, cost_certified=Tr
     )
 
 
+def _translate_subgroup_si_back_to_candidate(inner, representative, *, degree):
+    """Translate an exact H-string-isomorphism result back to H*r.
+
+    Under this repository's right-action convention, elements of H*r are
+    h∘r = compose(r, h).  Solving H on source∘r^{-1} versus target therefore
+    gives exactly the candidate-fiber solutions.  The subgroup is unchanged and
+    only the returned representative is right-translated by r.
+    """
+    if not inner.exact:
+        raise ValueError("translation requires an exact subgroup SI result")
+    extra_bound = 4.0 * log2(max(2, degree)) + 12.0
+    accounting = replace(
+        inner.accounting,
+        local_log2_cost_bound=inner.accounting.local_log2_cost_bound + extra_bound,
+        reason=inner.accounting.reason + "; exact fixed right-coset coordinate translation back to the candidate fiber",
+    )
+    result_coset = None
+    if inner.coset is not None:
+        result_coset = RightCoset(
+            inner.coset.subgroup,
+            compose(representative, inner.coset.representative),
+        )
+    return ProofCarryingCoset(
+        "exact_translated_" + inner.status,
+        result_coset,
+        inner.operation_kind,
+        inner.root_n,
+        inner.domain_size,
+        inner.canonical,
+        True,
+        inner.local_cost_certified,
+        inner.local_log2_cost_bound + extra_bound,
+        inner.terminal_certified,
+        inner.children,
+        accounting,
+        inner.permutation_candidates_checked,
+        "exact subgroup SI on source∘r^{-1} was translated back to the original candidate right coset H*r",
+    )
+
+
 def candidate_coset_string_isomorphism_u2(
     candidate: RightCoset,
     source_values,
@@ -56,13 +98,16 @@ def candidate_coset_string_isomorphism_u2(
     max_group_order: int = 256,
     max_depth: int = 64,
 ) -> ProofCarryingCoset:
-    """Candidate-coset SI with exact small-order terminals at every orbit level.
+    """Candidate-coset SI with exact small-order and structural recursion.
 
     First enumerate H*r directly when Schreier certifies H as small.  If H is
-    larger and intransitive, recurse over its canonical orbits, but use S1v2 on
-    each induced image so a large-degree orbit with a small represented group is
-    still solved exactly.  A genuinely large transitive H remains a typed V2
-    structural leaf rather than falling back to generic node-capped search.
+    larger and intransitive, recurse over its canonical orbits, using S1v2 on
+    each induced image.  If H is larger and transitive but has one unique
+    canonical nontrivial block system, reduce H*r to an H string-isomorphism
+    instance by the exact source∘r^{-1} coordinate change and invoke the V2
+    imprimitive small-certified-image quotient/kernel recursion.  Primitive
+    non-giant/giant and canonical block-family cases remain typed fail-closed
+    structural leaves rather than falling back to generic node-capped search.
     """
     H0 = candidate.subgroup
     n = H0.degree
@@ -119,15 +164,60 @@ def candidate_coset_string_isomorphism_u2(
 
     initial_orbits = _group_orbits(H0)
     if len(initial_orbits) <= 1 and n > 1:
+        classification = classify_s1_structure(
+            H0,
+            root_n=root_n,
+            polylog_power=polylog_power,
+            max_explicit_degree=max_explicit_degree,
+        )
+        if classification.status == "canonical_imprimitive_block_system":
+            # Local import avoids a module-import cycle: the V2 imprimitive
+            # executor itself uses this candidate operator for quotient fibers.
+            from v2_imprimitive_small_image_v2 import imprimitive_small_image_string_isomorphism_v2_recursive
+
+            rinv = inverse(candidate.representative)
+            subgroup_source = tuple(source[rinv[j]] for j in range(n))
+            inner = imprimitive_small_image_string_isomorphism_v2_recursive(
+                H0,
+                subgroup_source,
+                target,
+                root_n=root_n,
+                polylog_power=polylog_power,
+                max_explicit_degree=max_explicit_degree,
+                quotient_order_poly_power=group_order_poly_power,
+                max_quotient_image_order=max_group_order,
+                candidate_group_order_poly_power=group_order_poly_power,
+                max_candidate_group_order=max_group_order,
+            )
+            if inner.exact:
+                return _translate_subgroup_si_back_to_candidate(
+                    inner,
+                    candidate.representative,
+                    degree=n,
+                )
+            return _parent(
+                root_n=root_n,
+                degree=n,
+                status=inner.status,
+                coset=None,
+                exact=False,
+                children=(inner,),
+                cost_certified=False,
+                reason="unique canonical imprimitive candidate was structurally dispatched, but its V2 quotient/kernel child remains unresolved",
+            )
+
+        status = classification.status
+        if not status.startswith("undetermined_"):
+            status = "undetermined_" + status
         return _parent(
             root_n=root_n,
             degree=n,
-            status="undetermined_transitive_candidate_large_order",
+            status=status,
             coset=None,
             exact=False,
             children=(),
             cost_certified=False,
-            reason="candidate subgroup is transitive and above the exact-order cap; canonical structural quotient/local-certificate recursion is still required",
+            reason=classification.reason,
         )
 
     H = H0
