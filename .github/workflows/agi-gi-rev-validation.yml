@@ -48,5 +48,6 @@ jobs:
           test_canonical_partition_guided_string_iso_v1.py
           test_partition_guided_end_to_end_rev149.py
           test_quasipoly_recurrence_accounting_v1.py
+          test_block_action_preimage_coset_v1.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
