@@ -32,6 +32,7 @@ class UniformNeighborhoodTWLFamilyProgress:
     local_log2_cost_bound: float
     exact: bool
     reason: str
+    branch_child_aux_sizes: tuple[tuple[int, ...], ...] = ()
 
 
 def _falling_factorial(n: int, r: int) -> int:
@@ -59,21 +60,23 @@ def close_uniform_neighborhood_relation_with_twl_family(
 ) -> UniformNeighborhoodTWLFamilyProgress:
     """Use the exact Design-Lemma k-WL family only after rev205 stalls.
 
-    This adapter is deliberately layered.  It first executes the cheaper exact
-    codegree/pair descent from rev205.  Only the genuinely higher-arity homogeneous
+    This adapter is deliberately layered. It first executes the cheaper exact
+    codegree/pair descent from rev205. Only the genuinely higher-arity homogeneous
     residual is passed to the existing exact standard-k-WL Design witness family.
     The complete first successful individualization level is exhausted by that
     routine, making the *set of successful branches* equivariant rather than
     selecting a label-dependent witness.
 
     Every returned Design witness is then replayed through the existing recurrence
-    progress adapter.  Alpha-bounded colorings/imprimitive partitions and UPCCs
+    progress adapter. Alpha-bounded colorings/imprimitive partitions and UPCCs
     already reduced by coherent/Johnson machinery count as structural progress.
     A UPCC that still needs the corrected full Split-or-Johnson theorem is retained
-    as a typed residual branch.  Thus ``all_witness_branches_progress`` is strong:
+    as a typed residual branch. Thus ``all_witness_branches_progress`` is strong:
     it is true only when every branch in the canonical witness family has a proved
-    strictly smaller auxiliary measure.  Downstream SI children remain unsolved and
-    must still replace the recurrence placeholders before any global closure claim.
+    strictly smaller auxiliary measure. Exact child-size tuples are retained for
+    the next recurrence-frontier verifier. Downstream SI children remain unsolved
+    and must still replace the recurrence placeholders before any global closure
+    claim.
     """
     rows = _canonical_rows(right_size, arity, coordinates, colors)
     v = int(right_size)
@@ -160,6 +163,7 @@ def close_uniform_neighborhood_relation_with_twl_family(
         "certified_design_upcc_split_or_johnson_progress",
     }
     branch_statuses = []
+    branch_child_aux_sizes = []
     progress_count = 0
     residual_count = 0
     max_child = None
@@ -178,6 +182,7 @@ def close_uniform_neighborhood_relation_with_twl_family(
             max_johnson_nodes=max_johnson_nodes,
         )
         branch_statuses.append(progress.status)
+        branch_child_aux_sizes.append(tuple(progress.child_aux_sizes))
         max_branch_bound = max(max_branch_bound, progress.local_log2_cost_bound)
         if progress.status in structural_progress and progress.aux_shrink_certified:
             progress_count += 1
@@ -226,4 +231,5 @@ def close_uniform_neighborhood_relation_with_twl_family(
         local_bound,
         True,
         reason,
+        branch_child_aux_sizes=tuple(branch_child_aux_sizes),
     )
