@@ -97,7 +97,12 @@ def test_s6_j63_pair_image_si_returns_exact_original_domain_filter():
     assert got.coset is not None and got.coset.contains(witness)
     assert 0 < got.preimage_filter_order < G.order
     assert got.preimage_filter_order == got.image_si_order
-    assert validate_quasipoly_recurrence_tree_v3(got.accounting).certified
+    # This object is deliberately a filter, not a completed recurrence leaf.
+    # The global recurrence verifier must therefore reject it until the remaining
+    # full k-subset color restriction is attached as a child.
+    accounting_check = validate_quasipoly_recurrence_tree_v3(got.accounting)
+    assert not accounting_check.certified
+    assert accounting_check.status == "uncertified_terminal"
 
 
 def test_signed_higher_arity_signature_is_equivariant_under_complement():
