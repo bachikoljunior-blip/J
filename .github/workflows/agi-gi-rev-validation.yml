@@ -67,7 +67,7 @@ jobs:
           python -m pytest -q
           test_regular_prime_cyclic_terminal.py
           test_master_canonical_reduction_v5.py
-      - name: Validate Babai recurrence contract
+      - name: Validate Babai recurrence contract and current W1R Design path
         run: >-
           python -m pytest -q
           test_babai_recurrence_contract_v1.py
@@ -117,6 +117,13 @@ jobs:
           test_colored_subset_design_branch_plan_rev187.py
           test_design_branch_tuple_transport_rev188.py
           test_design_tuple_full_string_union_rev189.py
+          test_design_lemma_candidate_si_rev190.py
+          test_signed_johnson_log_design_lemma_rev191.py
+          test_design_lemma_branch_cost_rev192.py
+          test_colored_subset_exact_twl_design_rev193.py
+          test_design_lemma_exact_twl_candidate_rev194.py
+          test_design_twl_recurrence_progress_rev195.py
+          test_upcc_subconstituent_split_family_rev197.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
