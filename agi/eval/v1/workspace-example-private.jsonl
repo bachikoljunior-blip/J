@@ -1,0 +1,1 @@
+{"task_id":"dev-workspace-001","grader":{"type":"exact_match","expected":"done"},"arena_grader":{"type":"json_equal","path":"result.json","expected":{"status":"ok","value":7}},"human_reference_lower_bound":0.8,"seed":"workspace-example"}
