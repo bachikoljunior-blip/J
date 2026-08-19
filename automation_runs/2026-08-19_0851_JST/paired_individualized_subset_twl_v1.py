@@ -104,8 +104,9 @@ def paired_individualized_complete_subset_twl(
     to all ordered t-tuples by recording the equality pattern, the positions of
     any paired individualized constants, and the relation color when all tuple
     entries are distinct.  Standard t-dimensional Weisfeiler--Leman refinement
-    then replaces each coordinate by every ground vertex and records the exact
-    coordinate-wise multisets of resulting tuple colors.
+    then records, for each replacement vertex, the correlated t-vector of colors
+    obtained by replacing each coordinate.  The multiset of those t-vectors is
+    the usual t-WL neighborhood signature and specializes to coherent 2-WL.
 
     Source and target signatures are normalized jointly in every round, so color
     identifiers are directly comparable.  The output is canonical *conditional
@@ -188,8 +189,8 @@ def paired_individualized_complete_subset_twl(
     def initial_signatures(palette, individualized):
         out = []
         for values in tuples:
-            relation_color = (
-                palette[subset_index[tuple(sorted(values))]]
+            relation_token = (
+                ("RELATION_COLOR", palette[subset_index[tuple(sorted(values))]])
                 if len(set(values)) == t
                 else ("NON_DISTINCT_TUPLE",)
             )
@@ -198,7 +199,7 @@ def paired_individualized_complete_subset_twl(
                     "TUPLE",
                     _equality_pattern(values),
                     _individualization_marks(values, individualized),
-                    relation_color,
+                    relation_token,
                 )
             )
         return tuple(out)
@@ -214,19 +215,19 @@ def paired_individualized_complete_subset_twl(
         def refined_signatures(colors):
             signatures = []
             for values in tuples:
-                coordinate_multisets = []
-                for position in range(t):
-                    replaced = []
-                    for vertex in range(v):
+                replacement_profiles = []
+                for vertex in range(v):
+                    profile = []
+                    for position in range(t):
                         image = list(values)
                         image[position] = vertex
-                        replaced.append(colors[tuple_index[tuple(image)]])
-                    coordinate_multisets.append(tuple(sorted(Counter(replaced).items())))
+                        profile.append(colors[tuple_index[tuple(image)]])
+                    replacement_profiles.append(tuple(profile))
                 signatures.append(
                     (
                         "TWL",
                         colors[tuple_index[values]],
-                        tuple(coordinate_multisets),
+                        tuple(sorted(Counter(replacement_profiles).items())),
                     )
                 )
             return tuple(signatures)
