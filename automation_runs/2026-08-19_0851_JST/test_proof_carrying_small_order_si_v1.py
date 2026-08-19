@@ -94,10 +94,10 @@ def test_small_instance_matches_existing_exact_coset_oracle():
     assert got.coset.contains(exact.coset.representative)
 
 
-def test_large_group_order_falls_back_to_structural_s1_without_enumeration():
+def test_large_nonconstant_group_order_falls_back_to_structural_s1_without_enumeration():
     n = 9
     G = schreier_stabilizer_chain([cycle(n), transposition(n)])
-    source = (0,) * n
+    source = tuple(range(n))
     got = s1_string_isomorphism_v2(
         G,
         source,

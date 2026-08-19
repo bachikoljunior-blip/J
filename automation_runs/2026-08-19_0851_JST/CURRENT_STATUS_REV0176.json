@@ -1,0 +1,26 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 176,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "W1 signed-ground relational SI closure",
+  "world_existing_solution_check": "Babai-style Johnson recursion does not enumerate a large S_v ground. It canonically refines the relational structure and recurses after structural progress. rev176 implements a first exact refinement operator for nonhomogeneous colored k-subset relations and a cross-cutting terminal for monochromatic structural children.",
+  "direct_attempt_result": "The full W1 relation is not solved in one step. A complement-safe ground incidence invariant can, however, expose exact progress whenever ground points have distinct star/anti-star color histograms. That ground split induces a signed-complement-safe partition of k-subset positions by intersection-count profile; exact ambient partition transport then forces an intransitive candidate subgroup and reuses the existing orbit recursion.",
+  "implemented": [
+    "johnson_ground_signature_split_si_v1/v2: exact star/anti-star incidence signatures, complement-safe subset profiles, exact partition transporter, recursive candidate restriction",
+    "u3_candidate_coset_string_iso: intercepts only U2's certified large-ground Johnson cap and translates subgroup SI results back to the original H*r candidate coset",
+    "cross-cutting S1 monochromatic terminal: identical one-color strings return the full represented group exactly without enumerating it",
+    "J(9,2) regression: a point-star coloring is transported to a relabeled star, split into contains/not-contains structural orbits, recursively solved, and audited by the quasipolynomial recurrence verifier"
+  ],
+  "problem_tree_rewrite": "The tree is already at the 512-node forecast. The new incidence-split and monochromatic-terminal work is recorded as resolved implementation inside W1 rather than appended as extra active children. W1 remains the single cross-cutting active leaf for large-ground Johnson relational closure and later reuse by giant local-certificate relational outputs.",
+  "validation_boundary": "No rev176 success is claimed until the GitHub Actions run containing the new regression passes. Homogeneous signed-ground signatures and Johnson structure lost by the current orbital-size coarsening remain fail-closed.",
+  "next_leaf": {
+    "id": "W1-homogeneous",
+    "status": "unresolved",
+    "problem": "for signed-ground relations whose star/anti-star incidence signatures are homogeneous, build a deeper canonical relational/local-certificate refinement (and a robust Johnson certification path when safe orbital coarsening hides v=2k structure), then feed any verified split back through the same exact transporter/coset reconstruction path"
+  }
+}
