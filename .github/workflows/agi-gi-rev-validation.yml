@@ -45,6 +45,7 @@ jobs:
           test_local_certificate_higher_arity_relation_rev184.py
           test_paired_giant_action_certificates_rev184.py
           test_paired_action_subgroup_preimage_rev184.py
+          test_paired_local_certificate_test_preimage_rev184.py
 
   validate-rev-series:
     runs-on: ubuntu-latest
@@ -111,6 +112,7 @@ jobs:
           test_local_certificate_higher_arity_relation_rev184.py
           test_paired_giant_action_certificates_rev184.py
           test_paired_action_subgroup_preimage_rev184.py
+          test_paired_local_certificate_test_preimage_rev184.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
