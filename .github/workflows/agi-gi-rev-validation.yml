@@ -70,5 +70,6 @@ jobs:
           test_proof_carrying_small_order_si_v1.py
           test_candidate_small_order_recursive_v2.py
           test_candidate_transitive_imprimitive_rev172.py
+          test_primitive_johnson_ground_terminal_rev173.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
