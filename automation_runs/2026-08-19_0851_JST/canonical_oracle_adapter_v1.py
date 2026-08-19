@@ -36,15 +36,21 @@ def graph6_text(n: int, edges: Iterable[Tuple[int, int]]) -> str:
     return chr(n + 63) + payload
 
 
+def _find_labelg() -> Optional[str]:
+    # Upstream commonly installs `labelg`; Debian/Ubuntu packages rename tools
+    # with a `nauty-` prefix. Accept both without manufacturing an oracle.
+    return shutil.which("labelg") or shutil.which("nauty-labelg")
+
+
 def canonicalize_with_external_oracle(n: int, edges: Iterable[Tuple[int, int]], *, timeout: float = 10.0) -> OracleResult:
     """Return an independent canonical graph when a known backend is installed.
 
-    Preferred backend is nauty's labelg.  Absence, timeout, nonzero exit, or
+    Preferred backend is nauty's labelg. Absence, timeout, nonzero exit, or
     malformed output is fail-closed: no canonical result is manufactured.
     """
-    labelg = shutil.which("labelg")
+    labelg = _find_labelg()
     if labelg is None:
-        return OracleResult("oracle_unavailable", None, None, "nauty labelg not installed")
+        return OracleResult("oracle_unavailable", None, None, "nauty labelg executable not installed")
     source = graph6_text(n, edges) + "\n"
     try:
         p = subprocess.run([labelg, "-q"], input=source, text=True,
