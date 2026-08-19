@@ -1,0 +1,42 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 177,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "W1 signed-ground relational SI closure above the represented-group enumeration cap",
+  "world_existing_solution_check": "Babai's quasipolynomial String/GI framework handles Johnson configurations on the smaller ideal ground through canonical relational/local-certificate partitioning rather than exhaustive enumeration. rev177 deliberately implements only one exact canonical relational special case of that architecture and does not claim the full Split-or-Johnson/local-certificate recursion.",
+  "direct_attempt_result": "Added a complement-safe canonical ground invariant from the actual colored k-subset relation: each ground point is colored by its star color histogram, or by the unordered star/anti-star histogram pair when the faithful signed image contains the exceptional v=2k complement. The resulting ordered ground partition is transported by a bounded exact Schreier search that carries original-domain transporters and the complement-parity homomorphism. When the complete colored relation is determined by ground-cell count profiles, the exact original-domain SI right coset is reconstructed without enumerating the represented signed group; a one-parity solution is restricted through the exact parity kernel. Otherwise a significant partition is retained only as a non-exact candidate filter and no SI claim is made.",
+  "validation": {
+    "pull_request": 49,
+    "passing_workflow_run_id": 32280157302,
+    "workflow_run_number": 293,
+    "result": "success",
+    "validated_jobs": [
+      "validate-rev177-fast",
+      "validate-rev-series"
+    ],
+    "validated_steps": [
+      "large-order J(9,2) S9 profile-determined SI without represented-group enumeration",
+      "complement-expanded J(6,3) exact complement-parity filtering",
+      "profile invariant exact-emptiness regression",
+      "all prior Babai recurrence/master regressions",
+      "real nauty-labelg differential gate"
+    ],
+    "merged_main_sha": "66a8f3e16fcfa610b632a66dc519622014fbf000"
+  },
+  "resolved_in_this_revision": [
+    "exact profile-determined signed Johnson relation SI when the original signed-ground group is above the rev176 enumeration cap but the canonical partition orbit is polynomially bounded",
+    "complement-safe star/anti-star ground partitioning with exact parity-kernel reconstruction",
+    "proof-carrying exact emptiness from signed-ground profile invariants"
+  ],
+  "mandatory_rewrite": "A literal decomposition of W1 into a resolved profile-determined child and a residual higher-order child would increase the active count beyond the already-full 512 forecast. Those would-be children are therefore immediately rewritten transversally into one active residual leaf W1R: higher-order signed-ground relational closure. The rev177 profile terminal remains a solved internal fast path rather than a separately counted active branch. Reforecast remains 512.",
+  "next_leaf": {
+    "id": "W1R",
+    "status": "unresolved",
+    "problem": "for actual colored k-subset relations not determined by the rev177 point-profile partition, derive a stronger canonical pair/higher-arity significant split or local-certificate recurrence, preserve the signed complement homomorphism and quasipolynomial cost certificate, and compose the recursively solved candidates back to an exact original-domain SI coset"
+  }
+}
