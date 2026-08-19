@@ -1,0 +1,15 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 116,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "result": "Integrated a supported-function-class certificate stack: finite-sample tilt smoothness certificate -> Lipschitz pointwise density-ratio intervals -> robust weight-interval conformal threshold -> union-bound unconditional coverage floor. Added a reusable fitted calibrator and fail-closed small-sample support behavior. Full local regression 54 passed; 18 extra covariate-shift replications were all ready with minimum empirical coverage 0.9252 (mean 0.9374), none below 0.88. Added an explicit max_cells guard so high-dimensional grid requests cannot trigger exponential allocation silently; callers must use a slab/coarser partition. This empirical check does not replace the conditional proof assumptions.",
+  "next_leaf": {
+    "id": "D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2c2c2b2b3a",
+    "problem": "construct an extensible evidence-contract mechanism that certifies a global log-density-ratio derivative envelope for supported function classes and otherwise abstains, with empirically checkable contract provenance",
+    "status": "unresolved"
+  }
+}
