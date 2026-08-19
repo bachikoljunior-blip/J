@@ -17,7 +17,7 @@ permissions:
 jobs:
   eval-harness:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -43,3 +43,11 @@ jobs:
       - name: Exercise final broker/provider isolation path
         working-directory: agi/eval/v1
         run: python ci_broker_provider_integration.py
+      - name: Build sealed-bank qualification fixtures
+        working-directory: agi/eval/v1
+        run: |
+          docker build --build-arg LINEAGE=alpha -t agi-eval-v1-ci-sealed-alpha -f ci_fixture/Dockerfile.sealed_bank ci_fixture
+          docker build --build-arg LINEAGE=beta -t agi-eval-v1-ci-sealed-beta -f ci_fixture/Dockerfile.sealed_bank ci_fixture
+      - name: Exercise sealed-bank freeze and qualification path
+        working-directory: agi/eval/v1
+        run: python ci_sealed_bank_integration.py
