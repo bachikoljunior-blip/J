@@ -28,8 +28,11 @@ jobs:
           python-version: '3.12'
       - name: Install fast test dependencies
         run: python -m pip install --disable-pip-version-check pytest numpy
-      - name: Validate signed-ground W1R pair relation
-        run: python -m pytest -q test_signed_johnson_ground_pair_relation_si_rev178.py
+      - name: Validate signed-ground W1R pair closure
+        run: >-
+          python -m pytest -q
+          test_signed_johnson_ground_pair_relation_si_rev178.py
+          test_signed_johnson_ground_pair_orbit_si_rev178.py
 
   validate-rev-series:
     runs-on: ubuntu-latest
@@ -92,5 +95,6 @@ jobs:
           test_signed_johnson_ground_relational_si_rev176.py
           test_signed_johnson_ground_profile_partition_si_rev177.py
           test_signed_johnson_ground_pair_relation_si_rev178.py
+          test_signed_johnson_ground_pair_orbit_si_rev178.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
