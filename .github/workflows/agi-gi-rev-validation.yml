@@ -51,6 +51,8 @@ jobs:
           test_paired_affected_segment_automorphism_rev184.py
           test_paired_local_certificate_beard_rev184.py
           test_signed_johnson_local_certificate_relation_rev184.py
+          test_paired_partition_transporter_rev184.py
+          test_signed_johnson_local_certificate_split_filter_rev184.py
 
   validate-rev-series:
     runs-on: ubuntu-latest
@@ -123,6 +125,8 @@ jobs:
           test_paired_affected_segment_automorphism_rev184.py
           test_paired_local_certificate_beard_rev184.py
           test_signed_johnson_local_certificate_relation_rev184.py
+          test_paired_partition_transporter_rev184.py
+          test_signed_johnson_local_certificate_split_filter_rev184.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
