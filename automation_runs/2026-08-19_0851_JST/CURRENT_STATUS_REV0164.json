@@ -1,0 +1,37 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 164,
+  "rewrite_trigger": {
+    "predicted_total_active_nodes": 512,
+    "active_before_R1_decomposition": 512,
+    "temporary_active_after_replacing_R1_with_R1a_R1b": 513,
+    "prediction_exceeded": true
+  },
+  "transversal_audit": "Traversed the non-replaced correctness, execution, accounting and canonical-closure obligations after rev163. The new ProofCarryingCoset shows that the still-open structural recursion and the former separate R2 closure are not independent problems: every non-polylog recursive operator must itself emit the exact coset/emptiness, exact executed child objects, canonical/equivariance evidence and local cost node that R2 would otherwise reconstruct later. Keeping R1.b and R2 separate would reintroduce the proof/execution drift that rev162 was intended to eliminate.",
+  "low_probability_high_leverage_rewrite": "Replace the open remainder R1.b and all of R2 by one recursive closure problem S1. S1 is not merely a deduplication label: its operator protocol makes canonical aggregation and complexity evidence mandatory return values of every structural SI recursion step. The former R2 becomes an independent verifier/differential consumer of S1 objects, not a separate producer of evidence. The resolved rev163 boundary R1.a remains as the terminal/base operator reused by S1.",
+  "replaced_problems": ["R1", "R2"],
+  "replacement_solution_problems": [
+    {
+      "id": "T1",
+      "status": "resolved-rev163",
+      "problem": "Proof-carrying SI base operator: typed exact coset/emptiness object, execution-derived accounting node, exact full-S_m small/polylog terminal, and fail-closed refusal to substitute opaque node-capped SI for a non-polylog child."
+    },
+    {
+      "id": "S1",
+      "status": "open",
+      "problem": "Self-certifying structural SI closure. Implement every non-polylog path (intransitive composition, imprimitive quotient/kernel recursion, primitive non-giant reduction, giant local-certificates growing beard, Split/Johnson and exact certified terminals) as operators that recursively call S1 and return T1-compatible proof objects. The same returned objects must carry canonical/equivariance and local/global accounting evidence and be directly consumable by independent exact-coset/relabeling/labelg differential verification; no separate post-hoc R2 evidence construction is allowed."
+    }
+  ],
+  "world_existing_solution_check": "Babai's quasipolynomial SI algorithm already supplies the containing architecture for S1: Luks-style recursion, giant local certificates, affected/unaffected reduction, canonical partitioning and small auxiliary brute force are one recursive algorithm. The proof-object protocol is J's implementation strategy for forcing those algorithmic and complexity obligations to be witnessed by the same executed recursion.",
+  "reforecast_total_active_nodes": 512,
+  "actual_active_nodes_after_rewrite": 512,
+  "prediction_exceeded_after_rewrite": false,
+  "next_leaf": {
+    "id": "S1",
+    "status": "open",
+    "problem": "replace the first non-polylog transitive R1 stop with a structural S1 operator; start with a canonical structural classifier that returns either a certified intransitive/imprimitive reduction, an already-supported exact special terminal, or an explicit primitive/giant continuation without ever calling the old node-capped child SI"
+  }
+}
