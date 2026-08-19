@@ -1,16 +1,20 @@
 # AGI root problem — problem tree
 
-Updated: 2026-08-19 12:36 JST
+Updated: 2026-08-19 12:39 JST
 
 ## Root
 Deliver AGI without lowering the achievement criteria, not merely as a prototype/research artifact, but in a form that is actually usable.
 
 AGI itself is distinct from this problem-solving mechanism. Achievement must not be claimed without empirical evidence.
 
-## Total problem-count prediction
-Predicted total parent+child problems: **31**. The currently enumerated non-replaced tree is **31**, exactly at the prediction. The mandatory cross-tree rewrite/consolidation rule has therefore **not** triggered; it triggers only if the active count exceeds 31.
+## Problem-count prediction and mandatory rewrite history
+The previous prediction was **31** active parent+child problems. After resolving P3.3.3b, the next leaf P3.7.2 was attempted directly. A final secret generator bank cannot honestly be completed by placing its content in this public repository; the attempt therefore remained unresolved and was decomposed into five necessary subproblems: sealed execution/custody, cross-domain independent banks, adversarial variants, contamination/leakage auditing, and secret rotation/reproduction. That transient decomposition raised the active count from 31 to **36**, exceeding the prediction and triggering the required cross-tree rewrite.
 
-## Tree v1
+The transversal rewrite below is not a duplicate-only merge. It replaces several old open branches with three cross-cutting solution problems. The main low-probability/high-leverage move is to stop treating final evaluation as a static benchmark collection and instead make it a **post-freeze blind evaluation foundry**: multiple independently custodied sealed generators create tasks only after the candidate digest is frozen; competent humans are calibrated on the same generated families; the same service runs the candidate and an independent rerun. This simultaneously attacks secret task generation, contamination, human baselines, generality/performance evidence, and independent audit without weakening any gate.
+
+Reforecast total parent+child problems: **36**. Tree v2 currently enumerates **30** active non-replaced problems, leaving six-problem headroom before another mandatory transversal rewrite.
+
+## Tree v2 — active non-replaced problems
 
 - P0 [open] Deliver rigorously demonstrated, practically usable AGI.
   - P1 [open-parent] Define falsifiable AGI acceptance contract.
@@ -19,33 +23,34 @@ Predicted total parent+child problems: **31**. The currently enumerated non-repl
     - P1.3 [resolved-v0] Specify autonomy criterion.
     - P1.4 [resolved-v0] Specify practical-delivery criterion.
     - P1.5 [resolved-v0] Specify anti-contamination / anti-gaming criterion.
-  - P2 [open] Build an AGI system candidate distinct from the problem solver.
-  - P3 [open-parent] Build evaluation harness and held-out/fresh task generation.
+  - P3 [resolved-runtime-v2] Provide the evaluator-controlled substrate needed to freeze criteria/tasks/candidate identity, execute candidates in isolated environments, score conservatively, and emit replay-checkable evidence.
     - P3.1 [resolved-v1] Anti-weakening, fail-closed acceptance-manifest validation.
     - P3.2 [resolved-v1] Physically separated public/private task packs plus cryptographic freeze lock for manifest, packs, provenance, and immutable candidate identity.
     - P3.3 [resolved-runtime-v2] Execute candidates in evaluator-controlled task environments, including writable artifact arenas and evaluator-mediated isolated external-service tools while candidate IP networking remains disabled.
       - P3.3.1 [resolved-v1] Isolated final container protocol: no candidate network, read-only root, dropped capabilities, no-new-privileges, PID/resource controls, immutable candidate digest.
-      - P3.3.2 [resolved-runtime-v1] Final container mechanics were executed on GitHub Actions run `32211831216`: 16 tests passed, the isolated toy candidate image built, and `ci_container_integration.py` completed its final-mode path successfully. This is execution evidence for the harness mechanism only, explicitly not AGI evidence.
+      - P3.3.2 [resolved-runtime-v1] GitHub Actions run `32211831216` exercised the original isolated final-container mechanics. This is harness evidence only, not AGI evidence.
       - P3.3.3 [resolved-runtime-v2] Support nontrivial software/data/planning artifacts and evaluator-controlled tools.
         - P3.3.3a [resolved-v1] Writable `/work` arena with pristine read-only inputs, bounded no-symlink workspace snapshots, and hidden data-only artifact graders.
-        - P3.3.3b [resolved-runtime-v2] Evaluator-controlled AF_UNIX broker connects a `network=none` candidate to independently isolated, immutable-digest provider containers. Provider image/network/credential configuration is sourced only from sealed private rows; credential values are not placed in candidate requests/argv or evidence. GitHub Actions run `32212664460` passed 25 unit/development tests, the original final-container mechanics test, and a six-domain toy final-mode broker/provider fixture using a credentialed provider and separate private-network HTTP service. The fixture also verified allowlist denial, broker cost/policy telemetry, and absence of the toy credential from evidence. This is execution evidence for the harness mechanism only, not AGI evidence.
-      - P3.3.4 [resolved-framework] Evaluator-owned, hash-chained autonomy telemetry and derivation of completion, intervention, recovery, elapsed-time, resource-cost, policy-violation, and state-persistence metrics. This is instrumentation only; it does not establish the P6 autonomy gate.
-    - P3.4 [resolved-v1] Conservative per-family/per-domain scoring with Wilson lower confidence bounds, equal required-domain weighting, and no averaging away a required family/domain failure.
-    - P3.5 [resolved-framework] Deterministic fresh-task generator adapter interface with seed and generator/file provenance hashes.
-    - P3.6 [resolved-v1] Tamper-evident evidence bundles, per-record hash chaining, and offline evidence verification/recomputation.
-    - P3.7 [open-parent] Supply real, secret-preserving final task-generation content and human references.
-      - P3.7.1 [resolved-framework] Generator-provider request/response and provenance mechanism; final generator implementation can remain sealed while its digest/version is frozen.
-      - P3.7.2 [open] Build independent sealed generator banks across every required domain, with contamination/leakage checks and adversarial variants.
-      - P3.7.3 [open] Collect competent-human reference distributions, determine statistically justified per-family sample sizes, and freeze thresholds/sample-size plan before final evaluation.
-  - P4 [open] Demonstrate generality empirically.
-  - P5 [open] Demonstrate performance empirically.
-  - P6 [open] Demonstrate autonomy empirically.
-  - P7 [open] Demonstrate robustness, security, and bounded operation.
-  - P8 [open] Package the demonstrated system for practical use.
-  - P9 [open] Independently reproduce evidence and audit achievement claim.
+        - P3.3.3b [resolved-runtime-v2] A `network=none` candidate reaches only an evaluator AF_UNIX broker; external-service tools execute in separate immutable-digest provider containers whose network and credential configuration comes from sealed private rows. GitHub Actions run `32212664460` passed 25 tests plus both final-container and broker/provider mechanical integrations, including a credentialed provider/private-network service and credential-leak check. Harness evidence only, not AGI evidence.
+      - P3.3.4 [resolved-framework] Evaluator-owned, hash-chained autonomy telemetry and required derived metrics. Instrumentation only; it does not establish the autonomy gate.
+    - P3.4 [resolved-v1] Conservative family/domain scoring with Wilson lower bounds and no averaging away required failures.
+    - P3.5 [resolved-framework] Deterministic fresh-task generator adapter with seed/generator/file provenance.
+    - P3.6 [resolved-v1] Tamper-evident evidence bundles, per-record hash chaining, and offline verification/recomputation.
+  - X1 [open] **Immutable AGI appliance.** Build the AGI candidate itself, distinct from this problem solver, directly as the exact third-party-runnable artifact to be evaluated: immutable build identity, documented API/application, persistence, observability, resource envelope, reproducible install/run path, and repeatable acceptance entrypoint. Replaces old P2 + P8 and the deployment side of P9.
+  - X2 [open-parent] **Post-freeze blind human-calibrated evaluation foundry.** After X1 candidate digest freeze, generate secret tasks under independent custody, calibrate competent humans on the same families, execute candidate trials, and perform an independently custodied rerun. Replaces old P3.7/P3.7.2/P3.7.3 + P4 + P5 + the evaluation side of P9.
+    - X2.1 [open] Establish independently custodied, digest-pinned sealed generator banks spanning every required domain/family, with generator content unavailable to candidate development and at least two independent custody lineages per required domain.
+    - X2.2 [open] Build contamination/leakage auditing plus adversarial/metamorphic variant generation that can invalidate compromised families fail-closed rather than silently substitute them.
+    - X2.3 [open] Collect competent-human reference distributions on generated families and freeze statistically justified thresholds/sample sizes before candidate final trials.
+    - X2.4 [open] Run blind final generality/performance trials and an independently custodied statistically meaningful rerun against the exact X1 digest, preserving failures and provenance.
+  - X3 [open-parent] **Long-horizon autonomy/security proving ground.** Use the same post-freeze evaluator substrate to measure autonomous decomposition, tool use, recovery, state persistence, containment and bounded operation under evaluator-injected faults and adversarial conditions. Replaces old P6 + P7 and the autonomy/security part of P9.
+    - X3.1 [open] Long-horizon jobs with evaluator-owned fault injection, checkpoints, recovery observations and strict intervention accounting.
+    - X3.2 [open] Adversarial policy/security trials covering tool misuse, privilege/secret boundary pressure, malicious inputs/artifacts and containment failures.
+    - X3.3 [open] Resource/cost/duration stress trials that establish bounded operation and reproducibility under the frozen operational envelope.
+
+## Replaced old open problems
+P2, P3.7, P3.7.2, P3.7.3, P4, P5, P6, P7, P8 and P9 from Tree v1 are replaced by X1–X3 above and are excluded from the active count. Resolved descendants in the retained P1/P3 branches remain active historical prerequisites; the removed P3.7 branch is preserved by repository history but not double-counted.
 
 ## P1 acceptance contract v0
-
 An AGI claim is accepted only if **all** gates pass on a frozen candidate, with evaluation tasks/variants not available to the candidate during development.
 
 ### G1 Generality
@@ -64,7 +69,7 @@ The exact evaluated candidate must be runnable by a third party from a documente
 Final evaluation uses held-out or freshly generated task instances, records seeds/configuration/tool traces/results, separates development from final evaluation, reports failures as well as successes, and requires independent rerun of a statistically meaningful sample. Any material benchmark contamination or unverifiable result invalidates that result rather than being silently substituted.
 
 ## Current leaf selection
-P3.3.3b is resolved at the evaluation-mechanism level with executed CI evidence. Continue with P3.7.2: construct independent sealed generator banks across every required domain, including contamination/leakage controls and adversarial variants. This must produce real evaluation content/mechanisms, not merely toy examples, before P3.7 can be resolved.
+X2.1 is selected. The next implementation step is to make independently custodied sealed-bank identity/custody/commitment rules executable and fail-closed, then use that mechanism to admit real non-public generator providers rather than storing final task content in J.
 
 ## Evidence status
-**No AGI achievement is claimed.** Current work establishes and hardens evaluation infrastructure only. Development fixtures, toy CI fixtures, and framework-level resolutions are explicitly not evidence that P4–P9 pass.
+**No AGI achievement is claimed.** P3 is evaluation-infrastructure evidence only. X1, X2 and X3 remain open, so no claim is made that generality, performance, autonomy, robustness, practical delivery or independent reproduction has passed.
