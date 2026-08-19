@@ -1,0 +1,5 @@
+FROM python:3.12-slim
+ARG LINEAGE
+ENV BANK_LINEAGE=${LINEAGE}
+COPY sealed_bank_generator.py /generator.py
+ENTRYPOINT ["python", "/generator.py"]
