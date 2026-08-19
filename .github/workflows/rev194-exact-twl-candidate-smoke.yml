@@ -1,0 +1,30 @@
+name: rev194 exact k-WL candidate smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/colored_subset_exact_twl_branch_plan_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/design_lemma_exact_twl_candidate_si_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_design_lemma_exact_twl_candidate_rev194.py'
+      - '.github/workflows/rev194-exact-twl-candidate-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-rev194:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
+      - name: Validate theorem-faithful Design branch through full string SI
+        run: python -m pytest -q test_design_lemma_exact_twl_candidate_rev194.py
