@@ -1,6 +1,8 @@
-# AGI root problem — problem tree
+# Independent AGI acceptance/evidence problem tree
 
-Updated: 2026-08-19 17:24 JST
+> **Naming boundary:** This document is **not** the `AGI-GI rev系列`. The name `AGI-GI rev系列` is reserved exclusively for the 512-problem graph alignment / symmetry / graph isomorphism / permutation-group / canonical-labeling main line defined by `automation_runs/2026-08-19_0851_JST/AGI_GI_REV_SERIES.md` and summarized by `MAIN.md`.
+>
+> This separate tree is named **AGI Acceptance-Evidence Tree (AAE Tree)**. Its historical 34-problem forecast, F1 federation work, X1/X2/X3 evaluation work, and related custodian/evidence infrastructure must not be reported as AGI-GI rev-series progress.
 
 ## Root
 Deliver AGI without lowering the achievement criteria, not merely as a prototype/research artifact, but in a form that is actually usable.
@@ -60,7 +62,7 @@ Tree-v2 X2.1, X2.1a, X2.1b, X2.1b1, X2.1b2, X2.1b3, and X2.1c are replaced by F1
 An AGI claim is accepted only if all gates pass on the frozen candidate: generality across preregistered required domains, competent-human-level performance in every required family and aggregate, long-horizon autonomous decomposition/tool use/error recovery/state preservation, practical third-party delivery of the exact evaluated artifact, and anti-gaming/contamination controls with independent statistically meaningful rerun. Failures cannot be averaged away and unverifiable or materially contaminated evidence is invalidated rather than silently substituted.
 
 ## Current leaf selection
-`F1.1` is selected. The repository already has a signed documentary admission mechanism and a public custodian call, but no real outside participant is currently accepted. The next valid progress is real expression of interest followed by external identity/conflict/capability qualification; framework-only additions cannot resolve F1.1.
+`F1.1` is selected within the **AAE Tree only**. It is not the current leaf of the AGI-GI rev series.
 
 ## Evidence status
 **No AGI achievement is claimed.** P3 and earlier sealed-bank admission/qualification work are infrastructure evidence only. X1, F1, X2, and X3 remain open, so generality, performance, autonomy, robustness, practical delivery, and independent reproduction have not been demonstrated.
