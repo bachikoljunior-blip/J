@@ -51,6 +51,28 @@ def _canonical_rows(
     return tuple((T, by_coord[T]) for T in expected)
 
 
+def _integer_pair_weights(rows):
+    """Canonically encode arbitrary hashable pair colors for the integer reducer."""
+    unique = []
+    seen = set()
+    for _, value in rows:
+        try:
+            if value not in seen:
+                seen.add(value)
+                unique.append(value)
+        except TypeError as exc:
+            raise ValueError("relation colors must be hashable") from exc
+    keyed = sorted(
+        ((type(value).__module__, type(value).__qualname__, repr(value)), value)
+        for value in unique
+    )
+    for i in range(1, len(keyed)):
+        if keyed[i - 1][0] == keyed[i][0] and keyed[i - 1][1] != keyed[i][1]:
+            raise ValueError("distinct pair colors have indistinguishable canonical repr keys")
+    ids = {value: i for i, (_, value) in enumerate(keyed)}
+    return tuple((tuple(U), ids[value]) for U, value in rows)
+
+
 def descend_uniform_neighborhood_test_relation(
     right_size: int,
     arity: int,
@@ -64,12 +86,12 @@ def descend_uniform_neighborhood_test_relation(
     """Exact rev205 bridge from rev204's V2 relation into existing split/Johnson machinery.
 
     The input must be the complete controlled-arity colored subset relation produced
-    by ``build_uniform_neighborhood_hypergraph``.  The routine first refuses a
-    constant relation.  For arity two it hands the complete weighted pair relation
-    directly to the existing coherent/Johnson reducer.  For higher arity it runs
-    exact codegree/incidence refinement.  A significant point split is accepted as
-    strict right-ground progress.  If the first nonconstant lower relation is a pair
-    relation, that exact pair relation is handed to the same reducer.  Higher-arity
+    by ``build_uniform_neighborhood_hypergraph``. The routine first refuses a
+    constant relation. For arity two it hands the complete weighted pair relation
+    directly to the existing coherent/Johnson reducer. For higher arity it runs
+    exact codegree/incidence refinement. A significant point split is accepted as
+    strict right-ground progress. If the first nonconstant lower relation is a pair
+    relation, that exact pair relation is handed to the same reducer. Higher-arity
     homogeneous structure is deliberately preserved as an unresolved Design-Lemma
     obligation rather than being called solved.
 
@@ -84,7 +106,11 @@ def descend_uniform_neighborhood_test_relation(
     v = int(right_size)
     t = int(arity)
     palette = tuple(value for _, value in rows)
-    if len(set(palette)) <= 1:
+    try:
+        color_count = len(set(palette))
+    except TypeError as exc:
+        raise ValueError("relation colors must be hashable") from exc
+    if color_count <= 1:
         return UniformNeighborhoodRelationDescent(
             "constant_right_relation_unresolved", v, t, None,
             (tuple(range(v)),), v, False, None, None, None, True,
@@ -94,7 +120,7 @@ def descend_uniform_neighborhood_test_relation(
     if t == 2:
         pair = reduce_canonical_pair_structure(
             v,
-            rows,
+            _integer_pair_weights(rows),
             max_class_fraction=max_class_fraction,
             max_johnson_nodes=max_johnson_nodes,
         )
@@ -141,10 +167,10 @@ def descend_uniform_neighborhood_test_relation(
         )
 
     if design.decisive_subset_size == 2 and design.subset_signatures:
-        pair_weights = tuple((tuple(U), tuple(signature)) for U, signature in design.subset_signatures)
+        pair_rows = tuple((tuple(U), tuple(signature)) for U, signature in design.subset_signatures)
         pair = reduce_canonical_pair_structure(
             v,
-            pair_weights,
+            _integer_pair_weights(pair_rows),
             max_class_fraction=max_class_fraction,
             max_johnson_nodes=max_johnson_nodes,
         )
