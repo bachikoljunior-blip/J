@@ -18,9 +18,10 @@ def swap01(v):
     return tuple(p)
 
 
-def induced_action(v, k):
+def induced_action(v, k, *, include_complement=False):
     subsets = tuple(combinations(range(v), k))
     index = {subset: i for i, subset in enumerate(subsets)}
+    universe = set(range(v))
 
     def induce(sigma):
         return tuple(
@@ -28,7 +29,12 @@ def induced_action(v, k):
             for subset in subsets
         )
 
-    return schreier_stabilizer_chain([induce(swap01(v)), induce(cycle(v))])
+    gens = [induce(swap01(v)), induce(cycle(v))]
+    if include_complement:
+        if v != 2 * k:
+            raise ValueError("complement is a k-subset automorphism only when v=2k")
+        gens.append(tuple(index[tuple(sorted(universe.difference(subset)))] for subset in subsets))
+    return schreier_stabilizer_chain(gens)
 
 
 def test_j92_lifts_to_strictly_smaller_ground_without_enumerating_s9():
@@ -58,3 +64,17 @@ def test_j63_decoder_preserves_exceptional_complement_bit_exactly():
     assert _induce_signed_ground_generator(
         v, k, signed.ground_permutation, signed.complement
     ) == p_std
+
+
+def test_j63_complement_expanded_ambient_recovers_johnson_after_size_merge():
+    H = induced_action(6, 3, include_complement=True)
+    source = tuple(i % 4 for i in range(H.degree))
+    target = tuple((i * 5 + 2) % 7 for i in range(H.degree))
+
+    got = lift_primitive_johnson_to_ground_relation(H, source, target)
+    assert got.status == "exact_johnson_ground_relational_lift", got
+    assert (got.ground_size, got.subset_size, got.current_degree) == (6, 3, 20)
+    assert got.strict_auxiliary_progress
+    assert got.equivariant_up_to_johnson_automorphism
+    assert any(g.complement for g in got.lifted_generators)
+    assert "exact unordered-orbital family fallback" in got.reason

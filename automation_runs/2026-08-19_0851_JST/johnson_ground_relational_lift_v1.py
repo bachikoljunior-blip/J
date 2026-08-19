@@ -6,6 +6,7 @@ from typing import Tuple
 
 from canonical_orbital_size_relation import canonical_orbital_size_relation
 from johnson_pair_relation_recognizer import recognize_johnson_pair_relation
+from robust_johnson_orbital_recognition_v1 import recognize_johnson_from_exact_unordered_orbitals
 
 
 GroundPermutation = Tuple[int, ...]
@@ -98,27 +99,31 @@ def lift_primitive_johnson_to_ground_relation(
     target_values,
     *,
     max_recognition_nodes: int = 500000,
+    max_robust_orbital_degree: int = 128,
 ) -> JohnsonGroundRelationalLift:
     """Exact structural lift from a certified Johnson-domain SI instance to its ground relation.
+
+    The fast first recognizer uses canonical orbital-size signatures.  Equal-size
+    orbitals are deliberately merged there, so in bounded degree this function
+    now falls back to the exact *family* of unordered-pair orbitals when that safe
+    coarsening loses a Johnson color (notably complement-expanded v=2k actions).
+    Any fallback coordinate gauge is accepted only after every supplied ambient
+    generator decodes as a ground permutation plus optional complement and then
+    re-induces exactly.  Thus the repair adds certification power without turning
+    a guessed orbital name into evidence.
 
     This does not claim to solve the resulting large-ground relational SI problem.
     It proves the reduction interface needed for that recursion: one exact Johnson
     coordinate gauge, the source/target colors transported to standard k-subsets,
-    and every supplied ambient generator decoded to the faithful ground action
-    (with the v=2k complement bit when present).
-
-    The chosen coordinate representative need not itself be canonical.  Because
-    the recognizer returns the complete Johnson isomorphism coset, any other gauge
-    differs by a Johnson automorphism; the returned reduction is therefore exact
-    and equivariant up to that explicitly represented automorphism group.
+    and every supplied ambient generator decoded to the faithful ground action.
     """
     source = tuple(source_values)
     target = tuple(target_values)
     m = group.degree
     if len(source) != m or len(target) != m:
         raise ValueError("string/group degree mismatch")
-    if max_recognition_nodes < 1:
-        raise ValueError("max_recognition_nodes must be positive")
+    if max_recognition_nodes < 1 or max_robust_orbital_degree < 2:
+        raise ValueError("invalid Johnson recognition parameters")
 
     relation = canonical_orbital_size_relation(group)
     johnson = recognize_johnson_pair_relation(
@@ -126,16 +131,29 @@ def lift_primitive_johnson_to_ground_relation(
         relation.pair_weights,
         max_nodes_per_candidate=max_recognition_nodes,
     )
+    recognition_nodes = johnson.search_nodes
+    recognition_mode = "canonical orbital-size relation"
+
     if johnson.status != "exact_johnson_color_relation" or johnson.isomorphism_coset is None:
-        return JohnsonGroundRelationalLift(
-            "undetermined_not_certified_johnson",
-            int(johnson.ground_size or 0),
-            int(johnson.subset_size or 0),
-            m,
-            (), (), (), (), False, False,
-            johnson.search_nodes,
-            johnson.reason,
+        fallback = recognize_johnson_from_exact_unordered_orbitals(
+            group,
+            max_degree=max_robust_orbital_degree,
+            max_nodes_per_candidate=max_recognition_nodes,
         )
+        recognition_nodes += fallback.search_nodes
+        if fallback.status == "exact_johnson_color_relation" and fallback.isomorphism_coset is not None:
+            johnson = fallback
+            recognition_mode = "exact unordered-orbital family fallback"
+        else:
+            return JohnsonGroundRelationalLift(
+                "undetermined_not_certified_johnson",
+                int(fallback.ground_size or johnson.ground_size or 0),
+                int(fallback.subset_size or johnson.subset_size or 0),
+                m,
+                (), (), (), (), False, False,
+                recognition_nodes,
+                "orbital-size recognition did not certify Johnson and bounded exact-orbital fallback also did not produce a certified coordinate system: " + fallback.reason,
+            )
 
     v = int(johnson.ground_size)
     k = int(johnson.subset_size)
@@ -161,8 +179,8 @@ def lift_primitive_johnson_to_ground_relation(
                 "undetermined_generator_not_johnson_automorphism",
                 v, k, m, coordinate,
                 tuple(source_std), tuple(target_std), tuple(lifted),
-                v < m, False, johnson.search_nodes,
-                "a supplied ambient generator did not decode and re-induce as an exact Johnson automorphism",
+                v < m, False, recognition_nodes,
+                "a supplied ambient generator did not decode and re-induce as an exact Johnson automorphism after " + recognition_mode,
             )
         lifted.append(signed)
 
@@ -172,6 +190,6 @@ def lift_primitive_johnson_to_ground_relation(
         tuple(source_std), tuple(target_std), tuple(lifted),
         v < m,
         True,
-        johnson.search_nodes,
-        "certified Johnson coordinates transport the colored k-subset relation to a strictly smaller ground; every ambient generator was exactly decoded and re-induced",
+        recognition_nodes,
+        recognition_mode + " certified Johnson coordinates; the colored k-subset relation is transported to a strictly smaller ground and every ambient generator was exactly decoded/re-induced",
     )
