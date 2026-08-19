@@ -48,8 +48,11 @@ def test_one_empty_orbit_child_proves_global_emptiness():
     G = schreier_stabilizer_chain([
         triple_cycle(0), triple_cycle(3), triple_cycle(6)
     ])
+    # Global multiplicities agree (three 0s, three 1s, three 2s), so T1 cannot
+    # reject at the root.  The first two invariant orbits have incompatible local
+    # multiplicities, forcing emptiness to be established by the orbit recursion.
     source = (0, 0, 0, 1, 1, 1, 2, 2, 2)
-    target = (0, 0, 0, 1, 1, 1, 2, 2, 3)
+    target = (0, 0, 1, 0, 1, 1, 2, 2, 2)
     got = s1_string_isomorphism(
         G, source, target,
         root_n=64,
