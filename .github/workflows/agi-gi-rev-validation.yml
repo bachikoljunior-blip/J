@@ -38,5 +38,7 @@ jobs:
           python -m pytest -q
           test_regular_prime_cyclic_terminal.py
           test_master_canonical_reduction_v5.py
+      - name: Validate Babai recurrence contract
+        run: python -m pytest -q test_babai_recurrence_contract_v1.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
