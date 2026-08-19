@@ -1,0 +1,36 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 181,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "W1R-H2 complement-safe signed Johnson pair/higher-arity image action, exact smaller-image SI, original-domain preimage, then full k-subset restriction inside the candidate",
+  "world_existing_solution_check": "The existing-world analogue for the image plumbing is the standard finite-set action/homomorphism pattern (for example GAP Action/ActionHomomorphism with OnSets plus subgroup/representative preimages). The remaining hard-case architecture continues to match Babai's SI framework: Johnson configurations are the canonical-partition obstruction and local certificates/canonical partitioning are the mechanism for the giant barrier. These analogues are used as architecture checks, not as evidence that J has completed Babai's full theorem.",
+  "direct_attempt_result": "rev180 constructs complement-safe t-subset relation coordinates from signed Johnson generators. A generator acts on a t-subset through its ground permutation; the exceptional v=2k complement acts on k-subset colors and is quotiented by reversal of intersection-histogram signatures, so a pure complement enters the relation-image kernel. The exact relation-image string-isomorphism coset is computed by intersecting the induced image group with the complete value-preserving Young coset and is lifted to the original J(v,k) domain by rev179 paired_action_coset_preimage. Nonempty t<k output remains a verified relation filter. rev181 then feeds that exact original-domain filter into the existing U2/S1/V2 candidate-coset SI machinery, allowing the remaining full colored k-subset restriction to close when the filtered subgroup enters an existing exact structural case.",
+  "validation": {
+    "pull_request": 53,
+    "passing_workflow_run_id": 32285869392,
+    "workflow_run_number": 333,
+    "result": "success",
+    "validated_jobs": ["validate-w1r-fast", "validate-rev-series"],
+    "validated_steps": [
+      "pure signed complement on J(6,3) maps to the identity pair-image and is recovered as paired-action kernel order 2",
+      "S6 on J(6,3) pair image has degree 15 < 20 and yields an exact original-domain relation-filter coset containing the witness",
+      "signed v=8,k=4,t=3 relation signatures are equivariant under a ground permutation plus complement",
+      "the J(6,3) distinguished-point star string closes exactly after relation filtering, with final string stabilizer order 120",
+      "fast W1R image-plumbing job succeeded",
+      "integrated recurrence/master job succeeded",
+      "real nauty-labelg differential gate succeeded"
+    ],
+    "merged_main_sha": "12e1d7e59c66510344f755433fd3cfbcd7de26fd"
+  },
+  "mandatory_rewrite": "The forecast was already saturated at 512. rev180 relation images and rev181 candidate restriction are shared internal W1R-H substrate, not new active children. They replace separate pair-image, higher-arity-image, preimage-lift, and candidate-restriction branches while keeping the active count at 512/512.",
+  "next_leaf": {
+    "id": "W1R-H3",
+    "status": "unresolved",
+    "problem": "choose and execute the strongest strictly-smaller complement-safe higher-arity relation image canonically when the pair image is exhausted; if every such bounded relation remains homogeneous or leaves a hard transitive primitive candidate, aggregate logarithmic local certificates / Design-Lemma-style structure instead of enumerating the represented group"
+  }
+}
