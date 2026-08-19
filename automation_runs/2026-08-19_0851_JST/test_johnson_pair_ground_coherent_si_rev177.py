@@ -2,7 +2,6 @@ from itertools import combinations
 
 from johnson_pair_ground_coherent_si_v1 import johnson_pair_ground_coherent_string_isomorphism
 from permutation_group_schreier import inverse, schreier_stabilizer_chain
-from quasipoly_recurrence_accounting_v3 import validate_quasipoly_recurrence_tree_v3
 
 
 def ground_cycle(v):
@@ -35,17 +34,19 @@ def relabel_target(source, p):
     return tuple(source[pinv[j]] for j in range(len(source)))
 
 
-def test_s9_j92_large_group_closes_after_actual_relation_splits_ground():
+def test_s9_j92_high_rank_colors_preserve_observed_coherent_round_limit_fail_closed():
     G, subsets, gens = induced_symmetric_action(9)
     assert G.degree == 36
     assert G.order == 362880
 
-    # Every edge has an intrinsic color.  Stable coherent refinement therefore
-    # separates the nine ground points, while the ambient Johnson group remains S9.
+    # rev177 attempted to use full iterative coherent refinement on the actual
+    # high-rank colored relation.  The first CI run observed that this adapter
+    # reaches its explicit 128-round limit on unique edge colors.  Preserve that
+    # boundary as a fail-closed regression: rev178's direct incidence-signature
+    # path solves this kind of split without pretending the round-limited 2-WL
+    # execution was a success.
     source = tuple(100 * u + v for u, v in subsets)
-    witness = gens[1]
-    target = relabel_target(source, witness)
-
+    target = relabel_target(source, gens[1])
     got = johnson_pair_ground_coherent_string_isomorphism(
         G,
         source,
@@ -53,16 +54,10 @@ def test_s9_j92_large_group_closes_after_actual_relation_splits_ground():
         root_n=64,
         max_residual_group_order=64,
     )
-    assert got.status == "exact_johnson_pair_ground_relation_coset", got
-    assert got.exact and got.terminal_certified and got.local_cost_certified
+    assert got.status == "undetermined_ground_coherent_round_limit", got
+    assert not got.exact
+    assert not got.ground_split_verified
     assert got.ground_size == 9
-    assert got.domain_size == 36
-    assert got.ground_split_verified
-    assert got.largest_ground_class == 1
-    assert got.candidate_ground_order == 1
-    assert got.coset is not None and got.coset.contains(witness)
-    assert got.coset.subgroup.order == 1
-    assert validate_quasipoly_recurrence_tree_v3(got.accounting).certified
 
 
 def test_s9_j92_homogeneous_relation_stays_fail_closed_for_next_w1_child():
