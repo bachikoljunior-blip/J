@@ -1,0 +1,37 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 166,
+  "rewrite_trigger": {
+    "predicted_total_active_nodes": 512,
+    "active_before_S1_decomposition": 512,
+    "temporary_active_after_replacing_S1_with_S1a_S1b": 513,
+    "prediction_exceeded": true
+  },
+  "transversal_audit": "Traversed T1 and S1 together with the retained correctness/accounting infrastructure. rev163 T1 and rev165's classifier/intransitive operator are one reusable recursive substrate: exact proof objects, structural dispatch, exact preimage lifting and additive accounting. Keeping them as T1 plus a partly resolved S1 while adding new transitive children would spend separate problem nodes on the same execution protocol.",
+  "low_probability_high_leverage_rewrite": "Collapse the resolved shared substrate into U1 and make U2 the only open transitive closure. U2 must reuse U1 for every quotient/kernel/orbit child and must return the same proof objects upward. This removes the now-resolved intransitive/base branches from the open frontier without deleting their evidence, while concentrating all unresolved structural risk in one transitive problem rather than proliferating case-specific proof trees.",
+  "replaced_problems": ["T1", "S1"],
+  "replacement_solution_problems": [
+    {
+      "id": "U1",
+      "status": "resolved-rev165",
+      "problem": "Reusable proof-carrying SI substrate: typed exact coset/emptiness and embedded accounting, exact small/polylog terminal, canonical structural classification, exact intransitive recursive composition, paired-Schreier lifting, and fail-closed refusal of opaque non-polylog exact SI."
+    },
+    {
+      "id": "U2",
+      "status": "open",
+      "problem": "Transitive self-certifying SI closure. Implement canonical imprimitive quotient/kernel recursion, primitive non-giant/Split-Johnson-special-terminal reduction, and theorem-gated giant local-certificates/growing-beard recursion entirely through U1 proof objects; each operator must carry exact executed children, canonical/equivariance evidence and mechanically checkable local/global cost."
+    }
+  ],
+  "world_existing_solution_check": "Babai/Luks provides a containing recursive architecture in which transitive imprimitive and primitive/giant cases are structural continuations of the same String-Isomorphism recursion. U1/U2 mirrors that architecture while forcing execution and complexity evidence to coincide. Existing J block/orbit paired-Schreier preimage operators are reusable exact algebra for U2; they are not by themselves a quasipolynomial certificate.",
+  "reforecast_total_active_nodes": 512,
+  "actual_active_nodes_after_rewrite": 512,
+  "prediction_exceeded_after_rewrite": false,
+  "next_leaf": {
+    "id": "U2",
+    "status": "open",
+    "problem": "solve the first transitive imprimitive path: for a canonical block system with a small/polylog quotient, enumerate only the certified quotient image, exact-lift each quotient fiber, recursively intersect its smaller kernel orbits using U1 proof objects, and reassemble the exact parent coset; fail closed for large quotient or unresolved child"
+  }
+}
