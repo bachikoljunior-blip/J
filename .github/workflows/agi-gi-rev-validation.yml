@@ -43,5 +43,6 @@ jobs:
           python -m pytest -q
           test_babai_recurrence_contract_v1.py
           test_local_certificate_recurrence_adapter_v1.py
+          test_canonical_partition_transporter_v1.py
       - name: Run labelg-backed differential gate
         run: python -m pytest -q test_nauty_labelg_differential_rev141.py
