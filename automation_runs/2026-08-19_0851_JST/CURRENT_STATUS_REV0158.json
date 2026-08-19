@@ -1,0 +1,30 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 158,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "active_leaf": "Q1",
+  "implemented": "kernel_lifted_local_fullness_v2.py replaces rev153's full-domain generic coset-intersection call with rev157 invariant-orbit child SI execution for every lifted A(T) generator. Exact fullness/nonfullness and complexity evidence are separated: recurrence_child_bound_verified is true only when every actual child orbit is affected and obeys the rev114 kernel-orbit bound.",
+  "validation": {
+    "pull_request": 28,
+    "workflow_run_id": 32254590833,
+    "workflow_run_number": 97,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "covered": [
+      "fullness differential agreement with rev153",
+      "nonfullness and exact missing-generator agreement with rev153",
+      "actual two-point affected kernel-orbit child execution on the S6 wreath fixture",
+      "child-budget fail-closed with no global-intersection fallback",
+      "an independent unaffected S4 orbit preserves exact fullness but correctly forces recurrence-cost certification false",
+      "all earlier AGI-GI gates"
+    ]
+  },
+  "Q1_status": "open",
+  "remaining_gap": "When unaffected children exist, exact correctness is available but Babai's Unaffected Stabilizers route has not yet been composed with the child SI executor. Even on all-affected cases, the child SI calls themselves still need to be routed back through a proof-carrying general SI dispatcher rather than treated as opaque exact terminals when they are not polylogarithmically small.",
+  "next_action": "materialize and validate the Unaffected Stabilizers subgroup gate, then make large child SI calls explicit recursive dispatcher calls with the same cost trace used by execution"
+}
