@@ -29,13 +29,14 @@ class CertificateIncidenceDescent:
     exact_invariant: bool
     local_cost_certified: bool
     local_log2_cost_bound: float
+    allowed_local_log2_work: float
     reason: str
 
 
-def _fail(status, n, m, t, count, reason, *, gate=False, canonical=False):
+def _fail(status, n, m, t, count, reason, *, gate=False, canonical=False, allowed=0.0):
     return CertificateIncidenceDescent(
         status, n, m, t, count, 0, 0, (), (), m, False, False, 0,
-        gate, canonical, False, False, 0.0, reason,
+        gate, canonical, False, False, 0.0, allowed, reason,
     )
 
 
@@ -49,57 +50,63 @@ def certificate_incidence_descent(
     certificate_tokens_canonical: bool,
     max_class_fraction: float = 0.9,
     max_certificates: int = 200000,
-    certificate_count_poly_power: int = 4,
+    quasipoly_power: int = 5,
+    quasipoly_constant: float = 64.0,
 ) -> CertificateIncidenceDescent:
     """Aggregate proof-carrying local certificates into a canonical H5 descent.
 
-    ``certificates`` is a colored t-uniform test family.  Unlike a caller-supplied
-    Boolean claim of test-family canonicity, this routine mechanically verifies
-    that the complete colored family is invariant under every generator of the
-    supplied certified giant-domain action.  The certificate tokens themselves
-    must come from an upstream canonical certificate construction; their claimed
-    canonicity remains an explicit proof boundary rather than being inferred from
-    arbitrary Python values.  The exact Babai local-certificate theorem parameter
-    window is checked before any H5 progress is promoted.
+    The colored t-uniform test family is mechanically checked for invariance under
+    every generator of the supplied certified giant-domain action. Certificate
+    tokens remain an explicit upstream canonical-proof boundary. The exact Babai
+    local-certificate theorem parameter window is checked before any H5 progress
+    is promoted, and the giant degree is required not to exceed the primary
+    permutation degree used by the recurrence accounting.
 
-    Stable 1-WL refinement of the colored point/test incidence graph then yields
-    either a sufficiently balanced invariant point partition or, when the point
-    side remains homogeneous but certificate colors are nontrivial, an exact
-    higher-arity colored relation for the Design-Lemma-style branch.  All missing
-    proof boundaries, theorem-window failures, size overflows and malformed input
-    fail closed.
+    Stable 1-WL refinement of the colored point/test incidence graph yields either
+    a sufficiently balanced invariant point partition or, when points remain
+    homogeneous but certificate colors are nontrivial, an exact higher-arity
+    colored relation for a Design-Lemma-style branch.
 
-    The local accounting certificate is a conservative explicit operation bound
-    on this aggregation only; it is not a claim that the remaining SI recurrence
-    has been closed.
+    Local enumeration/refinement work is charged against an explicit
+    C*(log2 n)^q quasipolynomial envelope rather than an incorrect polynomial
+    certificate-count restriction: Babai-style aggregation may itself contain a
+    quasipolynomial number of logarithmic test sets. The separate max_certificates
+    parameter is only an implementation resource cap and fails closed when hit.
     """
     n = int(primary_domain_size)
     m = int(giant_degree)
     t = int(test_size)
     if n <= 0 or m <= 0 or t <= 0:
         return _fail("invalid_parameters", n, m, t, 0, "n, m and t must be positive")
+    if m > n:
+        return _fail(
+            "invalid_recurrence_measure", n, m, t, 0,
+            "giant auxiliary degree may not exceed the primary permutation degree",
+        )
     if not (0.0 < float(max_class_fraction) < 1.0):
         return _fail("invalid_split_fraction", n, m, t, 0, "max_class_fraction must lie in (0,1)")
-    if max_certificates < 1 or certificate_count_poly_power < 1:
-        return _fail("invalid_accounting_parameters", n, m, t, 0, "certificate limits must be positive")
+    if max_certificates < 1 or quasipoly_power < 1 or quasipoly_constant <= 0:
+        return _fail("invalid_accounting_parameters", n, m, t, 0, "resource and quasipolynomial parameters must be positive")
+    allowed = float(quasipoly_constant) * (log2(max(2, n)) ** int(quasipoly_power))
 
     gate = babai_local_certificate_parameter_gate(n, m, t)
     if not gate.certified:
         return _fail(
             "theorem_parameter_gate_failed", n, m, t, 0,
             "local-certificate theorem parameter window is not certified: " + gate.reason,
+            allowed=allowed,
         )
     if not certificate_tokens_canonical:
         return _fail(
             "uncertified_certificate_tokens", n, m, t, 0,
             "H5 aggregation requires upstream canonical certificate tokens",
-            gate=True,
+            gate=True, allowed=allowed,
         )
     if canonical_action_group is None or canonical_action_group.degree != m:
         return _fail(
             "invalid_canonical_action_group", n, m, t, 0,
             "a certified permutation action of the full giant domain is required",
-            gate=True,
+            gate=True, allowed=allowed,
         )
 
     rows = []
@@ -111,28 +118,28 @@ def certificate_incidence_descent(
                 return _fail(
                     "malformed_test_set", n, m, t, len(rows),
                     "every certificate test must be a distinct t-subset of the giant domain",
-                    gate=True,
+                    gate=True, allowed=allowed,
                 )
             if T in seen:
                 return _fail(
                     "duplicate_test_set", n, m, t, len(rows),
                     "a colored canonical test family may contain each test set at most once",
-                    gate=True,
+                    gate=True, allowed=allowed,
                 )
             hash(token)
             seen.add(T)
             rows.append((T, token))
             if len(rows) > max_certificates:
                 return _fail(
-                    "certificate_limit_exceeded", n, m, t, len(rows),
-                    "certificate family exceeds configured exact aggregation limit",
-                    gate=True,
+                    "certificate_resource_limit_exceeded", n, m, t, len(rows),
+                    "certificate family exceeds configured implementation resource cap",
+                    gate=True, allowed=allowed,
                 )
     except (TypeError, ValueError):
         return _fail(
             "malformed_certificate_token", n, m, t, len(rows),
             "certificate tokens must be hashable canonical values and tests must contain integer points",
-            gate=True,
+            gate=True, allowed=allowed,
         )
 
     count = len(rows)
@@ -140,19 +147,9 @@ def certificate_incidence_descent(
         return _fail(
             "empty_certificate_family", n, m, t, 0,
             "no local certificates were supplied",
-            gate=True,
-        )
-    if count > n ** certificate_count_poly_power:
-        return _fail(
-            "uncertified_certificate_count_cost", n, m, t, count,
-            "certificate count exceeds configured polynomial local-work envelope",
-            gate=True,
+            gate=True, allowed=allowed,
         )
 
-    # Mechanical proof that the colored test family is invariant under the full
-    # supplied action: checking a generating set suffices because preservation is
-    # closed under composition and inverse.  This prevents an arbitrary sampled
-    # family from being promoted merely because a caller labels it canonical.
     row_tokens = {T: token for T, token in rows}
     action_generators = canonical_action_group.original_generators or (identity(m),)
     missing = object()
@@ -161,7 +158,7 @@ def certificate_incidence_descent(
             return _fail(
                 "malformed_canonical_action_generator", n, m, t, count,
                 "canonical action contains a non-permutation generator",
-                gate=True,
+                gate=True, allowed=allowed,
             )
         for T, token in rows:
             image = tuple(sorted(g[x] for x in T))
@@ -169,12 +166,9 @@ def certificate_incidence_descent(
                 return _fail(
                     "colored_test_family_not_invariant", n, m, t, count,
                     "one canonical-action generator does not preserve the complete colored test family",
-                    gate=True,
+                    gate=True, allowed=allowed,
                 )
 
-    # Canonicalize certificate colors by token representation. Tokens are already
-    # upstream-certified canonical and generator-equivariance was checked above;
-    # repr only supplies deterministic internal color identifiers.
     token_keys = {token: (type(token).__qualname__, repr(token)) for _, token in rows}
     key_order = sorted(set(token_keys.values()))
     key_to_color = {key: i for i, key in enumerate(key_order)}
@@ -221,6 +215,14 @@ def certificate_incidence_descent(
 
     work_units = max(1, rounds * (incidence_edges + m + count + 1) * (m + count + 1))
     local_log2 = log2(work_units)
+    if local_log2 > allowed + 1e-12:
+        return CertificateIncidenceDescent(
+            "quasipolynomial_local_bound_exceeded", n, m, t, count,
+            certificate_rank, incidence_edges, tuple(point_colors), color_classes,
+            largest, significant, homogeneous_relation, rounds, True, True,
+            True, False, local_log2, allowed,
+            "exact canonical aggregation completed, but its explicit local-work charge exceeds the configured quasipolynomial envelope",
+        )
 
     if significant:
         status = "certified_significant_point_split"
@@ -239,5 +241,5 @@ def certificate_incidence_descent(
         status, n, m, t, count, certificate_rank, incidence_edges,
         tuple(point_colors), color_classes, largest, significant,
         homogeneous_relation, rounds, True, True, True, True,
-        local_log2, reason,
+        local_log2, allowed, reason,
     )
