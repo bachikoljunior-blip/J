@@ -13,7 +13,7 @@ def test_complete_relation_has_zero_symmetry_defect_and_fails_gate():
     assert got.twin_classes == (tuple(range(v)),)
 
 
-def test_distinguished_point_relation_has_exact_one_point_defect_and_passes_point-nine_gate():
+def test_distinguished_point_relation_has_exact_one_point_defect_and_passes_point_nine_gate():
     v, t = 8, 3
     colors = tuple(int(0 in S) for S in combinations(range(v), t))
     got = exact_colored_subset_symmetry_defect(v, t, colors, alpha=0.9)
