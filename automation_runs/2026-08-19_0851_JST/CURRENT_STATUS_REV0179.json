@@ -1,0 +1,35 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 179,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "W1R-H exact composition of a smaller ground/image SI result back into the original Johnson-domain candidate",
+  "world_existing_solution_check": "The GAP group-homomorphism interface supports generator-image homomorphisms, kernels, PreImage and PreImagesRepresentative; GAP's documented lifting examples reconstruct source-side representatives and subgroup preimages. J already had a quotient-specialized paired Schreier lift in block_action_preimage_coset_v1. rev179 generalizes that existing method instead of adding another action-specific enumerator.",
+  "direct_attempt_result": "Added paired_action_coset_preimage_v1: for one certified generator-paired action homomorphism, build an image Schreier chain while retaining original-domain words, certify |G|=|ker|*|im|, reject target subgroup/representative outside the image, lift the target right-coset representative and subgroup generators, adjoin the full kernel, and verify the preimage subgroup has exactly |ker| times the target-subgroup order. The output is the complete original-domain RightCoset preimage without domain- or image-group enumeration.",
+  "validation": {
+    "pull_request": 52,
+    "passing_workflow_run_id": 32283616306,
+    "workflow_run_number": 319,
+    "result": "success",
+    "validated_jobs": ["validate-w1r-fast", "validate-rev-series"],
+    "validated_steps": [
+      "generic S4 x C2 to S4 image-coset preimage reconstructs kernel order 2 and target-subgroup preimage order 12",
+      "target representative outside A4 image fails closed",
+      "inconsistent generator pairing is rejected by the kernel-times-image certification",
+      "8 fast W1R/image-plumbing tests passed",
+      "119 integrated recurrence/master tests passed",
+      "real nauty-labelg differential gate: 2 tests passed"
+    ],
+    "merged_main_sha": "3b5ad239b4b3c439a09544bdb9cd7b760f0fb16c"
+  },
+  "mandatory_rewrite": "The forecast is already saturated at 512. This generic preimage is not counted as a new active child: it replaces multiple possible pair/higher-arity/local-certificate-specific lifting branches as one shared internal W1R-H substrate. W1R-H remains the single active residual leaf and the reforecast stays 512/512.",
+  "next_leaf": {
+    "id": "W1R-H2",
+    "status": "unresolved",
+    "problem": "derive the complement-safe action of the signed Johnson generators on the smaller canonical pair/higher-arity relation, solve that image-relation SI with the existing proof-carrying S1/V2/candidate machinery when possible, lift any exact image right coset through paired_action_coset_preimage, and then for k>=3 restrict the remaining full colored k-subset SI inside that exact candidate; hard primitive image cases continue to logarithmic local-certificate/Design-Lemma-style aggregation rather than represented-group enumeration"
+  }
+}
