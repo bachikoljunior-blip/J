@@ -8,24 +8,25 @@
   "actual_active_nodes_before_attempt": 512,
   "attempted_leaf": "V2 primitive non-giant large-ground Johnson closure",
   "world_existing_solution_check": "Babai's quasipolynomial SI framework treats Johnson groups on the smaller ground Gamma and, once |Gamma| is too large for brute force, continues with relational/local-certificate recursion rather than enumerating the induced Johnson group. rev175 targets the exact interface from the current J(v,k) domain to that smaller ground relation.",
-  "direct_attempt_result": "Small-ground enumeration from rev174 does not scale to large Johnson grounds. The remaining leaf therefore requires a ground relational recursion. The first structural child is implemented here: exact extraction of one Johnson coordinate gauge, transport of both strings to standard k-subsets, faithful decoding of every ambient generator to a ground permutation plus the v=2k complement bit, and exact re-induction verification.",
-  "implemented": "johnson_ground_relational_lift_v1.py and regression tests for J(9,2) strict ground reduction and J(6,3) complement-coset preservation. The lift is exact/equivariant up to the complete Johnson automorphism gauge, but it deliberately does not claim to solve the resulting large-ground relational SI instance.",
+  "direct_attempt_result": "Small-ground enumeration from rev174 does not scale to large Johnson grounds. The remaining leaf therefore requires a ground relational recursion. The first structural child is implemented here: exact extraction of one Johnson coordinate gauge, transport of both strings to standard k-subsets, faithful decoding of every supplied ambient generator to a ground permutation plus the v=2k complement bit, and exact re-induction verification whenever the existing canonical Johnson recognizer certifies the coordinate system.",
+  "implemented": "johnson_ground_relational_lift_v1.py plus regression coverage for a certified large-ground J(9,2) lift and direct exact round-trip decoding of the exceptional J(6,3) complement bit. The first CI attempt also established a real limitation: adding the complement generator can make the current orbital-size coarsening fail to expose a Johnson color, so a complement-expanded ambient is not falsely claimed as certified by this lift.",
+  "validation_history": "workflow run 32273735197 / run #240 failed only in the initial J(6,3) end-to-end complement test because the existing Johnson recognizer correctly returned certified-no-Johnson for that coarsened ambient relation; the test was narrowed to the decoder boundary and CI was retriggered. No passing rev175 claim is made until the retriggered run succeeds.",
   "decomposition_trigger": {
     "naive_children": [
-      "JG1 exact Johnson-domain to signed-ground relational lift",
+      "JG1 exact Johnson-domain to signed-ground relational lift under a certified Johnson coordinate system",
       "JG2 proof-carrying relational SI recursion on the smaller Johnson ground",
       "JG3 exact reconstruction/translation of the ground SI coset to the original Johnson domain and candidate right coset"
     ],
     "would_raise_active_nodes_to": 515,
     "forecast_exceeded_if_appended": true
   },
-  "transversal_rewrite": "Do not append JG1-JG3 as three new active branches. Replace the existing V2 primitive-non-giant leaf by one cross-cutting active problem W1: signed-ground relational SI closure. W1 contains the resolved JG1 lift as its substrate and must integrate relational recursion plus exact coset reconstruction. This keeps the active count at 512 while reusing the same relation/coset machinery for Johnson non-giant and later giant local-certificate relational outputs.",
+  "transversal_rewrite": "Do not append JG1-JG3 as three new active branches. Replace the existing V2 primitive-non-giant leaf by one cross-cutting active problem W1: signed-ground relational SI closure. W1 contains the JG1 lift substrate and must integrate robust Johnson certification, relational recursion, and exact coset reconstruction. This keeps the active count at 512 while reusing the same relation/coset machinery for Johnson non-giant and later giant local-certificate relational outputs.",
   "actual_active_nodes_after_rewrite": 512,
   "prediction_exceeded": false,
-  "resolved_in_this_revision": ["JG1 exact Johnson-domain to signed-ground relational lift, subject to CI validation"],
+  "resolved_in_this_revision": ["JG1 exact signed-ground decoding/lift interface when Johnson coordinates are certified, subject to retriggered CI validation"],
   "next_leaf": {
     "id": "W1",
     "status": "unresolved",
-    "problem": "implement proof-carrying SI for the colored k-subset relation on the strictly smaller signed Johnson ground, with Split-or-Johnson/local-certificate compatible recursion and exact reconstruction to the original candidate coset; fail closed when the recurrence or cost certificate is unavailable"
+    "problem": "implement proof-carrying SI for the colored k-subset relation on the strictly smaller signed Johnson ground, including a certification path that does not lose v=2k Johnson structure under safe orbital coarsening, then reconstruct exactly to the original candidate coset; fail closed when recurrence or cost certification is unavailable"
   }
 }
