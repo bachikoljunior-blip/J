@@ -64,26 +64,30 @@ def reduce_part2_by_color_certificate(
     alpha: float = 0.75,
     left_colors: Iterable[Hashable] | None = None,
 ) -> ReducePart2ByColorCertificate:
-    """Exact certificate for the corrected Reduce-Part2-by-Color lemma.
+    """Exact right-part restriction certificate for Bipartite Split-or-Johnson.
 
     The input is a colored bipartite graph X=(V1,V2;E) with no twins in V1 and
-    an *ordered* partition V2=C0 dot-union C1. For each induced graph X[V1,Cj]
-    we compute the exact V1 twin classes. If X is twin-free on V1 and
-    ``alpha >= 2/3`` with ``|V1| >= 3``, the standard intersection argument says
-    at least one induced graph has relative symmetry defect at least ``1-alpha``.
+    an *ordered* partition V2=C0 dot-union C1. Helfgott's exposition uses exactly
+    this kind of restriction (Exercise 5.5 and the recursion in Proposition 5.7):
+    after splitting the right part, at least one restricted graph keeps a strong
+    enough bound on left twin classes. This routine does not rely on the asymptotic
+    exercise bound; it computes both induced left twin relations exactly and checks
+    the requested symmetry-defect threshold directly.
 
-    We verify that conclusion directly instead of assuming it. If one or both
-    parts pass, the lowest passing part index is selected; since the input color
-    partition is ordered, this is canonical relative to that supplied partition.
-    If the hypotheses are not met or neither side passes, the routine fails closed.
+    If one or both sides pass ``relative defect >= 1-alpha``, the lowest passing
+    input color index is selected. Because the right partition is supplied as an
+    ordered canonical coloring by the caller, that tie rule is canonical relative
+    to the supplied coloring. If the full graph is not left-twin-free or neither
+    restriction meets the threshold, the routine fails closed.
 
-    This is the exact reduction subroutine only. It does not claim that a caller
-    has constructed the surrounding corrected Bipartite Split-or-Johnson loop.
+    This is only a theorem-side reduction gate. It does not claim that the complete
+    corrected Bipartite Split-or-Johnson recursion or its Johnson output has been
+    implemented.
     """
     n1 = int(left_size)
     n2 = int(right_size)
     if n1 < 3 or n2 < 1:
-        raise ValueError("Reduce-Part2-by-Color requires left_size>=3 and right_size>=1")
+        raise ValueError("right-part restriction requires left_size>=3 and right_size>=1")
     if not 2 / 3 <= alpha < 1.0:
         raise ValueError("alpha must lie in [2/3,1)")
     palette = tuple(0 for _ in range(n1)) if left_colors is None else tuple(left_colors)
@@ -122,7 +126,7 @@ def reduce_part2_by_color_certificate(
             "reduce_part2_lemma_invariant_violation",
             n1, n2, float(alpha), full, C0, C1, T0, T1, d0, d1,
             None, (), None, False, True,
-            "twin-free hypotheses were verified but neither induced side reaches symmetry defect 1-alpha; do not continue the theorem recursion from this state",
+            "the full left side is twin-free, but neither supplied right-color restriction reaches symmetry defect 1-alpha; withhold recursive progress",
         )
 
     j, selected, defect = passing[0]
@@ -130,5 +134,5 @@ def reduce_part2_by_color_certificate(
         "certified_reduce_part2_by_color",
         n1, n2, float(alpha), full, C0, C1, T0, T1, d0, d1,
         j, selected, defect, True, True,
-        "full V1 twin-freeness and the selected induced side's symmetry-defect threshold are mechanically certified",
+        "full V1 twin-freeness and the selected right-color restriction's exact symmetry-defect threshold are mechanically certified",
     )
