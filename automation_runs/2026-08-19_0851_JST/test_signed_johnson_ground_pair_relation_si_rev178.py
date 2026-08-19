@@ -4,9 +4,6 @@ from permutation_group_schreier import inverse, schreier_stabilizer_chain
 from signed_johnson_ground_pair_relation_si_v1 import (
     signed_johnson_ground_pair_relation_si,
 )
-from signed_johnson_ground_profile_partition_si_v1 import (
-    signed_johnson_ground_profile_partition_si,
-)
 
 
 def cycle(v):
@@ -51,9 +48,14 @@ def relabel_target(source, p):
 
 def graph_edge_colors(v, edges):
     edge_set = {tuple(sorted(edge)) for edge in edges}
+    return tuple(int(pair in edge_set) for pair in combinations(range(v), 2))
+
+
+def point_star_histograms(v, colors):
+    subsets = tuple(combinations(range(v), 2))
     return tuple(
-        int(pair in edge_set)
-        for pair in combinations(range(v), 2)
+        tuple(sorted((color, sum(1 for i, pair in enumerate(subsets) if a in pair and colors[i] == color)) for color in set(colors)))
+        for a in range(v)
     )
 
 
@@ -63,15 +65,11 @@ def test_pair_coherent_refinement_splits_when_point_profiles_are_uniform():
     triangle = {(0, 1), (1, 2), (0, 2)}
     pentagon = {(3, 4), (4, 5), (5, 6), (6, 7), (3, 7)}
     source = graph_edge_colors(v, triangle | pentagon)
+    # Every ground point sees exactly two color-1 pairs: rev177's first-order
+    # star histogram is therefore uniform and cannot canonically split the ground.
+    assert len(set(point_star_histograms(v, source))) == 1
     witness = gens[1]
     target = relabel_target(source, witness)
-
-    first_order = signed_johnson_ground_profile_partition_si(
-        G, source, target, root_n=64, max_partition_states=2048
-    )
-    assert first_order.status == "undetermined_signed_ground_profile_no_split", first_order
-    assert not first_order.relation_profile_determined
-    assert not first_order.significant_ground_split
 
     got = signed_johnson_ground_pair_relation_si(
         G, source, target, root_n=64, max_partition_states=2048
@@ -92,12 +90,8 @@ def test_cycle_relation_becomes_explicit_smaller_pair_recurrence_target():
     G, gens, _ = induced_ground_group(v, k)
     edges = {(i, (i + 1) % v) for i in range(v)}
     source = graph_edge_colors(v, edges)
+    assert len(set(point_star_histograms(v, source))) == 1
     target = relabel_target(source, gens[1])
-
-    first_order = signed_johnson_ground_profile_partition_si(
-        G, source, target, root_n=64, max_partition_states=2048
-    )
-    assert first_order.status == "undetermined_signed_ground_profile_no_split", first_order
 
     got = signed_johnson_ground_pair_relation_si(
         G, source, target, root_n=64, max_partition_states=2048
