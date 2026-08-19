@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional
 
+from coset_stabilizer_primitives import RightCoset
+from giant_block_action_certificates import analyze_giant_block_action
 from permutation_group_schreier import StabilizerChain, identity
 from quotient_factored_partial_string_intersection_v1 import (
     QuotientFactoredPartialStringIntersection,
@@ -20,6 +22,11 @@ class AffectedSegmentAutomorphismV2:
     reason: str
 
 
+def _generator_preserves_segment(g, values, active):
+    A = set(active)
+    return {g[x] for x in A} == A and all(values[g[x]] == values[x] for x in A)
+
+
 def affected_segment_automorphism_group_v2(
     group: StabilizerChain,
     quotient_blocks,
@@ -31,14 +38,44 @@ def affected_segment_automorphism_group_v2(
 ) -> AffectedSegmentAutomorphismV2:
     """Exact segment automorphism group from the same double recursion we account.
 
-    The intersection of a group with a string-segment stabilizer is itself a
-    subgroup.  rev161's quotient-factored executor computes that intersection as
-    an exact right coset.  Because the identity must belong to the result, the
-    returned coset necessarily equals its subgroup; this wrapper checks that fact
-    explicitly and exposes the subgroup used by the growing-beard iteration.
+    If every current generator already preserves the active segment, subgroup
+    closure proves immediately that the entire group does; no quotient branching
+    is executed.  Otherwise rev161's quotient-factored executor computes the
+    intersection as an exact right coset.  Because the identity must belong to a
+    group/segment-stabilizer intersection, that coset necessarily equals its
+    subgroup.  Both paths therefore expose the exact subgroup used by the
+    growing-beard iteration without manufacturing complexity evidence.
     """
     vals = tuple(values)
     active = tuple(sorted(set(int(x) for x in active_points)))
+    gens = group.original_generators or (identity(group.degree),)
+    if all(_generator_preserves_segment(g, vals, active) for g in gens):
+        giant = analyze_giant_block_action(group, quotient_blocks)
+        t = len(tuple(quotient_blocks))
+        bound = (giant.largest_group_orbit + t - 1) // t if t else 0
+        execution = QuotientFactoredPartialStringIntersection(
+            "segment_already_invariant",
+            RightCoset(group, identity(group.degree)),
+            t,
+            giant.image_order,
+            0,
+            0,
+            0,
+            0,
+            bound,
+            True,
+            (),
+            "every source-group generator preserves the active segment, so subgroup closure proves the whole group does without recursive SI calls",
+        )
+        return AffectedSegmentAutomorphismV2(
+            "exact_affected_segment_automorphism_group",
+            group,
+            execution,
+            True,
+            True,
+            "the active segment was already invariant under every source-group generator",
+        )
+
     execution = quotient_factored_partial_string_intersection(
         group,
         quotient_blocks,
@@ -66,12 +103,9 @@ def affected_segment_automorphism_group_v2(
     subgroup = execution.coset.subgroup
     if not subgroup.contains(execution.coset.representative):
         raise AssertionError("identity-containing right coset did not collapse to its subgroup")
-    A = set(active)
     for g in subgroup.original_generators:
-        if {g[x] for x in A} != A:
-            raise AssertionError("segment automorphism generator moved the active set")
-        if any(vals[g[x]] != vals[x] for x in A):
-            raise AssertionError("segment automorphism generator changed an active value")
+        if not _generator_preserves_segment(g, vals, active):
+            raise AssertionError("segment automorphism generator violates the active string segment")
 
     return AffectedSegmentAutomorphismV2(
         "exact_affected_segment_automorphism_group",
