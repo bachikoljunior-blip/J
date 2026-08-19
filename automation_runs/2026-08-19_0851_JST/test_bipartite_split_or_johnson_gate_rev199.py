@@ -11,7 +11,7 @@ def test_semiregular_three_block_incidence_certifies_bipartite_soj_gate():
     assert got.part_size_gate and got.left_symmetry_defect_gate
     assert got.semiregular
     assert got.left_largest_twin_class == 2
-    assert got.left_relative_symmetry_defect == 4 / 6
+    assert abs(got.left_relative_symmetry_defect - (4 / 6)) < 1e-12
 
 
 def test_large_left_twin_class_fails_defect_gate_without_claiming_progress():
