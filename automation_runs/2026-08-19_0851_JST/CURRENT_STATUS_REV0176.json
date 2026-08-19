@@ -1,0 +1,33 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 176,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "W1 signed-ground relational SI closure",
+  "world_existing_solution_check": "Babai's quasipolynomial String/GI framework treats Johnson configurations on their smaller ideal ground and proceeds through relational/local-certificate recursion rather than brute-force enumeration when the induced group is large. rev176 uses that ground representation but does not claim the full Babai recursion is implemented.",
+  "direct_attempt_result": "Two concrete W1 boundaries were attacked. First, the rev175 complement-expanded J(v,k) recognition failure was repaired by bounded exact unordered-pair orbital certification: orbital-size merging is bypassed only when necessary, and every accepted coordinate gauge must still decode and exactly re-induce every supplied ambient generator. Second, an exact signed-ground relational terminal now enumerates only the faithfully represented signed group when its Schreier-certified order is within the explicit polynomial/hard cap, tests the complete colored k-subset relation, reconstructs the original-domain SI right coset, and audits it by a complete second pass.",
+  "validation": {
+    "pull_request": 48,
+    "passing_workflow_run_id": 32276514515,
+    "result": "success",
+    "validated_steps": [
+      "regular-prime terminal and master integration",
+      "Babai recurrence contract including complement-expanded Johnson certification and signed-ground relational regressions",
+      "real nauty labelg differential gate"
+    ],
+    "merged_main_sha": "26c8586c478dfb7ccb6d208c753baeae8cf4c604"
+  },
+  "resolved_in_this_revision": [
+    "bounded exact-orbital fallback for Johnson certification lost by equal-size orbital coarsening",
+    "proof-carrying exact SI/reconstruction for certified small-order signed Johnson ground groups"
+  ],
+  "next_leaf": {
+    "id": "W1",
+    "status": "unresolved",
+    "problem": "derive a canonical significant split or local-certificate recurrence from the actual colored k-subset relation when the faithfully represented signed-ground group is too large for enumeration; preserve the complement bit, certify quasipolynomial recurrence cost, and reconstruct exactly to the original candidate coset"
+  }
+}
