@@ -1,0 +1,40 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 161,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes_before_required_decomposition": 512,
+  "active_leaf_attempted": "Q1",
+  "implemented": "Exact affected-only string-segment coset intersection; explicit quotient point-image recursion down to singleton quotient images; paired-Schreier kernel lifts; affected kernel-orbit SI children only; exact right-coset reassembly with cardinality audit; and an iterative growing-beard local certificate that composes the affected branch with the exact Unaffected Stabilizer theorem gate. Exact fullness/nonfullness and theorem-scale recurrence evidence remain separate.",
+  "failed_attempt_and_repair": "The first quotient-recursion attempt failed CI because it reused the point stabilizer directly in the repository's RightCoset convention, producing an invalid branch union. The repair conjugates each child point stabilizer by its quotient transversal before recursing; exact reassembly cardinality then validates the union.",
+  "validation": {
+    "pull_request": 31,
+    "workflow_run_id": 32257287994,
+    "workflow_run_number": 126,
+    "job": "validate-rev-series",
+    "conclusion": "success",
+    "merged_main_sha": "cc21ff3da45807b1bca2351000d089784c4ce05c",
+    "covered": [
+      "partial affected-segment SI agrees with exact masked-string stabilizer",
+      "inactive invariant orbits are skipped rather than sent to opaque SI",
+      "quotient point-image recursion plus singleton kernel lifts agrees with exact segment stabilizer",
+      "right-coset branch reassembly cardinality",
+      "growing-beard nonfullness agrees with exact global local-fullness oracle",
+      "stable small giant fails closed without theorem gate",
+      "stable S9 beard yields a genuine full-string A9 subgroup while withholding theorem-scale evidence when the parameter window is not met",
+      "all prior AGI-GI gates and external labelg differential gate"
+    ]
+  },
+  "Q1_status": "open",
+  "remaining_gap": "The growing-beard/unaffected composition is now executable and exact. However each smaller affected kernel-orbit child is still solved by the repository's resource-bounded exact SI terminal. For non-polylogarithmic child domains, an opaque node cap is not a quasipolynomial cost certificate. Q1 therefore remains unresolved until those actual child calls recursively dispatch through the same proof-carrying SI machinery or reach mechanically cost-certified terminals. Q2 still requires the identical execution trace to survive canonical aggregation and global rev150 accounting.",
+  "required_unresolved_children_if_Q1_were_decomposed_normally": [
+    {"id":"Q1.a","problem":"replace every non-polylog affected kernel-orbit exact terminal by a self-recursive SI dispatch that returns the exact coset plus a certified local recurrence/cost node","status":"open"},
+    {"id":"Q1.b","problem":"make quotient/kernel/canonical-partition execution and recurrence accounting one trace object so execution cannot diverge from its complexity proof","status":"open"},
+    {"id":"Q1.c","problem":"mechanically certify terminal costs and differential-check every recursive dispatch against exact SI on tractable instances","status":"open"}
+  ],
+  "temporary_active_count_if_children_appended": 515,
+  "prediction_exceeded_by_required_decomposition": true,
+  "next_action": "perform the mandatory cross-tree transversal rewrite before adding the Q1 children as ordinary branches"
+}
