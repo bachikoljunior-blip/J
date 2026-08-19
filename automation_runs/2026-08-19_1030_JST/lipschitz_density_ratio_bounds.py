@@ -41,7 +41,7 @@ class CellRatioBounds:
         return float(self.lower[idx]),float(self.upper[idx])
 
 
-def fit_lipschitz_grid_ratio_bounds(train_x,test_x,*,domain_lower,domain_upper,bins=4,log_ratio_lipschitz:float,delta=.05):
+def fit_lipschitz_grid_ratio_bounds(train_x,test_x,*,domain_lower,domain_upper,bins=4,log_ratio_lipschitz:float,delta=.05,max_cells=200_000):
     p,lo,hi=_box(train_x,domain_lower,domain_upper);q,lo2,hi2=_box(test_x,domain_lower,domain_upper)
     if not np.array_equal(lo,lo2) or not np.array_equal(hi,hi2):raise ValueError('domains differ')
     if q.shape[1]!=p.shape[1] or len(q)==0 or len(p)==0:raise ValueError('dimension/sample mismatch')
@@ -52,6 +52,7 @@ def fit_lipschitz_grid_ratio_bounds(train_x,test_x,*,domain_lower,domain_upper,b
     L=float(log_ratio_lipschitz)
     if L<0 or not math.isfinite(L) or not 0<delta<1:raise ValueError('bad smoothness/delta')
     G=int(np.prod(bins))
+    if G > int(max_cells): raise ValueError('grid cell count exceeds max_cells; use slab bounds or a coarser grid')
     ep=math.sqrt(math.log(4*G/delta)/(2*len(p))); eq=math.sqrt(math.log(4*G/delta)/(2*len(q)))
     shape=bins; cp=np.zeros(shape,dtype=int);cq=np.zeros(shape,dtype=int)
     def ids(a):
