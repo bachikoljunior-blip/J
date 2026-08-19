@@ -1,6 +1,9 @@
 from itertools import combinations
 
-from colored_subset_design_witness_v1 import find_colored_subset_design_witness_family
+from colored_subset_design_witness_v1 import (
+    _incidence_two_wl,
+    find_colored_subset_design_witness_family,
+)
 
 
 def _fano_colors():
@@ -36,6 +39,14 @@ def test_homogeneous_relation_fails_exact_symmetry_defect_gate():
     assert got.theorem_parameter_gate
     assert not got.symmetry_defect_gate
     assert not got.exact
+
+
+def test_incidence_two_wl_stops_when_partition_stabilizes_even_if_color_ids_renumber():
+    v, t = 8, 3
+    colors = tuple(int(0 in S) for S in combinations(range(v), t))
+    got = _incidence_two_wl(v, t, colors, (), alpha=0.9, max_rounds=32)
+    assert got.status != "undetermined_wl_round_limit"
+    assert got.refinement_rounds < 32
 
 
 def test_distinguished_point_relation_has_zero_length_design_witness_family():
