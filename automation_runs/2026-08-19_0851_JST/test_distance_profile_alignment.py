@@ -13,7 +13,7 @@ def graph_from_edges(n,edges,attrs=None):
 def test_large_asymmetric_tree_metric_profiles_certify_permutation():
     # Main path plus deliberately unequal branch lengths creates exact metric
     # signatures without depending on floating point spectral calculations.
-    n=120; edges=[(i,i+1) for i in range(89)]
+    n=140; edges=[(i,i+1) for i in range(89)]
     nxt=90
     for root,length in [(7,3),(19,5),(31,7),(44,4),(58,9),(73,6)]:
         prev=root
