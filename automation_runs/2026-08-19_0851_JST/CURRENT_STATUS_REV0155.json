@@ -1,0 +1,33 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 155,
+  "rewrite_trigger": {
+    "previous_prediction": 512,
+    "active_before_failed_K1_decomposition": 512,
+    "temporary_active_after_required_children": 514,
+    "prediction_exceeded": true
+  },
+  "transversal_audit": "All active non-replaced AGI-GI obligations were reviewed. K1a needs exact orbit-factored coset semantics; K1b needs a proof-carrying work trace; K2 separately asks the same exact-coset and accounting evidence to survive canonical aggregation and final differential closure. Keeping them separate would duplicate subgroup/coset composition, progress evidence, cost evidence, and independent validation.",
+  "low_probability_high_leverage_rewrite": "Make the String-Isomorphism kernel itself proof-carrying: an exact coset operation may recurse only by emitting its certified smaller kernel-orbit children and their composition rule. The same trace is then consumed directly by canonical aggregation and the global quasipolynomial verifier, eliminating the later reconstruction of complexity evidence from opaque exact calls.",
+  "replaced_problems": ["K1", "K1a", "K1b", "K2"],
+  "replacement_solution_problems": [
+    {
+      "id": "Q1",
+      "status": "open",
+      "problem": "Orbit-factored proof-carrying SI kernel: execute each affected-kernel/value-preserving coset intersection through exact smaller kernel-orbit children, compose their exact cosets without cross-orbit loss/invention, and emit the same mechanically checkable recurrence/cost trace used for execution. Reuse rev152 preimage cosets, rev153 logarithmic local semantics, rev154 child-domain plan, and existing exact intersection only as a differential oracle on tractable instances."
+    },
+    {
+      "id": "Q2",
+      "status": "open",
+      "problem": "Canonical proof closure: aggregate a quasipolynomially bounded family of Q1 logarithmic certificates into Split/Johnson outcomes and B2.3 exact coset recursion, compose the full execution trace through the rev150 verifier, and independently differential-check exact sets, relabeling equivariance, labelg/canonical-oracle behavior where applicable, and all claimed cost bounds."
+    }
+  ],
+  "world_existing_solution_check": "Babai's quasipolynomial String Isomorphism framework is already organized around coset-valued Luks recursion, local certificates, affected-kernel reduction and canonical partitioning. The rewrite therefore aligns J's execution object with the known solution architecture instead of maintaining a separate post-hoc complexity proof layer.",
+  "reforecast_total_active_nodes": 512,
+  "actual_active_nodes_after_rewrite": 512,
+  "prediction_exceeded_after_rewrite": false,
+  "next_leaf": {"id":"Q1","status":"open"}
+}
