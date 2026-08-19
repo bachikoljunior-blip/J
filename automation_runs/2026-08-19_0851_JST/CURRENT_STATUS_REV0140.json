@@ -1,0 +1,18 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 140,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 499,
+  "prediction_exceeded": false,
+  "attempted_leaf": "B1 independent differential canonical-label oracle",
+  "implemented": "fail-closed graph6 interchange plus nauty labelg adapter; no candidate implementation is used to construct the oracle input or canonical result",
+  "world_existing_solution_check": "nauty/Traces 2.9.3 officially provides canonical labeling and automorphism computation; bliss also exposes canonical_form. These are independent practical solvers suitable as differential oracles, not proofs of our candidate's worst-case complexity.",
+  "validation_boundary": "adapter source and deterministic interchange tests are committed, but this execution has not independently observed repository CI nor a labelg-backed differential run; therefore B1 remains unresolved",
+  "next_leaf": {
+    "problem": "run labelg-backed differential tests over relabelings and adversarial graph families, persist mismatches/certificates, then connect the oracle gate to master canonical reduction regression tests",
+    "status": "unresolved"
+  }
+}
