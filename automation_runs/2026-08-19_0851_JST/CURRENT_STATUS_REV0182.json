@@ -1,0 +1,30 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 182,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "attempted_leaf": "W1R-H3 choose the strongest strictly-smaller complement-safe higher-arity relation image canonically when pair statistics are exhausted",
+  "world_existing_solution_check": "Babai's primary SI/GI framework explicitly uses polylog-dimensional local information, local certificates and the Design Lemma to turn local asymmetry into global irregularity, with Johnson structures as the canonical-partition obstruction. rev182 is deliberately only a bounded local-relation selector in that direction; it does not claim the full Design Lemma or Master Algorithm.",
+  "implemented": "A label-invariant relation-arity selector scans t<k with C(v,t)<C(v,k). Any source/target local-relation multiplicity mismatch is selected as an immediate exact emptiness route. Otherwise informative arities are scored by the log-order of the full color-preserving Young subgroup on the t-subset image, and the minimum such upper bound is selected before rev180/rev181 exact image SI, paired preimage, and full-string candidate recursion. If all tested strictly-smaller arities are homogeneous it fails closed into Design-Lemma/local-certificate aggregation.",
+  "regression": "The union of the two Z9 translates of bases {0,1,2,4} and {0,1,4,6} is verified in-test to be a 2-(9,4,3) design: every ground pair lies in exactly three selected 4-subsets, so the pair-local view is homogeneous, while triple incidences are nonconstant. The selector therefore chooses t=3, whose image degree 84 is strictly below the J(9,4) domain degree 126. This is an executable witness that pair exhaustion does not justify stopping at first order.",
+  "validation": {
+    "pull_request": 54,
+    "passing_workflow_run_id": 32286509375,
+    "workflow_run_number": 337,
+    "result": "success",
+    "fast_w1r_tests_passed": 14,
+    "validated_jobs": ["validate-w1r-fast", "validate-rev-series"],
+    "real_nauty_labelg_gate": "success",
+    "merged_main_sha": "a1389239fdf7d84561274b64cfa44c15820ff526"
+  },
+  "mandatory_rewrite": "The active count remains exactly 512/512. The arity selector is a shared implementation inside W1R-H, replacing separate pair-only and higher-arity-choice branches rather than adding active nodes.",
+  "next_leaf": {
+    "id": "W1R-H4",
+    "status": "unresolved",
+    "problem": "combine several informative lower-arity complement-safe relations into one generator-paired auxiliary action under a significant-shrink budget, lift the exact joint image coset to the original domain, and restrict the full string inside that candidate; if the joint candidate remains hard, proceed to logarithmic local-certificate/Design-Lemma aggregation"
+  }
+}
