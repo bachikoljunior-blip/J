@@ -1,0 +1,12 @@
+{
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 100,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 481,
+  "prediction_exceeded": false,
+  "result": "Added polynomial one-vertex individualization/refinement orbit enumeration. A 12-node regular graph left fully ambiguous by ordinary 1-WL becomes discrete after one seed and yields the complete verified isomorphism family; cycles remain fail-closed.",
+  "solved_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3c2","status":"solved_v0_1"},
+  "next_leaf": {"id":"D1b2b2c3d2b3b2c2b2b2b3d2d2c2d3b2b2b3c3c3","problem":"general scalable canonical labeling / automorphism group handling when polynomial invariants and shallow individualization remain non-discrete","status":"unresolved"}
+}
