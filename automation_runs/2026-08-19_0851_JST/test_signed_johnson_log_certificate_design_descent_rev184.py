@@ -84,6 +84,7 @@ def test_wrapper_builds_logarithmic_relation_and_connects_split_to_original_cand
         max_test_sets=1000,
         max_partition_states=512,
         max_candidate_group_order=256,
+        max_depth=1,
     )
     assert got.theorem_parameter_gate, got
     assert got.test_arity == 3
