@@ -34,6 +34,7 @@ def build_paired_uniform_neighborhood_candidate_cover(
     provenance: PairedUniformNeighborhoodProvenance,
     *,
     root_n: int | None = None,
+    design_alpha: float = 0.9,
     max_subsets: int = 200000,
     max_johnson_nodes: int = 500000,
     max_states: int = 200000,
@@ -48,14 +49,19 @@ def build_paired_uniform_neighborhood_candidate_cover(
 
     This layer removes an unsafe manual wiring point: coordinates/colors are read
     only from an exact rev212 certificate, so a caller cannot accidentally pair an
-    unrelated V2 relation while claiming rev204 provenance.  For the certified
+    unrelated V2 relation while claiming rev204 provenance. For the certified
     nonconstant containment-count case it materializes the complete exact k-WL
     witness-pair cover and lifts every surviving tuple pair through the supplied
     original-domain action on V2.
 
+    ``provenance.alpha`` is the bipartite degree-partition theorem parameter, not
+    the downstream Design/coherent split parameter.  The latter is therefore an
+    explicit independent ``design_alpha`` (default 0.9, matching W1R-H5/H6) rather
+    than being silently inherited across theorem layers.
+
     The result is a complete *candidate* cover for every ambient isomorphism that
-    preserves the certified bipartite state.  False-positive branches may remain and
-    must be intersected with the parent state.  Because rev212 proves only
+    preserves the certified bipartite state. False-positive branches may remain and
+    must be intersected with the parent state. Because rev212 proves only
     bipartite->V2 equivariance, ``parent_provenance_required`` stays true: a larger
     parent reduction must still prove parent->bipartite equivariance before using
     this cover as complete for that parent's full string.
@@ -63,75 +69,38 @@ def build_paired_uniform_neighborhood_candidate_cover(
     if root_n is None:
         root_n = int(ambient_group.degree)
     root_n = int(root_n)
+    if not 0.0 < design_alpha < 1.0:
+        raise ValueError("design_alpha must lie in (0,1)")
 
     if provenance.exact_empty:
         return PairedUniformNeighborhoodPipeline(
             "exact_empty_paired_uniform_neighborhood_provenance",
-            provenance.status,
-            None,
-            None,
-            0,
-            0,
-            True,
-            True,
-            bool(provenance.exact),
-            True,
+            provenance.status, None, None, 0, 0, True, True,
+            bool(provenance.exact), True,
             "the exact paired bipartite provenance stage already proves the source/target subproblems incompatible",
         )
     if not provenance.exact:
         return PairedUniformNeighborhoodPipeline(
             "undetermined_nonexact_paired_uniform_neighborhood_provenance",
-            provenance.status,
-            None,
-            None,
-            0,
-            0,
-            False,
-            False,
-            False,
-            True,
+            provenance.status, None, None, 0, 0, False, False, False, True,
             "the rev212 provenance stage is not exact, so no downstream candidate cover is exposed",
         )
     if provenance.paired_johnson_certified:
         return PairedUniformNeighborhoodPipeline(
             "paired_uniform_neighborhood_johnson_alternative",
-            provenance.status,
-            None,
-            None,
-            0,
-            0,
-            False,
-            True,
-            True,
-            True,
+            provenance.status, None, None, 0, 0, False, True, True, True,
             "rev212 certified the complete-uniform Johnson alternative; the containment-count Design branch is intentionally bypassed",
         )
     if provenance.status == "paired_degree_alpha_partition_preempts_uniform_neighborhood":
         return PairedUniformNeighborhoodPipeline(
             "paired_degree_partition_alternative",
-            provenance.status,
-            None,
-            None,
-            0,
-            0,
-            False,
-            True,
-            True,
-            True,
+            provenance.status, None, None, 0, 0, False, True, True, True,
             "the exact bipartite degree partition already gives structural progress on both sides, so no V2 Design candidate cover is needed",
         )
     if not provenance.derived_relation_certified:
         return PairedUniformNeighborhoodPipeline(
             "undetermined_uniform_neighborhood_relation_provenance_residual",
-            provenance.status,
-            None,
-            None,
-            0,
-            0,
-            False,
-            False,
-            False,
-            True,
+            provenance.status, None, None, 0, 0, False, False, False, True,
             "rev212 did not certify a nonconstant paired containment-count V2 relation; constant/design-bound or stage residual remains open",
         )
     if (
@@ -151,7 +120,7 @@ def build_paired_uniform_neighborhood_candidate_cover(
         provenance.target_coordinates,
         provenance.target_colors,
         root_n=root_n,
-        alpha=provenance.alpha,
+        alpha=design_alpha,
         max_subsets=max_subsets,
         max_johnson_nodes=max_johnson_nodes,
         max_states=max_states,
@@ -164,43 +133,22 @@ def build_paired_uniform_neighborhood_candidate_cover(
     if plan.exact_empty:
         return PairedUniformNeighborhoodPipeline(
             "exact_empty_paired_uniform_neighborhood_design_plan",
-            provenance.status,
-            plan,
-            None,
-            plan.branch_count,
-            0,
-            True,
-            True,
-            bool(plan.exact),
-            True,
+            provenance.status, plan, None, plan.branch_count, 0, True, True,
+            bool(plan.exact), True,
             "the exact rev212 relation payload reaches an exact-empty paired k-WL Design invariant before ambient transport",
         )
     if not plan.complete or not plan.exact:
         return PairedUniformNeighborhoodPipeline(
             "undetermined_paired_uniform_neighborhood_design_plan",
-            provenance.status,
-            plan,
-            None,
-            plan.branch_count,
-            0,
-            False,
-            False,
-            False,
-            True,
+            provenance.status, plan, None, plan.branch_count, 0, False, False,
+            False, True,
             "the mechanically provenance-bound V2 relation did not produce a complete exact rev209 branch plan",
         )
     if plan.status != "certified_paired_uniform_neighborhood_design_branch_cover":
         return PairedUniformNeighborhoodPipeline(
             "paired_uniform_neighborhood_non_design_alternative",
-            provenance.status,
-            plan,
-            None,
-            plan.branch_count,
-            0,
-            False,
-            True,
-            True,
-            True,
+            provenance.status, plan, None, plan.branch_count, 0, False, True,
+            True, True,
             "the exact V2 relation was classified by a cheaper rev205 alternative rather than the exact Design witness branch family",
         )
 
@@ -213,29 +161,15 @@ def build_paired_uniform_neighborhood_candidate_cover(
     if transport.exact_empty:
         return PairedUniformNeighborhoodPipeline(
             "exact_empty_paired_uniform_neighborhood_ambient_cover",
-            provenance.status,
-            plan,
-            transport,
-            plan.branch_count,
-            0,
-            True,
-            True,
-            bool(transport.exact),
-            True,
+            provenance.status, plan, transport, plan.branch_count, 0, True, True,
+            bool(transport.exact), True,
             "all branches in the exact provenance-bound V2 Design cover have proved-empty transporters in the supplied ambient action",
         )
     if not transport.complete or not transport.exact:
         return PairedUniformNeighborhoodPipeline(
             "undetermined_paired_uniform_neighborhood_ambient_cover",
-            provenance.status,
-            plan,
-            transport,
-            plan.branch_count,
-            transport.surviving_branch_count,
-            False,
-            False,
-            False,
-            True,
+            provenance.status, plan, transport, plan.branch_count,
+            transport.surviving_branch_count, False, False, False, True,
             "the exact provenance-bound Design cover could not be completely lifted through the supplied ambient V2 action",
         )
 
