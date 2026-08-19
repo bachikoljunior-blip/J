@@ -1,6 +1,6 @@
 # AGI root problem — problem tree
 
-Updated: 2026-08-19 12:41 JST
+Updated: 2026-08-19 12:43 JST
 
 ## Root
 Deliver AGI without lowering the achievement criteria, not merely as a prototype/research artifact, but in a form that is actually usable.
@@ -12,7 +12,7 @@ The previous prediction was **31** active parent+child problems. After resolving
 
 The transversal rewrite below is not a duplicate-only merge. It replaces several old open branches with three cross-cutting solution problems. The main low-probability/high-leverage move is to stop treating final evaluation as a static benchmark collection and instead make it a **post-freeze blind evaluation foundry**: multiple independently custodied sealed generators create tasks only after the candidate digest is frozen; competent humans are calibrated on the same generated families; the same service runs the candidate and an independent rerun. This simultaneously attacks secret task generation, contamination, human baselines, generality/performance evidence, and independent audit without weakening any gate.
 
-Reforecast total parent+child problems: **36**. X2.1's first direct implementation attempt established a concrete sealed-bank contract but did not supply real independently custodied non-public banks, so X2.1 is now decomposed into three children. Tree v2 currently enumerates **33** active non-replaced problems, still below the 36-problem reforecast; no second transversal rewrite is triggered.
+Reforecast total parent+child problems: **36**. X2.1's first direct implementation attempt established a concrete sealed-bank contract but did not supply real independently custodied non-public banks, so X2.1 is decomposed into three children. Tree v2 currently enumerates **33** active non-replaced problems, still below the 36-problem reforecast; no second transversal rewrite is triggered.
 
 ## Tree v2 — active non-replaced problems
 
@@ -39,7 +39,7 @@ Reforecast total parent+child problems: **36**. X2.1's first direct implementati
   - X1 [open] **Immutable AGI appliance.** Build the AGI candidate itself, distinct from this problem solver, directly as the exact third-party-runnable artifact to be evaluated: immutable build identity, documented API/application, persistence, observability, resource envelope, reproducible install/run path, and repeatable acceptance entrypoint. Replaces old P2 + P8 and the deployment side of P9.
   - X2 [open-parent] **Post-freeze blind human-calibrated evaluation foundry.** After X1 candidate digest freeze, generate secret tasks under independent custody, calibrate competent humans on the same families, execute candidate trials, and perform an independently custodied rerun. Replaces old P3.7/P3.7.2/P3.7.3 + P4 + P5 + the evaluation side of P9.
     - X2.1 [open-parent] Establish independently custodied, digest-pinned sealed generator banks spanning every required domain/family, with generator content unavailable to candidate development and at least two independent custody lineages per required family.
-      - X2.1a [implemented-pending-CI] Executable fail-closed bank registry/execution contract: no inline task/template/answer/secret content, immutable offline provider containers, two independent custody groups + implementation lineages + provider digests + content commitments per required family, and a commitment-only freeze lock. Implemented in PR #13; runtime/test resolution waits for CI.
+      - X2.1a [resolved-framework] Executable fail-closed bank registry/execution contract: no inline task/template/answer/secret content, immutable offline provider containers, two independent custody groups + implementation lineages + provider digests + content commitments per required family, and a commitment-only freeze lock. PR #13 merged after GitHub Actions run `32213000978` passed the full AGI eval integrity workflow. This validates the mechanism only; it does not establish that real independent banks exist.
       - X2.1b [open] Provision real non-public sealed generator images and seed schedules under at least two genuinely independent custodians/implementation lineages for every preregistered required family. Public toy labels or self-asserted independence do not satisfy this leaf.
       - X2.1c [open] Obtain and freeze auditable custody/lineage/content commitments before final candidate trials, then verify the staged image digests and registry lock without exposing generator content.
     - X2.2 [open] Build contamination/leakage auditing plus adversarial/metamorphic variant generation that can invalidate compromised families fail-closed rather than silently substitute them.
@@ -72,7 +72,7 @@ The exact evaluated candidate must be runnable by a third party from a documente
 Final evaluation uses held-out or freshly generated task instances, records seeds/configuration/tool traces/results, separates development from final evaluation, reports failures as well as successes, and requires independent rerun of a statistically meaningful sample. Any material benchmark contamination or unverifiable result invalidates that result rather than being silently substituted.
 
 ## Current leaf selection
-X2.1a remains selected until PR #13's CI result is known. If the implementation passes, mark X2.1a resolved-framework and proceed to X2.1b; X2.1 itself remains open until real non-public independently custodied banks and frozen attestations exist.
+X2.1b is selected. The immediate attempt is to define a contribution/qualification path by which genuinely independent custodians can provide non-public immutable generator images and seed commitments without revealing content to J or candidate development. If this cannot itself provision the real banks, X2.1b must be decomposed while remaining within the 36-problem forecast.
 
 ## Evidence status
-**No AGI achievement is claimed.** P3 is evaluation-infrastructure evidence only. X1, X2 and X3 remain open, so no claim is made that generality, performance, autonomy, robustness, practical delivery or independent reproduction has passed.
+**No AGI achievement is claimed.** P3 and X2.1a are evaluation-infrastructure evidence only. X1, X2 and X3 remain open, so no claim is made that generality, performance, autonomy, robustness, practical delivery or independent reproduction has passed.
