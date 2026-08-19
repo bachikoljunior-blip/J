@@ -1,0 +1,18 @@
+{
+  "series": "AGI-GI rev系列",
+  "root_problem_solved": false,
+  "agi_certified": false,
+  "candidate_claim": "NOT_AGI",
+  "revision": 153,
+  "predicted_total_active_nodes": 512,
+  "actual_active_nodes": 512,
+  "prediction_exceeded": false,
+  "active_leaf": "K1",
+  "attempt": "kernel-lifted logarithmic local fullness through exact quotient-preimage cosets",
+  "world_existing_solution_check": "Babai's String Isomorphism framework uses logarithmic-size local certificates, affected/unaffected points, kernel reductions, and coset-valued recursion; the set of string isomorphisms is maintained as a coset rather than as a Boolean witness. The current J construction follows that structural boundary without claiming the full published asymptotic analysis has been implemented.",
+  "implemented": "kernel_lifted_local_fullness_v1.py caps T at O(log n), obtains exact lifts of the standard A(T) generators using rev152 paired-Schreier quotient-preimage cosets, intersects each lift coset with the full string-preserving Young coset, records genuine lift witnesses or one exact missing-generator witness, and audits the rev114 affected-kernel orbit bound.",
+  "validation": "test_kernel_lifted_local_fullness_v1.py differentially compares full/nonfull outcomes with the older exact-global certificate, checks quotient images and genuine global string-preserving witnesses, verifies affected-kernel orbit shrink, and exercises locality/intersection fail-closed limits; the AGI-GI validation workflow includes this test.",
+  "K1_status": "open",
+  "remaining_gap": "The current exact recursive coset-intersection implementation is resource-bounded but does not itself carry a proved quasipolynomial asymptotic bound. The affected-kernel shrink is measured, but its recursive work has not yet been represented as proof-carrying recurrence children accepted by the rev150 global accounting verifier.",
+  "next_action_within_K1": "attempt to turn affected-kernel coset-intersection work into explicit shrinking recurrence obligations rather than charging an uncertified flat local cost"
+}
