@@ -28,6 +28,75 @@ class AggregatedCertificateRelation:
     reason: str
 
 
+def _aggregate_boolean_relation(
+    quotient_size,
+    test_size,
+    relation,
+    *,
+    max_class_fraction,
+    reason,
+):
+    """Canonically refine one complete Boolean t-subset relation.
+
+    Certificate production is deliberately outside this helper.  The bounded
+    global-stabilizer oracle and a growing-beard producer can therefore share the
+    same canonical incidence aggregation without sharing complexity claims.
+    """
+    m = int(quotient_size)
+    t = int(test_size)
+    relation = tuple((tuple(T), bool(full)) for T, full in relation)
+    expected = tuple(combinations(range(m), t))
+    if tuple(T for T, _ in relation) != expected:
+        raise ValueError("relation must contain every t-subset once in canonical order")
+
+    point_colors = [0] * m
+    test_colors = [1 if full else 2 for _, full in relation]
+    rounds = 0
+    while True:
+        point_signatures = []
+        for u in range(m):
+            counts = Counter(test_colors[j] for j, (T, _) in enumerate(relation) if u in T)
+            point_signatures.append(("P", point_colors[u], tuple(sorted(counts.items()))))
+
+        test_signatures = []
+        for j, (T, full) in enumerate(relation):
+            counts = Counter(point_colors[u] for u in T)
+            test_signatures.append(("T", int(full), test_colors[j], tuple(sorted(counts.items()))))
+
+        signatures = point_signatures + test_signatures
+        labels = {s: i for i, s in enumerate(sorted(set(signatures), key=repr))}
+        next_points = [labels[s] for s in point_signatures]
+        next_tests = [labels[s] for s in test_signatures]
+        rounds += 1
+        if next_points == point_colors and next_tests == test_colors:
+            break
+        point_colors, test_colors = next_points, next_tests
+        if rounds > m + len(relation) + 2:
+            raise AssertionError("incidence refinement failed to stabilize")
+
+    classes = {}
+    for u, color in enumerate(point_colors):
+        classes.setdefault(color, []).append(u)
+    color_classes = tuple(tuple(v) for _, v in sorted(classes.items()))
+    largest = max(map(len, color_classes), default=0)
+    significant = len(color_classes) > 1 and largest <= max_class_fraction * m + 1e-12
+    return AggregatedCertificateRelation(
+        "certified_significant_split" if significant else "canonical_relation_no_significant_split",
+        m,
+        t,
+        len(relation),
+        sum(full for _, full in relation),
+        sum(not full for _, full in relation),
+        tuple(point_colors),
+        color_classes,
+        largest,
+        significant,
+        rounds,
+        relation,
+        reason,
+    )
+
+
 def aggregate_fullness_relation(
     group,
     blocks,
@@ -86,52 +155,10 @@ def aggregate_fullness_relation(
         full = all(image.contains(q) for q in _alternating_test_generators(m, T))
         relation.append((T, full))
 
-    # 1-WL on the colored bipartite incidence structure: quotient points on one
-    # side, t-subsets on the other, with subset nodes initially colored full/nonfull.
-    point_colors = [0] * m
-    test_colors = [1 if full else 2 for _, full in relation]
-    rounds = 0
-    while True:
-        point_signatures = []
-        for u in range(m):
-            counts = Counter(test_colors[j] for j, (T, _) in enumerate(relation) if u in T)
-            point_signatures.append(("P", point_colors[u], tuple(sorted(counts.items()))))
-
-        test_signatures = []
-        for j, (T, full) in enumerate(relation):
-            counts = Counter(point_colors[u] for u in T)
-            test_signatures.append(("T", int(full), test_colors[j], tuple(sorted(counts.items()))))
-
-        signatures = point_signatures + test_signatures
-        labels = {s: i for i, s in enumerate(sorted(set(signatures), key=repr))}
-        next_points = [labels[s] for s in point_signatures]
-        next_tests = [labels[s] for s in test_signatures]
-        rounds += 1
-        if next_points == point_colors and next_tests == test_colors:
-            break
-        point_colors, test_colors = next_points, next_tests
-        if rounds > m + len(relation) + 2:
-            raise AssertionError("incidence refinement failed to stabilize")
-
-    classes = {}
-    for u, color in enumerate(point_colors):
-        classes.setdefault(color, []).append(u)
-    color_classes = tuple(tuple(v) for _, v in sorted(classes.items()))
-    largest = max(map(len, color_classes), default=0)
-    significant = len(color_classes) > 1 and largest <= max_class_fraction * m + 1e-12
-
-    return AggregatedCertificateRelation(
-        "certified_significant_split" if significant else "canonical_relation_no_significant_split",
+    return _aggregate_boolean_relation(
         m,
         t,
-        total,
-        sum(full for _, full in relation),
-        sum(not full for _, full in relation),
-        tuple(point_colors),
-        color_classes,
-        largest,
-        significant,
-        rounds,
-        tuple(relation),
-        "exact local-certificate relation plus canonical colored-incidence refinement",
+        relation,
+        max_class_fraction=max_class_fraction,
+        reason="bounded global-stabilizer relation plus canonical colored-incidence refinement",
     )
