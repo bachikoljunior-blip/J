@@ -9,6 +9,8 @@ on:
       - 'automation_runs/2026-08-19_0851_JST/test_bipartite_parent_action_coset_intersection_rev206.py'
       - 'automation_runs/2026-08-19_0851_JST/bipartite_design_parent_union_v1.py'
       - 'automation_runs/2026-08-19_0851_JST/test_bipartite_design_parent_union_rev206.py'
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_design_recurrence_gate_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_bipartite_design_recurrence_gate_rev206.py'
       - 'automation_runs/2026-08-19_0851_JST/BIPARTITE_NEIGHBORHOOD_COSET_AUDIT_REV206.md'
       - '.github/workflows/rev206-bipartite-neighborhood-coset-smoke.yml'
   workflow_dispatch:
@@ -30,9 +32,10 @@ jobs:
           python-version: '3.12'
       - name: Install test dependencies
         run: python -m pip install --disable-pip-version-check pytest numpy
-      - name: Validate exact right-coset, coupled parent-action, and complete Design-union intersections
+      - name: Validate exact parent integration and strict recurrence progress gates
         run: >-
           python -m pytest -q
           test_bipartite_neighborhood_coset_intersection_rev206.py
           test_bipartite_parent_action_coset_intersection_rev206.py
           test_bipartite_design_parent_union_rev206.py
+          test_bipartite_design_recurrence_gate_rev206.py
