@@ -1,0 +1,27 @@
+name: rev212 Design full-execution accounting smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/design_full_execution_accounting_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_design_full_execution_accounting_rev212.py'
+      - '.github/workflows/rev212-design-full-execution-accounting-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev212-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: python -m pytest -q test_design_full_execution_accounting_rev212.py test_design_lemma_candidate_si_rev190.py test_design_lemma_branch_cost_rev192.py
