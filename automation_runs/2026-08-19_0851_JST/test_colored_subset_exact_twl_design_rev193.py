@@ -21,7 +21,7 @@ def _fano():
     return v, k, coords, lines, tuple(int(S in lines) for S in coords)
 
 
-def test_fano_exact_3wl_reaches_alpha_branch_after_one_individualization():
+def test_fano_3wl_is_fail_closed_outside_extended_design_parameter_gate():
     v, k, _coords, _lines, colors = _fano()
     got = find_exact_twl_design_witness_family(
         v, k, colors,
@@ -30,32 +30,30 @@ def test_fano_exact_3wl_reaches_alpha_branch_after_one_individualization():
         max_rounds=32,
         max_work_units=30_000_000,
     )
-    assert got.status == "certified_exact_twl_design_witness_family"
-    assert got.minimal_individualization_length == 1
-    assert len(got.witness_outcomes) == 7
-    assert all(x.status == "certified_twl_alpha_coloring" for x in got.witness_outcomes)
+    assert got.status == "undetermined_twl_design_theorem_parameter_gate"
+    assert not got.theorem_parameter_gate and not got.exact
 
 
-def test_cycle5_exact_2wl_certifies_upcc_at_empty_individualization():
-    v, k = 5, 2
+def test_prime_cycle11_exact_2wl_certifies_upcc_at_empty_individualization():
+    v, k = 11, 2
     edges = {tuple(sorted((i, (i + 1) % v))) for i in range(v)}
     coords = tuple(combinations(range(v), k))
     colors = tuple(int(S in edges) for S in coords)
     got = find_exact_twl_design_witness_family(
-        v, k, colors, max_tuple_states=100, max_rounds=16, max_work_units=1_000_000
+        v, k, colors, max_tuple_states=200, max_rounds=16, max_work_units=1_000_000
     )
     assert got.status == "certified_exact_twl_design_witness_family"
     assert got.minimal_individualization_length == 0
     assert len(got.witness_outcomes) == 1
     outcome = got.witness_outcomes[0]
     assert outcome.status == "certified_twl_upcc"
-    assert outcome.two_skeleton_rank == 3
+    assert outcome.two_skeleton_rank == 6
     assert len(outcome.dominant_cell) == v
 
 
-def test_two_disjoint_triangles_exact_2wl_uses_imprimitive_split():
-    v, k = 6, 2
-    edges = set(combinations((0, 1, 2), 2)) | set(combinations((3, 4, 5), 2))
+def test_cycle8_exact_2wl_uses_imprimitive_split():
+    v, k = 8, 2
+    edges = {tuple(sorted((i, (i + 1) % v))) for i in range(v)}
     coords = tuple(combinations(range(v), k))
     colors = tuple(int(S in edges) for S in coords)
     got = find_exact_twl_design_witness_family(
@@ -64,11 +62,11 @@ def test_two_disjoint_triangles_exact_2wl_uses_imprimitive_split():
     assert got.status == "certified_exact_twl_design_witness_family"
     outcome = got.witness_outcomes[0]
     assert outcome.status == "certified_twl_imprimitive_alpha_partition"
-    assert sorted(map(len, outcome.output_partition)) == [3, 3]
-    assert sorted(map(len, outcome.constituent_components)) == [3, 3]
+    assert sorted(map(len, outcome.output_partition)) == [2, 2, 2, 2]
+    assert sorted(map(len, outcome.constituent_components)) == [2, 2, 2, 2]
 
 
-def test_paired_fano_family_is_invariant_under_arbitrary_ground_relabeling():
+def test_paired_fano_family_is_fail_closed_before_relabeling_comparison():
     v, k, coords, lines, source = _fano()
     image = (2, 0, 4, 1, 6, 3, 5)
     inverse = {image[x]: x for x in range(v)}
@@ -83,19 +81,22 @@ def test_paired_fano_family_is_invariant_under_arbitrary_ground_relabeling():
         max_rounds=32,
         max_work_units=60_000_000,
     )
-    assert got.status == "certified_paired_exact_twl_design_family"
-    assert got.invariant_compatible and got.complete and not got.exact_empty
-    assert got.source.minimal_individualization_length == got.target.minimal_individualization_length == 1
+    assert got.status == "undetermined_paired_exact_twl_design_family"
+    assert not got.invariant_compatible and not got.complete and not got.exact_empty
+    assert not got.source.theorem_parameter_gate
+    assert not got.target.theorem_parameter_gate
 
 
 def test_homogeneous_relation_and_resource_cap_fail_closed():
-    v, k = 8, 3
+    v, k = 12, 3
     homogeneous = tuple(0 for _ in combinations(range(v), k))
     closed = find_exact_twl_design_witness_family(v, k, homogeneous)
     assert closed.status == "undetermined_twl_design_symmetry_defect_gate"
     assert not closed.exact
 
-    fv, fk, _coords, _lines, fano = _fano()
+    fv, fk = 11, 2
+    edges = {tuple(sorted((i, (i + 1) % fv))) for i in range(fv)}
+    fano = tuple(int(S in edges) for S in combinations(range(fv), fk))
     capped = find_exact_twl_design_witness_family(
         fv, fk, fano, max_tuple_states=100
     )

@@ -448,21 +448,21 @@ def find_exact_twl_design_witness_family(
     palette = tuple(colors)
     if n < 1 or not 1 <= k <= n:
         raise ValueError("invalid vertex_count/arity")
-    if not 0.5 <= alpha < 1.0:
-        raise ValueError("alpha must lie in [1/2,1)")
+    if not 0.75 <= alpha < 1.0:
+        raise ValueError("Extended Design Lemma alpha must lie in [3/4,1)")
     if len(palette) != comb(n, k):
         raise ValueError("colors must contain one entry for every k-subset")
     if max_states < 1 or max_work_units < 1:
         raise ValueError("resource caps must be positive")
 
-    theorem_gate = 2 <= k <= n // 2
+    theorem_gate = 2 <= k <= n // 4
     symmetry = exact_colored_subset_symmetry_defect(n, k, palette, alpha=alpha)
     tuple_states = n ** k
     if not theorem_gate:
         return ExactTWLDesignFamily(
             "undetermined_twl_design_theorem_parameter_gate", n, k, float(alpha),
             False, symmetry.design_gate_certified, None, (), 0, tuple_states, 0, 0.0,
-            False, "Design-Lemma parameter gate requires 2<=arity<=floor(n/2)",
+            False, "Extended Design Lemma parameter gate requires 2<=arity<=floor(n/4)",
         )
     if not symmetry.design_gate_certified:
         return ExactTWLDesignFamily(

@@ -7,14 +7,14 @@ def _edges(hyperedges):
     return {(a, b) for a, edge in enumerate(hyperedges) for b in edge}
 
 
-def _cycle5():
-    return [(i, (i + 1) % 5) for i in range(5)]
+def _cycle(n=8):
+    return [(i, (i + 1) % n) for i in range(n)]
 
 
-def test_cycle5_no_large_twins_reaches_complete_exact_design_branch_plan():
-    edges = _edges(_cycle5())
+def test_cycle8_no_large_twins_reaches_complete_exact_design_branch_plan():
+    edges = _edges(_cycle())
     got = wire_no_large_twin_relation_into_design(
-        5, 5, edges, edges,
+        8, 8, edges, edges,
         alpha=0.75,
         max_tuple_states=100,
         max_twl_work_units=2_000_000,
@@ -59,9 +59,9 @@ def test_explicit_johnson_outcome_is_left_for_ambient_transport():
 
 
 def test_twl_resource_cap_fails_closed_after_mechanical_parent_provenance():
-    edges = _edges(_cycle5())
+    edges = _edges(_cycle())
     got = wire_no_large_twin_relation_into_design(
-        5, 5, edges, edges, alpha=0.75, max_tuple_states=1
+        8, 8, edges, edges, alpha=0.75, max_tuple_states=1
     )
     assert got.status == "undetermined_relation_design_branch_plan"
     assert got.parent_provenance_verified
@@ -70,9 +70,9 @@ def test_twl_resource_cap_fails_closed_after_mechanical_parent_provenance():
 
 
 def test_parent_relation_status_mismatch_is_exact_empty():
-    source = _edges(_cycle5())
-    target_hyperedges = list(_cycle5())
+    source = _edges(_cycle())
+    target_hyperedges = list(_cycle())
     target_hyperedges[-1] = target_hyperedges[0]
-    got = wire_no_large_twin_relation_into_design(5, 5, source, _edges(target_hyperedges))
+    got = wire_no_large_twin_relation_into_design(8, 8, source, _edges(target_hyperedges))
     assert got.status == "exact_empty_relation_twin_parent_invariant"
     assert got.exact_empty and got.exact
