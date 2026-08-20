@@ -1,3 +1,5 @@
+from collections import deque
+
 from bipartite_twin_ambient_coset_intersection_v1 import (
     intersect_unique_twin_mapping_with_ambient_coset,
 )
@@ -26,10 +28,28 @@ def _unique_refinement():
     )
 
 
+def _group_elements(chain, cap=10000):
+    e = identity(chain.degree)
+    gens = chain.original_generators or (e,)
+    seen = {e}
+    queue = deque((e,))
+    while queue:
+        x = queue.popleft()
+        for g in gens:
+            y = compose(x, g)
+            if y not in seen:
+                if len(seen) >= cap:
+                    raise AssertionError("test-only group enumeration exceeded cap")
+                seen.add(y)
+                queue.append(y)
+    assert len(seen) == chain.order
+    return seen
+
+
 def _coset_members(coset, cap=10000):
     return {
         compose(coset.representative, h)
-        for h in coset.subgroup.elements(max_elements=cap)
+        for h in _group_elements(coset.subgroup, cap=cap)
     }
 
 
