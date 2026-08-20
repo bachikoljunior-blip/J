@@ -1,4 +1,4 @@
-from itertools import combinations
+from itertools import combinations, permutations
 
 from coherent_pair_refinement import coherent_refine_pair_relation
 
@@ -28,9 +28,44 @@ def test_regular_pair_codegrees_can_split_after_coherent_refinement():
     }
     r = coherent_refine_pair_relation(6, tuple(weights.items()))
     assert r.status == "certified_coherent_point_split"
-    assert sorted(map(len, r.color_classes)) == [2, 4]
-    assert (2, 4) in r.color_classes
-    assert r.rank > 3
+
+    def weight(u, v):
+        return weights[tuple(sorted((u, v)))]
+
+    automorphisms = tuple(
+        p
+        for p in permutations(range(6))
+        if all(
+            weight(u, v) == weight(p[u], p[v])
+            for u, v in combinations(range(6), 2)
+        )
+    )
+    unseen = set(range(6))
+    orbits = []
+    while unseen:
+        u = min(unseen)
+        orbit = frozenset(p[u] for p in automorphisms)
+        orbits.append(orbit)
+        unseen.difference_update(orbit)
+
+    assert len(automorphisms) == 2
+    assert {frozenset(cell) for cell in r.color_classes} == set(orbits)
+    assert sorted(map(len, r.color_classes)) == [1, 1, 1, 1, 2]
+    assert r.rank == 26
+
+
+def test_stability_uses_color_partition_not_transient_numeric_ids():
+    # The same rev118 relation used to cycle its compressed integer IDs after
+    # the 2-WL partition was already stable and incorrectly hit max_rounds.
+    weights = {
+        (0, 1): 1, (0, 2): 1, (0, 3): 1, (0, 4): 2, (0, 5): 1,
+        (1, 2): 2, (1, 3): 1, (1, 4): 1, (1, 5): 1,
+        (2, 3): 2, (2, 4): 0, (2, 5): 2,
+        (3, 4): 1, (3, 5): 1, (4, 5): 2,
+    }
+    r = coherent_refine_pair_relation(6, tuple(weights.items()), max_rounds=8)
+    assert r.status == "certified_coherent_point_split"
+    assert r.refinement_rounds < 8
 
 
 def test_vertex_transitive_cyclic_distance_relation_remains_homogeneous_but_nontrivial():

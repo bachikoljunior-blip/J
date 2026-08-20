@@ -133,6 +133,8 @@ jobs:
           test_bounded_ground_s1_profile_filter_rev213.py
           test_general_log_pair_image_rev214.py
           test_replay_stable_johnson_lift_memo_rev215.py
+          test_shared_log_relation_artifact_rev216.py
+          test_coherent_pair_refinement.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update

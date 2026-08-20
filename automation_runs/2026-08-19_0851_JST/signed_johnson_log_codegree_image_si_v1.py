@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import replace
-from itertools import combinations
-from math import ceil, comb, log2
+from math import log2
 
 from candidate_full_accept_terminal_v1 import exact_if_entire_candidate_maps_string
 from canonical_partition_guided_string_iso_v1 import _all_value_preserving_maps
@@ -16,13 +15,10 @@ from quasipoly_recurrence_accounting_v1 import RecurrenceAccountingNode
 from quasipoly_recurrence_accounting_v4 import validate_quasipoly_recurrence_tree_v4
 from recursive_point_image_coset_intersection import right_coset_intersection_recursive
 from signed_johnson_complement_safe_image_si_v1 import (
-    complement_safe_t_relation_signatures,
     complement_safe_t_subset_image_generators,
 )
-from signed_johnson_ground_profile_partition_si_v1 import _color_token
 from signed_johnson_log_certificate_design_descent_si_v1 import (
-    _codegree_signatures,
-    _relation_descent,
+    build_signed_johnson_log_relation_artifact,
 )
 
 
@@ -54,35 +50,6 @@ def _unresolved(status, *, root_n, n, reason, coset=None, children=(), checked=0
         checked,
         reason,
     )
-
-
-def _replay_nonconstant_codegrees_to_pair(v, coords, source_values, target_values, arity):
-    """Replay rev184's deterministic nonconstant-codegree descent and expose arity 2."""
-    coords = tuple(tuple(x) for x in coords)
-    source_values = tuple(source_values)
-    target_values = tuple(target_values)
-    arity = int(arity)
-    path = [arity]
-    while arity > 2:
-        advanced = False
-        for s in range(arity - 1, 1, -1):
-            subcoords, src = _codegree_signatures(v, coords, source_values, s)
-            _, dst = _codegree_signatures(v, coords, target_values, s)
-            if Counter(src) != Counter(dst):
-                return None
-            if len(set(src).union(dst)) > 1:
-                coords = tuple(subcoords)
-                source_values = tuple(src)
-                target_values = tuple(dst)
-                arity = int(s)
-                path.append(arity)
-                advanced = True
-                break
-        if not advanced:
-            return None
-    if arity != 2 or coords != tuple(combinations(range(v), 2)):
-        return None
-    return coords, source_values, target_values, tuple(path)
 
 
 def signed_johnson_log_codegree_image_candidate_si(
@@ -137,53 +104,73 @@ def signed_johnson_log_codegree_image_candidate_si(
     lift = lift_primitive_johnson_to_ground_relation(
         group, source, target, max_recognition_nodes=max_recognition_nodes
     )
-    v = int(lift.ground_size)
-    k = int(lift.subset_size)
-    if lift.status != "exact_johnson_ground_relational_lift" or not lift.strict_auxiliary_progress:
+    relation_artifact = build_signed_johnson_log_relation_artifact(
+        lift,
+        root_n=root_n,
+        max_test_sets=max_test_sets,
+        max_recognition_nodes=max_recognition_nodes,
+        max_johnson_nodes=max_johnson_nodes,
+        max_class_fraction=max_class_fraction,
+    )
+    v = relation_artifact.ground_size
+    k = relation_artifact.subset_size
+    t = relation_artifact.test_arity
+    test_count = relation_artifact.test_count
+    if relation_artifact.status == "undetermined_log_relation_johnson_lift":
         return _unresolved(
             "undetermined_log_codegree_image_johnson_lift",
             root_n=root_n,
             n=n,
-            reason=lift.reason,
+            reason=relation_artifact.reason,
         )
-    if k <= 2:
+    if relation_artifact.status == "undetermined_log_relation_no_higher_arity":
         return _unresolved(
             "undetermined_log_codegree_image_no_higher_arity",
             root_n=root_n,
             n=n,
-            reason="codegree-image bridge requires the same genuinely higher-arity Johnson regime as rev184",
+            reason=relation_artifact.reason,
         )
-
-    arity_cap = max(1, ceil(log2(max(2, root_n))))
-    t = min(k - 1, max(2, ceil(log2(max(2, v)))))
-    test_count = comb(v, t)
-    if t > arity_cap or test_count > max_test_sets:
+    if relation_artifact.status == "undetermined_log_relation_parameter_gate":
         return _unresolved(
             "undetermined_log_codegree_image_parameter_gate",
             root_n=root_n,
             n=n,
-            reason="rev184 logarithmic theorem/test-count gate is not mechanically satisfied",
+            reason=relation_artifact.reason,
         )
-
-    complement = any(bool(g.complement) for g in lift.lifted_generators)
-    source_tokens = tuple(_color_token(x) for x in lift.source_on_standard_subsets)
-    target_tokens = tuple(_color_token(x) for x in lift.target_on_standard_subsets)
-    source_relation = complement_safe_t_relation_signatures(
-        v, k, source_tokens, t, complement_in_image=complement
-    )
-    target_relation = complement_safe_t_relation_signatures(
-        v, k, target_tokens, t, complement_in_image=complement
-    )
-    coords = tuple(combinations(range(v), t))
-    descent = _relation_descent(
-        v,
-        coords,
-        source_relation,
-        target_relation,
-        t,
-        max_class_fraction=max_class_fraction,
-        max_johnson_nodes=max_johnson_nodes,
-    )
+    if relation_artifact.status in {
+        "exact_empty_log_relation_color_invariant",
+        "exact_empty_log_relation_descent_invariant",
+    }:
+        accounting = RecurrenceAccountingNode(
+            n=root_n,
+            m=max(1, v),
+            operation_kind="log_codegree_relation_invariant_terminal",
+            canonical=True,
+            cost_certified=True,
+            local_log2_cost_bound=relation_artifact.scan_bound,
+            children=(),
+            terminal_certified=True,
+            reason=relation_artifact.reason,
+        )
+        return ProofCarryingCoset(
+            "exact_empty_log_codegree_relation_invariant",
+            None,
+            accounting.operation_kind,
+            root_n,
+            n,
+            True,
+            True,
+            True,
+            relation_artifact.scan_bound,
+            True,
+            (),
+            accounting,
+            test_count,
+            relation_artifact.reason,
+        )
+    if relation_artifact.status != "certified_log_relation_descent" or relation_artifact.descent is None:
+        raise AssertionError("unexpected shared logarithmic relation artifact status")
+    descent = relation_artifact.descent
     pair_descent_statuses = {
         "certified_log_certificate_johnson_descent",
         "homogeneous_pair_relation_unresolved",
@@ -197,14 +184,11 @@ def signed_johnson_log_codegree_image_candidate_si(
             checked=test_count,
         )
 
-    replay = _replay_nonconstant_codegrees_to_pair(
-        v, coords, source_relation, target_relation, t
-    )
-    if replay is None:
-        raise AssertionError("rev184 certified Johnson descent but deterministic codegree replay did not reach pairs")
-    pair_coords, pair_source, pair_target, path = replay
-    if tuple(descent.arity_path) != tuple(path):
-        raise AssertionError("codegree replay path disagrees with rev184 structural certificate")
+    pair_coords = descent.terminal_coords
+    pair_source = descent.terminal_source_relation
+    pair_target = descent.terminal_target_relation
+    if not pair_coords or descent.arity_path[-1:] != (2,):
+        raise AssertionError("shared codegree descent omitted its certified terminal pair relation")
     if len(set(pair_source).union(pair_target)) <= 1:
         return _unresolved(
             "undetermined_log_codegree_pair_image_homogeneous",
@@ -433,6 +417,5 @@ def signed_johnson_log_codegree_image_candidate_si(
 
 
 __all__ = [
-    "_replay_nonconstant_codegrees_to_pair",
     "signed_johnson_log_codegree_image_candidate_si",
 ]

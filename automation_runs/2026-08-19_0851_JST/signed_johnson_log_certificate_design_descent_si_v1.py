@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass, replace
+from functools import lru_cache
 from itertools import combinations
 from math import ceil, comb, log2
 
 from johnson_ground_relational_lift_v1 import (
-    _standard_subsets,
+    JohnsonGroundRelationalLift,
     lift_primitive_johnson_to_ground_relation,
 )
 from master_canonical_reduction import reduce_canonical_pair_structure
@@ -31,6 +32,34 @@ class RelationDescent:
     johnson_ground_size: int | None
     johnson_subset_size: int | None
     relation_rank: int
+    reason: str
+    terminal_coords: tuple[tuple[int, ...], ...] = ()
+    terminal_source_relation: tuple[object, ...] = ()
+    terminal_target_relation: tuple[object, ...] = ()
+
+
+@dataclass(frozen=True)
+class SignedJohnsonLogRelationArtifact:
+    """Immutable proof of the complete logarithmic relation and its descent."""
+
+    status: str
+    ground_size: int
+    subset_size: int
+    current_degree: int
+    root_n: int
+    max_test_sets: int
+    max_recognition_nodes: int
+    max_johnson_nodes: int
+    max_class_fraction: float
+    test_arity: int
+    test_count: int
+    theorem_arity_cap: int
+    theorem_parameter_gate: bool
+    coords: tuple[tuple[int, ...], ...]
+    source_relation: tuple[object, ...]
+    target_relation: tuple[object, ...]
+    descent: RelationDescent | None
+    scan_bound: float
     reason: str
 
 
@@ -173,11 +202,13 @@ def _relation_descent(v, coords, source_values, target_values, arity, *, max_cla
                 False, int(sr.johnson_ground_size), int(sr.johnson_subset_size),
                 len(set(source_values).union(target_values)),
                 "homogeneous pair certificate relation is an exact Johnson distance scheme on a strictly smaller ideal ground",
+                tuple(tuple(x) for x in coords), tuple(source_values), tuple(target_values),
             )
         return RelationDescent(
             "homogeneous_pair_relation_unresolved", path, source_cells, target_cells,
             False, None, None, len(set(source_values).union(target_values)),
             "stable homogeneous pair relation is not a certified Johnson reduction",
+            tuple(tuple(x) for x in coords), tuple(source_values), tuple(target_values),
         )
 
     # Descend to the largest lower arity carrying nonconstant exact codegrees.
@@ -203,6 +234,233 @@ def _relation_descent(v, coords, source_values, target_values, arity, *, max_cla
         False, None, None, len(set(source_values).union(target_values)),
         "the nontrivial logarithmic-arity relation is codegree-homogeneous at every lower arity; a stronger Design-Lemma theorem gate is required before claiming split-or-Johnson progress",
     )
+
+
+def _build_signed_johnson_log_relation_artifact_uncached(
+    lift: JohnsonGroundRelationalLift,
+    *,
+    root_n: int,
+    max_test_sets: int,
+    max_recognition_nodes: int,
+    max_johnson_nodes: int,
+    max_class_fraction: float,
+) -> SignedJohnsonLogRelationArtifact:
+    """Build the shared rev184/rev214 relation proof without memo semantics."""
+    n = int(lift.current_degree)
+    v = int(lift.ground_size)
+    k = int(lift.subset_size)
+    arity_cap = max(1, ceil(log2(max(2, root_n))))
+
+    def artifact(
+        status,
+        *,
+        t=0,
+        test_count=0,
+        gate=False,
+        coords=(),
+        source_relation=(),
+        target_relation=(),
+        descent=None,
+        scan_bound=0.0,
+        reason,
+    ):
+        return SignedJohnsonLogRelationArtifact(
+            status,
+            v,
+            k,
+            n,
+            root_n,
+            max_test_sets,
+            max_recognition_nodes,
+            max_johnson_nodes,
+            max_class_fraction,
+            int(t),
+            int(test_count),
+            arity_cap,
+            bool(gate),
+            tuple(tuple(x) for x in coords),
+            tuple(source_relation),
+            tuple(target_relation),
+            descent,
+            float(scan_bound),
+            reason,
+        )
+
+    if lift.status != "exact_johnson_ground_relational_lift" or not lift.strict_auxiliary_progress:
+        return artifact(
+            "undetermined_log_relation_johnson_lift",
+            reason=lift.reason,
+        )
+    if k <= 2:
+        return artifact(
+            "undetermined_log_relation_no_higher_arity",
+            reason="no genuinely higher-arity Johnson test-set relation exists when k<=2",
+        )
+
+    t = min(k - 1, max(2, ceil(log2(max(2, v)))))
+    test_count = comb(v, t)
+    gate = t <= arity_cap and test_count <= max_test_sets
+    if not gate:
+        return artifact(
+            "undetermined_log_relation_parameter_gate",
+            t=t,
+            test_count=test_count,
+            reason="logarithmic theorem/test-count parameter gate is not mechanically satisfied",
+        )
+
+    complement = any(bool(g.complement) for g in lift.lifted_generators)
+    source_tokens = tuple(_color_token(x) for x in lift.source_on_standard_subsets)
+    target_tokens = tuple(_color_token(x) for x in lift.target_on_standard_subsets)
+    source_relation = complement_safe_t_relation_signatures(
+        v, k, source_tokens, t, complement_in_image=complement
+    )
+    target_relation = complement_safe_t_relation_signatures(
+        v, k, target_tokens, t, complement_in_image=complement
+    )
+    coords = tuple(combinations(range(v), t))
+    if len(coords) != test_count or len(source_relation) != test_count or len(target_relation) != test_count:
+        raise AssertionError("logarithmic certificate relation size mismatch")
+    scan_bound = (
+        log2(max(1, test_count * max(1, t) * max(1, n)))
+        + 48.0 * log2(max(2, root_n))
+        + 64.0
+    )
+    if Counter(source_relation) != Counter(target_relation):
+        reason = "complete complement-safe logarithmic test-set relation has different color multiplicities"
+        descent = RelationDescent(
+            "relation_invariant_mismatch",
+            (t,),
+            (),
+            (),
+            False,
+            None,
+            None,
+            len(set(source_relation).union(target_relation)),
+            reason,
+            coords,
+            source_relation,
+            target_relation,
+        )
+        return artifact(
+            "exact_empty_log_relation_color_invariant",
+            t=t,
+            test_count=test_count,
+            gate=True,
+            coords=coords,
+            source_relation=source_relation,
+            target_relation=target_relation,
+            descent=descent,
+            scan_bound=scan_bound,
+            reason=reason,
+        )
+
+    descent = _relation_descent(
+        v,
+        coords,
+        source_relation,
+        target_relation,
+        t,
+        max_class_fraction=max_class_fraction,
+        max_johnson_nodes=max_johnson_nodes,
+    )
+    status = (
+        "exact_empty_log_relation_descent_invariant"
+        if descent.status == "relation_invariant_mismatch"
+        else "certified_log_relation_descent"
+    )
+    return artifact(
+        status,
+        t=t,
+        test_count=test_count,
+        gate=True,
+        coords=coords,
+        source_relation=source_relation,
+        target_relation=target_relation,
+        descent=descent,
+        scan_bound=scan_bound,
+        reason=descent.reason,
+    )
+
+
+@lru_cache(maxsize=64)
+def _memoized_signed_johnson_log_relation_artifact(
+    lift,
+    root_n,
+    max_test_sets,
+    max_recognition_nodes,
+    max_johnson_nodes,
+    max_class_fraction,
+):
+    return _build_signed_johnson_log_relation_artifact_uncached(
+        lift,
+        root_n=root_n,
+        max_test_sets=max_test_sets,
+        max_recognition_nodes=max_recognition_nodes,
+        max_johnson_nodes=max_johnson_nodes,
+        max_class_fraction=max_class_fraction,
+    )
+
+
+def build_signed_johnson_log_relation_artifact(
+    lift: JohnsonGroundRelationalLift,
+    *,
+    root_n: int,
+    max_test_sets: int = 200000,
+    max_recognition_nodes: int = 500000,
+    max_johnson_nodes: int = 500000,
+    max_class_fraction: float = 0.9,
+) -> SignedJohnsonLogRelationArtifact:
+    """Return one replay-stable relation/descent proof shared by both consumers.
+
+    The exact Johnson lift carries source/target orientation and its complete
+    frozen structural result.  Every caller-visible theorem or resource gate is
+    also in this cache identity.  Unhashable lifts bypass memoization, so cache
+    eligibility can change performance only, never the mathematical result.
+    """
+    integer_gates = {
+        "root_n": root_n,
+        "max_test_sets": max_test_sets,
+        "max_recognition_nodes": max_recognition_nodes,
+        "max_johnson_nodes": max_johnson_nodes,
+    }
+    for name, value in integer_gates.items():
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise TypeError(name + " must be an integer")
+    max_class_fraction = float(max_class_fraction)
+    if root_n < int(lift.current_degree):
+        raise ValueError("root_n must cover the current Johnson domain")
+    if max_test_sets < 1 or max_recognition_nodes < 1 or max_johnson_nodes < 1:
+        raise ValueError("invalid log-relation resource parameters")
+    if not (0.0 < max_class_fraction < 1.0):
+        raise ValueError("max_class_fraction must lie in (0,1)")
+    identity = (
+        lift,
+        root_n,
+        max_test_sets,
+        max_recognition_nodes,
+        max_johnson_nodes,
+        max_class_fraction,
+    )
+    try:
+        hash(identity)
+    except TypeError:
+        return _build_signed_johnson_log_relation_artifact_uncached(
+            lift,
+            root_n=root_n,
+            max_test_sets=max_test_sets,
+            max_recognition_nodes=max_recognition_nodes,
+            max_johnson_nodes=max_johnson_nodes,
+            max_class_fraction=max_class_fraction,
+        )
+    return _memoized_signed_johnson_log_relation_artifact(*identity)
+
+
+build_signed_johnson_log_relation_artifact.cache_clear = (
+    _memoized_signed_johnson_log_relation_artifact.cache_clear
+)
+build_signed_johnson_log_relation_artifact.cache_info = (
+    _memoized_signed_johnson_log_relation_artifact.cache_info
+)
 
 
 def _proof(status, coset, *, root_n, n, exact, cost, bound, terminal, accounting, checked, reason,
@@ -272,10 +530,22 @@ def signed_johnson_log_certificate_design_descent_si(
     lift = lift_primitive_johnson_to_ground_relation(
         group, source, target, max_recognition_nodes=max_recognition_nodes
     )
-    v = int(lift.ground_size)
-    k = int(lift.subset_size)
-    arity_cap = max(1, ceil(log2(max(2, root_n))))
-    if lift.status != "exact_johnson_ground_relational_lift" or not lift.strict_auxiliary_progress:
+    relation_artifact = build_signed_johnson_log_relation_artifact(
+        lift,
+        root_n=root_n,
+        max_test_sets=max_test_sets,
+        max_recognition_nodes=max_recognition_nodes,
+        max_johnson_nodes=max_johnson_nodes,
+        max_class_fraction=max_class_fraction,
+    )
+    v = relation_artifact.ground_size
+    k = relation_artifact.subset_size
+    t = relation_artifact.test_arity
+    test_count = relation_artifact.test_count
+    arity_cap = relation_artifact.theorem_arity_cap
+    scan_bound = relation_artifact.scan_bound
+    descent = relation_artifact.descent
+    if relation_artifact.status == "undetermined_log_relation_johnson_lift":
         accounting = RecurrenceAccountingNode(
             n=root_n, m=max(1, min(root_n, v or n)),
             operation_kind="unresolved_log_certificate_design_descent",
@@ -286,16 +556,16 @@ def signed_johnson_log_certificate_design_descent_si(
         return _proof(
             "undetermined_log_certificate_johnson_lift", None,
             root_n=root_n, n=n, exact=False, cost=False, bound=0.0, terminal=False,
-            accounting=accounting, checked=0, reason=lift.reason,
+            accounting=accounting, checked=0, reason=relation_artifact.reason,
             v=v, k=k, t=0, test_count=0, arity_cap=arity_cap, gate=False, descent=None,
         )
 
-    if k <= 2:
+    if relation_artifact.status == "undetermined_log_relation_no_higher_arity":
         accounting = RecurrenceAccountingNode(
             n=root_n, m=v, operation_kind="unresolved_log_certificate_design_descent",
             canonical=True, cost_certified=False, local_log2_cost_bound=0.0,
             children=(), terminal_certified=False,
-            reason="no genuinely higher-arity Johnson test-set relation exists when k<=2",
+            reason=relation_artifact.reason,
         )
         return _proof(
             "undetermined_log_certificate_no_higher_arity", None,
@@ -304,15 +574,12 @@ def signed_johnson_log_certificate_design_descent_si(
             v=v, k=k, t=0, test_count=0, arity_cap=arity_cap, gate=False, descent=None,
         )
 
-    t = min(k - 1, max(2, ceil(log2(max(2, v)))))
-    test_count = comb(v, t)
-    gate = t <= arity_cap and test_count <= max_test_sets
-    if not gate:
+    if relation_artifact.status == "undetermined_log_relation_parameter_gate":
         accounting = RecurrenceAccountingNode(
             n=root_n, m=v, operation_kind="unresolved_log_certificate_design_descent",
             canonical=True, cost_certified=False, local_log2_cost_bound=0.0,
             children=(), terminal_certified=False,
-            reason="logarithmic theorem/test-count parameter gate is not mechanically satisfied",
+            reason=relation_artifact.reason,
         )
         return _proof(
             "undetermined_log_certificate_parameter_gate", None,
@@ -321,45 +588,24 @@ def signed_johnson_log_certificate_design_descent_si(
             v=v, k=k, t=t, test_count=test_count, arity_cap=arity_cap, gate=False, descent=None,
         )
 
-    complement = any(bool(g.complement) for g in lift.lifted_generators)
-    source_tokens = tuple(_color_token(x) for x in lift.source_on_standard_subsets)
-    target_tokens = tuple(_color_token(x) for x in lift.target_on_standard_subsets)
-    source_relation = complement_safe_t_relation_signatures(
-        v, k, source_tokens, t, complement_in_image=complement
-    )
-    target_relation = complement_safe_t_relation_signatures(
-        v, k, target_tokens, t, complement_in_image=complement
-    )
-    coords = tuple(combinations(range(v), t))
-    if len(coords) != test_count or len(source_relation) != test_count or len(target_relation) != test_count:
-        raise AssertionError("logarithmic certificate relation size mismatch")
-
-    scan_bound = log2(max(1, test_count * max(1, t) * max(1, n))) + 48.0 * log2(max(2, root_n)) + 64.0
-    if Counter(source_relation) != Counter(target_relation):
+    if relation_artifact.status == "exact_empty_log_relation_color_invariant":
         accounting = RecurrenceAccountingNode(
             n=root_n, m=v, operation_kind="log_certificate_invariant_terminal",
             canonical=True, cost_certified=True, local_log2_cost_bound=scan_bound,
             children=(), terminal_certified=True,
-            reason="complete complement-safe logarithmic test-set relation has different color multiplicities",
-        )
-        empty_descent = RelationDescent(
-            "relation_invariant_mismatch", (t,), (), (), False, None, None,
-            len(set(source_relation).union(target_relation)), accounting.reason,
+            reason=relation_artifact.reason,
         )
         return _proof(
             "exact_empty_log_certificate_relation_invariant", None,
             root_n=root_n, n=n, exact=True, cost=True, bound=scan_bound, terminal=True,
             accounting=accounting, checked=test_count, reason=accounting.reason,
             v=v, k=k, t=t, test_count=test_count, arity_cap=arity_cap, gate=True,
-            descent=empty_descent,
+            descent=descent,
         )
 
-    descent = _relation_descent(
-        v, coords, source_relation, target_relation, t,
-        max_class_fraction=max_class_fraction,
-        max_johnson_nodes=max_johnson_nodes,
-    )
-    if descent.status == "relation_invariant_mismatch":
+    if relation_artifact.status == "exact_empty_log_relation_descent_invariant":
+        if descent is None:
+            raise AssertionError("descent invariant artifact omitted its descent proof")
         accounting = RecurrenceAccountingNode(
             n=root_n, m=v, operation_kind="log_certificate_invariant_terminal",
             canonical=True, cost_certified=True, local_log2_cost_bound=scan_bound,
@@ -371,6 +617,9 @@ def signed_johnson_log_certificate_design_descent_si(
             accounting=accounting, checked=test_count, reason=descent.reason,
             v=v, k=k, t=t, test_count=test_count, arity_cap=arity_cap, gate=True, descent=descent,
         )
+
+    if relation_artifact.status != "certified_log_relation_descent" or descent is None:
+        raise AssertionError("unexpected shared logarithmic relation artifact status")
 
     if descent.significant_split:
         allowed_states = min(max_partition_states, max(1, root_n ** partition_state_poly_power))
