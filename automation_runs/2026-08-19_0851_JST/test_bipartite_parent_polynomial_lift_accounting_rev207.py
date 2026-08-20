@@ -109,23 +109,26 @@ def test_unresolved_rev206_image_child_remains_fail_closed_before_cost_claim():
     assert not cert.exact_parent_union
 
 
-def test_trivial_parent_exact_empty_inventory_mismatch_is_certified_without_fake_branch():
-    parent = schreier_stabilizer_chain([identity(8)])
-    right_images = (identity(4),)
-    edges = {(0, 0), (1, 1)}
+def test_complete_cycle5_cover_with_left_color_inventory_mismatch_is_exact_empty_and_certified():
+    parent, right_images, _ = _diagonal_cycle5_parent()
+    edges = _cycle5_edges()
     union, cert = solve_and_certify_design_parent_polynomial_lift(
         parent,
         right_images,
-        tuple(range(4)),
-        tuple(range(4, 8)),
+        tuple(range(5)),
+        tuple(range(5, 10)),
         edges,
         edges,
-        source_left_colors=(0, 1, 2, 3),
-        target_left_colors=(0, 1, 2, 2),
-        root_n=8,
+        source_left_colors=(0, 1, 2, 3, 4),
+        target_left_colors=(0, 1, 2, 3, 3),
+        root_n=10,
         alpha=0.75,
-        max_auxiliary_degree=32,
-        max_image_group_order=8,
+        max_tuple_states=100,
+        max_twl_rounds=16,
+        max_twl_work_units=2_000_000,
+        max_branch_pairs=100,
+        max_auxiliary_degree=40,
+        max_image_group_order=16,
     )
     assert union.exact and union.exact_empty
     assert cert.certified
