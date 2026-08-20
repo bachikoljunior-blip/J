@@ -35,9 +35,6 @@ def _anchor_string(v, k, anchors):
 def _assert_old_cap_new_exact(v, k):
     group = _induced_symmetric_johnson_group(v, k)
     m = group.degree
-    # Encode every ground point.  The old dispatcher still stops at the Johnson
-    # ground cap because it does not exploit lower-arity relation images, while
-    # those images now have maximally strong canonical colors and close quickly.
     source = _anchor_string(v, k, v)
     candidate = RightCoset(group, identity(m))
 
@@ -72,9 +69,15 @@ def test_rev209_joint_relation_dispatch_closes_j10_4_above_old_ground_cap():
 
 
 def test_rev209_adaptive_relation_dispatch_closes_j9_4_when_two_relation_budget_does_not_fit():
-    # For J(9,4), C(9,2)+C(9,3)=120 exceeds 0.9*C(9,4)=113, so rev183's
-    # two-relation selector cannot fire.  Rev182's adaptive single-relation
-    # fallback can still select an informative strictly smaller relation and
-    # recover the exact identity string stabilizer.
+    # C(9,2)+C(9,3)=120 exceeds 0.9*C(9,4)=113, so the two-relation selector
+    # cannot fire.  The adaptive single-relation fallback still closes exactly.
     new = _assert_old_cap_new_exact(9, 4)
     assert "relation_image_candidate" in new.status
+
+
+def test_rev209_profile_terminal_closes_j9_2_when_no_lower_arity_exists():
+    # k=2 has no configured t>=2 relation below k, so both relation-image routes
+    # are structurally exhausted.  The existing rev177 profile terminal can still
+    # certify the complete colored pair relation directly from ground-profile cells.
+    new = _assert_old_cap_new_exact(9, 2)
+    assert "signed_ground_profile" in new.status
