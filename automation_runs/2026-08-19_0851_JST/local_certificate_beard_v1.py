@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 
 from affected_segment_automorphism_v2 import affected_segment_automorphism_group_v2
 from affected_segment_quotient_resource_v1 import AffectedSegmentQuotientResourceEnvelope
+from affected_segment_reassembly_resource_v1 import AffectedSegmentReassemblyResourceEnvelope
 from babai_local_certificate_parameter_gate_v1 import (
     BabaiLocalCertificateParameterGate,
     babai_local_certificate_parameter_gate,
@@ -43,6 +44,7 @@ class BeardLayer:
     certified_kernel_child_bound: int
     recurrence_child_bound_verified: bool
     segment_resource_envelope: Optional[AffectedSegmentQuotientResourceEnvelope] = None
+    reassembly_resource_envelope: Optional[AffectedSegmentReassemblyResourceEnvelope] = None
 
 
 @dataclass(frozen=True)
@@ -114,6 +116,7 @@ def local_certificate_beard(
     max_preimage_schreier_work=None,
     max_giant_action_schreier_work=None,
     max_affected_segment_schreier_work=None,
+    max_reassembly_schreier_work=None,
 ) -> LocalCertificateBeard:
     """Execute Babai's growing-beard local-certificate dichotomy exactly.
 
@@ -222,6 +225,7 @@ def local_certificate_beard(
             max_child_nodes=max_child_nodes,
             giant_certificate=before,
             max_quotient_schreier_work=max_affected_segment_schreier_work,
+            max_reassembly_schreier_work=max_reassembly_schreier_work,
         )
         if not seg.exact or seg.subgroup is None:
             return LocalCertificateBeard(
@@ -253,6 +257,7 @@ def local_certificate_beard(
             ex.certified_kernel_child_bound,
             seg.recurrence_child_bound_verified,
             ex.resource_envelope,
+            ex.reassembly_resource_envelope,
         )
         layers.append(layer)
         recurrence_ok = recurrence_ok and seg.recurrence_child_bound_verified
