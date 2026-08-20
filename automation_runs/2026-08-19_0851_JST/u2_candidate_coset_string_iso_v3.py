@@ -6,6 +6,9 @@ from literal_giant_candidate_si_v1 import exact_literal_giant_string_isomorphism
 from orbit_factored_string_coset_intersection_v1 import _group_orbits
 from permutation_group_schreier import inverse
 from s1_structural_classifier_v1 import classify_s1_structure
+from signed_johnson_ground_profile_partition_si_v1 import (
+    signed_johnson_ground_profile_partition_si,
+)
 from signed_johnson_joint_relation_candidate_si_v1 import (
     signed_johnson_joint_relation_candidate_string_isomorphism,
 )
@@ -30,20 +33,24 @@ def candidate_coset_string_isomorphism_u3(
     max_group_order: int = 256,
     max_depth: int = 64,
 ):
-    """rev208/209 candidate SI: exact literal giants, then Johnson image shrink.
+    """rev208/209 candidate SI: exact literal giants, then shared Johnson reducers.
 
     rev208 removes the candidate representative and closes natural-domain S_n/A_n
     exactly by direct color-class transporter cosets.
 
     rev209 reuses earlier W1R substrates rather than creating a parallel Johnson
     solver. For a transitive primitive-non-giant candidate it first tries rev183's
-    simultaneous complement-safe lower-arity relation image. If that exact
-    composition does not close, rev182 adaptively chooses the strongest single
-    strictly-smaller relation arity and retries rev180/181 image/preimage filtering.
-    Both routes finish with the unchanged v2 candidate machinery inside the exact
-    lifted relation candidate. Only exact compositions are accepted here; otherwise
-    the original v2 fail-closed result is returned. This conservatively collapses
-    two formerly separate Johnson subbranches into one shared image/preimage path.
+    simultaneous complement-safe lower-arity relation image; if that does not
+    close, rev182 adaptively chooses the strongest single strictly-smaller relation
+    and retries rev180/181 image/preimage filtering. If lower-arity images are
+    exhausted, rev177's exact signed-ground profile terminal is tried: a relation
+    determined completely by canonical ground-profile cells can be solved without
+    enumerating the large Johnson action, while a mere profile split stays nonexact.
+
+    Only exact compositions are accepted here. Otherwise the original v2 fail-
+    closed result is returned. This horizontally collapses three Johnson subbranches
+    into the already-validated image/preimage/profile substrate without weakening
+    theorem, exactness, or resource gates.
     """
     source = tuple(source_values)
     target = tuple(target_values)
@@ -116,6 +123,19 @@ def candidate_coset_string_isomorphism_u3(
             if adaptive.exact:
                 return _translate_subgroup_si_back_to_candidate(
                     adaptive,
+                    candidate.representative,
+                    degree=n,
+                )
+
+            profile = signed_johnson_ground_profile_partition_si(
+                H,
+                subgroup_source,
+                target,
+                root_n=root_n,
+            )
+            if profile.exact:
+                return _translate_subgroup_si_back_to_candidate(
+                    profile,
                     candidate.representative,
                     degree=n,
                 )
