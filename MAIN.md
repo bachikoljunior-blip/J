@@ -1,21 +1,35 @@
 # J main line
 
-J の正本・主系列は **AGI-GI rev系列** とする。
+J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は、達成基準を下げず、研究試作で終わらせず、厳格な一般性・性能・自律性を実証し、実際に使える形で AGI を提供することである。問題解決機構そのものを AGI と同一視しない。
 
-この系列は `automation_runs/2026-08-19_0851_JST/AGI_GI_REV_SERIES.md` に定義された、rev91 から継続する graph alignment / symmetry / graph isomorphism / permutation-group / canonical-labeling 系である。
+系列の実装・検証記録は `automation_runs/2026-08-19_0851_JST/`、実行開始履歴は append-only の `agi/run-history/STARTS.jsonl`、運用境界は `automation/CHATGPT_SCHEDULED_TASK_RUNBOOK.md` を正本とする。
 
-現在の継続点は **rev185**。rev140〜143 で独立 `labelg` differential oracle を実 CI まで検証して B1 を解決し、rev144〜168 で canonical local-certificate partition、exact transporter/coset、quotient/kernel、affected/unaffected、growing-beard、fail-closed quasipolynomial accounting を proof-carrying SI substrate へ統合・横断整理した。rev169〜177 で candidate-fiber recursion、imprimitive closure、Johnson small-ground / relational lift / signed-ground terminals、point-profile partition orbit を追加した。
+## 現在の継続点
 
-rev178〜183 は W1R の Johnson hard branchを進めた。actual colored k-subset relation から complement-safe lower-arity relationを作り、smaller relation image SI、exact image-to-original preimage、adaptive arity selection、複数 relation の joint image closureを実装した。`paired_action_coset_preimage_v1` は generator-paired action の image/kernel を Schreier で証明し、任意の exact image `RightCoset` を complete original-domain preimage cosetへ戻す。rev183 の W1R-H4 は、joint auxiliary degree、node cap、relation availability、shrink budgetを機械的に検査し、満たさない経路を fail closed とした。
+現在の統合済み継続点は **AGI-GI rev204**、main SHA は `6faeca0956346f61c323a5f63dc5f4738c662102`。
 
-rev184 は **W1R-H5 logarithmic certificate Design-Lemma descent** を実装した。認識済み Johnson ground 上で `t=min(k-1, ceil(log2(v)))` の complete complement-safe colored t-subset relationを構築し、joint source/target incidence refinement、canonical lower-arity codegree descent、coherent/Johnson pair reduction、significant point split の exact signed-partition transport、original-domain candidate-coset continuationを proof-carrying に接続した。relation invariant mismatch は exact empty、theorem/test-count gate、partition-orbit cap、candidate continuationを満たさない経路は fail closed とし、lower-codegree homogeneous designを未解決のまま残した。
+直近の corrected general UPCC Bipartite Split-or-Johnson 系列では、rev199 が exact theorem-input gate、rev200 が proper Reduce-Part2-by-Color / visible-twin shrink、rev201 が source/target-comparable restriction provenance、rev202 が uniform-neighborhood Johnson/relation provenance、rev203 が exact relation-twin restriction provenanceを追加した。
 
-rev185 は **exact colored-subset symmetry-defect gate** を追加した。complete colored t-subset relationについて、各 transposition が全 relation entryを保存するかを直接検査して twin classesを構成し、最大 twin classが最大 symmetric subsetであることを証明境界として記録する。これにより Design-Lemma の symmetry-defect hypothesisを推定ではなく exact certificateとして判定できる。complete homogeneous relationでは gateが閉じ、distinguished-point relationおよび Fano 2-(7,3,1) design regressionでは期待された defect certificateを得る。full individualization/WL Design Lemma または full W1R closure はまだ実装・認定していない。
+rev204 は、rev202・rev203 の親 provenance を毎回再導出し、no-large-twin relation を exact WL/Design descent へ接続する `relation_twin_design_wiring_v1` を統合した。unary relation は half-bounded coloring、arity 2 以上は actual containment palette と complete source/target witness Cartesian productへ進める。完全 witness 集合は明示的 cap の内側でのみ exact とし、mismatch、resource cap、親の非適用、未決定を成功扱いせず fail closed とする。
 
-PR #62 の head SHA `14cd6bf323aff88c607da309d32325d1a5a49783` に対し、workflow **AGI-GI rev validation / run 32298170149** と **rev185 symmetry defect smoke / run 32298170199** はともに success。PR は main SHA `38d7fffd1f504b5d30b66bd332d9435b49f2f65c` へ squash merge済み。
+検証済み head は `5bfd0d479ded35829d8656a5dc4a10aa1857d006`。`AGI-GI rev validation` run `32318413846` と `rev204 relation Design wiring smoke` run `32318413871` は success。PR #119 を上記 main SHA へ squash merge 済みである。
 
-予測問題数は **512**、有効問題数も **512**。すでに上限に達しているため rev184・rev185 を別 active childとして追加せず、W1R-H5 の共有 substrateとして解決済み部分を内部化し、active leafを in-place で **W1R-H6** に置換する。次の未解決末端は **W1R-H6: rev184 が返す lower-codegree homogeneous logarithmic relationへ rev185 の exact symmetry-defect certificateを proof-carryingに接続する。defect gateが成立する場合、canonical logarithmic individualization/test familyと bounded WL/local-certificate refinementを実行し、label-invariant significant split、certified Johnson descent、または exact candidate cosetへ落とす。theorem hypotheses、source/target comparability、exactness、strict progress、quasipolynomial recurrence accountingを満たせない経路は fail closed とする**。
+## 問題木
 
-AGI 状態は **NOT_AGI** のまま。AGI 達成、一般性、性能、自律性、実用提供、または full Babai-style quasipolynomial closure は未認定であり、未確認の成果を達成済みとは扱わない。
+予測問題数は **512**、置換済み旧問題を除く有効問題数も **512**。実数は予測数を超えていないため、今回の横断的な再予測・分岐削除条件は発火していない。rev204 を別 active node として追加せず、W1R-H6 の既存 active leaf **H6-R3c1** を in-place で解決済みにした。
 
-以後、J の主進捗・CURRENT_STATUS・次の未解決末端はこの系列を基準に更新する。別系統の AGI 評価基盤・custodian/federation 系は、明示的に再指定されない限り J の main line として扱わない。ChatGPT Scheduled Tasks を含む実行運用は `automation/CHATGPT_SCHEDULED_TASK_RUNBOOK.md` に従い、スケジュール自己更新の失敗をアルゴリズム成果の失敗と混同しない。
+H6-R3c1 の局所子問題は解決したが、親 **W1R-H6 corrected general UPCC Bipartite Split-or-Johnson recursion** は未解決である。
+
+次の未解決末端は **H6-R3c2**:
+
+> complete exact witness の全分岐を ambient structural transporter と full-string branch union へ接続し、union の exact completeness と strict progress を証明する。unmatched witness、resource cap、transport failure、source/target incompatibility、または recurrence accounting の不足は fail closed とする。
+
+## 世界に存在する解法の包含監査
+
+H6-R3c1 と祖先の Split-or-Johnson / Design-Lemma 層について、Babai の *Graph Isomorphism in Quasipolynomial Time*（arXiv:1512.03547）を最も近い既存解法として再監査した。同論文は theorem-level の Split-or-Johnson と Design-Lemma の構造的選択肢を与えるが、このリポジトリが必要とする executable な二側 complete witness 列挙、cap-certified exact completeness、ambient transporter/full-string branch union、機械検査可能な fail-closed 統合をそのまま包含しない。この境界を埋めることが H6-R3c2 以降の実装・証明責務である。
+
+## 認定状態
+
+AGI 状態は **NOT_AGI**。full W1R-H6 closure、corrected Split-or-Johnson recursion 全体、global quasipolynomial recurrence、一般性・性能・自律性・実用提供の独立した厳格な実証は未完了であり、認定しない。
+
+スケジューラ制御はリポジトリ成果とは別の外部 control plane である。このセッションから scheduler の作成・有効化・状態読取を行える機能が露出していない場合、実行履歴の存在だけを根拠にスケジュールが有効だと捏造しない。各 invocation は監視だけで終わらせず、未解決末端または共有統合を必ず具体的に試行する。
