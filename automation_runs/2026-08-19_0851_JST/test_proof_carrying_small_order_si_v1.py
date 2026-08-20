@@ -94,7 +94,7 @@ def test_small_instance_matches_existing_exact_coset_oracle():
     assert got.coset.contains(exact.coset.representative)
 
 
-def test_large_group_order_falls_back_to_structural_s1_without_enumeration():
+def test_large_literal_s9_group_uses_non_enumerative_exact_giant_terminal():
     n = 9
     G = schreier_stabilizer_chain([cycle(n), transposition(n)])
     source = (0,) * n
@@ -106,5 +106,8 @@ def test_large_group_order_falls_back_to_structural_s1_without_enumeration():
         max_explicit_degree=8,
         max_group_order=64,
     )
-    assert not got.exact
-    assert got.status == "undetermined_primitive_giant_local_certificates"
+    assert G.order > 64
+    assert got.exact and got.coset is not None
+    assert got.status == "exact_literal_symmetric_string_coset"
+    assert got.coset.subgroup.order == G.order
+    assert validate_quasipoly_recurrence_tree_v3(got.accounting).certified
