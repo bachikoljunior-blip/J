@@ -2,9 +2,9 @@
 
 ## Scope, count, and strict state
 
-rev205 closes the right-ground ambient alignment-domain child for the complete rev204 Design witness cover. It does not yet intersect each surviving right coset with the original bipartite incidence state. rev206 attacks that boundary at two layers: first an exact right-side neighborhood-family model, then a stronger exact intersection that preserves the actual coupled parent permutation action.
+rev205 closes the right-ground ambient alignment-domain child for the complete rev204 Design witness cover. It does not yet intersect each surviving right coset with the original bipartite incidence state. rev206 closes that **set-theoretic full-string boundary** in three layers: a right-side neighborhood-family specialization, a coupled actual-parent action intersection, and complete reconstruction of the full rev204/rev205 witness union.
 
-The predicted/effective problem count remains **512 / 512**. This work replaces the existing H6-R3c2b internal leaf in place; it does not add a new active global branch. `AGI = NOT_AGI` and the W1R-H6 parent remains unresolved.
+The predicted/effective problem count remains **512 / 512**. This work replaces the existing H6-R3c2b internal leaf in place; it does not add a new active global branch. `AGI = NOT_AGI` and the W1R-H6 parent remains unresolved because recurrence-safe cost/progress accounting is still separate.
 
 ## Existing-world mechanism checked across layers
 
@@ -19,45 +19,47 @@ The repository already has exact software analogues: `RightCoset`, Schreier chai
 
 For a candidate right coset `H*r`, if the left action is the full product of symmetric groups inside supplied left-color classes, a right permutation is a full colored-bipartite isomorphism exactly when it sends, color by color, the multiset of source left neighborhoods to the target neighborhood multiset.
 
-`bipartite_neighborhood_coset_intersection_v1.py` realizes that equivalence mechanically:
-
-1. validate source/target left-color inventories;
-2. move source neighborhoods through the fixed candidate representative `r`;
-3. build the complete orbit closure of source/target neighborhoods under `H`, with an explicit state cap;
-4. encode at each subset coordinate the exact multiplicity vector of left colors;
-5. solve the induced string in the image of `H` with existing candidate-coset SI;
-6. lift the image coset with generic paired Schreier preimage;
-7. restore `r` and return an exact subcoset of the original right candidate.
-
-Repeated neighborhoods and left-color multiplicities are preserved exactly. The regression suite compares the returned S4 coset with direct exhaustive colored-bipartite semantics.
+`bipartite_neighborhood_coset_intersection_v1.py` realizes that equivalence mechanically by closing the neighborhood subsets under `H`, encoding exact multiplicity-by-left-color on that invariant subset domain, solving the induced string in the image of `H`, lifting the image coset with generic paired Schreier preimage, and restoring `r`. Repeated neighborhoods and left-color multiplicities are preserved exactly. Small S4 regressions compare the returned coset with direct exhaustive semantics.
 
 ## Layer 2: preserve the actual coupled parent action
 
-The first model exposed a real theorem boundary: rev201 proves color-preserving structural provenance but does not imply that the actual parent left subgroup is a full symmetric product. Treating left and right permutations independently could therefore admit false isomorphisms.
+The first model exposed a theorem boundary: rev201 proves color-preserving structural provenance but does not imply that the actual parent left subgroup is a full symmetric product. Treating left and right permutations independently could admit false isomorphisms.
 
-`bipartite_parent_action_coset_intersection_v1.py` removes that relaxation whenever the caller supplies the actual parent `StabilizerChain` and the generator-paired parent-to-right action already needed by rev205:
+`bipartite_parent_action_coset_intersection_v1.py` removes that relaxation whenever the caller supplies the actual parent `StabilizerChain` and a generator-paired parent-to-right action:
 
-1. take a rev205 right structural candidate coset and recover its **exact preimage in the parent group** using `paired_action_coset_preimage`;
-2. keep the resulting parent subgroup and representative coupled—no independent left/right product group is introduced;
-3. construct its exact induced action on a disjoint auxiliary domain containing every left vertex, every right vertex, and every cross pair `L x R`;
-4. encode the complete colored bipartite state on that domain: left colors, right colors, and every edge/nonedge bit;
-5. shift the source auxiliary string through the fixed parent-candidate representative;
-6. run existing candidate-coset String Isomorphism in the induced subgroup action;
-7. lift the exact image result back through the same paired-action machinery and restore the fixed representative.
+1. recover the exact parent-group preimage of one rev205 right structural candidate with `paired_action_coset_preimage`;
+2. retain the coupled parent subgroup/representative rather than introducing independent left/right groups;
+3. form the induced action on all left vertices, all right vertices, and all cross pairs `L x R`;
+4. encode the complete colored bipartite state: left colors, right colors, and every edge/nonedge bit;
+5. solve the exact candidate-coset string in that induced subgroup action;
+6. lift the result back through the coupled parent action and restore the fixed representative.
 
-Thus the output is exactly the subset of the **actual parent group** that both projects into the supplied rev205 right alignment and maps the complete colored bipartite source state to the target state. A regression deliberately uses a diagonal S3 parent action: a right-only relabeling that would be accepted by independent left/right symmetric groups is correctly rejected by the coupled parent action. Other regressions compare the returned parent coset against direct exhaustive enumeration.
+Thus each output is exactly the subset of the **actual parent group** that projects into the supplied rev205 right alignment and maps the complete colored bipartite source state to target. A diagonal-S3 regression deliberately checks a right-only relabeling that independent left/right symmetric groups would permit but the actual coupled parent action forbids; it is correctly exact-empty. Other regressions compare the returned parent coset against direct exhaustive enumeration.
+
+## Layer 3: complete rev204/rev205 witness-union reconstruction
+
+`bipartite_design_parent_union_v1.py` connects the previous layers to the entire structural cover rather than one branch:
+
+1. generate the exact right image group from the parent generator pairing;
+2. re-derive rev204 and rev205 from the original bipartite inputs, obtaining the complete first-successful Design witness cover inside that exact right image;
+3. for every surviving right structural coset, invoke the coupled parent-action full-string intersection;
+4. fail closed if even one branch is unresolved;
+5. when every branch is exact, discard only exact-empty branches;
+6. reconstruct the complete nonempty union as one parent right coset using one representative, every child target-automorphism subgroup, and all inter-branch representative differences, with mechanical checks that each generator/difference preserves the complete target bipartite state.
+
+This mirrors the already-validated `design_tuple_full_string_union_si_v1` reconstruction argument, but on the actual parent bipartite action. Completeness comes from rev204's complete witness family, rev205's exact filtering inside the full right image of the parent group, and exact preimage/intersection of every survivor. Cycle-5 regressions verify that the complete structural cover reconstructs the full cyclic parent coset, that full parent colors can shrink it to the identity, that a color mismatch makes the entire union exact empty, and that an unresolved child resource cap withholds the union rather than sampling it.
 
 ## Current solved boundary and remaining decomposition
 
-The parent-action primitive solves the set-theoretic left/right coupling obligation generically, provided the caller supplies a certified generator-paired parent-to-right action. Therefore the active leaf is simplified in place:
+The set-theoretic H6-R3c2b obligations are now reduced in place:
 
-- **H6-R3c2b1 — exact local right-neighborhood intersection:** solved for the full color-symmetric-left model; retained as a reusable lower-dimensional specialization.
-- **H6-R3c2b2 — exact coupled parent-action intersection primitive:** solved by the parent preimage + complete bipartite auxiliary action described above.
-- **H6-R3c2b3 — complete rev205 witness-union wiring:** unresolved. The rev204/rev205 complete witness family must be invoked with the actual parent-to-right generator pairing, every surviving structural coset must pass through the coupled parent-action primitive, and the resulting exact children must be reconstructed as the complete parent isomorphism set without dropping a branch.
-- **H6-C1 — recurrence closure:** unresolved. The complete auxiliary domain has size `|L|+|R|+|L||R|`; rev206 certifies exactness but deliberately does not yet count that artificial degree as a valid quasipolynomial recurrence shrink/cost. A lower-dimensional implementation or an explicit cost transfer proof is still required before global accounting accepts the edge.
+- **H6-R3c2b1 — exact local right-neighborhood intersection:** solved for the full color-symmetric-left specialization.
+- **H6-R3c2b2 — exact coupled parent-action intersection primitive:** solved.
+- **H6-R3c2b3 — complete rev205 witness-union wiring and exact parent-isomorphism reconstruction:** solved, conditional only on the caller providing the certified generator-paired parent-to-right action that the wrapper explicitly validates.
+- **H6-C1 — recurrence/cost closure:** unresolved. Each exact parent child currently uses a complete auxiliary action of degree `|L|+|R|+|L||R|`. This is only a polynomial blow-up in the current domain, so quasipolynomial solvability is plausibly preserved, but rev206 does **not** infer a recurrence certificate from that observation. The child SI accounting must be mechanically transferred back to the original root measure, branch multiplicity and rev204 witness cost must be charged, and the resulting structural edge must still satisfy the corrected Split-or-Johnson progress condition before global accounting accepts it.
 
-This is a cross-layer reduction in problem count rather than branch growth: neighborhood multiplicities, duplicate rows, right structural restriction, actual left/right coupling, and coset reconstruction now share the same image/preimage + candidate-SI substrate. The remaining leaf is primarily complete family wiring plus cost/progress certification.
+This is a cross-layer simplification rather than branch growth: neighborhood multiplicities, duplicate rows, right structural restriction, actual left/right coupling, complete branch union, and coset reconstruction now share the existing image/preimage + candidate-SI substrate. The next active leaf is therefore primarily **H6-C1: recurrence-safe polynomial-blowup cost transfer plus strict progress certification for the complete parent Design union**.
 
 ## Non-claims
 
-rev206 does not yet union all rev205 witness branches and does not certify the quadratic auxiliary action as a globally admissible quasipolynomial recurrence edge. Resource overflow, invalid parent/right generator pairing, non-preserved bipartitions, or unresolved induced SI remain fail closed. Full corrected Split-or-Johnson closure, global W1R-H6 recurrence closure, generality/performance/autonomy proof, practical AGI delivery, and AGI are all unclaimed.
+rev206 certifies exact set reconstruction, not global recurrence closure. It does not yet certify the quadratic auxiliary action as an admissible charged edge of the existing quasipolynomial recurrence tree. Resource overflow, invalid parent/right generator pairing, non-preserved bipartitions, or unresolved induced SI remain fail closed. Full corrected Split-or-Johnson closure, global W1R-H6 recurrence closure, generality/performance/autonomy proof, practical AGI delivery, and AGI are all unclaimed.
