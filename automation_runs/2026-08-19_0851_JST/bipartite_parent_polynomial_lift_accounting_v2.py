@@ -26,10 +26,12 @@ def solve_and_certify_design_parent_polynomial_lift(
 ):
     """Replay-stable rev207 entry point through the rev214 pair-image closure.
 
-    rev207 intentionally reuses the same structural inputs twice: first for the
+    rev207 originally reused the same structural inputs twice: first for the
     complete rev206 parent union and then for proof-tree replay of every exact
-    image child.  Materialize every user-supplied iterable exactly once here so a
-    generator/iterator cannot be silently exhausted between those two phases.
+    image child.  rev218 removes that duplicate solver execution: rev206 captures
+    the immutable image proof actually produced, and polynomial-lift accounting
+    consumes that same object.  Inputs remain materialized once so one-shot
+    iterables have execution-stable identity.
 
     rev208 added exact literal natural A_n/S_n SI; rev209 added whole-candidate
     acceptance plus the larger-Johnson log/Design bridge; rev210 closed multiple
@@ -60,9 +62,10 @@ def solve_and_certify_design_parent_polynomial_lift(
 
     The recurrence verifier remains v4: exact same-domain quotient fibers may
     terminate directly, while every genuinely recursive quotient fiber must expose
-    strict kernel-orbit shrink.  Both rev206 execution and rev207 replay use the
-    same v7 dispatcher and v4 validator, preserving status/accounting correspondence
-    rather than post-hoc certification.
+    strict kernel-orbit shrink.  rev206 execution uses the v7 dispatcher and
+    captures its exact proof; rev207 accounting validates that same object with
+    v4, preserving execution/status/accounting correspondence rather than post-hoc
+    certification.
     """
     right_image_generators = tuple(right_image_generators)
     left_points = tuple(left_points)

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Hashable, Iterable
+from typing import TYPE_CHECKING, Hashable, Iterable
 
 from coset_stabilizer_primitives import RightCoset
 from paired_action_coset_preimage_v1 import paired_action_coset_preimage
@@ -14,6 +14,9 @@ from permutation_group_schreier import (
     validate_perm,
 )
 from u2_candidate_coset_string_iso_v2 import candidate_coset_string_isomorphism_u2
+
+if TYPE_CHECKING:
+    from proof_carrying_si_v1 import ProofCarryingCoset
 
 
 @dataclass(frozen=True)
@@ -33,6 +36,7 @@ class BipartiteParentActionCosetIntersection:
     right_alignment_preimage_verified: bool
     quasipolynomial_cost_certified: bool
     reason: str
+    image_candidate_proof: "ProofCarryingCoset | None" = None
 
 
 def _palette(size: int, colors: Iterable[Hashable] | None, default) -> tuple[tuple, ...]:
@@ -256,6 +260,7 @@ def intersect_parent_bipartite_string_through_right_alignment(
             n, l, r, auxiliary_degree, H.order, aux_group.order, image_si.status, None,
             False, False, True, True, False,
             "the exact coupled auxiliary action reached an unresolved candidate-coset String Isomorphism child",
+            image_si,
         )
     if image_si.coset is None:
         return BipartiteParentActionCosetIntersection(
@@ -263,6 +268,7 @@ def intersect_parent_bipartite_string_through_right_alignment(
             n, l, r, auxiliary_degree, H.order, aux_group.order, image_si.status, None,
             True, True, True, True, False,
             "the full colored bipartite string is exactly empty inside the parent-group preimage of the right structural alignment",
+            image_si,
         )
 
     lifted = paired_action_coset_preimage(H, tuple(aux_gens), image_si.coset)
@@ -272,6 +278,7 @@ def intersect_parent_bipartite_string_through_right_alignment(
             n, l, r, auxiliary_degree, H.order, aux_group.order, image_si.status, None,
             False, False, True, True, False,
             "the exact auxiliary String Isomorphism result could not be lifted back through the coupled parent subgroup action",
+            image_si,
         )
 
     result = RightCoset(
@@ -283,4 +290,5 @@ def intersect_parent_bipartite_string_through_right_alignment(
         n, l, r, auxiliary_degree, H.order, aux_group.order, image_si.status, result,
         True, False, True, True, False,
         "the right structural alignment was exactly lifted into the actual parent group, intersected with the complete colored bipartite incidence string under the coupled left/right action, and lifted back to an exact parent subcoset",
+        image_si,
     )

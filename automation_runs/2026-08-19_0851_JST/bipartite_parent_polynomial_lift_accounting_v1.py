@@ -5,16 +5,7 @@ from math import log2
 
 from bipartite_design_parent_union_v1 import solve_design_witness_cover_in_parent_bipartite_action
 from bipartite_design_recurrence_gate_v1 import certify_complete_design_cover_recurrence_progress
-from bipartite_parent_action_coset_intersection_v1 import (
-    _auxiliary_action,
-    _auxiliary_string,
-    _edge_set,
-    _palette,
-    _validate_part,
-)
 from coset_stabilizer_primitives import RightCoset
-from paired_action_coset_preimage_v1 import paired_action_coset_preimage
-from permutation_group_schreier import identity, inverse, schreier_stabilizer_chain, validate_perm
 from quasipoly_recurrence_accounting_v3 import validate_quasipoly_recurrence_tree_v3
 from u2_candidate_coset_string_iso_v2 import candidate_coset_string_isomorphism_u2
 
@@ -72,79 +63,6 @@ def _candidate_cover_cosets(cover):
     return ()
 
 
-def _trace_exact_image_proof(
-    parent_group,
-    right_image_generators,
-    right_candidate,
-    left_points,
-    right_points,
-    source_edges,
-    target_edges,
-    *,
-    source_left_colors=None,
-    target_left_colors=None,
-    source_right_colors=None,
-    target_right_colors=None,
-    root_n,
-    max_image_group_order,
-):
-    """Re-run only rev206's proof-carrying image SI and return its exact proof object.
-
-    rev206 intentionally returned only the lifted parent coset.  H6-C1 needs the
-    already-executed SI recurrence proof as complexity evidence, so this bridge
-    deterministically reconstructs the same paired preimage and coupled auxiliary
-    action, then re-runs the same candidate-coset SI.  No larger group or relaxed
-    product action is introduced.
-    """
-    n = int(parent_group.degree)
-    left = _validate_part(left_points, n, "left")
-    right = _validate_part(right_points, n, "right")
-    if set(left) & set(right):
-        raise ValueError("left and right parent parts must be disjoint")
-    l, r = len(left), len(right)
-    images = tuple(validate_perm(q) for q in right_image_generators)
-
-    preimage = paired_action_coset_preimage(parent_group, images, right_candidate)
-    if preimage.status != "exact_paired_action_coset_preimage" or preimage.coset is None:
-        return None, 0, preimage.status
-
-    candidate = preimage.coset
-    H = candidate.subgroup
-    rep = validate_perm(candidate.representative)
-    left_index = {x: i for i, x in enumerate(left)}
-    right_index = {x: i for i, x in enumerate(right)}
-    hgens = tuple(H.original_generators) or (identity(n),)
-    aux_gens = []
-    for g in hgens:
-        q = _auxiliary_action(g, left, right, left_index, right_index)
-        if q is None:
-            return None, 0, "parent_subgroup_does_not_preserve_bipartition"
-        aux_gens.append(q)
-    aux_rep = _auxiliary_action(rep, left, right, left_index, right_index)
-    if aux_rep is None:
-        return None, 0, "parent_representative_does_not_preserve_bipartition"
-
-    auxiliary_degree = l + r + l * r
-    source_lc = _palette(l, source_left_colors, 0)
-    target_lc = _palette(l, target_left_colors, 0)
-    source_rc = _palette(r, source_right_colors, 1)
-    target_rc = _palette(r, target_right_colors, 1)
-    source = _auxiliary_string(l, r, _edge_set(l, r, source_edges), source_lc, source_rc)
-    target = _auxiliary_string(l, r, _edge_set(l, r, target_edges), target_lc, target_rc)
-
-    aux_group = schreier_stabilizer_chain(tuple(aux_gens) or (identity(auxiliary_degree),))
-    rinv = inverse(aux_rep)
-    shifted_source = tuple(source[rinv[j]] for j in range(auxiliary_degree))
-    proof = candidate_coset_string_isomorphism_u2(
-        RightCoset(aux_group, identity(auxiliary_degree)),
-        shifted_source,
-        target,
-        root_n=max(int(root_n), auxiliary_degree),
-        max_group_order=max_image_group_order,
-    )
-    return proof, auxiliary_degree, proof.status
-
-
 def solve_and_certify_design_parent_polynomial_lift(
     parent_group,
     right_image_generators,
@@ -180,9 +98,10 @@ def solve_and_certify_design_parent_polynomial_lift(
         M = |L| + |R| + |L||R| <= n + n^2 <= root_n + root_n^2.
 
     Therefore an already-certified quasipolynomial SI proof on M is still
-    quasipolynomial in the original root measure.  This routine mechanically
-    replays the exact rev206 image proof for every complete structural branch,
-    validates each proof tree with the existing v3 recurrence verifier, charges
+    quasipolynomial in the original root measure.  This routine consumes the
+    exact execution-linked rev206 image proof captured for every complete
+    structural branch, validates each proof tree with the existing recurrence
+    verifier, charges
     actual branch multiplicity plus the rev206 Design gate and union bookkeeping,
     and checks the composed numeric envelope against a fixed polylogarithmic bound.
 
@@ -277,27 +196,19 @@ def solve_and_certify_design_parent_polynomial_lift(
     polynomial_gate = True
     exact_count = 0
     for i, (candidate, solved) in enumerate(zip(candidates, union.branch_results)):
-        proof, m, status = _trace_exact_image_proof(
-            parent_group,
-            tuple(right_image_generators),
-            candidate,
-            tuple(left_points),
-            tuple(right_points),
-            tuple(source_edges),
-            tuple(target_edges),
-            source_left_colors=source_left_colors,
-            target_left_colors=target_left_colors,
-            source_right_colors=source_right_colors,
-            target_right_colors=target_right_colors,
-            root_n=root,
-            max_image_group_order=max_image_group_order,
-        )
+        # rev218 captures the exact proof object produced by the rev206 execution.
+        # Re-running the candidate solver here used to duplicate real work while
+        # composing only one proof-tree charge.  Accounting now consumes the
+        # execution-linked immutable proof directly; missing capture fails closed.
+        proof = solved.image_candidate_proof
+        m = int(solved.auxiliary_degree)
+        status = None if proof is None else proof.status
         poly = bool(m and m <= aux_bound)
         polynomial_gate = polynomial_gate and poly
         if proof is None or not proof.exact or not solved.exact or status != solved.image_candidate_status:
             records.append(PolynomialLiftBranchCertificate(
                 i, int(m), poly, status, False, False, 0.0, 0.0,
-                "replayed candidate image proof did not reproduce the exact rev206 branch status",
+                "the execution-linked candidate image proof is absent or does not match the exact rev206 branch status",
             ))
             continue
         validation = validate_quasipoly_recurrence_tree_v3(proof.accounting)
@@ -334,7 +245,7 @@ def solve_and_certify_design_parent_polynomial_lift(
     if certified:
         status = "certified_exact_parent_polynomial_auxiliary_lift"
         reason = (
-            "every complete rev206 branch replays as an exact proof-carrying candidate SI; each coupled auxiliary degree is bounded by root+root^2, and structural, branch, wrapper, and union costs compose inside the translated quasipolynomial envelope"
+            "every complete rev206 branch carries the exact proof produced by its candidate SI execution; each coupled auxiliary degree is bounded by root+root^2, and structural, branch, wrapper, and union costs compose inside the translated quasipolynomial envelope"
         )
     elif not all_branches:
         status = "undetermined_uncertified_candidate_image_accounting"
