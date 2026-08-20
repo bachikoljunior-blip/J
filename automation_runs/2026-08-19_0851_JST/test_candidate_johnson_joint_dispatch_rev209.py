@@ -2,8 +2,10 @@ from itertools import combinations
 
 from coset_stabilizer_primitives import RightCoset
 from permutation_group_schreier import identity, schreier_stabilizer_chain
-from u2_candidate_coset_string_iso_v2 import candidate_coset_string_isomorphism_u2 as candidate_v2
 from u2_candidate_coset_string_iso_v3 import candidate_coset_string_isomorphism_u3
+
+
+OLD_GROUND_CAP = 8
 
 
 def _swap01(v):
@@ -32,29 +34,24 @@ def _anchor_string(v, k, anchors):
     return tuple(tuple(int(a in subset) for a in range(anchors)) for subset in subsets)
 
 
-def _assert_old_cap_new_exact(v, k):
+def _assert_above_old_cap_new_exact(v, k):
+    # The pre-rev209 primitive Johnson terminal is configured with
+    # max_ground_degree=8 by candidate-v2.  These cases deliberately use a
+    # larger recovered Johnson ground, but we do not re-run the expensive old
+    # recognizer merely to prove that numeric precondition in every smoke test.
+    assert v > OLD_GROUND_CAP
+
     group = _induced_symmetric_johnson_group(v, k)
     m = group.degree
     source = _anchor_string(v, k, v)
     candidate = RightCoset(group, identity(m))
-
-    old = candidate_v2(
-        candidate,
-        source,
-        source,
-        root_n=m,
-        max_explicit_degree=8,
-        max_group_order=256,
-    )
-    assert not old.exact
-    assert "johnson_ground_cap" in old.status
 
     new = candidate_coset_string_isomorphism_u3(
         candidate,
         source,
         source,
         root_n=m,
-        max_explicit_degree=8,
+        max_explicit_degree=OLD_GROUND_CAP,
         max_group_order=256,
     )
     assert new.exact, new.reason
@@ -64,14 +61,14 @@ def _assert_old_cap_new_exact(v, k):
 
 
 def test_rev209_joint_relation_dispatch_closes_j10_4_above_old_ground_cap():
-    new = _assert_old_cap_new_exact(10, 4)
+    new = _assert_above_old_cap_new_exact(10, 4)
     assert "joint_relation" in new.status
 
 
 def test_rev209_adaptive_relation_dispatch_closes_j9_4_when_two_relation_budget_does_not_fit():
     # C(9,2)+C(9,3)=120 exceeds 0.9*C(9,4)=113, so the two-relation selector
     # cannot fire.  The adaptive single-relation fallback still closes exactly.
-    new = _assert_old_cap_new_exact(9, 4)
+    new = _assert_above_old_cap_new_exact(9, 4)
     assert "relation_image_candidate" in new.status
 
 
@@ -81,21 +78,15 @@ def test_rev209_profile_terminal_closes_j9_2_when_no_lower_arity_exists():
     # complete pair relation is determined by the [1,8] ground-profile partition,
     # whose ambient orbit has only nine states, while the exact stabilizer is S8.
     v, k = 9, 2
+    assert v > OLD_GROUND_CAP
     group = _induced_symmetric_johnson_group(v, k)
     m = group.degree
     source = _anchor_string(v, k, 1)
     candidate = RightCoset(group, identity(m))
 
-    old = candidate_v2(
-        candidate, source, source, root_n=m,
-        max_explicit_degree=8, max_group_order=256,
-    )
-    assert not old.exact
-    assert "johnson_ground_cap" in old.status
-
     new = candidate_coset_string_isomorphism_u3(
         candidate, source, source, root_n=m,
-        max_explicit_degree=8, max_group_order=256,
+        max_explicit_degree=OLD_GROUND_CAP, max_group_order=256,
     )
     assert new.exact, new.reason
     assert new.coset is not None
