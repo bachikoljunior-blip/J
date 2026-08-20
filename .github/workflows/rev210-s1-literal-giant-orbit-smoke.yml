@@ -1,0 +1,27 @@
+name: rev210 S1 literal giant orbit smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/s1_string_isomorphism_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_s1_literal_giant_orbit_integration_rev210.py'
+      - '.github/workflows/rev210-s1-literal-giant-orbit-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev210-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: python -m pytest -q test_s1_literal_giant_orbit_integration_rev210.py test_literal_giant_candidate_si_rev208.py
