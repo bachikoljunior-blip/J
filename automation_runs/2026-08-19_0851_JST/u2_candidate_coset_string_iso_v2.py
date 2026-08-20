@@ -12,7 +12,7 @@ from primitive_johnson_ground_terminal_v1 import primitive_johnson_ground_string
 from proof_carrying_si_v1 import ProofCarryingCoset
 from proof_carrying_small_order_candidate_v1 import exact_small_order_candidate_string_isomorphism
 from quasipoly_recurrence_accounting_v1 import AccountingChild, RecurrenceAccountingNode
-from s1_string_isomorphism_v2 import s1_string_isomorphism_v2
+from s1_string_isomorphism_v3 import s1_string_isomorphism_v3
 from s1_structural_classifier_v1 import classify_s1_structure
 
 
@@ -216,7 +216,7 @@ def candidate_coset_string_isomorphism_u2(
         rinv = inverse(r)
         local_source = tuple(source[rinv[j]] for j in orbit)
         local_target = tuple(target[j] for j in orbit)
-        child = s1_string_isomorphism_v2(
+        child = s1_string_isomorphism_v3(
             image,
             local_source,
             local_target,
