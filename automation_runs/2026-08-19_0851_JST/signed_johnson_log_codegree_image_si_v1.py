@@ -5,6 +5,7 @@ from dataclasses import replace
 from itertools import combinations
 from math import ceil, comb, log2
 
+from canonical_partition_guided_string_iso_v1 import _all_value_preserving_maps
 from coset_stabilizer_primitives import RightCoset
 from johnson_ground_relational_lift_v1 import lift_primitive_johnson_to_ground_relation
 from paired_action_coset_preimage_v1 import paired_action_coset_preimage
@@ -12,6 +13,7 @@ from permutation_group_schreier import identity, schreier_stabilizer_chain
 from proof_carrying_si_v1 import ProofCarryingCoset
 from quasipoly_recurrence_accounting_v1 import RecurrenceAccountingNode
 from quasipoly_recurrence_accounting_v4 import validate_quasipoly_recurrence_tree_v4
+from recursive_point_image_coset_intersection import right_coset_intersection_recursive
 from signed_johnson_complement_safe_image_si_v1 import (
     complement_safe_t_relation_signatures,
     complement_safe_t_subset_image_generators,
@@ -93,6 +95,8 @@ def signed_johnson_log_codegree_image_candidate_si(
     max_recognition_nodes: int = 500000,
     max_johnson_nodes: int = 500000,
     max_class_fraction: float = 0.9,
+    image_si_poly_power: int = 4,
+    max_image_si_nodes: int = 200000,
     polylog_power: int = 2,
     max_explicit_degree: int = 8,
     candidate_group_order_poly_power: int = 2,
@@ -109,26 +113,25 @@ def signed_johnson_log_codegree_image_candidate_si(
     rev184 already proves that a logarithmic complete t-set relation canonically
     descends, by exact codegrees, to a homogeneous pair relation that is an exact
     Johnson distance scheme.  The old path stopped at the *second* Johnson-ground
-    structural certificate.  This routine observes that no new coordinate solver
-    is required to obtain exact String Isomorphism progress: the pair relation is
-    itself a canonical string on C(v,2) coordinates, with an exact generator-paired
-    action induced from the first Johnson ground.
+    structural certificate.  No arbitrary second coordinate gauge is needed for
+    exact SI progress: the pair relation itself is a canonical string on C(v,2)
+    coordinates with an exact generator-paired action induced from the first
+    Johnson ground.
 
-    We therefore solve that pair-relation string inside its actual action image,
-    lift the resulting right coset directly to the original Johnson domain using
-    the generic paired-action preimage, then solve the original full string inside
-    that exact filter.  Pure exceptional-complement generators map to the identity
-    pair action and are retained automatically in the preimage kernel.  Any gate,
-    image SI, preimage, recurrence certificate, or final full-string child that
-    does not close exactly remains fail-closed.
+    This routine intersects that actual pair-action group with the complete
+    value-preserving coset using the same bounded exact intersection substrate as
+    rev180, lifts the exact image coset directly to the original Johnson domain by
+    the generic paired-action preimage, then solves the original full string inside
+    the lifted filter.  Pure exceptional-complement generators map to identity on
+    pair coordinates and are retained automatically in the preimage kernel.
     """
     source = tuple(source_values)
     target = tuple(target_values)
     n = int(group.degree)
     if len(source) != n or len(target) != n:
         raise ValueError("string/group degree mismatch")
-    if root_n < n or max_test_sets < 1:
-        raise ValueError("invalid root/test parameters")
+    if root_n < n or max_test_sets < 1 or image_si_poly_power < 1 or max_image_si_nodes < 1:
+        raise ValueError("invalid root/test/image parameters")
 
     lift = lift_primitive_johnson_to_ground_relation(
         group, source, target, max_recognition_nodes=max_recognition_nodes
@@ -203,88 +206,108 @@ def signed_johnson_log_codegree_image_candidate_si(
     )
     if tuple(induced_coords) != tuple(pair_coords):
         raise AssertionError("pair-action coordinate order disagrees with codegree replay")
+    pair_degree = len(pair_coords)
     if not image_gens:
-        image_gens = (identity(len(pair_coords)),)
+        image_gens = (identity(pair_degree),)
     image = schreier_stabilizer_chain(image_gens)
-    image_candidate = candidate_dispatch(
-        RightCoset(image, identity(len(pair_coords))),
-        pair_source,
-        pair_target,
-        root_n=root_n,
-        polylog_power=polylog_power,
-        max_explicit_degree=max_explicit_degree,
-        group_order_poly_power=candidate_group_order_poly_power,
-        max_group_order=max_candidate_group_order,
-        max_depth=max_depth,
-        max_johnson_test_sets=max_johnson_test_sets,
-        max_partition_states=max_partition_states,
-        max_recognition_nodes=max_recognition_nodes,
-        max_johnson_nodes=max_johnson_nodes,
-        family_poly_power=family_poly_power,
-        max_family_systems=max_family_systems,
-        max_family_quotient_order=max_family_quotient_order,
-    )
-    if not image_candidate.exact:
-        return _unresolved(
-            "undetermined_log_codegree_pair_image_" + image_candidate.status,
-            root_n=root_n,
-            n=n,
-            reason="the canonical rev184 codegree pair image is exact and strictly smaller, but its candidate SI child remains unresolved: " + image_candidate.reason,
-            children=(image_candidate,),
-            checked=test_count + image_candidate.permutation_candidates_checked,
-        )
 
-    image_check = validate_quasipoly_recurrence_tree_v4(image_candidate.accounting)
-    if not image_check.certified:
-        return _unresolved(
-            "undetermined_log_codegree_pair_image_accounting_" + image_check.status,
-            root_n=root_n,
-            n=n,
-            reason="pair-image SI is exact but its recurrence certificate did not validate: " + image_check.reason,
-            children=(image_candidate,),
-            checked=test_count + image_candidate.permutation_candidates_checked,
-        )
+    labels = {
+        value: i
+        for i, value in enumerate(sorted(set(pair_source).union(pair_target), key=repr))
+    }
+    source_state = tuple(labels[x] for x in pair_source)
+    target_state = tuple(labels[x] for x in pair_target)
+    scan_units = max(1, test_count * max(1, t) * max(1, n) + 2 * pair_degree * max(1, v))
+    scan_bound = log2(scan_units) + 56.0 * log2(max(2, root_n)) + 80.0
 
-    scan_bound = log2(max(1, test_count * max(1, t) * max(1, n))) + 56.0 * log2(max(2, root_n)) + 80.0
-    if image_candidate.coset is None:
-        bound = scan_bound + image_check.certified_log2_work_bound
+    if Counter(source_state) != Counter(target_state):
         accounting = RecurrenceAccountingNode(
             n=root_n,
-            m=max(1, min(root_n, v)),
-            operation_kind="log_codegree_pair_image_empty_terminal",
+            m=max(1, pair_degree),
+            operation_kind="log_codegree_pair_image_invariant_terminal",
             canonical=True,
             cost_certified=True,
-            local_log2_cost_bound=bound,
+            local_log2_cost_bound=scan_bound,
             children=(),
             terminal_certified=True,
-            reason="the canonical rev184 codegree pair image has exact empty SI in the actual induced action, so the original full-string SI is empty",
+            reason="canonical codegree pair-relation color multiplicities differ",
         )
         return ProofCarryingCoset(
-            "exact_empty_log_codegree_pair_image",
+            "exact_empty_log_codegree_pair_invariant",
             None,
-            "log_codegree_pair_image_empty_terminal",
+            accounting.operation_kind,
             root_n,
             n,
             True,
             True,
             True,
-            bound,
+            scan_bound,
             True,
             (),
             accounting,
-            test_count + image_candidate.permutation_candidates_checked,
+            test_count,
             accounting.reason,
         )
 
-    preimage = paired_action_coset_preimage(group, image_gens, image_candidate.coset)
+    value_coset = _all_value_preserving_maps(source_state, target_state)
+    if value_coset is None:
+        raise AssertionError("equal pair-relation multiplicities did not produce a value-preserving coset")
+    allowed_nodes = min(max_image_si_nodes, max(1, root_n ** image_si_poly_power))
+    intersection = right_coset_intersection_recursive(
+        RightCoset(image, identity(pair_degree)),
+        value_coset,
+        max_nodes=allowed_nodes,
+    )
+    if intersection.status == "undetermined_node_limit":
+        return _unresolved(
+            "undetermined_log_codegree_pair_image_node_limit",
+            root_n=root_n,
+            n=n,
+            reason="exact canonical codegree pair-image intersection exhausted its polynomial node cap: " + intersection.reason,
+            checked=test_count + intersection.search_nodes,
+        )
+
+    work_units = max(1, scan_units + intersection.search_nodes * max(2, pair_degree + n + v) ** 6)
+    image_bound = log2(work_units) + 64.0 * log2(max(2, root_n)) + 96.0
+    if intersection.status == "empty_intersection":
+        accounting = RecurrenceAccountingNode(
+            n=root_n,
+            m=max(1, pair_degree),
+            operation_kind="log_codegree_pair_image_empty_terminal",
+            canonical=True,
+            cost_certified=True,
+            local_log2_cost_bound=image_bound,
+            children=(),
+            terminal_certified=True,
+            reason="exact SI of the canonical rev184 codegree pair image is empty in the actual induced action",
+        )
+        return ProofCarryingCoset(
+            "exact_empty_log_codegree_pair_image",
+            None,
+            accounting.operation_kind,
+            root_n,
+            n,
+            True,
+            True,
+            True,
+            image_bound,
+            True,
+            (),
+            accounting,
+            test_count + intersection.search_nodes,
+            accounting.reason,
+        )
+    if intersection.status != "exact_intersection_coset" or intersection.coset is None:
+        raise AssertionError("unexpected exact pair-image intersection status")
+
+    preimage = paired_action_coset_preimage(group, image_gens, intersection.coset)
     if preimage.status != "exact_paired_action_coset_preimage" or preimage.coset is None:
         return _unresolved(
             "undetermined_log_codegree_pair_preimage_" + preimage.status,
             root_n=root_n,
             n=n,
             reason="exact pair-image SI did not lift to a certified original-domain preimage: " + preimage.reason,
-            children=(image_candidate,),
-            checked=test_count + image_candidate.permutation_candidates_checked,
+            checked=test_count + intersection.search_nodes,
         )
 
     filtered = candidate_dispatch(
@@ -312,8 +335,8 @@ def signed_johnson_log_codegree_image_candidate_si(
             n=n,
             coset=preimage.coset,
             reason="pair-image SI and complete original-domain preimage are exact, but the remaining full-string candidate child is unresolved: " + filtered.reason,
-            children=(image_candidate, filtered),
-            checked=test_count + image_candidate.permutation_candidates_checked + filtered.permutation_candidates_checked,
+            children=(filtered,),
+            checked=test_count + intersection.search_nodes + filtered.permutation_candidates_checked,
         )
 
     filtered_check = validate_quasipoly_recurrence_tree_v4(filtered.accounting)
@@ -324,13 +347,12 @@ def signed_johnson_log_codegree_image_candidate_si(
             n=n,
             coset=preimage.coset,
             reason="full-string candidate is exact but its recurrence certificate did not validate: " + filtered_check.reason,
-            children=(image_candidate, filtered),
-            checked=test_count + image_candidate.permutation_candidates_checked + filtered.permutation_candidates_checked,
+            children=(filtered,),
+            checked=test_count + intersection.search_nodes + filtered.permutation_candidates_checked,
         )
 
     extra = (
-        scan_bound
-        + image_check.certified_log2_work_bound
+        image_bound
         + log2(max(1, preimage.sift_levels + preimage.kernel_order.bit_length() + image.order.bit_length()))
         + 32.0 * log2(max(2, n))
         + 32.0
@@ -356,7 +378,7 @@ def signed_johnson_log_codegree_image_candidate_si(
         filtered.terminal_certified,
         filtered.children,
         accounting,
-        test_count + image_candidate.permutation_candidates_checked + filtered.permutation_candidates_checked,
+        test_count + intersection.search_nodes + filtered.permutation_candidates_checked,
         (
             "rev184's second-Johnson structural leaf was closed without a label-dependent coordinate choice: the actual canonical codegree pair relation was solved in its induced action, lifted exactly to the original domain, and the remaining full string was solved inside that filter"
         ),
