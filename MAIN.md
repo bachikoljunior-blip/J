@@ -6,7 +6,7 @@ J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は�
 
 ## 現在の継続点
 
-現在の統合済み継続点は **AGI-GI rev212**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
+現在の統合済み継続点は **AGI-GI rev213**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
 
 rev208 は active leaf **H6-C2** の literal natural-domain giant subleafを解決した。represented subgroup が degree `n>=5` で order `n!` または `n!/2` なら、その action 自体が literal `S_n` / `A_n` なので、色クラス間の exact transporter と target-color stabilizerから full String-Isomorphism right cosetを直接復元する。
 
@@ -18,27 +18,29 @@ rev211 は rev184 の second-Johnson structural residualを、第二groundの任
 
 rev212 は既存rev177のcomplement-safe signed Johnson ground-profile SIを、transitive candidate境界とintransitive orbitのS1 child境界へ再接続した。profile invariant mismatchはexact empty、profile-determined relationはexact right cosetとして閉じ、rev208 literal giant terminalもS1 childで再利用する。significant partitionがfilterだけを与える場合、partition orbit cap、recognition failure、非profile-determined residualは未確認のexact解とせずfail closedを維持する。
 
-rev212 proposed head `b4ad4d399c8d06660e44b191e6bdd885c12a44e0` は AGI-GI rev validation run `32344669426`、rev212 smoke `32344669444`、rev211 smoke `32344669402`、rev210 smoke `32344669405`、rev209 smoke `32344669433`、rev208 smoke `32344669483` がすべて success。PR #140 をsquash mergeし、main commit `a4b426f9a43b7142395ff289e5a419a834cadf53` に統合済み。競合していた旧PR #139は未mergeのままsupersededとして閉じた。
+rev213 はその significant-profile filter を nested orbit depth で実用化した。S1 v4がnewest exact terminalsを自己再帰でも保持し、bounded Johnson-ground terminalをprofile no-splitより先に再利用し、explicit/polylog auxiliary window内のtransitive imprimitive childを既存candidate block/family dispatcherへ戻す。さらにrev177のsource partition stabilizerをrepositoryのright-coset規約に必要なtarget stabilizerへ共役し、nonidentity transporterで隠れていたcoset completenessとodd-witness compositionを修復した。上限外のground/quotient、recognition・partition resource overflowはfail closedのままである。
+
+rev213 proposed head `99e3fee47b50da06ddd1759042d14c3b9e9e753a` は AGI-GI rev validation run `32350556780`（independent `nauty-labelg` differential gateを含む）、rev213 smoke `32350556943`、rev212 smoke `32350556946`、rev211 smoke `32350556857`、rev210 smoke `32350556734`、rev209 smoke `32350556754`、rev208 smoke `32350556751` がすべて success。PR #141 をmergeし、main commit `be165ab362127e81a8272bc470191606948e5e3c` に統合済み。
 
 ## 問題木
 
-予測問題数は **512**、置換済み旧問題を除く有効問題数も **512**。今回観測した実数は予測数を超えていないため mandatory over-count full-tree rewrite trigger は発火していない。上限を超えないよう事前に問題追加を抑えてtriggerを回避したのではなく、rev211/rev212は既存H6-C2 typed residualのin-place replacement / branch deletionとして扱う。
+予測問題数は **512**、置換済み旧問題を除く有効問題数も **512**。今回観測した実数は予測数を超えていないため mandatory over-count full-tree rewrite trigger は発火していない。上限を超えないよう事前に問題追加を抑えてtriggerを回避したのではなく、rev211--rev213は既存H6-C2 typed residualのin-place replacement / branch deletionとして扱う。
 
-rev211により arbitrary second-Johnson coordinate gauge / separate second-ground reconstruction branch、rev212によりprofile-determined candidateとS1 orbit-childの重複branchは削除可能になった。一方、non-profile-determined significant filter、profile no-split/higher-order relation、resource-gated candidate、corrected Split-or-Johnsonの残部、W1R-H6 parent、AGI rootは未解決のまま。
+rev211により arbitrary second-Johnson coordinate gauge / separate second-ground reconstruction branch、rev212によりprofile-determined candidateとS1 orbit-childの重複branch、rev213によりbounded significant filterのnested S1 / imprimitive auxiliary branchは削除可能になった。一方、bounded gate外のsignificant filter、profile no-split/higher-order relation、resource-gated candidate、corrected Split-or-Johnsonの残部、W1R-H6 parent、AGI rootは未解決のまま。
 
-次の未解決末端は **H6-C2 / primitive non-giant / significant signed-ground profile filter / nonclosing restricted candidate**:
+次の未解決末端は **H6-C2 / primitive non-giant / signed-ground profile no-split above bounded ground / higher-order local-certificate relation**:
 
-> rev177 が `verified_signed_ground_profile_partition_filter` とexact original-domain filter cosetを返すが、rev211 dispatcherをそのfilter内で1回実行してもexactに閉じない場合を扱う。canonical significant ground splitをstrict progressとして証明し、filter subgroup内のcandidate SIまたはsmaller-ground higher-order/local-certificate relationへ再帰的に接続し、exact resultをoriginal candidateへ戻す。same-domain self-loop、missing theorem gate、nonexact child、partition/recognition/resource overflowはfail closedとする。
+> rev177 が `undetermined_signed_ground_profile_no_split` を返し、rev173 bounded-ground terminalの明示ground上限を超える場合を扱う。既存rev184 logarithmic certificate / Design descent、lower-arity relation image、paired-action preimageに内包できるcanonical higher-order relationまたはlocal certificateを探索し、strictly smaller auxiliary actionでexact SIを解いてoriginal candidateへ戻す。arbitrary coordinate choice、same-domain self-loop、missing theorem gate、nonexact child、recognition/resource overflowはfail closedとする。
 
-兄弟の `undetermined_signed_ground_profile_no_split`、primitive/local-certificate、corrected Split-or-Johnson residualは、この末端の解決だけで削除しない。
+兄弟のbounded gate外 significant filter、imprimitive quotient outside explicit/polylog window、partition/recognition cap、corrected Split-or-Johnson residualは、この末端の解決だけで削除しない。
 
 ## 世界に存在する解法の包含監査
 
 Babai の quasipolynomial SI/GI framework と corrected Split-or-Johnson、Luks 型 orbit/block/coset recursionを親問題レベルまで再監査している。large primitive barrierをJohnson structureとlocal certificates / Design Lemma / Split-or-Johnson / exact group-coset recursionへ落とす共有解法を優先し、J側では既存lower-arity relation image、paired-action preimage、block quotient、candidate SI、proof-carrying recurrenceを再利用する。
 
-rev211はcanonical pair relationをそのままaction-image stringとして解くことで、第二Johnson coordinate gaugeの分岐を上位H6-C2から削除した。rev212はrev177のsigned profile solverとrev208 literal giant terminalを共有境界へ持ち上げ、同一Jリポジトリの未統合PR #128を実装上の既存案として確認した上で、最新rev211 treeへfail-closedに再構成した。PR #128はmerged progressや達成証拠には数えていない。
+rev211はcanonical pair relationをそのままaction-image stringとして解くことで、第二Johnson coordinate gaugeの分岐を上位H6-C2から削除した。rev212はrev177のsigned profile solverとrev208 literal giant terminalを共有境界へ持ち上げ、同一Jリポジトリの未統合PR #128を実装上の既存案として確認した上で、最新rev211 treeへfail-closedに再構成した。PR #128はmerged progressや達成証拠には数えていない。rev213はLuks型orbit/block preimage、bounded auxiliary action、既存Johnson terminalをS1境界で再合成し、identity-only testが隠していたright-coset向きもnonidentity既知群次数で検証した。
 
-次のfilter residualでも新しい独立solver treeを作らず、既存のcanonical partition、smaller-ground local relation、exact candidate coset intersection/preimage、recurrence accountingを統合する。世界に存在する解法の包含確認は細部だけでなくH6-C2、W1R-H6、AGI rootの各親層で継続し、親から不要になった分岐だけを削除する。
+次のno-split residualでも新しい独立solver treeを作らず、既存のcanonical higher-order relation、logarithmic local certificate / Design descent、exact action-image/preimage、recurrence accountingを統合する。世界に存在する解法の包含確認は細部だけでなくH6-C2、W1R-H6、AGI rootの各親層で継続し、親から不要になった分岐だけを削除する。
 
 ## 認定状態
 
