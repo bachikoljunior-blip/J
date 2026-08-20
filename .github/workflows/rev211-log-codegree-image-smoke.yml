@@ -5,6 +5,7 @@ on:
     paths:
       - 'automation_runs/2026-08-19_0851_JST/signed_johnson_log_codegree_image_si_v1.py'
       - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v6.py'
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_parent_polynomial_lift_accounting_v2.py'
       - 'automation_runs/2026-08-19_0851_JST/test_signed_johnson_log_codegree_image_rev211.py'
       - '.github/workflows/rev211-log-codegree-image-smoke.yml'
   workflow_dispatch:
@@ -15,7 +16,7 @@ permissions:
 jobs:
   rev211-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 8
     defaults:
       run:
         working-directory: automation_runs/2026-08-19_0851_JST
@@ -30,3 +31,4 @@ jobs:
           test_signed_johnson_log_codegree_image_rev211.py
           test_canonical_imprimitive_family_candidate_si_rev210.py
           test_johnson_log_candidate_bridge_rev209.py
+          test_bipartite_parent_polynomial_lift_accounting_rev207.py
