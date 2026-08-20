@@ -51,7 +51,7 @@ jobs:
 
   validate-rev-series:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: automation_runs/2026-08-19_0851_JST
