@@ -48,6 +48,7 @@ def candidate_coset_string_isomorphism_u5(
     max_johnson_nodes: int = 500000,
     family_poly_power: int = 2,
     max_family_systems: int = 4096,
+    max_family_quotient_order: int = 4096,
 ):
     """rev210 candidate SI: close canonical minimum-block-system families.
 
@@ -108,7 +109,7 @@ def candidate_coset_string_isomorphism_u5(
         polylog_power=polylog_power,
         max_explicit_degree=max_explicit_degree,
         quotient_order_poly_power=group_order_poly_power,
-        max_quotient_image_order=max_group_order,
+        max_quotient_image_order=max_family_quotient_order,
         candidate_group_order_poly_power=group_order_poly_power,
         max_candidate_group_order=max_group_order,
         max_depth=max_depth,
