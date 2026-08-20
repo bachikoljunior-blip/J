@@ -1,0 +1,30 @@
+{
+  "run_id": "chatgpt-session-immediate-20260820T085307+0900-06aca83f",
+  "execution_started_at_jst": "2026-08-20T08:53:07+09:00",
+  "starting_main_sha": "06aca83ffef7e644ae63421514cfab8c2fe0c2ea",
+  "implementation_base_main_sha": "9eb59e771bf80d4bec8eba5b81d88957be920cc3",
+  "starting_agi_gi_rev": 199,
+  "current_agi_gi_rev": 200,
+  "agi_status": "NOT_AGI",
+  "root_problem_status": "UNRESOLVED",
+  "predicted_problem_count": 512,
+  "effective_problem_count": 512,
+  "count_overrun_rewrite_triggered": false,
+  "selected_parent": "W1R-H6 corrected general UPCC Bipartite Split-or-Johnson recursion",
+  "selected_leaf": "exact proper Reduce-Part2-by-Color restriction certificate",
+  "attempt_result": "LOCAL_CHILD_SOLVED_PARENT_UNRESOLVED",
+  "solved_claim": "full-left-twin-free plus proper ordered right partition implies an exactly checked Exercise 5.5 eligible restriction; alpha shrink is reported separately",
+  "next_unresolved_leaf": "H6-R3 parent provenance/canonicity of the ordered right coloring across source and target",
+  "unmerged_branches_counted_as_progress": false,
+  "verification": {
+    "command": "python -m pytest -q test_bipartite_reduce_part2_by_color_rev200.py",
+    "result": "6 passed",
+    "exhaustive_family": "all 4096 uncolored 4x3 bipartite graphs and every proper ordered right bipartition"
+  },
+  "schedule_control": {
+    "requested_title": "AGIルート問題実行",
+    "state": "UNAVAILABLE_IN_EXPOSED_SESSION_CONTROL",
+    "treated_as_active": false,
+    "repository_automation_treated_as_substitute": false
+  }
+}
