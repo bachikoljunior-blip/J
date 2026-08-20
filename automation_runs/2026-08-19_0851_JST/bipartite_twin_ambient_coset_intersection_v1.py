@@ -134,7 +134,7 @@ def intersect_unique_twin_mapping_with_ambient_coset(
     n1 = int(refinement.left_size)
     n2 = int(refinement.right_size)
     n = n1 + n2
-    if ambient_coset.degree != n:
+    if ambient_coset.subgroup.degree != n or len(ambient_coset.representative) != n:
         raise ValueError("ambient coset degree must equal left_size + right_size")
 
     target_left, target_right = _ordered_target_cells(refinement)
