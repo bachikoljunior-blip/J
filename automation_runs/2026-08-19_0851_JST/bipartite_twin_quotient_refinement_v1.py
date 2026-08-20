@@ -114,6 +114,17 @@ def _label_universe(values):
     return {value: i for i, value in enumerate(ordered)}
 
 
+def _equivalence_pattern(labels):
+    """Canonical first-occurrence encoding of the equality partition of labels."""
+    ids = {}
+    out = []
+    for label in labels:
+        if label not in ids:
+            ids[label] = len(ids)
+        out.append(ids[label])
+    return tuple(out)
+
+
 def _paired_refine(source, target):
     slc, src, slbase, srbase, smat = source
     tlc, trc, tlbase, trbase, tmat = target
@@ -136,6 +147,8 @@ def _paired_refine(source, target):
                 right.append(("RQ", label, tuple(sorted(nbr.items()))))
             return tuple(left), tuple(right)
 
+        old_left_partition = _equivalence_pattern(sl + tl)
+        old_right_partition = _equivalence_pattern(sr + tr)
         sls, srs = signatures(sl, sr, smat)
         tls, trs = signatures(tl, tr, tmat)
         ids = _label_universe(sls + srs + tls + trs)
@@ -143,7 +156,21 @@ def _paired_refine(source, target):
         nsr = tuple(ids[x] for x in srs)
         ntl = tuple(ids[x] for x in tls)
         ntr = tuple(ids[x] for x in trs)
-        if (nsl, nsr, ntl, ntr) == (sl, sr, tl, tr):
+
+        # Numeric IDs are canonically re-assigned from the joint signature
+        # universe every round. In a fully discrete coloring those IDs can keep
+        # changing even after the induced equality partition is stable. WL
+        # stabilization is about the partition, not literal integer-ID equality.
+        # Because each new signature contains the old label, this process only
+        # refines and never merges old color classes; unchanged equality patterns
+        # therefore prove stabilization. Return the newly assigned joint labels,
+        # which remain source/target comparable.
+        new_left_partition = _equivalence_pattern(nsl + ntl)
+        new_right_partition = _equivalence_pattern(nsr + ntr)
+        if (
+            new_left_partition == old_left_partition
+            and new_right_partition == old_right_partition
+        ):
             return nsl, nsr, ntl, ntr, round_no
         sl, sr, tl, tr = nsl, nsr, ntl, ntr
     raise AssertionError("paired twin-quotient refinement failed to stabilize")
