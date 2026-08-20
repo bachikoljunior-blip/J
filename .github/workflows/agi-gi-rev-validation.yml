@@ -148,6 +148,7 @@ jobs:
           test_prepared_block_action_local_certificate_rev223.py
           test_local_certificate_preimage_resource_rev224.py
           test_giant_action_resource_envelope_rev225.py
+          test_affected_segment_quotient_resource_rev226.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
