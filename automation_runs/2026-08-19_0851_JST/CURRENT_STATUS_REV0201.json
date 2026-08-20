@@ -1,0 +1,37 @@
+{
+  "run_id": "chatgpt-session-immediate-20260820T085307+0900-06aca83f",
+  "execution_started_at_jst": "2026-08-20T08:53:07+09:00",
+  "session_starting_main_sha": "06aca83ffef7e644ae63421514cfab8c2fe0c2ea",
+  "implementation_base_main_sha": "8616375bce4c5d1609df7fd37a3c6038de663a1a",
+  "starting_agi_gi_rev": 199,
+  "current_agi_gi_rev": 201,
+  "agi_status": "NOT_AGI",
+  "root_problem_status": "UNRESOLVED",
+  "predicted_problem_count": 512,
+  "effective_problem_count": 512,
+  "count_overrun_rewrite_triggered": false,
+  "selected_parent": "W1R-H6 corrected general UPCC Bipartite Split-or-Johnson recursion",
+  "selected_leaf": "H6-R3a paired degree/color-signature provenance for an ordered right restriction",
+  "attempt_result": "LOCAL_CHILD_SOLVED_PARENT_UNRESOLVED",
+  "solved_claim": "for the supported degree/color-signature subcase, every color-preserving bipartite isomorphism maps the deterministically selected source signature union to the identical target signature union",
+  "not_claimed": [
+    "higher-arity Design/coherent provenance",
+    "ambient transporter or full-string isomorphism set",
+    "full corrected Bipartite Split-or-Johnson",
+    "global quasipolynomial recurrence closure",
+    "AGI"
+  ],
+  "next_unresolved_leaf": "H6-R3b higher-arity right-relation provenance for the homogeneous degree/color residual",
+  "unmerged_branches_counted_as_progress": false,
+  "verification": {
+    "command": "python -m pytest -q test_paired_bipartite_right_partition_provenance_rev201.py",
+    "result": "6 passed",
+    "exhaustive_family": "all 4! x 4! = 576 left/right relabelings of the colored regression instance"
+  },
+  "schedule_control": {
+    "requested_title": "AGIルート問題実行",
+    "state": "UNAVAILABLE_IN_EXPOSED_SESSION_CONTROL",
+    "treated_as_active": false,
+    "repository_automation_treated_as_substitute": false
+  }
+}
