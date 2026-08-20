@@ -1,0 +1,31 @@
+name: rev200 exact Reduce-Part2-by-Color smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_reduce_part2_by_color_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_bipartite_reduce_part2_by_color_rev200.py'
+      - 'automation_runs/2026-08-19_0851_JST/REDUCE_PART2_BY_COLOR_AUDIT_REV200.md'
+      - 'automation_runs/2026-08-19_0851_JST/CURRENT_STATUS_REV0200.json'
+      - '.github/workflows/rev200-reduce-part2-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-rev200:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Validate exact Exercise 5.5 restriction certificate
+        run: python -m pytest -q test_bipartite_reduce_part2_by_color_rev200.py
