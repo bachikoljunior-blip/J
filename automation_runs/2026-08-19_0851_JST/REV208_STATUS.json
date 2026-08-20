@@ -1,0 +1,17 @@
+{
+  "rev": 208,
+  "root_status": "NOT_AGI",
+  "predicted_problem_count": 512,
+  "effective_problem_count": 512,
+  "active_parent": "W1R-H6-C2",
+  "solved_internal_child": "literal primitive giant A_n/S_n exact String Isomorphism at direct-candidate and invariant-orbit S1 boundaries",
+  "next_leaf": "W1R-H6-C2b: primitive non-giant / larger Johnson-ground and genuinely unresolved Split-or-Johnson image states",
+  "claims_withheld": [
+    "primitive non-giant closure",
+    "larger Johnson-ground closure",
+    "general Split-or-Johnson image closure",
+    "giant quotient with nontrivial kernel closure",
+    "global W1R-H6 recurrence closure",
+    "AGI"
+  ]
+}
