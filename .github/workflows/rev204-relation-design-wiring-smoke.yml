@@ -1,0 +1,31 @@
+name: rev204 relation Design wiring smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/relation_twin_design_wiring_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_relation_twin_design_wiring_rev204.py'
+      - 'automation_runs/2026-08-19_0851_JST/RELATION_DESIGN_WIRING_AUDIT_REV204.md'
+      - 'automation_runs/2026-08-19_0851_JST/CURRENT_STATUS_REV0204.json'
+      - '.github/workflows/rev204-relation-design-wiring-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-rev204:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
+      - name: Validate no-large-twin relation Design wiring
+        run: python -m pytest -q test_relation_twin_design_wiring_rev204.py
