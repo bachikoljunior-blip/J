@@ -77,7 +77,27 @@ def test_rev209_adaptive_relation_dispatch_closes_j9_4_when_two_relation_budget_
 
 def test_rev209_profile_terminal_closes_j9_2_when_no_lower_arity_exists():
     # k=2 has no configured t>=2 relation below k, so both relation-image routes
-    # are structurally exhausted.  The existing rev177 profile terminal can still
-    # certify the complete colored pair relation directly from ground-profile cells.
-    new = _assert_old_cap_new_exact(9, 2)
+    # are exhausted.  Color by membership in one distinguished ground point.  The
+    # complete pair relation is determined by the [1,8] ground-profile partition,
+    # whose ambient orbit has only nine states, while the exact stabilizer is S8.
+    v, k = 9, 2
+    group = _induced_symmetric_johnson_group(v, k)
+    m = group.degree
+    source = _anchor_string(v, k, 1)
+    candidate = RightCoset(group, identity(m))
+
+    old = candidate_v2(
+        candidate, source, source, root_n=m,
+        max_explicit_degree=8, max_group_order=256,
+    )
+    assert not old.exact
+    assert "johnson_ground_cap" in old.status
+
+    new = candidate_coset_string_isomorphism_u3(
+        candidate, source, source, root_n=m,
+        max_explicit_degree=8, max_group_order=256,
+    )
+    assert new.exact, new.reason
+    assert new.coset is not None
+    assert new.coset.subgroup.order == 40320
     assert "signed_ground_profile" in new.status
