@@ -145,6 +145,7 @@ jobs:
           test_proof_dag_accounting_rev220.py
           test_local_certificate_exact_twl_design_rev221.py
           test_theorem_local_certificate_relation_rev222.py
+          test_prepared_block_action_local_certificate_rev223.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update

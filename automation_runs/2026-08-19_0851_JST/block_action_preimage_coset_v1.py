@@ -31,6 +31,16 @@ class BlockActionPreimageCoset:
     reason: str
 
 
+@dataclass(frozen=True)
+class PreparedBlockActionPreimage:
+    group: StabilizerChain
+    blocks: Tuple[Tuple[int, ...], ...]
+    point_to_block: Tuple[Tuple[int, int], ...]
+    image: StabilizerChain
+    kernel: StabilizerChain
+    levels: tuple
+
+
 def _dedup_pairs(pairs):
     return tuple(sorted(set(pairs), key=repr))
 
@@ -73,14 +83,13 @@ def _paired_chain(domain_gens, image_gens):
     return tuple(levels), kernel_gens
 
 
-def block_action_preimage_coset(group, blocks, target_image) -> BlockActionPreimageCoset:
-    """Return the exact preimage coset of one quotient permutation.
+def prepare_block_action_preimage(group, blocks) -> PreparedBlockActionPreimage:
+    """Prepare one exact block-action homomorphism for repeated preimages.
 
-    Unlike BFS over the quotient group, this builds a Schreier chain on quotient
-    point orbits while carrying matching full-domain words.  Sifting the requested
-    quotient permutation yields one full-domain preimage if it is in the image;
-    the residual paired generators yield the exact kernel.  Hence every preimage
-    is exactly kernel * representative in the repository's RightCoset convention.
+    The paired image stabilizer chain, quotient kernel, and paired transversals
+    depend only on the domain group and ordered block family.  Keeping them in a
+    frozen artifact prevents local-certificate callers from rebuilding the same
+    homomorphism for every standard generator of A(T).
     """
     blocks = tuple(tuple(sorted(set(int(x) for x in b))) for b in blocks)
     k = len(blocks)
@@ -89,9 +98,6 @@ def block_action_preimage_coset(group, blocks, target_image) -> BlockActionPreim
     flat = [u for b in blocks for u in b]
     if len(flat) != len(set(flat)) or any(u < 0 or u >= group.degree for u in flat):
         raise ValueError("blocks must be disjoint subsets of the group domain")
-    target = validate_perm(target_image)
-    if len(target) != k:
-        raise ValueError("target quotient permutation has wrong degree")
 
     point_to_block = {u: i for i, b in enumerate(blocks) for u in b}
     eg = identity(group.degree)
@@ -101,11 +107,37 @@ def block_action_preimage_coset(group, blocks, target_image) -> BlockActionPreim
     image = schreier_stabilizer_chain(image_gens or [eq])
     levels, kernel_gens = _paired_chain(domain_gens, image_gens)
     kernel = schreier_stabilizer_chain(kernel_gens or [eg])
-
     if kernel.order * image.order != group.order:
         raise AssertionError("paired chain violates |G|=|ker|*|im|")
     if any(_block_action(g, blocks, point_to_block) != eq for g in kernel.original_generators):
         raise AssertionError("paired-chain kernel generator has nontrivial image")
+    return PreparedBlockActionPreimage(
+        group,
+        blocks,
+        tuple(sorted(point_to_block.items())),
+        image,
+        kernel,
+        levels,
+    )
+
+
+def lift_prepared_block_action_preimage(
+    prepared: PreparedBlockActionPreimage,
+    target_image,
+) -> BlockActionPreimageCoset:
+    """Lift one quotient permutation through a prepared exact homomorphism."""
+    group = prepared.group
+    blocks = prepared.blocks
+    k = len(blocks)
+    point_to_block = dict(prepared.point_to_block)
+    image = prepared.image
+    kernel = prepared.kernel
+    levels = prepared.levels
+    target = validate_perm(target_image)
+    if len(target) != k:
+        raise ValueError("target quotient permutation has wrong degree")
+    eg = identity(group.degree)
+    eq = identity(k)
 
     residual = target
     selected_domain = []
@@ -142,5 +174,20 @@ def block_action_preimage_coset(group, blocks, target_image) -> BlockActionPreim
     return BlockActionPreimageCoset(
         "exact_block_action_preimage_coset", k, image.order, kernel.order,
         len(levels), target, representative, kernel, coset,
-        "paired quotient Schreier sift returned one full-domain lift and the exact quotient kernel without quotient-group enumeration",
+        "prepared paired quotient Schreier sift returned one full-domain lift and the exact quotient kernel",
+    )
+
+
+def block_action_preimage_coset(group, blocks, target_image) -> BlockActionPreimageCoset:
+    """Return the exact preimage coset of one quotient permutation.
+
+    Unlike BFS over the quotient group, this builds a Schreier chain on quotient
+    point orbits while carrying matching full-domain words.  Sifting the requested
+    quotient permutation yields one full-domain preimage if it is in the image;
+    the residual paired generators yield the exact kernel.  Hence every preimage
+    is exactly kernel * representative in the repository's RightCoset convention.
+    """
+    return lift_prepared_block_action_preimage(
+        prepare_block_action_preimage(group, blocks),
+        target_image,
     )

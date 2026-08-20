@@ -9,7 +9,10 @@ from babai_local_certificate_parameter_gate_v1 import (
     BabaiLocalCertificateParameterGate,
     babai_local_certificate_parameter_gate,
 )
-from block_action_preimage_coset_v1 import block_action_preimage_coset
+from block_action_preimage_coset_v1 import (
+    lift_prepared_block_action_preimage,
+    prepare_block_action_preimage,
+)
 from giant_block_action_certificates import analyze_giant_block_action
 from local_fullness_certificates import _alternating_test_generators
 from permutation_group_schreier import StabilizerChain, identity, schreier_stabilizer_chain
@@ -65,10 +68,11 @@ def _test_alternating_preimage(group, blocks, test_set):
     if any(x < 0 or x >= k for x in T):
         raise ValueError("test-set point outside quotient")
 
+    prepared = prepare_block_action_preimage(group, blocks)
     lifts = []
     kernel = None
     for q in _alternating_test_generators(k, T):
-        lift = block_action_preimage_coset(group, blocks, q)
+        lift = lift_prepared_block_action_preimage(prepared, q)
         if lift.status != "exact_block_action_preimage_coset" or lift.coset is None:
             return None, tuple(blocks[i] for i in T), "embedded A(T) generator has no quotient preimage"
         if kernel is None:
