@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import replace
-from itertools import combinations
 from math import ceil, comb, log2
 
 import signed_johnson_log_certificate_design_descent_si_v1 as _base
 from johnson_ground_relational_lift_v1 import lift_primitive_johnson_to_ground_relation
-from quasipoly_recurrence_accounting_v1 import RecurrenceAccountingNode
 from signed_johnson_complement_safe_image_si_v1 import complement_safe_t_relation_signatures
 from signed_johnson_ground_profile_partition_si_v1 import _color_token
+from upcc_full_string_quasipoly_accounting_v2 import certify_upcc_full_string_execution_accounting
 from upcc_subconstituent_full_string_si_v1 import upcc_subconstituent_full_string_isomorphism
 
 
@@ -35,14 +34,7 @@ def _exact_upcc_from_relation(
     max_candidate_group_order=256,
     max_depth=64,
 ):
-    """Try the already-proved rev197/rev198 UPCC child on one exact t-relation.
-
-    This helper is deliberately an exactness bridge, not a new theorem.  It reuses
-    the stable exact k-WL UPCC classifier, complete all-root subconstituent split
-    family, exact ambient partition transport, and exact full-string branch union.
-    If the relation is not the certified full-ground UPCC case, or any materialized
-    cover exceeds its cap, the existing fail-closed result is returned unchanged.
-    """
+    """Try the already-proved rev197/rev198 UPCC child on one exact t-relation."""
     return upcc_subconstituent_full_string_isomorphism(
         group,
         lifted_generators,
@@ -88,22 +80,19 @@ def signed_johnson_log_certificate_design_descent_si_v2(
     max_upcc_twl_work_units: int = 100000000,
     max_upcc_partition_pair_branches: int = 200000,
 ):
-    """rev210 cross-cut: send the homogeneous log-relation remainder to rev198 UPCC.
+    """rev210/211 cross-cut for the homogeneous logarithmic Design remainder.
 
-    rev184 already constructs an exact canonical logarithmic t-subset relation on
-    the recognized Johnson ground and closes invariant, point-split and lower-
-    arity Johnson cases.  Its final homogeneous Design remainder was historically
-    left unresolved.  rev193/rev197/rev198 later implemented a stronger exact path
-    for one important subcase of exactly that representation: a full-ground UPCC
-    under stable exact t-WL whose every rooted subconstituent partition alpha-
-    shrinks.  This wrapper reuses that later solver rather than maintaining two
-    parallel problem branches.
+    rev184 already builds the exact canonical logarithmic t-subset relation and
+    closes invariant, significant-split and lower-arity Johnson cases.  rev210
+    reuses the later rev197/rev198 exact full-ground UPCC all-root subconstituent
+    solver when this same relation lands in that typed state.
 
-    Exact UPCC set closure is exposed immediately.  The rev198 implementation
-    explicitly did not certify the global theorem-scale recurrence, so this wrapper
-    also does not invent one: the returned exact coset has local_cost_certified
-    false and carries an uncertified accounting leaf.  Thus it deletes the set-
-    exactness child while leaving recurrence certification as the next obligation.
+    rev211 then removes a second duplicated child: for a completed rev198 instance,
+    every stored branch proof tree is revalidated and composed with the recorded
+    complete-cover/transport bound.  Only when that actual execution fits the
+    root quasipolynomial envelope is the returned exact UPCC coset also marked
+    locally cost-certified.  Non-UPCC relations, incomplete covers, failed proof
+    accounting and resource caps all retain the older fail-closed result.
     """
     source = tuple(source_values)
     target = tuple(target_values)
@@ -154,8 +143,6 @@ def signed_johnson_log_certificate_design_descent_si_v2(
         v, k, target_tokens, t, complement_in_image=complement
     )
     if Counter(source_relation) != Counter(target_relation):
-        # rev184 already handles this terminal; retaining the base result here
-        # prevents the wrapper from becoming a second invariant implementation.
         return base
 
     upcc = _exact_upcc_from_relation(
@@ -185,21 +172,8 @@ def signed_johnson_log_certificate_design_descent_si_v2(
     coset = None
     if upcc.full_string_result is not None:
         coset = upcc.full_string_result.coset
-    bound = float(upcc.local_log2_cost_bound)
-    accounting = RecurrenceAccountingNode(
-        n=int(root_n),
-        m=max(1, v),
-        operation_kind="exact_log_relation_upcc_full_string_unaccounted",
-        canonical=True,
-        cost_certified=False,
-        local_log2_cost_bound=0.0,
-        children=(),
-        terminal_certified=True,
-        reason=(
-            "rev198 exact full-ground UPCC subconstituent cover closed the set-valued SI child; "
-            "global recurrence charge for this reused branch family is intentionally still uncertified"
-        ),
-    )
+    execution = certify_upcc_full_string_execution_accounting(upcc, root_n=root_n)
+    cost_ok = bool(execution.certified)
     return replace(
         base,
         status=(
@@ -208,20 +182,26 @@ def signed_johnson_log_certificate_design_descent_si_v2(
             else "exact_log_relation_upcc_full_string_coset"
         ),
         coset=coset,
-        operation_kind="log_relation_upcc_full_string",
+        operation_kind=(
+            "log_relation_upcc_full_string_accounted"
+            if cost_ok else "log_relation_upcc_full_string"
+        ),
         exact=True,
-        local_cost_certified=False,
-        local_log2_cost_bound=bound,
+        local_cost_certified=cost_ok,
+        local_log2_cost_bound=(
+            execution.total_log2_work_bound
+            if cost_ok else float(upcc.local_log2_cost_bound)
+        ),
         terminal_certified=True,
         children=(),
-        accounting=accounting,
+        accounting=execution.accounting,
         permutation_candidates_checked=(
             base.permutation_candidates_checked + int(upcc.partition_pair_count)
         ),
         reason=(
             "the rev184 homogeneous logarithmic relation is a rev197/rev198 certified full-ground UPCC; "
-            "its complete all-root subconstituent cover and exact full-string union close this SI set, "
-            "while theorem-scale recurrence accounting remains open"
+            "its complete all-root subconstituent cover and exact full-string union close this SI set; "
+            + execution.reason
         ),
     )
 
