@@ -4,6 +4,8 @@ rev230 pairs source and target complete all-`T` evidence without selecting a
 label-dependent quotient point.  Both artifacts must contain every canonical
 test coordinate, every per-`T` certificate in the same canonical schedule, a
 completed finite all-test reservation, and theorem-scale exactness.
+The theorem-gate parameters and reserved schedule metadata must also agree;
+different instrumentation is not treated as mathematical non-isomorphism.
 
 A Boolean palette-multiplicity mismatch is an exact necessary-invariant failure.
 A match is deliberately released only as input to exact relation SI/t-WL/Design;
