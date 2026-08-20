@@ -68,13 +68,15 @@ def test_rev211_closes_rev184_second_johnson_structural_leaf_via_pair_image():
     assert descent.status == "certified_log_certificate_johnson_descent", descent
     assert (descent.johnson_ground_size, descent.johnson_subset_size) == (4, 2)
 
+    # The ambient S_6 has order 720, so even the normal polynomial candidate cap
+    # leaves rev210 unresolved.  The pair filter reduces it to Aut(J(4,2)), order 48.
     before = candidate_coset_string_isomorphism_u5(
         candidate,
         source,
         source,
         root_n=64,
         max_explicit_degree=2,
-        max_group_order=64,
+        max_group_order=256,
         max_johnson_nodes=100000,
     )
     assert not before.exact, before
@@ -85,7 +87,7 @@ def test_rev211_closes_rev184_second_johnson_structural_leaf_via_pair_image():
         source,
         root_n=64,
         max_explicit_degree=2,
-        max_group_order=64,
+        max_group_order=256,
         max_johnson_nodes=100000,
     )
     assert got.exact and got.coset is not None, got
