@@ -43,7 +43,7 @@ def test_ordered_tuple_transporter_rejects_unreachable_pair():
     assert got.exact
 
 
-def test_cycle5_design_cover_is_filtered_by_trivial_ambient_group():
+def test_cycle5_zero_individualization_design_cover_survives_trivial_ambient_group():
     edges = _edges(_cycle5())
     got = pair_design_witnesses_inside_ambient_action(
         _trivial_group(5),
@@ -57,17 +57,21 @@ def test_cycle5_design_cover_is_filtered_by_trivial_ambient_group():
     )
     assert got.status == "certified_ambient_design_witness_coset_cover"
     assert got.wiring.status == "certified_relation_design_branch_plan"
-    assert got.original_branch_count == 25
-    assert got.surviving_branch_count == 5
-    assert all(branch.source_tuple == branch.target_tuple for branch in got.branches)
-    assert all(branch.stabilizer_order == 1 for branch in got.branches)
+    assert got.wiring.branch_plan is not None
+    # Exact k-WL already produces the required split on C5 without individualization,
+    # so rev204's complete first-successful Cartesian cover is the single empty-tuple pair.
+    assert got.wiring.branch_plan.individualization_length == 0
+    assert got.original_branch_count == got.wiring.branch_plan.branch_count == 1
+    assert got.surviving_branch_count == 1
+    assert got.branches[0].source_tuple == got.branches[0].target_tuple == ()
+    assert got.branches[0].stabilizer_order == 1
     assert got.parent_provenance_verified
     assert got.ambient_pairing_complete
     assert not got.full_string_integration_complete
     assert got.exact and not got.exact_empty
 
 
-def test_cycle5_design_cover_keeps_all_singleton_pairs_under_transitive_cyclic_group():
+def test_cycle5_zero_individualization_cover_preserves_full_cyclic_ambient_group():
     edges = _edges(_cycle5())
     got = pair_design_witnesses_inside_ambient_action(
         _cyclic_group(5),
@@ -80,8 +84,12 @@ def test_cycle5_design_cover_keeps_all_singleton_pairs_under_transitive_cyclic_g
         max_twl_work_units=2_000_000,
     )
     assert got.status == "certified_ambient_design_witness_coset_cover"
-    assert got.original_branch_count == 25
-    assert got.surviving_branch_count == 25
+    assert got.wiring.branch_plan is not None
+    assert got.wiring.branch_plan.individualization_length == 0
+    assert got.original_branch_count == 1
+    assert got.surviving_branch_count == 1
+    assert got.branches[0].source_tuple == got.branches[0].target_tuple == ()
+    assert got.branches[0].stabilizer_order == 5
     assert got.ambient_pairing_complete and got.exact
 
 
