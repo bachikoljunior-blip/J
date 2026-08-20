@@ -1,0 +1,16 @@
+{
+  "rev": 208,
+  "root_status": "NOT_AGI",
+  "predicted_problem_count": 512,
+  "effective_problem_count": 512,
+  "active_parent": "W1R-H6-C2",
+  "solved_internal_child": "literal primitive giant A_n/S_n exact candidate String Isomorphism terminal",
+  "next_leaf": "W1R-H6-C2a2: integrate u2 candidate v3 through rev206 parent intersection, Design union, and rev207 polynomial-lift replay",
+  "claims_withheld": [
+    "primitive non-giant closure",
+    "larger Johnson-ground closure",
+    "general Split-or-Johnson image closure",
+    "global W1R-H6 recurrence closure",
+    "AGI"
+  ]
+}
