@@ -125,6 +125,7 @@ jobs:
           test_design_twl_recurrence_progress_rev195.py
           test_upcc_subconstituent_split_family_rev197.py
           test_bipartite_parent_polynomial_lift_accounting_rev207.py
+          test_literal_giant_candidate_si_rev208.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
