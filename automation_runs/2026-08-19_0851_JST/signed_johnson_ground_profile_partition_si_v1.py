@@ -284,6 +284,25 @@ def _signed_partition_transporter(
     )
 
 
+def _conjugate_source_stabilizer_to_target(source_stabilizer, representative):
+    """Convert source stabilizers to this repository's target-side right coset.
+
+    `RightCoset(H, r)` contains permutations `compose(r, h)`, so after `r`
+    transports source to target, `H` must stabilize the target.  The partition
+    Schreier search naturally produces the source stabilizer K.  Its target-side
+    copy is r K r^-1 in conventional notation, which is the composition below
+    under this module's apply-left-then-right convention.
+    """
+    r = tuple(representative)
+    rinv = inverse(r)
+    generators = tuple(source_stabilizer.original_generators) or (identity(len(r)),)
+    conjugated = tuple(
+        compose(compose(rinv, generator), r)
+        for generator in generators
+    )
+    return schreier_stabilizer_chain(conjugated or (identity(len(r)),))
+
+
 def _maps_string(source, target, permutation):
     return all(source[i] == target[permutation[i]] for i in range(len(source)))
 
@@ -675,6 +694,10 @@ def signed_johnson_ground_profile_partition_si(
         )
 
     if not profile_determined:
+        target_stabilizer = _conjugate_source_stabilizer_to_target(
+            transport.stabilizer,
+            transport.transporter,
+        )
         accounting = RecurrenceAccountingNode(
             n=root_n,
             m=v,
@@ -688,7 +711,7 @@ def signed_johnson_ground_profile_partition_si(
         )
         return _proof(
             "verified_signed_ground_profile_partition_filter",
-            RightCoset(transport.stabilizer, transport.transporter),
+            RightCoset(target_stabilizer, transport.transporter),
             root_n=root_n,
             current_degree=m,
             exact=False,
@@ -710,15 +733,15 @@ def signed_johnson_ground_profile_partition_si(
 
     parity_set = set(compatible_parities)
     representative = transport.transporter
-    subgroup = transport.stabilizer
+    source_subgroup = transport.stabilizer
 
     if parity_set == {False, True}:
-        result = RightCoset(subgroup, representative)
+        pass
     elif len(parity_set) == 1:
         desired = next(iter(parity_set))
         needed_h_parity = bool(desired) ^ bool(transport.transporter_parity)
         if not needed_h_parity:
-            result = RightCoset(transport.parity_kernel, representative)
+            source_subgroup = transport.parity_kernel
         else:
             if transport.odd_stabilizer_witness is None:
                 accounting = RecurrenceAccountingNode(
@@ -754,18 +777,27 @@ def signed_johnson_ground_profile_partition_si(
                     complement_in_image=complement_in_image,
                     checked=transport.action_steps,
                 )
-            representative = compose(representative, transport.odd_stabilizer_witness)
-            result = RightCoset(transport.parity_kernel, representative)
+            # The witness stabilizes the source partition, so it acts before the
+            # source-to-target transporter.  The previous order acted on target
+            # coordinates and silently broke nonidentity coset completeness.
+            representative = compose(transport.odd_stabilizer_witness, representative)
+            source_subgroup = transport.parity_kernel
     else:
         raise AssertionError("profile-determined branch reached an impossible parity set")
+
+    target_subgroup = _conjugate_source_stabilizer_to_target(
+        source_subgroup,
+        representative,
+    )
+    result = RightCoset(target_subgroup, representative)
 
     if not group.contains(result.representative):
         raise AssertionError("reconstructed profile terminal representative left the ambient group")
     if not _maps_string(source, target, result.representative):
         raise AssertionError("profile terminal representative does not map source to target")
     for generator in result.subgroup.original_generators or (identity(m),):
-        if not _stabilizes_string(source, generator):
-            raise AssertionError("profile terminal subgroup generator does not stabilize the source relation")
+        if not _stabilizes_string(target, generator):
+            raise AssertionError("profile terminal subgroup generator does not stabilize the target relation")
 
     accounting = RecurrenceAccountingNode(
         n=root_n,

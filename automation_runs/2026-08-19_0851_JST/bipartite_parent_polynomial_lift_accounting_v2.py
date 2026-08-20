@@ -24,7 +24,7 @@ def solve_and_certify_design_parent_polynomial_lift(
     target_right_colors=None,
     **kwargs,
 ):
-    """Replay-stable rev207 entry point through the rev212 candidate closure.
+    """Replay-stable rev207 entry point through the rev213 S1/filter closure.
 
     rev207 intentionally reuses the same structural inputs twice: first for the
     complete rev206 parent union and then for proof-tree replay of every exact
@@ -44,6 +44,13 @@ def solve_and_certify_design_parent_polynomial_lift(
     terminal at both the direct candidate and S1 orbit-child boundaries.  This
     closes profile-determined larger Johnson actions and exact profile mismatch
     without group enumeration; profile partition resource caps stay fail closed.
+
+    rev213 makes that significant-profile filter usable at nested orbit depth:
+    S1 recursively preserves its newest terminals, sends transitive imprimitive
+    children back through the existing candidate block/family dispatcher, and
+    reuses the bounded-ground Johnson terminal inside the explicit auxiliary
+    window.  rev177 source stabilizers are conjugated to the target side required
+    by the repository's right-coset convention, including odd-parity witnesses.
 
     The recurrence verifier remains v4: exact same-domain quotient fibers may
     terminate directly, while every genuinely recursive quotient fiber must expose
