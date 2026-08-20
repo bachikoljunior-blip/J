@@ -14,49 +14,49 @@ def _trivial(n):
     return schreier_stabilizer_chain([identity(n)])
 
 
-def _disconnected_triangles():
+def _disconnected_four_cycles():
     return [
-        (0, 1), (0, 2), (1, 2),
-        (3, 4), (3, 5), (4, 5),
+        (0, 1), (1, 2), (2, 3), (3, 0),
+        (4, 5), (5, 6), (6, 7), (7, 4),
     ]
 
 
-def _cycle5():
-    return [(i, (i + 1) % 5) for i in range(5)]
+def _cycle11():
+    return [(i, (i + 1) % 11) for i in range(11)]
 
 
 def test_complete_imprimitive_design_cover_has_strict_aux_shrink_plan():
-    incidence = _edges(_disconnected_triangles())
+    incidence = _edges(_disconnected_four_cycles())
     cover = pair_design_witnesses_inside_ambient_action(
-        _trivial(6),
-        6,
-        6,
+        _trivial(8),
+        8,
+        8,
         incidence,
         incidence,
         alpha=0.75,
-        max_tuple_states=100,
-        max_twl_rounds=16,
-        max_twl_work_units=2_000_000,
-        max_branch_pairs=100,
+        max_tuple_states=200,
+        max_twl_rounds=32,
+        max_twl_work_units=10_000_000,
+        max_branch_pairs=200,
     )
     assert cover.status == "certified_ambient_design_witness_coset_cover"
     gate = certify_complete_design_cover_recurrence_progress(
         cover,
         root_n=64,
         alpha=0.75,
-        max_tuple_states=100,
-        max_twl_rounds=16,
-        max_twl_work_units=2_000_000,
+        max_tuple_states=200,
+        max_twl_rounds=32,
+        max_twl_work_units=10_000_000,
     )
     assert gate.status == "certified_complete_design_aux_shrink_plan"
     assert gate.complete_structural_progress
     assert gate.unresolved_branches == 0
     assert gate.progress_branches == 1
-    assert gate.max_child_aux_size == 3
-    assert gate.max_child_aux_size <= 0.75 * 6
+    assert gate.max_child_aux_size == 2
+    assert gate.max_child_aux_size <= 0.75 * 8
     assert gate.accounting_root is not None
     assert gate.accounting_root.operation_kind == "aux_shrink"
-    assert tuple(edge.node.m for edge in gate.accounting_root.children) == (3, 3)
+    assert tuple(edge.node.m for edge in gate.accounting_root.children) == (2, 2, 2, 2)
 
     # Strict boundary: progress measures are proved, but downstream exact child SI
     # proofs are placeholders, so the global accounting validator must still reject.
@@ -65,28 +65,28 @@ def test_complete_imprimitive_design_cover_has_strict_aux_shrink_plan():
     assert validation.status == "uncertified_local_cost"
 
 
-def test_cycle5_surviving_upcc_branch_remains_explicitly_unresolved():
-    incidence = _edges(_cycle5())
+def test_cycle11_surviving_upcc_branch_remains_explicitly_unresolved():
+    incidence = _edges(_cycle11())
     cover = pair_design_witnesses_inside_ambient_action(
-        _trivial(5),
-        5,
-        5,
+        _trivial(11),
+        11,
+        11,
         incidence,
         incidence,
         alpha=0.75,
-        max_tuple_states=100,
-        max_twl_rounds=16,
-        max_twl_work_units=2_000_000,
-        max_branch_pairs=100,
+        max_tuple_states=200,
+        max_twl_rounds=32,
+        max_twl_work_units=10_000_000,
+        max_branch_pairs=200,
     )
     assert cover.status == "certified_ambient_design_witness_coset_cover"
     gate = certify_complete_design_cover_recurrence_progress(
         cover,
         root_n=32,
         alpha=0.75,
-        max_tuple_states=100,
-        max_twl_rounds=16,
-        max_twl_work_units=2_000_000,
+        max_tuple_states=200,
+        max_twl_rounds=32,
+        max_twl_work_units=10_000_000,
     )
     assert gate.status == "requires_full_split_or_johnson_on_surviving_design_branch"
     assert not gate.complete_structural_progress

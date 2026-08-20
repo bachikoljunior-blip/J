@@ -124,6 +124,10 @@ jobs:
           test_design_lemma_exact_twl_candidate_rev194.py
           test_design_twl_recurrence_progress_rev195.py
           test_upcc_subconstituent_split_family_rev197.py
+          test_relation_twin_design_wiring_rev204.py
+          test_ambient_design_tuple_transport_rev205.py
+          test_bipartite_design_parent_union_rev206.py
+          test_bipartite_design_recurrence_gate_rev206.py
           test_bipartite_parent_polynomial_lift_accounting_rev207.py
           test_literal_giant_candidate_si_rev208.py
           test_johnson_log_candidate_bridge_rev209.py
@@ -139,6 +143,7 @@ jobs:
           test_execution_linked_polynomial_lift_proof_rev218.py
           test_nested_s1_proof_identity_rev219.py
           test_proof_dag_accounting_rev220.py
+          test_local_certificate_exact_twl_design_rev221.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
