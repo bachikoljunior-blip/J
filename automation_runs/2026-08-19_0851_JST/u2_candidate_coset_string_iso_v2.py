@@ -14,6 +14,7 @@ from proof_carrying_small_order_candidate_v1 import exact_small_order_candidate_
 from quasipoly_recurrence_accounting_v1 import AccountingChild, RecurrenceAccountingNode
 from s1_string_isomorphism_v2 import s1_string_isomorphism_v2
 from s1_structural_classifier_v1 import classify_s1_structure
+from signed_johnson_ground_profile_partition_si_v1 import signed_johnson_ground_profile_partition_si
 
 
 def _parent(*, root_n, degree, status, coset, exact, children, cost_certified=True, reason):
@@ -90,16 +91,26 @@ def candidate_coset_string_isomorphism_u2(
     max_explicit_degree: int = 8,
     group_order_poly_power: int = 2,
     max_group_order: int = 256,
+    max_partition_states: int = 4096,
     max_depth: int = 64,
 ) -> ProofCarryingCoset:
     """Candidate-coset SI with proof-carrying structural recursion.
 
     Exact terminals are tried by represented group order first.  Intransitive H
     recurses over canonical orbits.  Large transitive H is classified: unique
-    canonical imprimitive cases reuse V2 quotient/kernel recursion; primitive
-    non-giant cases try the certified small-ground J(v,2) special terminal;
-    primitive giant and unresolved Johnson/block-family cases remain typed
-    fail-closed, with no generic node-capped SI fallback.
+    canonical imprimitive cases reuse V2 quotient/kernel recursion.  Primitive
+    non-giant cases first try the certified small-ground Johnson terminal and then
+    reuse rev177's validated complement-safe ground-profile terminal.  This closes
+    larger Johnson grounds whenever the complete colored k-subset relation is
+    determined by a bounded exact ground-profile partition, without enumerating
+    the large represented Johnson group.
+
+    The rev176 signed-ground small-order terminal is deliberately *not* repeated
+    here: candidate SI has already run an exact small-order scan on the same
+    subgroup with the same order gate, so invoking the signed copy would duplicate
+    a solved/failed child rather than add coverage.  Remaining primitive non-giant,
+    primitive giant and unresolved block-family cases stay typed fail-closed; no
+    generic node-capped SI fallback is introduced.
     """
     H0 = candidate.subgroup
     n = H0.degree
@@ -109,6 +120,8 @@ def candidate_coset_string_isomorphism_u2(
         raise ValueError("string/coset degree mismatch")
     if root_n < n:
         raise ValueError("root_n must dominate current degree")
+    if max_partition_states < 1:
+        raise ValueError("max_partition_states must be positive")
 
     try:
         if Counter(source) != Counter(target):
@@ -188,10 +201,27 @@ def candidate_coset_string_isomorphism_u2(
             )
             if johnson.exact:
                 return _translate_subgroup_si_back_to_candidate(johnson, candidate.representative, degree=n)
+
+            profile = signed_johnson_ground_profile_partition_si(
+                H0,
+                subgroup_source,
+                target,
+                root_n=root_n,
+                max_partition_states=min(max_partition_states, max(1, root_n ** 2)),
+            )
+            if profile.exact:
+                return _translate_subgroup_si_back_to_candidate(
+                    profile, candidate.representative, degree=n
+                )
+
             return _parent(
-                root_n=root_n, degree=n, status=johnson.status, coset=None,
-                exact=False, children=(johnson,), cost_certified=False,
-                reason="primitive non-giant candidate reached the Johnson structural path but requires a larger/higher-arity relational ground recursion",
+                root_n=root_n, degree=n, status=profile.status, coset=None,
+                exact=False, children=(johnson, profile), cost_certified=False,
+                reason=(
+                    "primitive non-giant candidate exhausted the certified small-ground Johnson terminal "
+                    "and bounded complement-safe profile-partition terminal; a higher-order relational/"
+                    "local-certificate Johnson recursion remains required"
+                ),
             )
 
         status = classification.status
@@ -225,6 +255,7 @@ def candidate_coset_string_isomorphism_u2(
             max_explicit_degree=max_explicit_degree,
             group_order_poly_power=group_order_poly_power,
             max_group_order=max_group_order,
+            max_partition_states=max_partition_states,
             max_depth=max_depth,
         )
         children.append(child)

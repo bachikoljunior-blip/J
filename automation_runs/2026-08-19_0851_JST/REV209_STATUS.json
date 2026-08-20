@@ -1,0 +1,18 @@
+{
+  "rev": 209,
+  "root_status": "NOT_AGI",
+  "predicted_problem_count": 512,
+  "effective_problem_count": 512,
+  "active_parent": "W1R-H6-C2b",
+  "solved_internal_child": "profile-determined large Johnson candidate SI through rev177 complement-safe ground partition reuse",
+  "removed_redundant_child": "signed-ground small-order candidate retry, because exact candidate small-order SI already executes the same subgroup order gate",
+  "next_leaf": "W1R-H6-C2b2: integrate higher-order lower-arity-image/log-certificate/Design-Lemma Johnson machinery for non-profile-determined primitive-non-giant candidate states",
+  "claims_withheld": [
+    "non-profile-determined Johnson closure",
+    "non-Johnson primitive non-giant closure",
+    "giant quotient with nontrivial kernel closure",
+    "general Split-or-Johnson image closure",
+    "global W1R-H6 recurrence closure",
+    "AGI"
+  ]
+}
