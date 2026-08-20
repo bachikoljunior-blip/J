@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-import signed_johnson_log_certificate_design_descent_si_v1 as _log_design
+import design_tuple_full_string_union_si_v1 as _design_union
+import signed_johnson_log_certificate_design_descent_si_v1 as _log_design_base
+import signed_johnson_log_certificate_upcc_si_v2 as _log_design
 from candidate_full_accept_terminal_v1 import exact_if_entire_candidate_maps_string
 from orbit_factored_string_coset_intersection_v1 import _group_orbits
 from permutation_group_schreier import inverse
@@ -56,22 +58,19 @@ def candidate_coset_string_isomorphism_u4(
     max_recognition_nodes: int = 500000,
     max_johnson_nodes: int = 500000,
 ):
-    """rev209 candidate SI: reuse the W1R log/Design substrate for larger Johnson fibers.
+    """rev209/210 candidate SI: reuse shared Johnson, log-Design, and UPCC paths.
 
-    Two cross-cutting reductions are attempted before rev208's dispatcher.
+    Before rev208 fallback this dispatcher first accepts a whole exact candidate
+    H*r when it is already contained in String Isomorphism.  For transitive
+    primitive-non-giant candidates it then runs the existing Johnson relational
+    lift and logarithmic certificate/Design descent.  rev210 additionally reuses
+    the later rev197/rev198 full-ground UPCC subconstituent closure when the same
+    exact logarithmic relation lands in that typed homogeneous Design state.
 
-    1. If the entire exact candidate H*r already transports the two strings,
-       accept H*r directly by checking one representative and generators of H.
-    2. For a transitive primitive-non-giant candidate, run the existing exact
-       Johnson relational lift plus logarithmic certificate/Design descent from
-       rev184.  Inside that descent, relation-filter candidates use the same full-
-       candidate acceptance terminal before falling back to rev208.  Thus a
-       certificate-induced coset that already equals the full-string solution is
-       closed without enumerating the larger Johnson ground.
-
-    All other cases are delegated unchanged to rev208/v3.  Missing recognition,
-    theorem/test gates, resource caps, or a non-closing relation filter remain
-    fail-closed.
+    The relation-filter and UPCC branch solvers are temporarily pointed at the
+    same cheap exact-candidate filter so both nested paths avoid re-entering this
+    Johnson wrapper recursively.  Missing recognition/theorem/resource gates and
+    unaccounted theorem-scale UPCC recurrence remain fail-closed.
     """
     source = tuple(source_values)
     target = tuple(target_values)
@@ -99,8 +98,10 @@ def candidate_coset_string_isomorphism_u4(
             rinv = inverse(candidate.representative)
             subgroup_source = tuple(source[rinv[j]] for j in range(n))
 
-            old_dispatch = _log_design.candidate_coset_string_isomorphism_u2
-            _log_design.candidate_coset_string_isomorphism_u2 = _filtered_candidate_dispatch
+            old_dispatch = _log_design_base.candidate_coset_string_isomorphism_u2
+            old_union_dispatch = _design_union.candidate_coset_string_isomorphism_u2
+            _log_design_base.candidate_coset_string_isomorphism_u2 = _filtered_candidate_dispatch
+            _design_union.candidate_coset_string_isomorphism_u2 = _filtered_candidate_dispatch
             try:
                 bridge = _log_design.signed_johnson_log_certificate_design_descent_si(
                     H,
@@ -118,7 +119,8 @@ def candidate_coset_string_isomorphism_u4(
                     max_depth=max_depth,
                 )
             finally:
-                _log_design.candidate_coset_string_isomorphism_u2 = old_dispatch
+                _log_design_base.candidate_coset_string_isomorphism_u2 = old_dispatch
+                _design_union.candidate_coset_string_isomorphism_u2 = old_union_dispatch
 
             if bridge.exact:
                 return _translate_subgroup_si_back_to_candidate(
