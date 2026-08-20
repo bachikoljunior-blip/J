@@ -45,6 +45,7 @@ def aggregate_beard_local_certificate_relation(
     max_layers: int | None = None,
     max_quotient_leaves: int = 2000000,
     max_child_nodes: int = 200000,
+    max_preimage_schreier_work: int = 1000000000,
     require_theorem_scale: bool = True,
 ) -> TheoremLocalCertificateRelation:
     """Build a complete Boolean t-subset relation from growing-beard proofs.
@@ -101,6 +102,9 @@ def aggregate_beard_local_certificate_relation(
             max_layers=max_layers,
             max_quotient_leaves=max_quotient_leaves,
             max_child_nodes=max_child_nodes,
+            max_preimage_schreier_work=(
+                max_preimage_schreier_work if require_theorem_scale else None
+            ),
         )
         certificates.append(cert)
         if cert.full is None:
