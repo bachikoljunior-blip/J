@@ -1,0 +1,33 @@
+name: rev208 primitive giant color terminal smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/primitive_giant_color_terminal_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/s1_string_isomorphism_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v3.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_primitive_giant_color_terminal_rev208.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_primitive_giant_candidate_integration_rev208.py'
+      - '.github/workflows/rev208-primitive-giant-color-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev208-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: >-
+          python -m pytest -q
+          test_primitive_giant_color_terminal_rev208.py
+          test_primitive_giant_candidate_integration_rev208.py
