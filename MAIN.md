@@ -6,29 +6,29 @@ J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は�
 
 ## 現在の継続点
 
-現在の統合済み継続点は **AGI-GI rev205**、main SHA は `67fde8e615fa8b88a6d2c0e3cff91cc5bd3dd06a`。
+現在の統合済み継続点は **AGI-GI rev206**、main SHA は `8216320c5366108a9ffc686654f411c6d2066729`。
 
-直近の corrected general UPCC Bipartite Split-or-Johnson 系列では、rev199 が exact theorem-input gate、rev200 が proper Reduce-Part2-by-Color / visible-twin shrink、rev201 が source/target-comparable restriction provenance、rev202 が uniform-neighborhood Johnson/relation provenance、rev203 が exact relation-twin restriction provenance、rev204 が no-large-twin relation を exact WL/Design witness cover へ接続した。
+直近の corrected general UPCC Bipartite Split-or-Johnson 系列では、rev199 が exact theorem-input gate、rev200 が proper Reduce-Part2-by-Color / visible-twin shrink、rev201 が source/target-comparable restriction provenance、rev202 が uniform-neighborhood Johnson/relation provenance、rev203 が exact relation-twin restriction provenance、rev204 が no-large-twin relation を exact WL/Design witness cover へ接続し、rev205 が complete witness cover を実際の right-ground ambient action 内の exact transporter coset へ接続した。
 
-rev205 は rev204 の complete first-successful Design witness cover を、実際に許された right-ground `StabilizerChain` の中の exact transporter coset へ接続した。ordered individualized tuple ごとに Schreier orbit/stabilizer で exact transporter を構成し、到達不能 tuple pair は厳密に除外する。unary relation は既存の exact canonical partition transporter を用いる。source/target witness cover の全候補を処理するため、ambient right action の範囲では true isomorphism を落とさない complete coset cover を返す。full original bipartite/string intersection はまだ未統合である。
+rev206 は rev205 の各 right structural coset を、元の完全な colored bipartite state と **actual coupled parent action** の中で exact に交差する境界を統合した。`bipartite_parent_action_coset_intersection_v1` は parent→right generator pairing の exact preimage を取り、left/right vertex colors と全 cross-pair edge/nonedge を一つの induced action 上の string として解くため、独立な左右 symmetric group へ緩和しない。`bipartite_design_parent_union_v1` は rev204/rev205 の complete witness cover を元入力から再導出し、全 surviving branch を exact intersection へ通し、exact-empty だけを捨て、target automorphism と inter-branch differences を検査して complete nonempty union を一つの parent right coset として再構成する。さらに `bipartite_design_recurrence_gate_v1` は、各 structural branch が exact invariant-empty か alpha-smaller auxiliary progress を持つかを fail-closed に検査するが、downstream exact child SI/accounting は deliberate placeholder のままである。
 
-検証済み head `03b833030a820e42078b88aed3f20fb3b78862e1` は `AGI-GI rev validation` run `32323091271` と `rev205 ambient Design tuple transport smoke` run `32323091240` がともに success。PR #121 を main SHA `67fde8e615fa8b88a6d2c0e3cff91cc5bd3dd06a` へ squash merge 済みである。
+検証済み head `879f2aa4da3c3f130abae64c8b38460659c35a57` は `AGI-GI rev validation` run `32324466475` と `rev206 bipartite parent/coset intersection smoke` run `32324466499` がともに success。PR #123 を main SHA `8216320c5366108a9ffc686654f411c6d2066729` へ squash merge 済みである。
 
 ## 問題木
 
-予測問題数は **512**、置換済み旧問題を除く有効問題数も **512**。実数は予測数を超えていないため、横断的な再予測・分岐削除条件は発火していない。rev205 を別 active node として追加せず、W1R-H6 の既存 active leaf **H6-R3c2a / ambient Design witness pairing** を in-place で解決済みにした。
+予測問題数は **512**、置換済み旧問題を除く有効問題数も **512**。実数は予測数を超えていないため、横断的な再予測・分岐削除条件は発火していない。rev206 は既存 active leaf **H6-R3c2b / full parent string intersection** を in-place で解決し、set-theoretic witness-union completeness を共有 substrate へ統合した。
 
-局所子問題は解決したが、親 **W1R-H6 corrected general UPCC Bipartite Split-or-Johnson recursion** は未解決である。
+局所 full-string child は解決したが、親 **W1R-H6 corrected general UPCC Bipartite Split-or-Johnson recursion** は未解決である。
 
-次の未解決末端は **H6-R3c2b**:
+次の未解決末端は **H6-C1**:
 
-> rev205 が返す各 exact ambient witness coset の中で、元の完全な source/target bipartite/string state を exact に交差させる。右側構造だけでなく左側の許可 action / color constraints も親 provenance から保持し、true parent isomorphism の union completeness を証明する。非空 child は既存 split / block / UPCC recurrence と proof-carrying shrink・quasipolynomial accounting に接続する。left-action provenance、subset/image lift、resource gate、または recurrence accounting が不足する経路は fail closed とする。
+> rev206 の complete parent Design union と `bipartite_design_recurrence_gate_v1` が出す exact-empty / alpha-smaller structural children を、元の root measure に対する proof-carrying exact downstream SI として再帰接続する。auxiliary action degree `|L|+|R|+|L||R|` の polynomial blow-up、rev204 witness family の branch multiplicity、各 source/target Design-progress cost、union reconstruction cost を同じ recurrence certificate に機械的に charge し、全 nonterminal child が corrected Split-or-Johnson の strict-progress 条件を満たす場合だけ global accounting へ渡す。placeholder child、missing provenance、unresolved UPCC/Split-or-Johnson branch、resource overflow は fail closed とする。
 
 ## 世界に存在する解法の包含監査
 
-rev205 と祖先の Split-or-Johnson / Design-Lemma 層について、Babai の *Graph Isomorphism in Quasipolynomial Time* と Luks の color-automorphism / String Isomorphism 型 group-action reduction を再監査した。既存理論での canonical structure は、source/target の structure を ambient group 内で align する subcoset を作り、その subcoset の中で元の string isomorphism を解くための制約として使われる。rev205 はこの alignment-domain 構成の right-ground 部分を executable にしたが、元の bipartite incidence 全体と左側 action を同時に交差する責務は H6-R3c2b に残る。
+rev206 と祖先の Split-or-Johnson / Design-Lemma 層について、Babai の *Graph Isomorphism in Quasipolynomial Time*、corrected Split-or-Johnson exposition、Luks 型 String Isomorphism / coset reduction を再監査した。既存理論では canonical structure により ambient isomorphism coset を制限し、その中で元の string を解き、各 canonical branch を strict smaller parameter に落として recurrence を閉じる。rev206 は「構造 alignment と元 string の exact intersection」を actual parent group 内で executable にしたため、残る H6-C1 は新しい独立 solver よりも、既存 `RecurrenceAccountingNode`、candidate-coset SI、split/block/UPCC adapters を同じ parent-child certificate に接続する cost/progress transfer 問題へ集約された。
 
-J には `RightCoset`、Schreier chain、generic paired-action image/preimage、candidate-coset String Isomorphism が既に存在する。次段はこれらを再利用し、left-neighborhood family を右側 subgroup の induced subset action 上の exact string として扱える範囲を横断的に統合する。親 left action が full color-symmetric でない場合は、右側だけの family equality を full parent SI と誤認せず、actual left subgroup との coupled transporter を別 proof obligation とする。
+この横断統合により、right neighborhood equality、actual left/right coupling、witness-branch union、parent coset reconstruction は同一 image/preimage + candidate-SI substrate へ削減済みである。したがってそれらを別々の active branches として再導入しない。
 
 ## 認定状態
 
