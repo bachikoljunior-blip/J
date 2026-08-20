@@ -7,7 +7,7 @@ from bipartite_parent_polynomial_lift_accounting_v1 import (
     PolynomialLiftBranchCertificate,
 )
 from quasipoly_recurrence_accounting_v4 import validate_quasipoly_recurrence_tree_v4
-from u2_candidate_coset_string_iso_v5 import candidate_coset_string_isomorphism_u5
+from u2_candidate_coset_string_iso_v6 import candidate_coset_string_isomorphism_u6
 
 
 def solve_and_certify_design_parent_polynomial_lift(
@@ -24,24 +24,27 @@ def solve_and_certify_design_parent_polynomial_lift(
     target_right_colors=None,
     **kwargs,
 ):
-    """Replay-stable rev207 entry point through the rev210 candidate closure.
+    """Replay-stable rev207 entry point through the rev211 candidate closure.
 
     rev207 intentionally reuses the same structural inputs twice: first for the
     complete rev206 parent union and then for proof-tree replay of every exact
     image child.  Materialize every user-supplied iterable exactly once here so a
     generator/iterator cannot be silently exhausted between those two phases.
 
-    rev208 added exact literal natural A_n/S_n SI and rev209 added whole-candidate
-    acceptance plus the larger-Johnson log/Design bridge.  rev210 advances the
-    same shared dispatcher to v5, which closes multiple equally canonical minimum
-    block systems by processing the complete canonical family and requiring exact
-    quotient/preimage consensus.  The recurrence verifier is advanced to v4 so an
-    exact same-domain quotient fiber may terminate directly while every genuinely
-    recursive quotient fiber must still expose strict kernel-orbit shrink.
+    rev208 added exact literal natural A_n/S_n SI; rev209 added whole-candidate
+    acceptance plus the larger-Johnson log/Design bridge; rev210 closed multiple
+    equally canonical minimum block systems by family-wide exact consensus.
+    rev211 advances the same shared dispatcher to v6: when rev184's logarithmic
+    codegree descent reaches the exact second-Johnson structural leaf, the actual
+    canonical pair relation is solved in its induced action, lifted by exact
+    paired-action preimage, and the original full string is solved inside that
+    filter.  No arbitrary second-ground coordinate representative is selected.
 
-    Both rev206 execution and rev207 replay use the same v5 dispatcher and v4
-    validator, preserving status/accounting correspondence rather than post-hoc
-    certification.
+    The recurrence verifier remains v4: exact same-domain quotient fibers may
+    terminate directly, while every genuinely recursive quotient fiber must expose
+    strict kernel-orbit shrink.  Both rev206 execution and rev207 replay use the
+    same v6 dispatcher and v4 validator, preserving status/accounting correspondence
+    rather than post-hoc certification.
     """
     right_image_generators = tuple(right_image_generators)
     left_points = tuple(left_points)
@@ -53,8 +56,8 @@ def solve_and_certify_design_parent_polynomial_lift(
     source_right_colors = None if source_right_colors is None else tuple(source_right_colors)
     target_right_colors = None if target_right_colors is None else tuple(target_right_colors)
 
-    _core.candidate_coset_string_isomorphism_u2 = candidate_coset_string_isomorphism_u5
-    _parent_intersection.candidate_coset_string_isomorphism_u2 = candidate_coset_string_isomorphism_u5
+    _core.candidate_coset_string_isomorphism_u2 = candidate_coset_string_isomorphism_u6
+    _parent_intersection.candidate_coset_string_isomorphism_u2 = candidate_coset_string_isomorphism_u6
     _core.validate_quasipoly_recurrence_tree_v3 = validate_quasipoly_recurrence_tree_v4
 
     return _core.solve_and_certify_design_parent_polynomial_lift(
