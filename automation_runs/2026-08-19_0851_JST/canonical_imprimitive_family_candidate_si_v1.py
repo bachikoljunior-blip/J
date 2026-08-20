@@ -111,8 +111,8 @@ def solve_canonical_imprimitive_family_string_isomorphism(
         raise ValueError("string/group degree mismatch")
     if root_n < n:
         raise ValueError("root_n must dominate current degree")
-    if family_poly_power < 1 or max_family_systems < 1:
-        raise ValueError("invalid family gate")
+    if family_poly_power < 1 or max_family_systems < 1 or max_quotient_image_order < 1:
+        raise ValueError("invalid family/quotient gate")
 
     systems = tuple(_normalize_system(system, n) for system in block_system_family)
     systems = tuple(sorted(set(systems)))
@@ -190,6 +190,7 @@ def solve_canonical_imprimitive_family_string_isomorphism(
                 max_johnson_nodes=max_johnson_nodes,
                 family_poly_power=family_poly_power,
                 max_family_systems=max_family_systems,
+                max_family_quotient_order=max_quotient_image_order,
             )
             all_fibers.append(fiber)
             if not fiber.exact:
