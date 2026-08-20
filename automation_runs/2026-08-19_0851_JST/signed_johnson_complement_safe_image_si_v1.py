@@ -13,7 +13,7 @@ from johnson_ground_relational_lift_v1 import (
     _standard_subsets,
     lift_primitive_johnson_to_ground_relation,
 )
-from paired_action_coset_preimage_v1 import paired_action_coset_preimage
+from paired_action_full_candidate_filter_v1 import build_paired_action_preimage_artifact
 from permutation_group_schreier import identity, schreier_stabilizer_chain
 from proof_carrying_si_v1 import ProofCarryingCoset
 from quasipoly_recurrence_accounting_v1 import RecurrenceAccountingNode
@@ -36,6 +36,8 @@ class SignedJohnsonComplementSafeImageProof(ProofCarryingCoset):
     strict_image_progress: bool = False
     relation_determines_string: bool = False
     image_search_nodes: int = 0
+    image_generators: tuple[tuple[int, ...], ...] = ()
+    image_coset: Optional[RightCoset] = None
 
 
 def _signed_item(item):
@@ -149,6 +151,8 @@ def _proof(
     strict=False,
     determines=False,
     nodes=0,
+    image_generators=(),
+    image_coset=None,
 ):
     return SignedJohnsonComplementSafeImageProof(
         status,
@@ -178,6 +182,8 @@ def _proof(
         strict_image_progress=strict,
         relation_determines_string=determines,
         image_search_nodes=nodes,
+        image_generators=tuple(tuple(q) for q in image_generators),
+        image_coset=image_coset,
     )
 
 
@@ -414,7 +420,9 @@ def signed_johnson_complement_safe_relation_image_si(
     if intersection.status != "exact_intersection_coset" or intersection.coset is None:
         raise AssertionError("unexpected exact image intersection status")
 
-    preimage = paired_action_coset_preimage(group, image_gens, intersection.coset)
+    preimage = build_paired_action_preimage_artifact(
+        group, image_gens, intersection.coset
+    )
     if preimage.status != "exact_paired_action_coset_preimage" or preimage.coset is None:
         raise AssertionError("certified image intersection failed generic exact preimage reconstruction")
 
@@ -473,4 +481,6 @@ def signed_johnson_complement_safe_relation_image_si(
         strict=strict,
         determines=determines,
         nodes=intersection.search_nodes,
+        image_generators=image_gens,
+        image_coset=intersection.coset,
     )

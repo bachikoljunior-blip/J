@@ -135,6 +135,7 @@ jobs:
           test_replay_stable_johnson_lift_memo_rev215.py
           test_shared_log_relation_artifact_rev216.py
           test_coherent_pair_refinement.py
+          test_shared_paired_action_candidate_artifact_rev217.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
