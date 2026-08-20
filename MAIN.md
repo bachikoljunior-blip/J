@@ -86,9 +86,13 @@ rev228 はrev224--rev227の独立phase capを、単一test set Tの一つのexec
 
 rev228 tested head `d72362adf2c7a4be6a2cdc26ff13c50d42d88aa8` は、AGI-GI rev validation `32421931496`（independent `nauty-labelg` differential gateを含む）、rev228 `32421931735`、rev227 `32421931835`、rev226 `32421931519`、rev225 `32421931558`、rev224 `32421931611`、rev223 `32421931532`、rev222 `32421931505`、rev221 `32421931509`、rev220 `32421931500`、rev219 `32421931528`、rev218 `32421931495`、rev217 `32421931542`、rev216 `32421931493`、rev215 `32421931507`、rev214 `32421931498`、rev213 `32421931523`、rev212 `32421931547` の18 workflowsがすべてsuccess。local affected/integration gateは37 tests、external labelg専用fileを除くall-module gateは484 tests、py_compileと差分検査もsuccess。PR #156 をexact tested head固定でmergeし、main commit `9716d48a29325b02821a8d11f0a2e06ac7361893` に統合済み。
 
+rev229 はcomplete all-T schedulingを開始する前に、canonical test-set総数とrev228の単一T上限の積を任意精度整数で計算し、一つの有限all-test budgetへ予約する。予約が成立しなければ最初のTを実行せずunknown、途中unknownでは実行済みT数・実測charge・完全な未実行suffixを保持する。complete証拠は予約した全Tが実行済みの場合だけ成立し、engineering `max_test_sets`を計算量証明へ昇格しない。
+
+rev229 tested head `85abf1e3294ec20373be884a044ef83078778781` は、AGI-GI rev validation `32425757531`（independent `nauty-labelg` differential gateを含む）、rev229 `32425757555`、rev228 `32425757533`、rev227 `32425757537`、rev226 `32425757552`、rev225 `32425757563`、rev224 `32425757547`、rev223 `32425757524`、rev222 `32425757541`、rev221 `32425757538`、rev220 `32425757530`、rev219 `32425757588`、rev218 `32425757559`、rev217 `32425757565`、rev216 `32425757554`、rev215 `32425757546`、rev214 `32425757525`、rev213 `32425757571`、rev212 `32425757578` の19 workflowsがすべてsuccess。local affected/integration gateは40 tests、external labelg専用fileを除くall-module gateは487 tests、py_compileと差分検査もsuccess。PR #157 をexact tested head固定でmergeし、main commit `7db78cf852ccfe6864ebe31847e2b215fa118e68` に統合済み。
+
 ## 問題木
 
-予測問題数は **576**、置換済み旧問題を除く有効問題数は **534**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
+予測問題数は **576**、置換済み旧問題を除く有効問題数は **537**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
 
 置換済み旧問題を除く全層――primitive relation、H6-C2、W1R-H6 corrected Split-or-Johnson/Design branch、global proof-carrying recurrence/resource、AGI rootの一般性・性能・自律性・実用提供――を横断し、7本の狭いrelation/filter/cap branchを三つのsolution-shaped problemへ書き換えた。**CRX1 exact canonical relation quotient/preimage closure**、**CRX2 information/symmetry-defect relation selection**、**CRX3 replay-stable proof/resource substrate**であり、単なる重複名の統合ではなく上位親から共有できる解法境界である。結果は `517 - 7 + 3 = 513`、再予測576。rev214はCRX1のnonconstant strict-pair subcaseとCRX3のhomogeneous/self-loop guardsだけを解決した。
 
@@ -116,11 +120,13 @@ rev225の直接試行ではCRX2子2.2.2.2を、(2.2.2.2a) before/after giant-act
 
 rev228は既に数えていたCRX2子2.2.2.3を解決し、rev224の2.2.2.1、rev225--rev227の統合済み2.2.2.2と合わせて親2.2.2の単一T完全resource envelopeを解決した。状態更新だけなので実数534、予測576は変わらず、over-count rewrite triggerは発火していない。
 
-CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2のcomplete all-T scheduling / source-target comparisonとそのexecution-linked original-root consumers、CRX3 substrateの未解決algorithmic consumers、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
+rev229の直接試行でCRX2子2.2.3を、(2.2.3.1) one-side complete all-T scheduling / multiplicity、(2.2.3.2) source/target local-certificate evidenceのcanonical comparison、(2.2.3.3) aggregation / t-WL / Design consumerのoriginal-root charge、の三子へ分解した。2.2.3.1を解決し、旧1末端をその親と3子へ置換したため有効数は `534 - 1 + 4 = 537`。537は予測576以下なのでover-count rewrite triggerは発火しておらず、子を抑制していない。
 
-次の未解決末端は **CRX2 / complete all-T scheduling, multiplicity, and original-root charge**:
+CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2のsource-target comparisonとそのexecution-linked original-root consumers、CRX3 substrateの未解決algorithmic consumers、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
 
-> theorem windowの全 `C(m,t)` test setをcanonical順でsource/target双方について完全に実行し、各Tのrev228 evidenceを実行発生ごとに課金する。test-set capを計算量証明と同一視せず、全T多重度、早期unknown時の未実行suffix、source/target比較、aggregation/TWL/Design consumerまでをoriginal root degreeのquasipolynomial envelopeへ戻す。
+次の未解決末端は **CRX2 / source-target local-certificate evidence canonical comparison**:
+
+> source/target双方のcomplete all-T relationと各T execution evidenceをcanonical test-set順で比較する。status、Boolean、test identity、theorem gate、resource admission/completion、実行済み多重度が一致する場合だけpaired relationを公開し、必要不変量の不一致はexact empty、片側unknown・不完全・順序不一致はfail closedとしてaggregationへ渡さない。
 
 ## 世界に存在する解法の包含監査
 
