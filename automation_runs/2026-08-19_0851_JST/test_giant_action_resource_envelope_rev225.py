@@ -59,3 +59,16 @@ def test_bound_saturates_at_remaining_cap_plus_one():
     large = giant_action_resource_envelope(group, 9, 10**40)
     assert small.work_upper_bound == 1001 and not small.admitted
     assert large.work_upper_bound > small.work_upper_bound and large.admitted
+
+
+def test_exactly_exhausted_budget_fails_closed_before_next_audit():
+    group, blocks = _symmetric_with_independent_pair(9)
+    first = giant_action_resource_envelope(group, 9, 10**40)
+    got = local_certificate_beard(
+        group, blocks, (0,) * group.degree, tuple(range(9)),
+        max_giant_action_schreier_work=first.work_upper_bound,
+    )
+    assert got.status == "undetermined_giant_action_schreier_work_cap"
+    assert len(got.giant_action_resource_envelopes) == 2
+    assert got.giant_action_resource_envelopes[0].admitted
+    assert not got.giant_action_resource_envelopes[1].admitted
