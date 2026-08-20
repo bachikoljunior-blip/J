@@ -1,0 +1,29 @@
+name: rev208 literal giant SI smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/literal_giant_candidate_si_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v3.py'
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_parent_polynomial_lift_accounting_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_literal_giant_candidate_si_rev208.py'
+      - '.github/workflows/rev208-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev208-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: python -m pytest -q test_literal_giant_candidate_si_rev208.py test_bipartite_parent_polynomial_lift_accounting_rev207.py
