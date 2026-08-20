@@ -6,7 +6,7 @@
   "implementation_base_main_sha": "922af3416a79bdaa57c2ef86d06ef9f2becab39c",
   "starting_agi_gi_rev": 201,
   "current_main_base_rev": 203,
-  "current_agi_gi_rev_candidate": 204,
+  "current_agi_gi_rev": 204,
   "agi_status": "NOT_AGI",
   "root_problem_status": "UNRESOLVED",
   "predicted_problem_count": 512,
@@ -14,16 +14,63 @@
   "count_overrun_rewrite_triggered": false,
   "selected_parent": "W1R-H6 corrected general UPCC Bipartite Split-or-Johnson recursion",
   "selected_leaf": "H6-R3c1 mechanical parent-provenance wiring into exact WL/Design descent for the no-large-twin relation",
-  "attempt_result": "IMPLEMENTED_PENDING_REPOSITORY_CI",
-  "implemented_claim": "rederive rev202/rev203 parent provenance on every call; direct unary no-large-twin relations to a half-bounded coloring and feed arity>=2 actual containment palettes into the exact k-WL/Design complete branch-plan machinery",
-  "not_claimed": [
-    "rev204 repository CI success before observed",
-    "Design witness ambient transport into the parent group",
-    "explicit Johnson ambient transport",
-    "full parent string-isomorphism set",
-    "global quasipolynomial recurrence closure",
-    "AGI"
+  "attempt_result": "LOCAL_CHILD_SOLVED_PARENT_UNRESOLVED",
+  "implementation_status": "MERGED_TO_MAIN",
+  "implemented_claim": "rederive rev202/rev203 parent provenance on every call; direct unary no-large-twin relations to a half-bounded coloring; feed arity>=2 actual containment palettes and the complete source/target witness Cartesian product into the exact k-WL/Design branch-plan machinery under an explicit resource cap",
+  "pull_request": 119,
+  "tested_head_sha": "5bfd0d479ded35829d8656a5dc4a10aa1857d006",
+  "merged_main_sha": "6faeca0956346f61c323a5f63dc5f4738c662102",
+  "main_merge_status": "MERGED",
+  "ci": {
+    "agi_gi_rev_validation": {
+      "run_id": 32318413846,
+      "conclusion": "success"
+    },
+    "rev204_relation_design_wiring_smoke": {
+      "run_id": 32318413871,
+      "conclusion": "success"
+    }
+  },
+  "resolved": [
+    "parent provenance is threaded into exact paired relation-twin restriction",
+    "the complete source/target witness Cartesian product is retained under an explicit cap",
+    "exact outcomes distinguish no-large-twin relation, partition orbit, mismatch, resource fail-closed, and undetermined paths",
+    "parent resource-gate and relation-mismatch paths remain non-exact and fail closed"
   ],
-  "conditional_next_unresolved_leaf": "H6-R3c2/H6-R4 exact ambient transport of Design/Johnson/restriction structural outputs",
+  "remaining": [
+    "ambient structural transporter and full-string integration",
+    "exact union of all complete witness branches",
+    "global strict progress and quasipolynomial recurrence closure",
+    "global W1R-H6 closure",
+    "strict AGI generality, performance, autonomy, and practical-delivery evidence"
+  ],
+  "world_solution_audit": {
+    "audited_layer": "H6-R3c1 and its Split-or-Johnson/Design-Lemma ancestors",
+    "closest_world_solution": "Babai, Graph Isomorphism in Quasipolynomial Time, arXiv:1512.03547",
+    "contained_by_existing_world_solution": false,
+    "inclusion_boundary": "The paper supplies theorem-level Split-or-Johnson and Design-Lemma structural alternatives. It does not by itself supply this repository's executable two-sided complete witness enumeration, cap-certified exact completeness, ambient transporter/full-string branch union, or machine-checkable fail-closed integration."
+  },
+  "next_unresolved_leaf": "H6-R3c2: connect every complete exact witness branch to the ambient structural transporter/full-string branch union, prove exact completeness and strict progress, and fail closed on unmatched witnesses, caps, or transport failure",
+  "canonicalization_run": {
+    "run_id": "chatgpt-session-immediate-20260820T085307+0900-06aca83f",
+    "started_at_jst": "2026-08-20T08:53:07+09:00",
+    "starting_main_sha": "06aca83ffef7e644ae63421514cfab8c2fe0c2ea",
+    "starting_rev": 199,
+    "start_history_main_commit": "7920c74aa6fa200a922e21eaa091f8c63035024c"
+  },
+  "schedule_control": {
+    "capability_available": false,
+    "verified": false,
+    "created_or_enabled": false,
+    "claimed_active": false,
+    "observation": "STARTS.jsonl contains a separate scheduled_automation invocation, but this session exposes no scheduler control-plane state.",
+    "reason": "Repository invocation evidence is not scheduler-control evidence."
+  },
+  "not_claimed": [
+    "full W1R-H6 closure",
+    "global corrected Split-or-Johnson recursion",
+    "quasipolynomial recurrence closure",
+    "AGI generality, performance, autonomy, or practical delivery"
+  ],
   "unmerged_branches_counted_as_progress": false
 }
