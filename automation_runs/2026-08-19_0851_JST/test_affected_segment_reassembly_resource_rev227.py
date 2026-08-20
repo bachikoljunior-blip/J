@@ -73,3 +73,13 @@ def test_reassembly_envelope_counts_all_internal_nodes_and_saturates():
     assert large.generator_input_upper_bound == 481 * 5 * (group.order + 1)
     assert large.containment_sift_upper_bound == large.generator_input_upper_bound
     assert large.admitted
+
+
+def test_reused_multiplicity_is_not_saturated_by_an_earlier_work_cap():
+    group, _ = _s5_with_independent_c2_orbit()
+    huge_leaves = 10**310
+    envelope = affected_segment_reassembly_resource_envelope(
+        group, 5, huge_leaves, 1 + 5 * huge_leaves, 1,
+    )
+    assert envelope.internal_node_upper_bound == 1 + 4 * huge_leaves
+    assert not envelope.admitted and envelope.work_upper_bound == 2
