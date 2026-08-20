@@ -14,6 +14,10 @@ from block_action_preimage_coset_v1 import (
     prepare_block_action_preimage,
 )
 from giant_block_action_certificates import analyze_giant_block_action
+from giant_action_resource_envelope_v1 import (
+    GiantActionResourceEnvelope,
+    giant_action_resource_envelope,
+)
 from local_fullness_certificates import _alternating_test_generators
 from local_certificate_preimage_resource_v1 import (
     PreimageSchreierResourceEnvelope,
@@ -52,6 +56,7 @@ class LocalCertificateBeard:
     theorem_scale_recurrence_evidence: bool
     reason: str
     preimage_resource_envelope: Optional[PreimageSchreierResourceEnvelope] = None
+    giant_action_resource_envelopes: Tuple[GiantActionResourceEnvelope, ...] = ()
 
 
 def _same_subgroup(a: StabilizerChain, b: StabilizerChain):
@@ -92,10 +97,6 @@ def _test_alternating_preimage(group, blocks, test_set):
     gens.extend(lifts)
     preimage = schreier_stabilizer_chain(gens or (identity(group.degree),))
     test_blocks = tuple(blocks[i] for i in T)
-    cert = analyze_giant_block_action(preimage, test_blocks)
-    expected = factorial(len(T)) // 2
-    if cert.giant_type != "A_k" or cert.image_order != expected:
-        return None, test_blocks, "generated test-set preimage did not have exact A(T) quotient image"
     return preimage, test_blocks, "exact preimage of embedded A(T) generated from quotient kernel and standard 3-cycle lifts"
 
 
@@ -109,6 +110,7 @@ def local_certificate_beard(
     max_quotient_leaves=2000000,
     max_child_nodes=200000,
     max_preimage_schreier_work=None,
+    max_giant_action_schreier_work=None,
 ) -> LocalCertificateBeard:
     """Execute Babai's growing-beard local-certificate dichotomy exactly.
 
@@ -163,13 +165,44 @@ def local_certificate_beard(
 
     H = preimage
     layers = []
+    giant_envelopes = []
+    remaining_giant_work = None if max_giant_action_schreier_work is None else int(max_giant_action_schreier_work)
+    if remaining_giant_work is not None and remaining_giant_work <= 0:
+        raise ValueError("max_giant_action_schreier_work must be positive")
+
+    def audited_giant_action(source):
+        nonlocal remaining_giant_work
+        if remaining_giant_work is not None:
+            envelope = giant_action_resource_envelope(source, len(test_blocks), remaining_giant_work)
+            giant_envelopes.append(envelope)
+            if not envelope.admitted:
+                return None
+            remaining_giant_work -= envelope.work_upper_bound
+        return analyze_giant_block_action(source, test_blocks)
+
+    current_giant = audited_giant_action(H)
+    if current_giant is None:
+        return LocalCertificateBeard(
+            "undetermined_giant_action_schreier_work_cap", T, None, preimage.order,
+            H, None, gate, (), False,
+            "complete structural-audit work bound exceeded before execution; fail closed",
+            resource_envelope, tuple(giant_envelopes),
+        )
+    expected = factorial(len(T)) // 2
+    if current_giant.giant_type != "A_k" or current_giant.image_order != expected:
+        return LocalCertificateBeard(
+            "test_alternating_preimage_unavailable", T, None, preimage.order,
+            H, None, gate, (), False,
+            "generated test-set preimage did not have exact A(T) quotient image",
+            resource_envelope, tuple(giant_envelopes),
+        )
     recurrence_ok = True
     limit = group.degree + 1 if max_layers is None else int(max_layers)
     if limit <= 0:
         raise ValueError("max_layers must be positive")
 
     for layer_index in range(limit):
-        before = analyze_giant_block_action(H, test_blocks)
+        before = current_giant
         if before.giant_type is None:
             return LocalCertificateBeard(
                 "certified_nonfull_before_segment", T, False, preimage.order,
@@ -192,7 +225,14 @@ def local_certificate_beard(
                 "affected-segment automorphism recursion did not complete exactly", resource_envelope,
             )
         H2 = seg.subgroup
-        after = analyze_giant_block_action(H2, test_blocks)
+        after = audited_giant_action(H2)
+        if after is None:
+            return LocalCertificateBeard(
+                "undetermined_giant_action_schreier_work_cap", T, None,
+                preimage.order, H2, None, gate, tuple(layers), False,
+                "complete structural-audit work bound exceeded before the next layer audit; fail closed",
+                resource_envelope, tuple(giant_envelopes),
+            )
         ex = seg.execution
         layer = BeardLayer(
             layer_index,
@@ -222,7 +262,7 @@ def local_certificate_beard(
             raise AssertionError("affected set shrank after adding string constraints")
 
         if tuple(after.affected_points) == W:
-            stable = unaffected_stabilizer_reduction(H2, test_blocks)
+            stable = unaffected_stabilizer_reduction(H2, test_blocks, giant_certificate=after)
             if stable.status != "exact_unaffected_pointwise_stabilizer_with_giant_image" or stable.subgroup is None:
                 return LocalCertificateBeard(
                     "stable_giant_without_unaffected_stabilizer_certificate", T,
@@ -240,10 +280,11 @@ def local_certificate_beard(
             return LocalCertificateBeard(
                 "certified_full_by_stable_beard", T, True,
                 preimage.order, H2, S, gate, tuple(layers), theorem_scale,
-                "the beard stabilized with a giant quotient; the pointwise stabilizer of every unaffected point still has giant image and was independently verified to preserve the entire string", resource_envelope,
+                "the beard stabilized with a giant quotient; the pointwise stabilizer of every unaffected point still has giant image and was independently verified to preserve the entire string", resource_envelope, tuple(giant_envelopes),
             )
 
         H = H2
+        current_giant = after
 
     return LocalCertificateBeard(
         "undetermined_beard_layer_limit", T, None, preimage.order, H,
