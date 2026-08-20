@@ -1,0 +1,31 @@
+name: rev204 parent-derived exact TWL/Design smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/derived_relation_twl_design_provenance_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_derived_relation_twl_design_provenance_rev204.py'
+      - 'automation_runs/2026-08-19_0851_JST/PARENT_DERIVED_TWL_DESIGN_AUDIT_REV204.md'
+      - 'automation_runs/2026-08-19_0851_JST/CURRENT_STATUS_REV0204.json'
+      - '.github/workflows/rev204-parent-derived-twl-design-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-rev204:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Validate parent-derived exact TWL/Design provenance
+        run: python -m pytest -q test_derived_relation_twl_design_provenance_rev204.py
