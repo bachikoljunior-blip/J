@@ -3,7 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
-from block_action_preimage_coset_v1 import block_action_preimage_coset
+from affected_segment_quotient_resource_v1 import (
+    AffectedSegmentQuotientResourceEnvelope,
+    affected_segment_quotient_resource_envelope,
+)
+from block_action_preimage_coset_v1 import (
+    lift_prepared_block_action_preimage,
+    prepare_block_action_preimage,
+)
 from coset_stabilizer_primitives import RightCoset, point_stabilizer_generators
 from giant_block_action_certificates import _block_action, analyze_giant_block_action
 from orbit_factored_partial_string_coset_intersection_v1 import (
@@ -33,6 +40,7 @@ class QuotientFactoredPartialStringIntersection:
     recurrence_child_bound_verified: bool
     child_search_nodes: Tuple[int, ...]
     reason: str
+    resource_envelope: Optional[AffectedSegmentQuotientResourceEnvelope] = None
 
 
 class _LeafLimit(Exception):
@@ -61,6 +69,8 @@ def quotient_factored_partial_string_intersection(
     *,
     max_quotient_leaves=2000000,
     max_child_nodes=200000,
+    giant_certificate=None,
+    max_quotient_schreier_work=None,
 ) -> QuotientFactoredPartialStringIntersection:
     """Intersect a giant-action group with an affected string segment by double recursion.
 
@@ -97,21 +107,36 @@ def quotient_factored_partial_string_intersection(
     if max_quotient_leaves <= 0:
         raise ValueError("max_quotient_leaves must be positive")
 
-    giant = analyze_giant_block_action(group, blocks)
+    giant = giant_certificate if giant_certificate is not None else analyze_giant_block_action(group, blocks)
     t = len(blocks)
+    if giant.group_order != group.order or giant.block_count != t:
+        raise ValueError("precomputed giant certificate does not match group/block action")
     if giant.giant_type is None:
         return QuotientFactoredPartialStringIntersection(
             "giant_action_required", None, t, 0, 0, 0, 0, 0, 0, False, (),
             "current group does not expose an A_t/S_t quotient on the supplied blocks",
         )
 
-    point_to_block = {u: i for i, b in enumerate(blocks) for u in b}
+    envelope = None
+    if max_quotient_schreier_work is not None:
+        envelope = affected_segment_quotient_resource_envelope(
+            group, t, giant.image_order,
+            max_quotient_leaves=max_quotient_leaves,
+            max_child_nodes=max_child_nodes,
+            max_work=max_quotient_schreier_work,
+        )
+        if not envelope.admitted:
+            return QuotientFactoredPartialStringIntersection(
+                "undetermined_quotient_leaf_limit" if envelope.status.startswith("quotient_leaf")
+                else "undetermined_quotient_schreier_work_cap",
+                None, t, giant.image_order, 0, 0, 0, 0, 0, False, (),
+                "complete quotient/kernel-child primitive bound exceeded before recursion; fail closed",
+                envelope,
+            )
+
+    prepared = prepare_block_action_preimage(group, blocks)
+    image = prepared.image
     eq = identity(t)
-    image_gens = tuple(
-        _block_action(g, blocks, point_to_block)
-        for g in (group.original_generators or (identity(group.degree),))
-    )
-    image = schreier_stabilizer_chain(image_gens or (eq,))
 
     quotient_nodes = 0
     quotient_leaves = 0
@@ -135,7 +160,7 @@ def quotient_factored_partial_string_intersection(
             if quotient_leaves > max_quotient_leaves:
                 raise _LeafLimit
             q = qcoset.representative
-            lift = block_action_preimage_coset(group, blocks, q)
+            lift = lift_prepared_block_action_preimage(prepared, q)
             if lift.status != "exact_block_action_preimage_coset" or lift.coset is None:
                 raise AssertionError("singleton quotient branch failed paired-Schreier lift")
             part = orbit_factored_partial_string_coset_intersection(
@@ -232,4 +257,5 @@ def quotient_factored_partial_string_intersection(
         kernel_leaf_children, largest_kernel_child, child_bound,
         recurrence_verified, tuple(all_search_nodes),
         "quotient point-image recursion, singleton paired-Schreier lifts, affected kernel child SI, and exact coset reassembly all completed",
+        envelope,
     )
