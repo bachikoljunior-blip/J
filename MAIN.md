@@ -6,29 +6,29 @@ J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は�
 
 ## 現在の継続点
 
-現在の統合済み継続点は **AGI-GI rev206**、main SHA は `8216320c5366108a9ffc686654f411c6d2066729`。
+現在の統合済み継続点は **AGI-GI rev207**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合した。
 
-直近の corrected general UPCC Bipartite Split-or-Johnson 系列では、rev199 が exact theorem-input gate、rev200 が proper Reduce-Part2-by-Color / visible-twin shrink、rev201 が source/target-comparable restriction provenance、rev202 が uniform-neighborhood Johnson/relation provenance、rev203 が exact relation-twin restriction provenance、rev204 が no-large-twin relation を exact WL/Design witness cover へ接続し、rev205 が complete witness cover を実際の right-ground ambient action 内の exact transporter coset へ接続した。
+rev207 は既存 active leaf **H6-C1** を横断整理した。`bipartite_parent_polynomial_lift_accounting_v2.py` は rev206 が実際に exact solve できた各 branch について、同じ paired parent→right preimage と coupled auxiliary action を再現し、実際に実行された `candidate_coset_string_isomorphism_u2` の proof-carrying accounting tree を `validate_quasipoly_recurrence_tree_v3` で再検証する。left/right は parent domain の互いに素な部分集合なので auxiliary degree
 
-rev206 は rev205 の各 right structural coset を、元の完全な colored bipartite state と **actual coupled parent action** の中で exact に交差する境界を統合した。`bipartite_parent_action_coset_intersection_v1` は parent→right generator pairing の exact preimage を取り、left/right vertex colors と全 cross-pair edge/nonedge を一つの induced action 上の string として解くため、独立な左右 symmetric group へ緩和しない。`bipartite_design_parent_union_v1` は rev204/rev205 の complete witness cover を元入力から再導出し、全 surviving branch を exact intersection へ通し、exact-empty だけを捨て、target automorphism と inter-branch differences を検査して complete nonempty union を一つの parent right coset として再構成する。さらに `bipartite_design_recurrence_gate_v1` は、各 structural branch が exact invariant-empty か alpha-smaller auxiliary progress を持つかを fail-closed に検査するが、downstream exact child SI/accounting は deliberate placeholder のままである。
+`M = |L| + |R| + |L||R| <= root_n + root_n^2`
 
-検証済み head `879f2aa4da3c3f130abae64c8b38460659c35a57` は `AGI-GI rev validation` run `32324466475` と `rev206 bipartite parent/coset intersection smoke` run `32324466499` がともに success。PR #123 を main SHA `8216320c5366108a9ffc686654f411c6d2066729` へ squash merge 済みである。
+を機械的に確認し、Design structural local cost、実 branch 数、rev206 union bookkeeping、固定次数 polynomial wrapper と子 SI work を original root の quasipolynomial envelope へ charge する。rev206 自体が exact でない branch、子 accounting failure、degree gate failure、translated envelope overflow は fail closed のままである。one-shot iterable は v2 entry point で一度だけ materialize し、union→proof replay 間の消費差異も regression 化した。
+
+検証済み head `20872d2a9a9f229b0eeb9526643d852d2b6b9e82` は `AGI-GI rev validation` run `32327521033` と `rev207 polynomial auxiliary accounting smoke` run `32327521040` がともに success。PR #124 を merge SHA `52db33dc0cadbf0ad9f4f6bfb658279bc241e393` として main へ squash merge 済み。
 
 ## 問題木
 
-予測問題数は **512**、置換済み旧問題を除く有効問題数も **512**。実数は予測数を超えていないため、横断的な再予測・分岐削除条件は発火していない。rev206 は既存 active leaf **H6-R3c2b / full parent string intersection** を in-place で解決し、set-theoretic witness-union completeness を共有 substrate へ統合した。
+予測問題数は **512**、置換済み旧問題を除く有効問題数も **512**。実数は予測数を超えていないため mandatory over-count full-tree rewrite trigger は発火していない。
 
-局所 full-string child は解決したが、親 **W1R-H6 corrected general UPCC Bipartite Split-or-Johnson recursion** は未解決である。
+rev207 により、**exact rev206 instance について quadratic auxiliary action を説明するためだけの artificial structural-child recursion は不要**になった。これは H6-C1 を in-place で共有 substrate へ置換したもので、rev206 が未解決の candidate SI branchを解決済みとみなすものではない。
 
-次の未解決末端は **H6-C1**:
+次の未解決末端は **H6-C2**:
 
-> rev206 の complete parent Design union と `bipartite_design_recurrence_gate_v1` が出す exact-empty / alpha-smaller structural children を、元の root measure に対する proof-carrying exact downstream SI として再帰接続する。auxiliary action degree `|L|+|R|+|L||R|` の polynomial blow-up、rev204 witness family の branch multiplicity、各 source/target Design-progress cost、union reconstruction cost を同じ recurrence certificate に機械的に charge し、全 nonterminal child が corrected Split-or-Johnson の strict-progress 条件を満たす場合だけ global accounting へ渡す。placeholder child、missing provenance、unresolved UPCC/Split-or-Johnson branch、resource overflow は fail closed とする。
+> rev206 coupled parent action 内でまだ typed unresolved となる proof-carrying candidate SI を閉じる。特に literal primitive giant A/S、primitive non-giant / larger Johnson ground、genuinely unresolved Split-or-Johnson image statesを既存 exact group/coset substrateへ接続し、rev207 polynomial-lift invariant を維持する。未確認 theorem gate、resource overflow、nonexact child は fail closed とする。
 
 ## 世界に存在する解法の包含監査
 
-rev206 と祖先の Split-or-Johnson / Design-Lemma 層について、Babai の *Graph Isomorphism in Quasipolynomial Time*、corrected Split-or-Johnson exposition、Luks 型 String Isomorphism / coset reduction を再監査した。既存理論では canonical structure により ambient isomorphism coset を制限し、その中で元の string を解き、各 canonical branch を strict smaller parameter に落として recurrence を閉じる。rev206 は「構造 alignment と元 string の exact intersection」を actual parent group 内で executable にしたため、残る H6-C1 は新しい独立 solver よりも、既存 `RecurrenceAccountingNode`、candidate-coset SI、split/block/UPCC adapters を同じ parent-child certificate に接続する cost/progress transfer 問題へ集約された。
-
-この横断統合により、right neighborhood equality、actual left/right coupling、witness-branch union、parent coset reconstruction は同一 image/preimage + candidate-SI substrate へ削減済みである。したがってそれらを別々の active branches として再導入しない。
+Babai の quasipolynomial GI / corrected Split-or-Johnson と Luks 型 String Isomorphism / coset reduction を親問題レベルまで再監査した。rev207 の要点は、polynomial-size induced action を新しい独立主問題として再帰する必要はなく、実行済み child SI が exact proof-carrying recurrence を持ち induced degree が original root の fixed polynomial で抑えられるなら、その work を original root measure へ戻せるという横断統合である。right neighborhood equality、actual parent coupling、Design branch union、candidate full-string SI、polynomial auxiliary accounting は同じ image/preimage + coset SI substrate として扱い、別 active branches として再導入しない。
 
 ## 認定状態
 
