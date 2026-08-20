@@ -3,6 +3,7 @@ from __future__ import annotations
 from bipartite_parent_polynomial_lift_accounting_v2 import (
     solve_and_certify_design_parent_polynomial_lift,
 )
+import bipartite_parent_polynomial_lift_accounting_v2 as _entry
 from permutation_group_schreier import identity, schreier_stabilizer_chain
 
 
@@ -55,6 +56,28 @@ def test_cycle5_exact_parent_union_gets_polynomial_lift_complexity_certificate()
     assert cert.branch_certificates[0].auxiliary_degree == 35
     assert cert.branch_certificates[0].auxiliary_degree <= cert.auxiliary_degree_bound
     assert cert.total_log2_work_bound <= cert.allowed_log2_work
+    captured = union.branch_results[0].image_candidate_proof
+    assert captured is not None and captured.exact
+    assert captured.status == union.branch_results[0].image_candidate_status
+
+
+def test_polynomial_lift_consumes_execution_linked_proof_without_replay(monkeypatch):
+    parent, right_images, _ = _diagonal_cycle5_parent()
+    edges = _cycle5_edges()
+    original = _entry.candidate_coset_string_isomorphism_u7
+    calls = 0
+
+    def counted(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(_entry, "candidate_coset_string_isomorphism_u7", counted)
+    union, cert = _solve_cycle5(parent, right_images, edges)
+    assert union.exact
+    assert union.branch_results[0].image_candidate_proof is not None
+    assert cert.certified
+    assert calls == 1
 
 
 def test_distinct_left_colors_keep_exact_identity_and_certified_lift():
