@@ -64,3 +64,14 @@ def test_incomplete_or_reordered_evidence_stays_fail_closed():
     assert got.status == "undetermined_incomplete_paired_evidence"
     assert not got.canonical_test_order_certified
     assert not got.exact_empty and not got.ready_for_relation_si
+
+
+def test_different_resource_schedule_stays_fail_closed():
+    source = _artifact((True, False, False, True, False, True))
+    target = _artifact((False, True, True, False, True, False))
+    changed = replace(target.all_test_resource_envelope, max_work=601)
+    target = replace(target, all_test_resource_envelope=changed)
+    got = pair_theorem_local_certificate_relations(source, target)
+    assert got.status == "undetermined_paired_schedule_mismatch"
+    assert got.canonical_test_order_certified
+    assert not got.exact_empty and not got.ready_for_relation_si
