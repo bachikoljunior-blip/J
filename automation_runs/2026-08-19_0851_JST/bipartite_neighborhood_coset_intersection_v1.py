@@ -69,7 +69,7 @@ def _orbit_closed_subset_domain(
     generators,
     *,
     max_subset_states: int,
-+) -> tuple[Subset, ...] | None:
+) -> tuple[Subset, ...] | None:
     if max_subset_states < 1:
         raise ValueError("max_subset_states must be positive")
     seen = {tuple(sorted(S)) for S in seeds}
@@ -127,22 +127,22 @@ def intersect_bipartite_neighborhoods_with_right_coset(
     """Exact colored-bipartite incidence intersection inside one right-side coset.
 
     This solves the precise model in which the left action is the full product of
-    symmetric groups on equal-color left vertices.  In that model a right
+    symmetric groups on equal-color left vertices. In that model a right
     permutation is a bipartite isomorphism iff, for every left color, it maps the
     multiset of source neighborhoods to the corresponding target multiset.
 
     For a candidate right coset ``H*r``, source neighborhoods are first moved by
-    ``r``.  The union of their H-orbits and the target-neighborhood H-orbits is a
-    finite H-invariant subset domain.  Neighborhood multiplicity-by-left-color is
-    an exact string on that domain.  Existing candidate-coset SI solves the image
+    ``r``. The union of their H-orbits and the target-neighborhood H-orbits is a
+    finite H-invariant subset domain. Neighborhood multiplicity-by-left-color is
+    an exact string on that domain. Existing candidate-coset SI solves the image
     string inside the induced H action; the generic paired Schreier preimage then
     lifts the exact image coset back to H, and the fixed representative r is
-    restored.  No ambient-right group element is enumerated by this wrapper.
+    restored. No ambient-right group element is enumerated by this wrapper.
 
     ``parent_left_action_verified`` is deliberately metadata, not a theorem gate:
     callers may use this exact result as the full parent bipartite intersection
     only after separately proving that the parent really permits the full
-    color-symmetric left action.  Otherwise this routine is an exact local model
+    color-symmetric left action. Otherwise this routine is an exact local model
     but must not be promoted to the full parent SI result.
     """
     n1s = int(source_left_size)
