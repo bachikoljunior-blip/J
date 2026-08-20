@@ -1,0 +1,35 @@
+name: rev210 canonical imprimitive family smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/canonical_imprimitive_family_candidate_si_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v5.py'
+      - 'automation_runs/2026-08-19_0851_JST/quasipoly_recurrence_accounting_v4.py'
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_parent_polynomial_lift_accounting_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_canonical_imprimitive_family_candidate_si_rev210.py'
+      - '.github/workflows/rev210-imprimitive-family-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev210-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: >-
+          python -m pytest -q
+          test_canonical_imprimitive_family_candidate_si_rev210.py
+          test_johnson_log_candidate_bridge_rev209.py
+          test_literal_giant_candidate_si_rev208.py
+          test_bipartite_parent_polynomial_lift_accounting_rev207.py
