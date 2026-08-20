@@ -37,6 +37,7 @@ def affected_segment_automorphism_group_v2(
     max_child_nodes=200000,
     giant_certificate=None,
     max_quotient_schreier_work=None,
+    max_reassembly_schreier_work=None,
 ) -> AffectedSegmentAutomorphismV2:
     """Exact segment automorphism group from the same double recursion we account.
 
@@ -87,6 +88,7 @@ def affected_segment_automorphism_group_v2(
         max_child_nodes=max_child_nodes,
         giant_certificate=giant_certificate,
         max_quotient_schreier_work=max_quotient_schreier_work,
+        max_reassembly_schreier_work=max_reassembly_schreier_work,
     )
     if execution.status.startswith("undetermined_") or execution.status == "giant_action_required":
         return AffectedSegmentAutomorphismV2(
