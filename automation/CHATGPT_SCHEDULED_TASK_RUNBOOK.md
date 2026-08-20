@@ -12,11 +12,18 @@ A failure in (2) or (3) does not erase a verified result in (1). Conversely, a s
 
 The task is not a monitoring-only task. Every invocation must attempt one unresolved AGI-GI leaf or one concrete integration that reduces that leaf. AGI remains `NOT_AGI` until the strict empirical criteria in `MAIN.md` are actually met.
 
+## AGI-GI series scope
+
+`AGI-GI rev series` means the continuous J main revision lineage beginning at rev91 and continuing through whatever revision `MAIN.md` currently records. The graph alignment / symmetry / graph isomorphism / permutation-group / canonical-labeling / String-Isomorphism work seen in current history describes the **current and historical unresolved branches**, not a permanent domain restriction. A run must follow the current problem tree wherever the AGI root legitimately requires it; if a later unresolved child or transversal solution is outside graph/GI mathematics, it remains part of AGI-GI when it is a continuation of this main lineage.
+
+Separate acceptance/evidence or custodian/federation trees must not be silently counted as AGI-GI revisions unless `MAIN.md` explicitly integrates them into the main lineage. This naming boundary prevents progress-history conflation; it does not narrow the AGI root problem.
+
 ## Persistent source of truth
 
 - Repository: `bachikoljunior-blip/J`
 - Base branch: `main`
 - Main-line state: `MAIN.md`
+- Rev-series definition: `automation_runs/2026-08-19_0851_JST/AGI_GI_REV_SERIES.md`
 - Rev-series directory: `automation_runs/2026-08-19_0851_JST/`
 - Active-node ceiling: the value recorded in `MAIN.md`
 
@@ -26,9 +33,9 @@ A scheduled web run must not assume that a local clone, worktree, uncommitted fi
 
 At the start of every invocation:
 
-1. Read `MAIN.md` from `main` and resolve the current main SHA.
+1. Read `MAIN.md` from `main`, read the AGI-GI rev-series definition, and resolve the current main SHA. Treat the latest state in `MAIN.md` as authoritative rather than any revision number embedded in an older prompt or report.
 2. Inspect open AGI-GI pull requests and relevant workflow results so that already-completed work is not repeated.
-3. Select exactly one unresolved active leaf, or one integration shared by several leaves when the active-node ceiling requires a transversal rewrite.
+3. Select exactly one unresolved active leaf, or one integration shared by several leaves when the active-node ceiling requires a transversal rewrite. Do not restrict selection to graph/GI topics merely because earlier revisions were in that domain.
 4. Recheck whether an existing world implementation, theorem, library, solver, oracle, benchmark, or proof framework contains a solution to that leaf and to any ancestor that has not yet received that audit. Record the exact inclusion boundary; do not substitute a name-only literature mention for an integration or proof.
 
 During repository work:
@@ -67,6 +74,6 @@ The per-run prompt may verify scheduler state only when a scheduler-read capabil
 
 ## Recommended durable per-run prompt
 
-> Continue the AGI-GI rev series only in `bachikoljunior-blip/J`. Read `MAIN.md` on `main`, inspect open AGI-GI PRs and CI, and select one unresolved active leaf. Attempt a concrete implementation or proof-carrying integration; audit existing world solutions for that leaf and unaudited ancestors; preserve exactness and fail-closed gates; add tests; merge only a CI-verified head; update `MAIN.md` with the verified result and next leaf. Do not treat this as monitoring, do not lower AGI criteria, and do not claim AGI without strict empirical evidence. Persist durable checkpoints before proceeding to another unit. Do not modify this scheduled task from inside the run. Distinguish repository success from notification or scheduler-aftercare failure.
+> Continue the AGI-GI rev series only in `bachikoljunior-blip/J`. Treat AGI-GI as the continuous main revision lineage from rev91, not as a graph/GI-only scope restriction. Read the latest `MAIN.md` and `automation_runs/2026-08-19_0851_JST/AGI_GI_REV_SERIES.md` on `main`, inspect open AGI-GI PRs and CI, and select one unresolved active leaf from the current problem tree regardless of technical domain. Attempt a concrete implementation or proof-carrying integration; audit existing world solutions for that leaf and unaudited ancestors; preserve exactness and fail-closed gates; add tests; merge only a CI-verified head; update `MAIN.md` with the verified result and next leaf. Do not treat this as monitoring, do not lower AGI criteria, and do not claim AGI without strict empirical evidence. Persist durable checkpoints before proceeding to another unit. Do not modify this scheduled task from inside the run. Distinguish repository success from notification or scheduler-aftercare failure.
 
 The long root constraint remains authoritative as the session-level problem definition. This shorter invocation prompt is an execution protocol, not a relaxation of the root or AGI criteria.
