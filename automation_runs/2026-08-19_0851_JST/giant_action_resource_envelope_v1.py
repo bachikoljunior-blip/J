@@ -37,8 +37,8 @@ def giant_action_resource_envelope(group, quotient_degree: int, max_work: int):
     executing any structural primitive first.
     """
     cap = int(max_work)
-    if cap <= 0:
-        raise ValueError("max_giant_action_schreier_work must be positive")
+    if cap < 0:
+        raise ValueError("remaining giant-action work cap must be nonnegative")
     n = int(group.degree)
     k = int(quotient_degree)
     order = max(1, int(group.order))
