@@ -1,0 +1,31 @@
+name: rev202 uniform-neighborhood provenance smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/uniform_neighborhood_relation_provenance_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_uniform_neighborhood_relation_provenance_rev202.py'
+      - 'automation_runs/2026-08-19_0851_JST/UNIFORM_NEIGHBORHOOD_PROVENANCE_AUDIT_REV202.md'
+      - 'automation_runs/2026-08-19_0851_JST/CURRENT_STATUS_REV0202.json'
+      - '.github/workflows/rev202-uniform-neighborhood-provenance-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-rev202:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Validate uniform-neighborhood provenance
+        run: python -m pytest -q test_uniform_neighborhood_relation_provenance_rev202.py
