@@ -5,8 +5,8 @@ from math import factorial
 from typing import Optional, Tuple
 
 from coset_stabilizer_primitives import pointwise_stabilizer_chain
-from giant_block_action_certificates import _block_action, analyze_giant_block_action
-from permutation_group_schreier import StabilizerChain, identity, schreier_stabilizer_chain
+from giant_block_action_certificates import analyze_giant_block_action
+from permutation_group_schreier import StabilizerChain
 
 
 @dataclass(frozen=True)
@@ -23,7 +23,7 @@ class UnaffectedStabilizerReduction:
     reason: str
 
 
-def unaffected_stabilizer_reduction(group, blocks) -> UnaffectedStabilizerReduction:
+def unaffected_stabilizer_reduction(group, blocks, *, giant_certificate=None) -> UnaffectedStabilizerReduction:
     """Expose the exact subgroup certified by the Unaffected Stabilizers gate.
 
     rev114 already classifies affected/unaffected points and checks the numerical
@@ -37,7 +37,9 @@ def unaffected_stabilizer_reduction(group, blocks) -> UnaffectedStabilizerReduct
     prove the corresponding SI composition rule.
     """
     blocks = tuple(tuple(b) for b in blocks)
-    giant = analyze_giant_block_action(group, blocks)
+    giant = giant_certificate if giant_certificate is not None else analyze_giant_block_action(group, blocks)
+    if giant.group_order != group.order or giant.block_count != len(blocks):
+        raise ValueError("precomputed giant certificate does not match group/block action")
     k = len(blocks)
     if giant.giant_type is None:
         return UnaffectedStabilizerReduction(
@@ -59,14 +61,13 @@ def unaffected_stabilizer_reduction(group, blocks) -> UnaffectedStabilizerReduct
             "rev114 exact theorem-side audit failed",
         )
 
-    subgroup = pointwise_stabilizer_chain(group, giant.unaffected_points)
-    point_to_block = {u: i for i, b in enumerate(blocks) for u in b}
-    gens = subgroup.original_generators or (identity(group.degree),)
-    image_gens = [_block_action(g, blocks, point_to_block) for g in gens]
-    image = schreier_stabilizer_chain(image_gens or [identity(k)])
+    subgroup = giant.unaffected_stabilizer_subgroup
+    if subgroup is None:
+        subgroup = pointwise_stabilizer_chain(group, giant.unaffected_points)
     full = factorial(k)
     half = full // 2
-    image_type = "S_k" if image.order == full else ("A_k" if image.order == half else None)
+    image_order = giant.unaffected_stabilizer_image_order
+    image_type = "S_k" if image_order == full else ("A_k" if image_order == half else None)
     if image_type is None:
         raise AssertionError("rev114 theorem verification disagrees with materialized unaffected stabilizer")
 
@@ -79,7 +80,7 @@ def unaffected_stabilizer_reduction(group, blocks) -> UnaffectedStabilizerReduct
         giant.affected_points,
         giant.unaffected_points,
         subgroup,
-        image.order,
+        image_order,
         image_type,
         True,
         True,

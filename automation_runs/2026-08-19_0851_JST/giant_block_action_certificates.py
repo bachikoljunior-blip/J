@@ -25,6 +25,8 @@ class GiantBlockActionCertificate:
     affected_orbit_lemma_verified: bool
     kernel_generator_count: int
     reason: str
+    unaffected_stabilizer_subgroup: Optional[StabilizerChain] = None
+    unaffected_stabilizer_image_order: int = 0
 
 
 def _dedup_pairs(pairs):
@@ -163,9 +165,12 @@ def analyze_giant_block_action(group: StabilizerChain, blocks: Iterable[Iterable
 
     theorem_applicable = giant_type is not None and k > max(8, 2 + log2(max(1, n0)))
     theorem_verified = True
+    unaffected_stabilizer = None
+    unaffected_stabilizer_image_order = 0
     if theorem_applicable:
         unaffected_stabilizer = pointwise_stabilizer_chain(group, unaffected)
         unaffected_image = _image_chain(unaffected_stabilizer, blocks, point_to_block)
+        unaffected_stabilizer_image_order = unaffected_image.order
         theorem_verified = unaffected_image.order in (half, full) and len(affected) > 0
 
     affected_lemma_verified = True
@@ -190,4 +195,6 @@ def analyze_giant_block_action(group: StabilizerChain, blocks: Iterable[Iterable
         theorem_applicable, theorem_verified, affected_lemma_verified,
         len(kernel.original_generators),
         "exact induced block homomorphism, paired-Schreier kernel, affected-point images, and theorem-side audits",
+        unaffected_stabilizer,
+        unaffected_stabilizer_image_order,
     )
