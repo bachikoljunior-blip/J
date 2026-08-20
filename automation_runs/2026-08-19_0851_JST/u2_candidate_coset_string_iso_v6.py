@@ -29,18 +29,21 @@ def candidate_coset_string_isomorphism_u6(
     max_family_systems: int = 4096,
     max_family_quotient_order: int = 4096,
 ):
-    """rev211 candidate SI: compose rev184 Johnson descent through its pair image.
+    """rev211/rev214 candidate SI: compose rev184 descent through its pair image.
 
     rev210/v5 is preserved as the first dispatcher, so every already exact terminal,
     imprimitive-family consensus, and rev209 path is unchanged.  If the remaining
     candidate is still transitive primitive-non-giant, or its canonical minimum
     blocks are the complement pairs of an odd Johnson layer, rev211 replays only
     the specifically certified rev184 `log-certificate -> codegrees -> Johnson
-    pair` path.  Rather than stopping at a second abstract Johnson ground, it
-    solves the actual canonical pair-relation string in the induced action, lifts
-    its exact coset by the generic paired-action preimage, and resolves the
-    original string inside that filter.  Missing gates or unresolved children
-    stay fail-closed.
+    pair` path.  rev214 also admits the same exact bridge when rev184 reaches a
+    nonconstant homogeneous pair relation that is not itself Johnson: the
+    canonical pair image, not its structural name, supplies strict progress.
+    The routine solves that actual pair-relation string in the induced action,
+    lifts its exact coset by generic paired-action preimage, and resolves the
+    original string inside the proper filter.  Homogeneous/nonshrinking images,
+    same-domain self-loops, missing gates, and unresolved children stay
+    fail-closed.
     """
     source = tuple(source_values)
     target = tuple(target_values)

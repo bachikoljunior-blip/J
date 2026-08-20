@@ -5,6 +5,7 @@ from dataclasses import replace
 from itertools import combinations
 from math import ceil, comb, log2
 
+from candidate_full_accept_terminal_v1 import exact_if_entire_candidate_maps_string
 from canonical_partition_guided_string_iso_v1 import _all_value_preserving_maps
 from coset_stabilizer_primitives import RightCoset
 from johnson_ground_relational_lift_v1 import lift_primitive_johnson_to_ground_relation
@@ -108,15 +109,15 @@ def signed_johnson_log_codegree_image_candidate_si(
     max_family_systems: int = 4096,
     max_family_quotient_order: int = 4096,
 ):
-    """Close rev184's Johnson-structural codegree leaf through its actual pair image.
+    """Close rev184's nonconstant codegree leaf through its actual pair image.
 
-    rev184 already proves that a logarithmic complete t-set relation canonically
-    descends, by exact codegrees, to a homogeneous pair relation that is an exact
-    Johnson distance scheme.  The old path stopped at the *second* Johnson-ground
-    structural certificate.  No arbitrary second coordinate gauge is needed for
-    exact SI progress: the pair relation itself is a canonical string on C(v,2)
-    coordinates with an exact generator-paired action induced from the first
-    Johnson ground.
+    rev184 proves that a logarithmic complete t-set relation canonically descends,
+    by exact codegrees, to a homogeneous pair relation.  rev211 used this only
+    when the pair relation was itself an exact Johnson distance scheme.  That
+    restriction is unnecessary for exact SI progress: every nonconstant pair
+    relation is already a canonical string on C(v,2) coordinates with an exact
+    generator-paired action induced from the first Johnson ground.  For k>2 this
+    image is strictly smaller than the original J(v,k) domain.
 
     This routine intersects that actual pair-action group with the complete
     value-preserving coset using the same bounded exact intersection substrate as
@@ -183,12 +184,16 @@ def signed_johnson_log_codegree_image_candidate_si(
         max_class_fraction=max_class_fraction,
         max_johnson_nodes=max_johnson_nodes,
     )
-    if descent.status != "certified_log_certificate_johnson_descent":
+    pair_descent_statuses = {
+        "certified_log_certificate_johnson_descent",
+        "homogeneous_pair_relation_unresolved",
+    }
+    if descent.status not in pair_descent_statuses:
         return _unresolved(
-            "undetermined_log_codegree_image_not_johnson_structural_leaf",
+            "undetermined_log_codegree_image_not_pair_leaf",
             root_n=root_n,
             n=n,
-            reason="this bridge applies only after rev184 certifies the homogeneous pair relation as an exact Johnson structural descent; got " + descent.status,
+            reason="this bridge applies only after rev184 canonically reaches a nonconstant homogeneous pair relation; got " + descent.status,
             checked=test_count,
         )
 
@@ -200,6 +205,14 @@ def signed_johnson_log_codegree_image_candidate_si(
     pair_coords, pair_source, pair_target, path = replay
     if tuple(descent.arity_path) != tuple(path):
         raise AssertionError("codegree replay path disagrees with rev184 structural certificate")
+    if len(set(pair_source).union(pair_target)) <= 1:
+        return _unresolved(
+            "undetermined_log_codegree_pair_image_homogeneous",
+            root_n=root_n,
+            n=n,
+            reason="the replayed pair relation is homogeneous and therefore supplies no candidate restriction",
+            checked=test_count,
+        )
 
     induced_coords, image_gens, _parity = complement_safe_t_subset_image_generators(
         lift.lifted_generators, v, 2
@@ -207,6 +220,14 @@ def signed_johnson_log_codegree_image_candidate_si(
     if tuple(induced_coords) != tuple(pair_coords):
         raise AssertionError("pair-action coordinate order disagrees with codegree replay")
     pair_degree = len(pair_coords)
+    if pair_degree >= n:
+        return _unresolved(
+            "undetermined_log_codegree_pair_image_not_strictly_smaller",
+            root_n=root_n,
+            n=n,
+            reason="the canonical pair image does not strictly shrink the original Johnson domain",
+            checked=test_count,
+        )
     if not image_gens:
         image_gens = (identity(pair_degree),)
     image = schreier_stabilizer_chain(image_gens)
@@ -310,24 +331,50 @@ def signed_johnson_log_codegree_image_candidate_si(
             checked=test_count + intersection.search_nodes,
         )
 
-    filtered = candidate_dispatch(
-        preimage.coset,
-        source,
-        target,
-        root_n=root_n,
-        polylog_power=polylog_power,
-        max_explicit_degree=max_explicit_degree,
-        group_order_poly_power=candidate_group_order_poly_power,
-        max_group_order=max_candidate_group_order,
-        max_depth=max_depth,
-        max_johnson_test_sets=max_johnson_test_sets,
-        max_partition_states=max_partition_states,
-        max_recognition_nodes=max_recognition_nodes,
-        max_johnson_nodes=max_johnson_nodes,
-        family_poly_power=family_poly_power,
-        max_family_systems=max_family_systems,
-        max_family_quotient_order=max_family_quotient_order,
+    # A pair image can be informative as a relation yet invariant under the
+    # supplied ambient subgroup.  Recursing on that unchanged candidate would be
+    # a same-domain self-loop.  Only the cheap whole-candidate terminal may close
+    # such a case; otherwise fail closed.  A proper preimage restriction uses the
+    # established recursive dispatcher.
+    nonrestricting = (
+        preimage.coset.subgroup.order == group.order
+        and group.contains(preimage.coset.representative)
     )
+    if nonrestricting:
+        filtered = exact_if_entire_candidate_maps_string(
+            preimage.coset,
+            source,
+            target,
+            root_n=root_n,
+        )
+        if not filtered.exact:
+            return _unresolved(
+                "undetermined_log_codegree_pair_image_nonrestricting",
+                root_n=root_n,
+                n=n,
+                coset=preimage.coset,
+                reason="exact pair-image preimage equals the ambient subgroup and the full string is not constant on that candidate; refusing a same-domain recursion loop",
+                checked=test_count + intersection.search_nodes,
+            )
+    else:
+        filtered = candidate_dispatch(
+            preimage.coset,
+            source,
+            target,
+            root_n=root_n,
+            polylog_power=polylog_power,
+            max_explicit_degree=max_explicit_degree,
+            group_order_poly_power=candidate_group_order_poly_power,
+            max_group_order=max_candidate_group_order,
+            max_depth=max_depth,
+            max_johnson_test_sets=max_johnson_test_sets,
+            max_partition_states=max_partition_states,
+            max_recognition_nodes=max_recognition_nodes,
+            max_johnson_nodes=max_johnson_nodes,
+            family_poly_power=family_poly_power,
+            max_family_systems=max_family_systems,
+            max_family_quotient_order=max_family_quotient_order,
+        )
     if not filtered.exact:
         return _unresolved(
             "undetermined_log_codegree_full_candidate_" + filtered.status,
@@ -380,7 +427,7 @@ def signed_johnson_log_codegree_image_candidate_si(
         accounting,
         test_count + intersection.search_nodes + filtered.permutation_candidates_checked,
         (
-            "rev184's second-Johnson structural leaf was closed without a label-dependent coordinate choice: the actual canonical codegree pair relation was solved in its induced action, lifted exactly to the original domain, and the remaining full string was solved inside that filter"
+            "rev184's homogeneous pair leaf was closed without a label-dependent coordinate choice or a Johnson-only restriction: the actual canonical codegree pair relation was solved in its strictly smaller induced action, lifted exactly to the original domain, and the remaining full string was solved inside that filter"
         ),
     )
 
