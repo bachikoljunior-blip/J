@@ -26,6 +26,7 @@ def _complete_theorem_palette(relation: TheoremLocalCertificateRelation):
     envelope = relation.all_test_resource_envelope
     if (
         not relation.exact
+        or relation.status != "certified_theorem_local_certificate_relation"
         or not relation.local_certificates_complete
         or not relation.theorem_scale_complete
         or not relation.parameter_gate.certified
@@ -50,6 +51,27 @@ def _complete_theorem_palette(relation: TheoremLocalCertificateRelation):
     ):
         return None
     return tuple(bool(full) for _, full in aggregate.relation)
+
+
+def _paired_schedule_metadata(relation: TheoremLocalCertificateRelation):
+    gate = relation.parameter_gate
+    envelope = relation.all_test_resource_envelope
+    if envelope is None:
+        return None
+    return (
+        gate.primary_domain_size,
+        gate.giant_degree,
+        gate.test_size,
+        gate.status,
+        envelope.test_count,
+        envelope.per_test_work_cap,
+        envelope.work_upper_bound,
+        envelope.max_work,
+        envelope.admitted,
+        envelope.executed_test_count,
+        envelope.unexecuted_test_count,
+        envelope.complete,
+    )
 
 
 def pair_theorem_local_certificate_relations(
@@ -87,6 +109,13 @@ def pair_theorem_local_certificate_relations(
             source_palette or (), target_palette or (), False, False, False,
             False,
             "both sides must carry complete canonical all-T theorem evidence and a completed finite reservation",
+        )
+
+    if _paired_schedule_metadata(source) != _paired_schedule_metadata(target):
+        return PairedTheoremLocalCertificateRelation(
+            "undetermined_paired_schedule_mismatch", source, target,
+            source_palette, target_palette, True, False, False, False,
+            "source and target theorem gates or reserved all-T schedules differ; evidence is not paired",
         )
 
     matched = Counter(source_palette) == Counter(target_palette)
