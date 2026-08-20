@@ -68,6 +68,8 @@ degree 22, auxiliary degree 143, cyclic order 11, and an explicit fail-closed
 auxiliary cap of 142.  All **23** affected cross-revision tests passed by direct
 invocation (including monkeypatch-equivalent restoration), and both the rev221
 smoke gate and the general validation gate now execute the whole repaired chain.
+Together with the adapter tests above, the expanded direct integration run passed
+**42 tests** before publication.
 
 ## Existing-world inclusion audit
 
