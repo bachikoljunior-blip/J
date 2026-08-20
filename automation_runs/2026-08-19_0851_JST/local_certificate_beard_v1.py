@@ -15,6 +15,10 @@ from block_action_preimage_coset_v1 import (
 )
 from giant_block_action_certificates import analyze_giant_block_action
 from local_fullness_certificates import _alternating_test_generators
+from local_certificate_preimage_resource_v1 import (
+    PreimageSchreierResourceEnvelope,
+    preimage_schreier_resource_envelope,
+)
 from permutation_group_schreier import StabilizerChain, identity, schreier_stabilizer_chain
 from unaffected_stabilizer_reduction_v1 import unaffected_stabilizer_reduction
 
@@ -47,6 +51,7 @@ class LocalCertificateBeard:
     layers: Tuple[BeardLayer, ...]
     theorem_scale_recurrence_evidence: bool
     reason: str
+    preimage_resource_envelope: Optional[PreimageSchreierResourceEnvelope] = None
 
 
 def _same_subgroup(a: StabilizerChain, b: StabilizerChain):
@@ -103,6 +108,7 @@ def local_certificate_beard(
     max_layers=None,
     max_quotient_leaves=2000000,
     max_child_nodes=200000,
+    max_preimage_schreier_work=None,
 ) -> LocalCertificateBeard:
     """Execute Babai's growing-beard local-certificate dichotomy exactly.
 
@@ -132,11 +138,27 @@ def local_certificate_beard(
         raise ValueError("string/domain size mismatch")
     gate = babai_local_certificate_parameter_gate(group.degree, len(blocks), len(T))
 
+    resource_envelope = None
+    if max_preimage_schreier_work is not None:
+        resource_envelope = preimage_schreier_resource_envelope(
+            group,
+            len(blocks),
+            len(_alternating_test_generators(len(blocks), T)),
+            max_preimage_schreier_work,
+        )
+        if not resource_envelope.admitted:
+            return LocalCertificateBeard(
+                "undetermined_preimage_schreier_work_cap", T, None, 0,
+                None, None, gate, (), False,
+                "complete preimage Schreier work bound exceeded before execution; fail closed",
+                resource_envelope,
+            )
+
     preimage, test_blocks, preimage_reason = _test_alternating_preimage(group, blocks, T)
     if preimage is None:
         return LocalCertificateBeard(
             "test_alternating_preimage_unavailable", T, None, 0, None, None,
-            gate, (), False, preimage_reason,
+            gate, (), False, preimage_reason, resource_envelope,
         )
 
     H = preimage
@@ -152,7 +174,7 @@ def local_certificate_beard(
             return LocalCertificateBeard(
                 "certified_nonfull_before_segment", T, False, preimage.order,
                 H, None, gate, tuple(layers), False,
-                "current exact segment automorphism subgroup already lacks a giant A(T)/S(T) image",
+                "current exact segment automorphism subgroup already lacks a giant A(T)/S(T) image", resource_envelope,
             )
         W = tuple(before.affected_points)
         seg = affected_segment_automorphism_group_v2(
@@ -167,7 +189,7 @@ def local_certificate_beard(
             return LocalCertificateBeard(
                 seg.status, T, None, preimage.order, H, None, gate,
                 tuple(layers), False,
-                "affected-segment automorphism recursion did not complete exactly",
+                "affected-segment automorphism recursion did not complete exactly", resource_envelope,
             )
         H2 = seg.subgroup
         after = analyze_giant_block_action(H2, test_blocks)
@@ -193,7 +215,7 @@ def local_certificate_beard(
             return LocalCertificateBeard(
                 "certified_nonfull_giant_obstruction", T, False,
                 preimage.order, H2, None, gate, tuple(layers), False,
-                "exact automorphisms of the current affected string segment no longer contain A(T); the full-string automorphism image is a subgroup and therefore cannot contain A(T) either",
+                "exact automorphisms of the current affected string segment no longer contain A(T); the full-string automorphism image is a subgroup and therefore cannot contain A(T) either", resource_envelope,
             )
 
         if not set(W) <= set(after.affected_points):
@@ -206,7 +228,7 @@ def local_certificate_beard(
                     "stable_giant_without_unaffected_stabilizer_certificate", T,
                     None, preimage.order, H2, None, gate, tuple(layers),
                     False,
-                    "the beard stabilized, but the exact Unaffected Stabilizer theorem gate is unavailable; fullness is not claimed",
+                    "the beard stabilized, but the exact Unaffected Stabilizer theorem gate is unavailable; fullness is not claimed", resource_envelope,
                 )
             S = stable.subgroup
             for g in S.original_generators:
@@ -218,7 +240,7 @@ def local_certificate_beard(
             return LocalCertificateBeard(
                 "certified_full_by_stable_beard", T, True,
                 preimage.order, H2, S, gate, tuple(layers), theorem_scale,
-                "the beard stabilized with a giant quotient; the pointwise stabilizer of every unaffected point still has giant image and was independently verified to preserve the entire string",
+                "the beard stabilized with a giant quotient; the pointwise stabilizer of every unaffected point still has giant image and was independently verified to preserve the entire string", resource_envelope,
             )
 
         H = H2
@@ -226,5 +248,5 @@ def local_certificate_beard(
     return LocalCertificateBeard(
         "undetermined_beard_layer_limit", T, None, preimage.order, H,
         None, gate, tuple(layers), False,
-        "affected set kept growing beyond max_layers; fail closed",
+        "affected set kept growing beyond max_layers; fail closed", resource_envelope,
     )
