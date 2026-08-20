@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 from itertools import combinations
 from typing import Tuple
 
@@ -93,7 +94,7 @@ def _decode_johnson_automorphism(v: int, k: int, p_std):
     return signed
 
 
-def lift_primitive_johnson_to_ground_relation(
+def _lift_primitive_johnson_to_ground_relation_uncached(
     group,
     source_values,
     target_values,
@@ -193,3 +194,91 @@ def lift_primitive_johnson_to_ground_relation(
         recognition_nodes,
         recognition_mode + " certified Johnson coordinates; the colored k-subset relation is transported to a strictly smaller ground and every ambient generator was exactly decoded/re-induced",
     )
+
+
+@lru_cache(maxsize=64)
+def _memoized_primitive_johnson_to_ground_relation(
+    group,
+    source_values,
+    target_values,
+    max_recognition_nodes,
+    max_robust_orbital_degree,
+):
+    """Content-keyed immutable proof artifact; every resource gate is in the key."""
+    return _lift_primitive_johnson_to_ground_relation_uncached(
+        group,
+        source_values,
+        target_values,
+        max_recognition_nodes=max_recognition_nodes,
+        max_robust_orbital_degree=max_robust_orbital_degree,
+    )
+
+
+def _memo_stable_color(value):
+    """Admit only recursively immutable built-in color values to a proof key."""
+    if value is None or isinstance(value, (bool, int, str, bytes)):
+        return True
+    if isinstance(value, tuple):
+        return all(_memo_stable_color(x) for x in value)
+    if isinstance(value, frozenset):
+        return all(_memo_stable_color(x) for x in value)
+    return False
+
+
+def lift_primitive_johnson_to_ground_relation(
+    group,
+    source_values,
+    target_values,
+    *,
+    max_recognition_nodes: int = 500000,
+    max_robust_orbital_degree: int = 128,
+) -> JohnsonGroundRelationalLift:
+    """Return a replay-stable Johnson-lift proof for the complete exact identity.
+
+    rev209, rev214, and the signed profile terminal can request the identical
+    Johnson recognition/lift while traversing one candidate dispatcher.  The
+    frozen group chain, exact source and target strings, and both resource gates
+    form the memo identity.  A bounded LRU stores the immutable result, including
+    fail-closed results; a hit never upgrades an unresolved proof to exact and
+    preserves the original recognition-node charge conservatively.
+
+    Replay-stable recursive built-in immutability and hashability are only
+    optimization gates.  Other color values bypass memoization and execute the
+    same exact implementation.
+    """
+    source = tuple(source_values)
+    target = tuple(target_values)
+    if not all(_memo_stable_color(value) for value in source + target):
+        return _lift_primitive_johnson_to_ground_relation_uncached(
+            group,
+            source,
+            target,
+            max_recognition_nodes=max_recognition_nodes,
+            max_robust_orbital_degree=max_robust_orbital_degree,
+        )
+    proof_identity = (
+        group,
+        source,
+        target,
+        max_recognition_nodes,
+        max_robust_orbital_degree,
+    )
+    try:
+        hash(proof_identity)
+    except TypeError:
+        return _lift_primitive_johnson_to_ground_relation_uncached(
+            group,
+            source,
+            target,
+            max_recognition_nodes=max_recognition_nodes,
+            max_robust_orbital_degree=max_robust_orbital_degree,
+        )
+    return _memoized_primitive_johnson_to_ground_relation(*proof_identity)
+
+
+lift_primitive_johnson_to_ground_relation.cache_clear = (
+    _memoized_primitive_johnson_to_ground_relation.cache_clear
+)
+lift_primitive_johnson_to_ground_relation.cache_info = (
+    _memoized_primitive_johnson_to_ground_relation.cache_info
+)
