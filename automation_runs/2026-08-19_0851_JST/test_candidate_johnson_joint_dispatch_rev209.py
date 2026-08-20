@@ -32,11 +32,10 @@ def _anchor_string(v, k, anchors):
     return tuple(tuple(int(a in subset) for a in range(anchors)) for subset in subsets)
 
 
-def test_rev209_joint_relation_dispatch_closes_j10_4_above_old_ground_cap():
-    v, k = 10, 4
+def _assert_old_cap_new_exact(v, k, anchors, expected_order):
     group = _induced_symmetric_johnson_group(v, k)
     m = group.degree
-    source = _anchor_string(v, k, 8)
+    source = _anchor_string(v, k, anchors)
     candidate = RightCoset(group, identity(m))
 
     old = candidate_v2(
@@ -60,7 +59,20 @@ def test_rev209_joint_relation_dispatch_closes_j10_4_above_old_ground_cap():
     )
     assert new.exact, new.reason
     assert new.coset is not None
-    # Eight individually encoded ground anchors leave exactly the swap of the
-    # two unanchored ground points, so the full k-subset string stabilizer is S2.
-    assert new.coset.subgroup.order == 2
+    assert new.coset.subgroup.order == expected_order
+    return new
+
+
+def test_rev209_joint_relation_dispatch_closes_j10_4_above_old_ground_cap():
+    new = _assert_old_cap_new_exact(10, 4, 8, 2)
     assert "joint_relation" in new.status
+
+
+def test_rev209_adaptive_relation_dispatch_closes_j9_4_when_two_relation_budget_does_not_fit():
+    # For J(9,4), C(9,2)+C(9,3)=120 exceeds 0.9*C(9,4)=113, so rev183's
+    # two-relation selector cannot fire.  The rev182 adaptive single-relation
+    # fallback can still select an informative strictly smaller relation and
+    # reduce the exact full-string candidate to the S2 on the two unanchored
+    # ground points.
+    new = _assert_old_cap_new_exact(9, 4, 7, 2)
+    assert "relation_image_candidate" in new.status
