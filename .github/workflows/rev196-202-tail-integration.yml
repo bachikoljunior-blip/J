@@ -1,0 +1,35 @@
+name: rev196-202 W1R-H6 tail integration
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/**'
+      - '.github/workflows/rev196-202-tail-integration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-h6-tail:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
+      - name: Validate structural accounting through current bipartite transport tail
+        run: >-
+          python -m pytest -q
+          test_quasipoly_structural_recurrence_rev196.py
+          test_upcc_subconstituent_full_string_si_rev198.py
+          test_bipartite_split_or_johnson_gate_rev199.py
+          test_bipartite_twin_split_progress_rev200.py
+          test_bipartite_twin_quotient_refinement_rev201.py
+          test_bipartite_twin_cell_transport_coset_rev202.py
