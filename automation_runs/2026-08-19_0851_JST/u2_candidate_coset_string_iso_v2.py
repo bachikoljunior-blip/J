@@ -80,7 +80,7 @@ def _translate_subgroup_si_back_to_candidate(inner, representative, *, degree):
     )
 
 
-def candidate_coset_string_isomorphism_u2(
+def _candidate_coset_string_isomorphism_u2(
     candidate: RightCoset,
     source_values,
     target_values,
@@ -256,3 +256,35 @@ def candidate_coset_string_isomorphism_u2(
         coset=RightCoset(H, r), exact=True, children=tuple(children),
         reason="all candidate-subgroup invariant orbit children were solved with S1v2 and exactly lifted; the returned coset is precisely the fiber string intersection",
     )
+
+
+def candidate_coset_string_isomorphism_u2(
+    candidate: RightCoset,
+    source_values,
+    target_values,
+    *,
+    root_n: int,
+    polylog_power: int = 2,
+    max_explicit_degree: int = 8,
+    group_order_poly_power: int = 2,
+    max_group_order: int = 256,
+    max_depth: int = 64,
+    proof_identity=None,
+) -> ProofCarryingCoset:
+    """Run u2 and attach an optional execution identity before returning."""
+    proof = _candidate_coset_string_isomorphism_u2(
+        candidate,
+        source_values,
+        target_values,
+        root_n=root_n,
+        polylog_power=polylog_power,
+        max_explicit_degree=max_explicit_degree,
+        group_order_poly_power=group_order_poly_power,
+        max_group_order=max_group_order,
+        max_depth=max_depth,
+    )
+    if proof_identity is None:
+        return proof
+    if proof.proof_identity is not None and proof.proof_identity != proof_identity:
+        raise ValueError("candidate proof already carries a different execution identity")
+    return replace(proof, proof_identity=proof_identity)

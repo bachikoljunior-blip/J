@@ -13,7 +13,18 @@ from permutation_group_schreier import (
     schreier_stabilizer_chain,
     validate_perm,
 )
+from proof_dag_accounting_v1 import build_candidate_si_proof_identity
 from u2_candidate_coset_string_iso_v2 import candidate_coset_string_isomorphism_u2
+
+
+# Instrumentation may wrap the callable, so execution identity is an explicit,
+# versioned algorithm label rather than a Python function object's incidental
+# module/qualname.  The rev207 entry point advances both globals together.
+candidate_si_dispatcher_identity = (
+    "u2_candidate_coset_string_iso_v2",
+    "candidate_coset_string_isomorphism_u2",
+    2,
+)
 
 if TYPE_CHECKING:
     from proof_carrying_si_v1 import ProofCarryingCoset
@@ -247,12 +258,23 @@ def intersect_parent_bipartite_string_through_right_alignment(
     aux_group = schreier_stabilizer_chain(tuple(aux_gens) or (identity(auxiliary_degree),))
     rinv = inverse(aux_rep)
     shifted_source = tuple(source[rinv[j]] for j in range(auxiliary_degree))
-    image_si = candidate_coset_string_isomorphism_u2(
-        RightCoset(aux_group, identity(auxiliary_degree)),
+    image_candidate = RightCoset(aux_group, identity(auxiliary_degree))
+    image_root = max(int(root_n or n), auxiliary_degree)
+    image_identity = build_candidate_si_proof_identity(
+        image_candidate,
         shifted_source,
         target,
-        root_n=max(int(root_n or n), auxiliary_degree),
+        root_n=image_root,
+        dispatcher_identity=candidate_si_dispatcher_identity,
         max_group_order=max_image_group_order,
+    )
+    image_si = candidate_coset_string_isomorphism_u2(
+        image_candidate,
+        shifted_source,
+        target,
+        root_n=image_root,
+        max_group_order=max_image_group_order,
+        proof_identity=image_identity,
     )
     if not image_si.exact:
         return BipartiteParentActionCosetIntersection(

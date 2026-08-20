@@ -1,0 +1,38 @@
+name: rev220 proof DAG accounting smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_parent_action_coset_intersection_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_parent_polynomial_lift_accounting_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_parent_polynomial_lift_accounting_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v7.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_proof_dag_accounting_rev220.py'
+      - '.github/workflows/rev220-proof-dag-accounting-smoke.yml'
+      - '.github/workflows/agi-gi-rev-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev220-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: >-
+          python -m pytest -q
+          test_proof_dag_accounting_rev220.py
+          test_bipartite_parent_polynomial_lift_accounting_rev207.py
+          test_execution_linked_polynomial_lift_proof_rev218.py
+          test_nested_s1_proof_identity_rev219.py
