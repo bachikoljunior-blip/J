@@ -27,6 +27,7 @@ class ProofCarryingCoset:
     accounting: RecurrenceAccountingNode
     permutation_candidates_checked: int
     reason: str
+    proof_identity: object | None = None
 
 
 def _log2_factorial(k: int) -> float:

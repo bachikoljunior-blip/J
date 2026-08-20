@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from math import factorial, log2
 
 from coset_stabilizer_primitives import RightCoset
@@ -18,9 +19,10 @@ from s1_structural_classifier_v1 import classify_s1_structure
 from signed_johnson_ground_profile_partition_si_v1 import (
     signed_johnson_ground_profile_partition_si,
 )
+from s1_proof_identity_v1 import build_s1_proof_identity
 
 
-def s1_string_isomorphism_v4(
+def _s1_string_isomorphism_v4(
     group,
     source_values,
     target_values,
@@ -226,6 +228,64 @@ def s1_string_isomorphism_v4(
         max_partition_states=min(max_partition_states, max(1, root_n ** 2)),
         max_recognition_nodes=max_recognition_nodes,
     )
+
+
+def s1_string_isomorphism_v4(
+    group,
+    source_values,
+    target_values,
+    *,
+    root_n: int | None = None,
+    polylog_power: int = 2,
+    max_explicit_degree: int = 8,
+    group_order_poly_power: int = 2,
+    max_group_order: int = 4096,
+    max_partition_states: int = 4096,
+    max_recognition_nodes: int = 500000,
+    max_depth: int = 64,
+    _depth: int = 0,
+):
+    """Attach a complete immutable identity to every nested S1 v4 proof.
+
+    The implementation remains the exact rev213 dispatcher.  This wrapper makes
+    its mathematical and resource identity execution-linked: recursive calls pass
+    through the same wrapper, so each nested child freezes its own induced group,
+    oriented local strings, original root, depth, dispatcher version and every
+    resource gate before the result is returned.
+    """
+    source = tuple(source_values)
+    target = tuple(target_values)
+    n = int(group.degree)
+    effective_root = n if root_n is None else int(root_n)
+    identity = build_s1_proof_identity(
+        group,
+        source,
+        target,
+        root_n=effective_root,
+        recursion_depth=int(_depth),
+        polylog_power=polylog_power,
+        max_explicit_degree=max_explicit_degree,
+        group_order_poly_power=group_order_poly_power,
+        max_group_order=max_group_order,
+        max_partition_states=max_partition_states,
+        max_recognition_nodes=max_recognition_nodes,
+        max_depth=max_depth,
+    )
+    proof = _s1_string_isomorphism_v4(
+        group,
+        source,
+        target,
+        root_n=effective_root,
+        polylog_power=polylog_power,
+        max_explicit_degree=max_explicit_degree,
+        group_order_poly_power=group_order_poly_power,
+        max_group_order=max_group_order,
+        max_partition_states=max_partition_states,
+        max_recognition_nodes=max_recognition_nodes,
+        max_depth=max_depth,
+        _depth=_depth,
+    )
+    return replace(proof, proof_identity=identity)
 
 
 __all__ = ["s1_string_isomorphism_v4"]

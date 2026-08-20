@@ -137,6 +137,7 @@ jobs:
           test_coherent_pair_refinement.py
           test_shared_paired_action_candidate_artifact_rev217.py
           test_execution_linked_polynomial_lift_proof_rev218.py
+          test_nested_s1_proof_identity_rev219.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
