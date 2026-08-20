@@ -6,6 +6,8 @@ from primitive_giant_full_action_string_iso_v1 import (
     _parity,
     primitive_giant_full_action_string_isomorphism_terminal,
 )
+from s1_string_isomorphism_v2 import s1_string_isomorphism_v2
+from u2_candidate_coset_string_iso_v2 import candidate_coset_string_isomorphism_u2 as candidate_v2
 from u2_candidate_coset_string_iso_v3 import candidate_coset_string_isomorphism_u2
 
 
@@ -97,3 +99,43 @@ def test_candidate_v3_dispatches_large_literal_a9_before_v2_unresolved_giant_pat
     assert _maps(source, target, got.coset.representative)
     assert got.accounting.cost_certified
     assert got.accounting.terminal_certified
+
+
+def test_s1_v2_dispatches_literal_s9_without_explicit_degree_or_group_enumeration():
+    n = 9
+    G = _symmetric(n)
+    source = (0, 0, 0, 0, 1, 1, 1, 1, 1)
+    target = (1, 0, 1, 0, 1, 0, 1, 0, 1)
+    got = s1_string_isomorphism_v2(
+        G,
+        source,
+        target,
+        root_n=n,
+        max_explicit_degree=8,
+        max_group_order=8,
+    )
+    assert got.exact and got.coset is not None
+    assert got.status == "exact_literal_symmetric_string_coset"
+    assert _maps(source, target, got.coset.representative)
+
+
+def test_existing_candidate_v2_intransitive_orbit_path_now_closes_s5_child_via_s1_v2():
+    n = 10
+    t = _swap(n, 0, 1)
+    c = list(range(n))
+    c[:5] = [1, 2, 3, 4, 0]
+    G = schreier_stabilizer_chain((t, tuple(c)))
+    assert G.order == factorial(5)
+    source = (0, 0, 1, 1, 1, "x5", "x6", "x7", "x8", "x9")
+    target = (1, 0, 1, 0, 1, "x5", "x6", "x7", "x8", "x9")
+    got = candidate_v2(
+        RightCoset(G, identity(n)),
+        source,
+        target,
+        root_n=n,
+        max_explicit_degree=4,
+        max_group_order=8,
+    )
+    assert got.exact and got.coset is not None
+    assert _maps(source, target, got.coset.representative)
+    assert got.accounting.cost_certified
