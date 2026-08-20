@@ -1,0 +1,38 @@
+{
+  "run_id": "chatgpt-session-immediate-20260820T085307+0900-06aca83f",
+  "execution_started_at_jst": "2026-08-20T08:53:07+09:00",
+  "session_starting_main_sha": "06aca83ffef7e644ae63421514cfab8c2fe0c2ea",
+  "implementation_base_main_sha": "43a16b622129308661fc20ca40f447ecb1f87d62",
+  "starting_agi_gi_rev": 199,
+  "current_agi_gi_rev": 202,
+  "agi_status": "NOT_AGI",
+  "root_problem_status": "UNRESOLVED",
+  "predicted_problem_count": 512,
+  "effective_problem_count": 512,
+  "count_overrun_rewrite_triggered": false,
+  "selected_parent": "W1R-H6 corrected general UPCC Bipartite Split-or-Johnson recursion",
+  "selected_leaf": "H6-R3b1 uniform-neighborhood Johnson/containment-relation provenance",
+  "attempt_result": "LOCAL_CHILD_SOLVED_PARENT_UNRESOLVED",
+  "solved_claim": "from a twin-free nontrivial common-degree left cell, derive the exact complemented uniform hypergraph and emit either an explicit complete-family Johnson embedding or the theorem-arity containment-count relation with paired necessary invariants",
+  "not_claimed": [
+    "relation-twin recursive restriction",
+    "Design/coherent descent",
+    "ambient ground transporter",
+    "full-string isomorphism set",
+    "global recurrence closure",
+    "AGI"
+  ],
+  "next_unresolved_leaf": "H6-R3b2 exact relation-twin partition and paired proper restriction",
+  "unmerged_branches_counted_as_progress": false,
+  "verification": {
+    "command": "python -m pytest -q test_uniform_neighborhood_relation_provenance_rev202.py",
+    "result": "6 passed",
+    "exhaustive_family": "all 4! x 4! = 576 left/right relabelings of the cycle relation regression"
+  },
+  "schedule_control": {
+    "requested_title": "AGIルート問題実行",
+    "state": "UNAVAILABLE_IN_EXPOSED_SESSION_CONTROL",
+    "treated_as_active": false,
+    "repository_automation_treated_as_substitute": false
+  }
+}
