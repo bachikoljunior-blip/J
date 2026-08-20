@@ -7,6 +7,11 @@ from affected_segment_quotient_resource_v1 import (
     AffectedSegmentQuotientResourceEnvelope,
     affected_segment_quotient_resource_envelope,
 )
+from affected_segment_reassembly_resource_v1 import (
+    AffectedSegmentReassemblyExecutionCharge,
+    AffectedSegmentReassemblyResourceEnvelope,
+    affected_segment_reassembly_resource_envelope,
+)
 from block_action_preimage_coset_v1 import (
     lift_prepared_block_action_preimage,
     prepare_block_action_preimage,
@@ -41,6 +46,8 @@ class QuotientFactoredPartialStringIntersection:
     child_search_nodes: Tuple[int, ...]
     reason: str
     resource_envelope: Optional[AffectedSegmentQuotientResourceEnvelope] = None
+    reassembly_resource_envelope: Optional[AffectedSegmentReassemblyResourceEnvelope] = None
+    reassembly_execution_charge: Optional[AffectedSegmentReassemblyExecutionCharge] = None
 
 
 class _LeafLimit(Exception):
@@ -71,6 +78,7 @@ def quotient_factored_partial_string_intersection(
     max_child_nodes=200000,
     giant_certificate=None,
     max_quotient_schreier_work=None,
+    max_reassembly_schreier_work=None,
 ) -> QuotientFactoredPartialStringIntersection:
     """Intersect a giant-action group with an affected string segment by double recursion.
 
@@ -134,6 +142,27 @@ def quotient_factored_partial_string_intersection(
                 envelope,
             )
 
+    reassembly_envelope = None
+    if max_reassembly_schreier_work is not None:
+        if envelope is None:
+            envelope = affected_segment_quotient_resource_envelope(
+                group, t, giant.image_order,
+                max_quotient_leaves=max_quotient_leaves,
+                max_child_nodes=max_child_nodes,
+                max_work=10**300,
+            )
+        reassembly_envelope = affected_segment_reassembly_resource_envelope(
+            group, t, envelope.quotient_leaf_upper_bound,
+            envelope.quotient_node_upper_bound, max_reassembly_schreier_work,
+        )
+        if not reassembly_envelope.admitted:
+            return QuotientFactoredPartialStringIntersection(
+                "undetermined_reassembly_schreier_work_cap", None, t,
+                giant.image_order, 0, 0, 0, 0, 0, False, (),
+                "complete parent-coset reassembly bound exceeded before quotient execution; fail closed",
+                envelope, reassembly_envelope,
+            )
+
     prepared = prepare_block_action_preimage(group, blocks)
     image = prepared.image
     eq = identity(t)
@@ -144,10 +173,14 @@ def quotient_factored_partial_string_intersection(
     largest_kernel_child = 0
     all_search_nodes = []
     all_leaf_orbits = []
+    reassembly_nodes = 0
+    reassembly_generator_inputs = 0
+    reassembly_sifts = 0
 
     def solve(qcoset: RightCoset):
         nonlocal quotient_nodes, quotient_leaves, kernel_leaf_children
         nonlocal largest_kernel_child
+        nonlocal reassembly_nodes, reassembly_generator_inputs, reassembly_sifts
         quotient_nodes += 1
         A = qcoset.subgroup
         gens = A.original_generators or (identity(t),)
@@ -205,6 +238,11 @@ def quotient_factored_partial_string_intersection(
         rebuilt = schreier_stabilizer_chain(
             rebuild_gens or (identity(group.degree),)
         )
+        reassembly_nodes += 1
+        reassembly_generator_inputs += len(rebuild_gens)
+        reassembly_sifts += sum(
+            1 + len(child.subgroup.original_generators) for child in children
+        )
         if rebuilt.order != expected_size:
             raise AssertionError(
                 "quotient branch reassembly cardinality mismatch: union is not the claimed exact coset"
@@ -244,12 +282,29 @@ def quotient_factored_partial_string_intersection(
         and set(active) <= affected
         and all(set(O) <= affected and len(O) <= child_bound for O in all_leaf_orbits)
     )
+    reassembly_charge = AffectedSegmentReassemblyExecutionCharge(
+        reassembly_nodes,
+        reassembly_generator_inputs,
+        reassembly_sifts,
+        bool(
+            reassembly_envelope is None or (
+                reassembly_nodes <= reassembly_envelope.internal_node_upper_bound
+                and reassembly_generator_inputs <= reassembly_envelope.generator_input_upper_bound
+                and reassembly_sifts <= reassembly_envelope.containment_sift_upper_bound
+            )
+        ),
+    )
+    if not reassembly_charge.envelope_verified:
+        raise AssertionError("actual parent-coset reassembly charge exceeded its preflight envelope")
     if result is None:
         return QuotientFactoredPartialStringIntersection(
             "empty_intersection", None, t, image.order, quotient_nodes,
             quotient_leaves, kernel_leaf_children, largest_kernel_child,
             child_bound, recurrence_verified, tuple(all_search_nodes),
             "every quotient point-image branch was eliminated by an exact affected kernel-orbit child",
+            envelope,
+            reassembly_envelope,
+            reassembly_charge,
         )
     return QuotientFactoredPartialStringIntersection(
         "exact_quotient_factored_partial_string_intersection",
@@ -258,4 +313,6 @@ def quotient_factored_partial_string_intersection(
         recurrence_verified, tuple(all_search_nodes),
         "quotient point-image recursion, singleton paired-Schreier lifts, affected kernel child SI, and exact coset reassembly all completed",
         envelope,
+        reassembly_envelope,
+        reassembly_charge,
     )
