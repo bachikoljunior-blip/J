@@ -128,6 +128,8 @@ jobs:
           test_literal_giant_candidate_si_rev208.py
           test_johnson_log_candidate_bridge_rev209.py
           test_canonical_imprimitive_family_candidate_si_rev210.py
+          test_signed_johnson_log_codegree_image_rev211.py
+          test_johnson_profile_candidate_bridge_rev212.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
