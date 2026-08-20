@@ -1,0 +1,28 @@
+name: rev210 UPCC log Design smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/signed_johnson_log_certificate_upcc_si_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v4.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_log_relation_upcc_bridge_rev210.py'
+      - '.github/workflows/rev210-upcc-log-design-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev210-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: python -m pytest -q test_log_relation_upcc_bridge_rev210.py test_johnson_log_candidate_bridge_rev209.py test_upcc_subconstituent_full_string_si_rev198.py
