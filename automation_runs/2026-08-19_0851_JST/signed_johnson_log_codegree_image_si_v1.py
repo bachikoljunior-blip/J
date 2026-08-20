@@ -4,15 +4,15 @@ from collections import Counter
 from dataclasses import replace
 from math import log2
 
-from candidate_full_accept_terminal_v1 import exact_if_entire_candidate_maps_string
 from canonical_partition_guided_string_iso_v1 import _all_value_preserving_maps
 from coset_stabilizer_primitives import RightCoset
 from johnson_ground_relational_lift_v1 import lift_primitive_johnson_to_ground_relation
-from paired_action_coset_preimage_v1 import paired_action_coset_preimage
+from paired_action_full_candidate_filter_v1 import (
+    build_paired_action_full_candidate_artifact,
+)
 from permutation_group_schreier import identity, schreier_stabilizer_chain
 from proof_carrying_si_v1 import ProofCarryingCoset
 from quasipoly_recurrence_accounting_v1 import RecurrenceAccountingNode
-from quasipoly_recurrence_accounting_v4 import validate_quasipoly_recurrence_tree_v4
 from recursive_point_image_coset_intersection import right_coset_intersection_recursive
 from signed_johnson_complement_safe_image_si_v1 import (
     complement_safe_t_subset_image_generators,
@@ -305,8 +305,31 @@ def signed_johnson_log_codegree_image_candidate_si(
     if intersection.status != "exact_intersection_coset" or intersection.coset is None:
         raise AssertionError("unexpected exact pair-image intersection status")
 
-    preimage = paired_action_coset_preimage(group, image_gens, intersection.coset)
-    if preimage.status != "exact_paired_action_coset_preimage" or preimage.coset is None:
+    artifact = build_paired_action_full_candidate_artifact(
+        group,
+        image_gens,
+        intersection.coset,
+        source,
+        target,
+        root_n=root_n,
+        candidate_dispatch=candidate_dispatch,
+        candidate_parameters=(
+            ("polylog_power", polylog_power),
+            ("max_explicit_degree", max_explicit_degree),
+            ("group_order_poly_power", candidate_group_order_poly_power),
+            ("max_group_order", max_candidate_group_order),
+            ("max_depth", max_depth),
+            ("max_johnson_test_sets", max_johnson_test_sets),
+            ("max_partition_states", max_partition_states),
+            ("max_recognition_nodes", max_recognition_nodes),
+            ("max_johnson_nodes", max_johnson_nodes),
+            ("family_poly_power", family_poly_power),
+            ("max_family_systems", max_family_systems),
+            ("max_family_quotient_order", max_family_quotient_order),
+        ),
+    )
+    preimage = artifact.preimage
+    if artifact.status.startswith("undetermined_paired_action_preimage_"):
         return _unresolved(
             "undetermined_log_codegree_pair_preimage_" + preimage.status,
             root_n=root_n,
@@ -315,51 +338,22 @@ def signed_johnson_log_codegree_image_candidate_si(
             checked=test_count + intersection.search_nodes,
         )
 
-    # A pair image can be informative as a relation yet invariant under the
-    # supplied ambient subgroup.  Recursing on that unchanged candidate would be
-    # a same-domain self-loop.  Only the cheap whole-candidate terminal may close
-    # such a case; otherwise fail closed.  A proper preimage restriction uses the
-    # established recursive dispatcher.
-    nonrestricting = (
-        preimage.coset.subgroup.order == group.order
-        and group.contains(preimage.coset.representative)
-    )
-    if nonrestricting:
-        filtered = exact_if_entire_candidate_maps_string(
-            preimage.coset,
-            source,
-            target,
+    filtered = artifact.candidate
+    if artifact.status == "undetermined_paired_action_nonrestricting_candidate":
+        return _unresolved(
+            "undetermined_log_codegree_pair_image_nonrestricting",
             root_n=root_n,
+            n=n,
+            coset=preimage.coset,
+            reason=artifact.reason,
+            children=() if filtered is None else (filtered,),
+            checked=test_count
+            + intersection.search_nodes
+            + (0 if filtered is None else filtered.permutation_candidates_checked),
         )
-        if not filtered.exact:
-            return _unresolved(
-                "undetermined_log_codegree_pair_image_nonrestricting",
-                root_n=root_n,
-                n=n,
-                coset=preimage.coset,
-                reason="exact pair-image preimage equals the ambient subgroup and the full string is not constant on that candidate; refusing a same-domain recursion loop",
-                checked=test_count + intersection.search_nodes,
-            )
-    else:
-        filtered = candidate_dispatch(
-            preimage.coset,
-            source,
-            target,
-            root_n=root_n,
-            polylog_power=polylog_power,
-            max_explicit_degree=max_explicit_degree,
-            group_order_poly_power=candidate_group_order_poly_power,
-            max_group_order=max_candidate_group_order,
-            max_depth=max_depth,
-            max_johnson_test_sets=max_johnson_test_sets,
-            max_partition_states=max_partition_states,
-            max_recognition_nodes=max_recognition_nodes,
-            max_johnson_nodes=max_johnson_nodes,
-            family_poly_power=family_poly_power,
-            max_family_systems=max_family_systems,
-            max_family_quotient_order=max_family_quotient_order,
-        )
-    if not filtered.exact:
+    if artifact.status.startswith("undetermined_paired_action_full_candidate_"):
+        if filtered is None:
+            raise AssertionError("full-candidate failure omitted its child proof")
         return _unresolved(
             "undetermined_log_codegree_full_candidate_" + filtered.status,
             root_n=root_n,
@@ -370,23 +364,24 @@ def signed_johnson_log_codegree_image_candidate_si(
             checked=test_count + intersection.search_nodes + filtered.permutation_candidates_checked,
         )
 
-    filtered_check = validate_quasipoly_recurrence_tree_v4(filtered.accounting)
-    if not filtered_check.certified:
+    if artifact.status.startswith("undetermined_paired_action_candidate_accounting_"):
+        if filtered is None:
+            raise AssertionError("accounting failure omitted its exact child proof")
         return _unresolved(
-            "undetermined_log_codegree_full_accounting_" + filtered_check.status,
+            "undetermined_log_codegree_full_accounting_" + artifact.recurrence_status,
             root_n=root_n,
             n=n,
             coset=preimage.coset,
-            reason="full-string candidate is exact but its recurrence certificate did not validate: " + filtered_check.reason,
+            reason=artifact.reason,
             children=(filtered,),
             checked=test_count + intersection.search_nodes + filtered.permutation_candidates_checked,
         )
+    if artifact.status != "exact_paired_action_full_candidate" or filtered is None:
+        raise AssertionError("unexpected shared paired-action/full-candidate artifact status")
 
     extra = (
         image_bound
-        + log2(max(1, preimage.sift_levels + preimage.kernel_order.bit_length() + image.order.bit_length()))
-        + 32.0 * log2(max(2, n))
-        + 32.0
+        + artifact.preimage_log2_cost_bound
     )
     accounting = replace(
         filtered.accounting,

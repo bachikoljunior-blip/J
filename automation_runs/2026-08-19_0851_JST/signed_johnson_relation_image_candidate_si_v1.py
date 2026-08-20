@@ -3,6 +3,9 @@ from __future__ import annotations
 from dataclasses import replace
 from math import log2
 
+from paired_action_full_candidate_filter_v1 import (
+    build_paired_action_full_candidate_artifact,
+)
 from proof_carrying_si_v1 import ProofCarryingCoset
 from quasipoly_recurrence_accounting_v1 import RecurrenceAccountingNode
 from signed_johnson_complement_safe_image_si_v1 import (
@@ -101,18 +104,30 @@ def signed_johnson_relation_image_candidate_string_isomorphism(
     if relation.coset is None:
         return relation
 
-    candidate = candidate_coset_string_isomorphism_u2(
-        relation.coset,
+    if not relation.image_generators or relation.image_coset is None:
+        raise AssertionError("relation filter omitted its certified paired-action proof identity")
+    artifact = build_paired_action_full_candidate_artifact(
+        group,
+        relation.image_generators,
+        relation.image_coset,
         source,
         target,
         root_n=root_n,
-        polylog_power=polylog_power,
-        max_explicit_degree=max_explicit_degree,
-        group_order_poly_power=candidate_group_order_poly_power,
-        max_group_order=max_candidate_group_order,
-        max_depth=max_depth,
+        candidate_dispatch=candidate_coset_string_isomorphism_u2,
+        candidate_parameters=(
+            ("polylog_power", polylog_power),
+            ("max_explicit_degree", max_explicit_degree),
+            ("group_order_poly_power", candidate_group_order_poly_power),
+            ("max_group_order", max_candidate_group_order),
+            ("max_depth", max_depth),
+        ),
     )
-    if candidate.exact:
+    if artifact.preimage.coset != relation.coset:
+        raise AssertionError("replayed paired-action preimage differs from the relation filter")
+    candidate = artifact.candidate
+    if artifact.status == "exact_paired_action_full_candidate":
+        if candidate is None:
+            raise AssertionError("exact paired-action artifact omitted its full-string child")
         return _absorb_filter_cost(candidate, relation)
 
     accounting = RecurrenceAccountingNode(
@@ -130,7 +145,7 @@ def signed_johnson_relation_image_candidate_string_isomorphism(
         ),
     )
     return ProofCarryingCoset(
-        "undetermined_w1r_after_relation_image_" + candidate.status,
+        "undetermined_w1r_after_relation_image_" + artifact.status,
         relation.coset,
         "unresolved_signed_johnson_relation_candidate",
         root_n,
@@ -140,11 +155,13 @@ def signed_johnson_relation_image_candidate_string_isomorphism(
         False,
         0.0,
         False,
-        (relation, candidate),
+        (relation,) if candidate is None else (relation, candidate),
         accounting,
-        relation.permutation_candidates_checked + candidate.permutation_candidates_checked,
+        relation.permutation_candidates_checked
+        + (0 if candidate is None else candidate.permutation_candidates_checked),
         (
             "rev180/rev179 reduced the ambient search to an exact relation-preserving candidate coset; "
-            "existing U2/S1/V2 candidate recursion did not yet certify the full string intersection: " + candidate.reason
+            "the shared paired-preimage/full-candidate artifact did not certify the full string intersection: "
+            + artifact.reason
         ),
     )

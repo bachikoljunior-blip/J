@@ -7,7 +7,10 @@ from math import comb, floor, lgamma, log, log2
 from canonical_partition_guided_string_iso_v1 import _all_value_preserving_maps
 from coset_stabilizer_primitives import RightCoset
 from johnson_ground_relational_lift_v1 import lift_primitive_johnson_to_ground_relation
-from paired_action_coset_preimage_v1 import paired_action_coset_preimage
+from paired_action_full_candidate_filter_v1 import (
+    build_paired_action_full_candidate_artifact,
+    build_paired_action_preimage_artifact,
+)
 from permutation_group_schreier import identity, schreier_stabilizer_chain
 from proof_carrying_si_v1 import ProofCarryingCoset
 from quasipoly_recurrence_accounting_v1 import RecurrenceAccountingNode
@@ -42,6 +45,8 @@ class SignedJohnsonJointRelationProof(ProofCarryingCoset):
     preimage_filter_order: int = 0
     relation_ranks: tuple[int, ...] = ()
     image_search_nodes: int = 0
+    image_generators: tuple[tuple[int, ...], ...] = ()
+    image_coset: RightCoset | None = None
 
 
 def _young_log2(signatures):
@@ -216,6 +221,8 @@ def _proof(
     preimage_order=0,
     ranks=(),
     nodes=0,
+    image_generators=(),
+    image_coset=None,
 ):
     return SignedJohnsonJointRelationProof(
         status,
@@ -241,6 +248,8 @@ def _proof(
         preimage_filter_order=preimage_order,
         relation_ranks=tuple(ranks),
         image_search_nodes=nodes,
+        image_generators=tuple(tuple(q) for q in image_generators),
+        image_coset=image_coset,
     )
 
 
@@ -414,7 +423,9 @@ def signed_johnson_joint_relation_image_filter(
     if intersection.status != "exact_intersection_coset" or intersection.coset is None:
         raise AssertionError("unexpected exact joint image intersection status")
 
-    preimage = paired_action_coset_preimage(group, joint_gens, intersection.coset)
+    preimage = build_paired_action_preimage_artifact(
+        group, joint_gens, intersection.coset
+    )
     if preimage.status != "exact_paired_action_coset_preimage" or preimage.coset is None:
         raise AssertionError("joint image coset failed exact paired-action preimage reconstruction")
 
@@ -442,6 +453,8 @@ def signed_johnson_joint_relation_image_filter(
         image_order=image.order, kernel_order=preimage.kernel_order,
         preimage_order=preimage.preimage_subgroup_order, ranks=ranks,
         nodes=intersection.search_nodes,
+        image_generators=joint_gens,
+        image_coset=intersection.coset,
     )
 
 
@@ -516,18 +529,30 @@ def signed_johnson_joint_relation_candidate_string_isomorphism(
     if relation.exact or relation.coset is None:
         return relation
 
-    candidate = candidate_coset_string_isomorphism_u2(
-        relation.coset,
+    if not relation.image_generators or relation.image_coset is None:
+        raise AssertionError("joint relation filter omitted its paired-action proof identity")
+    artifact = build_paired_action_full_candidate_artifact(
+        group,
+        relation.image_generators,
+        relation.image_coset,
         source,
         target,
         root_n=root_n,
-        polylog_power=polylog_power,
-        max_explicit_degree=max_explicit_degree,
-        group_order_poly_power=candidate_group_order_poly_power,
-        max_group_order=max_candidate_group_order,
-        max_depth=max_depth,
+        candidate_dispatch=candidate_coset_string_isomorphism_u2,
+        candidate_parameters=(
+            ("polylog_power", polylog_power),
+            ("max_explicit_degree", max_explicit_degree),
+            ("group_order_poly_power", candidate_group_order_poly_power),
+            ("max_group_order", max_candidate_group_order),
+            ("max_depth", max_depth),
+        ),
     )
-    if candidate.exact:
+    if artifact.preimage.coset != relation.coset:
+        raise AssertionError("replayed paired-action preimage differs from the joint filter")
+    candidate = artifact.candidate
+    if artifact.status == "exact_paired_action_full_candidate":
+        if candidate is None:
+            raise AssertionError("exact paired-action artifact omitted its full-string child")
         return _absorb_joint_filter_cost(candidate, relation)
 
     accounting = RecurrenceAccountingNode(
@@ -540,7 +565,7 @@ def signed_johnson_joint_relation_candidate_string_isomorphism(
         ),
     )
     return ProofCarryingCoset(
-        "undetermined_w1r_after_joint_relation_image_" + candidate.status,
+        "undetermined_w1r_after_joint_relation_image_" + artifact.status,
         relation.coset,
         "unresolved_signed_johnson_joint_relation_candidate",
         root_n,
@@ -550,11 +575,13 @@ def signed_johnson_joint_relation_candidate_string_isomorphism(
         False,
         0.0,
         False,
-        (relation, candidate),
+        (relation,) if candidate is None else (relation, candidate),
         accounting,
-        relation.permutation_candidates_checked + candidate.permutation_candidates_checked,
+        relation.permutation_candidates_checked
+        + (0 if candidate is None else candidate.permutation_candidates_checked),
         (
             "rev183 intersected several informative lower-arity relation constraints in one exact paired image and lifted the complete joint candidate; "
-            "existing candidate recursion did not yet close the full string: " + candidate.reason
+            "the shared paired-preimage/full-candidate artifact did not yet close the full string: "
+            + artifact.reason
         ),
     )
