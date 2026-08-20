@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from literal_giant_candidate_si_v1 import exact_literal_giant_string_isomorphism
 from proof_carrying_small_order_si_v1 import exact_small_order_group_string_isomorphism
 from s1_string_isomorphism_v1 import s1_string_isomorphism as s1_string_isomorphism_v1
 
@@ -16,12 +17,22 @@ def s1_string_isomorphism_v2(
     max_group_order: int = 4096,
     max_depth: int = 64,
 ):
-    """S1 with a proof-carrying small-order group terminal before structure.
+    """S1 with exact small-order and literal-natural-giant terminals first.
 
-    rev163's terminal was degree-gated because it enumerated S_m.  This wrapper
-    first asks a stronger question: is the represented group itself small enough
-    to enumerate exactly?  If yes, SI is solved directly regardless of degree.
-    Otherwise the existing structural S1 dispatcher is invoked unchanged.
+    The represented group may be easy for two independent reasons before the
+    heavier structural dispatcher is needed:
+
+    * its order is small enough for the existing exact enumeration terminal; or
+    * on its current natural domain it is literally S_n or A_n, in which case
+      rev208's exact color-class transporter reconstructs the whole SI coset in
+      polynomial time without a local-certificates recursion.
+
+    The second route is especially useful for invariant-orbit images of an
+    intransitive parent candidate: the parent need not itself be S_n/A_n.  Its
+    orbit image can be literal giant, and the existing exact orbit-action preimage
+    machinery then lifts that solved child, including the kernel, back into the
+    parent.  Every other group is delegated unchanged to the prior fail-closed S1
+    structural dispatcher.
     """
     source = tuple(source_values)
     target = tuple(target_values)
@@ -39,6 +50,15 @@ def s1_string_isomorphism_v2(
     )
     if small.exact:
         return small
+
+    literal_giant = exact_literal_giant_string_isomorphism(
+        group,
+        source,
+        target,
+        root_n=root_n,
+    )
+    if literal_giant.exact:
+        return literal_giant
 
     return s1_string_isomorphism_v1(
         group,
