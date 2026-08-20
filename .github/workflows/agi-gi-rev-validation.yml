@@ -131,6 +131,7 @@ jobs:
           test_signed_johnson_log_codegree_image_rev211.py
           test_johnson_profile_candidate_bridge_rev212.py
           test_bounded_ground_s1_profile_filter_rev213.py
+          test_general_log_pair_image_rev214.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update

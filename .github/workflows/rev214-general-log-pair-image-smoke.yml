@@ -1,0 +1,36 @@
+name: rev214 general log pair image smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/signed_johnson_log_codegree_image_si_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v6.py'
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_parent_polynomial_lift_accounting_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_general_log_pair_image_rev214.py'
+      - '.github/workflows/rev214-general-log-pair-image-smoke.yml'
+      - '.github/workflows/agi-gi-rev-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev214-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: >-
+          python -m pytest -q
+          test_general_log_pair_image_rev214.py
+          test_bounded_ground_s1_profile_filter_rev213.py
+          test_johnson_profile_candidate_bridge_rev212.py
+          test_signed_johnson_log_codegree_image_rev211.py
+          test_canonical_imprimitive_family_candidate_si_rev210.py

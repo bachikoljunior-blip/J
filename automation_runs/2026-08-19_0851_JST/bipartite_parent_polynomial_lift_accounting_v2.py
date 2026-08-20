@@ -24,7 +24,7 @@ def solve_and_certify_design_parent_polynomial_lift(
     target_right_colors=None,
     **kwargs,
 ):
-    """Replay-stable rev207 entry point through the rev213 S1/filter closure.
+    """Replay-stable rev207 entry point through the rev214 pair-image closure.
 
     rev207 intentionally reuses the same structural inputs twice: first for the
     complete rev206 parent union and then for proof-tree replay of every exact
@@ -51,6 +51,12 @@ def solve_and_certify_design_parent_polynomial_lift(
     reuses the bounded-ground Johnson terminal inside the explicit auxiliary
     window.  rev177 source stabilizers are conjugated to the target side required
     by the repository's right-coset convention, including odd-parity witnesses.
+
+    rev214 removes an unnecessary Johnson-only gate after logarithmic codegree
+    descent: every nonconstant pair relation with C(v,2)<C(v,k) is solved in its
+    exact induced action and lifted back by the same paired preimage machinery.
+    Homogeneous, nonshrinking, nonrestricting, and resource-capped images remain
+    fail closed, with nonrestricting candidates barred from same-domain recursion.
 
     The recurrence verifier remains v4: exact same-domain quotient fibers may
     terminate directly, while every genuinely recursive quotient fiber must expose
