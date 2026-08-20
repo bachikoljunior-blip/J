@@ -4,6 +4,7 @@ from math import factorial
 from coset_stabilizer_primitives import RightCoset
 from permutation_group_schreier import identity, inverse, schreier_stabilizer_chain
 from primitive_johnson_ground_terminal_v1 import primitive_johnson_ground_string_isomorphism_terminal
+from s1_string_isomorphism_v2 import s1_string_isomorphism_v2
 from u2_candidate_coset_string_iso_v2 import candidate_coset_string_isomorphism_u2
 
 
@@ -81,6 +82,51 @@ def test_candidate_closes_large_j92_profile_case_that_small_ground_terminal_reje
     assert _maps(source, target, got.coset.representative)
     assert got.local_cost_certified
     assert got.terminal_certified
+
+
+def test_s1_closes_the_same_large_j92_profile_case_for_orbit_children():
+    v, k = 9, 2
+    G, gens = _induced_johnson_group(v, k)
+    source = _membership_count_colors(v, k, range(4))
+    target = _relabel_target(source, gens[1])
+    got = s1_string_isomorphism_v2(
+        G,
+        source,
+        target,
+        root_n=64,
+        max_explicit_degree=8,
+        max_group_order=1024,
+        max_partition_states=1024,
+    )
+    assert got.exact and got.coset is not None, got
+    assert got.status == "exact_signed_ground_profile_partition_coset"
+    assert got.coset.contains(gens[1])
+
+
+def test_existing_candidate_intransitive_path_closes_j92_s1_child():
+    v, k = 9, 2
+    G, gens = _induced_johnson_group(v, k)
+    m = G.degree
+    extended_generators = tuple(tuple(g) + (m,) for g in G.original_generators)
+    H = schreier_stabilizer_chain(extended_generators)
+    assert H.degree == m + 1 and H.order == G.order
+
+    base = _membership_count_colors(v, k, range(4))
+    source = base + ("fixed",)
+    witness = tuple(gens[1]) + (m,)
+    target = _relabel_target(source, witness)
+    got = candidate_coset_string_isomorphism_u2(
+        RightCoset(H, identity(m + 1)),
+        source,
+        target,
+        root_n=64,
+        max_explicit_degree=8,
+        max_group_order=1024,
+        max_partition_states=1024,
+    )
+    assert got.exact and got.coset is not None, got
+    assert got.coset.contains(witness)
+    assert _maps(source, target, got.coset.representative)
 
 
 def test_candidate_large_j92_profile_mismatch_becomes_exact_empty():
