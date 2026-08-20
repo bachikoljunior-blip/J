@@ -6,30 +6,32 @@ J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は�
 
 ## 現在の継続点
 
-現在の統合済み継続点は **AGI-GI rev204**、main SHA は `6faeca0956346f61c323a5f63dc5f4738c662102`。
+現在の統合済み継続点は **AGI-GI rev205**、main SHA は `67fde8e615fa8b88a6d2c0e3cff91cc5bd3dd06a`。
 
-直近の corrected general UPCC Bipartite Split-or-Johnson 系列では、rev199 が exact theorem-input gate、rev200 が proper Reduce-Part2-by-Color / visible-twin shrink、rev201 が source/target-comparable restriction provenance、rev202 が uniform-neighborhood Johnson/relation provenance、rev203 が exact relation-twin restriction provenanceを追加した。
+直近の corrected general UPCC Bipartite Split-or-Johnson 系列では、rev199 が exact theorem-input gate、rev200 が proper Reduce-Part2-by-Color / visible-twin shrink、rev201 が source/target-comparable restriction provenance、rev202 が uniform-neighborhood Johnson/relation provenance、rev203 が exact relation-twin restriction provenance、rev204 が no-large-twin relation を exact WL/Design witness cover へ接続した。
 
-rev204 は、rev202・rev203 の親 provenance を毎回再導出し、no-large-twin relation を exact WL/Design descent へ接続する `relation_twin_design_wiring_v1` を統合した。unary relation は half-bounded coloring、arity 2 以上は actual containment palette と complete source/target witness Cartesian productへ進める。完全 witness 集合は明示的 cap の内側でのみ exact とし、mismatch、resource cap、親の非適用、未決定を成功扱いせず fail closed とする。
+rev205 は rev204 の complete first-successful Design witness cover を、実際に許された right-ground `StabilizerChain` の中の exact transporter coset へ接続した。ordered individualized tuple ごとに Schreier orbit/stabilizer で exact transporter を構成し、到達不能 tuple pair は厳密に除外する。unary relation は既存の exact canonical partition transporter を用いる。source/target witness cover の全候補を処理するため、ambient right action の範囲では true isomorphism を落とさない complete coset cover を返す。full original bipartite/string intersection はまだ未統合である。
 
-検証済み head は `5bfd0d479ded35829d8656a5dc4a10aa1857d006`。`AGI-GI rev validation` run `32318413846` と `rev204 relation Design wiring smoke` run `32318413871` は success。PR #119 を上記 main SHA へ squash merge 済みである。
+検証済み head `03b833030a820e42078b88aed3f20fb3b78862e1` は `AGI-GI rev validation` run `32323091271` と `rev205 ambient Design tuple transport smoke` run `32323091240` がともに success。PR #121 を main SHA `67fde8e615fa8b88a6d2c0e3cff91cc5bd3dd06a` へ squash merge 済みである。
 
 ## 問題木
 
-予測問題数は **512**、置換済み旧問題を除く有効問題数も **512**。実数は予測数を超えていないため、今回の横断的な再予測・分岐削除条件は発火していない。rev204 を別 active node として追加せず、W1R-H6 の既存 active leaf **H6-R3c1** を in-place で解決済みにした。
+予測問題数は **512**、置換済み旧問題を除く有効問題数も **512**。実数は予測数を超えていないため、横断的な再予測・分岐削除条件は発火していない。rev205 を別 active node として追加せず、W1R-H6 の既存 active leaf **H6-R3c2a / ambient Design witness pairing** を in-place で解決済みにした。
 
-H6-R3c1 の局所子問題は解決したが、親 **W1R-H6 corrected general UPCC Bipartite Split-or-Johnson recursion** は未解決である。
+局所子問題は解決したが、親 **W1R-H6 corrected general UPCC Bipartite Split-or-Johnson recursion** は未解決である。
 
-次の未解決末端は **H6-R3c2**:
+次の未解決末端は **H6-R3c2b**:
 
-> complete exact witness の全分岐を ambient structural transporter と full-string branch union へ接続し、union の exact completeness と strict progress を証明する。unmatched witness、resource cap、transport failure、source/target incompatibility、または recurrence accounting の不足は fail closed とする。
+> rev205 が返す各 exact ambient witness coset の中で、元の完全な source/target bipartite/string state を exact に交差させる。右側構造だけでなく左側の許可 action / color constraints も親 provenance から保持し、true parent isomorphism の union completeness を証明する。非空 child は既存 split / block / UPCC recurrence と proof-carrying shrink・quasipolynomial accounting に接続する。left-action provenance、subset/image lift、resource gate、または recurrence accounting が不足する経路は fail closed とする。
 
 ## 世界に存在する解法の包含監査
 
-H6-R3c1 と祖先の Split-or-Johnson / Design-Lemma 層について、Babai の *Graph Isomorphism in Quasipolynomial Time*（arXiv:1512.03547）を最も近い既存解法として再監査した。同論文は theorem-level の Split-or-Johnson と Design-Lemma の構造的選択肢を与えるが、このリポジトリが必要とする executable な二側 complete witness 列挙、cap-certified exact completeness、ambient transporter/full-string branch union、機械検査可能な fail-closed 統合をそのまま包含しない。この境界を埋めることが H6-R3c2 以降の実装・証明責務である。
+rev205 と祖先の Split-or-Johnson / Design-Lemma 層について、Babai の *Graph Isomorphism in Quasipolynomial Time* と Luks の color-automorphism / String Isomorphism 型 group-action reduction を再監査した。既存理論での canonical structure は、source/target の structure を ambient group 内で align する subcoset を作り、その subcoset の中で元の string isomorphism を解くための制約として使われる。rev205 はこの alignment-domain 構成の right-ground 部分を executable にしたが、元の bipartite incidence 全体と左側 action を同時に交差する責務は H6-R3c2b に残る。
+
+J には `RightCoset`、Schreier chain、generic paired-action image/preimage、candidate-coset String Isomorphism が既に存在する。次段はこれらを再利用し、left-neighborhood family を右側 subgroup の induced subset action 上の exact string として扱える範囲を横断的に統合する。親 left action が full color-symmetric でない場合は、右側だけの family equality を full parent SI と誤認せず、actual left subgroup との coupled transporter を別 proof obligation とする。
 
 ## 認定状態
 
 AGI 状態は **NOT_AGI**。full W1R-H6 closure、corrected Split-or-Johnson recursion 全体、global quasipolynomial recurrence、一般性・性能・自律性・実用提供の独立した厳格な実証は未完了であり、認定しない。
 
-スケジューラ制御はリポジトリ成果とは別の外部 control plane である。このセッションから scheduler の作成・有効化・状態読取を行える機能が露出していない場合、実行履歴の存在だけを根拠にスケジュールが有効だと捏造しない。各 invocation は監視だけで終わらせず、未解決末端または共有統合を必ず具体的に試行する。
+スケジューラ制御はリポジトリ成果とは別の外部 control plane である。実行履歴の存在だけを根拠にスケジュールが有効だと捏造しない。各 invocation は監視だけで終わらせず、未解決末端または共有統合を必ず具体的に試行する。
