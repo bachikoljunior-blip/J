@@ -255,6 +255,7 @@ def candidate_coset_string_isomorphism_u2(
             max_explicit_degree=max_explicit_degree,
             group_order_poly_power=group_order_poly_power,
             max_group_order=max_group_order,
+            max_partition_states=max_partition_states,
             max_depth=max_depth,
         )
         children.append(child)
