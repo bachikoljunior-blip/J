@@ -47,10 +47,10 @@ def candidate_coset_string_isomorphism_u3(
     determined completely by canonical ground-profile cells can be solved without
     enumerating the large Johnson action, while a mere profile split stays nonexact.
 
-    Only exact compositions are accepted here. Otherwise the original v2 fail-
-    closed result is returned. This horizontally collapses three Johnson subbranches
-    into the already-validated image/preimage/profile substrate without weakening
-    theorem, exactness, or resource gates.
+    A failed exact Johnson-ground lift is also treated as a routing certificate:
+    the other Johnson-only reducers are skipped rather than repeating the same
+    bounded recognizer. Only exact compositions are promoted; otherwise the old v2
+    fail-closed dispatcher remains authoritative.
     """
     source = tuple(source_values)
     target = tuple(target_values)
@@ -108,37 +108,37 @@ def candidate_coset_string_isomorphism_u3(
                     candidate.representative,
                     degree=n,
                 )
-
-            adaptive = adaptive_signed_johnson_relation_candidate_si(
-                H,
-                subgroup_source,
-                target,
-                root_n=root_n,
-                polylog_power=polylog_power,
-                max_explicit_degree=max_explicit_degree,
-                candidate_group_order_poly_power=group_order_poly_power,
-                max_candidate_group_order=max_group_order,
-                max_depth=max_depth,
-            )
-            if adaptive.exact:
-                return _translate_subgroup_si_back_to_candidate(
-                    adaptive,
-                    candidate.representative,
-                    degree=n,
+            if joint.status != "undetermined_signed_johnson_joint_relation_lift":
+                adaptive = adaptive_signed_johnson_relation_candidate_si(
+                    H,
+                    subgroup_source,
+                    target,
+                    root_n=root_n,
+                    polylog_power=polylog_power,
+                    max_explicit_degree=max_explicit_degree,
+                    candidate_group_order_poly_power=group_order_poly_power,
+                    max_candidate_group_order=max_group_order,
+                    max_depth=max_depth,
                 )
+                if adaptive.exact:
+                    return _translate_subgroup_si_back_to_candidate(
+                        adaptive,
+                        candidate.representative,
+                        degree=n,
+                    )
 
-            profile = signed_johnson_ground_profile_partition_si(
-                H,
-                subgroup_source,
-                target,
-                root_n=root_n,
-            )
-            if profile.exact:
-                return _translate_subgroup_si_back_to_candidate(
-                    profile,
-                    candidate.representative,
-                    degree=n,
+                profile = signed_johnson_ground_profile_partition_si(
+                    H,
+                    subgroup_source,
+                    target,
+                    root_n=root_n,
                 )
+                if profile.exact:
+                    return _translate_subgroup_si_back_to_candidate(
+                        profile,
+                        candidate.representative,
+                        degree=n,
+                    )
 
     return _candidate_v2(
         candidate,
