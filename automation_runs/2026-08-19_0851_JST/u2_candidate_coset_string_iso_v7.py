@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 from orbit_factored_string_coset_intersection_v1 import _group_orbits
 from permutation_group_schreier import inverse
 from proof_carrying_si_v1 import ProofCarryingCoset
@@ -31,7 +33,7 @@ def _wrap_profile_cap(inner):
     )
 
 
-def candidate_coset_string_isomorphism_u7(
+def _candidate_coset_string_isomorphism_u7(
     candidate,
     source_values,
     target_values,
@@ -146,6 +148,52 @@ def candidate_coset_string_isomorphism_u7(
     if profile.status == "undetermined_signed_ground_partition_orbit_limit":
         return _wrap_profile_cap(profile)
     return previous
+
+
+def candidate_coset_string_isomorphism_u7(
+    candidate,
+    source_values,
+    target_values,
+    *,
+    root_n: int,
+    polylog_power: int = 2,
+    max_explicit_degree: int = 8,
+    group_order_poly_power: int = 2,
+    max_group_order: int = 256,
+    max_depth: int = 64,
+    max_johnson_test_sets: int = 200000,
+    max_partition_states: int = 4096,
+    max_recognition_nodes: int = 500000,
+    max_johnson_nodes: int = 500000,
+    family_poly_power: int = 2,
+    max_family_systems: int = 4096,
+    max_family_quotient_order: int = 4096,
+    proof_identity=None,
+):
+    """Run u7 and attach an optional execution identity before returning."""
+    proof = _candidate_coset_string_isomorphism_u7(
+        candidate,
+        source_values,
+        target_values,
+        root_n=root_n,
+        polylog_power=polylog_power,
+        max_explicit_degree=max_explicit_degree,
+        group_order_poly_power=group_order_poly_power,
+        max_group_order=max_group_order,
+        max_depth=max_depth,
+        max_johnson_test_sets=max_johnson_test_sets,
+        max_partition_states=max_partition_states,
+        max_recognition_nodes=max_recognition_nodes,
+        max_johnson_nodes=max_johnson_nodes,
+        family_poly_power=family_poly_power,
+        max_family_systems=max_family_systems,
+        max_family_quotient_order=max_family_quotient_order,
+    )
+    if proof_identity is None:
+        return proof
+    if proof.proof_identity is not None and proof.proof_identity != proof_identity:
+        raise ValueError("candidate proof already carries a different execution identity")
+    return replace(proof, proof_identity=proof_identity)
 
 
 candidate_coset_string_isomorphism_u2 = candidate_coset_string_isomorphism_u7

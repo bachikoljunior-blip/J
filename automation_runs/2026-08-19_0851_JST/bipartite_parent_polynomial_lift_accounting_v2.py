@@ -79,6 +79,11 @@ def solve_and_certify_design_parent_polynomial_lift(
 
     _core.candidate_coset_string_isomorphism_u2 = candidate_coset_string_isomorphism_u7
     _parent_intersection.candidate_coset_string_isomorphism_u2 = candidate_coset_string_isomorphism_u7
+    _parent_intersection.candidate_si_dispatcher_identity = (
+        "u2_candidate_coset_string_iso_v7",
+        "candidate_coset_string_isomorphism_u7",
+        7,
+    )
     _core.validate_quasipoly_recurrence_tree_v3 = validate_quasipoly_recurrence_tree_v4
 
     return _core.solve_and_certify_design_parent_polynomial_lift(

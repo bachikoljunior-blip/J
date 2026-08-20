@@ -53,6 +53,9 @@ def test_cycle5_exact_parent_union_gets_polynomial_lift_complexity_certificate()
     assert cert.certified and cert.exact_parent_union and cert.polynomial_auxiliary_gate
     assert cert.structural_branches == cert.exact_branches == 1
     assert cert.branch_certificates[0].accounting_certified
+    assert cert.branch_certificates[0].proof_dag_status == "certified_execution_proof_dag"
+    assert cert.branch_certificates[0].proof_dag_unique_nodes >= 1
+    assert cert.branch_certificates[0].proof_dag_execution_occurrences >= cert.branch_certificates[0].proof_dag_unique_nodes
     assert cert.branch_certificates[0].auxiliary_degree == 35
     assert cert.branch_certificates[0].auxiliary_degree <= cert.auxiliary_degree_bound
     assert cert.total_log2_work_bound <= cert.allowed_log2_work

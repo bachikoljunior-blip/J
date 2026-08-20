@@ -6,7 +6,7 @@ from math import log2
 from bipartite_design_parent_union_v1 import solve_design_witness_cover_in_parent_bipartite_action
 from bipartite_design_recurrence_gate_v1 import certify_complete_design_cover_recurrence_progress
 from coset_stabilizer_primitives import RightCoset
-from quasipoly_recurrence_accounting_v3 import validate_quasipoly_recurrence_tree_v3
+from proof_dag_accounting_v1 import validate_execution_proof_dag
 from u2_candidate_coset_string_iso_v2 import candidate_coset_string_isomorphism_u2
 
 
@@ -21,6 +21,10 @@ class PolynomialLiftBranchCertificate:
     image_log2_work_bound: float
     translated_log2_work_bound: float
     reason: str
+    proof_dag_status: str = "not_checked"
+    proof_dag_unique_nodes: int = 0
+    proof_dag_execution_occurrences: int = 0
+    proof_dag_reused_occurrences: int = 0
 
 
 @dataclass(frozen=True)
@@ -211,7 +215,13 @@ def solve_and_certify_design_parent_polynomial_lift(
                 "the execution-linked candidate image proof is absent or does not match the exact rev206 branch status",
             ))
             continue
-        validation = validate_quasipoly_recurrence_tree_v3(proof.accounting)
+        validation = validate_execution_proof_dag(
+            proof,
+            original_root_n=root,
+            polynomial_lift_degree=m,
+            quasipoly_power=quasipoly_power,
+            quasipoly_constant=translated_constant,
+        )
         accounting_ok = bool(validation.certified)
         # The validator's actual composed log-work is already an execution-linked
         # proof-tree bound.  Translation to the parent measure changes only the
@@ -225,6 +235,10 @@ def solve_and_certify_design_parent_polynomial_lift(
             float(validation.log2_work_bound), translated,
             "exact candidate-SI accounting tree validates and its auxiliary degree is polynomially bounded by the original parent root" if accounting_ok and poly else
             "candidate-SI exactness or polynomial-lift accounting validation failed closed",
+            validation.status,
+            validation.unique_nodes,
+            validation.execution_occurrences,
+            validation.reused_occurrences,
         ))
 
     all_branches = exact_count == len(candidates)
