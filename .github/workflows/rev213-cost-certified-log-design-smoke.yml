@@ -1,0 +1,27 @@
+name: rev213 cost-certified log-Design smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/signed_johnson_log_design_lemma_si_v3.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_signed_johnson_log_design_cost_rev213.py'
+      - '.github/workflows/rev213-cost-certified-log-design-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev213-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: python -m pytest -q test_signed_johnson_log_design_cost_rev213.py test_design_full_execution_accounting_rev212.py test_signed_johnson_log_design_lemma_rev191.py
