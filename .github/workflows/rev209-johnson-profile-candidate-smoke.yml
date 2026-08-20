@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/s1_string_isomorphism_v2.py'
       - 'automation_runs/2026-08-19_0851_JST/test_candidate_johnson_profile_integration_rev209.py'
       - '.github/workflows/rev209-johnson-profile-candidate-smoke.yml'
 
