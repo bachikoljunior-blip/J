@@ -71,15 +71,16 @@ def test_full_candidate_accepts_nonconstant_exact_coset_without_enumeration():
 
 def test_larger_johnson_ground_uses_log_design_filter_instead_of_ground_enumeration():
     # J(9,3) lies just beyond rev173's max_explicit_degree=8 terminal.  The
-    # distinguished-point string canonically induces a significant point split;
-    # its exact partition-transporter coset is already the complete full-string SI
-    # fiber and rev209 accepts that coset by generators rather than scanning S_9.
+    # distinguished-point string canonically induces a significant point split.
+    # For the automorphism instance the exact partition-stabilizer coset is the
+    # complete full-string SI fiber, so rev209 can accept it by generators rather
+    # than scanning the recovered S_9 ground.  A separate test above covers a
+    # non-identity source/target right-coset transporter and its action convention.
     v, k = 9, 3
-    G, domain_gens = induced_ground_group(v, k)
+    G, _domain_gens = induced_ground_group(v, k)
     subsets = _standard_subsets(v, k)
     source = tuple(int(0 in S) for S in subsets)
-    witness = domain_gens[1]
-    target = relabel_target(source, witness)
+    target = source
     candidate = RightCoset(G, identity(G.degree))
 
     before = candidate_coset_string_isomorphism_u3(
