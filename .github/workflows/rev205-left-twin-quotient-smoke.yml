@@ -1,0 +1,31 @@
+name: rev205 left twin quotient smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/paired_bipartite_left_twin_quotient_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_paired_bipartite_left_twin_quotient_rev205.py'
+      - 'automation_runs/2026-08-19_0851_JST/LEFT_TWIN_QUOTIENT_AUDIT_REV205.md'
+      - 'automation_runs/2026-08-19_0851_JST/CURRENT_STATUS_REV0205.json'
+      - '.github/workflows/rev205-left-twin-quotient-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-rev205:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Validate paired left twin quotient
+        run: python -m pytest -q test_paired_bipartite_left_twin_quotient_rev205.py
