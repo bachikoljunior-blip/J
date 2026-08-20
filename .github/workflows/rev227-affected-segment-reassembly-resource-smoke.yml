@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'automation_runs/2026-08-19_0851_JST/affected_segment_reassembly_resource_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/affected_segment_quotient_resource_v1.py'
       - 'automation_runs/2026-08-19_0851_JST/quotient_factored_partial_string_intersection_v1.py'
       - 'automation_runs/2026-08-19_0851_JST/affected_segment_automorphism_v2.py'
       - 'automation_runs/2026-08-19_0851_JST/local_certificate_beard_v1.py'
