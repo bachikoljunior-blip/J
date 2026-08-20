@@ -6,7 +6,7 @@ J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は�
 
 ## 現在の継続点
 
-現在の統合済み継続点は **AGI-GI rev216**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
+現在の統合済み継続点は **AGI-GI rev217**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
 
 rev208 は active leaf **H6-C2** の literal natural-domain giant subleafを解決した。represented subgroup が degree `n>=5` で order `n!` または `n!/2` なら、その action 自体が literal `S_n` / `A_n` なので、色クラス間の exact transporter と target-color stabilizerから full String-Isomorphism right cosetを直接復元する。
 
@@ -36,6 +36,12 @@ rev216 は certified Johnson lift から logarithmic arity/test gate、complemen
 
 rev216 tested head `dc802bcd6449e56880ab87ae16479491ae8d0270` は AGI-GI rev validation run `32366109009`（independent `nauty-labelg` differential gateを含む）、rev216 smoke `32366109051`、rev215 smoke `32366109019`、rev214 smoke `32366109092`、rev213 smoke `32366109034`、rev212 smoke `32366109032`、rev211 smoke `32366108991` がすべて success。local all-module gateは外部labelg専用fileを除き438 tests success。PR #144 をexact tested head固定でmergeし、main commit `61762692ee32e34b05bac9e9174fc19f0f14c0a8` に統合済み。
 
+rev217 は CRX3 子3の paired-action preimage / full-candidate filterを、一つのimmutable replay artifactへ統合した。exact image right cosetとgenerator-paired actionからkernelを含むfull preimageを構成し、128-entry preimage cacheと64-entry full-artifact cacheで共有する。proof identityはfrozen domain group、順序付きimage generators、向き付きimage right coset、full source/target string、root、dispatcher identity、正規化した全resource引数を含む。unhashable inputはcacheをbypassし、mutable inputはartifact生成時のsnapshotから切り離す。
+
+ambient-equal/nonrestricting preimageとsame-domain self-loopは、whole-candidate exact terminalでfull stringを解ける場合を除いて拒否する。resource-capped/unresolved childをexact化せず、relation-image、joint-relation、lower-arity relation、log-codegreeの各consumerが同じbuilderを使用する。log-codegree内の重複preimage/candidate/accounting blockは削除し、recurrence verifier v4をartifact境界で検証する。
+
+rev217 tested head `26bc3d0c92e77638756eb9e75f068c0050dd26ed` は AGI-GI rev validation run `32369585203`（independent `nauty-labelg` differential gateを含む）、rev217 smoke `32369585064`、rev216 smoke `32369585018`、rev215 smoke `32369584974`、rev214 smoke `32369584952`、rev213 smoke `32369584975`、rev212 smoke `32369585172`、rev211 smoke `32369584935` がすべて success。local all-module gateは外部labelg専用fileを除き442 tests success。PR #145 をexact tested head固定でmergeし、main commit `ea52522f3e979c8a86844aa32426bf01a2436983` に統合済み。
+
 ## 問題木
 
 予測問題数は **576**、置換済み旧問題を除く有効問題数は **517**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
@@ -46,11 +52,13 @@ rev215の直接試行でCRX3末端を四子へ分解した: (1) replay-stable Jo
 
 rev216はCRX3子2を解決した。さらに既存CRX2 local-certificate/Design-escalation末端を、(a) stable coherent-refinement terminationと(b)残るDesign escalationへ分解し、(a)を解決した。1末端を2子へ置換したため有効数は `516 - 1 + 2 = 517`。517は予測576以下なので新しいover-count rewrite triggerは発火していない。
 
-CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2の残るcanonical local-certificate/Design escalation、CRX3の残る子3・子4、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
+rev217はCRX3子3を解決した。既に数えていた末端の状態を未解決から解決済みへ更新したため、有効問題数は517、予測問題数は576のままである。実数517は予測576以下なので、このrunでも新しいover-count rewrite triggerは発火していない。
 
-次の未解決末端は **CRX3 / replay-stable proof and resource substrate / shared paired-action preimage and full-candidate filter artifact**:
+CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2の残るcanonical local-certificate/Design escalation、CRX3の残る子4、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
 
-> exact image right cosetとgenerator-paired actionから、kernelを含むoriginal-domain full preimage、nonrestricting/self-loop guard、full-string candidate SI、recurrence chargeまでを一つのimmutable replay artifactへ因数分解し、relation-image、log-codegree、joint-relationの各consumerで共有する。domain/image generator pairing、image coset orientation、full source/target string、全resource gateをproof identityへ含め、cached unresolved・ambient-equal filter・resource-capped childをexact化しない。同じ完全逆像とcandidate childを再利用しつつ、数学的証拠とcache reuseを分離して検証する。
+次の未解決末端は **CRX3 / replay-stable proof and resource substrate / rev207 polynomial lift・nested S1を跨ぐproof-DAG accounting identity**:
+
+> rev207のauxiliary-degree polynomial lift、nested S1、shared Johnson/relation/preimage artifactが再利用する各recurrence nodeを、完全な数学的identityとresource gateで識別するproof DAGへ統合する。同一証明nodeの再生で実workを二重計上せず、cache hitを根拠に必要なworst-case chargeを消さない。original rootへのdegree lift、strict progress、branch union、nested child chargeを独立verifierが再計算できる形にし、identity衝突、resource-capped/unresolved node、異なるorientation/root/gateを共有しない。局所cacheの高速化とglobal quasipolynomial recurrence証明を分離し、rev207とS1 consumerのaccountingを同じartifactで照合する。
 
 ## 世界に存在する解法の包含監査
 
@@ -58,7 +66,7 @@ Babai の quasipolynomial SI/GI framework と corrected Split-or-Johnson、Luks 
 
 rev211はcanonical pair relationをそのままaction-image stringとして解くことで、第二Johnson coordinate gaugeの分岐を上位H6-C2から削除した。rev212はrev177のsigned profile solverとrev208 literal giant terminalを共有境界へ持ち上げ、同一Jリポジトリの未統合PR #128を実装上の既存案として確認した上で、最新rev211 treeへfail-closedに再構成した。PR #128はmerged progressや達成証拠には数えていない。rev213はLuks型orbit/block preimage、bounded auxiliary action、既存Johnson terminalをS1境界で再合成し、identity-only testが隠していたright-coset向きもnonidentity既知群次数で検証した。rev214は構造名をsolver分岐にする代わりに、informative relationのstrict action imageとexact preimageという共有解法へ持ち上げた。
 
-CRX3では既存世界のcontent-addressed DAG/hash-consing、incremental computation、proof replayの考え方を、Babai/Luks型canonical certificateとSchreier generator pairingへ適用する。rev215--rev216はPythonのbounded LRUとBazel型action-hash/content-addressed分離を参考にしたが、build-cacheの一致を数学的証明と同一視せず、Jでは完全なproof identity、不変artifact、orientation、progress、resource chargeの機械的replayを必須にした。coherent refinementにはstandard WLのpartition-stability終了則を適用した。次のpreimage子では、GAPのgroup-homomorphismがkernelとsubgroup/cosetのcomplete preimageを扱う既存方式を、Jのgenerator-paired Schreier proofとして共有する。同じ境界をH6-C2、W1R-H6、AGI rootの各親層まで継続し、親から不要になった分岐だけを削除する。
+CRX3では既存世界のcontent-addressed DAG/hash-consing、incremental computation、proof replayの考え方を、Babai/Luks型canonical certificateとSchreier generator pairingへ適用する。rev215--rev216はPythonのbounded LRUとBazel型action-hash/content-addressed分離を参考にしたが、build-cacheの一致を数学的証明と同一視せず、Jでは完全なproof identity、不変artifact、orientation、progress、resource chargeの機械的replayを必須にした。coherent refinementにはstandard WLのpartition-stability終了則を適用した。rev217では、GAPのgroup-homomorphismがkernelとsubgroup/cosetのcomplete preimageを扱う既存方式を、Jのgenerator-paired Schreier proofとして共有し、四つのcandidate consumerへ接続した。次のproof-DAG accounting子では、content-addressed DAG/hash-consing、incremental buildのaction identity、amortized/potential accountingを包含候補として使う。ただし同一cache keyを数学的同一性や計算量証明と同一視せず、完全なproof identity、original-rootへのlift、worst-case chargeを独立にreplayする。同じ境界をH6-C2、W1R-H6、AGI rootの各親層まで継続し、親から不要になった分岐だけを削除する。
 
 ## 認定状態
 
