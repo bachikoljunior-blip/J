@@ -1,0 +1,29 @@
+name: rev203 ambient twin intersection smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/bipartite_twin_ambient_coset_intersection_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_bipartite_twin_ambient_coset_intersection_rev203.py'
+      - '.github/workflows/rev203-ambient-twin-intersection-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-rev203:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Validate exact ambient right-coset intersection
+        run: python -m pytest -q test_bipartite_twin_ambient_coset_intersection_rev203.py
