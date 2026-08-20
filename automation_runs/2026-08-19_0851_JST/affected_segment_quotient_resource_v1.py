@@ -45,10 +45,13 @@ def affected_segment_quotient_resource_envelope(
     order = max(1, int(group.order))
     qorder = max(1, int(quotient_order))
     leaves = qorder
-    nodes = _sat_add(1, _sat_mul(t, leaves, cap + 1), cap + 1)
-    kernel_children = _sat_mul(leaves, n, cap + 1)
+    # Multiplicity evidence is exact and reusable by later envelopes.  Only the
+    # work sum saturates; saturating counts at this cap could understate a later
+    # independently capped phase.
+    nodes = 1 + t * leaves
+    kernel_children = leaves * n
     # The fail-closed counter observes limit+1 on the rejecting tick.
-    child_nodes = _sat_mul(kernel_children, int(max_child_nodes) + 1, cap + 1)
+    child_nodes = kernel_children * (int(max_child_nodes) + 1)
     stop = cap + 1
 
     # One shared block-action image/paired-kernel preparation.
