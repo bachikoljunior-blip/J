@@ -1,0 +1,33 @@
+name: rev230 paired theorem local-certificate smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/paired_theorem_local_certificate_relation_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_paired_theorem_local_certificate_rev230.py'
+      - '.github/workflows/rev230-paired-theorem-local-certificate-smoke.yml'
+      - '.github/workflows/agi-gi-rev-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev230-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: >-
+          python -m pytest -q
+          test_paired_theorem_local_certificate_rev230.py
+          test_all_test_resource_envelope_rev229.py
+          test_single_test_resource_envelope_rev228.py
+          test_theorem_local_certificate_relation_rev222.py
