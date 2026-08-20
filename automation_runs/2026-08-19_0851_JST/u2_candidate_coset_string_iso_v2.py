@@ -15,7 +15,6 @@ from quasipoly_recurrence_accounting_v1 import AccountingChild, RecurrenceAccoun
 from s1_string_isomorphism_v2 import s1_string_isomorphism_v2
 from s1_structural_classifier_v1 import classify_s1_structure
 from signed_johnson_ground_profile_partition_si_v1 import signed_johnson_ground_profile_partition_si
-from signed_johnson_ground_relational_si_v1 import signed_johnson_ground_relational_small_order_terminal
 
 
 def _parent(*, root_n, degree, status, coset, exact, children, cost_certified=True, reason):
@@ -100,13 +99,18 @@ def candidate_coset_string_isomorphism_u2(
     Exact terminals are tried by represented group order first.  Intransitive H
     recurses over canonical orbits.  Large transitive H is classified: unique
     canonical imprimitive cases reuse V2 quotient/kernel recursion.  Primitive
-    non-giant cases first try the certified small-ground Johnson terminal, then
-    reuse the already-validated faithful signed-ground small-order and complement-
-    safe profile-partition terminals.  This closes large Johnson grounds whenever
-    the actual signed group is small or the complete colored k-subset relation is
-    determined by a bounded exact ground-profile partition.  Remaining primitive
-    non-giant, primitive giant and unresolved block-family cases stay typed
-    fail-closed; no generic node-capped SI fallback is introduced.
+    non-giant cases first try the certified small-ground Johnson terminal and then
+    reuse rev177's validated complement-safe ground-profile terminal.  This closes
+    larger Johnson grounds whenever the complete colored k-subset relation is
+    determined by a bounded exact ground-profile partition, without enumerating
+    the large represented Johnson group.
+
+    The rev176 signed-ground small-order terminal is deliberately *not* repeated
+    here: candidate SI has already run an exact small-order scan on the same
+    subgroup with the same order gate, so invoking the signed copy would duplicate
+    a solved/failed child rather than add coverage.  Remaining primitive non-giant,
+    primitive giant and unresolved block-family cases stay typed fail-closed; no
+    generic node-capped SI fallback is introduced.
     """
     H0 = candidate.subgroup
     n = H0.degree
@@ -198,19 +202,6 @@ def candidate_coset_string_isomorphism_u2(
             if johnson.exact:
                 return _translate_subgroup_si_back_to_candidate(johnson, candidate.representative, degree=n)
 
-            signed_small = signed_johnson_ground_relational_small_order_terminal(
-                H0,
-                subgroup_source,
-                target,
-                root_n=root_n,
-                group_order_poly_power=group_order_poly_power,
-                max_group_order=max_group_order,
-            )
-            if signed_small.exact:
-                return _translate_subgroup_si_back_to_candidate(
-                    signed_small, candidate.representative, degree=n
-                )
-
             profile = signed_johnson_ground_profile_partition_si(
                 H0,
                 subgroup_source,
@@ -225,11 +216,11 @@ def candidate_coset_string_isomorphism_u2(
 
             return _parent(
                 root_n=root_n, degree=n, status=profile.status, coset=None,
-                exact=False, children=(johnson, signed_small, profile), cost_certified=False,
+                exact=False, children=(johnson, profile), cost_certified=False,
                 reason=(
-                    "primitive non-giant candidate exhausted the certified small-ground Johnson terminal, "
-                    "faithful signed-ground small-order terminal, and bounded complement-safe profile-partition terminal; "
-                    "a higher-order relational/local-certificate Johnson recursion remains required"
+                    "primitive non-giant candidate exhausted the certified small-ground Johnson terminal "
+                    "and bounded complement-safe profile-partition terminal; a higher-order relational/"
+                    "local-certificate Johnson recursion remains required"
                 ),
             )
 
