@@ -32,6 +32,11 @@ generator family gives finite upper bounds on internal nodes, generator inputs,
 containment sifts, and raw work. Cap failure returns unknown before quotient
 homomorphism preparation or recursion begins.
 
+Leaf, quotient-node, kernel-child, and child-search-node multiplicities remain
+exact arbitrary-precision integers. Only work sums saturate at `cap + 1`; this
+prevents an earlier phase's cap from understating counts reused by a later,
+independently capped reassembly phase.
+
 ## Execution-linked evidence
 
 The exact executor records actual internal rebuilds, generator inputs, and
