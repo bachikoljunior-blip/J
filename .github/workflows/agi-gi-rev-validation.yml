@@ -150,6 +150,7 @@ jobs:
           test_giant_action_resource_envelope_rev225.py
           test_affected_segment_quotient_resource_rev226.py
           test_affected_segment_reassembly_resource_rev227.py
+          test_single_test_resource_envelope_rev228.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
