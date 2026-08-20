@@ -5,6 +5,7 @@ on:
     paths:
       - 'automation_runs/2026-08-19_0851_JST/primitive_giant_full_action_string_iso_v1.py'
       - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v3.py'
+      - 'automation_runs/2026-08-19_0851_JST/s1_string_isomorphism_v2.py'
       - 'automation_runs/2026-08-19_0851_JST/test_primitive_giant_full_action_string_iso_rev208.py'
       - '.github/workflows/rev208-primitive-giant-si-smoke.yml'
 
