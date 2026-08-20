@@ -35,6 +35,8 @@ def affected_segment_automorphism_group_v2(
     *,
     max_quotient_leaves=2000000,
     max_child_nodes=200000,
+    giant_certificate=None,
+    max_quotient_schreier_work=None,
 ) -> AffectedSegmentAutomorphismV2:
     """Exact segment automorphism group from the same double recursion we account.
 
@@ -50,7 +52,7 @@ def affected_segment_automorphism_group_v2(
     active = tuple(sorted(set(int(x) for x in active_points)))
     gens = group.original_generators or (identity(group.degree),)
     if all(_generator_preserves_segment(g, vals, active) for g in gens):
-        giant = analyze_giant_block_action(group, quotient_blocks)
+        giant = giant_certificate if giant_certificate is not None else analyze_giant_block_action(group, quotient_blocks)
         t = len(tuple(quotient_blocks))
         bound = (giant.largest_group_orbit + t - 1) // t if t else 0
         execution = QuotientFactoredPartialStringIntersection(
@@ -83,6 +85,8 @@ def affected_segment_automorphism_group_v2(
         active,
         max_quotient_leaves=max_quotient_leaves,
         max_child_nodes=max_child_nodes,
+        giant_certificate=giant_certificate,
+        max_quotient_schreier_work=max_quotient_schreier_work,
     )
     if execution.status.startswith("undetermined_") or execution.status == "giant_action_required":
         return AffectedSegmentAutomorphismV2(
