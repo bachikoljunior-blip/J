@@ -58,6 +58,17 @@ relation-wiring modules was invoked directly under the module path: **19 passed*
 The changed modules also passed `py_compile`.  Repository CI remains the
 authoritative clean pytest gate.
 
+The first clean CI attempt then exposed seven historical integration regressions:
+rev205--rev218 fixtures still expected Cycle5 (`n=5,k=2`) to enter the Design
+theorem path.  They were not repaired by weakening the corrected gate.  The
+ambient transport, parent-union, recurrence, polynomial accounting, and
+execution-linked proof regressions now use theorem-valid Cycle11 fixtures, plus
+an `n=8,k=2` disconnected-four-cycle split.  The exact parent fixture has parent
+degree 22, auxiliary degree 143, cyclic order 11, and an explicit fail-closed
+auxiliary cap of 142.  All **23** affected cross-revision tests passed by direct
+invocation (including monkeypatch-equivalent restoration), and both the rev221
+smoke gate and the general validation gate now execute the whole repaired chain.
+
 ## Existing-world inclusion audit
 
 - Root/CRX2: Babai's quasipolynomial graph-isomorphism framework supplies the

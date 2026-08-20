@@ -7,39 +7,39 @@ import bipartite_parent_polynomial_lift_accounting_v2 as _entry
 from permutation_group_schreier import schreier_stabilizer_chain
 
 
-def _cycle5_edges():
-    neighborhoods = [(i, (i + 1) % 5) for i in range(5)]
+def _cycle11_edges():
+    neighborhoods = [(i, (i + 1) % 11) for i in range(11)]
     return {(a, b) for a, pair in enumerate(neighborhoods) for b in pair}
 
 
 def _instance():
-    cycle = tuple((i + 1) % 5 for i in range(5)) + tuple(
-        5 + ((i + 1) % 5) for i in range(5)
+    cycle = tuple((i + 1) % 11 for i in range(11)) + tuple(
+        11 + ((i + 1) % 11) for i in range(11)
     )
     parent = schreier_stabilizer_chain([cycle])
-    right_index = {5 + i: i for i in range(5)}
+    right_index = {11 + i: i for i in range(11)}
     images = tuple(
-        tuple(right_index[g[5 + i]] for i in range(5))
+        tuple(right_index[g[11 + i]] for i in range(11))
         for g in parent.original_generators
     )
-    return parent, images, _cycle5_edges()
+    return parent, images, _cycle11_edges()
 
 
 def _solve(parent, images, edges):
     return _entry.solve_and_certify_design_parent_polynomial_lift(
         parent,
         images,
-        tuple(range(5)),
-        tuple(range(5, 10)),
+        tuple(range(11)),
+        tuple(range(11, 22)),
         edges,
         edges,
-        root_n=10,
+        root_n=22,
         alpha=0.75,
-        max_tuple_states=100,
-        max_twl_rounds=16,
-        max_twl_work_units=2_000_000,
-        max_branch_pairs=100,
-        max_auxiliary_degree=40,
+        max_tuple_states=200,
+        max_twl_rounds=32,
+        max_twl_work_units=10_000_000,
+        max_branch_pairs=200,
+        max_auxiliary_degree=160,
         max_image_group_order=16,
     )
 
@@ -93,4 +93,3 @@ def test_missing_execution_proof_fails_closed_instead_of_replaying(monkeypatch):
     assert cert.status == "undetermined_uncertified_candidate_image_accounting"
     assert not cert.branch_certificates[0].exact
     assert cert.branch_certificates[0].image_status is None
-

@@ -5,6 +5,11 @@ on:
     paths:
       - 'automation_runs/2026-08-19_0851_JST/local_certificate_exact_twl_design_si_v1.py'
       - 'automation_runs/2026-08-19_0851_JST/test_local_certificate_exact_twl_design_rev221.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_ambient_design_tuple_transport_rev205.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_bipartite_design_parent_union_rev206.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_bipartite_design_recurrence_gate_rev206.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_bipartite_parent_polynomial_lift_accounting_rev207.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_execution_linked_polynomial_lift_proof_rev218.py'
       - '.github/workflows/rev221-local-certificate-exact-twl-design-smoke.yml'
       - '.github/workflows/agi-gi-rev-validation.yml'
   workflow_dispatch:
@@ -32,3 +37,8 @@ jobs:
           test_colored_subset_exact_twl_design_rev193.py
           test_design_lemma_exact_twl_candidate_rev194.py
           test_relation_twin_design_wiring_rev204.py
+          test_ambient_design_tuple_transport_rev205.py
+          test_bipartite_design_parent_union_rev206.py
+          test_bipartite_design_recurrence_gate_rev206.py
+          test_bipartite_parent_polynomial_lift_accounting_rev207.py
+          test_execution_linked_polynomial_lift_proof_rev218.py

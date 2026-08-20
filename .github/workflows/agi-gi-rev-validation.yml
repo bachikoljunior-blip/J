@@ -125,6 +125,9 @@ jobs:
           test_design_twl_recurrence_progress_rev195.py
           test_upcc_subconstituent_split_family_rev197.py
           test_relation_twin_design_wiring_rev204.py
+          test_ambient_design_tuple_transport_rev205.py
+          test_bipartite_design_parent_union_rev206.py
+          test_bipartite_design_recurrence_gate_rev206.py
           test_bipartite_parent_polynomial_lift_accounting_rev207.py
           test_literal_giant_candidate_si_rev208.py
           test_johnson_log_candidate_bridge_rev209.py

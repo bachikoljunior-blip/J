@@ -11,8 +11,8 @@ def _edges(hyperedges):
     return {(a, b) for a, edge in enumerate(hyperedges) for b in edge}
 
 
-def _cycle5():
-    return [(i, (i + 1) % 5) for i in range(5)]
+def _cycle11():
+    return [(i, (i + 1) % 11) for i in range(11)]
 
 
 def _cyclic_group(n):
@@ -43,22 +43,22 @@ def test_ordered_tuple_transporter_rejects_unreachable_pair():
     assert got.exact
 
 
-def test_cycle5_zero_individualization_design_cover_survives_trivial_ambient_group():
-    edges = _edges(_cycle5())
+def test_cycle11_zero_individualization_design_cover_survives_trivial_ambient_group():
+    edges = _edges(_cycle11())
     got = pair_design_witnesses_inside_ambient_action(
-        _trivial_group(5),
-        5,
-        5,
+        _trivial_group(11),
+        11,
+        11,
         edges,
         edges,
         alpha=0.75,
-        max_tuple_states=100,
-        max_twl_work_units=2_000_000,
+        max_tuple_states=200,
+        max_twl_work_units=10_000_000,
     )
     assert got.status == "certified_ambient_design_witness_coset_cover"
     assert got.wiring.status == "certified_relation_design_branch_plan"
     assert got.wiring.branch_plan is not None
-    # Exact k-WL already produces the required split on C5 without individualization,
+    # Exact k-WL already produces the required split on C11 without individualization,
     # so rev204's complete first-successful Cartesian cover is the single empty-tuple pair.
     assert got.wiring.branch_plan.individualization_length == 0
     assert got.original_branch_count == got.wiring.branch_plan.branch_count == 1
@@ -71,17 +71,17 @@ def test_cycle5_zero_individualization_design_cover_survives_trivial_ambient_gro
     assert got.exact and not got.exact_empty
 
 
-def test_cycle5_zero_individualization_cover_preserves_full_cyclic_ambient_group():
-    edges = _edges(_cycle5())
+def test_cycle11_zero_individualization_cover_preserves_full_cyclic_ambient_group():
+    edges = _edges(_cycle11())
     got = pair_design_witnesses_inside_ambient_action(
-        _cyclic_group(5),
-        5,
-        5,
+        _cyclic_group(11),
+        11,
+        11,
         edges,
         edges,
         alpha=0.75,
-        max_tuple_states=100,
-        max_twl_work_units=2_000_000,
+        max_tuple_states=200,
+        max_twl_work_units=10_000_000,
     )
     assert got.status == "certified_ambient_design_witness_coset_cover"
     assert got.wiring.branch_plan is not None
@@ -89,7 +89,7 @@ def test_cycle5_zero_individualization_cover_preserves_full_cyclic_ambient_group
     assert got.original_branch_count == 1
     assert got.surviving_branch_count == 1
     assert got.branches[0].source_tuple == got.branches[0].target_tuple == ()
-    assert got.branches[0].stabilizer_order == 5
+    assert got.branches[0].stabilizer_order == 11
     assert got.ambient_pairing_complete and got.exact
 
 
@@ -118,21 +118,21 @@ def test_unary_partition_is_exact_empty_when_trivial_ambient_group_cannot_move_i
 
 
 def test_rev204_parent_mismatch_remains_exact_empty_before_ambient_filtering():
-    source = _edges(_cycle5())
-    target_hyperedges = list(_cycle5())
+    source = _edges(_cycle11())
+    target_hyperedges = list(_cycle11())
     target_hyperedges[-1] = target_hyperedges[0]
     got = pair_design_witnesses_inside_ambient_action(
-        _cyclic_group(5), 5, 5, source, _edges(target_hyperedges)
+        _cyclic_group(11), 11, 11, source, _edges(target_hyperedges)
     )
     assert got.status == "exact_empty_rev204_parent"
     assert got.exact_empty and got.exact
 
 
 def test_ambient_group_degree_must_match_right_ground():
-    edges = _edges(_cycle5())
+    edges = _edges(_cycle11())
     try:
         pair_design_witnesses_inside_ambient_action(
-            _trivial_group(4), 5, 5, edges, edges
+            _trivial_group(4), 11, 11, edges, edges
         )
     except ValueError as exc:
         assert "degree" in str(exc)
