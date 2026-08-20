@@ -72,7 +72,7 @@ rev224 tested head `3fba4018e2fade65daae7f6dacc0dbc01539b431` は、AGI-GI rev v
 
 ## 問題木
 
-予測問題数は **576**、置換済み旧問題を除く有効問題数は **531**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
+予測問題数は **576**、置換済み旧問題を除く有効問題数は **534**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
 
 置換済み旧問題を除く全層――primitive relation、H6-C2、W1R-H6 corrected Split-or-Johnson/Design branch、global proof-carrying recurrence/resource、AGI rootの一般性・性能・自律性・実用提供――を横断し、7本の狭いrelation/filter/cap branchを三つのsolution-shaped problemへ書き換えた。**CRX1 exact canonical relation quotient/preimage closure**、**CRX2 information/symmetry-defect relation selection**、**CRX3 replay-stable proof/resource substrate**であり、単なる重複名の統合ではなく上位親から共有できる解法境界である。結果は `517 - 7 + 3 = 513`、再予測576。rev214はCRX1のnonconstant strict-pair subcaseとCRX3のhomogeneous/self-loop guardsだけを解決した。
 
@@ -96,9 +96,11 @@ rev223の直接試行でCRX2子2.2を、(2.2.1) 各T内で共有するprepared b
 
 rev224の直接試行でCRX2子2.2.2を、(2.2.2.1) prepared preimage phaseの全raw Schreier work cap、(2.2.2.2) affected-segment層と最終unaffected stabilizerのresource envelope、(2.2.2.3) 完全なsingle-T execution-linked sum、の三子へ分解した。2.2.2.1を解決し、旧1末端をその親と3子へ置換したため有効数は `528 - 1 + 4 = 531`。531は予測576以下なのでover-count rewrite triggerは発火せず、子を抑制していない。
 
+rev225の直接試行ではCRX2子2.2.2.2を、(2.2.2.2a) before/after giant-action structural auditとfinal unaffected stabilizerのraw Schreier/orbit envelope、(2.2.2.2b) affected-segment quotient/kernel recursion primitive envelope、(2.2.2.2c) layer内のexact coset reassemblyとchild SI charge、の三子へ分解した。2.2.2.2aの実装候補をPR #153へ公開し、旧1末端をその親と3子へ置換したため有効数は `531 - 1 + 4 = 534`。CIとmain統合前なので解決済みとはまだ認定しない。534は予測576以下でover-count rewrite triggerは発火せず、子を抑制していない。
+
 CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2の残るaffected-segment / final unaffected-stabilizer resource envelope、complete single-T execution sum、complete all-T scheduling / source-target comparisonとそのexecution-linked consumers、CRX3 substrateの未解決algorithmic consumers、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
 
-次の未解決末端は **CRX2 / affected-segment layers and final unaffected-stabilizer resource envelopes**:
+次の未解決末端は **CRX2 / giant-action structural audit and final unaffected-stabilizer resource envelope（rev225 validation pending）**:
 
 > 単一test setの各growing-beard layerで、before/after giant-action structural audit、affected-segment quotient/kernel recursion、最終unaffected stabilizer reductionの全primitive workを実行前に停止可能な有限capへ収め、超過をunknownとしてfail closedにする。その後、rev224 preimage phaseと合成した完全なsingle-T execution-linked sumへ進む。
 
