@@ -127,6 +127,7 @@ jobs:
           test_bipartite_parent_polynomial_lift_accounting_rev207.py
           test_literal_giant_candidate_si_rev208.py
           test_johnson_log_candidate_bridge_rev209.py
+          test_canonical_imprimitive_family_candidate_si_rev210.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
