@@ -79,6 +79,7 @@ def quotient_factored_partial_string_intersection(
     giant_certificate=None,
     max_quotient_schreier_work=None,
     max_reassembly_schreier_work=None,
+    max_combined_schreier_work=None,
 ) -> QuotientFactoredPartialStringIntersection:
     """Intersect a giant-action group with an affected string segment by double recursion.
 
@@ -114,6 +115,13 @@ def quotient_factored_partial_string_intersection(
         raise ValueError("string/domain size mismatch")
     if max_quotient_leaves <= 0:
         raise ValueError("max_quotient_leaves must be positive")
+    if max_combined_schreier_work is not None and (
+        max_quotient_schreier_work is not None
+        or max_reassembly_schreier_work is not None
+    ):
+        raise ValueError(
+            "combined affected-segment cap cannot be mixed with per-phase caps"
+        )
 
     giant = giant_certificate if giant_certificate is not None else analyze_giant_block_action(group, blocks)
     t = len(blocks)
@@ -125,13 +133,24 @@ def quotient_factored_partial_string_intersection(
             "current group does not expose an A_t/S_t quotient on the supplied blocks",
         )
 
+    combined_cap = (
+        None if max_combined_schreier_work is None
+        else int(max_combined_schreier_work)
+    )
+    if combined_cap is not None and combined_cap < 0:
+        raise ValueError("remaining combined affected-segment cap must be nonnegative")
+    quotient_cap = (
+        combined_cap if combined_cap is not None
+        else max_quotient_schreier_work
+    )
+
     envelope = None
-    if max_quotient_schreier_work is not None:
+    if quotient_cap is not None:
         envelope = affected_segment_quotient_resource_envelope(
             group, t, giant.image_order,
             max_quotient_leaves=max_quotient_leaves,
             max_child_nodes=max_child_nodes,
-            max_work=max_quotient_schreier_work,
+            max_work=quotient_cap,
         )
         if not envelope.admitted:
             return QuotientFactoredPartialStringIntersection(
@@ -142,8 +161,12 @@ def quotient_factored_partial_string_intersection(
                 envelope,
             )
 
+    reassembly_cap = max_reassembly_schreier_work
+    if combined_cap is not None and envelope is not None and envelope.admitted:
+        reassembly_cap = combined_cap - envelope.work_upper_bound
+
     reassembly_envelope = None
-    if max_reassembly_schreier_work is not None:
+    if reassembly_cap is not None:
         if envelope is None:
             envelope = affected_segment_quotient_resource_envelope(
                 group, t, giant.image_order,
@@ -153,7 +176,7 @@ def quotient_factored_partial_string_intersection(
             )
         reassembly_envelope = affected_segment_reassembly_resource_envelope(
             group, t, envelope.quotient_leaf_upper_bound,
-            envelope.quotient_node_upper_bound, max_reassembly_schreier_work,
+            envelope.quotient_node_upper_bound, reassembly_cap,
         )
         if not reassembly_envelope.admitted:
             return QuotientFactoredPartialStringIntersection(
