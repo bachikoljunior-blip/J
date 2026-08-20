@@ -112,6 +112,11 @@ def test_singleton_cells_produce_a_trivial_internal_subgroup():
         target_right_colors=("b", "c", "a"),
     )
     assert refinement.status == "exact_unique_twin_quotient_mapping"
+    # All quotient cells already have distinct base colors. WL stabilization is
+    # therefore one refinement round even if the canonical integer IDs themselves
+    # would be re-assigned on another round; rev202 explicitly tests partition
+    # stabilization rather than literal numeric-ID equality.
+    assert refinement.refinement_rounds == 1
     got = build_bipartite_twin_cell_transport_coset(refinement)
     assert got.expected_order == got.subgroup_order == 1
     assert got.coset.contains(got.representative)
