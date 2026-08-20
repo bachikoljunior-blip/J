@@ -76,7 +76,17 @@ def coherent_refine_pair_relation(
         }
         next_colors = [[relabel[x] for x in row] for row in signatures]
         rounds += 1
-        if next_colors == colors:
+        current_rank = len({x for row in colors for x in row})
+        next_rank = len(relabel)
+        if next_rank < current_rank:
+            raise AssertionError("2-WL refinement merged an existing pair-color class")
+        if next_rank == current_rank:
+            # Stability is equality of the induced partition, not equality of
+            # transient integer IDs.  The signature contains the old color, so
+            # every round refines the old partition; equal rank therefore proves
+            # the partition is unchanged even when canonical ID compression
+            # permutes its numeric labels.
+            colors = next_colors
             break
         colors = next_colors
         if rounds >= max_rounds:
