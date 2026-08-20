@@ -5,7 +5,7 @@
 The active root remains the strict practical AGI root and the AGI state remains `NOT_AGI`.
 The AGI-GI problem-tree forecast remains **512** and the effective non-replaced count remains **512**. This rev does not pre-cap a newly created branch to avoid the mandatory over-count rewrite; instead it replaces an internal part of existing leaf **W1R-H6-C2** in place. The actual count therefore does not exceed the forecast in this change.
 
-This rev attempts the `literal primitive giant A/S` part of H6-C2. It does **not** claim the primitive non-giant, larger Johnson-ground, genuinely unresolved Split-or-Johnson image, or global W1R-H6 recurrence cases.
+This rev closes the `literal primitive giant A/S` subcase of H6-C2 at both direct candidate and invariant-orbit S1 dispatch boundaries. It does **not** claim the primitive non-giant, larger Johnson-ground, genuinely unresolved Split-or-Johnson image, or global W1R-H6 recurrence cases.
 
 ## World-solution / higher-layer audit
 
@@ -22,12 +22,12 @@ This is a higher-layer compression for the **literal full-action giant** child o
 
 `primitive_giant_full_action_string_iso_v1.py` implements the exact terminal above. It reuses the existing exact giant certificate and paired-Schreier kernel substrate, audits the color-stabilizer order, verifies every returned subgroup generator lies in the ambient group and stabilizes the target string, and returns proof-carrying terminal accounting without enumerating `A_n` or `S_n`.
 
-`u2_candidate_coset_string_iso_v3.py` places this terminal ahead of the existing v2 structural dispatcher only when the represented candidate subgroup has literal full-action order `n!` or `n!/2` for `n>=5`. All other cases delegate unchanged to v2 and remain fail-closed.
+`u2_candidate_coset_string_iso_v3.py` places this terminal ahead of the existing v2 structural dispatcher when the candidate subgroup itself is a literal full-action giant. In addition, the established `s1_string_isomorphism_v2` now uses the same exact terminal after its small-order gate and before structural fallback. This second hook is the important rev206/rev207 integration point: existing `candidate_coset_string_isomorphism_u2` already decomposes intransitive candidate actions into invariant-orbit S1 children, so a literal `A_m`/`S_m` orbit child now closes exactly without changing or relaxing the coupled parent action. The rev207 proof replay calls the same candidate/S1 stack and therefore sees the same proof-carrying terminal.
 
-The regression covers literal `S_9`, literal `A_9`, the singleton-color odd-parity exact-empty case, and the v3 candidate-coset integration with explicit enumeration capped below the giant group order.
+The regression covers literal `S_9`, literal `A_9`, the singleton-color odd-parity exact-empty case, direct v3 candidate dispatch, direct S1 dispatch beyond the explicit-degree/enumeration caps, and the **existing v2 candidate** intransitive-orbit path with an `S_5` child. The latter verifies that callers need not migrate to a new parent API to gain the literal-giant closure.
 
 ## Remaining child after this attempt
 
-The immediate integration child is **W1R-H6-C2a2**: thread the v3 candidate dispatcher through the rev206 coupled parent intersection / Design-union replay / rev207 polynomial-lift accounting call chain, and prove that formerly typed literal-giant image branches become exact there without relaxing the actual parent action. After that, H6-C2 continues with primitive non-giant / larger Johnson-ground and genuinely unresolved Split-or-Johnson image states.
+The next unresolved part of **W1R-H6-C2** is now the non-literal remainder: primitive non-giant / larger Johnson-ground states and genuinely unresolved Split-or-Johnson image states. Exact giant quotients with nontrivial kernels still require the existing theorem-gated local-certificate/affected-unaffected machinery; they are not conflated with the literal full-action terminal.
 
 No result in this rev is evidence of AGI, full Split-or-Johnson closure, or global quasipolynomial recurrence closure.
