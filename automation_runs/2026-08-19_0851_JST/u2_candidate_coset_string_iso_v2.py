@@ -11,6 +11,7 @@ from permutation_group_schreier import compose, inverse
 from primitive_johnson_ground_terminal_v1 import primitive_johnson_ground_string_isomorphism_terminal
 from proof_carrying_si_v1 import ProofCarryingCoset
 from proof_carrying_small_order_candidate_v1 import exact_small_order_candidate_string_isomorphism
+from proof_carrying_state_orbit_candidate_v1 import exact_state_orbit_candidate_string_isomorphism
 from quasipoly_recurrence_accounting_v1 import AccountingChild, RecurrenceAccountingNode
 from s1_string_isomorphism_v4 import s1_string_isomorphism_v4
 from s1_structural_classifier_v1 import classify_s1_structure
@@ -91,6 +92,7 @@ def _candidate_coset_string_isomorphism_u2(
     group_order_poly_power: int = 2,
     max_group_order: int = 256,
     max_depth: int = 64,
+    max_state_orbit_work: int = 0,
 ) -> ProofCarryingCoset:
     """Candidate-coset SI with proof-carrying structural recursion.
 
@@ -142,6 +144,15 @@ def _candidate_coset_string_isomorphism_u2(
     )
     if small.exact:
         return small
+
+    if max_state_orbit_work > 0:
+        state_orbit = exact_state_orbit_candidate_string_isomorphism(
+            candidate, source, target,
+            root_n=root_n,
+            max_work=max_state_orbit_work,
+        )
+        if state_orbit.exact:
+            return state_orbit
 
     initial_orbits = _group_orbits(H0)
     if len(initial_orbits) <= 1 and n > 1:
@@ -269,6 +280,7 @@ def candidate_coset_string_isomorphism_u2(
     group_order_poly_power: int = 2,
     max_group_order: int = 256,
     max_depth: int = 64,
+    max_state_orbit_work: int = 0,
     proof_identity=None,
 ) -> ProofCarryingCoset:
     """Run u2 and attach an optional execution identity before returning."""
@@ -282,6 +294,7 @@ def candidate_coset_string_isomorphism_u2(
         group_order_poly_power=group_order_poly_power,
         max_group_order=max_group_order,
         max_depth=max_depth,
+        max_state_orbit_work=max_state_orbit_work,
     )
     if proof_identity is None:
         return proof
