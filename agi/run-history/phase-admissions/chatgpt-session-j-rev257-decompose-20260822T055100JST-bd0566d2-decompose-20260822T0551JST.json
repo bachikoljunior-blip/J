@@ -1,0 +1,52 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "main",
+    "claim_id": "chatgpt-session-j-rev257-decompose-20260822T055100JST-bd0566d2",
+    "heartbeat_at_jst": "2026-08-22T05:51:04+09:00",
+    "reserved_paths": [
+      "MAIN.md",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev257-decompose-20260822T055100JST-bd0566d2-decompose-20260822T0551JST.json"
+    ],
+    "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/decomposition",
+    "state": "active",
+    "target_revision": 257
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev255-primitive-johnson-design-integration-retakeover-20260822-0514",
+      "claim_id": "chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795",
+      "heartbeat_at_jst": "2026-08-22T05:14:47+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-attempt_solution-20260822T0514JST.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-merge-20260822T0514JST.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-publish-20260822T0514JST.json",
+        "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+        "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+        "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+      ],
+      "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+      "state": "active",
+      "target_revision": 255
+    }
+  ],
+  "paths": [
+    "MAIN.md",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev257-decompose-20260822T055100JST-bd0566d2-decompose-20260822T0551JST.json"
+  ],
+  "phase": "decompose",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T05:51:18+09:00",
+  "registry_digest": "sha256:f0e0886b2cd212d024abfc0fc62d8f9c2ea9a19aba3e266427b1d7fcf8efc311",
+  "registry_source_sha": "8bc4ac5f40c329656aa298006a41661aca6b8fa3",
+  "schema_version": 1,
+  "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/decomposition",
+  "target_revision": 257
+}
