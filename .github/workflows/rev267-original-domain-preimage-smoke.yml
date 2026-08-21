@@ -1,0 +1,37 @@
+name: rev267 original-domain preimage smoke
+
+on:
+  pull_request:
+    paths:
+      - automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_coset_v2.py
+      - automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_coset_rev267.py
+      - automation_runs/2026-08-19_0851_JST/REV267_ORIGINAL_DOMAIN_PREIMAGE.md
+      - .github/workflows/rev267-original-domain-preimage-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile rev267 and inherited contracts
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: |
+          python -m py_compile \
+            implicit_relation_image_preimage_coset_v2.py \
+            implicit_relation_image_action_v1.py \
+            bounded_relation_image_coset_v1.py \
+            coset_stabilizer_primitives.py
+      - name: Run focused original-domain paired-preimage regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python -m unittest -v test_implicit_relation_image_preimage_coset_rev267.py
+      - name: Run inherited rev257 paired-action regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python -m unittest -v test_implicit_relation_image_action_rev257.py
