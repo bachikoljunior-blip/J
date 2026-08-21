@@ -4,11 +4,6 @@ on:
   schedule:
     - cron: "56 * * * *"
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "automation/session_refire.py"
-      - "automation/test_session_refire.py"
-      - ".github/workflows/j-parallel-resilience-session-hourly-refire.yml"
 
 permissions:
   contents: read
@@ -16,7 +11,7 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: j-parallel-resilience-session-hourly-refire-${{ github.event_name }}
+  group: j-parallel-resilience-session-hourly-refire-runtime
   cancel-in-progress: false
 
 jobs:
@@ -63,10 +58,15 @@ jobs:
           fi
 
           owner="${REPOSITORY%%/*}"
-          pr_updated="$(
+          pr_updated=""
+          if pr_updated="$(
             gh api "repos/${REPOSITORY}/pulls?state=open&head=${owner}:${BRANCH}&per_page=1" \
-              --jq '.[0].updated_at // empty'
-          )"
+              --jq '.[0].updated_at // empty' 2>/dev/null
+          )"; then
+            :
+          else
+            pr_updated=""
+          fi
 
           args=(
             check
@@ -77,7 +77,18 @@ jobs:
           [[ -n "${branch_updated}" ]] && args+=(--branch-activity-at "${branch_updated}")
           [[ -n "${pr_updated}" ]] && args+=(--pr-activity-at "${pr_updated}")
 
-          decision="$(python automation/session_refire.py "${args[@]}")"
+          decision=""
+          if ! decision="$(python automation/session_refire.py "${args[@]}")"; then
+            echo "stale=false" >>"${GITHUB_OUTPUT}"
+            echo "reason=invalid_input" >>"${GITHUB_OUTPUT}"
+            {
+              echo "### J parallel resilience session guard"
+              echo "- Decision: exact-session input is invalid; fail closed without re-fire"
+              echo "- Other branches, PRs, claims, and workflows inspected or changed: none"
+            } >>"${GITHUB_STEP_SUMMARY}"
+            exit 0
+          fi
+
           stale="$(jq -r '.should_refire' <<<"${decision}")"
           reason="$(jq -r '.reason' <<<"${decision}")"
           echo "stale=${stale}" >>"${GITHUB_OUTPUT}"
@@ -95,7 +106,7 @@ jobs:
           } >>"${GITHUB_STEP_SUMMARY}"
 
       - name: Emit deduplicated durable continuation request
-        if: github.event_name != 'pull_request' && steps.guard.outputs.stale == 'true'
+        if: steps.guard.outputs.stale == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
