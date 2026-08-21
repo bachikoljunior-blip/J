@@ -22,9 +22,24 @@
   },
   "parallel_active_claims": [
     {
+      "branch": "agi-gi-rev252-proof-carrying-small-order-admission-session-20260821-2213",
+      "claim_id": "chatgpt-session-j-rev252-20260821T221349JST-7174b2e6",
+      "heartbeat_at_jst": "2026-08-22T06:44:36+09:00",
+      "reserved_paths": [
+        ".github/workflows/j-rev252-session-hourly-refire.yml",
+        ".github/workflows/rev252-proof-carrying-small-order-production-admission.yml",
+        "automation_runs/2026-08-19_0851_JST/REV252_PROOF_CARRYING_SMALL_ORDER_PRODUCTION_ADMISSION.md",
+        "automation_runs/2026-08-19_0851_JST/proof_carrying_small_order_production_admission_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_proof_carrying_small_order_production_admission_rev252.py"
+      ],
+      "scope": "crx3/acceptance/proof-carrying-small-order-production-admission",
+      "state": "active",
+      "target_revision": 252
+    },
+    {
       "branch": "agi-gi-rev258-implicit-image-resource-envelope-session-20260822-0644",
       "claim_id": "chatgpt-session-j-rev258-resource-envelope-20260822T064500JST-2675f756",
-      "heartbeat_at_jst": "2026-08-22T06:45:00+09:00",
+      "heartbeat_at_jst": "2026-08-22T06:48:30+09:00",
       "reserved_paths": [
         ".github/workflows/rev258-implicit-relation-image-resource-envelope-smoke.yml",
         "automation_runs/2026-08-19_0851_JST/REV258_IMPLICIT_RELATION_IMAGE_RESOURCE_ENVELOPE.md",
@@ -34,6 +49,23 @@
       "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-root-resource-envelope",
       "state": "active",
       "target_revision": 258
+    },
+    {
+      "branch": "agi-gi-rev259-implicit-image-paired-preimage-session-20260822-0648",
+      "claim_id": "chatgpt-session-j-rev259-implicit-image-paired-preimage-20260822T064816JST-e3c1c723",
+      "heartbeat_at_jst": "2026-08-22T06:48:16+09:00",
+      "reserved_paths": [
+        ".github/workflows/j-rev259-session-hourly-refire.yml",
+        ".github/workflows/rev259-implicit-relation-image-paired-preimage-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev259-implicit-image-paired-preimage-20260822T064816JST-e3c1c723-attempt-solution-20260822T0648JST.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev259-implicit-image-paired-preimage-20260822T064816JST-e3c1c723-publish-20260822T0648JST.json",
+        "automation_runs/2026-08-19_0851_JST/REV259_IMPLICIT_RELATION_IMAGE_PAIRED_PREIMAGE.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_image_paired_preimage_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_paired_preimage_rev259.py"
+      ],
+      "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-domain-paired-preimage",
+      "state": "active",
+      "target_revision": 259
     }
   ],
   "paths": [
@@ -45,9 +77,9 @@
   ],
   "phase": "merge",
   "reasons": [],
-  "recorded_at_jst": "2026-08-22T06:46:30+09:00",
-  "registry_digest": "sha256:9fcfd5df957ba50874c4bce6eb4e6d19018e2343eff80b102cb856b36d94eb91",
-  "registry_source_sha": "e5447a1e572301bdfdf9a68ea4866ee573a99e5b",
+  "recorded_at_jst": "2026-08-22T06:50:00+09:00",
+  "registry_digest": "sha256:c7dc0b8c29c146aa369c4ef1415b186d06a99788bef9d4e32ff9230dc1a1a0b3",
+  "registry_source_sha": "3a6f1a5c50d06d848f9efed1d67c8f6892537224",
   "schema_version": 1,
   "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/paired-faithful-auxiliary-action",
   "target_revision": 257
