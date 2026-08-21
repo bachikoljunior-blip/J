@@ -65,7 +65,7 @@ def transport_complete_design_tuple_branches(
         raise ValueError("max_partition_states must be positive")
     n = int(group.degree)
     v = int(branch_plan.vertex_count)
-    ledger = branch_plan.original_root_ledger
+    ledger = getattr(branch_plan, "original_root_ledger", None)
     if ledger is not None:
         if not ledger.admitted:
             return DesignTupleTransportPlan(
