@@ -1,4 +1,4 @@
-from itertools import combinations
+from itertools import combinations, permutations
 
 import upcc_pair_root_split_family_v1 as pair_root
 
@@ -60,6 +60,22 @@ def test_complete_pair_family_is_relabeling_equivariant_by_profiles():
     profile_a = sorted((status, tuple(sorted(row))) for status, row in zip(a.branch_statuses, a.child_aux_sizes))
     profile_b = sorted((status, tuple(sorted(row))) for status, row in zip(b.branch_statuses, b.child_aux_sizes))
     assert profile_a == profile_b
+
+
+def test_petersen_partitions_are_equivariant_under_all_s5_automorphisms():
+    got = _solve()
+    vertices = tuple(combinations(range(5), 2))
+    index = {pair: i for i, pair in enumerate(vertices)}
+    by_root = dict(zip(got.root_pairs, got.partitions))
+    for ground_permutation in permutations(range(5)):
+        image = tuple(
+            index[tuple(sorted((ground_permutation[a], ground_permutation[b])))]
+            for a, b in vertices
+        )
+        for (a, b), partition in by_root.items():
+            mapped = {frozenset(image[x] for x in cell) for cell in partition}
+            target = {frozenset(cell) for cell in by_root[(image[a], image[b])]}
+            assert mapped == target
 
 
 def test_branch_cap_rejects_before_any_twl_execution(monkeypatch):
