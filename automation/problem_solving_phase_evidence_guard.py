@@ -51,6 +51,16 @@ def is_problem_state_path(path: str) -> bool:
     return False
 
 
+def path_is_covered(path: str, admitted_paths: list[str]) -> bool:
+    try:
+        return any(
+            repo_path_is_within(path, admitted_path)
+            for admitted_path in admitted_paths
+        )
+    except ClaimFormatError:
+        return False
+
+
 def _git(repo: Path, *args: str) -> str:
     return subprocess.run(
         ["git", *args],
@@ -169,14 +179,7 @@ def main() -> int:
         except (OSError, json.JSONDecodeError):
             continue
     for changed_path in relevant:
-        try:
-            covered = any(
-                repo_path_is_within(changed_path, admitted_path)
-                for admitted_path in admitted_paths
-            )
-        except ClaimFormatError:
-            covered = False
-        if not covered:
+        if not path_is_covered(changed_path, admitted_paths):
             errors.append(f"changed problem-state path lacks admission coverage: {changed_path}")
 
     result = {

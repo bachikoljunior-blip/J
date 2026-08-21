@@ -29,7 +29,14 @@ jobs:
       - name: List pull-request changes
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: git diff --name-only "$BASE_SHA" HEAD > /tmp/changed-files.txt
+        run: |
+          if [[ -n "$BASE_SHA" ]]; then
+            base="$BASE_SHA"
+          else
+            git fetch --no-tags origin main
+            base="$(git merge-base origin/main HEAD)"
+          fi
+          git diff --name-only "$base" HEAD > /tmp/changed-files.txt
       - name: Replay phase-admission evidence
         run: |
           python automation/problem_solving_phase_evidence_guard.py \
