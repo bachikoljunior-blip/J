@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev257-status-sync-20260822T065100JST-e24fa496",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T064415+0900-29786052-turn1",
   "started_at_jst": "2026-08-22T06:50:58+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:50:58+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:53:58+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "e24fa496f948c2f8a294752b44142d086c2c6a26",
   "starting_agi_gi_rev": 257,
@@ -16,6 +16,8 @@
   ],
   "branch": "main",
   "non_interference": "Update only canonical rev257 problem-tree/status text and its replayable phase evidence; do not touch active rev258/rev259 implementation paths.",
-  "status": "active",
-  "agi_state": "NOT_AGI"
+  "status": "closed",
+  "agi_state": "NOT_AGI",
+  "completed_at_jst": "2026-08-22T06:53:58+09:00",
+  "canonical_main_commit_sha": "a1d01392291b18635e3abefa6ce08767669ca541"
 }
