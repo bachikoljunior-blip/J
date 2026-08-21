@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "event_type": "active_session_claim",
+  "automation_run_id": "chatgpt-session-j-rev243-20260821T194629+0900-19177bba",
+  "started_at_jst": "2026-08-21T19:46:29+09:00",
+  "request_received_at_utc": "2026-08-21T10:43:54Z",
+  "repository": "bachikoljunior-blip/J",
+  "starting_main_sha": "19177bbabd8316573f1e16521b82b37bff526224",
+  "starting_agi_gi_rev": 241,
+  "target_revision": 243,
+  "branch": "agi-gi-rev243-nested-imprimitive-preflight-session-20260821-1946",
+  "exclusive_scope": "CRX2/c2b2a2ii nested transitive-imprimitive block quotient/kernel preflight",
+  "excluded_parallel_scopes": [
+    "CRX2/c2b2a2i3b shared Design pipeline admission ledger"
+  ],
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "skip_duplicate_scope_when_this_claim_is_active": true,
+    "base_only_on_main_sha": "19177bbabd8316573f1e16521b82b37bff526224"
+  },
+  "restart_guard": {
+    "schedule_title": "AGI-GI実装継続",
+    "cadence": "hourly",
+    "execution_surface": "chatgpt_work_mode_same_conversation",
+    "stale_after_minutes": 75,
+    "behavior": "skip while a fresh heartbeat for this automation_run_id exists; re-enter the same unresolved scope only after the claim is stale"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
