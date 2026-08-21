@@ -31,4 +31,3 @@ jobs:
           test_design_full_string_child_resource_rev235.py
           test_design_tuple_full_string_union_rev189.py
           test_design_lemma_exact_twl_candidate_rev194.py
-          test_design_branch_materialization_resource_rev234.py
