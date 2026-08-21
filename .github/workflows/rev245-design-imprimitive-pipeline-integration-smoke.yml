@@ -1,0 +1,32 @@
+name: rev245 Design imprimitive pipeline integration smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  rev245-design-imprimitive-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pytest numpy
+      - name: Run rev245 and inherited resource regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: >-
+          python -m pytest -q
+          test_design_imprimitive_pipeline_integration_rev245.py
+          test_imprimitive_quotient_kernel_resource_rev244.py
+          test_design_original_root_pipeline_resource_rev242.py
+          test_design_state_orbit_cover_rev240.py
+      - name: Compile changed modules
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py
+          automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py
+          automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py
+          automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py
+          automation_runs/2026-08-19_0851_JST/test_design_imprimitive_pipeline_integration_rev245.py
