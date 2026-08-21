@@ -1,0 +1,48 @@
+name: rev265 implicit relation-image resource envelope bootstrap
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/rev265-implicit-relation-image-resource-envelope-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev265-resource-envelope-20260822T074900JST-f3389aa0-attempt-solution.json'
+      - 'automation_runs/2026-08-19_0851_JST/REV265_IMPLICIT_RELATION_IMAGE_RESOURCE_ENVELOPE.md'
+      - 'automation_runs/2026-08-19_0851_JST/implicit_relation_image_resource_envelope_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_resource_envelope_rev265.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase-admission-bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate exact attempt-solution admission evidence
+        run: >-
+          python automation/problem_solving_parallel_admission.py
+          --claim-id chatgpt-session-j-rev265-resource-envelope-20260822T074900JST-f3389aa0
+          --phase attempt_solution
+          --scope crx1/bounded-arity-relation-image/implicit-generator-group/original-root-resource-envelope
+          --target-revision 265
+          --path .github/workflows/rev265-implicit-relation-image-resource-envelope-smoke.yml
+          --path agi/run-history/phase-admissions/chatgpt-session-j-rev265-resource-envelope-20260822T074900JST-f3389aa0-attempt-solution.json
+          --path automation_runs/2026-08-19_0851_JST/REV265_IMPLICIT_RELATION_IMAGE_RESOURCE_ENVELOPE.md
+          --path automation_runs/2026-08-19_0851_JST/implicit_relation_image_resource_envelope_v2.py
+          --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_resource_envelope_rev265.py
+          --now 2026-08-22T07:52:00+09:00
+          --output /tmp/rev265-attempt-solution.json
+      - name: Show evidence
+        run: cat /tmp/rev265-attempt-solution.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rev265-attempt-solution-evidence
+          path: /tmp/rev265-attempt-solution.json
+          if-no-files-found: error
