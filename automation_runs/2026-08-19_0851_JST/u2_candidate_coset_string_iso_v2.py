@@ -93,6 +93,7 @@ def _candidate_coset_string_isomorphism_u2(
     max_group_order: int = 256,
     max_depth: int = 64,
     max_state_orbit_work: int = 0,
+    max_imprimitive_quotient_kernel_work: int = 0,
 ) -> ProofCarryingCoset:
     """Candidate-coset SI with proof-carrying structural recursion.
 
@@ -166,6 +167,34 @@ def _candidate_coset_string_isomorphism_u2(
         subgroup_source = tuple(source[rinv[j]] for j in range(n))
 
         if classification.status == "canonical_imprimitive_block_system":
+            if max_imprimitive_quotient_kernel_work > 0:
+                from resource_bounded_imprimitive_candidate_si_v1 import (
+                    resource_bounded_imprimitive_string_isomorphism,
+                )
+
+                inner = resource_bounded_imprimitive_string_isomorphism(
+                    H0,
+                    subgroup_source,
+                    target,
+                    root_n=root_n,
+                    polylog_power=polylog_power,
+                    max_explicit_degree=max_explicit_degree,
+                    quotient_order_poly_power=group_order_poly_power,
+                    max_quotient_image_order=max_group_order,
+                    candidate_group_order_poly_power=group_order_poly_power,
+                    max_candidate_group_order=max_group_order,
+                    max_imprimitive_quotient_kernel_work=max_imprimitive_quotient_kernel_work,
+                    certified_block_system=classification.block_system,
+                )
+                if inner.exact:
+                    return _translate_subgroup_si_back_to_candidate(
+                        inner, candidate.representative, degree=n,
+                    )
+                return _parent(
+                    root_n=root_n, degree=n, status=inner.status, coset=None,
+                    exact=False, children=(inner,), cost_certified=False,
+                    reason="the reserved unique imprimitive quotient/kernel child remains unresolved",
+                )
             from v2_imprimitive_small_image_v2 import imprimitive_small_image_string_isomorphism_v2_recursive
 
             inner = imprimitive_small_image_string_isomorphism_v2_recursive(
@@ -281,6 +310,7 @@ def candidate_coset_string_isomorphism_u2(
     max_group_order: int = 256,
     max_depth: int = 64,
     max_state_orbit_work: int = 0,
+    max_imprimitive_quotient_kernel_work: int = 0,
     proof_identity=None,
 ) -> ProofCarryingCoset:
     """Run u2 and attach an optional execution identity before returning."""
@@ -295,6 +325,7 @@ def candidate_coset_string_isomorphism_u2(
         max_group_order=max_group_order,
         max_depth=max_depth,
         max_state_orbit_work=max_state_orbit_work,
+        max_imprimitive_quotient_kernel_work=max_imprimitive_quotient_kernel_work,
     )
     if proof_identity is None:
         return proof
