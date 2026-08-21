@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev263-exact-empty-parent-verifier-20260822T0743JST-71109236",
+  "session_id": "chatgpt-session-j-parallel-resilience-continuation-20260822T0743+0900-turn1",
+  "started_at_jst": "2026-08-22T07:43:11+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:43:11+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "71109236ae1bdecdba4b89654d2b6427b3cef03a",
+  "starting_agi_gi_rev": 257,
+  "target_revision": 263,
+  "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/exact-empty-parent-promotion-verifier",
+  "branch": "agi-gi-rev263-exact-empty-parent-verifier-session-20260822-0743",
+  "reserved_paths": [
+    ".github/workflows/rev263-exact-empty-parent-verifier-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev263-exact-empty-parent-verifier-20260822T0743JST-71109236-attempt-solution.json",
+    "automation_runs/2026-08-19_0851_JST/REV263_EXACT_EMPTY_PARENT_VERIFIER.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_parent_exact_empty_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_exact_empty_rev263.py"
+  ],
+  "parallel_exclusions": [
+    "rev258 resource-envelope and value-coset branches/PRs",
+    "rev259 original-domain paired-preimage claim",
+    "rev260 differential verifier / PR #205",
+    "rev261 nonempty parent-promotion verifier / PR #204",
+    "rev262 value-preserving image-coset claim",
+    "CRX3 state-orbit proof-DAG / PR #206",
+    "MAIN.md and shared coordination implementation"
+  ],
+  "non_interference": "Add only new rev263 bounded exact-empty verification paths. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite sibling branches, PRs, claims, or workflows.",
+  "strict_boundary": "Independently verify one exact-empty parent-promotion certificate from canonical auxiliary value inventories and explicit exact-empty evidence. This does not compute rev262 image intersection, does not construct rev259 paired preimages, does not alter rev261 nonempty promotion, and does not close original-root integration, CRX1, GI, or AGI.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
