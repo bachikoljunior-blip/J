@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev265-resource-envelope-20260822T074900JST-f3389aa0",
   "session_id": "chatgpt-session-j-continuation-20260822T074400+0900-274ed1e5-turn1",
   "started_at_jst": "2026-08-22T07:49:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T07:49:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:55:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "f3389aa001318a4ba94a497eb4b65f9786357a48",
   "starting_agi_gi_rev": 257,
   "target_revision": 265,
   "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-root-resource-envelope",
   "branch": "agi-gi-rev265-implicit-image-resource-envelope-session-20260822-0749",
+  "pull_request": 208,
+  "latest_head_sha": "3ed4576daaa75683439ee6de4c2c38986b93ac51",
   "reserved_paths": [
     ".github/workflows/rev265-implicit-relation-image-resource-envelope-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev265-resource-envelope-20260822T074900JST-f3389aa0-attempt-solution.json",
@@ -23,12 +25,27 @@
     "rev262 value-preserving image-coset intersection",
     "rev263 exact-empty parent verifier",
     "rev264 parent outcome contract",
+    "rev264 primitive-Johnson proof DAG",
+    "rev266 parent outcome contract",
     "rev259 paired preimage",
     "rev260 differential verifier",
     "rev261 nonempty parent promotion",
     "CRX3 active claims"
   ],
   "non_interference": "Only new rev265 resource-envelope, phase-evidence, test, audit, and path-scoped smoke files are reserved. Do not modify sibling branches, PRs, claims, workflows, MAIN.md, or shared implementation files.",
+  "phase_admission": {
+    "attempt_solution": "success",
+    "registry_source_sha": "ae4553da541b02dae5f76b4486f789c221c9b16c",
+    "registry_digest": "sha256:2edb7c1d15242917b99bf9f0522175bce9ef32ff22eb59e3acdba045b93e5dfa"
+  },
+  "validation": {
+    "dedicated_smoke_run": 32534780353,
+    "dedicated_smoke": "success_12_tests_and_py_compile",
+    "parallel_admission_run": 32534780408,
+    "parallel_admission": "success",
+    "general_validation_run": 32534780418,
+    "general_validation": "in_progress"
+  },
   "status": "active",
   "agi_state": "NOT_AGI"
 }
