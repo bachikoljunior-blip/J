@@ -4,13 +4,16 @@
   "claim_id": "chatgpt-session-j-crx3-state-orbit-proof-dag-20260822T065011JST-89c598e1",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T064415+0900-29786052-turn1",
   "started_at_jst": "2026-08-22T06:50:11+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:50:11+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:12:38+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "585a1699633843e28e37f9cc25167ae17f90e019",
   "starting_agi_gi_rev": 256,
   "target_revision": null,
   "scope": "crx3/algorithmic-consumers/state-orbit-exact-terminal-proof-dag",
   "branch": "agi-gi-state-orbit-proof-dag-session-20260822-0650-89c598e1",
+  "pull_request": 206,
+  "latest_head_sha": "6731cdca2c2c459624ae389719a7a7d17990c092",
+  "last_refreshed_main_sha": "3642c3b528d0afaa67dc4ba3d873b53bf63dc834",
   "reserved_paths": [
     ".github/workflows/j-state-orbit-proof-dag-session-hourly-refire.yml",
     ".github/workflows/state-orbit-proof-dag-consumer-smoke.yml",
@@ -41,14 +44,23 @@
     "fallback_cron": "17 * * * *"
   },
   "parallel_exclusions": [
-    "rev257 implicit relation-image auxiliary action PR #198",
-    "rev255 primitive-Johnson Design integration",
-    "rev256 bounded relation-image coset",
+    "rev252 small-order production admission",
+    "rev258 original-root resource envelope",
+    "rev259 original-domain paired-preimage",
+    "rev260 preimage differential verifier",
+    "rev261 parent exact-promotion gate",
     "MAIN.md and current revision ledgers",
-    "all sibling active claims, branches, PRs, and workflows"
+    "all sibling active claims, branches, PRs, issues, and workflows"
   ],
   "non_interference": "Use only the reserved state-orbit identity-consumer paths on the dedicated branch. Re-read main, the active registry, and open PR changed paths before every persistent write. Never cancel, rerun, merge, close, rebase, or update another session's branch, PR, issue, workflow, or claim.",
   "verification_method": "pytest rev239 state-orbit terminal + rev220 proof-DAG accounting + focused state-orbit proof-DAG consumer tests; py_compile; workflow YAML validation",
-  "status": "active",
+  "validation": {
+    "local_py_compile": "passed",
+    "local_workflow_yaml": "passed",
+    "exact_head_workflows": "running",
+    "dedicated_smoke_run": 32531964821,
+    "parallel_admission_run": 32531964934
+  },
+  "status": "draft_pr_open_ci_running",
   "agi_state": "NOT_AGI"
 }
