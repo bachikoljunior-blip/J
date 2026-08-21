@@ -9,6 +9,10 @@ from colored_subset_design_witness_v1 import (
     DesignWitnessFamily,
     find_colored_subset_design_witness_family,
 )
+from design_original_root_ledger_v1 import (
+    DesignOriginalRootLedger,
+    design_original_root_ledger,
+)
 
 
 @dataclass(frozen=True)
@@ -17,8 +21,8 @@ class DesignBranchPlan:
     vertex_count: int
     arity: int
     individualization_length: int | None
-    source_family: DesignWitnessFamily
-    target_family: DesignWitnessFamily
+    source_family: DesignWitnessFamily | None
+    target_family: DesignWitnessFamily | None
     branches: tuple[tuple[tuple[int, ...], tuple[int, ...]], ...]
     branch_count: int
     local_log2_cost_bound: float
@@ -26,6 +30,7 @@ class DesignBranchPlan:
     complete: bool
     reason: str
     materialization_resource_envelope: object | None = None
+    original_root_ledger: DesignOriginalRootLedger | None = None
 
 
 def build_colored_subset_design_branch_plan(
@@ -39,8 +44,18 @@ def build_colored_subset_design_branch_plan(
     max_wl_vertices: int = 512,
     max_wl_rounds: int = 4096,
     max_branch_pairs: int = 200000,
+    original_root_degree: int | None = None,
+    max_partition_states: int = 200000,
+    max_design_full_string_child_work: int = 10**30,
+    max_design_union_reconstruction_work: int = 10**30,
+    max_original_root_design_work: int = 10**60,
 ) -> DesignBranchPlan:
     """Build a complete source/target branch family for a Design-Lemma witness level.
+
+    Before the first incidence-WL execution, one original-root ledger reserves the
+    complete correlated witness searches and every downstream phase through exact
+    union reconstruction.  A rejected ledger therefore returns fail-closed without
+    entering either source or target witness search.
 
     The single-structure witness finder returns the *entire* first successful
     ordered-tuple level. Under every color-preserving isomorphism that family maps
@@ -48,11 +63,6 @@ def build_colored_subset_design_branch_plan(
     of the two complete families is a safe exact branching cover: every true
     isomorphism maps some source witness tuple to a target witness tuple occurring in
     the plan. No arbitrary tuple representative is selected.
-
-    This routine does not yet compute the ambient-group transporter for each tuple
-    pair. It certifies only the complete quasipolynomial branch cover and invariant
-    rejection gates; the next layer must intersect each pair with the signed Johnson
-    ground action and recurse on the full string.
     """
     v = int(vertex_count)
     t = int(arity)
@@ -60,6 +70,27 @@ def build_colored_subset_design_branch_plan(
     target = tuple(target_colors)
     if max_branch_pairs < 1:
         raise ValueError("max_branch_pairs must be positive")
+    root = v if original_root_degree is None else int(original_root_degree)
+
+    ledger = design_original_root_ledger(
+        root,
+        v,
+        t,
+        max_states=max_states,
+        max_wl_vertices=max_wl_vertices,
+        max_wl_rounds=max_wl_rounds,
+        max_branch_pairs=max_branch_pairs,
+        max_partition_states=max_partition_states,
+        max_design_full_string_child_work=max_design_full_string_child_work,
+        max_design_union_reconstruction_work=max_design_union_reconstruction_work,
+        max_work=max_original_root_design_work,
+    )
+    if not ledger.admitted:
+        return DesignBranchPlan(
+            ledger.status, v, t, None, None, None, (), 0, 0.0,
+            False, False, ledger.reason,
+            original_root_ledger=ledger,
+        )
 
     source_family = find_colored_subset_design_witness_family(
         v, t, source,
@@ -90,6 +121,7 @@ def build_colored_subset_design_branch_plan(
             base_bound + log2(max(2, len(source) + len(target))),
             True, True,
             "source and target complete colored t-subset relations have different color multiplicities",
+            original_root_ledger=ledger,
         )
 
     if source_family.status != "certified_design_witness_family" or not source_family.exact:
@@ -98,6 +130,7 @@ def build_colored_subset_design_branch_plan(
             v, t, None, source_family, target_family, (), 0,
             base_bound, False, False,
             "source Design-Lemma witness family is not exact and complete",
+            original_root_ledger=ledger,
         )
     if target_family.status != "certified_design_witness_family" or not target_family.exact:
         return DesignBranchPlan(
@@ -105,6 +138,7 @@ def build_colored_subset_design_branch_plan(
             v, t, None, source_family, target_family, (), 0,
             base_bound, False, False,
             "target Design-Lemma witness family is not exact and complete",
+            original_root_ledger=ledger,
         )
 
     sell = source_family.minimal_individualization_length
@@ -122,6 +156,7 @@ def build_colored_subset_design_branch_plan(
             base_bound + 16.0,
             True, True,
             "minimal witness length, witness-family cardinality, or certified outcome multiplicities differ",
+            original_root_ledger=ledger,
         )
 
     branch_count = len(source_family.witness_tuples) * len(target_family.witness_tuples)
@@ -132,6 +167,7 @@ def build_colored_subset_design_branch_plan(
             v, t, sell, source_family, target_family, (), branch_count,
             branch_bound, False, False,
             "the exact Cartesian witness cover is quasipolynomially structured but exceeds the explicit branch-pair materialization cap",
+            original_root_ledger=ledger,
         )
 
     branches = tuple(
@@ -144,4 +180,5 @@ def build_colored_subset_design_branch_plan(
         v, t, sell, source_family, target_family, branches, branch_count,
         branch_bound, False, True,
         "the entire minimal source witness family is paired with the entire minimal target witness family; every true relation isomorphism is covered without selecting a label-dependent representative",
+        original_root_ledger=ledger,
     )
