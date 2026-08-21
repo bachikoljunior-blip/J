@@ -13,6 +13,10 @@ from proof_carrying_si_v1 import ProofCarryingCoset
 from proof_carrying_small_order_candidate_v1 import exact_small_order_candidate_string_isomorphism
 from proof_carrying_state_orbit_candidate_v1 import exact_state_orbit_candidate_string_isomorphism
 from quasipoly_recurrence_accounting_v1 import AccountingChild, RecurrenceAccountingNode
+from resource_bounded_primitive_johnson_candidate_si_v1 import (
+    ResourceBoundedPrimitiveJohnsonProof,
+    resource_bounded_primitive_johnson_string_isomorphism,
+)
 from s1_string_isomorphism_v4 import s1_string_isomorphism_v4
 from s1_structural_classifier_v1 import classify_s1_structure
 
@@ -81,6 +85,37 @@ def _translate_subgroup_si_back_to_candidate(inner, representative, *, degree):
     )
 
 
+def _translate_resource_bounded_primitive_johnson_back_to_candidate(
+    inner: ResourceBoundedPrimitiveJohnsonProof,
+    representative,
+    *,
+    degree: int,
+) -> ResourceBoundedPrimitiveJohnsonProof:
+    """Preserve the rev246 execution ledger while translating an exact coset."""
+    if not inner.exact:
+        return inner
+    extra_bound = 4.0 * log2(max(2, degree)) + 12.0
+    accounting = replace(
+        inner.accounting,
+        local_log2_cost_bound=inner.accounting.local_log2_cost_bound + extra_bound,
+        reason=inner.accounting.reason + "; exact fixed right-coset coordinate translation back to the candidate fiber",
+    )
+    result_coset = None
+    if inner.coset is not None:
+        result_coset = RightCoset(
+            inner.coset.subgroup,
+            compose(representative, inner.coset.representative),
+        )
+    return replace(
+        inner,
+        status="exact_translated_" + inner.status,
+        coset=result_coset,
+        accounting=accounting,
+        local_log2_cost_bound=inner.local_log2_cost_bound + extra_bound,
+        reason="exact resource-bounded primitive-Johnson subgroup SI was translated back to the original candidate right coset H*r",
+    )
+
+
 def _candidate_coset_string_isomorphism_u2(
     candidate: RightCoset,
     source_values,
@@ -93,15 +128,15 @@ def _candidate_coset_string_isomorphism_u2(
     max_group_order: int = 256,
     max_depth: int = 64,
     max_state_orbit_work: int = 0,
+    max_imprimitive_quotient_kernel_work: int = 0,
+    primitive_johnson_reservation=None,
 ) -> ProofCarryingCoset:
     """Candidate-coset SI with proof-carrying structural recursion.
 
-    Exact terminals are tried by represented group order first.  Intransitive H
-    recurses over canonical orbits.  Large transitive H is classified: unique
-    canonical imprimitive cases reuse V2 quotient/kernel recursion; primitive
-    non-giant cases try the certified small-ground J(v,2) special terminal;
-    primitive giant and unresolved Johnson/block-family cases remain typed
-    fail-closed, with no generic node-capped SI fallback.
+    A Design caller may supply one rev254 primitive-Johnson reservation.  In that
+    case the primitive-non-giant branch executes rev246 under exactly the
+    pre-admitted order/generator/work bounds and returns its proof subtype intact
+    so the complete-cover execution ledger can be checked by the caller.
     """
     H0 = candidate.subgroup
     n = H0.degree
@@ -166,6 +201,34 @@ def _candidate_coset_string_isomorphism_u2(
         subgroup_source = tuple(source[rinv[j]] for j in range(n))
 
         if classification.status == "canonical_imprimitive_block_system":
+            if max_imprimitive_quotient_kernel_work > 0:
+                from resource_bounded_imprimitive_candidate_si_v1 import (
+                    resource_bounded_imprimitive_string_isomorphism,
+                )
+
+                inner = resource_bounded_imprimitive_string_isomorphism(
+                    H0,
+                    subgroup_source,
+                    target,
+                    root_n=root_n,
+                    polylog_power=polylog_power,
+                    max_explicit_degree=max_explicit_degree,
+                    quotient_order_poly_power=group_order_poly_power,
+                    max_quotient_image_order=max_group_order,
+                    candidate_group_order_poly_power=group_order_poly_power,
+                    max_candidate_group_order=max_group_order,
+                    max_imprimitive_quotient_kernel_work=max_imprimitive_quotient_kernel_work,
+                    certified_block_system=classification.block_system,
+                )
+                if inner.exact:
+                    return _translate_subgroup_si_back_to_candidate(
+                        inner, candidate.representative, degree=n,
+                    )
+                return _parent(
+                    root_n=root_n, degree=n, status=inner.status, coset=None,
+                    exact=False, children=(inner,), cost_certified=False,
+                    reason="the reserved unique imprimitive quotient/kernel child remains unresolved",
+                )
             from v2_imprimitive_small_image_v2 import imprimitive_small_image_string_isomorphism_v2_recursive
 
             inner = imprimitive_small_image_string_isomorphism_v2_recursive(
@@ -189,6 +252,33 @@ def _candidate_coset_string_isomorphism_u2(
             )
 
         if classification.status == "primitive_non_giant":
+            if primitive_johnson_reservation is not None:
+                reservation = primitive_johnson_reservation
+                if not bool(getattr(reservation, "selected", False)):
+                    raise ValueError("primitive-Johnson caller supplied an unselected reservation")
+                reserved_work = int(getattr(reservation, "reserved_work_upper_bound", 0))
+                if reserved_work <= 0:
+                    raise ValueError("primitive-Johnson reservation has no positive work budget")
+                bounded = resource_bounded_primitive_johnson_string_isomorphism(
+                    H0,
+                    subgroup_source,
+                    target,
+                    root_n=root_n,
+                    polylog_power=polylog_power,
+                    max_explicit_degree=max_explicit_degree,
+                    parent_order_upper_bound=int(reservation.parent_order_upper_bound),
+                    image_order_upper_bound=int(reservation.image_order_upper_bound),
+                    generator_upper_bound=int(reservation.generator_upper_bound),
+                    max_recognition_nodes=500000,
+                    max_partition_states=4096,
+                    max_primitive_johnson_work=reserved_work,
+                )
+                return _translate_resource_bounded_primitive_johnson_back_to_candidate(
+                    bounded,
+                    candidate.representative,
+                    degree=n,
+                )
+
             johnson = primitive_johnson_ground_string_isomorphism_terminal(
                 H0,
                 subgroup_source,
@@ -281,6 +371,8 @@ def candidate_coset_string_isomorphism_u2(
     max_group_order: int = 256,
     max_depth: int = 64,
     max_state_orbit_work: int = 0,
+    max_imprimitive_quotient_kernel_work: int = 0,
+    primitive_johnson_reservation=None,
     proof_identity=None,
 ) -> ProofCarryingCoset:
     """Run u2 and attach an optional execution identity before returning."""
@@ -295,6 +387,8 @@ def candidate_coset_string_isomorphism_u2(
         max_group_order=max_group_order,
         max_depth=max_depth,
         max_state_orbit_work=max_state_orbit_work,
+        max_imprimitive_quotient_kernel_work=max_imprimitive_quotient_kernel_work,
+        primitive_johnson_reservation=primitive_johnson_reservation,
     )
     if proof_identity is None:
         return proof
