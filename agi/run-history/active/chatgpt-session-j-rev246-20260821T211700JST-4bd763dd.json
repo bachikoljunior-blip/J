@@ -4,13 +4,24 @@
   "claim_id": "chatgpt-session-j-rev246-20260821T211700JST-4bd763dd",
   "session_id": "chatgpt-session-j-continuation-20260821T211642+0900-a8260072-turn1",
   "started_at_jst": "2026-08-21T21:17:00+09:00",
-  "heartbeat_at_jst": "2026-08-21T21:17:00+09:00",
+  "heartbeat_at_jst": "2026-08-21T21:29:16+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "4bd763ddb3f18126e00299c6d618ef27a33daa6b",
   "starting_agi_gi_rev": 244,
   "target_revision": 246,
   "scope": "CRX2/c2b2a2iii2",
   "branch": "agi-gi-rev246-primitive-johnson-production-admission-session-20260821-2117",
+  "pull_request": 179,
+  "latest_head_sha": "d34b7e5a6396538789fba03152954c47aa0e73d8",
+  "validation": {
+    "dedicated_workflow_run": 32481869026,
+    "dedicated_status": "success",
+    "general_validation_run": 32481868901,
+    "general_validation_status": "in_progress"
+  },
+  "parallel_exclusions": [
+    "PR #177 rev245 Design-imprimitive shared caller integration"
+  ],
   "status": "active",
   "agi_state": "NOT_AGI"
 }
