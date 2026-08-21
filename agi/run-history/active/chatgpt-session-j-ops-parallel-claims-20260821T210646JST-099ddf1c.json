@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "event_type": "active_session_claim",
+  "session_id": "chatgpt-session-j-ops-parallel-claims-20260821T210646+0900-099ddf1c",
+  "started_at_jst": "2026-08-21T21:06:46+09:00",
+  "last_heartbeat_at_jst": "2026-08-21T21:06:46+09:00",
+  "repository": "bachikoljunior-blip/J",
+  "starting_main_sha": "099ddf1c916bf58dc759a116612ae481aa6d196d",
+  "target_revision": null,
+  "branch": "ops-parallel-session-claims-v2",
+  "exclusive_scope": "repository-coordination/parallel-session-claim-protocol-v2",
+  "intent": "standardize a machine-readable start marker so independent sessions detect active parallel work before choosing a revision or problem-tree scope",
+  "excluded_parallel_scopes": [
+    "AGI-GI rev245 Design imprimitive integration (PR #177)",
+    "CRX2/c2b2a2iii nested primitive Johnson/profile branch"
+  ],
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "recheck_main_open_prs_and_claims_before_each_persistent_write": true
+  },
+  "stale_after_minutes": 90,
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
