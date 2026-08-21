@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -52,3 +54,16 @@ jobs:
               raise SystemExit(f"branch-only sibling imports are forbidden in rev268: {hits}")
           print("PASS: rev268 remains a structural orchestration boundary")
           PY
+      - name: Emit replayable attempt-solution admission snapshot
+        run: |
+          git checkout --detach 63c36256582cd2a26f6beefb143166103a5ca0fb
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev268-production-parent-orchestration-20260822T082705JST-8f4c1a72 \
+            --phase attempt_solution \
+            --scope crx1/bounded-arity-relation-image/implicit-generator-group/production-parent-orchestration \
+            --target-revision 268 \
+            --now 2026-08-22T08:27:05+09:00 \
+            --path .github/workflows/rev268-implicit-relation-production-parent-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV268_IMPLICIT_RELATION_PRODUCTION_PARENT.md \
+            --path automation_runs/2026-08-19_0851_JST/implicit_relation_production_parent_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_production_parent_rev268.py
