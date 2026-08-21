@@ -5,6 +5,8 @@ from dataclasses import dataclass, replace
 from local_certificate_preimage_resource_v1 import _chain_bound, _sat_add
 from orbit_factored_string_coset_intersection_v1 import _group_orbits, _image_chain
 from proof_carrying_state_orbit_candidate_v1 import state_orbit_candidate_envelope
+from imprimitive_quotient_kernel_resource_v1 import imprimitive_quotient_kernel_resource_envelope
+from s1_structural_classifier_v1 import classify_s1_structure
 
 
 @dataclass(frozen=True)
@@ -30,6 +32,7 @@ class DesignFullStringChildPreflight:
     permutation_scan_upper_bounds: tuple[int, ...] = ()
     state_orbit_work_upper_bounds: tuple[int, ...] = ()
     state_orbit_image_upper_bounds: tuple[int, ...] = ()
+    imprimitive_work_upper_bounds: tuple[int, ...] = ()
 
 
 def design_full_string_child_preflight(
@@ -114,20 +117,51 @@ def design_full_string_child_preflight(
         )
         state_work = tuple(int(envelope.work_upper_bound) for envelope in envelopes)
         state_images = tuple(int(envelope.state_image_upper_bound) for envelope in envelopes)
-        kinds = tuple(
-            "small_order" if order <= gate else (
-                "state_orbit" if envelope.admitted else "unresolved_state_orbit"
+        imprimitive_work = []
+        kinds = []
+        for branch, order, state in zip(frozen, orders, envelopes):
+            if order <= gate:
+                kinds.append("small_order")
+                imprimitive_work.append(0)
+                continue
+            group = branch.coset.subgroup
+            classification = classify_s1_structure(
+                group, root_n=root, polylog_power=power,
+                max_explicit_degree=min(n, implementation_cap),
             )
-            for order, envelope in zip(orders, envelopes)
-        )
+            imp = None
+            if classification.status == "canonical_imprimitive_block_system":
+                imp = imprimitive_quotient_kernel_resource_envelope(
+                    group, classification.block_system, target,
+                    original_root_degree=root,
+                    quotient_order_poly_power=power,
+                    max_quotient_image_order=implementation_cap,
+                    candidate_group_order_poly_power=power,
+                    max_candidate_group_order=implementation_cap,
+                    max_work=cap,
+                )
+            imp_work = int(imp.work_upper_bound) if imp is not None else 0
+            imprimitive_work.append(imp_work)
+            if imp is not None and imp.admitted:
+                kinds.append("imprimitive_quotient_kernel")
+            elif state.admitted:
+                kinds.append("state_orbit")
+            else:
+                kinds.append("unresolved_exact_terminal")
+        kinds = tuple(kinds)
+        imprimitive_work = tuple(imprimitive_work)
         per_branch = tuple(
-            order * scale if kind == "small_order" else work
-            for order, kind, work in zip(orders, kinds, state_work)
+            order * scale if kind == "small_order" else (
+                imp if kind == "imprimitive_quotient_kernel" else work
+            )
+            for order, kind, work, imp in zip(orders, kinds, state_work, imprimitive_work)
         )
         total = 0
         for work in per_branch:
             total = _sat_add(total, int(work), stop)
-        terminal_path = all(kind in {"small_order", "state_orbit"} for kind in kinds)
+        terminal_path = all(kind in {
+            "small_order", "state_orbit", "imprimitive_quotient_kernel",
+        } for kind in kinds)
         admitted = root_lift and terminal_path and total <= cap
         scans = tuple(
             2 * order if kind == "small_order" else (
@@ -151,6 +185,7 @@ def design_full_string_child_preflight(
             status, root, n, len(frozen), orders, gate, per_branch, total, cap,
             root_lift, terminal_path, admitted, 0, 0, False, reason,
             kinds, tuple(() for _ in orders), scans, state_work, state_images,
+            imprimitive_work,
         )
     # Reserve the complete-cover structural audit before constructing even one
     # orbit image.  At most n canonical orbits exist, and each image chain is
