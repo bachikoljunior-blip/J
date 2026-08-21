@@ -5,6 +5,10 @@ from math import log2
 
 from coset_stabilizer_primitives import RightCoset
 from design_branch_tuple_transport_v1 import DesignTupleTransportPlan
+from design_full_string_child_resource_proof_v1 import (
+    DesignFullStringChildResourceProof,
+    certify_design_full_string_child_resources,
+)
 from permutation_group_schreier import compose, identity, inverse, schreier_stabilizer_chain
 from proof_carrying_si_v1 import ProofCarryingCoset
 from u2_candidate_coset_string_iso_v2 import candidate_coset_string_isomorphism_u2
@@ -21,6 +25,7 @@ class DesignTupleFullStringSI:
     complete: bool
     explicit_union_log2_cost_bound: float
     reason: str
+    child_resource_proof: DesignFullStringChildResourceProof | None = None
 
 
 def _maps_string(source, target, p) -> bool:
@@ -43,6 +48,8 @@ def solve_design_tuple_transport_full_string(
     group_order_poly_power: int = 2,
     max_group_order: int = 256,
     max_depth: int = 64,
+    quasipoly_power: int = 5,
+    quasipoly_constant: float = 64.0,
 ) -> DesignTupleFullStringSI:
     """Solve every exact Design-Lemma tuple branch on the original full string.
 
@@ -112,6 +119,20 @@ def solve_design_tuple_transport_full_string(
         if child.coset is not None:
             nonempty.append(child.coset)
 
+    child_resource = certify_design_full_string_child_resources(
+        solved,
+        expected_branch_count=transport_plan.surviving_branch_count,
+        original_root_degree=root_n,
+        quasipoly_power=quasipoly_power,
+        quasipoly_constant=quasipoly_constant,
+    )
+    if not child_resource.certified:
+        return DesignTupleFullStringSI(
+            "undetermined_design_tuple_full_string_child_resources", None,
+            tuple(solved), len(solved), len(nonempty), False, False, 0.0,
+            child_resource.reason, child_resource,
+        )
+
     layer_bound = (
         transport_plan.local_log2_cost_bound
         + log2(max(1, len(solved)))
@@ -124,6 +145,7 @@ def solve_design_tuple_transport_full_string(
             "exact_empty_design_tuple_full_string_union", None, tuple(solved),
             len(solved), 0, True, True, layer_bound,
             "every branch in the complete tuple-transporter cover has an exact empty full-string intersection",
+            child_resource,
         )
 
     r0 = nonempty[0].representative
@@ -151,4 +173,5 @@ def solve_design_tuple_transport_full_string(
         tuple(solved), len(solved), len(nonempty),
         True, True, layer_bound,
         "all tuple branches were exactly intersected with the original string and their complete union was reconstructed as one target-automorphism right coset",
+        child_resource,
     )
