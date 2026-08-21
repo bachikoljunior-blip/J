@@ -1,0 +1,28 @@
+name: rev254 Design primitive Johnson complete-cover smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  rev254-design-primitive-johnson-complete-cover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pytest numpy
+      - name: Run rev254 plus inherited primitive Johnson regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: >-
+          python -m pytest -q
+          test_design_primitive_johnson_complete_cover_rev254.py
+          test_resource_bounded_primitive_johnson_candidate_rev246.py
+          test_design_nested_primitive_johnson_resource_rev243.py
+      - name: Compile rev254 adapter and regression
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/design_primitive_johnson_complete_cover_preflight_v1.py
+          automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_complete_cover_rev254.py
