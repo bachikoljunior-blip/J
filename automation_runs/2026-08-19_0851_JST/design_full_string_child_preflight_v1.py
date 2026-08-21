@@ -76,7 +76,47 @@ def design_full_string_child_preflight(
     terminal_path = True
     stop = cap + 1
     scale = max(2, n) ** 12 * (2 ** 24)
+    # Reserve the complete-cover structural audit before constructing even one
+    # orbit image.  At most n canonical orbits exist, and each image chain is
+    # bounded by the full branch degree/order.  The factor two separately pays
+    # for this immutable preflight audit and the later S1 classification pass.
+    audit_reservations = []
     for branch, order in zip(frozen, orders):
+        if order <= gate:
+            audit_reservations.append(order * scale)
+            continue
+        group = branch.coset.subgroup
+        g = max(1, len(group.original_generators))
+        orbit_work = 8 * n * n * max(g, order)
+        all_image_chains = n * _chain_bound(n, g, order, n, stop)
+        audit_reservations.append(2 * (orbit_work + all_image_chains))
+    audit_total = sum(audit_reservations)
+    has_structural = any(order > gate for order in orders)
+    if not root_lift or audit_total > cap:
+        status = (
+            "design_full_string_child_original_root_lift_unavailable"
+            if not root_lift else (
+                "design_full_string_child_audit_work_cap_exceeded"
+                if has_structural else "design_full_string_child_work_cap_exceeded"
+            )
+        )
+        reason = (
+            "the full-string child degree exceeds the original root"
+            if not root_lift else (
+                "the complete-cover orbit/image audit reservation exceeds the finite budget before any structural audit or child"
+                if has_structural else
+                "the complete small-order child cover exceeds the finite budget before the first child"
+            )
+        )
+        return DesignFullStringChildPreflight(
+            status, root, n, len(frozen), orders, gate,
+            tuple(audit_reservations), audit_total, cap,
+            root_lift, False, False, 0, 0, False, reason,
+            tuple("small_order" if order <= gate else "unexamined_structural" for order in orders),
+            tuple(() for _ in orders), tuple(2 * order if order <= gate else 0 for order in orders),
+        )
+
+    for branch, order, audit_reservation in zip(frozen, orders, audit_reservations):
         if order <= gate:
             terminal_kinds.append("small_order")
             orbit_image_orders.append(())
@@ -112,18 +152,16 @@ def design_full_string_child_preflight(
         # charges a second full-domain orbit/classification pass because this
         # preflight audit is separate from the actual S1 execution.
         g = max(1, len(group.original_generators))
-        audit = 2 * (8 * n * n * max(g, order) + _chain_bound(n, g, order, n, stop))
-        work = audit
+        work = audit_reservation
         scans = 0
         for orbit, image_order in zip(orbits, image_orders):
             m = len(orbit)
-            image_chain = _chain_bound(m, g, order, m, stop)
             child = image_order * (max(2, m) ** 12) * (2 ** 24)
             paired = _chain_bound(m, g, order, n + m, stop)
             kernel = _chain_bound(n, order, order, n, stop)
             lifts = image_order * m * order * 4 * (n + m)
             preimage = _chain_bound(n, order + image_order, order, n, stop)
-            work += image_chain + child + paired + kernel + lifts + preimage
+            work += child + paired + kernel + lifts + preimage
             scans += 2 * image_order
         terminal_kinds.append("intransitive_small_order_orbit_images")
         scan_bounds.append(scans)
