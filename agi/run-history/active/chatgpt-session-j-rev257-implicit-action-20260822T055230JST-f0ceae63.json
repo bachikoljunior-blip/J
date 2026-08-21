@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev257-implicit-action-20260822T055230JST-f0ceae63",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T054325+0900-d4fc3140-turn1",
   "started_at_jst": "2026-08-22T05:52:37+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:45:09+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:50:31+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "f0ceae634deccc01ba9920380fa37fd98a7427f6",
   "starting_agi_gi_rev": 256,
@@ -21,8 +21,12 @@
   ],
   "branch": "codex/agi-gi-rev257-implicit-relation-image-action-20260821-205230z",
   "non_interference": "Use only the reserved rev257 paths. Do not modify MAIN.md, rev255 Design paths, sibling claims, or existing shared primitives.",
-  "status": "active",
+  "status": "closed",
   "agi_state": "NOT_AGI",
   "pull_request": 198,
-  "exact_head_sha": "7b8764e0a19cbb9b19fe449b1a874e42470491dc"
+  "exact_head_sha": "7b8764e0a19cbb9b19fe449b1a874e42470491dc",
+  "completed_at_jst": "2026-08-22T06:50:31+09:00",
+  "merge_commit_sha": "2a02fa5429c15965c55dc6d736bb29f085c29725",
+  "merged_pull_request": 198,
+  "workflow_summary": "12/12 success"
 }
