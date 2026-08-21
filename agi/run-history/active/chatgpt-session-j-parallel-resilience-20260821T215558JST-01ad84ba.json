@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba",
   "session_id": "chatgpt-session-j-parallel-resilience-20260821T215558+0900-01ad84ba-turn1",
   "started_at_jst": "2026-08-21T21:55:58+09:00",
-  "heartbeat_at_jst": "2026-08-21T22:18:33+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:46:00+09:00",
+  "completed_at_jst": "2026-08-22T06:46:00+09:00",
   "stale_after_minutes": 55,
   "starting_main_sha": "01ad84ba3b537ef4a191bcbdf3f8df709fadb320",
   "starting_agi_gi_rev": 244,
@@ -12,9 +13,10 @@
   "scope": "automation/session-specific-hourly-refire-and-parallel-safe-continuation-evidence",
   "branch": "ops-j-parallel-resilience-20260821-215558",
   "pull_request": 181,
-  "pull_request_state": "ready_for_review",
+  "pull_request_state": "merged",
   "ready_for_review_at_jst": "2026-08-21T22:18:14+09:00",
   "latest_head_sha": "1baedb76aad1f1edd6bf1be3c50c6d3f850c55c9",
+  "merged_main_sha": "e5447a1e572301bdfdf9a68ea4866ee573a99e5b",
   "validated_merge_ref_sha": "18bedb173091e2646275ef761cb5354cacaf6ee1",
   "intent": "add a non-interrupting per-session hourly re-fire guard and advance only collision-free continuation support while problem-solving revisions proceed independently",
   "parallel_exclusions": [
@@ -41,22 +43,10 @@
   },
   "deployment_state": {
     "hourly_schedule_on_main": true,
-    "hardened_runtime": "pending_pr_181",
+    "hardened_runtime": "merged_pr_181",
     "pull_request_ready_for_review": true,
-    "merge_performed": false
+    "merge_performed": true
   },
-  "cooperative_branch_updates": [
-    {
-      "commit": "15ecd7c5f721f7743c6cac0fa03f6465be72a5f3",
-      "message": "ops: serialize and fail-close session re-fire runtime",
-      "audit": "retained_within_claimed_scope"
-    },
-    {
-      "commit": "e40720d97814f7d56dca7c5f3755fd6d89a4f647",
-      "message": "test: pin parallel session workflow safety contract",
-      "audit": "retained_within_claimed_scope"
-    }
-  ],
   "validation": {
     "local_functional_unit_tests": 12,
     "local_py_compile": "success",
@@ -65,16 +55,8 @@
     "exact_merge_ref_tests": 17,
     "exact_merge_ref_py_compile": "success",
     "fresh_scenario": "success_suppressed_refire",
-    "stale_scenario": "success_requested_refire",
-    "github_actions": [
-      {"run_id": 32485682741, "name": "J parallel resilience session re-fire smoke", "conclusion": "success"},
-      {"run_id": 32485682744, "name": "rev238 Design nested intransitive resource smoke", "conclusion": "success"},
-      {"run_id": 32485682756, "name": "rev239 state-orbit candidate terminal smoke", "conclusion": "success"},
-      {"run_id": 32485682749, "name": "rev240 Design state-orbit complete-cover smoke", "conclusion": "success"},
-      {"run_id": 32485682717, "name": "rev241 Design union reconstruction resource smoke", "conclusion": "success"},
-      {"run_id": 32485682712, "name": "rev242 Design original-root pipeline resource smoke", "conclusion": "success"}
-    ]
+    "stale_scenario": "success_requested_refire"
   },
-  "status": "active",
+  "status": "completed_merged",
   "agi_state": "NOT_AGI"
 }
