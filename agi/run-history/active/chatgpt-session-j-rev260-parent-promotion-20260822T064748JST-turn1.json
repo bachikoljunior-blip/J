@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev260-parent-promotion-20260822T064748JST-turn1",
   "session_id": "chatgpt-session-j-parallel-continuation-20260821T124554Z-turn1",
   "started_at_jst": "2026-08-22T06:47:48+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:47:48+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:57:22+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "585a1699633843e28e37f9cc25167ae17f90e019",
   "starting_agi_gi_rev": 256,
   "target_revision": 260,
   "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/parent-exact-promotion-gate",
   "branch": "chatgpt/agi-gi-rev260-implicit-relation-parent-promotion-20260822-0647jst",
+  "pull_request": 203,
+  "latest_head_sha": "90022a838ba25e8e7ed5e5de562ec21ad19274a6",
   "reserved_paths": [
     ".github/workflows/rev260-implicit-relation-parent-promotion-smoke.yml",
     "agi/run-history/active/chatgpt-session-j-rev260-parent-promotion-20260822T064748JST-turn1.json",
@@ -31,7 +33,12 @@
     "rev255 PR #195, rev245 PR #177, MAIN.md, and shared coordination implementation"
   ],
   "non_interference": "Add only a new rev260 parent-promotion verifier, focused regressions, audit note, path-scoped smoke workflow, and this claim. The verifier consumes already-certified preimage evidence; it does not implement or rerun rev258 image-coset intersection or rev259 paired preimage.",
-  "strict_boundary": "Verify the final original-domain right-coset promotion contract: representative transports the full named unary/binary relation image, target-subgroup generators stabilize the target image, subgroup/representative stay inside the certified domain group, and supplied exact-preimage order evidence is internally consistent. This is a fail-closed parent promotion gate only; upstream image intersection, preimage construction, root resource accounting, CRX1, GI, and AGI remain separate obligations.",
-  "status": "active",
+  "strict_boundary": "Verify the final original-domain right-coset promotion contract: representative transports the full named unary/binary relation image, target-subgroup generators stabilize the target image, subgroup/representative stay inside the certified domain group, and the concrete exact-preimage artifact/order evidence is internally consistent. This is a fail-closed nonempty parent promotion gate only; upstream image intersection, preimage construction, exact-empty handling, root resource accounting, CRX1, GI, and AGI remain separate obligations.",
+  "validation": {
+    "local_py_compile": "passed",
+    "github_smoke_run": 32530855065,
+    "github_smoke_status": "queued"
+  },
+  "status": "draft_pr_open_ci_pending",
   "agi_state": "NOT_AGI"
 }
