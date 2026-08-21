@@ -1,0 +1,40 @@
+name: rev250 phase-start ticket ledger smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/phase_start_ticket_ledger_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_phase_start_ticket_ledger_rev250.py"
+      - "automation_runs/2026-08-19_0851_JST/REV250_PHASE_START_TICKET_LEDGER.md"
+      - ".github/workflows/rev250-phase-start-ticket-ledger-smoke.yml"
+      - "agi/run-history/phase-admissions/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rev250-phase-start-ticket-ledger-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile and run rev250 regression suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="automation_runs/2026-08-19_0851_JST"
+          python -m py_compile \
+            "${root}/phase_start_ticket_ledger_v1.py" \
+            "${root}/test_phase_start_ticket_ledger_rev250.py"
+          (
+            cd "${root}"
+            python -m unittest -v test_phase_start_ticket_ledger_rev250.py
+          )
