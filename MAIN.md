@@ -102,6 +102,8 @@ rev232 はcorrelated t-WLのsource/target実行を一つのoriginal-root resourc
 
 rev232 tested head `a23d1feda891bbf69be4853318217a9f2a3cb744` は、AGI-GI rev validation、rev232専用gateを含む23 workflowsがすべてsuccess。local affected gateは18 tests、external labelg専用fileを除くall-module gateは498 tests、py_compileと差分検査もsuccess。PR #160 をexact tested head固定でmergeし、main commit `7ffe9c6df27cc5b5a95c7949f4ad741718faceac` に統合済み。
 
+rev233候補はc1のうち、既に生成されたcomplete Cartesian branch planから全tuple transportを開始する前のoriginal-root resource admissionを実装した。`|G|`による各partition orbit state上限、全state-generator edge、stabilizer/parity-kernel/final-coset Schreier chainを全branch多重度で予約し、完了時のbranch/orbit/action実測をexactly onceで記録する。branch plan自身をmaterialization前に予約する境界は未解決のため、c1全体を解決済みとは扱わない。proposed head `446cbfca94ecfe2e2fcdf2834f1332191ec73484` はlocal direct resource assertions、rev194 Design integration 4 cases、py_compile、差分検査がsuccess。PR #161を作成し、GitHub pytest/workflow検証中でありmain未統合。
+
 ## 問題木
 
 予測問題数は **576**、置換済み旧問題を除く有効問題数は **543**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
