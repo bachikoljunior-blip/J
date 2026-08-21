@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev250-20260821T220548JST-f08fe9ae",
+  "session_id": "chatgpt-session-j-parallel-rev250-20260821T220548+0900-f08fe9ae-turn1",
+  "started_at_jst": "2026-08-21T22:05:48+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:05:48+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "f08fe9aec2edfdc1ff034820d755a0181f12dfe4",
+  "starting_agi_gi_rev": 244,
+  "target_revision": 250,
+  "scope": "CRX3/original-root-ledger/phase-start-tickets",
+  "branch": "agi-gi-rev250-phase-start-tickets-session-20260821-2205",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/phase_start_ticket_ledger_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_phase_start_ticket_ledger_rev250.py",
+    "automation_runs/2026-08-19_0851_JST/REV250_PHASE_START_TICKET_LEDGER.md",
+    ".github/workflows/rev250-phase-start-ticket-ledger-smoke.yml",
+    ".github/workflows/j-rev250-session-hourly-refire.yml"
+  ],
+  "rescope_from": "chatgpt-session-j-rev249-20260821T220020JST-09d66cc6",
+  "non_interference": "Add only new rev250 phase-ticket, regression, audit, and session workflow paths. Do not modify rev245, rev246, rev247, rev248, rev249, CRX1 admission, MAIN.md, or shared Design/S1 implementation files.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
