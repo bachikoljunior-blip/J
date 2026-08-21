@@ -1,0 +1,21 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev256-status-sync-20260822T054700JST-a007c3bc",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T054325+0900-d4fc3140-turn1",
+  "started_at_jst": "2026-08-22T05:47:29+09:00",
+  "heartbeat_at_jst": "2026-08-22T05:47:29+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "a007c3bcec513bfe139f7c2318ed12e1c0e99b84",
+  "starting_agi_gi_rev": 256,
+  "target_revision": 256,
+  "scope": "root/canonical-main-status/rev256-problem-tree",
+  "reserved_paths": [
+    "MAIN.md",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev256-status-sync-20260822T054700JST-a007c3bc-update-problem-tree-20260822T0547JST.json"
+  ],
+  "branch": "main",
+  "non_interference": "Update only MAIN.md rev256 reachability, bounded CRX1 decomposition, counts, and this claim's evidence; do not touch rev255 shared Design paths or any sibling claim.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
