@@ -1,4 +1,5 @@
 import unittest
+from itertools import permutations
 
 from bounded_arity_relation_image_solver import BoundedArityRelationImage, RelationSpec
 from bounded_group_transport import enumerate_group
@@ -43,6 +44,28 @@ class ImplicitRelationImageValueCosetTests(unittest.TestCase):
         actual = {g for g in elements if result.coset.contains(g)}
         self.assertEqual(actual, expected)
         self.assertEqual(result.coset.subgroup.order, len(expected))
+
+    def test_all_s3_relation_relabellings_match_complete_enumeration(self):
+        source = image()
+        generators = ((1, 2, 0), (1, 0, 2))
+        for permutation in permutations(range(3)):
+            with self.subTest(permutation=permutation):
+                target = image(
+                    unary=(permutation[0],),
+                    binary=((permutation[0], permutation[1]),),
+                )
+                action = prepare_implicit_relation_image_action(
+                    source, target, generators
+                )
+                result = exact_implicit_relation_image_value_coset(action)
+                self.assertEqual(
+                    result.status, "exact_implicit_relation_image_value_coset"
+                )
+                elements = enumerate_group(action.image_group, max_elements=100)
+                expected = {g for g in elements if transports(action, g)}
+                actual = {g for g in elements if result.coset.contains(g)}
+                self.assertEqual(actual, expected)
+                self.assertEqual(result.coset.subgroup.order, len(expected))
 
     def test_trivial_implicit_group_proves_empty_for_relabelled_relation(self):
         action = prepare_implicit_relation_image_action(
