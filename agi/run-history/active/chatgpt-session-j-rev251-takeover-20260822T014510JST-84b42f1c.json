@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev251-takeover-20260822T014510JST-84b42f1c",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T014136+0900-a5e1fd95-turn1",
   "started_at_jst": "2026-08-22T01:45:10+09:00",
-  "heartbeat_at_jst": "2026-08-22T01:47:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T01:57:23+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "84b42f1cda6404a4b6d5494e58db1c3378c1c2d9",
   "starting_agi_gi_rev": 254,
@@ -23,6 +23,18 @@
     "exact_head": "b5305668cf5bf24805c872c1380aa785536cb5e4",
     "policy": "do not rewrite the stale claim; validate and integrate its exact-result leaf from current main under this fresh claim"
   },
-  "status": "active",
-  "agi_state": "NOT_AGI"
+  "status": "closed",
+  "agi_state": "NOT_AGI",
+  "closed_at_jst": "2026-08-22T01:57:23+09:00",
+  "merge": {
+    "pull_request": 185,
+    "exact_head": "b5305668cf5bf24805c872c1380aa785536cb5e4",
+    "merge_commit": "3475257bda970c86f8c8ac2c2d2627d013acdb53"
+  },
+  "verification": {
+    "dedicated_unittest": "11 passed",
+    "full_series_excluding_external_labelg": "591 passed in 513.07s",
+    "syntax": "passed",
+    "parallel_conflicts": 0
+  }
 }
