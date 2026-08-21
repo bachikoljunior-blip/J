@@ -1,0 +1,59 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "agi-gi-rev250-phase-start-tickets-session-20260821-2205",
+    "claim_id": "chatgpt-session-j-rev250-takeover-20260822T034243JST-6e98af2a",
+    "heartbeat_at_jst": "2026-08-22T03:42:43+09:00",
+    "reserved_paths": [
+      ".github/workflows/rev250-envelope-hardening-runner.yml",
+      ".github/workflows/rev250-phase-start-ticket-ledger-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev250-takeover-20260822T034243JST-6e98af2a-publish-20260822T0343JST.json",
+      "automation_runs/2026-08-19_0851_JST/.rev250-envelope-hardening.patch",
+      "automation_runs/2026-08-19_0851_JST/REV250_PHASE_START_TICKET_LEDGER.md",
+      "automation_runs/2026-08-19_0851_JST/phase_start_ticket_ledger_v1.py",
+      "automation_runs/2026-08-19_0851_JST/test_phase_start_ticket_ledger_rev250.py"
+    ],
+    "scope": "crx3/original-root-ledger/phase-start-tickets/integration",
+    "state": "active",
+    "target_revision": 250
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev255-primitive-johnson-design-integration-takeover-20260822-0318",
+      "claim_id": "chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1",
+      "heartbeat_at_jst": "2026-08-22T03:18:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1-attempt_solution-20260822T0318JST.json",
+        "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+        "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+        "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+      ],
+      "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+      "state": "active",
+      "target_revision": 255
+    }
+  ],
+  "paths": [
+    ".github/workflows/rev250-envelope-hardening-runner.yml",
+    ".github/workflows/rev250-phase-start-ticket-ledger-smoke.yml",
+    "automation_runs/2026-08-19_0851_JST/.rev250-envelope-hardening.patch",
+    "automation_runs/2026-08-19_0851_JST/REV250_PHASE_START_TICKET_LEDGER.md",
+    "automation_runs/2026-08-19_0851_JST/phase_start_ticket_ledger_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_phase_start_ticket_ledger_rev250.py"
+  ],
+  "phase": "publish",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T03:43:30+09:00",
+  "registry_digest": "sha256:493d233dca95e04917f5aed98d249d9fed124f2e5178580eefb7e2d8cbec3f68",
+  "registry_source_sha": "e7434201f84a91a50dfaf2eb01ad5091e7e89437",
+  "schema_version": 1,
+  "scope": "crx3/original-root-ledger/phase-start-tickets/integration",
+  "target_revision": 250
+}
