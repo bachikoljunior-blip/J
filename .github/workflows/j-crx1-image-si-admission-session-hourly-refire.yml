@@ -1,0 +1,129 @@
+name: J CRX1 image-SI admission session hourly re-fire
+
+on:
+  schedule:
+    - cron: "31 * * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/j-crx1-image-si-admission-session-hourly-refire.yml"
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: j-crx1-image-si-admission-session-hourly-refire-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  re-fire-stale-session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Detect stale CRX1 admission session without touching siblings
+        id: guard
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          CLAIM_PATH: agi/run-history/active/chatgpt-session-j-crx1-image-si-admission-20260821T220200JST-f3a215ea.json
+          BRANCH: feat/crx1-image-si-resource-admission-session-20260821-2202
+          STALE_AFTER_MINUTES: "55"
+        run: |
+          set -euo pipefail
+
+          now_epoch="$(date -u +%s)"
+          cutoff_epoch="$((now_epoch - STALE_AFTER_MINUTES * 60))"
+
+          claim_json=""
+          if ! claim_json="$(
+            gh api "repos/${REPOSITORY}/contents/${CLAIM_PATH}?ref=main" \
+              --jq '.content' | tr -d '\n' | base64 --decode
+          )"; then
+            echo "stale=false" >>"${GITHUB_OUTPUT}"
+            echo "reason=claim is absent; no session re-fire is emitted" >>"${GITHUB_OUTPUT}"
+            echo "### J CRX1 image-SI admission session guard" >>"${GITHUB_STEP_SUMMARY}"
+            echo "- Decision: claim is absent; no session re-fire is emitted" >>"${GITHUB_STEP_SUMMARY}"
+            exit 0
+          fi
+
+          claim_status="$(jq -r '.status // "unknown"' <<<"${claim_json}")"
+          heartbeat="$(jq -r '.heartbeat_at_jst // .started_at_jst // empty' <<<"${claim_json}")"
+          heartbeat_epoch=0
+          if [[ -n "${heartbeat}" ]]; then
+            heartbeat_epoch="$(date -d "${heartbeat}" +%s)"
+          fi
+
+          branch_epoch=0
+          if branch_date="$(
+            gh api "repos/${REPOSITORY}/commits/${BRANCH}" \
+              --jq '.commit.committer.date // .commit.author.date' 2>/dev/null
+          )"; then
+            branch_epoch="$(date -d "${branch_date}" +%s)"
+          fi
+
+          owner="${REPOSITORY%%/*}"
+          pr_epoch=0
+          pr_updated="$(
+            gh api "repos/${REPOSITORY}/pulls?state=open&head=${owner}:${BRANCH}&per_page=1" \
+              --jq '.[0].updated_at // empty'
+          )"
+          if [[ -n "${pr_updated}" ]]; then
+            pr_epoch="$(date -d "${pr_updated}" +%s)"
+          fi
+
+          latest_epoch="${heartbeat_epoch}"
+          (( branch_epoch > latest_epoch )) && latest_epoch="${branch_epoch}"
+          (( pr_epoch > latest_epoch )) && latest_epoch="${pr_epoch}"
+
+          stale=false
+          reason="session activity is fresh"
+          if [[ "${claim_status}" != "active" ]]; then
+            reason="claim is ${claim_status}; no re-fire is needed"
+          elif (( latest_epoch < cutoff_epoch )); then
+            stale=true
+            reason="this CRX1 admission session has no claim heartbeat, branch commit, or PR update within ${STALE_AFTER_MINUTES} minutes"
+          fi
+
+          echo "stale=${stale}" >>"${GITHUB_OUTPUT}"
+          echo "reason=${reason}" >>"${GITHUB_OUTPUT}"
+          {
+            echo "### J CRX1 image-SI admission session guard"
+            echo "- Claim status: ${claim_status}"
+            echo "- Claim heartbeat: ${heartbeat:-missing}"
+            echo "- Dedicated branch activity epoch: ${branch_epoch}"
+            echo "- Dedicated PR activity epoch: ${pr_epoch}"
+            echo "- Other branches, PRs, claims, and workflows inspected or changed: none"
+            echo "- Decision: ${reason}"
+          } >>"${GITHUB_STEP_SUMMARY}"
+
+      - name: Emit deduplicated durable continuation request
+        if: github.event_name != 'pull_request' && steps.guard.outputs.stale == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CLAIM_PATH: agi/run-history/active/chatgpt-session-j-crx1-image-si-admission-20260821T220200JST-f3a215ea.json
+          BRANCH: feat/crx1-image-si-resource-admission-session-20260821-2202
+        run: |
+          set -euo pipefail
+
+          title="[automation] J CRX1 image-SI admission session re-fire queue"
+          timestamp="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          issue_number="$(
+            gh issue list --repo "${REPOSITORY}" --state open --limit 100 \
+              --json number,title \
+              --jq ".[] | select(.title == \"${title}\") | .number" \
+              | head -n 1
+          )"
+
+          message="Hourly session continuation re-fire requested at ${timestamp}. Reconstruct only CRX1/node-resource-capped-image-SI/resource-admission-certificate from ${CLAIM_PATH} and branch ${BRANCH}. Re-read active claims before every persistent write; preserve rev248's exact solver and every CRX2, MAIN, branch, PR, workflow, and claim. Follow automation/CHATGPT_SCHEDULED_TASK_RUNBOOK.md. Trigger: ${RUN_URL}"
+
+          if [[ -z "${issue_number}" ]]; then
+            gh issue create --repo "${REPOSITORY}" --title "${title}" --body "${message}"
+          else
+            gh issue comment "${issue_number}" --repo "${REPOSITORY}" --body "${message}"
+          fi
