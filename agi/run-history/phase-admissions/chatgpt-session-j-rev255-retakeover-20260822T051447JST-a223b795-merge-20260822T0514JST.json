@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "event_type": "problem_solving_phase_admission",
+  "recorded_at_jst": "2026-08-22T06:18:30+09:00",
+  "admitted": true,
+  "phase": "merge",
+  "mode": "exclusive",
+  "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+  "target_revision": 255,
+  "paths": [
+    ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+    "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+    "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+    "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+    "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+    "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+  ],
+  "registry_source_sha": "2a1e4c617cb115c567a09e97670771bee8a5f17c",
+  "registry_digest": "sha256:062d48fbee45543fd720f8dabdee95c5702887943f1c25c562de5d1941eec024",
+  "own_claim": {
+    "claim_id": "chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795",
+    "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+    "target_revision": 255,
+    "heartbeat_at_jst": "2026-08-22T06:16:39+09:00",
+    "state": "active",
+    "branch": "agi-gi-rev255-primitive-johnson-design-integration-retakeover-20260822-0514",
+    "reserved_paths": [
+      ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-attempt_solution-20260822T0514JST.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-merge-20260822T0514JST.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-publish-20260822T0514JST.json",
+      "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+      "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+      "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+      "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+      "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+      "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+    ]
+  },
+  "parallel_active_claims": [
+    {
+      "claim_id": "chatgpt-session-j-rev257-implicit-action-20260822T055230JST-f0ceae63",
+      "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/paired-faithful-auxiliary-action",
+      "target_revision": 257,
+      "heartbeat_at_jst": "2026-08-22T05:55:57+09:00",
+      "state": "active",
+      "branch": "codex/agi-gi-rev257-implicit-relation-image-action-20260821-205230z",
+      "reserved_paths": [
+        ".github/workflows/rev257-implicit-relation-image-action-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev257-implicit-action-20260822T055230JST-f0ceae63-attempt-solution-20260822T0552JST.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev257-implicit-action-20260822T055230JST-f0ceae63-merge-20260822T0552JST.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev257-implicit-action-20260822T055230JST-f0ceae63-publish-20260822T0552JST.json",
+        "automation_runs/2026-08-19_0851_JST/REV257_IMPLICIT_RELATION_IMAGE_ACTION.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_image_action_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_action_rev257.py"
+      ]
+    }
+  ],
+  "conflicts": [],
+  "reasons": []
+}
