@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev256-bounded-image-20260822T0438JST-435503ad",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T034116+0900-92e55a14-turn1",
   "started_at_jst": "2026-08-22T04:38:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T05:44:48+09:00",
+  "heartbeat_at_jst": "2026-08-22T05:46:32+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "435503adef2d26822eddbf8c6fe06e415a8a2d64",
   "starting_agi_gi_rev": 254,
@@ -21,6 +21,10 @@
   ],
   "branch": "codex/agi-gi-rev256-bounded-relation-image-coset-20260821-193800z",
   "non_interference": "Use only the listed rev256 paths. Do not modify rev253, rev255 shared Design caller paths, MAIN.md, sibling claims, or unrelated workflows.",
-  "status": "active",
-  "agi_state": "NOT_AGI"
+  "status": "completed_merged",
+  "agi_state": "NOT_AGI",
+  "completed_at_jst": "2026-08-22T05:46:32+09:00",
+  "pull_request": 196,
+  "exact_head_sha": "19d959ed05e87140261d45473c36d6bbab39a60d",
+  "merge_commit_sha": "1a4f62b98dc98693b9936bade34054e008cfff6f"
 }
