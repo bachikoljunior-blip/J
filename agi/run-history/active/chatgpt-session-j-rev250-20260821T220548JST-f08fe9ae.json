@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev250-20260821T220548JST-f08fe9ae",
   "session_id": "chatgpt-session-j-parallel-rev250-20260821T220548+0900-f08fe9ae-turn1",
   "started_at_jst": "2026-08-21T22:05:48+09:00",
-  "heartbeat_at_jst": "2026-08-21T22:20:27+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:27:59+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "f08fe9aec2edfdc1ff034820d755a0181f12dfe4",
   "starting_agi_gi_rev": 244,
@@ -21,12 +21,14 @@
   "rescope_from": "chatgpt-session-j-rev249-20260821T220020JST-09d66cc6",
   "non_interference": "Add only new rev250 phase-ticket, regression, audit, and session workflow paths. Do not modify rev245, rev246, rev247, rev248, rev249, CRX1 admission, MAIN.md, or shared Design/S1 implementation files.",
   "pull_request": 184,
-  "latest_head_sha": "efd98a72c32ae398a696dd2591c9205a2372ba37",
+  "latest_head_sha": "bdce6ae503adddfec19f5658bcc11f6503cf203b",
+  "hardening": "exact active-ticket payload equality rejects token reuse with a forged phase bound",
   "validation": {
-    "local_unittest_count": 12,
+    "local_unittest_count": 13,
     "local_unittest_status": "passed",
-    "github_actions_run_id": 32486274483,
-    "github_actions_status": "success"
+    "github_actions_run_id": 32486875766,
+    "github_actions_status": "success",
+    "workflow_permissions": "contents: read"
   },
   "status": "active",
   "agi_state": "NOT_AGI"
