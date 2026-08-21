@@ -1,0 +1,54 @@
+name: rev268 implicit relation production parent smoke
+
+on:
+  push:
+    branches:
+      - agi-gi-rev268-production-parent-orchestration-session-20260822-0827
+    paths:
+      - automation_runs/2026-08-19_0851_JST/implicit_relation_production_parent_v1.py
+      - automation_runs/2026-08-19_0851_JST/test_implicit_relation_production_parent_rev268.py
+      - .github/workflows/rev268-implicit-relation-production-parent-smoke.yml
+  pull_request:
+    paths:
+      - automation_runs/2026-08-19_0851_JST/implicit_relation_production_parent_v1.py
+      - automation_runs/2026-08-19_0851_JST/test_implicit_relation_production_parent_rev268.py
+      - automation_runs/2026-08-19_0851_JST/REV268_IMPLICIT_RELATION_PRODUCTION_PARENT.md
+      - .github/workflows/rev268-implicit-relation-production-parent-smoke.yml
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile rev268 boundary
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-19_0851_JST/implicit_relation_production_parent_v1.py \
+            automation_runs/2026-08-19_0851_JST/test_implicit_relation_production_parent_rev268.py
+      - name: Run focused rev268 regressions
+        run: |
+          python automation_runs/2026-08-19_0851_JST/test_implicit_relation_production_parent_rev268.py -v
+      - name: Enforce additive sibling boundary
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path("automation_runs/2026-08-19_0851_JST/implicit_relation_production_parent_v1.py").read_text()
+          forbidden = (
+              "import implicit_relation_image_value_coset_v2",
+              "import implicit_relation_image_preimage_coset_v2",
+              "import implicit_relation_image_parent_promotion_v1",
+              "import implicit_relation_parent_exact_empty_v1",
+              "import implicit_relation_image_resource_envelope_v2",
+              "import implicit_relation_parent_outcome_v1",
+          )
+          hits = [item for item in forbidden if item in text]
+          if hits:
+              raise SystemExit(f"branch-only sibling imports are forbidden in rev268: {hits}")
+          print("PASS: rev268 remains a structural orchestration boundary")
+          PY
