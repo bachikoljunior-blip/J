@@ -6,7 +6,7 @@ J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は�
 
 ## 現在の継続点
 
-現在の統合済み継続点は **AGI-GI rev235**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
+現在の統合済み継続点は **AGI-GI rev236**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
 
 rev208 は active leaf **H6-C2** の literal natural-domain giant subleafを解決した。represented subgroup が degree `n>=5` で order `n!` または `n!/2` なら、その action 自体が literal `S_n` / `A_n` なので、色クラス間の exact transporter と target-color stabilizerから full String-Isomorphism right cosetを直接復元する。
 
@@ -108,11 +108,13 @@ rev234はsource/target witness outcomeのcardinalityだけからCartesian branch
 
 rev235は、全surviving Design branchで実際に返されたfull-string child proofを再実行せず直接捕捉し、各recurrence-v4証拠を検証して全branch分をlog-sum-expで一度ずつ合成する。complete branch数との不一致、nonexact/uncertified child、original-root envelope超過はfail closedであり、成功してもchildを開始する前の保守的予約まで解決したとは扱わない。初回専用workflow `32445130597` は未統合rev234 testを参照したfixture構成ミスでfailureとなり証拠に数えず、修正head `c01843c4a71a674e164beb04e95007dca8685c3f` のAGI-GI rev validation `32445197747` とrev235 `32445197690` はともにsuccess。local direct assertions、rev189/rev194 integration、py_compile、差分検査もsuccess。PR #163をexact tested head固定でmergeし、main commit `799390f6025127c2c038adab1e46a336d1979a5c` に統合済み。
 
-rev236候補はc2bのsmall-order exact-terminal subcaseを実行前予約へ接続する。全surviving branchのsubgroup位数をsolver開始前にsnapshotし、`min(max_group_order, root**power)`以下でU2の最初のexact small-order terminalへ必ず停止する場合だけ、同terminalの既存機械的上界 `|H| * max(2,n)^12 * 2^24` を全branch分任意精度整数で予約する。大位数structural branchまたはbudget超過は最初のchildを呼ばずfail closed、完了時は実child数とcandidate scan数を予約へ照合する。proposed head `58c46658110dad200f2817dc9bfa3dbcf1f10065` はrev236 before-call sentinelを含む4 assertions、rev189/rev194/rev235 integration 9 assertions、py_compile、差分検査がsuccess。PR #164でGitHub workflow検証中でありmain未統合。
+rev236候補はc2bのsmall-order exact-terminal subcaseを実行前予約へ接続する。全surviving branchのsubgroup位数をsolver開始前にsnapshotし、`min(max_group_order, root**power)`以下でU2の最初のexact small-order terminalへ必ず停止する場合だけ、同terminalの既存機械的上界 `|H| * max(2,n)^12 * 2^24` を全branch分任意精度整数で予約する。大位数structural branchまたはbudget超過は最初のchildを呼ばずfail closed、完了時は実child数とcandidate scan数を予約へ照合する。tested head `58c46658110dad200f2817dc9bfa3dbcf1f10065` はrev236 before-call sentinelを含む4 assertions、rev189/rev194/rev235 integration 9 assertions、py_compile、差分検査がsuccess。AGI-GI rev validation `32448040944`、rev236 `32448040975`、rev235 `32448040958` はすべてsuccess。PR #164をexact tested head固定でmergeし、main commit `7583802264a5051081320b542327787b8cc68b7e` に統合済み。
+
+rev237候補はc2b2aのinitial-orbit small-image subcaseを実装する。whole-branch small-order gateを超えるintransitive subgroupについて、最初のfull-string childを開始する前に全canonical initial orbit imageを構築してexact orderを証明する。全imageが既存small-order terminal gate以下の場合だけ、preflight audit、image chain、全image enumeration、paired chain/kernel、全generator lift sift、full-domain preimage chainをcomplete branch cover全体で予約する。後続subgroupのimage orderは初期image orderを超えないことを利用し、nested structural imageはfail closedに保持する。local direct/integration 12 assertions、py_compile、差分検査がsuccess。proposed head `46cc937554ae1ec2014cf1da60f24767cf805196` をPR #165でGitHub workflow検証中でありmain未統合。
 
 ## 問題木
 
-予測問題数は **576**、置換済み旧問題を除く有効問題数は **552**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
+予測問題数は **576**、置換済み旧問題を除く有効問題数は **554**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
 
 置換済み旧問題を除く全層――primitive relation、H6-C2、W1R-H6 corrected Split-or-Johnson/Design branch、global proof-carrying recurrence/resource、AGI rootの一般性・性能・自律性・実用提供――を横断し、7本の狭いrelation/filter/cap branchを三つのsolution-shaped problemへ書き換えた。**CRX1 exact canonical relation quotient/preimage closure**、**CRX2 information/symmetry-defect relation selection**、**CRX3 replay-stable proof/resource substrate**であり、単なる重複名の統合ではなく上位親から共有できる解法境界である。結果は `517 - 7 + 3 = 513`、再予測576。rev214はCRX1のnonconstant strict-pair subcaseとCRX3のhomogeneous/self-loop guardsだけを解決した。
 
@@ -154,15 +156,17 @@ rev233の実装試行でc1を、(c1a) source/target witness Cartesian productを
 
 rev235への直接試行でc2を、(c2a) 実際に実行した全full-string childのproof object捕捉・recurrence検証・完全多重度合成、(c2b) 最初のchildを開始する前の全branch保守的resource reservation、の二子へ分解した。旧1末端をその親と2子へ置換したため有効数は `545 - 1 + 3 = 547`。rev235はc2aを解決したが、c2bと親c2は未解決のままである。
 
-rev236への直接試行でc2bを、(c2b1) U2のexact small-order terminalへ必ず停止する全branch coverの実行前予約、(c2b2) imprimitive/Johnson/orbit等のstructural recursionへ進むbranchの実行前予約、の二子へ分解した。旧1末端をその親と2子へ置換したため有効数は `547 - 1 + 3 = 549`。rev236候補はc2b1だけを実装し、GitHub検証・統合前なので解決済みへ昇格しない。549は予測576以下でover-count rewrite triggerは発火しておらず、c2b2を抑制していない。
+rev236への直接試行でc2bを、(c2b1) U2のexact small-order terminalへ必ず停止する全branch coverの実行前予約、(c2b2) imprimitive/Johnson/orbit等のstructural recursionへ進むbranchの実行前予約、の二子へ分解した。旧1末端をその親と2子へ置換したため有効数は `547 - 1 + 3 = 549`。rev236はc2b1を解決した。既に数えた末端の状態更新だけなので有効数549は変わらず、予測576以下でover-count rewrite triggerは発火しておらず、c2b2を抑制していない。
 
 c2b2の直接試行ではU2/S1の実dispatchを横断し、(c2b2a) intransitive candidateの全orbit imageとpaired preimage、(c2b2b) transitive imprimitive block quotient/kernel recursion、(c2b2c) primitive non-giant Johnson/profile recognition・relation recursion、の三子へ分解した。各経路はstate/order/recognition capとSchreier primitiveが異なり、単一のnode capでは実行前証明にならない。旧1末端をその親と3子へ置換したため有効数は `549 - 1 + 4 = 552`。552は予測576以下でover-count rewrite triggerは発火しておらず、三経路のいずれも抑制していない。
 
+rev237への直接試行でc2b2aを、(c2b2a1) 全initial orbit imageがsmall-order exact terminalへ停止するcomplete-cover preflight、(c2b2a2) initial image自体がintransitive/imprimitive/primitive non-giantとなるnested structural image preflight、の二子へ分解した。旧1末端をその親と2子へ置換したため有効数は `552 - 1 + 3 = 554`。rev237候補はc2b2a1だけを実装し、GitHub検証・統合前なので解決済みへ昇格しない。554は予測576以下でover-count rewrite triggerは発火しておらず、nested structural imageを抑制していない。
+
 CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2のsource-target comparisonとそのexecution-linked original-root consumers、CRX3 substrateの未解決algorithmic consumers、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
 
-次の未解決末端は **CRX2 / Design intransitive-orbit full-string child preflight**:
+次の未解決末端は **CRX2 / Design nested structural orbit-image preflight**:
 
-> whole-candidate small-order gateを超えるintransitive branchについて、全canonical orbit imageの位数を実行前に証明し、各imageがsmall-order exact group terminalへ停止する場合のenumeration、image chain、paired kernel/preimage Schreier workをcomplete cover全体で予約する。後続subgroupでimage位数が増えないことを用い、nested structural imageはc2b2aの次子としてfail closedに残す。
+> initial orbit imageがsmall-order gateを超えるintransitive branchについて、strict smaller image domainとsame-domain nonprogress拒否を証明し、image側のintransitive/imprimitive/primitive non-giant dispatchを最初のoriginal-domain childより前に再帰予約する。全nested proof occurrence、paired preimage、original-root multiplicityを完全に課金し、未予約pathはfail closedにする。
 
 ## 世界に存在する解法の包含監査
 
