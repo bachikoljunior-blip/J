@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-crx1-image-si-takeover-20260822T024349JST-a4f328be",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T024223+0900-8a2c255e-turn1",
+  "started_at_jst": "2026-08-22T02:43:49+09:00",
+  "heartbeat_at_jst": "2026-08-22T02:43:49+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "a4f328beaf5b5702b48ac4c7345e4cb540dded9f",
+  "starting_agi_gi_rev": 254,
+  "target_revision": null,
+  "scope": "CRX1/node-resource-capped-image-SI/resource-admission-certificate/integration",
+  "reserved_paths": [
+    "agi/run-history/phase-admissions/chatgpt-session-j-crx1-image-si-takeover-20260822T024349JST-a4f328be-merge-20260822T0244JST.json",
+    "automation_runs/2026-08-19_0851_JST/CRX1_IMAGE_SI_RESOURCE_ADMISSION.md",
+    "automation_runs/2026-08-19_0851_JST/crx1_image_si_resource_admission_v1.py",
+    "automation_runs/2026-08-19_0851_JST/crx1_image_si_resource_bounds_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_crx1_image_si_resource_admission_v1.py"
+  ],
+  "branch": "feat/crx1-image-si-resource-admission-session-20260821-2202",
+  "takeover_audit": {
+    "stale_claim": "chatgpt-session-j-crx1-image-si-admission-20260821T220200JST-f3a215ea",
+    "pull_request": 187,
+    "exact_head": "9c5378c71c42823454fad0f8b42a2a507f6b310b",
+    "policy": "do not rewrite the stale claim; validate and integrate the existing isolated CRX1 leaf under this fresh claim"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
