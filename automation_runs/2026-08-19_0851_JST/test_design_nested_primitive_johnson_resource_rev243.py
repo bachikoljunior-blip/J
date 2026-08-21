@@ -35,7 +35,7 @@ def test_johnson_parameter_family_is_complete_before_unknown_subgroup():
     assert proof.partition_action_upper_bound == 256
     assert proof.work_upper_bound <= proof.max_work
     assert proof.resource_admitted
-    assert proof.admitted
+    assert not proof.admitted
     assert not proof.exact_path_certified
 
 
@@ -55,6 +55,7 @@ def test_signed_complement_parameter_gets_two_v_factorial_coverage():
     assert proof.max_subset_size == 3
     assert proof.johnson_action_order_certified
     assert proof.resource_admitted
+    assert not proof.admitted
 
 
 def test_robust_fallback_is_not_reserved_above_explicit_degree_cap():
@@ -70,6 +71,7 @@ def test_robust_fallback_is_not_reserved_above_explicit_degree_cap():
     assert proof.johnson_parameter_candidates == ((6, 2),)
     assert proof.recognition_comparison_upper_bound == comb(15, 2)
     assert proof.resource_admitted
+    assert not proof.admitted
 
 
 def test_work_saturates_at_caller_cap_plus_one_before_recognition():
@@ -77,6 +79,7 @@ def test_work_saturates_at_caller_cap_plus_one_before_recognition():
     assert proof.status == "design_nested_primitive_johnson_work_cap_exceeded"
     assert proof.work_upper_bound == 98
     assert not proof.resource_admitted
+    assert not proof.admitted
 
 
 def test_non_johnson_degree_fails_closed_without_claiming_a_path():
@@ -94,6 +97,7 @@ def test_non_johnson_degree_fails_closed_without_claiming_a_path():
     assert proof.johnson_parameter_cover_certified
     assert not proof.strict_ground_progress_certified
     assert not proof.resource_admitted
+    assert not proof.admitted
 
 
 def test_root_lift_and_order_guards_fail_closed():
@@ -104,6 +108,7 @@ def test_root_lift_and_order_guards_fail_closed():
     )
     assert proof.status == "design_nested_primitive_johnson_original_root_lift_unavailable"
     assert not proof.resource_admitted
+    assert not proof.admitted
 
     too_large_for_johnson = _proof(image_order_upper_bound=121)
     assert too_large_for_johnson.status == (
@@ -111,6 +116,7 @@ def test_root_lift_and_order_guards_fail_closed():
     )
     assert not too_large_for_johnson.johnson_action_order_certified
     assert not too_large_for_johnson.resource_admitted
+    assert not too_large_for_johnson.admitted
 
     try:
         _proof(image_order_upper_bound=721)
