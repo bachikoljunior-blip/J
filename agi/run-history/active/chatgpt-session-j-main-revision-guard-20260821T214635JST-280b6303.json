@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-main-revision-guard-20260821T214635JST-280b6303",
   "session_id": "same-chat-automation-20260821T214115+0900-ad2f6ef2-turn1",
   "started_at_jst": "2026-08-21T21:46:35+09:00",
-  "heartbeat_at_jst": "2026-08-22T00:40:14+09:00",
+  "heartbeat_at_jst": "2026-08-22T00:55:32+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "280b63039436e0ee3f7ec6c6c1d729a4a48b0a52",
   "starting_agi_gi_rev": 244,
@@ -29,6 +29,10 @@
     "automation_runs/2026-08-19_0851_JST/MAIN_REVISION_GUARD_AUDIT.md"
   ],
   "branch": "ops-agi-gi-main-revision-guard-20260821-214635",
-  "status": "active",
-  "agi_state": "NOT_AGI"
+  "status": "closed",
+  "agi_state": "NOT_AGI",
+  "completed_at_jst": "2026-08-22T00:55:32+09:00",
+  "merged_main_sha": "201f3b979b53655824b2ce7b7a3f7055701acf90",
+  "implementation_head": "3aeb0a67066122ceab9ba841088d2dc86712602a",
+  "coordination_state": "COMPLETED_MERGED"
 }
