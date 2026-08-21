@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886",
   "session_id": "chatgpt-session-j-continuation-20260822T074400+0900-274ed1e5-turn1",
   "started_at_jst": "2026-08-22T07:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T08:01:04.094600+09:00",
+  "heartbeat_at_jst": "2026-08-22T08:10:34+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "9e47c88689cbbe10d84cc6a900674feb3aa31ce6",
   "starting_agi_gi_rev": 257,
@@ -12,6 +12,8 @@
   "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/parent-exact-outcome-contract",
   "branch": "agi-gi-rev266-parent-outcome-contract-session-20260822-0751",
   "pull_request": 209,
+  "pull_request_state": "ready_for_review",
+  "ready_for_review_at_jst": "2026-08-22T08:10:21+09:00",
   "latest_head_sha": "9519b0608e6ceec060c99eea3b3a75c983403ca1",
   "reserved_paths": [
     ".github/workflows/rev266-implicit-relation-parent-outcome-smoke.yml",
@@ -40,6 +42,7 @@
   "rescope_reason": "mandatory post-claim recheck exposed a simultaneous rev264 target collision; rev265 was also newly occupied",
   "validation": {
     "exact_head_sha": "9519b0608e6ceec060c99eea3b3a75c983403ca1",
+    "all_exact_head_workflows": "success",
     "dedicated_smoke_run_id": 32535356686,
     "dedicated_smoke": "success",
     "focused_tests": "12/12 success",
@@ -51,7 +54,21 @@
     "publish_evidence_source_sha": "81727cd08af60f3fa0d7b284f49aaecf79a0e23a",
     "publish_registry_digest": "sha256:83636e7a5c38bffa3fcb4ca446e5a488f1b3055ecc518207e2bee8ec201b0f6d",
     "agi_gi_rev_validation_run_id": 32535356618,
-    "agi_gi_rev_validation": "in_progress_at_last_check"
+    "agi_gi_rev_validation": "success",
+    "validate_w1r_fast": "success",
+    "validate_rev_series": "success",
+    "independent_labelg_differential": "success",
+    "inherited_workflow_run_ids": [
+      32535356596,
+      32535356520,
+      32535356556,
+      32535356561,
+      32535356531,
+      32535356558,
+      32535356473,
+      32535356601,
+      32535356463
+    ]
   },
   "status": "active",
   "agi_state": "NOT_AGI"
