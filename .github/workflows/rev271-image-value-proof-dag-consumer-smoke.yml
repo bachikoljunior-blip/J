@@ -18,9 +18,46 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Compute replayable rev271 attempt admission
+        run: |
+          rm -rf /tmp/rev271-registry
+          mkdir -p /tmp/rev271-registry
+          git archive fefa7352455f138cd4047c04052ce0b6a68efe35 agi/run-history/active | tar -x -C /tmp/rev271-registry
+          PYTHONPATH="$PWD" python - <<'PY'
+          import json
+          from datetime import datetime
+          from pathlib import Path
+          from automation.parallel_claims import load_registry
+          from automation.problem_solving_parallel_admission import admit_problem_phase, evidence_payload
+          source = "fefa7352455f138cd4047c04052ce0b6a68efe35"
+          now = datetime.fromisoformat("2026-08-22T08:55:30+09:00")
+          claims, errors = load_registry(Path("/tmp/rev271-registry"))
+          if errors:
+              raise SystemExit("registry errors: " + repr(errors))
+          result = admit_problem_phase(
+              claims,
+              claim_id="chatgpt-session-j-rev271-image-value-proof-dag-20260822T085500JST-429b7cee",
+              phase="attempt_solution",
+              scope="crx3/algorithmic-consumers/implicit-image-value-coset-exact-terminal-proof-dag",
+              target_revision=271,
+              now=now,
+              registry_source_sha=source,
+              paths=[
+                  ".github/workflows/rev271-image-value-proof-dag-consumer-smoke.yml",
+                  "automation_runs/2026-08-19_0851_JST/REV271_IMAGE_VALUE_PROOF_DAG_CONSUMER.md",
+                  "automation_runs/2026-08-19_0851_JST/implicit_image_value_proof_dag_consumer_v1.py",
+                  "automation_runs/2026-08-19_0851_JST/test_implicit_image_value_proof_dag_consumer_rev271.py",
+              ],
+          )
+          print(json.dumps(evidence_payload(result, now), ensure_ascii=False, indent=2, sort_keys=True))
+          if not result["admitted"]:
+              raise SystemExit(2)
+          PY
       - name: Run rev271 focused and inherited regressions
         working-directory: automation_runs/2026-08-19_0851_JST
         run: python -m unittest -v test_implicit_relation_image_value_coset_rev262.py test_proof_dag_accounting_rev220.py test_implicit_image_value_proof_dag_consumer_rev271.py
