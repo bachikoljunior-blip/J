@@ -1,0 +1,15 @@
+{
+  "event_type": "parallel_execution_claim",
+  "started_at_jst": "2026-08-21T19:31:55+09:00",
+  "request_received_at_utc": "2026-08-21T10:31:55Z",
+  "starting_main_sha": "539e855cfd51ccddf8c304a7814b86c9dc5f31e9",
+  "starting_integrated_agi_gi_rev": 240,
+  "observed_open_pr": 169,
+  "claimed_next_leaf": "c2b2a2i3b_shared_pipeline_admission",
+  "planned_branch": "agi-gi-rev242-design-pipeline-ledger-session-20260821t193155",
+  "execution_surface": "chatgpt_work_mode_same_conversation",
+  "session_schedule_title": "AGI-GI実装継続・再発火2",
+  "coordination_state": "ACTIVE",
+  "collision_policy": "do not modify the rev241 head; merge only its exact CI-verified head, then branch from the refreshed main; re-read main and open PRs before every write",
+  "agi_state": "NOT_AGI"
+}
