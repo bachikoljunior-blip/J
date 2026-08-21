@@ -201,21 +201,38 @@ def design_full_string_child_preflight(
             )
             for index, (order, kind, image_bound) in enumerate(zip(orders, kinds, state_images))
         )
+        extended_cover = bool(primitive_candidates) or any(work > 0 for work in imprimitive_work)
         if not root_lift:
             status = "design_full_string_child_original_root_lift_unavailable"
             reason = "the full-string child degree exceeds the original root"
         elif not terminal_path:
-            status = "design_full_string_exact_terminal_cover_unavailable"
-            if primitive_candidates and not primitive_preflight.admitted:
-                reason = primitive_preflight.reason
+            if extended_cover:
+                status = "design_full_string_exact_terminal_cover_unavailable"
+                if primitive_candidates and not primitive_preflight.admitted:
+                    reason = primitive_preflight.reason
+                else:
+                    reason = "at least one complete branch lacks a reserved exact terminal; no branch was started"
             else:
-                reason = "at least one complete branch lacks a reserved exact terminal; no branch was started"
+                status = "design_full_string_state_orbit_cover_work_cap_exceeded"
+                reason = "at least one complete branch state orbit exceeds the finite budget; no branch or structural child was started"
         elif total > cap:
-            status = "design_full_string_exact_terminal_cover_work_cap_exceeded"
+            status = (
+                "design_full_string_exact_terminal_cover_work_cap_exceeded"
+                if extended_cover
+                else "design_full_string_state_orbit_cover_work_cap_exceeded"
+            )
             reason = "the sum of all exact branch terminal reservations exceeds the finite budget before the first branch"
         else:
-            status = "certified_design_full_string_exact_terminal_cover_preflight"
-            reason = "every surviving Design branch has a reserved exact terminal path, including the complete primitive-Johnson subcover, before the first branch starts"
+            status = (
+                "certified_design_full_string_exact_terminal_cover_preflight"
+                if extended_cover
+                else "certified_design_full_string_state_orbit_cover_preflight"
+            )
+            reason = (
+                "every surviving Design branch has a reserved exact terminal path, including the complete primitive-Johnson subcover, before the first branch starts"
+                if extended_cover
+                else "every surviving Design branch has an exact small-order or complete state-orbit terminal and the entire cover was reserved before the first branch"
+            )
         return DesignFullStringChildPreflight(
             status,
             root,
