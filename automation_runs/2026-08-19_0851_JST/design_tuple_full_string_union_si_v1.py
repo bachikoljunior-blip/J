@@ -79,7 +79,7 @@ def solve_design_tuple_transport_full_string(
     if root_n < n:
         raise ValueError("root_n must dominate current degree")
 
-    ledger = transport_plan.original_root_ledger
+    ledger = getattr(transport_plan, "original_root_ledger", None)
     if ledger is not None:
         if not ledger.admitted:
             return DesignTupleFullStringSI(
