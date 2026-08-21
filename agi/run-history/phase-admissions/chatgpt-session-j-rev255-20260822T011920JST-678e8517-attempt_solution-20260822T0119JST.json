@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "event_type": "problem_solving_phase_admission",
+  "recorded_at_jst": "2026-08-22T01:20:00+09:00",
+  "admitted": true,
+  "phase": "attempt_solution",
+  "mode": "exclusive",
+  "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+  "target_revision": 255,
+  "paths": [
+    ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+    "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+    "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+    "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+    "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+    "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+  ],
+  "registry_source_sha": "a5e1fd95e49613f6edb314ef83045df7b22a5c13",
+  "registry_digest": "sha256:ae050044d0415bbf513edba42f1fe7b3225b06873ba871032ce66ceac8406a0a",
+  "own_claim": {
+    "claim_id": "chatgpt-session-j-rev255-20260822T011920JST-678e8517",
+    "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+    "target_revision": 255,
+    "heartbeat_at_jst": "2026-08-22T01:19:20+09:00",
+    "state": "active",
+    "branch": "agi-gi-rev255-primitive-johnson-design-integration-session-20260822-0119",
+    "reserved_paths": [
+      ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev255-20260822T011920JST-678e8517-attempt_solution-20260822T0119JST.json",
+      "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+      "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+      "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+      "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+      "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+      "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+    ]
+  },
+  "parallel_active_claims": [],
+  "conflicts": [],
+  "reasons": []
+}
