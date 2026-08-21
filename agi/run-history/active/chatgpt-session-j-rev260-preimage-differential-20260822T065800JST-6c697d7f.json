@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f",
+  "session_id": "chatgpt-session-current-conversation-rev260-20260822T065800+0900",
+  "started_at_jst": "2026-08-22T06:58:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:58:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "6c697d7f2aebd6ea87ffe8593981df7e3d5e7241",
+  "starting_agi_gi_rev": 257,
+  "target_revision": 260,
+  "scope": "crx3/replay-stable-proof-substrate/implicit-relation-image-preimage-differential-verifier",
+  "branch": "agi-gi-rev260-preimage-differential-session-20260822-0658",
+  "reserved_paths": [
+    ".github/workflows/j-rev260-session-hourly-refire.yml",
+    ".github/workflows/rev260-implicit-image-preimage-differential-smoke.yml",
+    "automation_runs/2026-08-19_0851_JST/REV260_IMPLICIT_IMAGE_PREIMAGE_DIFFERENTIAL.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_differential_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_differential_rev260.py"
+  ],
+  "stacked_on": {
+    "rev258_pr": 200,
+    "rev258_head": "6a02e6c029148b91f18f72c1ac6b2410f9a7e1a0",
+    "observed_rev259_claim": "chatgpt-session-j-rev259-original-preimage-20260822T0652JST-c31a94ef"
+  },
+  "verification_boundary": "For small certified groups only, independently enumerate the original domain and compare every element's direct induced auxiliary image against the generic paired-preimage right coset. This is an oracle/audit, not a second production preimage solver.",
+  "parallel_exclusions": [
+    "rev259 original-domain preimage integration claim",
+    "rev258 original-root resource envelope claim / PR #199",
+    "rev258 image/value-coset claims / PR #200 and PR #201",
+    "rev257 implicit relation-image paired action / PR #198",
+    "rev255 primitive-Johnson Design caller integration / PR #195",
+    "MAIN.md and shared coordination implementation"
+  ],
+  "non_interference": "Add only new rev260 small-order differential oracle, regression, audit, dedicated smoke, and this session's dedicated hourly guard. Do not modify any production preimage implementation, active claim, sibling branch, PR, MAIN.md, or shared workflow.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
