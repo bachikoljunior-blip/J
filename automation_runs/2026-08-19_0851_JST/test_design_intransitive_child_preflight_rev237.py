@@ -27,7 +27,7 @@ def _plan(branch):
 def test_intransitive_parent_is_admitted_when_every_initial_orbit_image_is_small():
     got = design_full_string_child_preflight(
         (_intransitive_branch(),), original_root_degree=6, original_degree=6,
-        group_order_poly_power=2, max_group_order=3, max_work=10**100,
+        group_order_poly_power=2, max_group_order=3, max_work=10**1100,
     )
     assert got.admitted
     assert got.subgroup_orders == (9,)
@@ -40,7 +40,7 @@ def test_intransitive_complete_cover_is_rejected_before_first_child_when_budget_
     branch = _intransitive_branch()
     exact = design_full_string_child_preflight(
         (branch,), original_root_degree=6, original_degree=6,
-        group_order_poly_power=2, max_group_order=3, max_work=10**100,
+        group_order_poly_power=2, max_group_order=3, max_work=10**1100,
     )
 
     def forbidden(*_args, **_kwargs):
@@ -63,7 +63,7 @@ def test_intransitive_parent_executes_all_small_image_children_and_records_scans
         branch.coset.subgroup, _plan(branch),
         (0, 1, 2, 0, 1, 2), (0, 1, 2, 0, 1, 2),
         root_n=6, max_explicit_degree=1, max_group_order=3,
-        max_design_full_string_child_work=10**100,
+        max_design_full_string_child_work=10**1100,
     )
     assert got.exact and got.complete and got.branches_checked == 1
     assert got.child_preflight is not None and got.child_preflight.complete
