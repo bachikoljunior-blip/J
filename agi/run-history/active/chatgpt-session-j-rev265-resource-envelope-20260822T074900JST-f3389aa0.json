@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev265-resource-envelope-20260822T074900JST-f3389aa0",
+  "session_id": "chatgpt-session-j-continuation-20260822T074400+0900-274ed1e5-turn1",
+  "started_at_jst": "2026-08-22T07:49:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:49:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "f3389aa001318a4ba94a497eb4b65f9786357a48",
+  "starting_agi_gi_rev": 257,
+  "target_revision": 265,
+  "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-root-resource-envelope",
+  "branch": "agi-gi-rev265-implicit-image-resource-envelope-session-20260822-0749",
+  "reserved_paths": [
+    ".github/workflows/rev265-implicit-relation-image-resource-envelope-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev265-resource-envelope-20260822T074900JST-f3389aa0-attempt-solution.json",
+    "automation_runs/2026-08-19_0851_JST/REV265_IMPLICIT_RELATION_IMAGE_RESOURCE_ENVELOPE.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_image_resource_envelope_v2.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_resource_envelope_rev265.py"
+  ],
+  "rescope_from": "chatgpt-session-j-rev258-resource-envelope-20260822T064500JST-2675f756",
+  "parallel_exclusions": [
+    "rev262 value-preserving image-coset intersection",
+    "rev263 exact-empty parent verifier",
+    "rev264 parent outcome contract",
+    "rev259 paired preimage",
+    "rev260 differential verifier",
+    "rev261 nonempty parent promotion",
+    "CRX3 active claims"
+  ],
+  "non_interference": "Only new rev265 resource-envelope, phase-evidence, test, audit, and path-scoped smoke files are reserved. Do not modify sibling branches, PRs, claims, workflows, MAIN.md, or shared implementation files.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
