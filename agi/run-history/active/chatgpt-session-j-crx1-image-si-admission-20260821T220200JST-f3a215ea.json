@@ -1,0 +1,35 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-crx1-image-si-admission-20260821T220200JST-f3a215ea",
+  "session_id": "chatgpt-session-j-crx1-image-si-admission-parallel-20260821T220200+0900-turn1",
+  "branch": "feat/crx1-image-si-resource-admission-session-20260821-2202",
+  "base_main_sha": "f3a215eaed90958b43cbfa44649479a26220971b",
+  "base_commit": "f3a215eaed90958b43cbfa44649479a26220971b",
+  "claimed_at_utc": "2026-08-21T13:02:00Z",
+  "started_at_jst": "2026-08-21T22:02:00+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:02:00+09:00",
+  "expected_heartbeat_interval_minutes": 30,
+  "stale_after_minutes": 90,
+  "expires_at_utc": "2026-08-21T16:02:00Z",
+  "target_revision": null,
+  "scope": [
+    "CRX1/node-resource-capped-image-SI/resource-admission-certificate"
+  ],
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/crx1_image_si_resource_admission_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_crx1_image_si_resource_admission_v1.py",
+    "automation_runs/2026-08-19_0851_JST/CRX1_IMAGE_SI_RESOURCE_ADMISSION.md",
+    ".github/workflows/j-crx1-image-si-admission-session-hourly-refire.yml"
+  ],
+  "parallel_exclusions": [
+    "CRX1/k<=2/homogeneous-blocks-nonrestricting-relation-image/exact-witness (rev248)",
+    "CRX2/shared-s1/imprimitive-production-admission (rev247)",
+    "CRX2/Design imprimitive caller integration (rev245 / PR #177)",
+    "CRX2/c2b2a2iii2 primitive Johnson production admission (rev246 / PR #179)",
+    "repository-state/agi-gi-main-revision-guard"
+  ],
+  "non_interference": "Add only new CRX1 admission-certificate, test, report, and session workflow paths; do not modify exact solver, CRX2, MAIN.md, existing claims, workflows, branches, or PRs.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
