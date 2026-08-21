@@ -1,0 +1,50 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "main",
+    "claim_id": "chatgpt-session-j-rev250-status-sync-20260822T041353JST-a8901efa",
+    "heartbeat_at_jst": "2026-08-22T04:13:53+09:00",
+    "reserved_paths": [
+      "MAIN.md",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev250-status-sync-20260822T041353JST-a8901efa-update-problem-tree-20260822T0413JST.json"
+    ],
+    "scope": "crx3/original-root-ledger/phase-start-tickets/status-sync",
+    "state": "active",
+    "target_revision": null
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev255-primitive-johnson-design-integration-takeover-20260822-0318",
+      "claim_id": "chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1",
+      "heartbeat_at_jst": "2026-08-22T03:18:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1-attempt_solution-20260822T0318JST.json",
+        "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+        "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+        "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+      ],
+      "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+      "state": "active",
+      "target_revision": 255
+    }
+  ],
+  "paths": [
+    "MAIN.md",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev250-status-sync-20260822T041353JST-a8901efa-update-problem-tree-20260822T0413JST.json"
+  ],
+  "phase": "update_problem_tree",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T04:13:53+09:00",
+  "registry_digest": "sha256:01f6dea1338b759e2cd6427ee93cef09c7318293aa3581e046bf757733305d88",
+  "registry_source_sha": "606a6ea57e2ffc34d6b92ae72f8f5c28e90b49ef",
+  "schema_version": 1,
+  "scope": "crx3/original-root-ledger/phase-start-tickets/status-sync",
+  "target_revision": null
+}
