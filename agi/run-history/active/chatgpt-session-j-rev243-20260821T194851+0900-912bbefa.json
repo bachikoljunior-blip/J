@@ -3,13 +3,18 @@
   "event_type": "active_session_claim",
   "automation_run_id": "chatgpt-session-j-rev243-20260821T194851+0900-912bbefa",
   "started_at_jst": "2026-08-21T19:48:51+09:00",
+  "last_heartbeat_at_jst": "2026-08-21T20:10:00+09:00",
   "request_received_at_utc": "2026-08-21T10:43:54Z",
   "repository": "bachikoljunior-blip/J",
   "starting_main_sha": "912bbefadc994637d728d04d2de6db2a2faa51a9",
+  "observed_main_sha": "05169806267271f1b1169aea7a152aba59dd27f8",
   "starting_agi_gi_rev": 241,
   "target_revision": 243,
   "branch": "agi-gi-rev243-nested-primitive-johnson-preflight-session-20260821-1948",
+  "draft_pr": 174,
   "exclusive_scope": "CRX2/c2b2a2iii nested primitive non-giant Johnson/profile relation preflight",
+  "implemented_child": "c2b2a2iii1 unknown-post-child nested primitive-Johnson resource envelope",
+  "remaining_child": "c2b2a2iii2 production complete-cover admission/path integration and execution-linked charge",
   "excluded_parallel_scopes": [
     "CRX2/c2b2a2i3b shared Design pipeline admission ledger",
     "CRX2/c2b2a2ii nested transitive-imprimitive block quotient/kernel resource preflight"
@@ -25,15 +30,27 @@
     "do_not_modify_other_active_branches": true,
     "do_not_cancel_or_rerun_unrelated_workflows": true,
     "skip_duplicate_scope_when_this_claim_is_active": true,
-    "recheck_main_open_prs_active_claims_before_each_write": true
+    "recheck_main_open_prs_active_claims_before_each_write": true,
+    "sibling_acknowledgement_commit": "05169806267271f1b1169aea7a152aba59dd27f8"
+  },
+  "implementation": {
+    "head_sha": "66499f31dea325fcb267ef822bd4e6fc2dd9def8",
+    "module": "automation_runs/2026-08-19_0851_JST/design_nested_primitive_johnson_resource_v1.py",
+    "tests": "automation_runs/2026-08-19_0851_JST/test_design_nested_primitive_johnson_resource_rev243.py",
+    "workflow": ".github/workflows/rev243-design-nested-primitive-johnson-resource-smoke.yml",
+    "proof_memo": "automation_runs/2026-08-19_0851_JST/REV243_DESIGN_NESTED_PRIMITIVE_JOHNSON_RESOURCE.md",
+    "local_validation": "6 focused tests passed; py_compile passed",
+    "claim_boundary": "resource_admitted is a finite pre-execution budget claim only; exact_path_certified remains false"
   },
   "restart_guard": {
     "schedule_title": "AGI-GI実装継続",
     "cadence": "hourly",
     "execution_surface": "chatgpt_work_mode_same_conversation",
-    "stale_after_minutes": 75,
-    "behavior": "skip while a fresh heartbeat for this automation_run_id exists; re-enter the same unresolved scope only after the claim is stale"
+    "repository_watchdog_commit": "61b2e52e91d96e63c029e9d8b1eadf3fe0f163f0",
+    "repository_watchdog_cron_utc": "17 * * * *",
+    "stale_after_minutes": 90,
+    "behavior": "leave queued/running workflows and fresh AGI-GI claims/PRs untouched; only an idle/stale state emits a durable continuation re-fire request"
   },
-  "status": "active",
+  "status": "implementation_committed_ci_pending",
   "agi_state": "NOT_AGI"
 }
