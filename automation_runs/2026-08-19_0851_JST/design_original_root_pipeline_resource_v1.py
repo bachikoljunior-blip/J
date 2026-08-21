@@ -97,7 +97,17 @@ def design_original_root_pipeline_resource_envelope(
     action = _sat_mul(_sat_mul(states, order, stop), n, stop)
     state_chain = _chain_bound(n, max(1, states * order), order, n, stop)
     state_orbit = _sat_add(action, state_chain, stop)
-    child_per_branch = max(small, state_orbit)
+    # A transitive-imprimitive child may intentionally use the structured
+    # quotient/kernel terminal instead of enumerating the ambient state orbit.
+    # Without knowing the later branch subgroup or block count, |G| and n give
+    # a uniform envelope for every q<=n: all preparation/lift/reassembly chains
+    # are O(n^3|G|^3), while the worst exact small-order fiber cover is bounded
+    # by 2^24*n^12*|G|^2.  The larger integer monomial below dominates both and
+    # keeps the choice available inside this same pre-tWL reservation.
+    imprimitive_universal = _sat_mul(
+        (2 ** 26) * (max(2, n) ** 12), order ** 3, stop,
+    )
+    child_per_branch = max(small, state_orbit, imprimitive_universal)
     children = _sat_mul(branches, child_per_branch, stop)
 
     # Worst case: every branch is nonempty and contributes at most |G| subgroup
