@@ -23,7 +23,7 @@ jobs:
           python-version: "3.11"
       - name: Run rev271 focused and inherited regressions
         working-directory: automation_runs/2026-08-19_0851_JST
-        run: python -m unittest -v test_implicit_relation_image_value_coset_rev262.py test_proof_dag_accounting_v1.py test_implicit_image_value_proof_dag_consumer_rev271.py
+        run: python -m unittest -v test_implicit_relation_image_value_coset_rev262.py test_proof_dag_accounting_rev220.py test_implicit_image_value_proof_dag_consumer_rev271.py
       - name: Compile rev271 consumer
         run: python -m py_compile automation_runs/2026-08-19_0851_JST/implicit_image_value_proof_dag_consumer_v1.py automation_runs/2026-08-19_0851_JST/test_implicit_image_value_proof_dag_consumer_rev271.py
       - name: Enforce no sibling branch-only imports
