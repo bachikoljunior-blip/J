@@ -1,0 +1,68 @@
+name: J parallel resilience session re-fire smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "automation/session_refire.py"
+      - "automation/test_session_refire.py"
+      - "automation/test_session_refire_workflow_contract.py"
+      - ".github/workflows/j-parallel-resilience-session-hourly-refire.yml"
+      - ".github/workflows/j-parallel-resilience-session-refire-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  session-refire-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run focused session re-fire tests
+        run: >-
+          python -m unittest
+          automation.test_session_refire
+          automation.test_session_refire_workflow_contract
+          -v
+
+      - name: Compile session re-fire modules
+        run: >-
+          python -m py_compile
+          automation/session_refire.py
+          automation/test_session_refire.py
+          automation/test_session_refire_workflow_contract.py
+
+      - name: Verify a fresh dedicated branch suppresses re-fire
+        shell: bash
+        env:
+          CLAIM_ID: chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba
+          CLAIM_PATH: agi/run-history/active/chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba.json
+        run: |
+          set -euo pipefail
+          decision="$(
+            python automation/session_refire.py check \
+              --claim-file "${CLAIM_PATH}" \
+              --claim-id "${CLAIM_ID}" \
+              --now "2026-08-21T22:00:00+09:00" \
+              --branch-activity-at "2026-08-21T21:59:00+09:00"
+          )"
+          jq -e '.should_refire == false and .reason == "session_activity_fresh"' \
+            <<<"${decision}"
+
+      - name: Verify stale activity requests re-fire without sibling inputs
+        shell: bash
+        env:
+          CLAIM_ID: chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba
+          CLAIM_PATH: agi/run-history/active/chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba.json
+        run: |
+          set -euo pipefail
+          decision="$(
+            python automation/session_refire.py check \
+              --claim-file "${CLAIM_PATH}" \
+              --claim-id "${CLAIM_ID}" \
+              --now "2026-08-21T23:31:00+09:00"
+          )"
+          jq -e '.should_refire == true and .reason == "session_activity_stale"' \
+            <<<"${decision}"
