@@ -32,8 +32,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install test runner
-        run: python -m pip install --disable-pip-version-check pytest
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
 
       - name: Compile rev249 boundary
         working-directory: automation_runs/2026-08-19_0851_JST
