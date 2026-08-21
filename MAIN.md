@@ -6,9 +6,9 @@ J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は�
 
 ## 現在の継続点
 
-現在の統合済み継続点は **AGI-GI rev248**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
+現在の統合済み継続点は **AGI-GI rev249**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
 
-並行branchの統合順は数値順とは限らない。rev248 (`42e1bf2df813dbe9d2e17fbf2a56697107fcbd9f`)、rev244 (`bfee3ed1c70d5ee3e74ec525459a98a98fa78cd2`)、rev242 (`1a87ebb4da251f3584ed15929e4b2e702de74ace`)、rev243 (`099ddf1c916bf58dc759a116612ae481aa6d196d`) はいずれもmain到達可能な `AGI-GI revN:` integration commitであり、数値最大のrev248を継続点とする。`automation/agi_gi_main_revision_guard.py` はmain到達可能なintegration commitだけから最大revを再計算し、この宣言の遅延・先行をfail closedにする。branch実装commit、claim、PR、予約subjectで始まらないmerge commit、未統合のrev245・rev247・rev249以降は統合済み継続点に数えない。
+並行branchの統合順は数値順とは限らない。rev249 (`188f223b1c55b0c57ce91cd30e375e0d1b57c2ec`)、rev248 (`42e1bf2df813dbe9d2e17fbf2a56697107fcbd9f`)、rev244 (`bfee3ed1c70d5ee3e74ec525459a98a98fa78cd2`)、rev242 (`1a87ebb4da251f3584ed15929e4b2e702de74ace`)、rev243 (`099ddf1c916bf58dc759a116612ae481aa6d196d`) はいずれもmain到達可能な `AGI-GI revN:` integration commitであり、数値最大のrev249を継続点とする。`automation/agi_gi_main_revision_guard.py` はmain到達可能なintegration commitだけから最大revを再計算し、この宣言の遅延・先行をfail closedにする。branch実装commit、claim、PR、予約subjectで始まらないmerge commit、未統合のrev245・rev247・rev250以降は統合済み継続点に数えない。
 
 rev208 は active leaf **H6-C2** の literal natural-domain giant subleafを解決した。represented subgroup が degree `n>=5` で order `n!` または `n!/2` なら、その action 自体が literal `S_n` / `A_n` なので、色クラス間の exact transporter と target-color stabilizerから full String-Isomorphism right cosetを直接復元する。
 
