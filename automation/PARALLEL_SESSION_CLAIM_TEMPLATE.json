@@ -1,0 +1,16 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "REPLACE_WITH_UNIQUE_CLAIM_ID",
+  "session_id": "REPLACE_WITH_UNIQUE_SESSION_ID",
+  "started_at_jst": "YYYY-MM-DDTHH:MM:SS+09:00",
+  "heartbeat_at_jst": "YYYY-MM-DDTHH:MM:SS+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "REPLACE_WITH_40_HEX_MAIN_SHA",
+  "starting_agi_gi_rev": 0,
+  "target_revision": null,
+  "scope": "REPLACE/WITH/CANONICAL/HIERARCHICAL/SCOPE",
+  "branch": "REPLACE_WITH_BRANCH_NAME",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
