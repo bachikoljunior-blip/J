@@ -37,7 +37,7 @@ A bound is rejected before recognition starts when the original-root lift is inv
 
 ## Exact claim boundary
 
-`resource_admitted=True` certifies only that the whole bounded attempt fits the finite budget. `exact_path_certified` is deliberately and permanently false in this revision.
+`resource_admitted=True` certifies only that the whole bounded attempt fits the finite budget. `exact_path_certified` is deliberately and permanently false in this revision. The public `.admitted` property requires both conditions, so it remains false and cannot accidentally admit a production branch without the missing path/integration certificate.
 
 In particular, rev243 does **not** assert that the unknown post-child subgroup will be primitive, Johnson, profile-determined, nonempty, or exactly solvable. Those facts remain checked by the existing classifier, Johnson recognizer, generator round-trip, profile solver, and proof-carrying S1/U2 return values. A partition-state or recognition cap may still produce a typed unresolved result; the preflight merely proves that even that fail-closed attempt was reserved before execution.
 
@@ -57,7 +57,8 @@ The focused regression suite covers:
 - omission of the exact-orbital fallback above its explicit degree cap;
 - exact arbitrary-precision `cap + 1` saturation;
 - non-Johnson image degrees failing closed without a path claim;
-- original-root, parent-order, image-order, and signed-Johnson-order guards.
+- original-root, parent-order, image-order, and signed-Johnson-order guards;
+- full-branch `.admitted=False` on every rev243 outcome until a separate exact path certificate exists.
 
 Local execution completed all six focused tests and `py_compile`. The dedicated GitHub workflow also reruns the inherited rev238 nested-resource contract so the shared saturation/Schreier assumptions remain covered on the exact proposed head.
 
