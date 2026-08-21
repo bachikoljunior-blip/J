@@ -104,6 +104,8 @@ rev232 tested head `a23d1feda891bbf69be4853318217a9f2a3cb744` は、AGI-GI rev v
 
 rev233はc1のうち、既に生成されたcomplete Cartesian branch planから全tuple transportを開始する前のoriginal-root resource admissionを実装した。`|G|`による各partition orbit state上限、全state-generator edge、stabilizer/parity-kernel/final-coset Schreier chainを全branch多重度で予約し、完了時のbranch/orbit/action実測をexactly onceで記録する。branch plan自身をmaterialization前に予約する境界は未解決のため、c1全体を解決済みとは扱わない。tested head `446cbfca94ecfe2e2fcdf2834f1332191ec73484` はAGI-GI rev validation、rev233専用、rev232、rev194の4 workflowsがすべてsuccess。local direct resource assertions、Design integration 15 cases、py_compile、差分検査もsuccess。PR #161をexact tested head固定でmergeし、main commit `ae457e030bfb9672e050c6b8f72162df7901da08` に統合済み。
 
+rev234候補はsource/target witness outcomeのcardinalityだけからCartesian branch数を任意精度整数で導き、全witness snapshotと各pairのtuple-copy/object constructionをbranch tupleへ触れる前に予約する。original-root ground/log-arity gateと有限budgetが不成立なら`outcome.individualized`を一度も読まずfail closed、成立時はcomplete branch数を記録してrev233の同一coverへ一度だけ渡す。`max_branch_pairs`は独立したruntime guardのままである。proposed head `818a1bcb29cafca59dfd7e4f846438ff72b0aa80` はlocal before-touch/resource assertions、rev194--rev234 Design integration 4 cases、py_compile、差分検査がsuccess。PR #162を作成しGitHub pytest/workflow検証中でありmain未統合。
+
 ## 問題木
 
 予測問題数は **576**、置換済み旧問題を除く有効問題数は **545**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
