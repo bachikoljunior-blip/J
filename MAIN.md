@@ -106,7 +106,7 @@ rev233はc1のうち、既に生成されたcomplete Cartesian branch planから
 
 rev234候補はsource/target witness outcomeのcardinalityだけからCartesian branch数を任意精度整数で導き、全witness snapshotと各pairのtuple-copy/object constructionをbranch tupleへ触れる前に予約する。original-root ground/log-arity gateと有限budgetが不成立なら`outcome.individualized`を一度も読まずfail closed、成立時はcomplete branch数を記録してrev233の同一coverへ一度だけ渡す。`max_branch_pairs`は独立したruntime guardのままである。proposed head `818a1bcb29cafca59dfd7e4f846438ff72b0aa80` はlocal before-touch/resource assertions、rev194--rev234 Design integration 4 cases、py_compile、差分検査がsuccess。PR #162を作成しGitHub pytest/workflow検証中でありmain未統合。
 
-rev235候補は、全surviving Design branchで実際に返されたfull-string child proofを再実行せず直接捕捉し、各recurrence-v4証拠を検証して全branch分をlog-sum-expで一度ずつ合成する。complete branch数との不一致、nonexact/uncertified child、original-root envelope超過はfail closedであり、成功してもchildを開始する前の保守的予約まで解決したとは扱わない。proposed head `d49703022dd7a22ac5447c821b54da67fac87b36` はlocal direct assertions、rev189/rev194 integration、py_compile、差分検査がsuccess。PR #163を作成しGitHub workflow検証中でありmain未統合。
+rev235候補は、全surviving Design branchで実際に返されたfull-string child proofを再実行せず直接捕捉し、各recurrence-v4証拠を検証して全branch分をlog-sum-expで一度ずつ合成する。complete branch数との不一致、nonexact/uncertified child、original-root envelope超過はfail closedであり、成功してもchildを開始する前の保守的予約まで解決したとは扱わない。proposed head `c01843c4a71a674e164beb04e95007dca8685c3f` はlocal direct assertions、rev189/rev194 integration、py_compile、差分検査がsuccess。初回専用workflowは未統合rev234 testを参照したfixture構成ミスでfailureと判明し、実装failureと解釈せず参照を除いてheadを更新した。PR #163で全workflowを再検証中でありmain未統合。
 
 ## 問題木
 
