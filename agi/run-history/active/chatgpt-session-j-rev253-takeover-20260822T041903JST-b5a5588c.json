@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev253-takeover-20260822T041903JST-b5a5588c",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T034116+0900-92e55a14-turn1",
+  "started_at_jst": "2026-08-22T04:19:03+09:00",
+  "heartbeat_at_jst": "2026-08-22T04:19:03+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "b5a5588ce3642deb44f51e3188a2ef1c0862c4ad",
+  "starting_agi_gi_rev": 254,
+  "target_revision": 253,
+  "scope": "corrected-split-or-johnson/upcc-pair-root/complete-ordered-two-root-split-family",
+  "reserved_paths": [
+    ".github/workflows/rev253-upcc-pair-root-split-family-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev253-takeover-20260822T041903JST-b5a5588c-attempt-solution-20260822T0419JST.json",
+    "automation_runs/2026-08-19_0851_JST/REV253_UPCC_PAIR_ROOT_SPLIT_FAMILY.md",
+    "automation_runs/2026-08-19_0851_JST/test_upcc_pair_root_split_family_rev253.py",
+    "automation_runs/2026-08-19_0851_JST/upcc_pair_root_split_family_v1.py"
+  ],
+  "branch": "codex/agi-gi-rev253-upcc-pair-root-20260821-124648z",
+  "takeover_audit": {
+    "stale_pull_request": 188,
+    "stale_head": "00e0b4ec0cf5402a29b1dd657c70e8bf80e5ba4d",
+    "stale_changed_files": 1,
+    "stale_state": "claim-only draft with no implementation",
+    "policy": "preserve the disjoint pair-root scope while replacing the stale claim-only head with a current-main implementation and replayable phase admission"
+  },
+  "status": "active",
+  "non_interference": "Use only the listed rev253 paths. Do not modify rev255 shared Design caller paths, MAIN.md, sibling claims, or unrelated workflows.",
+  "agi_state": "NOT_AGI"
+}
