@@ -1,0 +1,56 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "codex/agi-gi-rev253-upcc-pair-root-20260821-124648z",
+    "claim_id": "chatgpt-session-j-rev253-takeover-20260822T041903JST-b5a5588c",
+    "heartbeat_at_jst": "2026-08-22T04:19:03+09:00",
+    "reserved_paths": [
+      ".github/workflows/rev253-upcc-pair-root-split-family-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev253-takeover-20260822T041903JST-b5a5588c-attempt-solution-20260822T0419JST.json",
+      "automation_runs/2026-08-19_0851_JST/REV253_UPCC_PAIR_ROOT_SPLIT_FAMILY.md",
+      "automation_runs/2026-08-19_0851_JST/test_upcc_pair_root_split_family_rev253.py",
+      "automation_runs/2026-08-19_0851_JST/upcc_pair_root_split_family_v1.py"
+    ],
+    "scope": "corrected-split-or-johnson/upcc-pair-root/complete-ordered-two-root-split-family",
+    "state": "active",
+    "target_revision": 253
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev255-primitive-johnson-design-integration-takeover-20260822-0318",
+      "claim_id": "chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1",
+      "heartbeat_at_jst": "2026-08-22T03:18:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1-attempt_solution-20260822T0318JST.json",
+        "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+        "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+        "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+      ],
+      "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+      "state": "active",
+      "target_revision": 255
+    }
+  ],
+  "paths": [
+    ".github/workflows/rev253-upcc-pair-root-split-family-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev253-takeover-20260822T041903JST-b5a5588c-attempt-solution-20260822T0419JST.json",
+    "automation_runs/2026-08-19_0851_JST/REV253_UPCC_PAIR_ROOT_SPLIT_FAMILY.md",
+    "automation_runs/2026-08-19_0851_JST/test_upcc_pair_root_split_family_rev253.py",
+    "automation_runs/2026-08-19_0851_JST/upcc_pair_root_split_family_v1.py"
+  ],
+  "phase": "attempt_solution",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T04:19:32+09:00",
+  "registry_digest": "sha256:a3c4d916054a6de686d8800c4196774c58dd0b7b91e8f8ef49abd389dae1ee95",
+  "registry_source_sha": "e86f67873ee65cf1166792f4e4009cb96b163c3c",
+  "schema_version": 1,
+  "scope": "corrected-split-or-johnson/upcc-pair-root/complete-ordered-two-root-split-family",
+  "target_revision": 253
+}

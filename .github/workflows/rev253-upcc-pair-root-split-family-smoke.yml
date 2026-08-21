@@ -1,0 +1,28 @@
+name: rev253 complete ordered pair-root UPCC split family smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  rev253-upcc-pair-root-split-family:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pytest numpy
+      - name: Run rev253 and inherited UPCC regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: >-
+          python -m pytest -q
+          test_upcc_pair_root_split_family_rev253.py
+          test_upcc_subconstituent_split_family_rev197.py
+          test_upcc_subconstituent_full_string_si_rev198.py
+      - name: Compile rev253 implementation and regression
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/upcc_pair_root_split_family_v1.py
+          automation_runs/2026-08-19_0851_JST/test_upcc_pair_root_split_family_rev253.py
