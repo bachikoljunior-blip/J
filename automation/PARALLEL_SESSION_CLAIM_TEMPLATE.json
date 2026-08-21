@@ -10,6 +10,7 @@
   "starting_agi_gi_rev": 0,
   "target_revision": null,
   "scope": "REPLACE/WITH/CANONICAL/HIERARCHICAL/SCOPE",
+  "reserved_paths": [],
   "branch": "REPLACE_WITH_BRANCH_NAME",
   "status": "active",
   "agi_state": "NOT_AGI"

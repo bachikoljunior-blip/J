@@ -12,6 +12,9 @@ from automation.parallel_claims import (
     load_claim,
     load_registry,
     normalize_scope,
+    normalize_repo_path,
+    repo_path_is_within,
+    repo_paths_overlap,
     scopes_overlap,
 )
 
@@ -58,6 +61,18 @@ class ParallelClaimTests(unittest.TestCase):
             "crx2/c2b2a2iii",
         )
 
+    def test_repository_path_overlap_is_component_aware(self):
+        self.assertTrue(repo_paths_overlap("automation/core.py", "automation"))
+        self.assertTrue(repo_paths_overlap("automation", "automation/core.py"))
+        self.assertFalse(repo_paths_overlap("automation", "automation_runs"))
+        self.assertTrue(repo_path_is_within("automation/core.py", "automation"))
+        self.assertFalse(repo_path_is_within("automation", "automation/core.py"))
+
+    def test_repository_path_rejects_absolute_and_parent_escape(self):
+        for path in ("/automation/core.py", "automation/../MAIN.md"):
+            with self.subTest(path=path), self.assertRaises(ClaimFormatError):
+                normalize_repo_path(path)
+
     def test_fresh_parent_scope_conflicts_with_child(self):
         with tempfile.TemporaryDirectory() as raw:
             directory = Path(raw)
@@ -82,6 +97,24 @@ class ParallelClaimTests(unittest.TestCase):
                 now=NOW,
             )
             self.assertEqual(conflicts[0][1], ["target_revision_collision"])
+
+    def test_reserved_path_conflicts_across_sibling_scopes(self):
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            claim = load_claim(
+                self.write_claim(
+                    directory,
+                    canonical_claim(reserved_paths=["automation/shared.py"]),
+                )
+            )
+            conflicts = find_conflicts(
+                [claim],
+                scope="CRX3/sibling",
+                target_revision=247,
+                now=NOW,
+                reserved_paths=["automation/shared.py"],
+            )
+            self.assertEqual(conflicts[0][1], ["reserved_path_collision"])
 
     def test_fresh_sibling_with_different_revision_is_available(self):
         with tempfile.TemporaryDirectory() as raw:
@@ -193,6 +226,31 @@ class ParallelClaimTests(unittest.TestCase):
             claim = load_claim(self.write_claim(directory, legacy))
             self.assertTrue(claim.legacy)
             self.assertEqual(claim.state_at(NOW), "closed")
+
+    def test_singleton_scope_list_is_blocking_interoperability_claim(self):
+        variant = canonical_claim(
+            claim_id="variant",
+            session_id="variant",
+            scope=["CRX1/image-si/resource-admission"],
+        )
+        variant.pop("starting_main_sha")
+        variant.pop("starting_agi_gi_rev")
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            claim = load_claim(self.write_claim(directory, variant))
+            self.assertTrue(claim.legacy)
+            self.assertEqual(claim.scope, "crx1/image-si/resource-admission")
+            self.assertTrue(claim.is_fresh(NOW))
+
+    def test_multi_scope_variant_fails_closed(self):
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            path = self.write_claim(
+                directory,
+                canonical_claim(scope=["CRX1/a", "CRX2/b"]),
+            )
+            with self.assertRaisesRegex(ClaimFormatError, "exactly one string"):
+                load_claim(path)
 
     def test_repository_registry_accepts_current_legacy_files(self):
         root = Path(__file__).resolve().parents[1]

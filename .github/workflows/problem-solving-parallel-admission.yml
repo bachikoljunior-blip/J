@@ -1,0 +1,38 @@
+name: Problem-solving parallel admission
+
+on:
+  pull_request:
+    paths:
+      - MAIN.md
+      - agi/**
+      - automation/**
+      - automation_runs/**
+      - .github/workflows/agi-gi*.yml
+      - .github/workflows/rev*.yml
+      - .github/workflows/problem-solving-parallel-admission.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: List pull-request changes
+        run: |
+          git fetch --no-tags origin main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "$base" HEAD > /tmp/changed-files.txt
+      - name: Replay phase-admission evidence
+        run: |
+          python automation/problem_solving_phase_evidence_guard.py \
+            --changed-files /tmp/changed-files.txt \
+            --head-ref HEAD
