@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f",
   "session_id": "chatgpt-session-current-conversation-rev260-20260822T065800+0900",
   "started_at_jst": "2026-08-22T06:58:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T07:16:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:30:08+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "6c697d7f2aebd6ea87ffe8593981df7e3d5e7241",
   "starting_agi_gi_rev": 257,
@@ -16,6 +16,8 @@
     ".github/workflows/j-rev260-session-hourly-refire.yml",
     ".github/workflows/rev260-implicit-image-preimage-differential-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f-merge.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f-publish.json",
     "automation_runs/2026-08-19_0851_JST/REV260_IMPLICIT_IMAGE_PREIMAGE_DIFFERENTIAL.md",
     "automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_differential_v1.py",
     "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_differential_rev260.py"
