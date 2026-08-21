@@ -32,6 +32,9 @@ class DesignTupleTransportPlan:
     exact_empty: bool
     complete: bool
     reason: str
+    executed_branch_count: int = 0
+    total_orbit_states: int = 0
+    total_action_steps: int = 0
 
 
 def _tuple_partition(v: int, ordered_tuple: tuple[int, ...]):
@@ -89,6 +92,7 @@ def transport_complete_design_tuple_branches(
 
     kept = []
     total_steps = 0
+    total_orbit_states = 0
     max_orbit_states = 0
     for source_tuple, target_tuple in branch_plan.branches:
         source_cells = _tuple_partition(v, tuple(source_tuple))
@@ -101,6 +105,7 @@ def transport_complete_design_tuple_branches(
             max_states=max_partition_states,
         )
         total_steps += int(transport.action_steps)
+        total_orbit_states += int(transport.orbit_states)
         max_orbit_states = max(max_orbit_states, int(transport.orbit_states))
         if transport.status == "undetermined_signed_ground_partition_orbit_limit":
             return DesignTupleTransportPlan(
@@ -145,6 +150,7 @@ def transport_complete_design_tuple_branches(
             branch_plan.branch_count, 0, (), local_bound,
             True, True,
             "every tuple pair in the complete canonical Design-Lemma witness cover has an exact empty ambient transporter",
+            branch_plan.branch_count, total_orbit_states, total_steps,
         )
 
     return DesignTupleTransportPlan(
@@ -153,4 +159,5 @@ def transport_complete_design_tuple_branches(
         branch_plan.branch_count, len(kept), tuple(kept), local_bound,
         False, True,
         "every surviving tuple-pair branch carries its exact original-domain ambient right coset; only proved-empty transporter branches were removed",
+        branch_plan.branch_count, total_orbit_states, total_steps,
     )

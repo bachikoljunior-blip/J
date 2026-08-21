@@ -43,6 +43,11 @@ def test_cycle11_theorem_faithful_path_composes_to_exact_full_string_coset():
     assert got.full_string_result.coset.subgroup.order == 11
     assert got.full_string_result.coset.contains(identity(v))
     assert got.full_string_result.coset.contains(cycle)
+    assert got.transport_resource_envelope is not None
+    assert got.transport_resource_envelope.admitted
+    assert got.transport_resource_envelope.complete
+    assert got.transport_resource_envelope.executed_branches == 1
+    assert got.transport_resource_envelope.charged_work_upper_bound > 0
 
 
 def test_cycle11_distinct_string_filters_the_exact_design_cover_to_identity():
