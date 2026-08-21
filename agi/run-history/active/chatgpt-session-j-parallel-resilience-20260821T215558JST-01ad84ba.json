@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba",
+  "session_id": "chatgpt-session-j-parallel-resilience-20260821T215558+0900-01ad84ba-turn1",
+  "started_at_jst": "2026-08-21T21:55:58+09:00",
+  "heartbeat_at_jst": "2026-08-21T21:55:58+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "01ad84ba3b537ef4a191bcbdf3f8df709fadb320",
+  "starting_agi_gi_rev": 244,
+  "target_revision": null,
+  "scope": "automation/session-specific-hourly-refire-and-parallel-safe-continuation-evidence",
+  "branch": "ops-j-parallel-resilience-20260821-215558",
+  "intent": "add a non-interrupting per-session hourly re-fire guard and advance only collision-free continuation support while rev245, rev246, rev247, and MAIN revision work proceed independently",
+  "parallel_exclusions": [
+    "repository-coordination/problem-solving-parallel-admission and MAIN.md revision",
+    "CRX2/Design imprimitive caller integration (rev245 / PR #177)",
+    "CRX2/c2b2a2iii2 primitive Johnson production admission (rev246 / PR #179)",
+    "CRX2/shared-s1/imprimitive-production-admission (rev247)"
+  ],
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "session_refire_must_ignore_unrelated_active_work": true,
+    "session_refire_must_dedupe_its_own_queue": true
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
