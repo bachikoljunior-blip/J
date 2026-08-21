@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev261-parent-promotion-20260822T065904JST-ece2f260",
   "session_id": "chatgpt-session-j-parallel-continuation-20260821T124554Z-turn1",
   "started_at_jst": "2026-08-22T06:59:04+09:00",
-  "heartbeat_at_jst": "2026-08-22T07:05:03+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:07:01+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "ece2f2601e8a128232a0b4f9fc3c0496499f9128",
   "starting_agi_gi_rev": 257,
@@ -16,6 +16,9 @@
   "reserved_paths": [
     ".github/workflows/rev261-implicit-relation-parent-promotion-smoke.yml",
     "agi/run-history/active/chatgpt-session-j-rev261-parent-promotion-20260822T065904JST-ece2f260.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev261-parent-promotion-20260822T065904JST-ece2f260-attempt-solution-20260822T0707JST.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev261-parent-promotion-20260822T065904JST-ece2f260-publish-20260822T0707JST.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev261-parent-promotion-20260822T065904JST-ece2f260-merge-20260822T0707JST.json",
     "automation_runs/2026-08-19_0851_JST/REV261_IMPLICIT_RELATION_PARENT_PROMOTION.md",
     "automation_runs/2026-08-19_0851_JST/implicit_relation_image_parent_promotion_v1.py",
     "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_parent_promotion_rev261.py"
@@ -34,12 +37,15 @@
     "all rev258/rev259 reserved paths, branches, PRs, and workflows",
     "rev255 PR #195, rev245 PR #177, MAIN.md, and shared coordination implementation"
   ],
-  "non_interference": "Add only the rev261 parent-promotion verifier, focused regression, audit note, path-scoped smoke workflow, and this claim. Do not modify or rerun rev258/rev259/rev260 work or any unrelated workflow.",
+  "non_interference": "Add only the rev261 parent-promotion verifier, focused regression, audit note, path-scoped smoke workflow, phase-admission evidence, and this claim. Do not modify or rerun rev258/rev259/rev260 work or any unrelated workflow.",
   "strict_boundary": "Consume a concrete exact generic paired-preimage artifact and independently verify artifact consistency, original-domain relation transport, target-subgroup stabilization, group containment, exact order identities, and bounded verification work before nonempty exact parent promotion. Upstream image intersection, preimage construction, exact-empty handling, original-root accounting, CRX1, GI, and AGI remain separate obligations.",
   "validation": {
     "local_py_compile": "passed",
-    "github_ci": "pending"
+    "focused_smoke_run": 32531425397,
+    "focused_smoke": "success",
+    "parallel_admission_run": 32531425393,
+    "parallel_admission": "failed_missing_phase_admission_evidence"
   },
-  "status": "draft_pr_open_ci_pending",
+  "status": "ci_fix_phase_admission_evidence",
   "agi_state": "NOT_AGI"
 }
