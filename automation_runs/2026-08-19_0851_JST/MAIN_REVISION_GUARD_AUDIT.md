@@ -49,15 +49,18 @@ existing-solution audit, attempt, decomposition, evaluation, child/parent/root
 integration, problem-tree update, publication, and merge to the same registry.
 Read-only phases expose all occupied scopes; mutation phases require a fresh
 schema-v2 owner, exact revision equality, descendant-only scope, and zero live
-collision.  Parent integration therefore cannot silently absorb a child still
+scope/revision/path collision. Repository paths are component-aware durable
+reservations, and every exclusive phase records the exact files or directories
+it will mutate. Parent integration therefore cannot silently absorb a child still
 owned by another session.  The registry source SHA and digest make the visible
 parallel state replayable as evidence.
 
 The admission CLI can persist a complete phase record under
 `agi/run-history/phase-admissions/`.  The PR workflow reconstructs the claim
 registry from the record's exact source commit, reruns the phase decision, and
-compares scope, revision, owner, parallel claims, conflicts, and digest.  A
-problem-state diff without a changed replayable record is rejected, turning the
+compares scope, revision, paths, owner, parallel claims, conflicts, and digest.
+It also requires every problem-state file in the diff to be covered by those
+paths. A problem-state diff without a changed replayable record is rejected, turning the
 protocol from advisory text into an executable integration gate.
 
 Cross-session interoperability is conservative.  A foreign record using a

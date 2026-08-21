@@ -72,6 +72,33 @@ def scopes_overlap(left: str, right: str) -> bool:
     return left_parts[:common] == right_parts[:common]
 
 
+def normalize_repo_path(value: str) -> str:
+    path = value.strip().replace("\\", "/")
+    if path.startswith("/"):
+        raise ClaimFormatError(f"repository path must be relative: {value!r}")
+    path = path.strip("/")
+    parts = [part for part in path.split("/") if part]
+    if not parts or any(part in {".", ".."} for part in parts):
+        raise ClaimFormatError(f"invalid repository-relative path: {value!r}")
+    return "/".join(parts)
+
+
+def repo_paths_overlap(left: str, right: str) -> bool:
+    left_parts = normalize_repo_path(left).split("/")
+    right_parts = normalize_repo_path(right).split("/")
+    common = min(len(left_parts), len(right_parts))
+    return left_parts[:common] == right_parts[:common]
+
+
+def repo_path_is_within(requested: str, reserved: str) -> bool:
+    requested_parts = normalize_repo_path(requested).split("/")
+    reserved_parts = normalize_repo_path(reserved).split("/")
+    return (
+        len(requested_parts) >= len(reserved_parts)
+        and requested_parts[: len(reserved_parts)] == reserved_parts
+    )
+
+
 @dataclass(frozen=True)
 class Claim:
     claim_id: str
@@ -86,6 +113,7 @@ class Claim:
     path: Path
     legacy: bool
     completed_at: datetime | None
+    reserved_paths: tuple[str, ...]
 
     def is_closed(self) -> bool:
         return self.completed_at is not None or self.status.lower() in CLOSED_STATES
@@ -211,6 +239,12 @@ def load_claim(path: Path) -> Claim:
     branch_value = data.get("branch") or data.get("completed_branch")
     branch = None if branch_value is None else _require_text(branch_value, "branch", path)
     revision = _optional_revision(data.get("target_revision"), path)
+    reserved_value = data.get("reserved_paths", [])
+    if not isinstance(reserved_value, list) or not all(
+        isinstance(item, str) for item in reserved_value
+    ):
+        raise ClaimFormatError(f"{path}: reserved_paths must be a list of strings")
+    reserved_paths = tuple(sorted({normalize_repo_path(item) for item in reserved_value}))
 
     if canonical:
         if event_type != "active_session_claim":
@@ -247,6 +281,7 @@ def load_claim(path: Path) -> Claim:
         path=path,
         legacy=not canonical,
         completed_at=completed_at,
+        reserved_paths=reserved_paths,
     )
 
 
@@ -271,9 +306,11 @@ def find_conflicts(
     target_revision: int | None,
     now: datetime,
     exclude_claim_ids: set[str] | None = None,
+    reserved_paths: Iterable[str] = (),
 ) -> list[tuple[Claim, list[str]]]:
     excluded = exclude_claim_ids or set()
     normalized_scope = normalize_scope(scope)
+    normalized_paths = tuple(normalize_repo_path(path) for path in reserved_paths)
     conflicts: list[tuple[Claim, list[str]]] = []
     for claim in claims:
         if claim.claim_id in excluded or not claim.is_fresh(now):
@@ -283,6 +320,12 @@ def find_conflicts(
             reasons.append("scope_overlap")
         if target_revision is not None and claim.target_revision == target_revision:
             reasons.append("target_revision_collision")
+        if any(
+            repo_paths_overlap(proposed, occupied)
+            for proposed in normalized_paths
+            for occupied in claim.reserved_paths
+        ):
+            reasons.append("reserved_path_collision")
         if reasons:
             conflicts.append((claim, reasons))
     return conflicts
@@ -303,6 +346,12 @@ def find_registry_collisions(
                 and left.target_revision == right.target_revision
             ):
                 reasons.append("target_revision_collision")
+            if any(
+                repo_paths_overlap(left_path, right_path)
+                for left_path in left.reserved_paths
+                for right_path in right.reserved_paths
+            ):
+                reasons.append("reserved_path_collision")
             if reasons:
                 collisions.append((left, right, reasons))
     return collisions
@@ -326,6 +375,7 @@ def _claim_json(claim: Claim, now: datetime) -> dict[str, Any]:
         "stale_after_minutes": claim.stale_after_minutes,
         "legacy": claim.legacy,
         "path": claim.path.as_posix(),
+        "reserved_paths": list(claim.reserved_paths),
     }
 
 
@@ -374,11 +424,13 @@ def command_check(args: argparse.Namespace) -> int:
         target_revision=args.target_revision,
         now=now,
         exclude_claim_ids=set(args.exclude_claim_id),
+        reserved_paths=args.path,
     )
     payload = {
         "available": not conflicts,
         "scope": normalized_scope,
         "target_revision": args.target_revision,
+        "reserved_paths": [normalize_repo_path(path) for path in args.path],
         "checked_at_jst": now.isoformat(),
         "conflicts": [
             {**_claim_json(claim, now), "reasons": reasons}
@@ -403,6 +455,7 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument("--scope", required=True)
     check.add_argument("--target-revision", type=int)
     check.add_argument("--exclude-claim-id", action="append", default=[])
+    check.add_argument("--path", action="append", default=[])
     check.add_argument("--now", help="deterministic JST timestamp for tests or replay")
     check.set_defaults(func=command_check)
     return parser

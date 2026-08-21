@@ -6,7 +6,25 @@
   "own_claim": {
     "branch": "ops-agi-gi-main-revision-guard-20260821-214635",
     "claim_id": "chatgpt-session-j-main-revision-guard-20260821T214635JST-280b6303",
-    "heartbeat_at_jst": "2026-08-21T21:52:15+09:00",
+    "heartbeat_at_jst": "2026-08-21T22:15:07+09:00",
+    "reserved_paths": [
+      ".github/workflows/agi-gi-main-revision-guard.yml",
+      ".github/workflows/problem-solving-parallel-admission.yml",
+      "MAIN.md",
+      "agi/run-history/active/README.md",
+      "agi/run-history/phase-admissions/chatgpt-session-j-main-revision-guard-20260821T214635JST-280b6303-publish-20260821T2208JST.json",
+      "automation/CHATGPT_SCHEDULED_TASK_RUNBOOK.md",
+      "automation/PARALLEL_SESSION_CLAIM_TEMPLATE.json",
+      "automation/agi_gi_main_revision_guard.py",
+      "automation/parallel_claims.py",
+      "automation/problem_solving_parallel_admission.py",
+      "automation/problem_solving_phase_evidence_guard.py",
+      "automation/test_agi_gi_main_revision_guard.py",
+      "automation/test_parallel_claims.py",
+      "automation/test_problem_solving_parallel_admission.py",
+      "automation/test_problem_solving_phase_evidence_guard.py",
+      "automation_runs/2026-08-19_0851_JST/MAIN_REVISION_GUARD_AUDIT.md"
+    ],
     "scope": "repository-coordination/problem-solving-parallel-admission",
     "state": "active",
     "target_revision": null
@@ -16,6 +34,12 @@
       "branch": "feat/crx1-image-si-resource-admission-session-20260821-2202",
       "claim_id": "chatgpt-session-j-crx1-image-si-admission-20260821T220200JST-f3a215ea",
       "heartbeat_at_jst": "2026-08-21T22:02:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/j-crx1-image-si-admission-session-hourly-refire.yml",
+        "automation_runs/2026-08-19_0851_JST/CRX1_IMAGE_SI_RESOURCE_ADMISSION.md",
+        "automation_runs/2026-08-19_0851_JST/crx1_image_si_resource_admission_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_crx1_image_si_resource_admission_v1.py"
+      ],
       "scope": "crx1/node-resource-capped-image-si/resource-admission-certificate",
       "state": "active",
       "target_revision": null
@@ -23,7 +47,8 @@
     {
       "branch": "ops-j-parallel-resilience-20260821-215558",
       "claim_id": "chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba",
-      "heartbeat_at_jst": "2026-08-21T21:55:58+09:00",
+      "heartbeat_at_jst": "2026-08-21T22:14:22+09:00",
+      "reserved_paths": [],
       "scope": "automation/session-specific-hourly-refire-and-parallel-safe-continuation-evidence",
       "state": "active",
       "target_revision": null
@@ -32,6 +57,7 @@
       "branch": "agi-gi-rev246-primitive-johnson-production-admission-session-20260821-2117",
       "claim_id": "chatgpt-session-j-rev246-20260821T211700JST-4bd763dd",
       "heartbeat_at_jst": "2026-08-21T21:29:16+09:00",
+      "reserved_paths": [],
       "scope": "crx2/c2b2a2iii2",
       "state": "active",
       "target_revision": 246
@@ -39,7 +65,8 @@
     {
       "branch": "agi-gi-rev247-s1-imprimitive-production-admission-session-20260821-2152",
       "claim_id": "chatgpt-session-j-rev247-20260821T215201JST-8c4346d0",
-      "heartbeat_at_jst": "2026-08-21T21:52:01+09:00",
+      "heartbeat_at_jst": "2026-08-21T22:13:47+09:00",
+      "reserved_paths": [],
       "scope": "crx2/shared-s1/imprimitive-production-admission",
       "state": "active",
       "target_revision": 247
@@ -47,7 +74,14 @@
     {
       "branch": "agi-gi-rev248-crx1-k2-relation-image-session-20260821-2155",
       "claim_id": "chatgpt-session-j-rev248-20260821T215536JST-01ad84ba",
-      "heartbeat_at_jst": "2026-08-21T21:55:36+09:00",
+      "heartbeat_at_jst": "2026-08-21T22:11:50+09:00",
+      "reserved_paths": [
+        ".github/workflows/j-rev248-session-hourly-refire.yml",
+        ".github/workflows/rev248-bounded-arity-relation-image-smoke.yml",
+        "automation_runs/2026-08-19_0851_JST/REV248_BOUNDED_ARITY_RELATION_IMAGE_WITNESS.md",
+        "automation_runs/2026-08-19_0851_JST/bounded_arity_relation_image_solver.py",
+        "automation_runs/2026-08-19_0851_JST/test_bounded_arity_relation_image_solver.py"
+      ],
       "scope": "crx1/k<=2/homogeneous-blocks-nonrestricting-relation-image/exact-witness",
       "state": "active",
       "target_revision": 248
@@ -55,7 +89,14 @@
     {
       "branch": "agi-gi-rev249-design-child-proof-dag-cover-session-20260821-2202",
       "claim_id": "chatgpt-session-j-rev249-20260821T220205JST-f3a215ea",
-      "heartbeat_at_jst": "2026-08-21T22:02:05+09:00",
+      "heartbeat_at_jst": "2026-08-21T22:10:40+09:00",
+      "reserved_paths": [
+        ".github/workflows/j-rev249-session-hourly-refire.yml",
+        ".github/workflows/rev249-design-child-proof-dag-cover-smoke.yml",
+        "automation_runs/2026-08-19_0851_JST/REV249_DESIGN_CHILD_PROOF_DAG_COVER.md",
+        "automation_runs/2026-08-19_0851_JST/design_child_proof_dag_cover_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_design_child_proof_dag_cover_rev249.py"
+      ],
       "scope": "crx3/design-child-cover/execution-proof-dag-consumer",
       "state": "active",
       "target_revision": 249
@@ -64,16 +105,68 @@
       "branch": "agi-gi-rev250-phase-start-tickets-session-20260821-2205",
       "claim_id": "chatgpt-session-j-rev250-20260821T220548JST-f08fe9ae",
       "heartbeat_at_jst": "2026-08-21T22:05:48+09:00",
+      "reserved_paths": [
+        ".github/workflows/j-rev250-session-hourly-refire.yml",
+        ".github/workflows/rev250-phase-start-ticket-ledger-smoke.yml",
+        "automation_runs/2026-08-19_0851_JST/REV250_PHASE_START_TICKET_LEDGER.md",
+        "automation_runs/2026-08-19_0851_JST/phase_start_ticket_ledger_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_phase_start_ticket_ledger_rev250.py"
+      ],
       "scope": "crx3/original-root-ledger/phase-start-tickets",
       "state": "active",
       "target_revision": 250
+    },
+    {
+      "branch": "codex/j-rev251-exact-result-replay-20260821-2210JST",
+      "claim_id": "chatgpt-session-j-rev251-20260821T221010JST-27c9422d",
+      "heartbeat_at_jst": "2026-08-21T22:10:10+09:00",
+      "reserved_paths": [
+        "automation_runs/2026-08-19_0851_JST/REV251_EXACT_RESULT_REPLAY_VERIFIER.md",
+        "automation_runs/2026-08-19_0851_JST/exact_result_replay_verifier_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_exact_result_replay_verifier_rev251.py"
+      ],
+      "scope": "crx1/exact-result/replay-proof-verifier",
+      "state": "active",
+      "target_revision": 251
+    },
+    {
+      "branch": "agi-gi-rev252-proof-carrying-small-order-admission-session-20260821-2213",
+      "claim_id": "chatgpt-session-j-rev252-20260821T221349JST-7174b2e6",
+      "heartbeat_at_jst": "2026-08-21T22:13:49+09:00",
+      "reserved_paths": [
+        ".github/workflows/j-rev252-session-hourly-refire.yml",
+        ".github/workflows/rev252-proof-carrying-small-order-production-admission.yml",
+        "automation_runs/2026-08-19_0851_JST/REV252_PROOF_CARRYING_SMALL_ORDER_PRODUCTION_ADMISSION.md",
+        "automation_runs/2026-08-19_0851_JST/proof_carrying_small_order_production_admission_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_proof_carrying_small_order_production_admission_rev252.py"
+      ],
+      "scope": "crx3/acceptance/proof-carrying-small-order-production-admission",
+      "state": "active",
+      "target_revision": 252
     }
+  ],
+  "paths": [
+    ".github/workflows/agi-gi-main-revision-guard.yml",
+    ".github/workflows/problem-solving-parallel-admission.yml",
+    "MAIN.md",
+    "agi/run-history/active/README.md",
+    "automation/CHATGPT_SCHEDULED_TASK_RUNBOOK.md",
+    "automation/PARALLEL_SESSION_CLAIM_TEMPLATE.json",
+    "automation/agi_gi_main_revision_guard.py",
+    "automation/parallel_claims.py",
+    "automation/problem_solving_parallel_admission.py",
+    "automation/problem_solving_phase_evidence_guard.py",
+    "automation/test_agi_gi_main_revision_guard.py",
+    "automation/test_parallel_claims.py",
+    "automation/test_problem_solving_parallel_admission.py",
+    "automation/test_problem_solving_phase_evidence_guard.py",
+    "automation_runs/2026-08-19_0851_JST/MAIN_REVISION_GUARD_AUDIT.md"
   ],
   "phase": "publish",
   "reasons": [],
-  "recorded_at_jst": "2026-08-21T22:08:21.852768+09:00",
-  "registry_digest": "sha256:e2314adb6c4caf6a9e65a943f89de73f6f16b261dd2c26bf39b6efa910abb4e8",
-  "registry_source_sha": "edf86b5a09fc490a95c83508c82f82f430a66510",
+  "recorded_at_jst": "2026-08-21T22:18:30+09:00",
+  "registry_digest": "sha256:00a8948a4b450a8c5b50d298f7e4ab615117d00a28852523aba3df95681a65b9",
+  "registry_source_sha": "8121cff7a1949f472caf81c86ee82982f1a6f0b2",
   "schema_version": 1,
   "scope": "repository-coordination/problem-solving-parallel-admission",
   "target_revision": null

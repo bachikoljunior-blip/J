@@ -11,13 +11,23 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from automation.parallel_claims import load_registry, parse_jst_timestamp
+    from automation.parallel_claims import (
+        ClaimFormatError,
+        load_registry,
+        parse_jst_timestamp,
+        repo_path_is_within,
+    )
     from automation.problem_solving_parallel_admission import (
         admit_problem_phase,
         validate_evidence_payload,
     )
 except ModuleNotFoundError:  # Direct ``python automation/<script>.py`` invocation.
-    from parallel_claims import load_registry, parse_jst_timestamp  # type: ignore[no-redef]
+    from parallel_claims import (  # type: ignore[no-redef]
+        ClaimFormatError,
+        load_registry,
+        parse_jst_timestamp,
+        repo_path_is_within,
+    )
     from problem_solving_parallel_admission import (  # type: ignore[no-redef]
         admit_problem_phase,
         validate_evidence_payload,
@@ -105,12 +115,14 @@ def replay_evidence(repo: Path, path: Path, head_ref: str) -> tuple[str, ...]:
         target_revision=payload.get("target_revision"),
         now=recorded,
         registry_source_sha=source_sha,
+        paths=payload.get("paths", []),
     )
     for field in (
         "admitted",
         "mode",
         "scope",
         "target_revision",
+        "paths",
         "registry_source_sha",
         "registry_digest",
         "own_claim",
@@ -147,11 +159,31 @@ def main() -> int:
         errors.append("problem-state changes require a changed phase-admission evidence file")
     for evidence_path in evidence_paths:
         errors.extend(replay_evidence(repo, evidence_path, args.head_ref))
+    admitted_paths: list[str] = []
+    for evidence_path in evidence_paths:
+        try:
+            payload = json.loads(evidence_path.read_text(encoding="utf-8"))
+            paths = payload.get("paths", [])
+            if isinstance(paths, list):
+                admitted_paths.extend(item for item in paths if isinstance(item, str))
+        except (OSError, json.JSONDecodeError):
+            continue
+    for changed_path in relevant:
+        try:
+            covered = any(
+                repo_path_is_within(changed_path, admitted_path)
+                for admitted_path in admitted_paths
+            )
+        except ClaimFormatError:
+            covered = False
+        if not covered:
+            errors.append(f"changed problem-state path lacks admission coverage: {changed_path}")
 
     result = {
         "valid": not errors,
         "relevant_changed_files": relevant,
         "evidence_files": [path.relative_to(repo).as_posix() for path in evidence_paths],
+        "admitted_paths": sorted(set(admitted_paths)),
         "errors": errors,
     }
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))

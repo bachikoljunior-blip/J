@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev251-20260821T221010JST-27c9422d",
+  "session_id": "chatgpt-session-j-parallel-rev251-20260821T221010+0900-27c9422d-turn1",
+  "created_at": "2026-08-21T22:10:10+09:00",
+  "started_at_jst": "2026-08-21T22:10:10+09:00",
+  "heartbeat_at": "2026-08-21T22:10:10+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:10:10+09:00",
+  "expires_at": "2026-08-22T02:10:10+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "edf86b5a09fc490a95c83508c82f82f430a66510",
+  "starting_agi_gi_rev": 244,
+  "target_revision": 251,
+  "scope": "CRX1/exact-result/replay-proof-verifier",
+  "branch": "codex/j-rev251-exact-result-replay-20260821-2210JST",
+  "worktree": "/tmp/J-rev251-exact-result-replay-27c9422d",
+  "target_pr": null,
+  "owner_pr": null,
+  "verification_method": "python -m unittest automation_runs/2026-08-19_0851_JST/test_exact_result_replay_verifier_rev251.py",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/exact_result_replay_verifier_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_exact_result_replay_verifier_rev251.py",
+    "automation_runs/2026-08-19_0851_JST/REV251_EXACT_RESULT_REPLAY_VERIFIER.md"
+  ],
+  "write_set": [
+    "automation_runs/2026-08-19_0851_JST/exact_result_replay_verifier_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_exact_result_replay_verifier_rev251.py",
+    "automation_runs/2026-08-19_0851_JST/REV251_EXACT_RESULT_REPLAY_VERIFIER.md",
+    "agi/run-history/active/chatgpt-session-j-rev251-20260821T221010JST-27c9422d.json"
+  ],
+  "schedule_registration": {
+    "workflow": ".github/workflows/j-continuation-hourly-refire.yml",
+    "cron": "17 * * * *",
+    "mode": "fresh active-claim registry plus durable idle re-fire issue"
+  },
+  "parallel_exclusions": [
+    "rev245 Design/imprimitive integration PR #177",
+    "rev246 primitive Johnson production admission PR #179",
+    "rev247 shared-S1 imprimitive admission",
+    "rev248 CRX1 bounded-arity relation-image exact witness",
+    "CRX1 image-SI resource admission certificate",
+    "rev249 Design proof-DAG consumer",
+    "rev250 phase-start ticket ledger",
+    "MAIN.md and all existing workflow files"
+  ],
+  "non_interference": "Add only the three reserved rev251 verifier/report paths on the dedicated branch; do not modify existing solvers, claims, workflows, MAIN.md, or concurrent PR branches.",
+  "status": "active",
+  "notes": "Session marker is intentionally machine-readable so all parallel executions can detect this claim before writing. The existing main-branch hourly watchdog is used without modifying its shared workflow.",
+  "agi_state": "NOT_AGI"
+}

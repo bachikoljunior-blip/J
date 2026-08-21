@@ -2,8 +2,8 @@
 
 This directory is the durable, main-visible registry for work that is currently
 owned by an independent session.  It prevents two sessions from choosing the
-same AGI-GI revision or the same problem-tree scope without depending on chat
-memory or a shared local checkout.
+same AGI-GI revision, problem-tree scope, or repository path without depending
+on chat memory or a shared local checkout.
 
 ## Start protocol
 
@@ -12,7 +12,8 @@ entry, but before any AGI-GI implementation write, every session must:
 
 1. re-read current `main`, open AGI-GI pull requests, and every JSON file here;
 2. run `automation/parallel_claims.py check` for the proposed hierarchical
-   scope and target revision;
+   scope, target revision, and every intended repository path (`--path` may be
+   repeated);
 3. choose an unclaimed sibling/revision if the check reports a collision;
 4. create one schema-v2 JSON file here in a direct `main` commit;
 5. re-read `main` and run the check again with its own claim excluded.  This
@@ -24,7 +25,8 @@ Example:
 ```bash
 python automation/parallel_claims.py check \
   --scope CRX2/c2b2a2iii2 \
-  --target-revision 246
+  --target-revision 246 \
+  --path automation/solver.py
 
 python automation/parallel_claims.py check \
   --scope CRX2/c2b2a2iii2 \
@@ -38,7 +40,8 @@ JST values with seconds and the literal `+09:00` offset.  `scope` is a stable
 slash-separated problem-tree path, not prose.  A parent and any descendant are
 mutually exclusive.  A numeric `target_revision` is also exclusive even when
 the scopes differ.  Operational work that consumes no AGI-GI revision uses
-`null`.
+`null`. `reserved_paths` may name files or directories, is component-aware,
+and is exclusive while fresh; an absolute path or `..` traversal is rejected.
 
 ## Heartbeat and close protocol
 
@@ -66,14 +69,17 @@ Mutation/evidence phases (`attempt_solution`, `decompose`, `evaluate`,
 `integrate_children`, `solve_parent`, `solve_root`, `update_problem_tree`,
 `publish`, and `merge`) are admitted only inside the caller's fresh schema-v2
 scope and exact target revision.  A fresh descendant claim blocks parent
-integration.  Each result contains the registry source SHA and a digest of all
+integration.  Pass every path the phase will write with repeated `--path`;
+each must be inside the caller's `reserved_paths`, and any overlap with another
+fresh claim fails closed.  Each result contains the registry source SHA and a digest of all
 claims; persist both with the phase evidence so a later session can reconstruct
 which parallel work was visible.
 
 Use `--output agi/run-history/phase-admissions/<claim>-<phase>-<time>.json` to
 persist an admitted phase.  The pull-request evidence workflow replays that
-record from its exact `registry_source_sha`; problem-state changes without a
-changed, replayable admission record fail closed.
+record from its exact `registry_source_sha`; every problem-state path in the
+diff must be covered by the persisted `paths`, so an unreserved write or a
+problem-state change without replayable admission fails closed.
 
 Noncanonical records from another worker are never ignored.  A schema-v2
 label with a singleton scope list or legacy base fields is loaded as a blocking

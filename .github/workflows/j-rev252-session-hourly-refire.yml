@@ -1,0 +1,129 @@
+name: J rev252 session hourly re-fire
+
+on:
+  schedule:
+    - cron: "53 * * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/j-rev252-session-hourly-refire.yml"
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: j-rev252-session-hourly-refire-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  re-fire-stale-session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Detect stale rev252 session activity
+        id: guard
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          CLAIM_PATH: agi/run-history/active/chatgpt-session-j-rev252-20260821T221349JST-7174b2e6.json
+          BRANCH: agi-gi-rev252-proof-carrying-small-order-admission-session-20260821-2213
+          STALE_AFTER_MINUTES: "55"
+        run: |
+          set -euo pipefail
+
+          now_epoch="$(date -u +%s)"
+          cutoff_epoch="$((now_epoch - STALE_AFTER_MINUTES * 60))"
+          stale=false
+          reason="session activity is fresh"
+
+          if ! encoded_claim="$(
+            gh api "repos/${REPOSITORY}/contents/${CLAIM_PATH}?ref=main" \
+              --jq '.content' 2>/dev/null
+          )"; then
+            reason="claim is absent; no re-fire is needed"
+            echo "stale=false" >>"${GITHUB_OUTPUT}"
+            echo "reason=${reason}" >>"${GITHUB_OUTPUT}"
+            echo "### J rev252 session guard" >>"${GITHUB_STEP_SUMMARY}"
+            echo "- Decision: ${reason}" >>"${GITHUB_STEP_SUMMARY}"
+            exit 0
+          fi
+
+          claim_json="$(tr -d '\n' <<<"${encoded_claim}" | base64 --decode)"
+          claim_status="$(jq -r '.status // "unknown"' <<<"${claim_json}")"
+          heartbeat="$(jq -r '.heartbeat_at_jst // empty' <<<"${claim_json}")"
+          heartbeat_epoch=0
+          if [[ -n "${heartbeat}" ]]; then
+            heartbeat_epoch="$(date -d "${heartbeat}" +%s)"
+          fi
+
+          branch_epoch=0
+          if branch_date="$(
+            gh api "repos/${REPOSITORY}/commits/${BRANCH}" \
+              --jq '.commit.committer.date // .commit.author.date' 2>/dev/null
+          )"; then
+            branch_epoch="$(date -d "${branch_date}" +%s)"
+          fi
+
+          owner="${REPOSITORY%%/*}"
+          pr_epoch=0
+          pr_updated="$(
+            gh api "repos/${REPOSITORY}/pulls?state=open&head=${owner}:${BRANCH}&per_page=1" \
+              --jq '.[0].updated_at // empty'
+          )"
+          if [[ -n "${pr_updated}" ]]; then
+            pr_epoch="$(date -d "${pr_updated}" +%s)"
+          fi
+
+          latest_epoch="${heartbeat_epoch}"
+          (( branch_epoch > latest_epoch )) && latest_epoch="${branch_epoch}"
+          (( pr_epoch > latest_epoch )) && latest_epoch="${pr_epoch}"
+
+          if [[ "${claim_status}" != "active" ]]; then
+            reason="claim is ${claim_status}; no re-fire is needed"
+          elif (( latest_epoch < cutoff_epoch )); then
+            stale=true
+            reason="no rev252 claim heartbeat, branch commit, or PR update was seen within ${STALE_AFTER_MINUTES} minutes"
+          fi
+
+          echo "stale=${stale}" >>"${GITHUB_OUTPUT}"
+          echo "reason=${reason}" >>"${GITHUB_OUTPUT}"
+          {
+            echo "### J rev252 session guard"
+            echo "- Claim status: ${claim_status}"
+            echo "- Claim heartbeat: ${heartbeat:-missing}"
+            echo "- Branch activity epoch: ${branch_epoch}"
+            echo "- PR activity epoch: ${pr_epoch}"
+            echo "- Decision: ${reason}"
+          } >>"${GITHUB_STEP_SUMMARY}"
+
+      - name: Emit durable rev252 continuation request
+        if: github.event_name != 'pull_request' && steps.guard.outputs.stale == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CLAIM_PATH: agi/run-history/active/chatgpt-session-j-rev252-20260821T221349JST-7174b2e6.json
+          BRANCH: agi-gi-rev252-proof-carrying-small-order-admission-session-20260821-2213
+        run: |
+          set -euo pipefail
+
+          title="[automation] J rev252 session re-fire queue"
+          timestamp="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          issue_number="$(
+            gh issue list --repo "${REPOSITORY}" --state open --limit 100 \
+              --json number,title \
+              --jq ".[] | select(.title == \"${title}\") | .number" \
+              | head -n 1
+          )"
+
+          message="@codex continue J for rev252. Hourly session re-fire requested at ${timestamp}. Reconstruct this execution from ${CLAIM_PATH} and branch ${BRANCH}; follow automation/CHATGPT_SCHEDULED_TASK_RUNBOOK.md; preserve every other active claim, branch, PR, and workflow. Trigger: ${RUN_URL}"
+
+          if [[ -z "${issue_number}" ]]; then
+            gh issue create --repo "${REPOSITORY}" --title "${title}" --body "${message}"
+          else
+            gh issue comment "${issue_number}" --repo "${REPOSITORY}" --body "${message}"
+          fi

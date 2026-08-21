@@ -82,6 +82,48 @@ class ProblemSolvingParallelAdmissionTest(unittest.TestCase):
             )
             self.assertTrue(result["admitted"])
 
+    def test_exclusive_phase_requires_paths_inside_own_reservation(self):
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            own = self.claim(
+                directory,
+                _payload("own", "CRX2/a", 247, reserved_paths=["automation/owned"]),
+            )
+            accepted = admit_problem_phase(
+                [own], claim_id="own", phase="attempt_solution",
+                scope="CRX2/a", target_revision=247, now=NOW,
+                registry_source_sha="f" * 40, paths=["automation/owned/solver.py"],
+            )
+            rejected = admit_problem_phase(
+                [own], claim_id="own", phase="attempt_solution",
+                scope="CRX2/a", target_revision=247, now=NOW,
+                registry_source_sha="f" * 40, paths=["automation/shared.py"],
+            )
+            self.assertTrue(accepted["admitted"])
+            self.assertFalse(rejected["admitted"])
+            self.assertIn("path_outside_own_claim", rejected["reasons"])
+
+    def test_parallel_reserved_path_blocks_sibling_scope(self):
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            own = self.claim(
+                directory,
+                _payload("own", "CRX2/a", 247, reserved_paths=["automation/shared.py"]),
+            )
+            other = self.claim(
+                directory,
+                _payload("other", "CRX3/b", 248, reserved_paths=["automation/shared.py"]),
+            )
+            result = admit_problem_phase(
+                [own, other], claim_id="own", phase="publish",
+                scope="CRX2/a", target_revision=247, now=NOW,
+                registry_source_sha="f" * 40, paths=["automation/shared.py"],
+            )
+            self.assertFalse(result["admitted"])
+            self.assertEqual(
+                result["conflicts"][0]["reasons"], ["reserved_path_collision"]
+            )
+
     def test_parent_mutation_outside_claim_is_blocked(self):
         with tempfile.TemporaryDirectory() as raw:
             directory = Path(raw)

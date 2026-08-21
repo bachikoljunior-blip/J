@@ -17,10 +17,13 @@ try:
         Claim,
         ClaimFormatError,
         find_conflicts,
-    load_registry,
-    normalize_scope,
-    parse_jst_timestamp,
-    scopes_overlap,
+        load_registry,
+        normalize_repo_path,
+        normalize_scope,
+        parse_jst_timestamp,
+        repo_path_is_within,
+        repo_paths_overlap,
+        scopes_overlap,
     )
 except ModuleNotFoundError:  # Direct ``python automation/<script>.py`` invocation.
     from parallel_claims import (  # type: ignore[no-redef]
@@ -29,8 +32,11 @@ except ModuleNotFoundError:  # Direct ``python automation/<script>.py`` invocati
         ClaimFormatError,
         find_conflicts,
         load_registry,
+        normalize_repo_path,
         normalize_scope,
         parse_jst_timestamp,
+        repo_path_is_within,
+        repo_paths_overlap,
         scopes_overlap,
     )
 
@@ -66,6 +72,7 @@ def _claim_snapshot(claim: Claim, now: datetime) -> dict[str, Any]:
         "heartbeat_at_jst": claim.heartbeat_at.isoformat(),
         "state": claim.state_at(now),
         "branch": claim.branch,
+        "reserved_paths": list(claim.reserved_paths),
     }
 
 
@@ -90,12 +97,14 @@ def admit_problem_phase(
     target_revision: int | None,
     now: datetime,
     registry_source_sha: str,
+    paths: Iterable[str] = (),
 ) -> dict[str, Any]:
     if phase not in ALL_PHASES:
         raise ClaimFormatError(f"unknown problem-solving phase: {phase}")
     normalized_scope = normalize_scope(scope)
     if not normalized_scope:
         raise ClaimFormatError("scope must normalize to a non-empty path")
+    normalized_paths = tuple(sorted({normalize_repo_path(path) for path in paths}))
 
     claim_list = list(claims)
     owners = [claim for claim in claim_list if claim.claim_id == claim_id]
@@ -115,12 +124,22 @@ def admit_problem_phase(
             reasons.append("scope_outside_own_claim")
         if target_revision != owner.target_revision:
             reasons.append("target_revision_differs_from_own_claim")
+        if normalized_paths and not owner.reserved_paths:
+            reasons.append("own_claim_has_no_reserved_paths")
+        for path in normalized_paths:
+            if not any(
+                repo_path_is_within(path, reserved)
+                for reserved in owner.reserved_paths
+            ):
+                reasons.append("path_outside_own_claim")
+                break
         conflicts = find_conflicts(
             claim_list,
             scope=normalized_scope,
             target_revision=target_revision,
             now=now,
             exclude_claim_ids={claim_id},
+            reserved_paths=normalized_paths,
         )
         if conflicts:
             reasons.append("parallel_claim_collision")
@@ -139,6 +158,7 @@ def admit_problem_phase(
         "mode": mode,
         "scope": normalized_scope,
         "target_revision": target_revision,
+        "paths": list(normalized_paths),
         "registry_source_sha": registry_source_sha,
         "registry_digest": registry_digest(claim_list, now),
         "own_claim": None if owner is None else _claim_snapshot(owner, now),
@@ -198,12 +218,31 @@ def validate_evidence_payload(payload: dict[str, Any]) -> tuple[str, ...]:
                 errors.append("exclusive evidence scope is outside own claim")
             if payload.get("target_revision") != owner.get("target_revision"):
                 errors.append("exclusive evidence revision differs from own claim")
+            paths = payload.get("paths")
+            if not isinstance(paths, list) or not all(isinstance(item, str) for item in paths):
+                errors.append("paths must be a list of repository-relative strings")
+                paths = []
+            owner_paths = owner.get("reserved_paths", [])
+            if not isinstance(owner_paths, list):
+                errors.append("own_claim reserved_paths must be a list")
+                owner_paths = []
+            for path in paths:
+                try:
+                    if not any(repo_path_is_within(path, reserved) for reserved in owner_paths):
+                        errors.append("exclusive evidence path is outside own claim")
+                except ClaimFormatError:
+                    errors.append("exclusive evidence path is invalid")
             for item in parallel:
                 if scopes_overlap(str(payload.get("scope", "")), str(item.get("scope", ""))):
                     errors.append("exclusive evidence overlaps a parallel claim")
                 target = payload.get("target_revision")
                 if target is not None and target == item.get("target_revision"):
                     errors.append("exclusive evidence collides on target revision")
+                parallel_paths = item.get("reserved_paths", [])
+                if isinstance(parallel_paths, list):
+                    for path in paths:
+                        if any(repo_paths_overlap(path, other) for other in parallel_paths):
+                            errors.append("exclusive evidence overlaps a parallel reserved path")
     return tuple(errors)
 
 
@@ -224,6 +263,7 @@ def main() -> int:
     parser.add_argument("--phase", choices=sorted(ALL_PHASES), required=True)
     parser.add_argument("--scope", required=True)
     parser.add_argument("--target-revision", type=int)
+    parser.add_argument("--path", action="append", default=[])
     parser.add_argument("--now")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -247,6 +287,7 @@ def main() -> int:
             target_revision=args.target_revision,
             now=now,
             registry_source_sha=_git_head(root),
+            paths=args.path,
         )
     except ClaimFormatError as exc:
         print(json.dumps({"admitted": False, "reasons": [str(exc)]}, indent=2))
