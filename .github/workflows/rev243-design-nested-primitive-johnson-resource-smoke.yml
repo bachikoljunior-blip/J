@@ -1,0 +1,35 @@
+name: rev243 Design nested primitive Johnson resource smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/design_nested_primitive_johnson_resource_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_design_nested_primitive_johnson_resource_rev243.py'
+      - 'automation_runs/2026-08-19_0851_JST/local_certificate_preimage_resource_v1.py'
+      - '.github/workflows/rev243-design-nested-primitive-johnson-resource-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Compile resource contract
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/design_nested_primitive_johnson_resource_v1.py
+          automation_runs/2026-08-19_0851_JST/test_design_nested_primitive_johnson_resource_rev243.py
+      - name: Validate rev243 and inherited nested-resource contracts
+        run: >-
+          python -m pytest -q
+          automation_runs/2026-08-19_0851_JST/test_design_nested_primitive_johnson_resource_rev243.py
+          automation_runs/2026-08-19_0851_JST/test_design_nested_intransitive_resource_rev238.py
