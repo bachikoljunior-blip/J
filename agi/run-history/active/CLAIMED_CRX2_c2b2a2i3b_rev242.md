@@ -8,8 +8,11 @@ This scope is actively owned by the isolated rev242 session.
 - PR: `#170`
 - Status: `ACTIVE`
 - Started: `2026-08-21T19:34:02+09:00`
+- Last progress: `2026-08-21T19:45:14+09:00`
 - Stale-after: `75 minutes without heartbeat/progress`
 
 Parallel workers must skip this exact scope while this marker is fresh. Adjacent leaves remain available. Do not modify this branch, cancel its workflow, or rerun unrelated workflows. If stale, re-read repository state and verify there is no fresh replacement claim before taking over.
+
+Current implementation on this branch includes the shared pre-execution Design pipeline ledger, production-caller gate, rev242 regressions, and dedicated smoke workflow.
 
 AGI state remains `NOT_AGI`.
