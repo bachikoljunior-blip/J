@@ -1,0 +1,54 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-crx3-state-orbit-proof-dag-20260822T065011JST-89c598e1",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T064415+0900-29786052-turn1",
+  "started_at_jst": "2026-08-22T06:50:11+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:50:11+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "585a1699633843e28e37f9cc25167ae17f90e019",
+  "starting_agi_gi_rev": 256,
+  "target_revision": null,
+  "scope": "crx3/algorithmic-consumers/state-orbit-exact-terminal-proof-dag",
+  "branch": "agi-gi-state-orbit-proof-dag-session-20260822-0650-89c598e1",
+  "reserved_paths": [
+    ".github/workflows/j-state-orbit-proof-dag-session-hourly-refire.yml",
+    ".github/workflows/state-orbit-proof-dag-consumer-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-crx3-state-orbit-proof-dag-20260822T065011JST-89c598e1-attempt-solution-20260822T0650JST.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-crx3-state-orbit-proof-dag-20260822T065011JST-89c598e1-publish-20260822T0650JST.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-crx3-state-orbit-proof-dag-20260822T065011JST-89c598e1-merge-20260822T0650JST.json",
+    "automation_runs/2026-08-19_0851_JST/STATE_ORBIT_PROOF_DAG_CONSUMER_V1.md",
+    "automation_runs/2026-08-19_0851_JST/proof_carrying_state_orbit_candidate_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_state_orbit_proof_dag_consumer_v1.py"
+  ],
+  "write_set": [
+    ".github/workflows/j-state-orbit-proof-dag-session-hourly-refire.yml",
+    ".github/workflows/state-orbit-proof-dag-consumer-smoke.yml",
+    "agi/run-history/active/chatgpt-session-j-crx3-state-orbit-proof-dag-20260822T065011JST-89c598e1.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-crx3-state-orbit-proof-dag-20260822T065011JST-89c598e1-attempt-solution-20260822T0650JST.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-crx3-state-orbit-proof-dag-20260822T065011JST-89c598e1-publish-20260822T0650JST.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-crx3-state-orbit-proof-dag-20260822T065011JST-89c598e1-merge-20260822T0650JST.json",
+    "automation_runs/2026-08-19_0851_JST/STATE_ORBIT_PROOF_DAG_CONSUMER_V1.md",
+    "automation_runs/2026-08-19_0851_JST/proof_carrying_state_orbit_candidate_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_state_orbit_proof_dag_consumer_v1.py"
+  ],
+  "restart_guard": {
+    "workflow": ".github/workflows/j-state-orbit-proof-dag-session-hourly-refire.yml",
+    "cron": "53 * * * *",
+    "stale_after_minutes": 55,
+    "queue_issue_title": "[automation] J state-orbit proof-DAG session re-fire queue",
+    "fallback_workflow": ".github/workflows/j-continuation-hourly-refire.yml",
+    "fallback_cron": "17 * * * *"
+  },
+  "parallel_exclusions": [
+    "rev257 implicit relation-image auxiliary action PR #198",
+    "rev255 primitive-Johnson Design integration",
+    "rev256 bounded relation-image coset",
+    "MAIN.md and current revision ledgers",
+    "all sibling active claims, branches, PRs, and workflows"
+  ],
+  "non_interference": "Use only the reserved state-orbit identity-consumer paths on the dedicated branch. Re-read main, the active registry, and open PR changed paths before every persistent write. Never cancel, rerun, merge, close, rebase, or update another session's branch, PR, issue, workflow, or claim.",
+  "verification_method": "pytest rev239 state-orbit terminal + rev220 proof-DAG accounting + focused state-orbit proof-DAG consumer tests; py_compile; workflow YAML validation",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
