@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev249-20260821T220205JST-f3a215ea",
   "session_id": "chatgpt-session-j-parallel-20260821T215111+0900-8c4346d0-turn1",
   "started_at_jst": "2026-08-21T22:02:05+09:00",
-  "heartbeat_at_jst": "2026-08-21T22:21:25+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:25:20+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "f3a215eaed90958b43cbfa44649479a26220971b",
   "starting_agi_gi_rev": 244,
@@ -12,7 +12,7 @@
   "scope": "CRX3/design-child-cover/execution-proof-dag-consumer",
   "branch": "agi-gi-rev249-design-child-proof-dag-cover-session-20260821-2202",
   "pull_request": 186,
-  "head_sha": "18f5b508696e65ebc7baf665de85d586613e6428",
+  "head_sha": "910af85dd9978c8a4bcdefdf7d3758bd0d222af3",
   "reserved_paths": [
     "automation_runs/2026-08-19_0851_JST/design_child_proof_dag_cover_v1.py",
     "automation_runs/2026-08-19_0851_JST/test_design_child_proof_dag_cover_rev249.py",
@@ -30,10 +30,12 @@
   },
   "validation": {
     "local_focused": "7 passed",
+    "exact_head_focused_and_inherited": "11 passed",
     "py_compile": "passed",
     "changed_files": 4,
-    "dedicated_workflow_run_id": 32486381894,
-    "ci_state": "queued"
+    "dedicated_workflow_run_id": 32486623512,
+    "dedicated_ci_state": "success",
+    "shared_ci_state": "in_progress"
   },
   "non_interference": "New adapter and regressions only; do not modify rev245 Design caller paths, rev246 primitive Johnson paths, rev247 shared-S1 paths, rev248 relation-image paths, MAIN.md, or any other active claim branch.",
   "status": "active",
