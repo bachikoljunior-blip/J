@@ -1,0 +1,19 @@
+{
+  "claim_id": "chatgpt-session-j-rev258-image-coset-20260822T0646JST-7d42e8b1",
+  "state": "active",
+  "started_at_jst": "2026-08-22T06:46:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:46:00+09:00",
+  "target_revision": 258,
+  "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/value-preserving-image-coset-intersection",
+  "base_pr": 198,
+  "base_head_sha": "7b8764e0a19cbb9b19fe449b1a874e42470491dc",
+  "branch": "codex/agi-gi-rev258-implicit-image-coset-20260822-0646jst",
+  "reserved_paths": [
+    ".github/workflows/rev258-implicit-image-coset-smoke.yml",
+    "automation_runs/2026-08-19_0851_JST/REV258_IMPLICIT_IMAGE_COSET_INTERSECTION.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_image_coset_intersection_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_coset_intersection_rev258.py"
+  ],
+  "do_not_duplicate": true,
+  "strict_boundary": "Solve only the complete value-preserving right-coset intersection inside rev257's faithful implicit auxiliary image. Original-domain preimage integration and original-root quasipolynomial accounting remain unresolved. AGI remains NOT_AGI."
+}
