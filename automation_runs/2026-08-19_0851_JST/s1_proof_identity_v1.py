@@ -91,6 +91,7 @@ def build_s1_proof_identity(
     max_partition_states: int,
     max_recognition_nodes: int,
     max_depth: int,
+    max_imprimitive_quotient_kernel_work: int = 0,
 ) -> S1ProofIdentity:
     source = tuple(source_values)
     target = tuple(target_values)
@@ -101,10 +102,16 @@ def build_s1_proof_identity(
         raise ValueError("root_n must dominate the S1 identity domain")
     if recursion_depth < 0 or max_depth < 0:
         raise ValueError("S1 depth parameters must be nonnegative")
+    if max_imprimitive_quotient_kernel_work < 0:
+        raise ValueError("max_imprimitive_quotient_kernel_work must be nonnegative")
 
-    # The downstream values are fixed defaults inside u7 but still affect the
-    # proof execution.  Recording them explicitly prevents a later default change
-    # from silently reusing an older identity schema.
+    # The downstream values are fixed defaults inside the candidate dispatcher
+    # but still affect proof execution. Recording them explicitly prevents a
+    # later default change from silently reusing an older identity schema.
+    #
+    # rev247 adds the one-shot transitive-imprimitive quotient/kernel caller cap:
+    # zero selects v8's exact legacy-v7 delegation; a positive value enables the
+    # reserve-before-execute rev244 operator for a unique canonical block system.
     resources = (
         ("family_poly_power", 2),
         ("group_order_poly_power", int(group_order_poly_power)),
@@ -113,6 +120,10 @@ def build_s1_proof_identity(
         ("max_family_quotient_order", 4096),
         ("max_family_systems", 4096),
         ("max_group_order", int(max_group_order)),
+        (
+            "max_imprimitive_quotient_kernel_work",
+            int(max_imprimitive_quotient_kernel_work),
+        ),
         ("max_johnson_nodes", 500000),
         ("max_johnson_test_sets", 200000),
         ("max_partition_states", int(max_partition_states)),
@@ -123,7 +134,7 @@ def build_s1_proof_identity(
     target_identity = tuple(_freeze_identity_value(x) for x in target)
     return S1ProofIdentity(
         "s1-proof-identity-v1",
-        ("s1_string_isomorphism_v4", "candidate_coset_string_isomorphism_u7", 4),
+        ("s1_string_isomorphism_v4", "candidate_coset_string_isomorphism_u8", 4),
         _freeze_group(group),
         source_identity,
         target_identity,
