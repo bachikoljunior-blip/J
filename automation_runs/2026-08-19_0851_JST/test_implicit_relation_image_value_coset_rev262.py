@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import replace
 from itertools import permutations
 
 from bounded_arity_relation_image_solver import BoundedArityRelationImage, RelationSpec
@@ -27,6 +28,17 @@ def transports(action, permutation):
 
 
 class ImplicitRelationImageValueCosetTests(unittest.TestCase):
+    def test_constant_features_return_the_whole_implicit_image_group(self):
+        relation = BoundedArityRelationImage((0, 1, 2), ())
+        action = prepare_implicit_relation_image_action(
+            relation, relation, ((1, 2, 0), (1, 0, 2))
+        )
+        result = exact_implicit_relation_image_value_coset(action)
+        self.assertEqual(result.status, "exact_implicit_relation_image_value_coset")
+        self.assertEqual(result.coset.subgroup.order, action.image_group.order)
+        elements = enumerate_group(action.image_group, max_elements=100)
+        self.assertTrue(all(result.coset.contains(g) for g in elements))
+
     def test_s3_implicit_image_returns_complete_nonempty_coset(self):
         action = prepare_implicit_relation_image_action(
             image(),
@@ -106,6 +118,21 @@ class ImplicitRelationImageValueCosetTests(unittest.TestCase):
         self.assertEqual(result.status, "exact_empty_relation_signature_mismatch")
         self.assertTrue(result.exact)
         self.assertTrue(result.complete)
+
+    def test_feature_inventory_mismatch_is_exact_empty_without_search(self):
+        action = prepare_implicit_relation_image_action(
+            image(), image(), ((1, 2, 0), (1, 0, 2))
+        )
+        mismatched = replace(
+            action,
+            target_features=action.target_features[:-1] + (("forged",),),
+        )
+        result = exact_implicit_relation_image_value_coset(mismatched)
+        self.assertEqual(result.status, "exact_empty_feature_inventory_mismatch")
+        self.assertEqual(result.partition_orbit_states, 0)
+        self.assertTrue(result.exact)
+        self.assertTrue(result.complete)
+        self.assertIsNone(result.coset)
 
     def test_invalid_partition_cap_is_rejected(self):
         action = prepare_implicit_relation_image_action(
