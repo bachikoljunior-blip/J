@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "event_type": "problem_solving_phase_admission",
+  "phase": "attempt_solution",
+  "mode": "exclusive",
+  "recorded_at_jst": "2026-08-22T07:51:15+09:00",
+  "registry_source_sha": "4d6012142753fc63e0875cbb625b2873e9e0ff38",
+  "registry_digest": "sha256:5c6b659761ae029e2f41b0fa4104c7e67a006f0ecf8872909a93d3547f5726ea",
+  "claim_id": "chatgpt-session-j-rev264-primitive-johnson-proof-dag-20260822T074942JST-7e8c3f53",
+  "scope": "crx3/algorithmic-consumers/primitive-johnson-ground-proof-dag",
+  "target_revision": 264,
+  "paths": [
+    ".github/workflows/rev264-primitive-johnson-proof-dag-smoke.yml",
+    "automation_runs/2026-08-19_0851_JST/REV264_PRIMITIVE_JOHNSON_PROOF_DAG.md",
+    "automation_runs/2026-08-19_0851_JST/primitive_johnson_proof_dag_consumer_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_primitive_johnson_proof_dag_consumer_rev264.py"
+  ],
+  "admitted": true,
+  "conflicts": [],
+  "reasons": [],
+  "evidence_method": "fresh connector re-read of main, open PRs, active claim registry, and relevant workflow heads; dedicated CI replays automation/problem_solving_parallel_admission.py on the exact PR head",
+  "parallel_exclusions": [
+    "rev252 proof-carrying small-order production admission",
+    "rev258 implicit relation-image resource envelope",
+    "rev259 original-domain paired preimage",
+    "rev260 merged generic paired-action preimage differential (no mutation)",
+    "rev261 parent-promotion verifier",
+    "rev262 value-preserving image-coset intersection",
+    "rev263 exact-empty parent verifier",
+    "CRX3 state-orbit proof-DAG PR #206"
+  ],
+  "agi_state": "NOT_AGI"
+}
