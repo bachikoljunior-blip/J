@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev246-20260821T211700JST-4bd763dd",
   "session_id": "chatgpt-session-j-continuation-20260821T211642+0900-a8260072-turn1",
   "started_at_jst": "2026-08-21T21:17:00+09:00",
-  "heartbeat_at_jst": "2026-08-21T22:18:49+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:20:52+09:00",
+  "completed_at_jst": "2026-08-21T22:20:52+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "4bd763ddb3f18126e00299c6d618ef27a33daa6b",
   "starting_agi_gi_rev": 244,
@@ -13,6 +14,7 @@
   "branch": "agi-gi-rev246-primitive-johnson-production-admission-session-20260821-2117",
   "pull_request": 179,
   "latest_head_sha": "304aabc5548ae45530b004cfaca0276d50c0d46f",
+  "merged_main_sha": "8a4bb7e159ed99cbbaa026c14e66f221d232bdae",
   "validation": {
     "dedicated_workflow_run": 32482210176,
     "dedicated_status": "success",
@@ -25,6 +27,8 @@
     "rev247 shared S1 imprimitive production admission",
     "all later rev248+ independently claimed scopes"
   ],
-  "status": "active",
+  "remaining_boundary": "caller-side complete-cover selection plus parent-lift/original-root ledger threading after rev245 shared Design integration settles",
+  "status": "closed",
+  "coordination_state": "COMPLETED_MERGED",
   "agi_state": "NOT_AGI"
 }

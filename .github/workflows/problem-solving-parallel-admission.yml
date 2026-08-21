@@ -27,15 +27,9 @@ jobs:
         with:
           python-version: "3.11"
       - name: List pull-request changes
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          if [[ -n "$BASE_SHA" ]]; then
-            base="$BASE_SHA"
-          else
-            git fetch --no-tags origin main
-            base="$(git merge-base origin/main HEAD)"
-          fi
+          git fetch --no-tags origin main
+          base="$(git merge-base origin/main HEAD)"
           git diff --name-only "$base" HEAD > /tmp/changed-files.txt
       - name: Replay phase-admission evidence
         run: |

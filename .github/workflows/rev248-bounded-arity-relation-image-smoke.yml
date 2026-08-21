@@ -1,0 +1,28 @@
+name: rev248 bounded-arity relation-image witness smoke
+
+on:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/bounded_arity_relation_image_solver.py"
+      - "automation_runs/2026-08-19_0851_JST/test_bounded_arity_relation_image_solver.py"
+      - "automation_runs/2026-08-19_0851_JST/REV248_BOUNDED_ARITY_RELATION_IMAGE_WITNESS.md"
+      - ".github/workflows/rev248-bounded-arity-relation-image-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  rev248-bounded-arity-relation-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run focused exact-witness regression
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python -m unittest -v test_bounded_arity_relation_image_solver.py
+      - name: Compile rev248 module and regression
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/bounded_arity_relation_image_solver.py
+          automation_runs/2026-08-19_0851_JST/test_bounded_arity_relation_image_solver.py
