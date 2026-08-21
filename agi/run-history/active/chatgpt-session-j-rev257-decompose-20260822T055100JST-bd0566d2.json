@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev257-decompose-20260822T055100JST-bd0566d2",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T054325+0900-d4fc3140-turn1",
   "started_at_jst": "2026-08-22T05:51:04+09:00",
-  "heartbeat_at_jst": "2026-08-22T05:51:04+09:00",
+  "heartbeat_at_jst": "2026-08-22T05:52:08+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "bd0566d20328cca9b9250c3cb6a73d0ec5d328cc",
   "starting_agi_gi_rev": 256,
@@ -16,6 +16,14 @@
   ],
   "branch": "main",
   "non_interference": "Only decompose the unresolved rev256 successor in MAIN.md and persist this phase evidence; do not touch rev255 or implementation paths.",
-  "status": "active",
-  "agi_state": "NOT_AGI"
+  "status": "closed",
+  "agi_state": "NOT_AGI",
+  "completed_at_jst": "2026-08-22T05:52:08+09:00",
+  "completion": {
+    "phase_admission": "agi/run-history/phase-admissions/chatgpt-session-j-rev257-decompose-20260822T055100JST-bd0566d2-decompose-20260822T0551JST.json",
+    "problem_tree_commit_sha": "ef0ec5113bc7d4355492fb04ba653d6b898144a1",
+    "effective_problem_count": 571,
+    "forecast_problem_count": 576,
+    "next_leaf": "CRX1/bounded-arity-relation-image/implicit-generator-group/paired-faithful-auxiliary-action"
+  }
 }
