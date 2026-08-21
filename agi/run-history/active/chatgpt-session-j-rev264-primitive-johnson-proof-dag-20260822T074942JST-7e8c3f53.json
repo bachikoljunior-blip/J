@@ -1,0 +1,35 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev264-primitive-johnson-proof-dag-20260822T074942JST-7e8c3f53",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T074450+0900-turn1",
+  "started_at_jst": "2026-08-22T07:44:50+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:49:42+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "7e8c3f531713475f1c4c76b788ce9e5c36c3b23d",
+  "starting_agi_gi_rev": 257,
+  "target_revision": 264,
+  "scope": "crx3/algorithmic-consumers/primitive-johnson-ground-proof-dag",
+  "branch": "agi-gi-rev264-primitive-johnson-proof-dag-session-20260822-0749",
+  "reserved_paths": [
+    ".github/workflows/rev264-primitive-johnson-proof-dag-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev264-primitive-johnson-proof-dag-20260822T074942JST-7e8c3f53-attempt-solution.json",
+    "automation_runs/2026-08-19_0851_JST/REV264_PRIMITIVE_JOHNSON_PROOF_DAG.md",
+    "automation_runs/2026-08-19_0851_JST/primitive_johnson_proof_dag_consumer_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_primitive_johnson_proof_dag_consumer_rev264.py"
+  ],
+  "parallel_exclusions": [
+    "rev252 proof-carrying small-order production admission",
+    "rev258 resource-envelope branches/PRs",
+    "rev259 original-domain paired-preimage branches/claims",
+    "rev261 parent-promotion verifier",
+    "rev262 value-preserving image-coset claim/PR",
+    "rev263 exact-empty parent verifier",
+    "CRX3 state-orbit proof-DAG / PR #206",
+    "MAIN.md, proof_dag_accounting_v1.py, s1_string_isomorphism_v4.py, primitive_johnson_ground_terminal_v1.py, and all shared coordination implementation"
+  ],
+  "non_interference": "Add only the five reserved rev264 primitive-Johnson proof-DAG consumer paths on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite sibling branches, PRs, claims, workflows, or shared solver/proof-DAG files.",
+  "strict_boundary": "Attach a replay-stable execution identity to the already exact bounded primitive-Johnson ground terminal through a standalone consumer and validate that proof with the existing rev220 conservative proof-DAG verifier. This does not alter the primitive solver, does not close the state-orbit or small-order consumers, does not solve CRX1/CRX2, corrected Split-or-Johnson, global String Isomorphism, GI, or AGI.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
