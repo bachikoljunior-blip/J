@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886",
   "session_id": "chatgpt-session-j-continuation-20260822T074400+0900-274ed1e5-turn1",
   "started_at_jst": "2026-08-22T07:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T08:10:34+09:00",
+  "heartbeat_at_jst": "2026-08-22T08:42:27+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "9e47c88689cbbe10d84cc6a900674feb3aa31ce6",
   "starting_agi_gi_rev": 257,
@@ -15,6 +15,7 @@
   "pull_request_state": "ready_for_review",
   "ready_for_review_at_jst": "2026-08-22T08:10:21+09:00",
   "latest_head_sha": "9519b0608e6ceec060c99eea3b3a75c983403ca1",
+  "observed_main_sha": "dff834b01656f1724ce19adaf5b27820c68681d2",
   "reserved_paths": [
     ".github/workflows/rev266-implicit-relation-parent-outcome-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886-attempt-solution.json",
