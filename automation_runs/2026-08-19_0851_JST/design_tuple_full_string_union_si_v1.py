@@ -14,6 +14,11 @@ from design_full_string_child_preflight_v1 import (
     design_full_string_child_preflight,
     record_design_full_string_child_execution,
 )
+from design_union_reconstruction_resource_v1 import (
+    DesignUnionReconstructionResourceEnvelope,
+    design_union_reconstruction_resource_envelope,
+    record_design_union_reconstruction_execution,
+)
 from permutation_group_schreier import compose, identity, inverse, schreier_stabilizer_chain
 from proof_carrying_si_v1 import ProofCarryingCoset
 from u2_candidate_coset_string_iso_v2 import candidate_coset_string_isomorphism_u2
@@ -32,6 +37,7 @@ class DesignTupleFullStringSI:
     reason: str
     child_resource_proof: DesignFullStringChildResourceProof | None = None
     child_preflight: DesignFullStringChildPreflight | None = None
+    union_resource_envelope: DesignUnionReconstructionResourceEnvelope | None = None
 
 
 def _maps_string(source, target, p) -> bool:
@@ -57,6 +63,7 @@ def solve_design_tuple_transport_full_string(
     quasipoly_power: int = 5,
     quasipoly_constant: float = 64.0,
     max_design_full_string_child_work: int = 10**30,
+    max_design_union_reconstruction_work: int = 10**30,
 ) -> DesignTupleFullStringSI:
     """Solve every exact Design-Lemma tuple branch on the original full string.
 
@@ -182,6 +189,18 @@ def solve_design_tuple_transport_full_string(
             child_resource, child_preflight,
         )
 
+    union_resource = design_union_reconstruction_resource_envelope(
+        ambient_group,
+        solved,
+        max_work=max_design_union_reconstruction_work,
+    )
+    if not union_resource.admitted:
+        return DesignTupleFullStringSI(
+            union_resource.status, None, tuple(solved), len(solved), len(nonempty),
+            False, False, layer_bound, union_resource.reason,
+            child_resource, child_preflight, union_resource,
+        )
+
     r0 = nonempty[0].representative
     if not ambient_group.contains(r0) or not _maps_string(source, target, r0):
         raise AssertionError("exact child representative is not an ambient full-string isomorphism")
@@ -201,11 +220,16 @@ def solve_design_tuple_transport_full_string(
         generators.append(delta)
 
     target_aut = schreier_stabilizer_chain(generators or (identity(n),))
+    union_resource = record_design_union_reconstruction_execution(
+        union_resource,
+        executed_generator_count=len(generators),
+        complete=True,
+    )
     return DesignTupleFullStringSI(
         "exact_design_tuple_full_string_union_coset",
         RightCoset(target_aut, r0),
         tuple(solved), len(solved), len(nonempty),
         True, True, layer_bound,
         "all tuple branches were exactly intersected with the original string and their complete union was reconstructed as one target-automorphism right coset",
-        child_resource, child_preflight,
+        child_resource, child_preflight, union_resource,
     )
