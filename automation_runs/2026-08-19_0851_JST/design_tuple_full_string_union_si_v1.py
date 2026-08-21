@@ -9,6 +9,11 @@ from design_full_string_child_resource_proof_v1 import (
     DesignFullStringChildResourceProof,
     certify_design_full_string_child_resources,
 )
+from design_full_string_child_preflight_v1 import (
+    DesignFullStringChildPreflight,
+    design_full_string_child_preflight,
+    record_design_full_string_child_execution,
+)
 from permutation_group_schreier import compose, identity, inverse, schreier_stabilizer_chain
 from proof_carrying_si_v1 import ProofCarryingCoset
 from u2_candidate_coset_string_iso_v2 import candidate_coset_string_isomorphism_u2
@@ -26,6 +31,7 @@ class DesignTupleFullStringSI:
     explicit_union_log2_cost_bound: float
     reason: str
     child_resource_proof: DesignFullStringChildResourceProof | None = None
+    child_preflight: DesignFullStringChildPreflight | None = None
 
 
 def _maps_string(source, target, p) -> bool:
@@ -50,6 +56,7 @@ def solve_design_tuple_transport_full_string(
     max_depth: int = 64,
     quasipoly_power: int = 5,
     quasipoly_constant: float = 64.0,
+    max_design_full_string_child_work: int = 10**30,
 ) -> DesignTupleFullStringSI:
     """Solve every exact Design-Lemma tuple branch on the original full string.
 
@@ -91,6 +98,20 @@ def solve_design_tuple_transport_full_string(
             "full-string branch solving requires a complete exact tuple-transporter cover",
         )
 
+    child_preflight = design_full_string_child_preflight(
+        transport_plan.branches,
+        original_root_degree=root_n,
+        original_degree=n,
+        group_order_poly_power=group_order_poly_power,
+        max_group_order=max_group_order,
+        max_work=max_design_full_string_child_work,
+    )
+    if not child_preflight.admitted:
+        return DesignTupleFullStringSI(
+            child_preflight.status, None, (), 0, 0, False, False, 0.0,
+            child_preflight.reason, None, child_preflight,
+        )
+
     solved = []
     nonempty = []
     for branch in transport_plan.branches:
@@ -111,14 +132,21 @@ def solve_design_tuple_transport_full_string(
         )
         solved.append(child)
         if not child.exact:
+            partial_preflight = record_design_full_string_child_execution(
+                child_preflight, solved, complete=False,
+            )
             return DesignTupleFullStringSI(
                 "undetermined_design_tuple_full_string_branch", None, tuple(solved),
                 len(solved), len(nonempty), False, False, 0.0,
                 "at least one branch in the complete tuple cover remains unresolved; exact union reconstruction is withheld",
+                None, partial_preflight,
             )
         if child.coset is not None:
             nonempty.append(child.coset)
 
+    child_preflight = record_design_full_string_child_execution(
+        child_preflight, solved, complete=True,
+    )
     child_resource = certify_design_full_string_child_resources(
         solved,
         expected_branch_count=transport_plan.surviving_branch_count,
@@ -130,7 +158,7 @@ def solve_design_tuple_transport_full_string(
         return DesignTupleFullStringSI(
             "undetermined_design_tuple_full_string_child_resources", None,
             tuple(solved), len(solved), len(nonempty), False, False, 0.0,
-            child_resource.reason, child_resource,
+            child_resource.reason, child_resource, child_preflight,
         )
 
     layer_bound = (
@@ -145,7 +173,7 @@ def solve_design_tuple_transport_full_string(
             "exact_empty_design_tuple_full_string_union", None, tuple(solved),
             len(solved), 0, True, True, layer_bound,
             "every branch in the complete tuple-transporter cover has an exact empty full-string intersection",
-            child_resource,
+            child_resource, child_preflight,
         )
 
     r0 = nonempty[0].representative
@@ -173,5 +201,5 @@ def solve_design_tuple_transport_full_string(
         tuple(solved), len(solved), len(nonempty),
         True, True, layer_bound,
         "all tuple branches were exactly intersected with the original string and their complete union was reconstructed as one target-automorphism right coset",
-        child_resource,
+        child_resource, child_preflight,
     )
