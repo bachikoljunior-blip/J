@@ -4,13 +4,20 @@
   "claim_id": "chatgpt-session-j-rev247-20260821T215201JST-8c4346d0",
   "session_id": "chatgpt-session-j-parallel-continuation-20260821T214645+0900-turn1",
   "started_at_jst": "2026-08-21T21:52:01+09:00",
-  "heartbeat_at_jst": "2026-08-22T07:52:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:54:00+09:00",
   "resumed_at_jst": "2026-08-22T07:52:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "8c4346d0151c4e06e5c08e1a5342ce6f1a282fe3",
   "starting_agi_gi_rev": 244,
   "target_revision": 247,
   "scope": "CRX2/shared-s1/imprimitive-production-admission",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/s1_string_isomorphism_v4.py",
+    "automation_runs/2026-08-19_0851_JST/s1_proof_identity_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_s1_imprimitive_production_admission_rev247.py",
+    "automation_runs/2026-08-19_0851_JST/REV247_S1_IMPRIMITIVE_PRODUCTION_ADMISSION.md",
+    ".github/workflows/rev247-s1-imprimitive-production-admission-smoke.yml"
+  ],
   "branch": "agi-gi-rev247-s1-imprimitive-production-admission-session-20260821-2152",
   "status": "active",
   "agi_state": "NOT_AGI"
