@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev253-takeover-20260822T041903JST-b5a5588c",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T034116+0900-92e55a14-turn1",
   "started_at_jst": "2026-08-22T04:19:03+09:00",
-  "heartbeat_at_jst": "2026-08-22T04:29:06+09:00",
+  "heartbeat_at_jst": "2026-08-22T04:43:38+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "b5a5588ce3642deb44f51e3188a2ef1c0862c4ad",
   "starting_agi_gi_rev": 254,
@@ -26,7 +26,17 @@
     "stale_state": "claim-only draft with no implementation",
     "policy": "preserve the disjoint pair-root scope while replacing the stale claim-only head with a current-main implementation and replayable phase admission"
   },
-  "status": "active",
-  "non_interference": "Use only the listed rev253 paths. Do not modify rev255 shared Design caller paths, MAIN.md, sibling claims, or unrelated workflows.",
+  "status": "closed",
+  "completion": {
+    "pull_request": 188,
+    "exact_head": "98dd43f3a12e027b522583dd40fd49658f7b7c57",
+    "merge_commit": "92bc31d7e6ced716756f0a4d294c09633d06e44d",
+    "workflow_total": 11,
+    "workflow_success": 11,
+    "workflow_failure": 0,
+    "focused_local_tests": 14,
+    "parallel_merge_admission_main_commit": "a2cac09f0f0c9ac40cd33f8d9f0af952e0098842"
+  },
+  "non_interference": "Completed using only the listed rev253 paths; rev255 and rev256 reservations remained disjoint.",
   "agi_state": "NOT_AGI"
 }
