@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev267-original-domain-preimage-20260822T081520JST-2f881e95",
+  "session_id": "chatgpt-session-j-agi-gi-refire-20260822T0812+0900-00b458f9-turn1",
+  "started_at_jst": "2026-08-22T08:15:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T08:15:20+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "00b458f91d58149e8a87d056b49df8dee70c88c7",
+  "starting_agi_gi_rev": 257,
+  "target_revision": 267,
+  "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-domain-paired-preimage",
+  "reserved_paths": [
+    ".github/workflows/rev267-original-domain-preimage-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev267-original-domain-preimage-20260822T081520JST-2f881e95-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev267-original-domain-preimage-20260822T081520JST-2f881e95-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV267_ORIGINAL_DOMAIN_PREIMAGE.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_coset_v2.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_coset_rev267.py"
+  ],
+  "branch": "agi-gi-rev267-original-domain-preimage-session-20260822-0815",
+  "status": "active",
+  "agi_state": "NOT_AGI",
+  "existing_solution_audit": {
+    "source_pr": 202,
+    "source_branch": "codex/agi-gi-rev259-original-domain-preimage-20260822-0652jst",
+    "source_module": "automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_coset_v1.py",
+    "decision": "port_the_previously_green_superseded_preimage_child_to_current_rev257_plus_active_rev262_contract_under_an_unoccupied_revision"
+  },
+  "parallel_exclusions": [
+    "rev261 nonempty parent-promotion verifier / PR #204",
+    "rev262 value-preserving image-coset claim / PR #207",
+    "rev263 exact-empty parent verifier",
+    "rev264 primitive-Johnson proof-DAG / PR #210",
+    "rev265 resource envelope / PR #208",
+    "rev266 exact parent-outcome contract / PR #209",
+    "CRX3 state-orbit proof-DAG / PR #206",
+    "rev247 shared S1 work / PR #211",
+    "MAIN.md and shared coordination implementation"
+  ],
+  "non_interference": "Add only new rev267 original-domain paired-preimage paths. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite sibling branches, PRs, claims, workflows, or shared implementation files.",
+  "strict_boundary": "Lift a complete exact auxiliary image right coset from the rev262 contract through rev257's paired Schreier action into the original domain, preserving exact-empty and fail-closed outcomes. This revision does not modify rev262, perform rev261/rev263 semantic parent verification, discharge rev265 original-root accounting, normalize rev266 parent outcomes, wire a production parent, or close CRX1, GI, or AGI."
+}
