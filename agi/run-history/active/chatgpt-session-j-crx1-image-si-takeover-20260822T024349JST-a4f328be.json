@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-crx1-image-si-takeover-20260822T024349JST-a4f328be",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T024223+0900-8a2c255e-turn1",
   "started_at_jst": "2026-08-22T02:43:49+09:00",
-  "heartbeat_at_jst": "2026-08-22T02:43:49+09:00",
+  "heartbeat_at_jst": "2026-08-22T02:54:17+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "a4f328beaf5b5702b48ac4c7345e4cb540dded9f",
   "starting_agi_gi_rev": 254,
@@ -24,6 +24,18 @@
     "exact_head": "9c5378c71c42823454fad0f8b42a2a507f6b310b",
     "policy": "do not rewrite the stale claim; validate and integrate the existing isolated CRX1 leaf under this fresh claim"
   },
-  "status": "active",
-  "agi_state": "NOT_AGI"
+  "status": "closed",
+  "agi_state": "NOT_AGI",
+  "closed_at_jst": "2026-08-22T02:54:17+09:00",
+  "merge": {
+    "pull_request": 187,
+    "exact_head": "9c5378c71c42823454fad0f8b42a2a507f6b310b",
+    "merge_commit": "c48b84aa09563c6c7e25cbf992760cc7dbef8ee9"
+  },
+  "verification": {
+    "dedicated_unittest": "15 passed",
+    "full_series_excluding_external_labelg": "606 passed in 504.09s",
+    "syntax": "passed",
+    "parallel_conflicts": 0
+  }
 }
