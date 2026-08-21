@@ -12,6 +12,11 @@ from correlated_twl_resource_envelope_v1 import (
 from design_branch_tuple_transport_v1 import DesignTupleTransportPlan, transport_complete_design_tuple_branches
 from design_lemma_branch_cost_certificate_v1 import DesignBranchCostCertificate, certify_design_branch_quasipoly_cost
 from design_tuple_full_string_union_si_v1 import DesignTupleFullStringSI, solve_design_tuple_transport_full_string
+from design_tuple_transport_resource_envelope_v1 import (
+    DesignTupleTransportResourceEnvelope,
+    design_tuple_transport_resource_envelope,
+    record_design_tuple_transport_execution,
+)
 
 
 @dataclass(frozen=True)
@@ -28,6 +33,7 @@ class ExactTWLDesignCandidateSI:
     complete: bool
     reason: str
     twl_resource_envelope: PairedCorrelatedTWLResourceEnvelope | None = None
+    transport_resource_envelope: DesignTupleTransportResourceEnvelope | None = None
 
 
 def exact_twl_design_candidate_string_isomorphism(
@@ -49,6 +55,7 @@ def exact_twl_design_candidate_string_isomorphism(
     max_paired_twl_work_units: int = 10**30,
     max_branch_pairs: int = 200000,
     max_partition_states: int = 200000,
+    max_design_transport_work: int = 10**30,
     polylog_power: int = 2,
     max_explicit_degree: int = 8,
     group_order_poly_power: int = 2,
@@ -131,21 +138,49 @@ def exact_twl_design_candidate_string_isomorphism(
             theorem_gate, fidelity, False, False, False, branch_cost.reason, twl_resource,
         )
 
+    transport_resource = design_tuple_transport_resource_envelope(
+        root_n,
+        int(group.degree),
+        vertex_count,
+        int(plan.individualization_length or 0),
+        int(plan.branch_count),
+        int(group.order),
+        max(1, len(tuple(group.original_generators))),
+        max_design_transport_work,
+    )
+    if not transport_resource.admitted:
+        return ExactTWLDesignCandidateSI(
+            "undetermined_exact_twl_design_transport_resource_preflight",
+            plan, branch_cost, None, None, theorem_gate, fidelity, True,
+            False, False, transport_resource.reason, twl_resource,
+            transport_resource,
+        )
+
     transport = transport_complete_design_tuple_branches(
         group,
         lifted_generators,
         plan,
         max_partition_states=max_partition_states,
     )
+    if transport.complete:
+        transport_resource = record_design_tuple_transport_execution(
+            transport_resource,
+            executed_branches=transport.executed_branch_count,
+            executed_orbit_states=transport.total_orbit_states,
+            executed_action_steps=transport.total_action_steps,
+            complete=True,
+        )
     if transport.exact_empty:
         return ExactTWLDesignCandidateSI(
             "exact_empty_exact_twl_design_transport", plan, branch_cost, transport, None,
             theorem_gate, fidelity, True, True, True, transport.reason, twl_resource,
+            transport_resource,
         )
     if not transport.complete or transport.status != "certified_complete_design_tuple_transport_cover":
         return ExactTWLDesignCandidateSI(
             "undetermined_exact_twl_design_transport", plan, branch_cost, transport, None,
             theorem_gate, fidelity, True, False, False, transport.reason, twl_resource,
+            transport_resource,
         )
 
     full = solve_design_tuple_transport_full_string(
@@ -164,6 +199,7 @@ def exact_twl_design_candidate_string_isomorphism(
         return ExactTWLDesignCandidateSI(
             "undetermined_exact_twl_design_full_string", plan, branch_cost, transport, full,
             theorem_gate, fidelity, True, False, False, full.reason, twl_resource,
+            transport_resource,
         )
     return ExactTWLDesignCandidateSI(
         "exact_empty_exact_twl_design_full_string" if full.coset is None else "exact_twl_design_full_string_coset",
@@ -178,4 +214,5 @@ def exact_twl_design_candidate_string_isomorphism(
         True,
         "exact standard-k-WL Design witness family, quasipolynomial branch charge, exact ambient tuple transport, and exact full-string union all certified",
         twl_resource,
+        transport_resource,
     )
