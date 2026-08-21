@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev258-resource-envelope-20260822T064500JST-2675f756",
   "session_id": "chatgpt-session-j-rev258-resource-envelope-20260822T064500+0900-turn1",
   "started_at_jst": "2026-08-22T06:45:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:48:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:50:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2675f7561c3dac0d43f22de2d83261353d05132e",
   "starting_agi_gi_rev": 257,
@@ -26,9 +26,15 @@
   "validation": {
     "local_focused_tests": "11/11 passed",
     "py_compile": "passed",
-    "github_smoke": "awaiting pull_request run discovery"
+    "github_smoke_run": 32530162370,
+    "github_smoke": "success",
+    "general_validation_run": 32530162269,
+    "general_validation": "success",
+    "parallel_admission_run": 32530162209,
+    "parallel_admission": "failure_missing_phase_admission_evidence"
   },
-  "non_interference": "Only new rev258 resource-envelope, test, audit, and path-scoped smoke files are reserved. Do not modify rev255/rev257 paths, MAIN.md, other active claims, branches, PRs, or running workflows.",
-  "status": "draft_pr_open_ci_pending",
+  "status": "superseded",
+  "completed_at_jst": "2026-08-22T07:50:00+09:00",
+  "superseded_reason": "fresh rev258 claims and PRs acquired the numeric revision and adjacent implicit-image descendants; the branch is preserved as validated audit history and is rescoping to an unoccupied revision with required phase-admission evidence",
   "agi_state": "NOT_AGI"
 }
