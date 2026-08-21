@@ -34,19 +34,19 @@ def _s1_string_isomorphism_v4(
     max_group_order: int = 4096,
     max_partition_states: int = 4096,
     max_recognition_nodes: int = 500000,
+    max_imprimitive_quotient_kernel_work: int = 0,
     max_depth: int = 64,
     _depth: int = 0,
 ):
     """S1 with shared full-candidate and bounded Johnson-ground terminals.
 
-    rev213 closes the orbit children exposed by rev212's significant Johnson
-    profile filter without inventing another SI search.  It reuses rev209's exact
-    whole-candidate acceptance, rev208's literal natural giant terminal, rev173's
-    bounded-ground Johnson terminal, and rev177's larger profile path.  Canonical
-    intransitive children recurse through this same dispatcher so the terminals
-    are not lost inside v1.  Transitive imprimitive children are represented as
-    identity candidate cosets and returned to the existing v7 block/family
-    dispatcher.  Every failed recognition or resource gate remains fail closed.
+    rev247 promotes rev244's opt-in, reserve-before-execute transitive-imprimitive
+    quotient/kernel operator into the shared S1 dispatcher.  A zero imprimitive
+    budget preserves the existing v7 behavior exactly.  A positive budget is
+    threaded through every nested S1 child and only intercepts a unique canonical
+    transitive-imprimitive block system through candidate v8.  Canonical block
+    families and every non-imprimitive branch continue through their existing
+    dispatchers.  A rejected reservation remains fail closed.
     """
     source = tuple(source_values)
     target = tuple(target_values)
@@ -55,6 +55,8 @@ def _s1_string_isomorphism_v4(
         root_n = n
     if max_partition_states < 1:
         raise ValueError("max_partition_states must be positive")
+    if max_imprimitive_quotient_kernel_work < 0:
+        raise ValueError("max_imprimitive_quotient_kernel_work must be nonnegative")
     if root_n < n:
         raise ValueError("root_n must dominate current degree")
 
@@ -131,6 +133,7 @@ def _s1_string_isomorphism_v4(
                 max_group_order=max_group_order,
                 max_partition_states=max_partition_states,
                 max_recognition_nodes=max_recognition_nodes,
+                max_imprimitive_quotient_kernel_work=max_imprimitive_quotient_kernel_work,
                 max_depth=max_depth,
                 _depth=_depth + 1,
             )
@@ -178,10 +181,10 @@ def _s1_string_isomorphism_v4(
         "canonical_imprimitive_block_system",
         "canonical_imprimitive_family",
     }:
-        # Runtime import avoids the module cycle: candidate v2 uses S1 v4 for
-        # orbit children, while a transitive imprimitive S1 child needs the
-        # already validated candidate block/family machinery.
-        from u2_candidate_coset_string_iso_v7 import candidate_coset_string_isomorphism_u7
+        # Runtime import avoids the module cycle.  Candidate v8 is a drop-in
+        # v7 delegate unless a positive budget and one unique block system are
+        # both present.
+        from u2_candidate_coset_string_iso_v8 import candidate_coset_string_isomorphism_u8
 
         quotient_cap = max_group_order
         q = int(classification.quotient_degree)
@@ -192,7 +195,7 @@ def _s1_string_isomorphism_v4(
                 min(root_n ** group_order_poly_power, factorial(q)),
             )
 
-        return candidate_coset_string_isomorphism_u7(
+        return candidate_coset_string_isomorphism_u8(
             RightCoset(group, identity(n)),
             source,
             target,
@@ -204,6 +207,7 @@ def _s1_string_isomorphism_v4(
             max_depth=max_depth,
             max_partition_states=max_partition_states,
             max_recognition_nodes=max_recognition_nodes,
+            max_imprimitive_quotient_kernel_work=max_imprimitive_quotient_kernel_work,
         )
 
     if classification.status != "primitive_non_giant":
@@ -242,16 +246,16 @@ def s1_string_isomorphism_v4(
     max_group_order: int = 4096,
     max_partition_states: int = 4096,
     max_recognition_nodes: int = 500000,
+    max_imprimitive_quotient_kernel_work: int = 0,
     max_depth: int = 64,
     _depth: int = 0,
 ):
     """Attach a complete immutable identity to every nested S1 v4 proof.
 
-    The implementation remains the exact rev213 dispatcher.  This wrapper makes
-    its mathematical and resource identity execution-linked: recursive calls pass
-    through the same wrapper, so each nested child freezes its own induced group,
-    oriented local strings, original root, depth, dispatcher version and every
-    resource gate before the result is returned.
+    rev247 adds the explicit transitive-imprimitive caller cap to that frozen
+    execution identity.  Recursive calls receive the same cap, so a later replay
+    cannot silently switch between the legacy unreserved v7 path and the
+    reserve-before-execute v8 path.
     """
     source = tuple(source_values)
     target = tuple(target_values)
@@ -269,6 +273,7 @@ def s1_string_isomorphism_v4(
         max_group_order=max_group_order,
         max_partition_states=max_partition_states,
         max_recognition_nodes=max_recognition_nodes,
+        max_imprimitive_quotient_kernel_work=max_imprimitive_quotient_kernel_work,
         max_depth=max_depth,
     )
     proof = _s1_string_isomorphism_v4(
@@ -282,6 +287,7 @@ def s1_string_isomorphism_v4(
         max_group_order=max_group_order,
         max_partition_states=max_partition_states,
         max_recognition_nodes=max_recognition_nodes,
+        max_imprimitive_quotient_kernel_work=max_imprimitive_quotient_kernel_work,
         max_depth=max_depth,
         _depth=_depth,
     )
