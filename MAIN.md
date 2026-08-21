@@ -6,7 +6,7 @@ J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は�
 
 ## 現在の継続点
 
-現在の統合済み継続点は **AGI-GI rev228**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
+現在の統合済み継続点は **AGI-GI rev230**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
 
 rev208 は active leaf **H6-C2** の literal natural-domain giant subleafを解決した。represented subgroup が degree `n>=5` で order `n!` または `n!/2` なら、その action 自体が literal `S_n` / `A_n` なので、色クラス間の exact transporter と target-color stabilizerから full String-Isomorphism right cosetを直接復元する。
 
@@ -90,6 +90,10 @@ rev229 はcomplete all-T schedulingを開始する前に、canonical test-set総
 
 rev229 tested head `85abf1e3294ec20373be884a044ef83078778781` は、AGI-GI rev validation `32425757531`（independent `nauty-labelg` differential gateを含む）、rev229 `32425757555`、rev228 `32425757533`、rev227 `32425757537`、rev226 `32425757552`、rev225 `32425757563`、rev224 `32425757547`、rev223 `32425757524`、rev222 `32425757541`、rev221 `32425757538`、rev220 `32425757530`、rev219 `32425757588`、rev218 `32425757559`、rev217 `32425757565`、rev216 `32425757554`、rev215 `32425757546`、rev214 `32425757525`、rev213 `32425757571`、rev212 `32425757578` の19 workflowsがすべてsuccess。local affected/integration gateは40 tests、external labelg専用fileを除くall-module gateは487 tests、py_compileと差分検査もsuccess。PR #157 をexact tested head固定でmergeし、main commit `7db78cf852ccfe6864ebe31847e2b215fa118e68` に統合済み。
 
+rev230 はsource/target双方のcomplete all-T theorem relationをpaired evidenceへ統合した。各側でcanonical test order、全certificate execution、finite reservation completionを独立検査し、theorem gateとreserved schedule metadataも一致させる。Boolean palette multiplicity mismatchだけをpermutation-invariantなexact emptyとし、一致は同型へ昇格せず後段exact relation SI / t-WL / Design入力として保持する。incomplete、reordered、unreserved、instrumentation mismatchはfail closedである。
+
+rev230 tested head `16b7cdf99f7ca1f196bc70b3f13c662dafc57293` は、AGI-GI rev validation `32430163570`、rev230 `32430163588`、rev229 `32430163572`、rev228 `32430163595`、rev227 `32430163604`、rev226 `32430163583`、rev225 `32430163613`、rev224 `32430163566`、rev223 `32430163568`、rev222 `32430163591`、rev221 `32430163598`、rev220 `32430163574`、rev219 `32430163592`、rev218 `32430163573`、rev217 `32430163594`、rev216 `32430163576`、rev215 `32430163590`、rev214 `32430163589`、rev213 `32430163597`、rev212 `32430163585` の20 workflowsがすべてsuccess。local affected gateは35 tests、external labelg専用fileを除くall-module gateは491 tests、py_compileと差分検査もsuccess。PR #158 をexact tested head固定でmergeし、main commit `b422ccad740fd3dde5ff869669a169df91beaf4f` に統合済み。
+
 ## 問題木
 
 予測問題数は **576**、置換済み旧問題を除く有効問題数は **537**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
@@ -122,11 +126,13 @@ rev228は既に数えていたCRX2子2.2.2.3を解決し、rev224の2.2.2.1、re
 
 rev229の直接試行でCRX2子2.2.3を、(2.2.3.1) one-side complete all-T scheduling / multiplicity、(2.2.3.2) source/target local-certificate evidenceのcanonical comparison、(2.2.3.3) aggregation / t-WL / Design consumerのoriginal-root charge、の三子へ分解した。2.2.3.1を解決し、旧1末端をその親と3子へ置換したため有効数は `534 - 1 + 4 = 537`。537は予測576以下なのでover-count rewrite triggerは発火しておらず、子を抑制していない。
 
+rev230は既に数えていたCRX2子2.2.3.2を解決した。状態更新だけなので実数537、予測576は変わらず、over-count rewrite triggerは発火していない。palette一致は後段exact relation SIの入力であり、2.2.3.3や親2.2.3まで解決したとは認定しない。
+
 CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2のsource-target comparisonとそのexecution-linked original-root consumers、CRX3 substrateの未解決algorithmic consumers、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
 
-次の未解決末端は **CRX2 / source-target local-certificate evidence canonical comparison**:
+次の未解決末端は **CRX2 / aggregation, t-WL, Design consumer original-root charge**:
 
-> source/target双方のcomplete all-T relationと各T execution evidenceをcanonical test-set順で比較する。status、Boolean、test identity、theorem gate、resource admission/completion、実行済み多重度が一致する場合だけpaired relationを公開し、必要不変量の不一致はexact empty、片側unknown・不完全・順序不一致はfail closedとしてaggregationへ渡さない。
+> paired complete relationのcanonical aggregation、correlated-replacement t-WL、Design branch planning、original-domain transporter/full-string SIで実際に呼ぶprimitive列と全branch multiplicityを、一つのexecution-linked有限budgetへ入れる。auxiliary test-relation degreeからoriginal root degreeへのquasipolynomial liftを独立検証し、cap超過は次consumer開始前にfail closedとする。
 
 ## 世界に存在する解法の包含監査
 
