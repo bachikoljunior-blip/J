@@ -112,7 +112,7 @@ rev236候補はc2bのsmall-order exact-terminal subcaseを実行前予約へ接�
 
 ## 問題木
 
-予測問題数は **576**、置換済み旧問題を除く有効問題数は **549**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
+予測問題数は **576**、置換済み旧問題を除く有効問題数は **552**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
 
 置換済み旧問題を除く全層――primitive relation、H6-C2、W1R-H6 corrected Split-or-Johnson/Design branch、global proof-carrying recurrence/resource、AGI rootの一般性・性能・自律性・実用提供――を横断し、7本の狭いrelation/filter/cap branchを三つのsolution-shaped problemへ書き換えた。**CRX1 exact canonical relation quotient/preimage closure**、**CRX2 information/symmetry-defect relation selection**、**CRX3 replay-stable proof/resource substrate**であり、単なる重複名の統合ではなく上位親から共有できる解法境界である。結果は `517 - 7 + 3 = 513`、再予測576。rev214はCRX1のnonconstant strict-pair subcaseとCRX3のhomogeneous/self-loop guardsだけを解決した。
 
@@ -156,11 +156,13 @@ rev235への直接試行でc2を、(c2a) 実際に実行した全full-string chi
 
 rev236への直接試行でc2bを、(c2b1) U2のexact small-order terminalへ必ず停止する全branch coverの実行前予約、(c2b2) imprimitive/Johnson/orbit等のstructural recursionへ進むbranchの実行前予約、の二子へ分解した。旧1末端をその親と2子へ置換したため有効数は `547 - 1 + 3 = 549`。rev236候補はc2b1だけを実装し、GitHub検証・統合前なので解決済みへ昇格しない。549は予測576以下でover-count rewrite triggerは発火しておらず、c2b2を抑制していない。
 
+c2b2の直接試行ではU2/S1の実dispatchを横断し、(c2b2a) intransitive candidateの全orbit imageとpaired preimage、(c2b2b) transitive imprimitive block quotient/kernel recursion、(c2b2c) primitive non-giant Johnson/profile recognition・relation recursion、の三子へ分解した。各経路はstate/order/recognition capとSchreier primitiveが異なり、単一のnode capでは実行前証明にならない。旧1末端をその親と3子へ置換したため有効数は `549 - 1 + 4 = 552`。552は予測576以下でover-count rewrite triggerは発火しておらず、三経路のいずれも抑制していない。
+
 CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2のsource-target comparisonとそのexecution-linked original-root consumers、CRX3 substrateの未解決algorithmic consumers、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
 
-次の未解決末端は **CRX2 / Design full-string structural-child preflight**:
+次の未解決末端は **CRX2 / Design intransitive-orbit full-string child preflight**:
 
-> small-order gateを超えてU2/S1のorbit、imprimitive quotient/kernel、Johnson/profile構造再帰へ進み得るbranchについて、既存depth/state/order/recognition capを実際のprimitive work上限へ結び、complete coverを最初のchildより前に予約する。単なるpost-execution recurrence検証やnode capを計算量証明へ読み替えず、拒否時はstructural solverを一度も開始しない。
+> whole-candidate small-order gateを超えるintransitive branchについて、全canonical orbit imageの位数を実行前に証明し、各imageがsmall-order exact group terminalへ停止する場合のenumeration、image chain、paired kernel/preimage Schreier workをcomplete cover全体で予約する。後続subgroupでimage位数が増えないことを用い、nested structural imageはc2b2aの次子としてfail closedに残す。
 
 ## 世界に存在する解法の包含監査
 
