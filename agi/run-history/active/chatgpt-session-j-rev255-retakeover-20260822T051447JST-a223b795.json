@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795",
+  "session_id": "chatgpt-session-j-rev243-continuation-rev255-retakeover-20260822T051447+0900",
+  "started_at_jst": "2026-08-22T05:14:47+09:00",
+  "heartbeat_at_jst": "2026-08-22T05:14:47+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "a223b795b450f6e16aaf3d8fb7be5b211ac5cf8e",
+  "starting_agi_gi_rev": 254,
+  "target_revision": 255,
+  "scope": "CRX2/c2b2a2iii2/shared-design-caller-integration",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+    "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+    "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+    "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py",
+    "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+    "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+    ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-attempt_solution-20260822T0514JST.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-publish-20260822T0514JST.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-merge-20260822T0514JST.json"
+  ],
+  "branch": "agi-gi-rev255-primitive-johnson-design-integration-retakeover-20260822-0514",
+  "lineage": {
+    "original_session_marker": "chatgpt-session-j-rev243-20260821T194851+0900-912bbefa",
+    "original_pr": 174,
+    "resource_operator_pr": 179,
+    "complete_cover_pr": 192,
+    "complete_cover_revision": 254
+  },
+  "takeover_audit": {
+    "stale_claim": "chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1",
+    "stale_branch": "agi-gi-rev255-primitive-johnson-design-integration-takeover-20260822-0318",
+    "stale_branch_head": "6ecac42247ffdcb53a881eedd77e2846297db4d3",
+    "stale_claim_heartbeat_jst": "2026-08-22T03:18:00+09:00",
+    "stale_branch_last_commit_jst": "2026-08-22T03:33:20+09:00",
+    "stale_after_minutes": 90,
+    "observed_at_jst": "2026-08-22T05:14:47+09:00",
+    "pull_request": 195,
+    "pull_request_state": "open_draft_clean",
+    "exact_head_ci": "all_observed_workflows_success",
+    "policy": "do not rewrite, close, rerun, rebase, or otherwise modify the stale claim, branch, PR #195, or its workflows; reproduce only the still-relevant reserved rev255 integration from current main under this fresh takeover claim"
+  },
+  "non_interference": "Use only the listed rev255 paths. Do not modify or close PR #195 or PR #177, either stale rev255 branch, the fresh rev256 claim/PR #196 and its bounded-image paths, sibling claims/workflows, or unrelated main coordination files.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
