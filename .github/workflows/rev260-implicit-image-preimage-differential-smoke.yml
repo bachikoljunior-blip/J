@@ -1,0 +1,78 @@
+name: rev260 generic paired-action preimage differential smoke
+
+on:
+  pull_request:
+    paths:
+      - automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_differential_v1.py
+      - automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_differential_rev260.py
+      - automation_runs/2026-08-19_0851_JST/REV260_IMPLICIT_IMAGE_PREIMAGE_DIFFERENTIAL.md
+      - .github/workflows/rev260-implicit-image-preimage-differential-smoke.yml
+      - agi/run-history/phase-admissions/chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f-attempt-solution.json
+      - agi/run-history/phase-admissions/chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f-publish.json
+      - agi/run-history/phase-admissions/chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f-merge.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run generic paired-preimage and rev260 focused tests
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: >-
+          python -m unittest -v
+          test_paired_action_coset_preimage_rev179.py
+          test_implicit_relation_image_preimage_differential_rev260.py
+      - name: Compile rev260 implementation
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_differential_v1.py
+          automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_differential_rev260.py
+      - name: Emit replayable attempt-solution evidence payload
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f \
+            --phase attempt_solution \
+            --scope crx3/replay-stable-proof-substrate/implicit-relation-image-preimage-differential-verifier \
+            --target-revision 260 \
+            --path .github/workflows/rev260-implicit-image-preimage-differential-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV260_IMPLICIT_IMAGE_PREIMAGE_DIFFERENTIAL.md \
+            --path automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_differential_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_differential_rev260.py \
+            --output /tmp/rev260-attempt-solution.json
+          cat /tmp/rev260-attempt-solution.json
+      - name: Emit replayable publish evidence payload
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f \
+            --phase publish \
+            --scope crx3/replay-stable-proof-substrate/implicit-relation-image-preimage-differential-verifier \
+            --target-revision 260 \
+            --path .github/workflows/rev260-implicit-image-preimage-differential-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV260_IMPLICIT_IMAGE_PREIMAGE_DIFFERENTIAL.md \
+            --path automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_differential_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_differential_rev260.py \
+            --output /tmp/rev260-publish.json
+          cat /tmp/rev260-publish.json
+      - name: Emit replayable merge evidence payload
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f \
+            --phase merge \
+            --scope crx3/replay-stable-proof-substrate/implicit-relation-image-preimage-differential-verifier \
+            --target-revision 260 \
+            --path .github/workflows/rev260-implicit-image-preimage-differential-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV260_IMPLICIT_IMAGE_PREIMAGE_DIFFERENTIAL.md \
+            --path automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_differential_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_differential_rev260.py \
+            --output /tmp/rev260-merge.json
+          cat /tmp/rev260-merge.json
