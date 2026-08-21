@@ -5,8 +5,9 @@
   "session_id": "chatgpt-session-j-rev243-continuation-rev254-20260821T231757+0900",
   "created_at": "2026-08-21T23:17:57+09:00",
   "started_at_jst": "2026-08-21T23:17:57+09:00",
-  "heartbeat_at": "2026-08-21T23:22:27+09:00",
-  "heartbeat_at_jst": "2026-08-21T23:22:27+09:00",
+  "heartbeat_at": "2026-08-22T00:18:01+09:00",
+  "heartbeat_at_jst": "2026-08-22T00:18:01+09:00",
+  "completed_at_jst": "2026-08-22T00:19:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "08e81c38e93171183959e939291ca959c8df3506",
   "starting_agi_gi_rev": 253,
@@ -21,7 +22,8 @@
   "branch": "agi-gi-rev254-primitive-johnson-complete-cover-session-20260821-2317",
   "target_pr": 192,
   "owner_pr": 192,
-  "implementation_head": "0217262256a44ca3624a9a03aa62d219dab2bc61",
+  "implementation_head": "ec0a7bfdbb1d5761416da47e4ccfa7ddc1983e15",
+  "merged_main_sha": "a1cf55fa3662485a758160012c585b9740cf11bf",
   "reserved_paths": [
     "automation_runs/2026-08-19_0851_JST/design_primitive_johnson_complete_cover_preflight_v1.py",
     "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_complete_cover_rev254.py",
@@ -47,9 +49,24 @@
     "PR #180 parallel-aware coordination mechanism",
     "MAIN.md and all existing shared workflow/coordination files"
   ],
-  "non_interference": "Add only the four reserved rev254 paths on a dedicated branch. Do not modify the active rev245 shared Design caller, another claim, another branch/PR, or an existing workflow. This revision supplies a standalone complete-cover primitive-Johnson selection/charge adapter for later caller wiring.",
-  "remaining_boundary_before_start": "rev246 left caller-side complete-cover selection plus parent-lift/original-root ledger threading; rev254 targets only the standalone selection/aggregate charge layer while PR #177 still owns the shared caller.",
-  "status": "active",
-  "notes": "Draft PR #192 is open at the implementation head; dedicated and inherited CI are running. No sibling workflow was cancelled or rerun.",
+  "validation": {
+    "exact_head": "ec0a7bfdbb1d5761416da47e4ccfa7ddc1983e15",
+    "dedicated_rev254": "success",
+    "inherited_rev246": "success",
+    "inherited_rev238_rev242": "success",
+    "agi_gi_rev_validation": "success"
+  },
+  "main_overlap_audit": {
+    "observed_main_before_merge": "7df7fb27551b576fce331a0dd1ddee6646d93278",
+    "since_pr_base_files": [
+      "agi/run-history/STARTS.jsonl",
+      "agi/run-history/active/chatgpt-session-j-main-revision-guard-20260821T214635JST-280b6303.json"
+    ],
+    "reserved_path_overlap": false
+  },
+  "remaining_boundary": "shared-caller wiring of the settled cheaper-terminal preflight and rev254 primitive-Johnson selected subcover, including per-branch rev246 reservation/charge into the original-root ledger before exact union reconstruction; defer while PR #177 still owns the shared Design caller",
+  "status": "closed",
+  "coordination_state": "COMPLETED_MERGED",
+  "notes": "PR #192 merged from exact green head after disjoint-main overlap audit. No sibling workflow was cancelled, rerun, or modified.",
   "agi_state": "NOT_AGI"
 }
