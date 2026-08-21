@@ -4,6 +4,7 @@ from dataclasses import dataclass, replace
 
 from correlated_twl_resource_envelope_v1 import paired_correlated_twl_resource_envelope
 from design_branch_materialization_resource_v1 import design_branch_materialization_resource_envelope
+from design_nested_primitive_johnson_resource_v1 import design_nested_primitive_johnson_resource_envelope
 from design_tuple_transport_resource_envelope_v1 import design_tuple_transport_resource_envelope
 from local_certificate_preimage_resource_v1 import _chain_bound, _sat_add, _sat_mul
 
@@ -45,12 +46,12 @@ def design_original_root_pipeline_resource_envelope(
 ) -> DesignOriginalRootPipelineResourceEnvelope:
     """Reserve the complete Design pipeline before its first correlated t-WL run.
 
-    The bound deliberately depends only on inputs available before witness
-    materialization.  Every possible source/target witness pair is reserved, and
-    every resulting subgroup is conservatively charged as if it had the ambient
-    order.  This is a WCET-style reserve-before-execute ledger: phase-local
-    envelopes remain the executable checks, while this envelope prevents their
-    independent caps from hiding an over-budget complete pipeline.
+    The child phase reserves a uniform upper bound for every exact production
+    terminal that may be selected only after tuple transport fixes the branch
+    subgroup: small-order scan, complete state orbit, transitive-imprimitive
+    quotient/kernel recursion, and the rev243 primitive-Johnson recognition /
+    profile / partition / original-root-lift path.  Later branch-specific
+    preflights must fit inside this immutable pre-tWL envelope.
     """
     root = int(original_root_degree)
     n = int(group.degree)
@@ -78,9 +79,6 @@ def design_original_root_pipeline_resource_envelope(
         root, n, v, k, branches, order, generators, cap,
     )
 
-    # Each branch subgroup is a subgroup of G.  Its order and a duplicate-free
-    # raw generator family are therefore both bounded by |G|.  Reserve the more
-    # expensive of the exact small-order scan and the complete target-state orbit.
     gate = min(implementation_cap, root ** power)
     small_candidates = min(order, gate)
     small = _sat_mul(small_candidates, max(2, n) ** 12 * (2 ** 24), stop)
@@ -97,11 +95,39 @@ def design_original_root_pipeline_resource_envelope(
     action = _sat_mul(_sat_mul(states, order, stop), n, stop)
     state_chain = _chain_bound(n, max(1, states * order), order, n, stop)
     state_orbit = _sat_add(action, state_chain, stop)
-    child_per_branch = max(small, state_orbit)
+
+    imprimitive_universal = _sat_mul(
+        (2 ** 26) * (max(2, n) ** 12), order ** 3, stop,
+    )
+
+    # This call is used only as a monotone work envelope.  Its semantic
+    # resource_admitted flag may be false because the ambient |G| is deliberately
+    # looser than the later exact branch subgroup.  work_upper_bound nevertheless
+    # dominates the same rev243 computation for every H <= G, with the identical
+    # production recognition/partition caps used by rev254/rev246.
+    primitive_universal_envelope = design_nested_primitive_johnson_resource_envelope(
+        original_root_degree=root,
+        original_degree=n,
+        image_degree=n,
+        parent_order_upper_bound=order,
+        image_order_upper_bound=order,
+        generator_upper_bound=max(1, generators),
+        max_recognition_nodes=500000,
+        max_robust_orbital_degree=128,
+        partition_state_poly_power=2,
+        max_partition_states=4096,
+        max_work=cap,
+    )
+    primitive_johnson_universal = int(primitive_universal_envelope.work_upper_bound)
+
+    child_per_branch = max(
+        small,
+        state_orbit,
+        imprimitive_universal,
+        primitive_johnson_universal,
+    )
     children = _sat_mul(branches, child_per_branch, stop)
 
-    # Worst case: every branch is nonempty and contributes at most |G| subgroup
-    # generators plus one representative delta to the final union chain.
     union_inputs = _sat_mul(branches, order + 1, stop)
     verify_per_input = _sat_mul(16 * n * n, order, stop)
     union_verify = _sat_mul(union_inputs, verify_per_input, stop)
@@ -133,7 +159,7 @@ def design_original_root_pipeline_resource_envelope(
         reason = "the sum of all Design phase reservations exceeds the finite budget before the first correlated t-WL run"
     else:
         status = "certified_design_original_root_pipeline_work_bound"
-        reason = "correlated t-WL, complete branch materialization and transport, all exact child SI, and union reconstruction fit one original-root budget"
+        reason = "correlated t-WL, complete branch materialization and transport, all reserved exact child terminals including primitive-Johnson, and union reconstruction fit one original-root budget"
     return DesignOriginalRootPipelineResourceEnvelope(
         status, root, n, v, k, branches, phase_bounds, total, cap,
         root_lift, admitted, (), (), 0, PHASES, False, reason,
