@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev259-implicit-image-paired-preimage-20260822T064816JST-e3c1c723",
+  "session_id": "chatgpt-session-current-conversation-rev259-20260822T064816+0900",
+  "started_at_jst": "2026-08-22T06:48:16+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:48:16+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "e3c1c723c0456b92ad387b21ddf3016615651ab6",
+  "starting_agi_gi_rev": 257,
+  "target_revision": 259,
+  "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-domain-paired-preimage",
+  "branch": "agi-gi-rev259-implicit-image-paired-preimage-session-20260822-0648",
+  "reserved_paths": [
+    ".github/workflows/j-rev259-session-hourly-refire.yml",
+    ".github/workflows/rev259-implicit-relation-image-paired-preimage-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev259-implicit-image-paired-preimage-20260822T064816JST-e3c1c723-attempt-solution-20260822T0648JST.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev259-implicit-image-paired-preimage-20260822T064816JST-e3c1c723-publish-20260822T0648JST.json",
+    "automation_runs/2026-08-19_0851_JST/REV259_IMPLICIT_RELATION_IMAGE_PAIRED_PREIMAGE.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_image_paired_preimage_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_paired_preimage_rev259.py"
+  ],
+  "stacked_on": {
+    "rev257_pr": 198,
+    "rev257_head": "7b8764e0a19cbb9b19fe449b1a874e42470491dc",
+    "required_contract": "exact_implicit_relation_image_paired_action"
+  },
+  "parallel_exclusions": [
+    "rev258 original-root resource envelope claim",
+    "rev258 value-preserving image-coset intersection claim",
+    "rev257 implicit relation-image paired action / PR #198",
+    "rev255 primitive-Johnson Design caller integration / PR #195",
+    "rev245 imprimitive Design pipeline integration / PR #177",
+    "MAIN.md and shared coordination implementation"
+  ],
+  "non_interference": "Add only new rev259 paired-preimage adapter, regression, audit, path-scoped smoke, phase evidence, and this session's dedicated hourly guard. Do not modify rev257/rev258 implementation paths, existing claims, branches, PRs, MAIN.md, or unrelated workflows.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
