@@ -9,6 +9,7 @@ on:
       - "automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_v1.py"
       - "automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_rev266.py"
       - "agi/run-history/phase-admissions/chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886-attempt-solution.json"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886-publish.json"
 
 permissions:
   contents: read
@@ -58,6 +59,25 @@ jobs:
             --path automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_v1.py \
             --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_rev266.py \
             --output "${evidence}"
-          echo '---REV266_EVIDENCE_BEGIN---'
+          echo '---REV266_ATTEMPT_EVIDENCE_BEGIN---'
           cat "${evidence}"
-          echo '---REV266_EVIDENCE_END---'
+          echo '---REV266_ATTEMPT_EVIDENCE_END---'
+
+      - name: Generate replayable publish admission evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="/tmp/rev266-publish.json"
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886 \
+            --phase publish \
+            --scope crx1/bounded-arity-relation-image/implicit-generator-group/parent-exact-outcome-contract \
+            --target-revision 266 \
+            --path .github/workflows/rev266-implicit-relation-parent-outcome-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV266_IMPLICIT_RELATION_PARENT_OUTCOME_CONTRACT.md \
+            --path automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_rev266.py \
+            --output "${evidence}"
+          echo '---REV266_PUBLISH_EVIDENCE_BEGIN---'
+          cat "${evidence}"
+          echo '---REV266_PUBLISH_EVIDENCE_END---'
