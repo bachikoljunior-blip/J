@@ -40,7 +40,8 @@ class NestedPrimitiveJohnsonResourceEnvelope:
 
     @property
     def admitted(self) -> bool:
-        return self.resource_admitted
+        """Full-branch admission remains false until a path certificate exists."""
+        return self.resource_admitted and self.exact_path_certified
 
 
 def _johnson_parameter_candidates(vertex_count: int) -> tuple[tuple[int, int], ...]:
@@ -73,9 +74,9 @@ def design_nested_primitive_johnson_resource_envelope(
     has fixed the later current subgroup.  The envelope covers the exact Johnson
     parameter scan, canonical orbital-size recognition, the bounded exact-orbital
     fallback, generator decode/re-induction, complement-safe star/profile tables,
-    and the complete bounded signed partition-orbit attempt with its original-domain Schreier chains,
-    and the paired image/kernel/preimage lift back to the current full-string
-    domain.
+    the complete bounded signed partition-orbit attempt with its original-domain
+    Schreier chains, and the paired image/kernel/preimage lift back to the current
+    full-string domain.
 
     Admission is a resource statement only.  It does not claim that the unknown
     post-child subgroup will be primitive, Johnson, profile-determined, or exact.
@@ -286,8 +287,9 @@ def design_nested_primitive_johnson_resource_envelope(
         status = "certified_design_nested_primitive_johnson_resource_preflight"
         reason = (
             "every feasible Johnson-gauge attempt, bounded recognition fallback, "
-            "signed profile partition-orbit attempt, original-domain Schreier chain, and paired "
-            "lift fits the finite caller budget before the exact post-child subgroup exists"
+            "signed profile partition-orbit attempt, original-domain Schreier "
+            "chain, and paired lift fits the finite caller budget before the "
+            "exact post-child subgroup exists"
         )
 
     return NestedPrimitiveJohnsonResourceEnvelope(
