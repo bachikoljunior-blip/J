@@ -1,0 +1,40 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886",
+  "session_id": "chatgpt-session-j-continuation-20260822T074400+0900-274ed1e5-turn1",
+  "started_at_jst": "2026-08-22T07:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:51:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "9e47c88689cbbe10d84cc6a900674feb3aa31ce6",
+  "starting_agi_gi_rev": 257,
+  "target_revision": 266,
+  "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/parent-exact-outcome-contract",
+  "branch": "agi-gi-rev266-parent-outcome-contract-session-20260822-0751",
+  "reserved_paths": [
+    ".github/workflows/rev266-implicit-relation-parent-outcome-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV266_IMPLICIT_RELATION_PARENT_OUTCOME_CONTRACT.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_rev266.py"
+  ],
+  "parallel_exclusions": [
+    "rev258 legacy branches",
+    "rev259 original-domain paired-preimage branches/claims",
+    "rev260 integrated differential verifier ancestry",
+    "rev261 nonempty parent-promotion verifier / PR #204",
+    "rev262 value-preserving image-coset claim/PR",
+    "rev263 exact-empty parent verifier",
+    "rev264 primitive-Johnson proof-DAG consumer",
+    "rev265 implicit relation resource envelope",
+    "CRX3 state-orbit proof-DAG / PR #206",
+    "MAIN.md and shared coordination implementation"
+  ],
+  "non_interference": "Add only new rev266 exact-outcome contract paths. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite sibling branches, PRs, claims, workflows, or shared implementation files.",
+  "strict_boundary": "Normalize already independently verified nonempty or exact-empty parent evidence into one replay-stable fail-closed typed exact-outcome contract and reject contradictory, mismatched, or corrupted transcripts. This revision does not compute image/value-coset intersection, construct paired preimages, perform rev261/rev263 semantic verification, discharge rev265 original-root accounting, wire production callers, or close CRX1, GI, or AGI.",
+  "rescope_from_claim": "chatgpt-session-j-rev264-parent-outcome-contract-20260822T0749JST-bbf53979",
+  "rescope_reason": "mandatory post-claim recheck exposed a simultaneous rev264 target collision; rev265 was also newly occupied",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
