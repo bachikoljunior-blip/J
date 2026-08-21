@@ -1,0 +1,55 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev254-20260821T231757JST-08e81c38",
+  "session_id": "chatgpt-session-j-rev243-continuation-rev254-20260821T231757+0900",
+  "created_at": "2026-08-21T23:17:57+09:00",
+  "started_at_jst": "2026-08-21T23:17:57+09:00",
+  "heartbeat_at": "2026-08-21T23:22:27+09:00",
+  "heartbeat_at_jst": "2026-08-21T23:22:27+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "08e81c38e93171183959e939291ca959c8df3506",
+  "starting_agi_gi_rev": 253,
+  "target_revision": 254,
+  "scope": "CRX2/c2b2a2iii2/primitive-johnson-complete-cover-preflight-and-execution-charge",
+  "lineage": {
+    "original_session_marker": "chatgpt-session-j-rev243-20260821T194851+0900-912bbefa",
+    "original_pr": 174,
+    "resource_operator_pr": 179,
+    "resource_operator_revision": 246
+  },
+  "branch": "agi-gi-rev254-primitive-johnson-complete-cover-session-20260821-2317",
+  "target_pr": 192,
+  "owner_pr": 192,
+  "implementation_head": "0217262256a44ca3624a9a03aa62d219dab2bc61",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/design_primitive_johnson_complete_cover_preflight_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_complete_cover_rev254.py",
+    "automation_runs/2026-08-19_0851_JST/REV254_DESIGN_PRIMITIVE_JOHNSON_COMPLETE_COVER.md",
+    ".github/workflows/rev254-design-primitive-johnson-complete-cover-smoke.yml"
+  ],
+  "write_set": [
+    "automation_runs/2026-08-19_0851_JST/design_primitive_johnson_complete_cover_preflight_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_complete_cover_rev254.py",
+    "automation_runs/2026-08-19_0851_JST/REV254_DESIGN_PRIMITIVE_JOHNSON_COMPLETE_COVER.md",
+    ".github/workflows/rev254-design-primitive-johnson-complete-cover-smoke.yml",
+    "agi/run-history/active/chatgpt-session-j-rev254-20260821T231757JST-08e81c38.json"
+  ],
+  "parallel_exclusions": [
+    "PR #177 rev245 Design/imprimitive shared caller integration and all six of its changed files",
+    "rev247 shared-S1 imprimitive admission",
+    "rev248 relation-image witness",
+    "rev249 Design proof-DAG consumer",
+    "rev250 phase-start ticket ledger",
+    "rev251 exact-result replay verifier",
+    "rev252 proof-carrying small-order production admission",
+    "rev253 UPCC pair-root split family",
+    "PR #180 parallel-aware coordination mechanism",
+    "MAIN.md and all existing shared workflow/coordination files"
+  ],
+  "non_interference": "Add only the four reserved rev254 paths on a dedicated branch. Do not modify the active rev245 shared Design caller, another claim, another branch/PR, or an existing workflow. This revision supplies a standalone complete-cover primitive-Johnson selection/charge adapter for later caller wiring.",
+  "remaining_boundary_before_start": "rev246 left caller-side complete-cover selection plus parent-lift/original-root ledger threading; rev254 targets only the standalone selection/aggregate charge layer while PR #177 still owns the shared caller.",
+  "status": "active",
+  "notes": "Draft PR #192 is open at the implementation head; dedicated and inherited CI are running. No sibling workflow was cancelled or rerun.",
+  "agi_state": "NOT_AGI"
+}
