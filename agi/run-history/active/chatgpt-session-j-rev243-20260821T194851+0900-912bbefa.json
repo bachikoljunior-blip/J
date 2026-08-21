@@ -3,11 +3,12 @@
   "event_type": "active_session_claim",
   "automation_run_id": "chatgpt-session-j-rev243-20260821T194851+0900-912bbefa",
   "started_at_jst": "2026-08-21T19:48:51+09:00",
-  "last_heartbeat_at_jst": "2026-08-21T20:17:38+09:00",
+  "last_heartbeat_at_jst": "2026-08-21T21:17:00+09:00",
+  "completed_at_jst": "2026-08-21T21:17:00+09:00",
   "request_received_at_utc": "2026-08-21T10:43:54Z",
   "repository": "bachikoljunior-blip/J",
   "starting_main_sha": "912bbefadc994637d728d04d2de6db2a2faa51a9",
-  "observed_main_sha": "05169806267271f1b1169aea7a152aba59dd27f8",
+  "observed_main_sha": "099ddf1c916bf58dc759a116612ae481aa6d196d",
   "starting_agi_gi_rev": 241,
   "target_revision": 243,
   "branch": "agi-gi-rev243-nested-primitive-johnson-preflight-session-20260821-1948",
@@ -34,8 +35,8 @@
     "sibling_acknowledgement_commit": "05169806267271f1b1169aea7a152aba59dd27f8"
   },
   "implementation": {
-    "code_and_test_head_sha": "2ea64502ca7a551c0de65dfeab8065530d41c622",
-    "latest_observed_head_before_heartbeat": "cbcc3cc6fdf0ab6c630a83c67e3d604e1d082843",
+    "code_and_test_head_sha": "4d8f2325b312292448f6b75eaa1d5787ece0ebf3",
+    "latest_observed_head_before_heartbeat": "4d8f2325b312292448f6b75eaa1d5787ece0ebf3",
     "module": "automation_runs/2026-08-19_0851_JST/design_nested_primitive_johnson_resource_v1.py",
     "tests": "automation_runs/2026-08-19_0851_JST/test_design_nested_primitive_johnson_resource_rev243.py",
     "workflow": ".github/workflows/rev243-design-nested-primitive-johnson-resource-smoke.yml",
@@ -53,6 +54,8 @@
     "stale_after_minutes": 90,
     "behavior": "leave queued/running workflows and fresh AGI-GI claims/PRs untouched; only an idle/stale state emits a durable continuation re-fire request"
   },
-  "status": "ci_rerunning_after_fail_closed_admission_fix",
+  "status": "closed",
+  "coordination_state": "COMPLETED_MERGED",
+  "merged_main_sha": "099ddf1c916bf58dc759a116612ae481aa6d196d",
   "agi_state": "NOT_AGI"
 }
