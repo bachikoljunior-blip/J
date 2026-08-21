@@ -1,0 +1,40 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev255-20260822T011920JST-678e8517",
+  "session_id": "chatgpt-session-j-rev243-continuation-rev255-20260822T011920+0900",
+  "started_at_jst": "2026-08-22T01:19:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T01:19:20+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "678e851742d640103d569c0260a5fa63c5df336b",
+  "starting_agi_gi_rev": 254,
+  "target_revision": 255,
+  "scope": "CRX2/c2b2a2iii2/shared-design-caller-integration",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+    "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+    "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+    "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py",
+    "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+    "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+    ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev255-20260822T011920JST-678e8517-attempt_solution-20260822T0119JST.json"
+  ],
+  "branch": "agi-gi-rev255-primitive-johnson-design-integration-session-20260822-0119",
+  "lineage": {
+    "original_session_marker": "chatgpt-session-j-rev243-20260821T194851+0900-912bbefa",
+    "original_pr": 174,
+    "resource_operator_pr": 179,
+    "complete_cover_pr": 192,
+    "complete_cover_revision": 254
+  },
+  "takeover_audit": {
+    "stale_shared_caller_pr": 177,
+    "stale_shared_caller_head": "b2558426acd44f3284eedfc4a41603a5644cd7e9",
+    "stale_shared_caller_state": "open_draft_mergeable_green_but_unupdated_since_2026-08-21T20:45:30+09:00",
+    "policy": "do_not_modify_or_close_pr177_or_its_branch; reimplement the required shared integration from current main under this fresh claim"
+  },
+  "non_interference": "Use only the listed rev255 paths. Do not modify or close PR #177, rev247 S1, rev248/rev250-rev253/CRX1 branches or claims, sibling workflows, or unrelated main coordination files.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
