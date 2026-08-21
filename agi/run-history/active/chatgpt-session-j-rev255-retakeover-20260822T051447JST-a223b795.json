@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795",
   "session_id": "chatgpt-session-j-rev243-continuation-rev255-retakeover-20260822T051447+0900",
   "started_at_jst": "2026-08-22T05:14:47+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:16:39+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:19:55+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "a223b795b450f6e16aaf3d8fb7be5b211ac5cf8e",
   "starting_agi_gi_rev": 254,
@@ -44,6 +44,10 @@
     "policy": "do not rewrite, close, rerun, rebase, or otherwise modify the stale claim, branch, PR #195, or its workflows; reproduce only the still-relevant reserved rev255 integration from current main under this fresh takeover claim"
   },
   "non_interference": "Use only the listed rev255 paths. Do not modify or close PR #195 or PR #177, either stale rev255 branch, the fresh rev256 claim/PR #196 and its bounded-image paths, sibling claims/workflows, or unrelated main coordination files.",
-  "status": "active",
-  "agi_state": "NOT_AGI"
+  "status": "completed_merged",
+  "agi_state": "NOT_AGI",
+  "completed_at_jst": "2026-08-22T06:19:55+09:00",
+  "pull_request": 197,
+  "exact_head_sha": "c09d796d57db53d740d7f3fdcf8b00c8026e2ec3",
+  "merge_commit_sha": "8adfc7d87dea52723fe7151c498cf17696240cb4"
 }
