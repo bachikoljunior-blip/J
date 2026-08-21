@@ -5,6 +5,7 @@ from math import log2
 
 from colored_subset_design_branch_plan_v1 import DesignBranchPlan
 from coset_stabilizer_primitives import RightCoset
+from design_original_root_ledger_v1 import DesignOriginalRootLedger
 from signed_johnson_ground_profile_partition_si_v1 import _signed_partition_transporter
 
 
@@ -35,6 +36,7 @@ class DesignTupleTransportPlan:
     executed_branch_count: int = 0
     total_orbit_states: int = 0
     total_action_steps: int = 0
+    original_root_ledger: DesignOriginalRootLedger | None = None
 
 
 def _tuple_partition(v: int, ordered_tuple: tuple[int, ...]):
@@ -55,22 +57,31 @@ def transport_complete_design_tuple_branches(
 ) -> DesignTupleTransportPlan:
     """Intersect every Design-Lemma tuple branch with an exact ambient action.
 
-    Each ordered witness tuple is represented as an ordered partition consisting
-    of its singleton positions followed by the unindividualized remainder. The
-    existing signed-ground partition Schreier routine therefore returns the exact
-    original-domain right coset mapping one source tuple to one target tuple,
-    including the Johnson complement bit when present.
-
-    Because `branch_plan` is a complete source/target witness cover, discarding
-    only branches with a proved-empty ambient transporter preserves completeness.
-    Any orbit/resource-limit result aborts fail-closed rather than exposing a
-    partial cover. The returned object is still a *family* of candidate cosets;
-    full string recursion and exact coset-union reconstruction are later children.
+    If the upstream branch plan carries a rev242 original-root ledger, this phase
+    may not enlarge the reserved tuple-orbit cap. The ledger is propagated to the
+    full-string child so later phases remain bound to the same pre-WL reservation.
     """
     if max_partition_states < 1:
         raise ValueError("max_partition_states must be positive")
     n = int(group.degree)
     v = int(branch_plan.vertex_count)
+    ledger = branch_plan.original_root_ledger
+    if ledger is not None:
+        if not ledger.admitted:
+            return DesignTupleTransportPlan(
+                ledger.status, n, v, branch_plan.individualization_length,
+                branch_plan.branch_count, 0, (), 0.0, False, False,
+                "tuple transport cannot start from a rejected original-root ledger",
+                original_root_ledger=ledger,
+            )
+        if int(max_partition_states) > ledger.partition_state_cap:
+            return DesignTupleTransportPlan(
+                "design_tuple_transport_exceeds_original_root_ledger", n, v,
+                branch_plan.individualization_length, branch_plan.branch_count, 0,
+                (), 0.0, False, False,
+                "tuple transport requested a state cap larger than the amount reserved before the first t-WL execution",
+                original_root_ledger=ledger,
+            )
 
     if branch_plan.exact_empty:
         return DesignTupleTransportPlan(
@@ -80,6 +91,7 @@ def transport_complete_design_tuple_branches(
             branch_plan.local_log2_cost_bound + 8.0,
             True, True,
             "the upstream exact Design-Lemma branch plan is already empty",
+            original_root_ledger=ledger,
         )
     if not branch_plan.complete or branch_plan.status != "certified_complete_design_branch_plan":
         return DesignTupleTransportPlan(
@@ -88,6 +100,7 @@ def transport_complete_design_tuple_branches(
             branch_plan.branch_count, 0, (),
             0.0, False, False,
             "tuple transport requires an exact complete upstream Design-Lemma branch cover",
+            original_root_ledger=ledger,
         )
 
     kept = []
@@ -114,6 +127,7 @@ def transport_complete_design_tuple_branches(
                 branch_plan.branch_count, 0, (),
                 0.0, False, False,
                 "at least one tuple-pair transporter orbit exceeded the explicit state cap; the complete cover is withheld",
+                original_root_ledger=ledger,
             )
         if transport.status == "no_signed_ground_partition_transporter":
             continue
@@ -124,6 +138,7 @@ def transport_complete_design_tuple_branches(
                 branch_plan.branch_count, 0, (),
                 0.0, False, False,
                 "an upstream-complete tuple branch returned an unrecognized transporter status",
+                original_root_ledger=ledger,
             )
         kept.append(
             DesignTupleBranch(
@@ -150,7 +165,7 @@ def transport_complete_design_tuple_branches(
             branch_plan.branch_count, 0, (), local_bound,
             True, True,
             "every tuple pair in the complete canonical Design-Lemma witness cover has an exact empty ambient transporter",
-            branch_plan.branch_count, total_orbit_states, total_steps,
+            branch_plan.branch_count, total_orbit_states, total_steps, ledger,
         )
 
     return DesignTupleTransportPlan(
@@ -159,5 +174,5 @@ def transport_complete_design_tuple_branches(
         branch_plan.branch_count, len(kept), tuple(kept), local_bound,
         False, True,
         "every surviving tuple-pair branch carries its exact original-domain ambient right coset; only proved-empty transporter branches were removed",
-        branch_plan.branch_count, total_orbit_states, total_steps,
+        branch_plan.branch_count, total_orbit_states, total_steps, ledger,
     )
