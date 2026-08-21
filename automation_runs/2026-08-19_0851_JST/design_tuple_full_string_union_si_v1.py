@@ -142,6 +142,11 @@ def solve_design_tuple_transport_full_string(
                 if child_preflight.terminal_kinds[branch_index] == "state_orbit"
                 else 0
             ),
+            max_imprimitive_quotient_kernel_work=(
+                child_preflight.imprimitive_work_upper_bounds[branch_index]
+                if child_preflight.terminal_kinds[branch_index] == "imprimitive_quotient_kernel"
+                else 0
+            ),
         )
         solved.append(child)
         if not child.exact:
