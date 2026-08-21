@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev248-20260821T215536JST-01ad84ba",
+  "session_id": "chatgpt-session-j-parallel-continuation-20260821T124554Z-turn1",
+  "started_at_jst": "2026-08-21T21:55:36+09:00",
+  "heartbeat_at_jst": "2026-08-21T21:55:36+09:00",
+  "stale_after_minutes": 55,
+  "starting_main_sha": "01ad84ba3b537ef4a191bcbdf3f8df709fadb320",
+  "starting_agi_gi_rev": 244,
+  "target_revision": 248,
+  "scope": "CRX1/k<=2/homogeneous-blocks-nonrestricting-relation-image/exact-witness",
+  "branch": "agi-gi-rev248-crx1-k2-relation-image-session-20260821-2155",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/bounded_arity_relation_image_solver.py",
+    "automation_runs/2026-08-19_0851_JST/test_bounded_arity_relation_image_solver.py",
+    ".github/workflows/j-rev248-session-hourly-refire.yml"
+  ],
+  "non_interference": "Do not modify rev245 Design integration, rev246 primitive Johnson evaluator, or rev247 S1 imprimitive-production-admission paths.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
