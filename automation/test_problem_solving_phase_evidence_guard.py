@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from automation.problem_solving_phase_evidence_guard import (
     is_problem_state_path,
@@ -38,6 +39,15 @@ class ProblemSolvingPhaseEvidenceGuardTest(unittest.TestCase):
 
     def test_invalid_admitted_path_fails_closed(self):
         self.assertFalse(path_is_covered("MAIN.md", ["../MAIN.md"]))
+
+    def test_workflow_diffs_against_fresh_current_main(self):
+        root = Path(__file__).resolve().parents[1]
+        workflow = (root / ".github/workflows/problem-solving-parallel-admission.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("git fetch --no-tags origin main", workflow)
+        self.assertIn("git merge-base origin/main HEAD", workflow)
+        self.assertNotIn("github.event.pull_request.base.sha", workflow)
 
 
 if __name__ == "__main__":
