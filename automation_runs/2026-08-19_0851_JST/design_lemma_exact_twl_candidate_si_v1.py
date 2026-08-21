@@ -11,6 +11,7 @@ from correlated_twl_resource_envelope_v1 import (
 )
 from design_branch_tuple_transport_v1 import DesignTupleTransportPlan, transport_complete_design_tuple_branches
 from design_lemma_branch_cost_certificate_v1 import DesignBranchCostCertificate, certify_design_branch_quasipoly_cost
+from design_pipeline_admission_ledger_v1 import design_pipeline_admission_ledger
 from design_tuple_full_string_union_si_v1 import DesignTupleFullStringSI, solve_design_tuple_transport_full_string
 from design_tuple_transport_resource_envelope_v1 import (
     DesignTupleTransportResourceEnvelope,
@@ -57,6 +58,7 @@ def exact_twl_design_candidate_string_isomorphism(
     max_design_branch_materialization_work: int = 10**30,
     max_partition_states: int = 200000,
     max_design_transport_work: int = 10**30,
+    max_design_pipeline_work: int = 10**30,
     polylog_power: int = 2,
     max_explicit_degree: int = 8,
     group_order_poly_power: int = 2,
@@ -72,6 +74,24 @@ def exact_twl_design_candidate_string_isomorphism(
     gate. Recursive-child measure decrease remains a separate global recurrence
     obligation and is not inferred from an exact result here.
     """
+    pipeline = design_pipeline_admission_ledger(
+        original_root_degree=root_n,
+        original_degree=int(group.degree),
+        vertex_count=vertex_count,
+        arity=arity,
+        ambient_group_order=int(group.order),
+        ambient_generator_count=max(1, len(tuple(group.original_generators))),
+        target_values=target_values,
+        group_order_poly_power=group_order_poly_power,
+        max_group_order=max_group_order,
+        max_work=max_design_pipeline_work,
+    )
+    if not pipeline.admitted:
+        return ExactTWLDesignCandidateSI(
+            "undetermined_exact_twl_design_pipeline_preflight", None, None, None, None,
+            False, False, False, False, False, pipeline.reason,
+        )
+
     twl_resource = paired_correlated_twl_resource_envelope(
         root_n, vertex_count, arity, max_paired_twl_work_units,
     )
