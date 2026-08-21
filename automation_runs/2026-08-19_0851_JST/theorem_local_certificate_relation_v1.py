@@ -18,6 +18,11 @@ from babai_local_certificate_parameter_gate_v1 import (
     babai_local_certificate_parameter_gate,
 )
 from local_certificate_beard_v1 import LocalCertificateBeard, local_certificate_beard
+from relation_aggregation_resource_envelope_v1 import (
+    RelationAggregationResourceEnvelope,
+    record_relation_aggregation_execution,
+    relation_aggregation_resource_envelope,
+)
 
 
 @dataclass(frozen=True)
@@ -38,6 +43,7 @@ class TheoremLocalCertificateRelation:
     exact: bool
     reason: str
     all_test_resource_envelope: AllTestResourceEnvelope | None = None
+    relation_aggregation_resource_envelope: RelationAggregationResourceEnvelope | None = None
 
 
 def aggregate_beard_local_certificate_relation(
@@ -57,6 +63,7 @@ def aggregate_beard_local_certificate_relation(
     max_reassembly_schreier_work: int = 1000000000,
     max_single_test_schreier_work: int | None = 4000000000,
     max_all_test_schreier_work: int | None = 800000000000000,
+    max_relation_aggregation_work: int | None = 1000000000000000,
     require_theorem_scale: bool = True,
 ) -> TheoremLocalCertificateRelation:
     """Build a complete Boolean t-subset relation from growing-beard proofs.
@@ -196,14 +203,6 @@ def aggregate_beard_local_certificate_relation(
                 execution_envelope,
             )
 
-    aggregate = _aggregate_boolean_relation(
-        m,
-        t,
-        relation,
-        max_class_fraction=max_class_fraction,
-        reason="complete growing-beard local-certificate relation plus canonical colored-incidence refinement",
-    )
-    theorem_scale = bool(theorem_complete and len(certificates) == total)
     execution_envelope = (
         None if all_test_envelope is None else
         record_all_test_execution(
@@ -211,6 +210,34 @@ def aggregate_beard_local_certificate_relation(
             complete=True,
         )
     )
+    aggregation_envelope = None
+    if require_theorem_scale:
+        if max_relation_aggregation_work is None:
+            raise ValueError("theorem-scale aggregation requires a finite aggregation cap")
+        aggregation_envelope = relation_aggregation_resource_envelope(
+            m, t, total, max_relation_aggregation_work,
+        )
+        if not aggregation_envelope.admitted:
+            return TheoremLocalCertificateRelation(
+                "undetermined_relation_aggregation_work_cap", m, t, total,
+                len(certificates), full_count, nonfull_count, 0, gate,
+                tuple(certificates), None, True, False, False,
+                "complete local Booleans exist but canonical aggregation exceeded its finite preflight cap",
+                execution_envelope, aggregation_envelope,
+            )
+
+    aggregate = _aggregate_boolean_relation(
+        m,
+        t,
+        relation,
+        max_class_fraction=max_class_fraction,
+        reason="complete growing-beard local-certificate relation plus canonical colored-incidence refinement",
+    )
+    if aggregation_envelope is not None:
+        aggregation_envelope = record_relation_aggregation_execution(
+            aggregation_envelope, aggregate.refinement_rounds,
+        )
+    theorem_scale = bool(theorem_complete and len(certificates) == total)
     return TheoremLocalCertificateRelation(
         (
             "certified_theorem_local_certificate_relation"
@@ -224,6 +251,7 @@ def aggregate_beard_local_certificate_relation(
             + (" with theorem-scale evidence" if theorem_scale else "; the bounded exact relation is not theorem-scale evidence")
         ),
         execution_envelope,
+        aggregation_envelope,
     )
 
 

@@ -153,6 +153,7 @@ jobs:
           test_single_test_resource_envelope_rev228.py
           test_all_test_resource_envelope_rev229.py
           test_paired_theorem_local_certificate_rev230.py
+          test_relation_aggregation_resource_rev231.py
       - name: Install independent canonical oracle
         run: |
           sudo apt-get update
