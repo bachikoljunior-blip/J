@@ -1,0 +1,54 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "codex/agi-gi-rev257-implicit-relation-image-action-20260821-205230z",
+    "claim_id": "chatgpt-session-j-rev257-implicit-action-20260822T055230JST-f0ceae63",
+    "heartbeat_at_jst": "2026-08-22T06:45:09+09:00",
+    "reserved_paths": [
+      ".github/workflows/rev257-implicit-relation-image-action-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev257-implicit-action-20260822T055230JST-f0ceae63-attempt-solution-20260822T0552JST.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev257-implicit-action-20260822T055230JST-f0ceae63-merge-20260822T0552JST.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev257-implicit-action-20260822T055230JST-f0ceae63-publish-20260822T0552JST.json",
+      "automation_runs/2026-08-19_0851_JST/REV257_IMPLICIT_RELATION_IMAGE_ACTION.md",
+      "automation_runs/2026-08-19_0851_JST/implicit_relation_image_action_v1.py",
+      "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_action_rev257.py"
+    ],
+    "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/paired-faithful-auxiliary-action",
+    "state": "active",
+    "target_revision": 257
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev258-implicit-image-resource-envelope-session-20260822-0644",
+      "claim_id": "chatgpt-session-j-rev258-resource-envelope-20260822T064500JST-2675f756",
+      "heartbeat_at_jst": "2026-08-22T06:45:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev258-implicit-relation-image-resource-envelope-smoke.yml",
+        "automation_runs/2026-08-19_0851_JST/REV258_IMPLICIT_RELATION_IMAGE_RESOURCE_ENVELOPE.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_image_resource_envelope_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_resource_envelope_rev258.py"
+      ],
+      "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-root-resource-envelope",
+      "state": "active",
+      "target_revision": 258
+    }
+  ],
+  "paths": [
+    ".github/workflows/rev257-implicit-relation-image-action-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev257-implicit-action-20260822T055230JST-f0ceae63-publish-20260822T0552JST.json",
+    "automation_runs/2026-08-19_0851_JST/REV257_IMPLICIT_RELATION_IMAGE_ACTION.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_image_action_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_action_rev257.py"
+  ],
+  "phase": "merge",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T06:46:30+09:00",
+  "registry_digest": "sha256:9fcfd5df957ba50874c4bce6eb4e6d19018e2343eff80b102cb856b36d94eb91",
+  "registry_source_sha": "e5447a1e572301bdfdf9a68ea4866ee573a99e5b",
+  "schema_version": 1,
+  "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/paired-faithful-auxiliary-action",
+  "target_revision": 257
+}
