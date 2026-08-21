@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev266-main-sync-20260822T0850JST-56901069",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T083805+0900-63c36256-turn1",
   "started_at_jst": "2026-08-22T08:50:20+09:00",
-  "heartbeat_at_jst": "2026-08-22T08:50:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T08:54:35+09:00",
   "stale_after_minutes": 30,
   "starting_main_sha": "5690106982366500611477c94f28234b99cd4972",
   "starting_agi_gi_rev": 266,
@@ -15,12 +15,20 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev266-main-sync-20260822T0850JST-56901069-update_problem_tree.json"
   ],
   "branch": "main",
-  "status": "active",
+  "status": "closed",
   "agi_state": "NOT_AGI",
   "existing_solution_audit": {
     "source": "automation/agi_gi_main_revision_guard.py",
     "observation": "declared rev257, highest canonically integrated rev266",
     "decision": "synchronize authoritative continuation without changing problem count"
   },
-  "strict_boundary": "Synchronize only MAIN.md to already integrated rev262 and rev266 evidence. No algorithmic claim, sibling path, or AGI achievement."
+  "strict_boundary": "Synchronize only MAIN.md to already integrated rev262 and rev266 evidence. No algorithmic claim, sibling path, or AGI achievement.",
+  "closed_at_jst": "2026-08-22T08:54:35+09:00",
+  "synchronized_main_sha": "80bf6664dc6dd8588a02930f14ad958847a66b09",
+  "validation": {
+    "main_revision_guard": "valid: declared 266 == integrated 266",
+    "phase_evidence_guard": "valid: MAIN.md admitted",
+    "forecast": 576,
+    "effective": 571
+  }
 }
