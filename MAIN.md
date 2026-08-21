@@ -174,6 +174,8 @@ CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped
 
 > 最初のoriginal-domain childを開始する前に、全above-gate descendant imageがintransitive分岐だけを通ることをexact group certificateから証明し、rev238候補の入力非依存resource envelopeへ接続する。pathを証明できない場合はchildを一つも開始せず、transitive imprimitive/primitive non-giant imageをそれぞれc2b2a2ii/c2b2a2iiiとしてfail closedに保持する。
 
+path証明のコード監査では、paired orbit preimageが `|H'|=|ker(phi)|*|L|` をassertし、child subgroup `L` はimage内のtarget-color stabilizerに含まれることを確認した。したがってcolor-class factorial積とexact kernel orderから後続full-domain subgroup orderの実行前上界を得られる。後続orbit degreeより上界が小さい場合はorbit-stabilizerによりtransitivityを排除できるが、一般にはこの十分条件を満たさず、exact image-stabilizer artifactの事前構築・再利用が残る。単なるmax-node capや未実行child結果の仮定でpathを認定しない。
+
 ## 世界に存在する解法の包含監査
 
 Babai の quasipolynomial SI/GI framework と corrected Split-or-Johnson、Luks 型 orbit/block/coset recursionを親問題レベルまで再監査している。large primitive barrierをJohnson structureとlocal certificates / Design Lemma / Split-or-Johnson / exact group-coset recursionへ落とす共有解法を優先し、J側では既存lower-arity relation image、paired-action preimage、block quotient、candidate SI、proof-carrying recurrenceを再利用する。
