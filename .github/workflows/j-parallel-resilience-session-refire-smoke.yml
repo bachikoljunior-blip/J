@@ -6,6 +6,7 @@ on:
     paths:
       - "automation/session_refire.py"
       - "automation/test_session_refire.py"
+      - "automation/test_session_refire_workflow_contract.py"
       - ".github/workflows/j-parallel-resilience-session-hourly-refire.yml"
       - ".github/workflows/j-parallel-resilience-session-refire-smoke.yml"
 
@@ -20,10 +21,18 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run focused session re-fire tests
-        run: python -m unittest automation.test_session_refire -v
+        run: >-
+          python -m unittest
+          automation.test_session_refire
+          automation.test_session_refire_workflow_contract
+          -v
 
       - name: Compile session re-fire modules
-        run: python -m py_compile automation/session_refire.py automation/test_session_refire.py
+        run: >-
+          python -m py_compile
+          automation/session_refire.py
+          automation/test_session_refire.py
+          automation/test_session_refire_workflow_contract.py
 
       - name: Verify a fresh dedicated branch suppresses re-fire
         shell: bash
