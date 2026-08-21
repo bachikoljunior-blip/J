@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev261-parent-promotion-20260822T065904JST-ece2f260",
   "session_id": "chatgpt-session-j-parallel-continuation-20260821T124554Z-turn1",
   "started_at_jst": "2026-08-22T06:59:04+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:59:04+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:05:03+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "ece2f2601e8a128232a0b4f9fc3c0496499f9128",
   "starting_agi_gi_rev": 257,
   "target_revision": 261,
   "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/parent-exact-promotion-gate",
   "branch": "chatgpt/agi-gi-rev261-implicit-relation-parent-promotion-20260822-0659jst",
+  "pull_request": 204,
+  "latest_head_sha": "48f4d671365b1c9b52761ade58e19b402b41d158",
   "reserved_paths": [
     ".github/workflows/rev261-implicit-relation-parent-promotion-smoke.yml",
     "agi/run-history/active/chatgpt-session-j-rev261-parent-promotion-20260822T065904JST-ece2f260.json",
@@ -34,6 +36,10 @@
   ],
   "non_interference": "Add only the rev261 parent-promotion verifier, focused regression, audit note, path-scoped smoke workflow, and this claim. Do not modify or rerun rev258/rev259/rev260 work or any unrelated workflow.",
   "strict_boundary": "Consume a concrete exact generic paired-preimage artifact and independently verify artifact consistency, original-domain relation transport, target-subgroup stabilization, group containment, exact order identities, and bounded verification work before nonempty exact parent promotion. Upstream image intersection, preimage construction, exact-empty handling, original-root accounting, CRX1, GI, and AGI remain separate obligations.",
-  "status": "active",
+  "validation": {
+    "local_py_compile": "passed",
+    "github_ci": "pending"
+  },
+  "status": "draft_pr_open_ci_pending",
   "agi_state": "NOT_AGI"
 }
