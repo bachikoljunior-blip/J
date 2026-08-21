@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev252-20260821T221325JST-3fda2080",
+  "session_id": "codex/session-20260821-124648z",
+  "request_received_at_utc": "2026-08-21T12:46:48Z",
+  "started_at_utc": "2026-08-21T13:13:25Z",
+  "started_at_jst": "2026-08-21T22:13:25+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:13:25+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "3fda2080cefc92e41b0ab9a0e3091b2439042112",
+  "starting_agi_gi_rev": 244,
+  "target_revision": 252,
+  "scope": "corrected-split-or-johnson/upcc-pair-root/complete-ordered-two-root-split-family",
+  "branch": "codex/agi-gi-rev252-upcc-pair-root-20260821-124648z",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/upcc_pair_root_split_family_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_upcc_pair_root_split_family_rev252.py",
+    "automation_runs/2026-08-19_0851_JST/REV252_UPCC_PAIR_ROOT_SPLIT_FAMILY.md",
+    ".github/workflows/rev252-upcc-pair-root-split-smoke.yml",
+    "agi/run-history/active/chatgpt-session-j-rev252-20260821T221325JST-3fda2080.json"
+  ],
+  "schedule_registration": {
+    "workflow": ".github/workflows/j-continuation-hourly-refire.yml",
+    "cron": "17 * * * *",
+    "mode": "existing main-branch hourly watchdog; this active claim and open codex PR are the durable resume markers"
+  },
+  "parallel_exclusions": [
+    "rev245 Design/imprimitive integration",
+    "rev246 primitive Johnson production admission",
+    "rev247 shared-S1 imprimitive admission",
+    "rev248 CRX1 bounded-arity relation-image exact witness",
+    "rev249 Design proof-DAG consumer",
+    "rev250 phase-start ticket ledger",
+    "rev251 exact-result replay verifier",
+    "CRX1 image-SI resource admission",
+    "shared schedule implementation and MAIN.md"
+  ],
+  "non_interference": "Add only the reserved rev252 module, focused regression, audit, smoke workflow, and claim on this dedicated branch. Do not modify existing solvers, existing claims, shared workflows, MAIN.md, or any concurrent branch write-set.",
+  "sync_note": "Before every persistence, re-read main active claims and open PRs; if an overlapping pair-root or Split-or-Johnson reservation appears, stop rather than overwrite.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
