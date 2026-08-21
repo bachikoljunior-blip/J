@@ -31,6 +31,7 @@ python automation/parallel_claims.py check \
 python automation/parallel_claims.py check \
   --scope CRX2/c2b2a2iii2 \
   --target-revision 246 \
+  --path automation/solver.py \
   --exclude-claim-id session-20260821T211000JST-rev246
 ```
 
