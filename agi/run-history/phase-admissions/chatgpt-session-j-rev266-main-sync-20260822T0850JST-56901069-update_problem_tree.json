@@ -141,9 +141,10 @@
     {
       "branch": "agi-gi-rev270-resource-execution-ledger-session-20260822-0847",
       "claim_id": "chatgpt-session-j-rev270-resource-execution-ledger-20260822T084700JST-38c7a699",
-      "heartbeat_at_jst": "2026-08-22T08:47:00+09:00",
+      "heartbeat_at_jst": "2026-08-22T08:52:00+09:00",
       "reserved_paths": [
         ".github/workflows/rev270-implicit-relation-resource-execution-ledger-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev270-resource-execution-ledger-20260822T084700JST-38c7a699-attempt-solution.json",
         "automation_runs/2026-08-19_0851_JST/REV270_IMPLICIT_RELATION_RESOURCE_EXECUTION_LEDGER.md",
         "automation_runs/2026-08-19_0851_JST/implicit_relation_resource_execution_ledger_v1.py",
         "automation_runs/2026-08-19_0851_JST/test_implicit_relation_resource_execution_ledger_rev270.py"
@@ -159,9 +160,9 @@
   ],
   "phase": "update_problem_tree",
   "reasons": [],
-  "recorded_at_jst": "2026-08-22T08:51:00+09:00",
-  "registry_digest": "sha256:91a301339c223f5bf5881f69d55eeb5fa4ce80821d344e9ae27416a13e163a87",
-  "registry_source_sha": "7d21b625c50d00c3469e349e3afa2b4d6c235806",
+  "recorded_at_jst": "2026-08-22T08:53:20+09:00",
+  "registry_digest": "sha256:3b2cd91eedc767f6adfdc3bdf40fa96d4ec7fe8ced6f5beb9ce1750fa17492ed",
+  "registry_source_sha": "429b7cee134f97bab2bb047f24864462c06e72ee",
   "schema_version": 1,
   "scope": "repository/main-revision-sync/rev266",
   "target_revision": 266
