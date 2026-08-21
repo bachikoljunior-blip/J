@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev258-implicit-image-value-coset-20260822T064650JST",
   "session_id": "chatgpt-session-current-conversation-rev258-20260822T064548+0900",
   "started_at_jst": "2026-08-22T06:46:50+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:46:50+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:49:04+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "40ea9221a4bbce6d13bf750d951815729b15a075",
   "starting_agi_gi_rev": 257,
@@ -19,11 +19,14 @@
     "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_value_coset_rev258.py"
   ],
   "branch": "agi-gi-rev258-implicit-image-value-coset-session-20260822-0646",
-  "status": "active",
+  "status": "superseded",
   "parallel_exclusions": [
     "PR #195 rev255 primitive-Johnson Design caller integration",
     "PR #177 rev245 imprimitive Design pipeline integration",
     "PR #198 rev257 implicit relation-image paired action"
   ],
-  "agi_state": "NOT_AGI"
+  "agi_state": "NOT_AGI",
+  "completed_at_jst": "2026-08-22T06:49:04+09:00",
+  "superseded_by_claim_id": "chatgpt-session-j-rev258-resource-envelope-20260822T064500JST-2675f756",
+  "supersession_reason": "Rejected by the durable registry: this later target_revision 258 claim conflicts with the fresh canonical rev258 claim created at 2026-08-22T06:45:00+09:00; branch contents are preserved for a future distinct revision."
 }
