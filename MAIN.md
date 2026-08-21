@@ -6,7 +6,9 @@ J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は�
 
 ## 現在の継続点
 
-現在の統合済み継続点は **AGI-GI rev241**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
+現在の統合済み継続点は **AGI-GI rev244**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
+
+並行branchの統合順は数値順とは限らない。rev244 (`bfee3ed1c70d5ee3e74ec525459a98a98fa78cd2`)、rev242 (`1a87ebb4da251f3584ed15929e4b2e702de74ace`)、rev243 (`099ddf1c916bf58dc759a116612ae481aa6d196d`) はいずれもmain到達可能な `AGI-GI revN:` integration commitであり、数値最大のrev244を継続点とする。`automation/agi_gi_main_revision_guard.py` はmain到達可能なintegration commitだけから最大revを再計算し、この宣言の遅延・先行をfail closedにする。branch実装commit、claim、PR、未統合rev245/rev246は統合済み成果に数えない。
 
 rev208 は active leaf **H6-C2** の literal natural-domain giant subleafを解決した。represented subgroup が degree `n>=5` で order `n!` または `n!/2` なら、その action 自体が literal `S_n` / `A_n` なので、色クラス間の exact transporter と target-color stabilizerから full String-Isomorphism right cosetを直接復元する。
 
@@ -116,7 +118,7 @@ rev238はnested intransitive imageのstrict-smaller orbit recursionについて�
 
 ## 問題木
 
-予測問題数は **576**、置換済み旧問題を除く有効問題数は **564**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
+予測問題数は **576**、置換済み旧問題を除く有効問題数は **566**。rev243で既存primitive-Johnson末端を親・resource envelope・production integrationの3問題へ置換したため、rev241時点の564から2増えた。rev242とrev244は既に数えた末端の状態更新であり、566は予測576以下なので新しいover-count rewrite triggerは発火していない。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
 
 置換済み旧問題を除く全層――primitive relation、H6-C2、W1R-H6 corrected Split-or-Johnson/Design branch、global proof-carrying recurrence/resource、AGI rootの一般性・性能・自律性・実用提供――を横断し、7本の狭いrelation/filter/cap branchを三つのsolution-shaped problemへ書き換えた。**CRX1 exact canonical relation quotient/preimage closure**、**CRX2 information/symmetry-defect relation selection**、**CRX3 replay-stable proof/resource substrate**であり、単なる重複名の統合ではなく上位親から共有できる解法境界である。結果は `517 - 7 + 3 = 513`、再予測576。rev214はCRX1のnonconstant strict-pair subcaseとCRX3のhomogeneous/self-loop guardsだけを解決した。
 
