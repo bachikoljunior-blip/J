@@ -70,5 +70,16 @@ integration.  Each result contains the registry source SHA and a digest of all
 claims; persist both with the phase evidence so a later session can reconstruct
 which parallel work was visible.
 
+Use `--output agi/run-history/phase-admissions/<claim>-<phase>-<time>.json` to
+persist an admitted phase.  The pull-request evidence workflow replays that
+record from its exact `registry_source_sha`; problem-state changes without a
+changed, replayable admission record fail closed.
+
+Noncanonical records from another worker are never ignored.  A schema-v2
+label with a singleton scope list or legacy base fields is loaded as a blocking
+interoperability claim: its scope prevents collisions, but it cannot serve as
+the caller's canonical owner for an exclusive phase.  Ambiguous multi-scope
+records still invalidate the registry.
+
 `automation/parallel_claims.py validate` accepts the historical v1 records in
 this directory read-only and enforces the full contract for schema-v2 files.

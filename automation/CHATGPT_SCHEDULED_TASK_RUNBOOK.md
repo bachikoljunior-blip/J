@@ -44,7 +44,7 @@ During repository work:
 
 1. Work on an explicit branch and preserve fail-closed behavior.
 2. Re-read claims and open PRs before each persistent write. Refresh the claim heartbeat on `main` at least every 30 minutes; if the scope or revision changes, publish the rescope before touching the new scope.
-3. Before every recursive problem-solving transition, run the matching phase admission (`attempt_solution`, `decompose`, `evaluate`, `integrate_children`, `solve_parent`, `solve_root`, `update_problem_tree`, `publish`, or `merge`). Persist its `registry_source_sha` and `registry_digest` with the resulting evidence. A denied phase is not executed; rescope or wait for the conflicting owner instead.
+3. Before every recursive problem-solving transition, run the matching phase admission (`attempt_solution`, `decompose`, `evaluate`, `integrate_children`, `solve_parent`, `solve_root`, `update_problem_tree`, `publish`, or `merge`) with `--output agi/run-history/phase-admissions/<claim>-<phase>-<time>.json`. A denied phase is not executed; rescope or wait for the conflicting owner instead. The pull-request workflow replays the persisted registry source and digest and rejects problem-state changes without evidence.
 4. Add focused regression tests and connect them to the maintained validation workflow when the change is executable code.
 5. Do not call a structural reduction exact unless the returned set/coset is complete and the proof boundary is mechanically checked.
 6. Do not claim a quasipolynomial bound unless the recurrence object and every local-cost hypothesis are certified.

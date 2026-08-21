@@ -1,0 +1,80 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "ops-agi-gi-main-revision-guard-20260821-214635",
+    "claim_id": "chatgpt-session-j-main-revision-guard-20260821T214635JST-280b6303",
+    "heartbeat_at_jst": "2026-08-21T21:52:15+09:00",
+    "scope": "repository-coordination/problem-solving-parallel-admission",
+    "state": "active",
+    "target_revision": null
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "feat/crx1-image-si-resource-admission-session-20260821-2202",
+      "claim_id": "chatgpt-session-j-crx1-image-si-admission-20260821T220200JST-f3a215ea",
+      "heartbeat_at_jst": "2026-08-21T22:02:00+09:00",
+      "scope": "crx1/node-resource-capped-image-si/resource-admission-certificate",
+      "state": "active",
+      "target_revision": null
+    },
+    {
+      "branch": "ops-j-parallel-resilience-20260821-215558",
+      "claim_id": "chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba",
+      "heartbeat_at_jst": "2026-08-21T21:55:58+09:00",
+      "scope": "automation/session-specific-hourly-refire-and-parallel-safe-continuation-evidence",
+      "state": "active",
+      "target_revision": null
+    },
+    {
+      "branch": "agi-gi-rev246-primitive-johnson-production-admission-session-20260821-2117",
+      "claim_id": "chatgpt-session-j-rev246-20260821T211700JST-4bd763dd",
+      "heartbeat_at_jst": "2026-08-21T21:29:16+09:00",
+      "scope": "crx2/c2b2a2iii2",
+      "state": "active",
+      "target_revision": 246
+    },
+    {
+      "branch": "agi-gi-rev247-s1-imprimitive-production-admission-session-20260821-2152",
+      "claim_id": "chatgpt-session-j-rev247-20260821T215201JST-8c4346d0",
+      "heartbeat_at_jst": "2026-08-21T21:52:01+09:00",
+      "scope": "crx2/shared-s1/imprimitive-production-admission",
+      "state": "active",
+      "target_revision": 247
+    },
+    {
+      "branch": "agi-gi-rev248-crx1-k2-relation-image-session-20260821-2155",
+      "claim_id": "chatgpt-session-j-rev248-20260821T215536JST-01ad84ba",
+      "heartbeat_at_jst": "2026-08-21T21:55:36+09:00",
+      "scope": "crx1/k<=2/homogeneous-blocks-nonrestricting-relation-image/exact-witness",
+      "state": "active",
+      "target_revision": 248
+    },
+    {
+      "branch": "agi-gi-rev249-design-child-proof-dag-cover-session-20260821-2202",
+      "claim_id": "chatgpt-session-j-rev249-20260821T220205JST-f3a215ea",
+      "heartbeat_at_jst": "2026-08-21T22:02:05+09:00",
+      "scope": "crx3/design-child-cover/execution-proof-dag-consumer",
+      "state": "active",
+      "target_revision": 249
+    },
+    {
+      "branch": "agi-gi-rev250-phase-start-tickets-session-20260821-2205",
+      "claim_id": "chatgpt-session-j-rev250-20260821T220548JST-f08fe9ae",
+      "heartbeat_at_jst": "2026-08-21T22:05:48+09:00",
+      "scope": "crx3/original-root-ledger/phase-start-tickets",
+      "state": "active",
+      "target_revision": 250
+    }
+  ],
+  "phase": "publish",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-21T22:08:21.852768+09:00",
+  "registry_digest": "sha256:e2314adb6c4caf6a9e65a943f89de73f6f16b261dd2c26bf39b6efa910abb4e8",
+  "registry_source_sha": "edf86b5a09fc490a95c83508c82f82f430a66510",
+  "schema_version": 1,
+  "scope": "repository-coordination/problem-solving-parallel-admission",
+  "target_revision": null
+}

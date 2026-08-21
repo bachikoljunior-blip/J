@@ -194,6 +194,31 @@ class ParallelClaimTests(unittest.TestCase):
             self.assertTrue(claim.legacy)
             self.assertEqual(claim.state_at(NOW), "closed")
 
+    def test_singleton_scope_list_is_blocking_interoperability_claim(self):
+        variant = canonical_claim(
+            claim_id="variant",
+            session_id="variant",
+            scope=["CRX1/image-si/resource-admission"],
+        )
+        variant.pop("starting_main_sha")
+        variant.pop("starting_agi_gi_rev")
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            claim = load_claim(self.write_claim(directory, variant))
+            self.assertTrue(claim.legacy)
+            self.assertEqual(claim.scope, "crx1/image-si/resource-admission")
+            self.assertTrue(claim.is_fresh(NOW))
+
+    def test_multi_scope_variant_fails_closed(self):
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            path = self.write_claim(
+                directory,
+                canonical_claim(scope=["CRX1/a", "CRX2/b"]),
+            )
+            with self.assertRaisesRegex(ClaimFormatError, "exactly one string"):
+                load_claim(path)
+
     def test_repository_registry_accepts_current_legacy_files(self):
         root = Path(__file__).resolve().parents[1]
         claims, errors = load_registry(root)

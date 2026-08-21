@@ -126,9 +126,32 @@ def load_claim(path: Path) -> Claim:
         )
 
     schema_version = data.get("schema_version")
-    canonical = schema_version == 2
     if schema_version not in (None, 1, 2):
         raise ClaimFormatError(f"{path}: unsupported schema_version {schema_version!r}")
+
+    canonical_required = {
+        "claim_id",
+        "session_id",
+        "scope",
+        "started_at_jst",
+        "heartbeat_at_jst",
+        "stale_after_minutes",
+        "starting_main_sha",
+        "starting_agi_gi_rev",
+        "target_revision",
+        "branch",
+        "status",
+        "agi_state",
+    }
+    # Other parallel workers may publish a conservative reservation with a
+    # schema-v2 label but a singleton scope list or legacy base-SHA fields.
+    # Recognize it as a blocking interoperability claim, but never grant it the
+    # canonical ownership privileges used by phase admission.
+    canonical = (
+        schema_version == 2
+        and canonical_required.issubset(data)
+        and isinstance(data.get("scope"), str)
+    )
 
     claim_id = data.get("claim_id") or data.get("session_id") or data.get("automation_run_id")
     if claim_id is None and event_type == "parallel_execution_claim":
@@ -146,6 +169,12 @@ def load_claim(path: Path) -> Claim:
         or data.get("delegated_leaf")
         or data.get("completed_leaf")
     )
+    if isinstance(scope_value, list):
+        if len(scope_value) != 1 or not isinstance(scope_value[0], str):
+            raise ClaimFormatError(
+                f"{path}: interoperability scope list must contain exactly one string"
+            )
+        scope_value = scope_value[0]
     scope = normalize_scope(_require_text(scope_value, "scope", path))
     if not scope:
         raise ClaimFormatError(f"{path}: scope normalizes to an empty key")
@@ -186,23 +215,6 @@ def load_claim(path: Path) -> Claim:
     if canonical:
         if event_type != "active_session_claim":
             raise ClaimFormatError(f"{path}: schema v2 requires active_session_claim")
-        required = {
-            "claim_id",
-            "session_id",
-            "scope",
-            "started_at_jst",
-            "heartbeat_at_jst",
-            "stale_after_minutes",
-            "starting_main_sha",
-            "starting_agi_gi_rev",
-            "target_revision",
-            "branch",
-            "status",
-            "agi_state",
-        }
-        missing = sorted(required.difference(data))
-        if missing:
-            raise ClaimFormatError(f"{path}: schema v2 missing fields: {', '.join(missing)}")
         if path.stem != claim_id:
             raise ClaimFormatError(f"{path}: filename stem must equal claim_id")
         starting_sha = _require_text(data.get("starting_main_sha"), "starting_main_sha", path)

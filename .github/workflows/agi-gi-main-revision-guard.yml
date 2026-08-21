@@ -9,6 +9,8 @@ on:
       - automation/test_agi_gi_main_revision_guard.py
       - automation/problem_solving_parallel_admission.py
       - automation/test_problem_solving_parallel_admission.py
+      - automation/problem_solving_phase_evidence_guard.py
+      - automation/test_problem_solving_phase_evidence_guard.py
       - .github/workflows/agi-gi-main-revision-guard.yml
   pull_request:
     paths:
@@ -17,6 +19,8 @@ on:
       - automation/test_agi_gi_main_revision_guard.py
       - automation/problem_solving_parallel_admission.py
       - automation/test_problem_solving_parallel_admission.py
+      - automation/problem_solving_phase_evidence_guard.py
+      - automation/test_problem_solving_phase_evidence_guard.py
       - .github/workflows/agi-gi-main-revision-guard.yml
   workflow_dispatch:
 
@@ -39,6 +43,7 @@ jobs:
           python -m unittest \
             automation/test_agi_gi_main_revision_guard.py \
             automation/test_parallel_claims.py \
-            automation/test_problem_solving_parallel_admission.py
+            automation/test_problem_solving_parallel_admission.py \
+            automation/test_problem_solving_phase_evidence_guard.py
       - name: Verify canonical continuation point
         run: python automation/agi_gi_main_revision_guard.py --ref HEAD

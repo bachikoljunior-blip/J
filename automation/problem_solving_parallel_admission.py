@@ -17,9 +17,10 @@ try:
         Claim,
         ClaimFormatError,
         find_conflicts,
-        load_registry,
-        normalize_scope,
-        parse_jst_timestamp,
+    load_registry,
+    normalize_scope,
+    parse_jst_timestamp,
+    scopes_overlap,
     )
 except ModuleNotFoundError:  # Direct ``python automation/<script>.py`` invocation.
     from parallel_claims import (  # type: ignore[no-redef]
@@ -30,6 +31,7 @@ except ModuleNotFoundError:  # Direct ``python automation/<script>.py`` invocati
         load_registry,
         normalize_scope,
         parse_jst_timestamp,
+        scopes_overlap,
     )
 
 
@@ -67,13 +69,16 @@ def _claim_snapshot(claim: Claim, now: datetime) -> dict[str, Any]:
     }
 
 
-def registry_digest(claims: Iterable[Claim], now: datetime) -> str:
-    snapshot = sorted(
-        (_claim_snapshot(claim, now) for claim in claims),
-        key=lambda item: item["claim_id"],
-    )
-    encoded = json.dumps(snapshot, sort_keys=True, separators=(",", ":")).encode()
+def snapshot_digest(snapshot: Iterable[dict[str, Any]]) -> str:
+    normalized = sorted(snapshot, key=lambda item: item["claim_id"])
+    encoded = json.dumps(normalized, sort_keys=True, separators=(",", ":")).encode()
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def registry_digest(claims: Iterable[Claim], now: datetime) -> str:
+    return snapshot_digest(
+        _claim_snapshot(claim, now) for claim in claims if claim.is_fresh(now)
+    )
 
 
 def admit_problem_phase(
@@ -120,11 +125,14 @@ def admit_problem_phase(
         if conflicts:
             reasons.append("parallel_claim_collision")
 
-    active_parallel = [
+    active_parallel = sorted(
+        (
         claim
         for claim in claim_list
         if claim.claim_id != claim_id and claim.is_fresh(now)
-    ]
+        ),
+        key=lambda claim: claim.claim_id,
+    )
     return {
         "admitted": not reasons,
         "phase": phase,
@@ -145,6 +153,60 @@ def admit_problem_phase(
     }
 
 
+def evidence_payload(result: dict[str, Any], recorded_at: datetime) -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "event_type": "problem_solving_phase_admission",
+        "recorded_at_jst": recorded_at.isoformat(),
+        **result,
+    }
+
+
+def validate_evidence_payload(payload: dict[str, Any]) -> tuple[str, ...]:
+    errors: list[str] = []
+    if payload.get("schema_version") != 1:
+        errors.append("schema_version must be 1")
+    if payload.get("event_type") != "problem_solving_phase_admission":
+        errors.append("event_type is not problem_solving_phase_admission")
+    if payload.get("admitted") is not True:
+        errors.append("evidence must record an admitted phase")
+    phase = payload.get("phase")
+    if phase not in ALL_PHASES:
+        errors.append("phase is unknown")
+    expected_mode = "observe" if phase in OBSERVE_PHASES else "exclusive"
+    if payload.get("mode") != expected_mode:
+        errors.append("mode does not match phase")
+
+    source_sha = payload.get("registry_source_sha")
+    if not isinstance(source_sha, str) or len(source_sha) != 40:
+        errors.append("registry_source_sha must be a 40-character commit SHA")
+    owner = payload.get("own_claim")
+    parallel = payload.get("parallel_active_claims")
+    if not isinstance(owner, dict) or owner.get("state") != "active":
+        errors.append("own_claim must be an active claim snapshot")
+        owner = None
+    if not isinstance(parallel, list) or not all(isinstance(item, dict) for item in parallel):
+        errors.append("parallel_active_claims must be a list of snapshots")
+        parallel = []
+
+    if owner is not None:
+        snapshots = [owner, *parallel]
+        if payload.get("registry_digest") != snapshot_digest(snapshots):
+            errors.append("registry_digest does not match embedded active claims")
+        if expected_mode == "exclusive":
+            if not scope_is_within(str(payload.get("scope", "")), str(owner.get("scope", ""))):
+                errors.append("exclusive evidence scope is outside own claim")
+            if payload.get("target_revision") != owner.get("target_revision"):
+                errors.append("exclusive evidence revision differs from own claim")
+            for item in parallel:
+                if scopes_overlap(str(payload.get("scope", "")), str(item.get("scope", ""))):
+                    errors.append("exclusive evidence overlaps a parallel claim")
+                target = payload.get("target_revision")
+                if target is not None and target == item.get("target_revision"):
+                    errors.append("exclusive evidence collides on target revision")
+    return tuple(errors)
+
+
 def _git_head(root: Path) -> str:
     return subprocess.run(
         ["git", "rev-parse", "HEAD"],
@@ -163,6 +225,7 @@ def main() -> int:
     parser.add_argument("--scope", required=True)
     parser.add_argument("--target-revision", type=int)
     parser.add_argument("--now")
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 
     root = args.root.resolve()
@@ -189,6 +252,13 @@ def main() -> int:
         print(json.dumps({"admitted": False, "reasons": [str(exc)]}, indent=2))
         return 3
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+    if args.output is not None and result["admitted"]:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            json.dumps(evidence_payload(result, now), ensure_ascii=False, indent=2, sort_keys=True)
+            + "\n",
+            encoding="utf-8",
+        )
     return 0 if result["admitted"] else 2
 
 

@@ -52,3 +52,16 @@ schema-v2 owner, exact revision equality, descendant-only scope, and zero live
 collision.  Parent integration therefore cannot silently absorb a child still
 owned by another session.  The registry source SHA and digest make the visible
 parallel state replayable as evidence.
+
+The admission CLI can persist a complete phase record under
+`agi/run-history/phase-admissions/`.  The PR workflow reconstructs the claim
+registry from the record's exact source commit, reruns the phase decision, and
+compares scope, revision, owner, parallel claims, conflicts, and digest.  A
+problem-state diff without a changed replayable record is rejected, turning the
+protocol from advisory text into an executable integration gate.
+
+Cross-session interoperability is conservative.  A foreign record using a
+singleton scope array or legacy base-SHA fields is retained as a blocking
+claim, while `legacy=True` prevents it from authorizing an exclusive phase.
+Ambiguous multi-scope records remain invalid.  This recognizes parallel work
+without silently upgrading a malformed reservation into mutation authority.

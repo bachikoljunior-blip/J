@@ -7,8 +7,10 @@ from pathlib import Path
 from automation.parallel_claims import ClaimFormatError, load_claim
 from automation.problem_solving_parallel_admission import (
     admit_problem_phase,
+    evidence_payload,
     registry_digest,
     scope_is_within,
+    validate_evidence_payload,
 )
 
 
@@ -179,6 +181,55 @@ class ProblemSolvingParallelAdmissionTest(unittest.TestCase):
                 now=NOW,
                 registry_source_sha="f" * 40,
             )
+
+    def test_evidence_payload_validates_and_detects_tampering(self):
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            own = self.claim(directory, _payload("own", "CRX2/a", 247))
+            result = admit_problem_phase(
+                [own],
+                claim_id="own",
+                phase="publish",
+                scope="CRX2/a",
+                target_revision=247,
+                now=NOW,
+                registry_source_sha="f" * 40,
+            )
+            evidence = evidence_payload(result, NOW)
+            self.assertEqual(validate_evidence_payload(evidence), ())
+            evidence["scope"] = "CRX3/stolen"
+            self.assertIn(
+                "exclusive evidence scope is outside own claim",
+                validate_evidence_payload(evidence),
+            )
+
+    def test_evidence_rejects_parallel_snapshot_tampering(self):
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            own = self.claim(directory, _payload("own", "CRX2/a", 247))
+            result = admit_problem_phase(
+                [own],
+                claim_id="own",
+                phase="publish",
+                scope="CRX2/a",
+                target_revision=247,
+                now=NOW,
+                registry_source_sha="f" * 40,
+            )
+            evidence = evidence_payload(result, NOW)
+            evidence["parallel_active_claims"] = [
+                {
+                    "claim_id": "other",
+                    "scope": "CRX2/a/child",
+                    "target_revision": 248,
+                    "heartbeat_at_jst": NOW.isoformat(),
+                    "state": "active",
+                    "branch": "other",
+                }
+            ]
+            errors = validate_evidence_payload(evidence)
+            self.assertIn("registry_digest does not match embedded active claims", errors)
+            self.assertIn("exclusive evidence overlaps a parallel claim", errors)
 
 
 if __name__ == "__main__":
