@@ -4,6 +4,10 @@ from math import log2
 
 from colored_subset_design_branch_plan_v1 import DesignBranchPlan
 from colored_subset_exact_twl_design_v1 import paired_exact_twl_design_witness_families
+from design_branch_materialization_resource_v1 import (
+    design_branch_materialization_resource_envelope,
+    record_design_branch_materialization,
+)
 
 
 def build_exact_twl_design_branch_plan(
@@ -18,6 +22,8 @@ def build_exact_twl_design_branch_plan(
     max_rounds: int | None = None,
     max_work_units: int = 500000000,
     max_branch_pairs: int = 200000,
+    original_root_degree: int | None = None,
+    max_materialization_work: int = 10**30,
 ) -> DesignBranchPlan:
     """Build the complete Design witness branch cover from exact standard k-WL.
 
@@ -79,6 +85,21 @@ def build_exact_twl_design_branch_plan(
     ell = source.minimal_individualization_length
     if ell != target.minimal_individualization_length or ell is None:
         raise AssertionError("paired exact-k-WL family was certified with inconsistent minimal levels")
+    root = v if original_root_degree is None else int(original_root_degree)
+    materialization = design_branch_materialization_resource_envelope(
+        root,
+        v,
+        int(ell),
+        len(source.witness_outcomes),
+        len(target.witness_outcomes),
+        max_materialization_work,
+    )
+    if not materialization.admitted:
+        return DesignBranchPlan(
+            "undetermined_exact_twl_design_branch_materialization_preflight",
+            v, k, ell, source, target, (), materialization.branch_count,
+            base_bound, False, False, materialization.reason, materialization,
+        )
     source_tuples = tuple(outcome.individualized for outcome in source.witness_outcomes)
     target_tuples = tuple(outcome.individualized for outcome in target.witness_outcomes)
     branch_count = len(source_tuples) * len(target_tuples)
@@ -97,9 +118,15 @@ def build_exact_twl_design_branch_plan(
             False,
             False,
             "the complete theorem-faithful witness Cartesian cover exceeds the explicit branch materialization cap",
+            materialization,
         )
 
     branches = tuple((xs, yt) for xs in source_tuples for yt in target_tuples)
+    materialization = record_design_branch_materialization(
+        materialization,
+        materialized_branch_count=len(branches),
+        complete=True,
+    )
     return DesignBranchPlan(
         "certified_complete_design_branch_plan",
         v,
@@ -113,4 +140,5 @@ def build_exact_twl_design_branch_plan(
         False,
         True,
         "the complete first-successful exact standard-k-WL Design witness families are paired without choosing a label-dependent representative",
+        materialization,
     )

@@ -54,6 +54,7 @@ def exact_twl_design_candidate_string_isomorphism(
     max_twl_work_units: int = 500000000,
     max_paired_twl_work_units: int = 10**30,
     max_branch_pairs: int = 200000,
+    max_design_branch_materialization_work: int = 10**30,
     max_partition_states: int = 200000,
     max_design_transport_work: int = 10**30,
     polylog_power: int = 2,
@@ -91,6 +92,8 @@ def exact_twl_design_candidate_string_isomorphism(
         max_rounds=max_twl_rounds,
         max_work_units=max_twl_work_units,
         max_branch_pairs=max_branch_pairs,
+        original_root_degree=root_n,
+        max_materialization_work=max_design_branch_materialization_work,
     )
     source_family = plan.source_family
     target_family = plan.target_family

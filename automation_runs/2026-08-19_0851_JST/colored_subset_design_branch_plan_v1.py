@@ -25,6 +25,7 @@ class DesignBranchPlan:
     exact_empty: bool
     complete: bool
     reason: str
+    materialization_resource_envelope: object | None = None
 
 
 def build_colored_subset_design_branch_plan(
