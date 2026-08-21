@@ -1,0 +1,50 @@
+name: rev249 Design child proof-DAG cover smoke
+
+on:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/design_child_proof_dag_cover_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_design_child_proof_dag_cover_rev249.py"
+      - "automation_runs/2026-08-19_0851_JST/REV249_DESIGN_CHILD_PROOF_DAG_COVER.md"
+      - "automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/design_full_string_child_resource_proof_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/design_tuple_ful_string_union_si_v1.py"
+      - ".github/workflows/rev249-design-child-proof-dag-cover-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rev249-design-child-proof-dag-cover-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact head
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+
+      - name: Compile rev249 boundary
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: |
+          python -m py_compile \
+            design_child_proof_dag_cover_v1.py \
+            test_design_child_proof_dag_cover_rev249.py
+
+      - name: Run rev249 and inherited proof-DAG regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: |
+          python -m pytest -q \
+            test_design_child_proof_dag_cover_rev249.py \
+            test_proof_dag_accounting_rev220.py
