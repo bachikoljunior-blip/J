@@ -3,16 +3,18 @@
   "event_type": "active_session_claim",
   "claim_id": "chatgpt-session-j-rev259-original-preimage-20260822T0652JST-c31a94ef",
   "session_id": "chatgpt-session-j-rev259-original-preimage-20260822T0652JST-c31a94ef",
-  "state": "active",
-  "status": "active",
+  "state": "superseded",
+  "status": "superseded",
   "started_at_jst": "2026-08-22T06:52:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:52:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:54:30+09:00",
+  "completed_at_jst": "2026-08-22T06:54:30+09:00",
   "stale_after_minutes": 90,
   "target_revision": 259,
   "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-domain-preimage-integration",
   "base_pr": 200,
   "base_head_sha": "6a02e6c029148b91f18f72c1ac6b2410f9a7e1a0",
   "branch": "codex/agi-gi-rev259-original-domain-preimage-20260822-0652jst",
+  "pull_request": 202,
   "reserved_paths": [
     ".github/workflows/rev259-original-domain-preimage-smoke.yml",
     "automation_runs/2026-08-19_0851_JST/REV259_ORIGINAL_DOMAIN_PREIMAGE.md",
@@ -20,5 +22,7 @@
     "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_coset_rev259.py"
   ],
   "do_not_duplicate": true,
-  "strict_boundary": "Lift rev258 exact auxiliary value-transporter cosets through rev257's paired Schreier action to the complete original-domain right coset. Original-root quasipolynomial accounting remains separate; AGI remains NOT_AGI."
+  "superseded_by_claim_id": "chatgpt-session-j-rev259-implicit-image-paired-preimage-20260822T064816JST-e3c1c723",
+  "supersession_reason": "A prior durable rev259 original-domain paired-preimage claim started at 06:48:16 JST. This branch's focused smoke was green, but PR #202 was closed without integration to avoid duplicate ownership.",
+  "strict_boundary": "No integration from this claim. Preserve branch only as audit evidence. AGI remains NOT_AGI."
 }
