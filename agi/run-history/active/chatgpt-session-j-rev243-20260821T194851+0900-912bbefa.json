@@ -3,7 +3,7 @@
   "event_type": "active_session_claim",
   "automation_run_id": "chatgpt-session-j-rev243-20260821T194851+0900-912bbefa",
   "started_at_jst": "2026-08-21T19:48:51+09:00",
-  "last_heartbeat_at_jst": "2026-08-21T20:10:00+09:00",
+  "last_heartbeat_at_jst": "2026-08-21T20:17:38+09:00",
   "request_received_at_utc": "2026-08-21T10:43:54Z",
   "repository": "bachikoljunior-blip/J",
   "starting_main_sha": "912bbefadc994637d728d04d2de6db2a2faa51a9",
@@ -34,13 +34,15 @@
     "sibling_acknowledgement_commit": "05169806267271f1b1169aea7a152aba59dd27f8"
   },
   "implementation": {
-    "head_sha": "66499f31dea325fcb267ef822bd4e6fc2dd9def8",
+    "code_and_test_head_sha": "2ea64502ca7a551c0de65dfeab8065530d41c622",
+    "latest_observed_head_before_heartbeat": "cbcc3cc6fdf0ab6c630a83c67e3d604e1d082843",
     "module": "automation_runs/2026-08-19_0851_JST/design_nested_primitive_johnson_resource_v1.py",
     "tests": "automation_runs/2026-08-19_0851_JST/test_design_nested_primitive_johnson_resource_rev243.py",
     "workflow": ".github/workflows/rev243-design-nested-primitive-johnson-resource-smoke.yml",
     "proof_memo": "automation_runs/2026-08-19_0851_JST/REV243_DESIGN_NESTED_PRIMITIVE_JOHNSON_RESOURCE.md",
     "local_validation": "6 focused tests passed; py_compile passed",
-    "claim_boundary": "resource_admitted is a finite pre-execution budget claim only; exact_path_certified remains false"
+    "prior_ci_evidence": "run 32475982151 passed 10 focused plus inherited tests on pre-audit head 00017d620dd0c370cc1c4a4558c39b24a24cedb3",
+    "claim_boundary": "resource_admitted is a finite pre-execution budget claim only; exact_path_certified remains false and public admitted therefore remains false"
   },
   "restart_guard": {
     "schedule_title": "AGI-GI実装継続",
@@ -51,6 +53,6 @@
     "stale_after_minutes": 90,
     "behavior": "leave queued/running workflows and fresh AGI-GI claims/PRs untouched; only an idle/stale state emits a durable continuation re-fire request"
   },
-  "status": "implementation_committed_ci_pending",
+  "status": "ci_rerunning_after_fail_closed_admission_fix",
   "agi_state": "NOT_AGI"
 }
