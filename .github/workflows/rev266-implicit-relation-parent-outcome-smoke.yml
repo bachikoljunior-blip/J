@@ -8,6 +8,7 @@ on:
       - "automation_runs/2026-08-19_0851_JST/REV266_IMPLICIT_RELATION_PARENT_OUTCOME_CONTRACT.md"
       - "automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_v1.py"
       - "automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_rev266.py"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886-attempt-solution.json"
 
 permissions:
   contents: read
@@ -18,6 +19,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
 
       - name: Run focused rev266 contract regressions
         working-directory: automation_runs/2026-08-19_0851_JST
@@ -38,3 +42,22 @@ jobs:
           ! grep -Eq 'from (implicit_relation_image_parent_promotion_v1|implicit_relation_parent_exact_empty_v1)|import (implicit_relation_image_parent_promotion_v1|implicit_relation_parent_exact_empty_v1)' implicit_relation_parent_outcome_v1.py
           grep -q 'NONEMPTY_SOURCE_REVISION = 261' implicit_relation_parent_outcome_v1.py
           grep -q 'EXACT_EMPTY_SOURCE_REVISION = 263' implicit_relation_parent_outcome_v1.py
+
+      - name: Generate replayable attempt-solution admission evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="/tmp/rev266-attempt-solution.json"
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev266-parent-outcome-contract-20260822T0751JST-9e47c886 \
+            --phase attempt_solution \
+            --scope crx1/bounded-arity-relation-image/implicit-generator-group/parent-exact-outcome-contract \
+            --target-revision 266 \
+            --path .github/workflows/rev266-implicit-relation-parent-outcome-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV266_IMPLICIT_RELATION_PARENT_OUTCOME_CONTRACT.md \
+            --path automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_rev266.py \
+            --output "${evidence}"
+          echo '---REV266_EVIDENCE_BEGIN---'
+          cat "${evidence}"
+          echo '---REV266_EVIDENCE_END---'
