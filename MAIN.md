@@ -6,7 +6,7 @@ J の正本・主系列は **AGI-GI rev 系列** とする。ルート問題は�
 
 ## 現在の継続点
 
-現在の統合済み継続点は **AGI-GI rev232**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
+現在の統合済み継続点は **AGI-GI rev233**。rev206 までに corrected general UPCC Bipartite Split-or-Johnson の exact theorem-input / restriction provenance / Design witness cover / ambient transporter / actual coupled parent full-string intersection と complete branch-union reconstructionを統合し、rev207 で exact rev206 branch の実 candidate SI accounting を polynomial auxiliary-degree lift として original root の quasipolynomial envelopeへ機械的に戻した。
 
 rev208 は active leaf **H6-C2** の literal natural-domain giant subleafを解決した。represented subgroup が degree `n>=5` で order `n!` または `n!/2` なら、その action 自体が literal `S_n` / `A_n` なので、色クラス間の exact transporter と target-color stabilizerから full String-Isomorphism right cosetを直接復元する。
 
@@ -102,11 +102,11 @@ rev232 はcorrelated t-WLのsource/target実行を一つのoriginal-root resourc
 
 rev232 tested head `a23d1feda891bbf69be4853318217a9f2a3cb744` は、AGI-GI rev validation、rev232専用gateを含む23 workflowsがすべてsuccess。local affected gateは18 tests、external labelg専用fileを除くall-module gateは498 tests、py_compileと差分検査もsuccess。PR #160 をexact tested head固定でmergeし、main commit `7ffe9c6df27cc5b5a95c7949f4ad741718faceac` に統合済み。
 
-rev233候補はc1のうち、既に生成されたcomplete Cartesian branch planから全tuple transportを開始する前のoriginal-root resource admissionを実装した。`|G|`による各partition orbit state上限、全state-generator edge、stabilizer/parity-kernel/final-coset Schreier chainを全branch多重度で予約し、完了時のbranch/orbit/action実測をexactly onceで記録する。branch plan自身をmaterialization前に予約する境界は未解決のため、c1全体を解決済みとは扱わない。proposed head `446cbfca94ecfe2e2fcdf2834f1332191ec73484` はlocal direct resource assertions、rev194 Design integration 4 cases、py_compile、差分検査がsuccess。PR #161を作成し、GitHub pytest/workflow検証中でありmain未統合。
+rev233はc1のうち、既に生成されたcomplete Cartesian branch planから全tuple transportを開始する前のoriginal-root resource admissionを実装した。`|G|`による各partition orbit state上限、全state-generator edge、stabilizer/parity-kernel/final-coset Schreier chainを全branch多重度で予約し、完了時のbranch/orbit/action実測をexactly onceで記録する。branch plan自身をmaterialization前に予約する境界は未解決のため、c1全体を解決済みとは扱わない。tested head `446cbfca94ecfe2e2fcdf2834f1332191ec73484` はAGI-GI rev validation、rev233専用、rev232、rev194の4 workflowsがすべてsuccess。local direct resource assertions、Design integration 15 cases、py_compile、差分検査もsuccess。PR #161をexact tested head固定でmergeし、main commit `ae457e030bfb9672e050c6b8f72162df7901da08` に統合済み。
 
 ## 問題木
 
-予測問題数は **576**、置換済み旧問題を除く有効問題数は **543**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
+予測問題数は **576**、置換済み旧問題を除く有効問題数は **545**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
 
 置換済み旧問題を除く全層――primitive relation、H6-C2、W1R-H6 corrected Split-or-Johnson/Design branch、global proof-carrying recurrence/resource、AGI rootの一般性・性能・自律性・実用提供――を横断し、7本の狭いrelation/filter/cap branchを三つのsolution-shaped problemへ書き換えた。**CRX1 exact canonical relation quotient/preimage closure**、**CRX2 information/symmetry-defect relation selection**、**CRX3 replay-stable proof/resource substrate**であり、単なる重複名の統合ではなく上位親から共有できる解法境界である。結果は `517 - 7 + 3 = 513`、再予測576。rev214はCRX1のnonconstant strict-pair subcaseとCRX3のhomogeneous/self-loop guardsだけを解決した。
 
@@ -144,11 +144,13 @@ rev232は既に数えていたCRX2子2.2.3.3bを解決した。状態更新だ�
 
 rev233への直接試行ではCRX2子2.2.3.3cの実行経路を監査し、現行の`max_branch_pairs`、各tuple transporterの`max_partition_states`、各full-string childのgroup/order/depth cap、最終union chainが独立しており、全phaseの実行前予約と実測chargeを一つにする証拠が欠落していることを確認した。2.2.3.3cを、(c1) exact Design witness Cartesian branch materializationと全tuple original-domain Schreier transport、(c2) 全surviving branchのproof-carrying full-string child SI、(c3) complete union reassemblyとc1--c3のsequential original-root budget、の三子へ分解した。旧1末端をその親と3子へ置換したため有効数は `540 - 1 + 4 = 543`。543は予測576以下なのでover-count rewrite triggerは発火しておらず、子を抑制していない。
 
+rev233の実装試行でc1を、(c1a) source/target witness Cartesian productをbranch object生成前に予約するmaterialization envelope、(c1b) 生成済みcomplete coverの全original-domain tuple Schreier transport envelope、の二子へ分解し、c1bを解決した。旧1末端をその親と2子へ置換したため有効数は `543 - 1 + 3 = 545`。545は予測576以下なのでover-count rewrite triggerは発火しておらず、materialization前予約を省略してc1全体を解決済みにしていない。
+
 CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2のsource-target comparisonとそのexecution-linked original-root consumers、CRX3 substrateの未解決algorithmic consumers、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
 
-次の未解決末端は **CRX2 / exact Design branch materialization and original-domain tuple-transport charge**:
+次の未解決末端は **CRX2 / exact Design Cartesian branch materialization preflight**:
 
-> source/target witness familyのCartesian branch数をmaterialization前に任意精度整数で導き、全branchについてpartition-orbit generator edge、Schreier stabilizer/parity-kernel chain、transporter coset構築を保守的にoriginal-root有限budgetへ予約する。既存`max_branch_pairs`と`max_partition_states`はruntime guardのまま分離し、予約不成立なら最初のbranch materializationまたはtuple transport前にfail closed、成功時は各branchの実`orbit_states`と`action_steps`をexactly onceで課金する。
+> source/target exact witness tuple countからCartesian branch数とtuple-pair object construction/canonical copy workを任意精度整数で導き、`branches = tuple((xs, yt) ...)`を生成する前にoriginal-root有限budgetへ予約する。既存`max_branch_pairs`はruntime guardのまま分離し、予約不成立ならbranch objectを一つも生成せずfail closedにする。成功時はmaterialized branch数を予約と一致させ、rev233のtuple-transport envelopeへ同じcomplete coverを一度だけ渡す。
 
 ## 世界に存在する解法の包含監査
 
