@@ -106,9 +106,11 @@ rev233はc1のうち、既に生成されたcomplete Cartesian branch planから
 
 rev234候補はsource/target witness outcomeのcardinalityだけからCartesian branch数を任意精度整数で導き、全witness snapshotと各pairのtuple-copy/object constructionをbranch tupleへ触れる前に予約する。original-root ground/log-arity gateと有限budgetが不成立なら`outcome.individualized`を一度も読まずfail closed、成立時はcomplete branch数を記録してrev233の同一coverへ一度だけ渡す。`max_branch_pairs`は独立したruntime guardのままである。proposed head `818a1bcb29cafca59dfd7e4f846438ff72b0aa80` はlocal before-touch/resource assertions、rev194--rev234 Design integration 4 cases、py_compile、差分検査がsuccess。PR #162を作成しGitHub pytest/workflow検証中でありmain未統合。
 
+rev235候補は、全surviving Design branchで実際に返されたfull-string child proofを再実行せず直接捕捉し、各recurrence-v4証拠を検証して全branch分をlog-sum-expで一度ずつ合成する。complete branch数との不一致、nonexact/uncertified child、original-root envelope超過はfail closedであり、成功してもchildを開始する前の保守的予約まで解決したとは扱わない。proposed head `d49703022dd7a22ac5447c821b54da67fac87b36` はlocal direct assertions、rev189/rev194 integration、py_compile、差分検査がsuccess。PR #163を作成しGitHub workflow検証中でありmain未統合。
+
 ## 問題木
 
-予測問題数は **576**、置換済み旧問題を除く有効問題数は **545**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
+予測問題数は **576**、置換済み旧問題を除く有効問題数は **547**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
 
 置換済み旧問題を除く全層――primitive relation、H6-C2、W1R-H6 corrected Split-or-Johnson/Design branch、global proof-carrying recurrence/resource、AGI rootの一般性・性能・自律性・実用提供――を横断し、7本の狭いrelation/filter/cap branchを三つのsolution-shaped problemへ書き換えた。**CRX1 exact canonical relation quotient/preimage closure**、**CRX2 information/symmetry-defect relation selection**、**CRX3 replay-stable proof/resource substrate**であり、単なる重複名の統合ではなく上位親から共有できる解法境界である。結果は `517 - 7 + 3 = 513`、再予測576。rev214はCRX1のnonconstant strict-pair subcaseとCRX3のhomogeneous/self-loop guardsだけを解決した。
 
@@ -147,6 +149,8 @@ rev232は既に数えていたCRX2子2.2.3.3bを解決した。状態更新だ�
 rev233への直接試行ではCRX2子2.2.3.3cの実行経路を監査し、現行の`max_branch_pairs`、各tuple transporterの`max_partition_states`、各full-string childのgroup/order/depth cap、最終union chainが独立しており、全phaseの実行前予約と実測chargeを一つにする証拠が欠落していることを確認した。2.2.3.3cを、(c1) exact Design witness Cartesian branch materializationと全tuple original-domain Schreier transport、(c2) 全surviving branchのproof-carrying full-string child SI、(c3) complete union reassemblyとc1--c3のsequential original-root budget、の三子へ分解した。旧1末端をその親と3子へ置換したため有効数は `540 - 1 + 4 = 543`。543は予測576以下なのでover-count rewrite triggerは発火しておらず、子を抑制していない。
 
 rev233の実装試行でc1を、(c1a) source/target witness Cartesian productをbranch object生成前に予約するmaterialization envelope、(c1b) 生成済みcomplete coverの全original-domain tuple Schreier transport envelope、の二子へ分解し、c1bを解決した。旧1末端をその親と2子へ置換したため有効数は `543 - 1 + 3 = 545`。545は予測576以下なのでover-count rewrite triggerは発火しておらず、materialization前予約を省略してc1全体を解決済みにしていない。
+
+rev235への直接試行でc2を、(c2a) 実際に実行した全full-string childのproof object捕捉・recurrence検証・完全多重度合成、(c2b) 最初のchildを開始する前の全branch保守的resource reservation、の二子へ分解した。旧1末端をその親と2子へ置換したため有効数は `545 - 1 + 3 = 547`。rev235候補はc2aだけを実装し、GitHub検証・統合前なので解決済みへ昇格しない。547は予測576以下でover-count rewrite triggerは発火しておらず、c2bを抑制していない。
 
 CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2のsource-target comparisonとそのexecution-linked original-root consumers、CRX3 substrateの未解決algorithmic consumers、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
 
