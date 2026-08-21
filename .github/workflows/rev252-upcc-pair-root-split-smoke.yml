@@ -1,0 +1,46 @@
+name: rev252 UPCC pair-root split smoke
+
+on:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/upcc_pair_root_split_family_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_upcc_pair_root_split_family_rev252.py"
+      - "automation_runs/2026-08-19_0851_JST/REV252_UPCC_PAIR_ROOT_SPLIT_FAMILY.md"
+      - ".github/workflows/rev252-upcc-pair-root-split-smoke.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/upcc_pair_root_split_family_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_upcc_pair_root_split_family_rev252.py"
+      - "automation_runs/2026-08-19_0851_JST/REV252_UPCC_PAIR_ROOT_SPLIT_FAMILY.md"
+      - ".github/workflows/rev252-upcc-pair-root-split-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rev252-upcc-pair-root-split-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  focused-rev252:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install focused test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Run rev252 focused regression
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python -m pytest -q test_upcc_pair_root_split_family_rev252.py
+      - name: Compile rev252 implementation and regression
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: >-
+          python -m py_compile
+          upcc_pair_root_split_family_v1.py
+          test_upcc_pair_root_split_family_rev252.py

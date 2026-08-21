@@ -6,24 +6,33 @@
   "request_received_at_utc": "2026-08-21T12:46:48Z",
   "started_at_utc": "2026-08-21T13:13:25Z",
   "started_at_jst": "2026-08-21T22:13:25+09:00",
-  "heartbeat_at_jst": "2026-08-21T22:13:25+09:00",
-  "stale_after_minutes": 90,
+  "heartbeat_at_jst": "2026-08-21T22:28:15+09:00",
+  "stale_after_minutes": 55,
   "starting_main_sha": "3fda2080cefc92e41b0ab9a0e3091b2439042112",
+  "latest_observed_main_sha": "b3cb4c158343bf0b63e9c6e42b96d15dedaab5e9",
   "starting_agi_gi_rev": 244,
   "target_revision": 252,
   "scope": "corrected-split-or-johnson/upcc-pair-root/complete-ordered-two-root-split-family",
   "branch": "codex/agi-gi-rev252-upcc-pair-root-20260821-124648z",
+  "target_pr": 183,
   "reserved_paths": [
     "automation_runs/2026-08-19_0851_JST/upcc_pair_root_split_family_v1.py",
     "automation_runs/2026-08-19_0851_JST/test_upcc_pair_root_split_family_rev252.py",
     "automation_runs/2026-08-19_0851_JST/REV252_UPCC_PAIR_ROOT_SPLIT_FAMILY.md",
     ".github/workflows/rev252-upcc-pair-root-split-smoke.yml",
+    ".github/workflows/j-rev252-session-hourly-refire.yml",
     "agi/run-history/active/chatgpt-session-j-rev252-20260821T221325JST-3fda2080.json"
   ],
   "schedule_registration": {
+    "workflow": ".github/workflows/j-rev252-session-hourly-refire.yml",
+    "cron": "46 * * * *",
+    "stale_after_minutes": 55,
+    "mode": "session-local claim/branch/PR activity guard with a deduplicated durable re-fire issue; never cancels or reruns sibling work"
+  },
+  "repository_wide_schedule": {
     "workflow": ".github/workflows/j-continuation-hourly-refire.yml",
     "cron": "17 * * * *",
-    "mode": "existing main-branch hourly watchdog; this active claim and open codex PR are the durable resume markers"
+    "relationship": "independent fallback; rev252 does not modify the shared watchdog"
   },
   "parallel_exclusions": [
     "rev245 Design/imprimitive integration",
@@ -36,8 +45,13 @@
     "CRX1 image-SI resource admission",
     "shared schedule implementation and MAIN.md"
   ],
-  "non_interference": "Add only the reserved rev252 module, focused regression, audit, smoke workflow, and claim on this dedicated branch. Do not modify existing solvers, existing claims, shared workflows, MAIN.md, or any concurrent branch write-set.",
+  "non_interference": "Add or update only the reserved rev252 module, focused regression, audit, dedicated smoke, dedicated session workflow, and this claim on the dedicated branch. Do not modify existing solvers, existing claims, shared workflows, MAIN.md, or any concurrent branch write-set.",
   "sync_note": "Before every persistence, re-read main active claims and open PRs; if an overlapping pair-root or Split-or-Johnson reservation appears, stop rather than overwrite.",
+  "local_validation": {
+    "focused_pytest": "5 passed",
+    "py_compile": "passed",
+    "witness": "rook(4,4): rev197 one-root maximum 9 > 8; all 240 ordered two-root branches maximum 6 <= 8"
+  },
   "status": "active",
   "agi_state": "NOT_AGI"
 }
