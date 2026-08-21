@@ -1,0 +1,16 @@
+name: rev239 state-orbit candidate terminal smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pytest
+      - run: pytest -q automation_runs/2026-08-19_0851_JST/test_state_orbit_candidate_terminal_rev239.py
