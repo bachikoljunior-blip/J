@@ -74,6 +74,7 @@ def design_full_string_child_preflight(
     scan_bounds = []
     per_branch = []
     terminal_path = True
+    stop = cap + 1
     scale = max(2, n) ** 12 * (2 ** 24)
     for branch, order in zip(frozen, orders):
         if order <= gate:
@@ -111,17 +112,17 @@ def design_full_string_child_preflight(
         # charges a second full-domain orbit/classification pass because this
         # preflight audit is separate from the actual S1 execution.
         g = max(1, len(group.original_generators))
-        audit = 2 * (8 * n * n * max(g, order) + _chain_bound(n, g, order, n, 10**1000))
+        audit = 2 * (8 * n * n * max(g, order) + _chain_bound(n, g, order, n, stop))
         work = audit
         scans = 0
         for orbit, image_order in zip(orbits, image_orders):
             m = len(orbit)
-            image_chain = _chain_bound(m, g, order, m, 10**1000)
+            image_chain = _chain_bound(m, g, order, m, stop)
             child = image_order * (max(2, m) ** 12) * (2 ** 24)
-            paired = _chain_bound(m, g, order, n + m, 10**1000)
-            kernel = _chain_bound(n, order, order, n, 10**1000)
+            paired = _chain_bound(m, g, order, n + m, stop)
+            kernel = _chain_bound(n, order, order, n, stop)
             lifts = image_order * m * order * 4 * (n + m)
-            preimage = _chain_bound(n, order + image_order, order, n, 10**1000)
+            preimage = _chain_bound(n, order + image_order, order, n, stop)
             work += image_chain + child + paired + kernel + lifts + preimage
             scans += 2 * image_order
         terminal_kinds.append("intransitive_small_order_orbit_images")
