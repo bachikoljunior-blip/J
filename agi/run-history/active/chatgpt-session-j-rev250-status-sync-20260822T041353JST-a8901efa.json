@@ -1,0 +1,21 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev250-status-sync-20260822T041353JST-a8901efa",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T034116+0900-92e55a14-turn1",
+  "started_at_jst": "2026-08-22T04:13:53+09:00",
+  "heartbeat_at_jst": "2026-08-22T04:13:53+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "a8901efa9bbf191c5f6d55458ad86a19eb538173",
+  "starting_agi_gi_rev": 254,
+  "target_revision": null,
+  "scope": "CRX3/original-root-ledger/phase-start-tickets/status-sync",
+  "reserved_paths": [
+    "MAIN.md",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev250-status-sync-20260822T041353JST-a8901efa-update-problem-tree-20260822T0413JST.json"
+  ],
+  "branch": "main",
+  "status": "active",
+  "non_interference": "Update only MAIN.md rev250 reachability/status text and this claim's phase evidence; do not touch rev255 paths or any other active claim.",
+  "agi_state": "NOT_AGI"
+}
