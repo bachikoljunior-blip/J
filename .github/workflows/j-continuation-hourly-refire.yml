@@ -1,0 +1,114 @@
+name: J continuation hourly re-fire
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/j-continuation-hourly-refire.yml"
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+concurrency:
+  group: j-continuation-hourly-watchdog-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  re-fire-when-idle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Detect active continuation work
+        id: guard
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+          STALE_AFTER_MINUTES: "90"
+        run: |
+          set -euo pipefail
+
+          now_epoch="$(date -u +%s)"
+          cutoff_epoch="$((now_epoch - STALE_AFTER_MINUTES * 60))"
+
+          runs_json="$(gh api "repos/${REPOSITORY}/actions/runs?per_page=100")"
+          active_runs="$(
+            jq --argjson current "${CURRENT_RUN_ID}" '
+              [.workflow_runs[]
+               | select(.id != $current)
+               | select(.status == "queued"
+                     or .status == "in_progress"
+                     or .status == "waiting"
+                     or .status == "requested"
+                     or .status == "pending")]
+              | length
+            ' <<<"${runs_json}"
+          )"
+
+          pulls_json="$(gh api "repos/${REPOSITORY}/pulls?state=open&per_page=100")"
+          fresh_continuation_prs="$(
+            jq --argjson cutoff "${cutoff_epoch}" '
+              [.[]
+               | select(.head.ref | startswith("agi-gi-"))
+               | select((.updated_at | fromdateiso8601) >= $cutoff)]
+              | length
+            ' <<<"${pulls_json}"
+          )"
+
+          claim_commits="$(gh api "repos/${REPOSITORY}/commits?path=agi/run-history/active&per_page=1")"
+          fresh_claim_commits="$(
+            jq --argjson cutoff "${cutoff_epoch}" '
+              [.[0]?
+               | (.commit.committer.date // .commit.author.date // empty)
+               | fromdateiso8601
+               | select(. >= $cutoff)]
+              | length
+            ' <<<"${claim_commits}"
+          )"
+
+          active_total="$((active_runs + fresh_continuation_prs + fresh_claim_commits))"
+          if (( active_total > 0 )); then
+            echo "active=true" >>"${GITHUB_OUTPUT}"
+          else
+            echo "active=false" >>"${GITHUB_OUTPUT}"
+          fi
+
+          {
+            echo "### J continuation hourly guard"
+            echo "- Other queued/running workflows: ${active_runs}"
+            echo "- AGI-GI PRs updated within ${STALE_AFTER_MINUTES} minutes: ${fresh_continuation_prs}"
+            echo "- Active-claim commits within ${STALE_AFTER_MINUTES} minutes: ${fresh_claim_commits}"
+            echo "- Decision: $([[ ${active_total} -gt 0 ]] && echo 'leave existing execution untouched' || echo 'emit continuation re-fire request')"
+          } >>"${GITHUB_STEP_SUMMARY}"
+
+      - name: Emit durable continuation re-fire request
+        if: github.event_name != 'pull_request' && steps.guard.outputs.active == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          title="[automation] J continuation re-fire queue"
+          timestamp="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          issue_number="$(
+            gh issue list --repo "${REPOSITORY}" --state open --limit 100 \
+              --json number,title \
+              --jq ".[] | select(.title == \"${title}\") | .number" \
+              | head -n 1
+          )"
+
+          message="Hourly continuation re-fire requested at ${timestamp}. No recent AGI-GI PR update, active-claim commit, or other queued/running workflow was detected. Reconstruct state from main and follow automation/CHATGPT_SCHEDULED_TASK_RUNBOOK.md. Trigger: ${RUN_URL}"
+
+          if [[ -z "${issue_number}" ]]; then
+            gh issue create --repo "${REPOSITORY}" --title "${title}" --body "${message}"
+          else
+            gh issue comment "${issue_number}" --repo "${REPOSITORY}" --body "${message}"
+          fi
