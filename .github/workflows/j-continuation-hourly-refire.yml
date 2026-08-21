@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/j-continuation-hourly-refire.yml"
 
 permissions:
   actions: read
@@ -11,7 +14,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: j-continuation-hourly-watchdog
+  group: j-continuation-hourly-watchdog-${{ github.event_name }}
   cancel-in-progress: false
 
 jobs:
@@ -84,7 +87,7 @@ jobs:
           } >>"${GITHUB_STEP_SUMMARY}"
 
       - name: Emit durable continuation re-fire request
-        if: steps.guard.outputs.active == 'false'
+        if: github.event_name != 'pull_request' && steps.guard.outputs.active == 'false'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
