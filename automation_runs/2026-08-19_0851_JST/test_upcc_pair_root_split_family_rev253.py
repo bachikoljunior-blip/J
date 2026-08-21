@@ -98,3 +98,16 @@ def test_rank_two_clique_is_not_promoted_to_pair_root_upcc_progress():
     assert got.status == "not_full_ground_upcc_pair_root_leaf"
     assert got.design_status == "stable_twl_clique_continue"
     assert got.exact and not got.complete and not got.aux_shrink_certified
+
+
+def test_invalid_relation_is_rejected_even_when_resource_preflight_would_close():
+    try:
+        pair_root.certify_upcc_pair_root_split_family(
+            10, 2, (), root_n=64, alpha=0.5, max_pair_branches=1,
+            max_tuple_states=1, per_run_work_cap=1,
+            max_total_work_units=1,
+        )
+    except ValueError as exc:
+        assert "one entry for every k-subset" in str(exc)
+    else:
+        raise AssertionError("malformed relation input must not be hidden by a resource-cap result")

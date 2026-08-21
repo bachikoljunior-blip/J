@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from itertools import permutations
-from math import log2
+from math import comb, log2
 
 from colored_subset_exact_twl_design_v1 import (
     classify_stable_twl_design,
@@ -106,6 +106,10 @@ def certify_upcc_pair_root_split_family(
         raise ValueError("alpha must lie in [1/2,1)")
     if min(max_pair_branches, max_tuple_states, per_run_work_cap, max_total_work_units) < 1:
         raise ValueError("resource caps must be positive")
+    if max_rounds is not None and int(max_rounds) < 1:
+        raise ValueError("max_rounds must be positive when supplied")
+    if len(palette) != comb(v, k):
+        raise ValueError("colors must contain one entry for every k-subset")
 
     pair_count = v * (v - 1)
     tuple_states = v ** k
