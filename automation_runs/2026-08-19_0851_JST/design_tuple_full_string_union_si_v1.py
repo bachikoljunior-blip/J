@@ -105,6 +105,7 @@ def solve_design_tuple_transport_full_string(
         group_order_poly_power=group_order_poly_power,
         max_group_order=max_group_order,
         max_work=max_design_full_string_child_work,
+        target_values=target,
     )
     if not child_preflight.admitted:
         return DesignTupleFullStringSI(
@@ -114,7 +115,7 @@ def solve_design_tuple_transport_full_string(
 
     solved = []
     nonempty = []
-    for branch in transport_plan.branches:
+    for branch_index, branch in enumerate(transport_plan.branches):
         if branch.coset is None:
             raise AssertionError("a surviving tuple branch must carry a right coset")
         if not ambient_group.contains(branch.coset.representative):
@@ -129,6 +130,11 @@ def solve_design_tuple_transport_full_string(
             group_order_poly_power=group_order_poly_power,
             max_group_order=max_group_order,
             max_depth=max_depth,
+            max_state_orbit_work=(
+                child_preflight.state_orbit_work_upper_bounds[branch_index]
+                if child_preflight.terminal_kinds[branch_index] == "state_orbit"
+                else 0
+            ),
         )
         solved.append(child)
         if not child.exact:
