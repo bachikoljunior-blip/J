@@ -114,7 +114,7 @@ rev237候補はc2b2aのinitial-orbit small-image subcaseを実装する。whole-
 
 ## 問題木
 
-予測問題数は **576**、置換済み旧問題を除く有効問題数は **554**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
+予測問題数は **576**、置換済み旧問題を除く有効問題数は **557**。旧予測/実数512/512の末端を直接試行し、解決したgeneric strict-pair subcaseと未解決5子問題へ分解した時点で実数は一時的に517となり、旧予測512を実際に超えた。この超過を事前抑制せず、mandatory full-tree rewrite triggerを発火させた。
 
 置換済み旧問題を除く全層――primitive relation、H6-C2、W1R-H6 corrected Split-or-Johnson/Design branch、global proof-carrying recurrence/resource、AGI rootの一般性・性能・自律性・実用提供――を横断し、7本の狭いrelation/filter/cap branchを三つのsolution-shaped problemへ書き換えた。**CRX1 exact canonical relation quotient/preimage closure**、**CRX2 information/symmetry-defect relation selection**、**CRX3 replay-stable proof/resource substrate**であり、単なる重複名の統合ではなく上位親から共有できる解法境界である。結果は `517 - 7 + 3 = 513`、再予測576。rev214はCRX1のnonconstant strict-pair subcaseとCRX3のhomogeneous/self-loop guardsだけを解決した。
 
@@ -162,11 +162,13 @@ c2b2の直接試行ではU2/S1の実dispatchを横断し、(c2b2a) intransitive 
 
 rev237への直接試行でc2b2aを、(c2b2a1) 全initial orbit imageがsmall-order exact terminalへ停止するcomplete-cover preflight、(c2b2a2) initial image自体がintransitive/imprimitive/primitive non-giantとなるnested structural image preflight、の二子へ分解した。旧1末端をその親と2子へ置換したため有効数は `552 - 1 + 3 = 554`。rev237候補はc2b2a1だけを実装し、GitHub検証・統合前なので解決済みへ昇格しない。554は予測576以下でover-count rewrite triggerは発火しておらず、nested structural imageを抑制していない。
 
+c2b2a2の直接監査では、S1が各initial orbit childのpaired preimage後にcurrent subgroup `H`を更新するため、後続initial orbit上のimageは元imageのsubgroupになるが、small-order化は保証されないことを確認した。c2b2a2を、(c2b2a2i) current imageがintransitiveとなるstrict-smaller orbit recursion、(c2b2a2ii) transitive imprimitiveとなるblock quotient/kernel recursion、(c2b2a2iii) primitive non-giantとなるJohnson/profile relation recursion、の三子へ分解した。これは既存S1/U2のLuks型三分岐をnested occurrenceの実行前予約へ再利用するもので、generic node capへの置換ではない。旧1末端をその親と3子へ置換したため有効数は `554 - 1 + 4 = 557`。557は予測576以下でover-count rewrite triggerは発火しておらず、三分岐を抑制していない。
+
 CRX1の`k<=2`、homogeneous/nonrestricting relation image、node/resource-capped image SI、CRX2のsource-target comparisonとそのexecution-linked original-root consumers、CRX3 substrateの未解決algorithmic consumers、corrected Split-or-Johnson残部、W1R-H6 parent、AGI rootは未解決のままである。
 
-次の未解決末端は **CRX2 / Design nested structural orbit-image preflight**:
+次の未解決末端は **CRX2 / Design nested intransitive image preflight**:
 
-> initial orbit imageがsmall-order gateを超えるintransitive branchについて、strict smaller image domainとsame-domain nonprogress拒否を証明し、image側のintransitive/imprimitive/primitive non-giant dispatchを最初のoriginal-domain childより前に再帰予約する。全nested proof occurrence、paired preimage、original-root multiplicityを完全に課金し、未予約pathはfail closedにする。
+> paired preimage後のcurrent subgroupが後続initial orbit上でintransitiveとなる場合に、全strict-smaller suborbit imageをchild開始前に列挙し、recursive image chain、small-order leaf enumeration、paired kernel/preimage、proof occurrenceをoriginal-root予算へ予約する。transitive imprimitive/primitive non-giant imageはそれぞれc2b2a2ii/c2b2a2iiiとしてfail closedに保持する。
 
 ## 世界に存在する解法の包含監査
 
