@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 
+from local_certificate_preimage_resource_v1 import _chain_bound
+from orbit_factored_string_coset_intersection_v1 import _group_orbits, _image_chain
+
 
 @dataclass(frozen=True)
 class DesignFullStringChildPreflight:
@@ -21,6 +24,9 @@ class DesignFullStringChildPreflight:
     permutation_candidates_checked: int
     complete: bool
     reason: str
+    terminal_kinds: tuple[str, ...] = ()
+    orbit_image_orders: tuple[tuple[int, ...], ...] = ()
+    permutation_scan_upper_bounds: tuple[int, ...] = ()
 
 
 def design_full_string_child_preflight(
@@ -42,8 +48,13 @@ def design_full_string_child_preflight(
         log2(|H|) + 12 log2(max(2,n)) + 24,
 
     so ``|H| * max(2,n)**12 * 2**24`` is its exact integer work envelope.  We
-    sum this for the complete branch cover before calling U2 even once.  Larger
-    structural branches are deliberately rejected and remain a separate problem.
+    sum this for the complete branch cover before calling U2 even once.  For an
+    intransitive larger parent, the preflight also constructs every canonical
+    initial orbit image before the first child.  If all those exact image orders
+    pass the same terminal gate, it reserves their enumeration plus image-chain,
+    paired-kernel and full-domain preimage work.  A later subgroup cannot increase
+    an orbit image order.  Transitive and nested-structural images remain separate
+    fail-closed problems.
     """
     frozen = tuple(branches)
     root = int(original_root_degree)
@@ -58,9 +69,66 @@ def design_full_string_child_preflight(
         raise ValueError("Design child subgroup orders must be positive")
     gate = min(implementation_cap, root ** power)
     root_lift = n <= root
-    terminal_path = all(order <= gate for order in orders)
+    terminal_kinds = []
+    orbit_image_orders = []
+    scan_bounds = []
+    per_branch = []
+    terminal_path = True
     scale = max(2, n) ** 12 * (2 ** 24)
-    per_branch = tuple(order * scale for order in orders)
+    for branch, order in zip(frozen, orders):
+        if order <= gate:
+            terminal_kinds.append("small_order")
+            orbit_image_orders.append(())
+            scan_bounds.append(2 * order)
+            per_branch.append(order * scale)
+            continue
+
+        group = branch.coset.subgroup
+        orbits = _group_orbits(group)
+        if len(orbits) <= 1:
+            terminal_path = False
+            terminal_kinds.append("unresolved_structural")
+            orbit_image_orders.append(())
+            scan_bounds.append(0)
+            per_branch.append(0)
+            continue
+
+        images = tuple(_image_chain(group, orbit) for orbit in orbits)
+        image_orders = tuple(int(image.order) for image in images)
+        orbit_image_orders.append(image_orders)
+        if any(image_order > gate for image_order in image_orders):
+            terminal_path = False
+            terminal_kinds.append("unresolved_nested_structural_image")
+            scan_bounds.append(0)
+            per_branch.append(0)
+            continue
+
+        # S1 first classifies the parent, then for every canonical orbit builds
+        # the current image, solves its small-order terminal, and constructs the
+        # paired kernel/preimage.  Later current groups are subgroups of the
+        # initial branch group, hence their orbit-image orders cannot exceed the
+        # exact initial image orders certified above.  The bound deliberately
+        # charges a second full-domain orbit/classification pass because this
+        # preflight audit is separate from the actual S1 execution.
+        g = max(1, len(group.original_generators))
+        audit = 2 * (8 * n * n * max(g, order) + _chain_bound(n, g, order, n, 10**1000))
+        work = audit
+        scans = 0
+        for orbit, image_order in zip(orbits, image_orders):
+            m = len(orbit)
+            image_chain = _chain_bound(m, g, order, m, 10**1000)
+            child = image_order * (max(2, m) ** 12) * (2 ** 24)
+            paired = _chain_bound(m, g, order, n + m, 10**1000)
+            kernel = _chain_bound(n, order, order, n, 10**1000)
+            lifts = image_order * m * order * 4 * (n + m)
+            preimage = _chain_bound(n, order + image_order, order, n, 10**1000)
+            work += image_chain + child + paired + kernel + lifts + preimage
+            scans += 2 * image_order
+        terminal_kinds.append("intransitive_small_order_orbit_images")
+        scan_bounds.append(scans)
+        per_branch.append(work)
+
+    per_branch = tuple(per_branch)
     total = sum(per_branch)
     admitted = root_lift and terminal_path and total <= cap
     if not root_lift:
@@ -73,11 +141,12 @@ def design_full_string_child_preflight(
         status = "design_full_string_child_work_cap_exceeded"
         reason = "the complete small-order child cover exceeds the finite budget before the first child"
     else:
-        status = "certified_design_full_string_small_order_child_preflight"
-        reason = "every branch is guaranteed to terminate in the exact small-order path and the complete cover fits the finite budget"
+        status = "certified_design_full_string_terminal_child_preflight"
+        reason = "every branch is guaranteed to terminate either directly or through certified intransitive small-order orbit images, and the complete cover fits the finite budget"
     return DesignFullStringChildPreflight(
         status, root, n, len(frozen), orders, gate, per_branch, total, cap,
         root_lift, terminal_path, admitted, 0, 0, False, reason,
+        tuple(terminal_kinds), tuple(orbit_image_orders), tuple(scan_bounds),
     )
 
 
@@ -95,7 +164,7 @@ def record_design_full_string_child_execution(
     if complete and len(frozen) != preflight.branch_count:
         raise ValueError("complete Design child execution omitted a reserved branch")
     checked = sum(int(child.permutation_candidates_checked) for child in frozen)
-    permitted = sum(2 * order for order in preflight.subgroup_orders[:len(frozen)])
+    permitted = sum(preflight.permutation_scan_upper_bounds[:len(frozen)])
     if checked > permitted:
         raise ValueError("executed candidate scans exceed the exact small-order reservation")
     return replace(
