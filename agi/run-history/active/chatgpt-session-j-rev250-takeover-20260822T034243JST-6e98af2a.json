@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev250-takeover-20260822T034243JST-6e98af2a",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T034116+0900-92e55a14-turn1",
+  "started_at_jst": "2026-08-22T03:42:43+09:00",
+  "heartbeat_at_jst": "2026-08-22T03:42:43+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "6e98af2a0640b31525b820536876bb98140a7426",
+  "starting_agi_gi_rev": 254,
+  "target_revision": 250,
+  "scope": "CRX3/original-root-ledger/phase-start-tickets/integration",
+  "reserved_paths": [
+    ".github/workflows/rev250-envelope-hardening-runner.yml",
+    ".github/workflows/rev250-phase-start-ticket-ledger-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev250-takeover-20260822T034243JST-6e98af2a-publish-20260822T0343JST.json",
+    "automation_runs/2026-08-19_0851_JST/.rev250-envelope-hardening.patch",
+    "automation_runs/2026-08-19_0851_JST/REV250_PHASE_START_TICKET_LEDGER.md",
+    "automation_runs/2026-08-19_0851_JST/phase_start_ticket_ledger_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_phase_start_ticket_ledger_rev250.py"
+  ],
+  "branch": "agi-gi-rev250-phase-start-tickets-session-20260821-2205",
+  "takeover_audit": {
+    "stale_claim": "chatgpt-session-j-rev250-20260821T220548JST-f08fe9ae",
+    "pull_request": 184,
+    "failed_head": "267d090770760f112ec60eee6b2db0745236a65e",
+    "failed_workflow": 32490120654,
+    "failure": "memo property insertion target not found",
+    "policy": "replace the stale six-file self-rewriting head with a current-main child containing exactly the four durable ledger paths"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
