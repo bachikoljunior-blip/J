@@ -142,11 +142,29 @@ class Rev255PrimitiveJohnsonCallerIntegrationTests(TestCase):
             selected_branch_count=1,
             execution_charge_complete=False,
         )
-        child_plan = SimpleNamespace(
+        child_plan = preflight.DesignFullStringChildPreflight(
+            status="certified_design_full_string_exact_terminal_cover_preflight",
+            original_root_degree=10,
+            original_degree=6,
+            branch_count=1,
+            subgroup_orders=(12,),
+            small_order_gate=8,
+            work_per_branch_upper_bounds=(77,),
+            work_upper_bound=77,
+            max_work=100,
+            root_lift_certified=True,
+            terminal_path_certified=True,
             admitted=True,
+            executed_branch_count=0,
+            permutation_candidates_checked=0,
+            complete=False,
+            reason="test reservation",
             terminal_kinds=("primitive_johnson",),
+            permutation_scan_upper_bounds=(128,),
             state_orbit_work_upper_bounds=(0,),
+            state_orbit_image_upper_bounds=(0,),
             imprimitive_work_upper_bounds=(0,),
+            primitive_johnson_work_upper_bounds=(77,),
             primitive_johnson_preflight=primitive_plan,
         )
         proof = SimpleNamespace(
