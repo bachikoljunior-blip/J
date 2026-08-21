@@ -34,18 +34,20 @@ A scheduled web run must not assume that a local clone, worktree, uncommitted fi
 At the start of every invocation:
 
 1. Read `MAIN.md` from `main`, read the AGI-GI rev-series definition, and resolve the current main SHA. Treat the latest state in `MAIN.md` as authoritative rather than any revision number embedded in an older prompt or report.
-2. Inspect open AGI-GI pull requests and relevant workflow results so that already-completed work is not repeated.
-3. Select exactly one unresolved active leaf, or one integration shared by several leaves when the active-node ceiling requires a transversal rewrite. Do not restrict selection to graph/GI topics merely because earlier revisions were in that domain.
-4. Recheck whether an existing world implementation, theorem, library, solver, oracle, benchmark, or proof framework contains a solution to that leaf and to any ancestor that has not yet received that audit. Record the exact inclusion boundary; do not substitute a name-only literature mention for an integration or proof.
+2. After appending and remotely re-reading the mandatory invocation-start record, inspect open AGI-GI pull requests, relevant workflow results, and every JSON claim under `agi/run-history/active/`. The start-history commit remains the first persistent operation of a scheduled run.
+3. Select exactly one unresolved active leaf, or one integration shared by several leaves when the active-node ceiling requires a transversal rewrite. Do not restrict selection to graph/GI topics merely because earlier revisions were in that domain. Run `python automation/parallel_claims.py check --scope <canonical/problem/path> --target-revision <rev>` and rescope if it reports a live scope or revision collision.
+4. Before any implementation write, publish a unique schema-v2 claim from `automation/PARALLEL_SESSION_CLAIM_TEMPLATE.json` under `agi/run-history/active/<claim_id>.json` in a direct `main` commit. Re-read `main` and repeat the check with `--exclude-claim-id <claim_id>`; this post-commit check detects simultaneous starts. Do not modify, cancel, or rerun work owned by another fresh claim. Follow `agi/run-history/active/README.md` for heartbeat, stale takeover, and close rules.
+5. Recheck whether an existing world implementation, theorem, library, solver, oracle, benchmark, or proof framework contains a solution to that leaf and to any ancestor that has not yet received that audit. Record the exact inclusion boundary; do not substitute a name-only literature mention for an integration or proof.
 
 During repository work:
 
 1. Work on an explicit branch and preserve fail-closed behavior.
-2. Add focused regression tests and connect them to the maintained validation workflow when the change is executable code.
-3. Do not call a structural reduction exact unless the returned set/coset is complete and the proof boundary is mechanically checked.
-4. Do not claim a quasipolynomial bound unless the recurrence object and every local-cost hypothesis are certified.
-5. Do not lower AGI, generality, performance, autonomy, or practical-delivery criteria.
-6. Persist a checkpoint before beginning another substantial unit. Consecutive units may be attempted while execution budget remains, but wall-clock busy-waiting is not repository progress.
+2. Re-read claims and open PRs before each persistent write. Refresh the claim heartbeat on `main` at least every 30 minutes; if the scope or revision changes, publish the rescope before touching the new scope.
+3. Add focused regression tests and connect them to the maintained validation workflow when the change is executable code.
+4. Do not call a structural reduction exact unless the returned set/coset is complete and the proof boundary is mechanically checked.
+5. Do not claim a quasipolynomial bound unless the recurrence object and every local-cost hypothesis are certified.
+6. Do not lower AGI, generality, performance, autonomy, or practical-delivery criteria.
+7. Persist a checkpoint before beginning another substantial unit. Consecutive units may be attempted while execution budget remains, but wall-clock busy-waiting is not repository progress.
 
 Before merging:
 
@@ -54,6 +56,7 @@ Before merging:
 3. Merge only that verified head.
 4. Update `MAIN.md` to the actual merged revision, the verified evidence, the active-node count, and the next unresolved leaf.
 5. Leave `AGI = NOT_AGI` unless the independent strict acceptance evidence exists.
+6. Close the session claim on `main` after the merge or mark it abandoned/superseded when stopping without integration; retain the record as evidence.
 
 ## Failure classification
 

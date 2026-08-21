@@ -1,0 +1,30 @@
+name: Parallel session claims
+
+on:
+  pull_request:
+    paths:
+      - "agi/run-history/active/**"
+      - "automation/parallel_claims.py"
+      - "automation/test_parallel_claims.py"
+      - "automation/PARALLEL_SESSION_CLAIM_TEMPLATE.json"
+      - ".github/workflows/parallel-session-claims.yml"
+  push:
+    branches: [main]
+    paths:
+      - "agi/run-history/active/**"
+      - "automation/parallel_claims.py"
+      - "automation/test_parallel_claims.py"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit tests
+        run: python -m unittest automation.test_parallel_claims
+      - name: Validate registry
+        run: python automation/parallel_claims.py validate
