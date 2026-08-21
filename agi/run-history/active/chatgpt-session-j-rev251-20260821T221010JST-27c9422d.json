@@ -51,7 +51,8 @@
     "MAIN.md and all existing workflow files"
   ],
   "non_interference": "Add only the three reserved rev251 verifier/report paths on the dedicated branch; do not modify existing solvers, claims, workflows, MAIN.md, or concurrent PR branches.",
-  "status": "active",
-  "notes": "PR #185 is open at the verified implementation head. The machine-readable claim remains active so the hourly watchdog can reconstruct and re-fire this exact session if repository execution becomes idle.",
+  "status": "closed",
+  "completed_at_jst": "2026-08-22T07:22:16+09:00",
+  "notes": "PR #185 merged into main at 2026-08-22T01:47:24+09:00. All pull-request-triggered workflow runs observed for head b5305668cf5bf24805c872c1380aa785536cb5e4 completed successfully, with no review submissions or review threads. The dedicated branch is retained for history and is fully behind current main with no unique commits. rev251 is complete; this claim is closed and no longer reserves its scope, revision, or paths.",
   "agi_state": "NOT_AGI"
 }
