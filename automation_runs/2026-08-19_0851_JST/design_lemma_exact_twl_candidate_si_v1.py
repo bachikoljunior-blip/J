@@ -11,7 +11,11 @@ from correlated_twl_resource_envelope_v1 import (
 )
 from design_branch_tuple_transport_v1 import DesignTupleTransportPlan, transport_complete_design_tuple_branches
 from design_lemma_branch_cost_certificate_v1 import DesignBranchCostCertificate, certify_design_branch_quasipoly_cost
-from design_pipeline_admission_ledger_v1 import design_pipeline_admission_ledger
+from design_pipeline_admission_ledger_v1 import (
+    DesignPipelineAdmissionLedger,
+    design_pipeline_admission_ledger,
+    record_design_pipeline_execution,
+)
 from design_tuple_full_string_union_si_v1 import DesignTupleFullStringSI, solve_design_tuple_transport_full_string
 from design_tuple_transport_resource_envelope_v1 import (
     DesignTupleTransportResourceEnvelope,
@@ -35,6 +39,7 @@ class ExactTWLDesignCandidateSI:
     reason: str
     twl_resource_envelope: PairedCorrelatedTWLResourceEnvelope | None = None
     transport_resource_envelope: DesignTupleTransportResourceEnvelope | None = None
+    pipeline_admission_ledger: DesignPipelineAdmissionLedger | None = None
 
 
 def exact_twl_design_candidate_string_isomorphism(
@@ -58,7 +63,7 @@ def exact_twl_design_candidate_string_isomorphism(
     max_design_branch_materialization_work: int = 10**30,
     max_partition_states: int = 200000,
     max_design_transport_work: int = 10**30,
-    max_design_pipeline_work: int = 10**30,
+    max_design_pipeline_work: int = 10**100,
     polylog_power: int = 2,
     max_explicit_degree: int = 8,
     group_order_poly_power: int = 2,
@@ -66,6 +71,12 @@ def exact_twl_design_candidate_string_isomorphism(
     max_depth: int = 64,
 ) -> ExactTWLDesignCandidateSI:
     """Compose exact standard k-WL Design branching through full ambient-string SI.
+
+    The rev242 boundary first reserves one input-only original-root ledger for
+    correlated t-WL, witness materialization, tuple transport, every exact child
+    terminal, and final union reconstruction.  Rejection occurs before the first
+    call that can execute correlated t-WL.  Existing per-phase and runtime caps
+    remain stricter fail-closed guards inside that single outer reservation.
 
     Compared with the earlier incidence-2WL execution boundary, this path verifies
     the actual correlated-replacement k-WL + Split-or-UPCC witness mechanism before
@@ -90,6 +101,7 @@ def exact_twl_design_candidate_string_isomorphism(
         return ExactTWLDesignCandidateSI(
             "undetermined_exact_twl_design_pipeline_preflight", None, None, None, None,
             False, False, False, False, False, pipeline.reason,
+            pipeline_admission_ledger=pipeline,
         )
 
     twl_resource = paired_correlated_twl_resource_envelope(
@@ -99,6 +111,7 @@ def exact_twl_design_candidate_string_isomorphism(
         return ExactTWLDesignCandidateSI(
             "undetermined_exact_twl_resource_preflight", None, None, None, None,
             False, False, False, False, False, twl_resource.reason, twl_resource,
+            pipeline_admission_ledger=pipeline,
         )
 
     plan = build_exact_twl_design_branch_plan(
@@ -128,6 +141,38 @@ def exact_twl_design_candidate_string_isomorphism(
             and getattr(target_family, "exact", False)
         ),
     )
+
+    def _record_pipeline(
+        *,
+        transport_resource_obj=None,
+        full_obj=None,
+        complete: bool,
+    ) -> DesignPipelineAdmissionLedger:
+        materialization = getattr(plan, "materialization_resource_envelope", None)
+        if materialization is not None and not bool(getattr(materialization, "complete", False)):
+            materialization = None
+        transport_execution = transport_resource_obj
+        if transport_execution is not None and not bool(getattr(transport_execution, "complete", False)):
+            transport_execution = None
+        child = getattr(full_obj, "child_preflight", None) if full_obj is not None else None
+        if child is not None and not (
+            bool(getattr(child, "complete", False))
+            or int(getattr(child, "executed_branch_count", 0)) > 0
+        ):
+            child = None
+        union = getattr(full_obj, "union_resource_envelope", None) if full_obj is not None else None
+        if union is not None and not bool(getattr(union, "complete", False)):
+            union = None
+        return record_design_pipeline_execution(
+            pipeline,
+            twl_resource=twl_resource,
+            materialization_resource=materialization,
+            transport_resource=transport_execution,
+            child_preflight=child,
+            union_resource=union,
+            complete=complete,
+        )
+
     source_gate = bool(
         getattr(plan.source_family, "theorem_parameter_gate", False)
         and getattr(plan.source_family, "symmetry_defect_gate", False)
@@ -147,11 +192,13 @@ def exact_twl_design_candidate_string_isomorphism(
         return ExactTWLDesignCandidateSI(
             "exact_empty_exact_twl_design_branch_plan", plan, None, None, None,
             theorem_gate, False, False, True, True, plan.reason, twl_resource,
+            pipeline_admission_ledger=_record_pipeline(complete=True),
         )
     if not plan.complete or plan.status != "certified_complete_design_branch_plan":
         return ExactTWLDesignCandidateSI(
             "undetermined_exact_twl_design_branch_plan", plan, None, None, None,
             theorem_gate, False, False, False, False, plan.reason, twl_resource,
+            pipeline_admission_ledger=_record_pipeline(complete=False),
         )
 
     branch_cost = certify_design_branch_quasipoly_cost(plan, root_n=root_n)
@@ -159,6 +206,7 @@ def exact_twl_design_candidate_string_isomorphism(
         return ExactTWLDesignCandidateSI(
             "undetermined_exact_twl_design_branch_cost", plan, branch_cost, None, None,
             theorem_gate, fidelity, False, False, False, branch_cost.reason, twl_resource,
+            pipeline_admission_ledger=_record_pipeline(complete=False),
         )
 
     transport_resource = design_tuple_transport_resource_envelope(
@@ -177,6 +225,7 @@ def exact_twl_design_candidate_string_isomorphism(
             plan, branch_cost, None, None, theorem_gate, fidelity, True,
             False, False, transport_resource.reason, twl_resource,
             transport_resource,
+            _record_pipeline(complete=False),
         )
 
     transport = transport_complete_design_tuple_branches(
@@ -198,12 +247,20 @@ def exact_twl_design_candidate_string_isomorphism(
             "exact_empty_exact_twl_design_transport", plan, branch_cost, transport, None,
             theorem_gate, fidelity, True, True, True, transport.reason, twl_resource,
             transport_resource,
+            _record_pipeline(
+                transport_resource_obj=transport_resource,
+                complete=True,
+            ),
         )
     if not transport.complete or transport.status != "certified_complete_design_tuple_transport_cover":
         return ExactTWLDesignCandidateSI(
             "undetermined_exact_twl_design_transport", plan, branch_cost, transport, None,
             theorem_gate, fidelity, True, False, False, transport.reason, twl_resource,
             transport_resource,
+            _record_pipeline(
+                transport_resource_obj=transport_resource,
+                complete=False,
+            ),
         )
 
     full = solve_design_tuple_transport_full_string(
@@ -223,6 +280,11 @@ def exact_twl_design_candidate_string_isomorphism(
             "undetermined_exact_twl_design_full_string", plan, branch_cost, transport, full,
             theorem_gate, fidelity, True, False, False, full.reason, twl_resource,
             transport_resource,
+            _record_pipeline(
+                transport_resource_obj=transport_resource,
+                full_obj=full,
+                complete=False,
+            ),
         )
     return ExactTWLDesignCandidateSI(
         "exact_empty_exact_twl_design_full_string" if full.coset is None else "exact_twl_design_full_string_coset",
@@ -238,4 +300,9 @@ def exact_twl_design_candidate_string_isomorphism(
         "exact standard-k-WL Design witness family, quasipolynomial branch charge, exact ambient tuple transport, and exact full-string union all certified",
         twl_resource,
         transport_resource,
+        _record_pipeline(
+            transport_resource_obj=transport_resource,
+            full_obj=full,
+            complete=True,
+        ),
     )

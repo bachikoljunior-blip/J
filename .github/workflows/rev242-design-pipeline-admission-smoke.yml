@@ -12,8 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - run: python -m pip install pytest numpy
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
       - name: Run shared pipeline and inherited resource regressions
         working-directory: automation_runs/2026-08-19_0851_JST
         run: >-
@@ -21,8 +21,10 @@ jobs:
           test_design_pipeline_admission_rev242.py
           test_correlated_twl_resource_rev232.py
           test_design_tuple_transport_resource_rev233.py
+          test_design_branch_materialization_resource_rev234.py
           test_design_state_orbit_cover_rev240.py
           test_design_union_reconstruction_resource_rev241.py
+          test_design_lemma_exact_twl_candidate_rev194.py
       - name: Compile changed modules
         run: >-
           python -m py_compile
