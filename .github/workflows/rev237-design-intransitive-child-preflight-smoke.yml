@@ -1,0 +1,35 @@
+name: rev237 Design intransitive child preflight smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_design_intransitive_child_preflight_rev237.py'
+      - '.github/workflows/rev237-design-intransitive-child-preflight-smoke.yml'
+      - '.github/workflows/agi-gi-rev-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev237-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - run: >-
+          python -m pytest -q
+          test_design_intransitive_child_preflight_rev237.py
+          test_design_full_string_child_preflight_rev236.py
+          test_design_full_string_child_resource_rev235.py
+          test_design_tuple_full_string_union_rev189.py
+          test_design_lemma_exact_twl_candidate_rev194.py
