@@ -1,0 +1,56 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev252-20260821T221349JST-7174b2e6",
+  "session_id": "chatgpt-session-j-parallel-rev252-20260821T221349+0900-7174b2e6-turn1",
+  "created_at": "2026-08-21T22:13:49+09:00",
+  "started_at_jst": "2026-08-21T22:13:49+09:00",
+  "heartbeat_at": "2026-08-21T22:13:49+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:13:49+09:00",
+  "expires_at": "2026-08-22T02:13:49+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "7174b2e612ed510cb3acb3c94588c41ab4a90bd9",
+  "starting_agi_gi_rev": 244,
+  "target_revision": 252,
+  "scope": "CRX3/acceptance/proof-carrying-small-order-production-admission",
+  "branch": "agi-gi-rev252-proof-carrying-small-order-admission-session-20260821-2213",
+  "worktree": null,
+  "target_pr": null,
+  "owner_pr": null,
+  "verification_method": "python -m unittest automation_runs/2026-08-19_0851_JST/test_proof_carrying_small_order_production_admission_rev252.py",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/proof_carrying_small_order_production_admission_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_proof_carrying_small_order_production_admission_rev252.py",
+    "automation_runs/2026-08-19_0851_JST/REV252_PROOF_CARRYING_SMALL_ORDER_PRODUCTION_ADMISSION.md",
+    ".github/workflows/rev252-proof-carrying-small-order-production-admission.yml",
+    ".github/workflows/j-rev252-session-hourly-refire.yml"
+  ],
+  "write_set": [
+    "automation_runs/2026-08-19_0851_JST/proof_carrying_small_order_production_admission_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_proof_carrying_small_order_production_admission_rev252.py",
+    "automation_runs/2026-08-19_0851_JST/REV252_PROOF_CARRYING_SMALL_ORDER_PRODUCTION_ADMISSION.md",
+    ".github/workflows/rev252-proof-carrying-small-order-production-admission.yml",
+    ".github/workflows/j-rev252-session-hourly-refire.yml",
+    "agi/run-history/active/chatgpt-session-j-rev252-20260821T221349JST-7174b2e6.json"
+  ],
+  "schedule_registration": {
+    "workflow": ".github/workflows/j-rev252-session-hourly-refire.yml",
+    "cron": "53 * * * *",
+    "mode": "dedicated claim-aware hourly re-fire with duplicate suppression"
+  },
+  "parallel_exclusions": [
+    "rev245 Design/imprimitive integration PR #177",
+    "rev246 primitive Johnson production admission PR #179",
+    "rev247 shared-S1 imprimitive admission",
+    "rev248 CRX1 bounded-arity relation-image exact witness",
+    "CRX1 image-SI resource admission certificate",
+    "rev249 Design proof-DAG consumer",
+    "rev250 phase-start ticket ledger",
+    "rev251 exact-result replay verifier",
+    "MAIN.md and all existing shared workflow or coordination files"
+  ],
+  "non_interference": "Add only the five reserved rev252 implementation, test, memo, smoke, and dedicated hourly-refire paths on the dedicated branch or as the dedicated scheduler; do not modify existing solvers, claims, shared workflows, MAIN.md, or concurrent PR branches.",
+  "status": "active",
+  "notes": "Machine-readable start marker and narrow sibling scope allow concurrent sessions to detect and avoid this work. The dedicated hourly guard is installed without changing the shared watchdog.",
+  "agi_state": "NOT_AGI"
+}
