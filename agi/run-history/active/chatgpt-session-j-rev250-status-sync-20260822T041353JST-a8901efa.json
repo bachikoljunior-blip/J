@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev250-status-sync-20260822T041353JST-a8901efa",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T034116+0900-92e55a14-turn1",
   "started_at_jst": "2026-08-22T04:13:53+09:00",
-  "heartbeat_at_jst": "2026-08-22T04:13:53+09:00",
+  "heartbeat_at_jst": "2026-08-22T04:18:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "a8901efa9bbf191c5f6d55458ad86a19eb538173",
   "starting_agi_gi_rev": 254,
@@ -15,7 +15,17 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev250-status-sync-20260822T041353JST-a8901efa-update-problem-tree-20260822T0413JST.json"
   ],
   "branch": "main",
-  "status": "active",
+  "completion": {
+    "phase_admission": "agi/run-history/phase-admissions/chatgpt-session-j-rev250-status-sync-20260822T041353JST-a8901efa-update-problem-tree-20260822T0413JST.json",
+    "evidence_commit_sha": "6898383c22621ba995d59e38fed2a178a0fbcd4c",
+    "main_status_commit_sha": "38d4550f876298d18459dfbd3559f466081ec79b",
+    "declared_revision": 254,
+    "latest_integrated_revision": 254,
+    "effective_problem_count": 566,
+    "forecast_problem_count": 576
+  },
+  "status": "closed",
+  "completed_at_jst": "2026-08-22T04:18:00+09:00",
   "non_interference": "Update only MAIN.md rev250 reachability/status text and this claim's phase evidence; do not touch rev255 paths or any other active claim.",
   "agi_state": "NOT_AGI"
 }
