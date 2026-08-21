@@ -8,7 +8,7 @@ on:
       - "automation_runs/2026-08-19_0851_JST/REV249_DESIGN_CHILD_PROOF_DAG_COVER.md"
       - "automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py"
       - "automation_runs/2026-08-19_0851_JST/design_full_string_child_resource_proof_v1.py"
-      - "automation_runs/2026-08-19_0851_JST/design_tuple_ful_string_union_si_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py"
       - ".github/workflows/rev249-design-child-proof-dag-cover-smoke.yml"
   workflow_dispatch:
 
