@@ -1,0 +1,52 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "main",
+    "claim_id": "chatgpt-session-j-rev256-status-sync-20260822T054700JST-a007c3bc",
+    "heartbeat_at_jst": "2026-08-22T05:47:29+09:00",
+    "reserved_paths": [
+      "MAIN.md",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev256-status-sync-20260822T054700JST-a007c3bc-update-problem-tree-20260822T0547JST.json"
+    ],
+    "scope": "root/canonical-main-status/rev256-problem-tree",
+    "state": "active",
+    "target_revision": 256
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev255-primitive-johnson-design-integration-retakeover-20260822-0514",
+      "claim_id": "chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795",
+      "heartbeat_at_jst": "2026-08-22T05:14:47+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-attempt_solution-20260822T0514JST.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-merge-20260822T0514JST.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-retakeover-20260822T051447JST-a223b795-publish-20260822T0514JST.json",
+        "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+        "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+        "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+      ],
+      "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+      "state": "active",
+      "target_revision": 255
+    }
+  ],
+  "paths": [
+    "MAIN.md",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev256-status-sync-20260822T054700JST-a007c3bc-update-problem-tree-20260822T0547JST.json"
+  ],
+  "phase": "update_problem_tree",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T05:47:45+09:00",
+  "registry_digest": "sha256:5fac4911769a702354a2ea5613e9f81c7c1ee96afccadd153618b74fac1488ce",
+  "registry_source_sha": "d386e2b5e4fd70787db294679597a8a3491aa0b1",
+  "schema_version": 1,
+  "scope": "root/canonical-main-status/rev256-problem-tree",
+  "target_revision": 256
+}
