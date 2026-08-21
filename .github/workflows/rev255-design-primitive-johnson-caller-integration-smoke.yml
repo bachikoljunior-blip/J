@@ -1,0 +1,51 @@
+name: Rev255 Design primitive Johnson caller integration smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py'
+      - 'automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md'
+      - '.github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
+      - name: Syntax check integrated caller modules
+        run: >-
+          python -m py_compile
+          design_full_string_child_preflight_v1.py
+          design_original_root_pipeline_resource_v1.py
+          design_tuple_full_string_union_si_v1.py
+          u2_candidate_coset_string_iso_v2.py
+          test_design_primitive_johnson_caller_integration_rev255.py
+      - name: Run rev255 caller regressions and inherited primitive Johnson contracts
+        run: >-
+          python -m pytest -q
+          test_design_primitive_johnson_caller_integration_rev255.py
+          test_design_primitive_johnson_complete_cover_rev254.py
+          test_resource_bounded_primitive_johnson_candidate_rev246.py
+          test_design_nested_primitive_johnson_resource_rev243.py
+      - name: Run inherited shared Design caller regressions
+        run: >-
+          python -m pytest -q
+          test_design_tuple_full_string_union_rev189.py
+          test_candidate_transitive_imprimitive_rev172.py

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from math import log2
 
 from coset_stabilizer_primitives import RightCoset
@@ -13,6 +13,9 @@ from design_full_string_child_preflight_v1 import (
     DesignFullStringChildPreflight,
     design_full_string_child_preflight,
     record_design_full_string_child_execution,
+)
+from design_primitive_johnson_complete_cover_preflight_v1 import (
+    record_design_primitive_johnson_complete_cover_execution,
 )
 from design_union_reconstruction_resource_v1 import (
     DesignUnionReconstructionResourceEnvelope,
@@ -67,22 +70,10 @@ def solve_design_tuple_transport_full_string(
 ) -> DesignTupleFullStringSI:
     """Solve every exact Design-Lemma tuple branch on the original full string.
 
-    `transport_plan` is assumed to be a complete cover of all ambient tuple
-    transporters.  Every surviving right coset is intersected *exactly* with the
-    original source/target string by the proof-carrying U2 candidate solver.  If
-    even one branch remains unresolved, the entire result is withheld fail-closed.
-
-    When every branch is exact, the nonempty branch intersections are themselves
-    right cosets contained in the same full string-isomorphism set.  Choosing one
-    representative r0, their target-side automorphism subgroups together with the
-    differences r_i r0^-1 generate exactly the target automorphism subgroup covered
-    by the union.  Because the upstream tuple cover is complete, this generated
-    right coset is exactly the full ambient string-isomorphism set, not merely a
-    sampled union of branches.
-
-    This routine certifies exact set reconstruction.  Its explicit local union
-    bookkeeping bound is recorded, but theorem-scale H5 recurrence/complexity
-    closure remains a separate proof obligation.
+    The complete child cover is reserved before execution.  When rev254 marks a
+    subset of branches as primitive-Johnson, each corresponding U2 call consumes
+    its exact rev246 reservation and the caller records the ordered execution
+    charges back into the same complete-cover ledger before union reconstruction.
     """
     source = tuple(source_values)
     target = tuple(target_values)
@@ -120,6 +111,15 @@ def solve_design_tuple_transport_full_string(
             child_preflight.reason, None, child_preflight,
         )
 
+    primitive_preflight = child_preflight.primitive_johnson_preflight
+    primitive_reservations = {}
+    if primitive_preflight is not None:
+        primitive_reservations = {
+            reservation.branch_index: reservation
+            for reservation in primitive_preflight.branch_reservations
+        }
+    primitive_results = []
+
     solved = []
     nonempty = []
     for branch_index, branch in enumerate(transport_plan.branches):
@@ -127,6 +127,7 @@ def solve_design_tuple_transport_full_string(
             raise AssertionError("a surviving tuple branch must carry a right coset")
         if not ambient_group.contains(branch.coset.representative):
             raise AssertionError("tuple-branch representative escaped the ambient group")
+        terminal_kind = child_preflight.terminal_kinds[branch_index]
         child = candidate_coset_string_isomorphism_u2(
             branch.coset,
             source,
@@ -139,11 +140,37 @@ def solve_design_tuple_transport_full_string(
             max_depth=max_depth,
             max_state_orbit_work=(
                 child_preflight.state_orbit_work_upper_bounds[branch_index]
-                if child_preflight.terminal_kinds[branch_index] == "state_orbit"
+                if terminal_kind == "state_orbit"
                 else 0
+            ),
+            max_imprimitive_quotient_kernel_work=(
+                child_preflight.imprimitive_work_upper_bounds[branch_index]
+                if terminal_kind == "imprimitive_quotient_kernel"
+                else 0
+            ),
+            primitive_johnson_reservation=(
+                primitive_reservations.get(branch_index)
+                if terminal_kind == "primitive_johnson"
+                else None
             ),
         )
         solved.append(child)
+
+        if terminal_kind == "primitive_johnson":
+            primitive_results.append(child)
+            if primitive_preflight is None:
+                raise AssertionError("primitive-Johnson child lacks the complete-cover preflight")
+            if bool(getattr(child, "production_attempt_admitted", False)):
+                primitive_preflight = record_design_primitive_johnson_complete_cover_execution(
+                    primitive_preflight,
+                    primitive_results,
+                    complete=False,
+                )
+                child_preflight = replace(
+                    child_preflight,
+                    primitive_johnson_preflight=primitive_preflight,
+                )
+
         if not child.exact:
             partial_preflight = record_design_full_string_child_execution(
                 child_preflight, solved, complete=False,
@@ -156,6 +183,38 @@ def solve_design_tuple_transport_full_string(
             )
         if child.coset is not None:
             nonempty.append(child.coset)
+
+    if primitive_preflight is not None and primitive_preflight.selected_branch_count:
+        if len(primitive_results) != primitive_preflight.selected_branch_count:
+            return DesignTupleFullStringSI(
+                "undetermined_design_primitive_johnson_execution_ledger", None,
+                tuple(solved), len(solved), len(nonempty), False, False, 0.0,
+                "the executed primitive-Johnson branches do not match the caller-selected complete subcover",
+                None, child_preflight,
+            )
+        if not all(bool(getattr(result, "production_attempt_admitted", False)) for result in primitive_results):
+            return DesignTupleFullStringSI(
+                "undetermined_design_primitive_johnson_execution_ledger", None,
+                tuple(solved), len(solved), len(nonempty), False, False, 0.0,
+                "at least one selected primitive-Johnson branch did not carry a production-admitted rev246 execution charge",
+                None, child_preflight,
+            )
+        primitive_preflight = record_design_primitive_johnson_complete_cover_execution(
+            primitive_preflight,
+            primitive_results,
+            complete=True,
+        )
+        if not primitive_preflight.execution_charge_complete:
+            return DesignTupleFullStringSI(
+                "undetermined_design_primitive_johnson_execution_ledger", None,
+                tuple(solved), len(solved), len(nonempty), False, False, 0.0,
+                "the rev254 primitive-Johnson complete-cover execution ledger is incomplete",
+                None, child_preflight,
+            )
+        child_preflight = replace(
+            child_preflight,
+            primitive_johnson_preflight=primitive_preflight,
+        )
 
     child_preflight = record_design_full_string_child_execution(
         child_preflight, solved, complete=True,
