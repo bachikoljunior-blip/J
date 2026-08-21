@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev250-takeover-20260822T034243JST-6e98af2a",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T034116+0900-92e55a14-turn1",
   "started_at_jst": "2026-08-22T03:42:43+09:00",
-  "heartbeat_at_jst": "2026-08-22T04:10:58+09:00",
+  "heartbeat_at_jst": "2026-08-22T04:12:47+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "6e98af2a0640b31525b820536876bb98140a7426",
   "starting_agi_gi_rev": 254,
@@ -30,6 +30,18 @@
     "failure": "memo property insertion target not found",
     "policy": "replace the stale six-file self-rewriting head with a current-main child containing four durable ledger paths plus changed replayable admission evidence"
   },
-  "status": "active",
+  "completion": {
+    "pull_request": 184,
+    "exact_head_sha": "c8a7954428253ac7ac296707d1dda4260f58861d",
+    "merge_commit_sha": "b6c67051c21893bc73c3c9df5c080c5652d7a221",
+    "workflows_success": 10,
+    "workflows_failure": 0,
+    "focused_tests_passed": 13,
+    "all_module_tests_passed": 619,
+    "labelg_differential_gate": "success",
+    "merge_admission": "agi/run-history/phase-admissions/chatgpt-session-j-rev250-takeover-20260822T034243JST-6e98af2a-merge-20260822T0410JST.json"
+  },
+  "status": "closed",
+  "completed_at_jst": "2026-08-22T04:12:47+09:00",
   "agi_state": "NOT_AGI"
 }
