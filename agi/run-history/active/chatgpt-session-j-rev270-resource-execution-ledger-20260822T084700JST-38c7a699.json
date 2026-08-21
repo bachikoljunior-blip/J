@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev270-resource-execution-ledger-20260822T084700JST-38c7a699",
   "session_id": "chatgpt-session-j-continuation-20260822T084356+0900-turn2",
   "started_at_jst": "2026-08-22T08:47:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T08:47:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T08:52:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "38c7a69901c7a8aefe9261b53812222152371fd5",
   "starting_agi_gi_rev": 266,
@@ -13,6 +13,7 @@
   "branch": "agi-gi-rev270-resource-execution-ledger-session-20260822-0847",
   "reserved_paths": [
     ".github/workflows/rev270-implicit-relation-resource-execution-ledger-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev270-resource-execution-ledger-20260822T084700JST-38c7a699-attempt-solution.json",
     "automation_runs/2026-08-19_0851_JST/REV270_IMPLICIT_RELATION_RESOURCE_EXECUTION_LEDGER.md",
     "automation_runs/2026-08-19_0851_JST/implicit_relation_resource_execution_ledger_v1.py",
     "automation_runs/2026-08-19_0851_JST/test_implicit_relation_resource_execution_ledger_rev270.py"
@@ -27,6 +28,16 @@
   ],
   "intent": "add an additive execution-linked phase ledger that consumes a pre-admitted rev265-style six-phase resource envelope without importing or modifying the still-active rev265 branch, records each phase once in canonical order, preserves the unexecuted suffix, and fails closed on overcharge, replay, context drift, or incomplete execution",
   "non_interference": "Only new rev270 reserved paths are to be added; do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, or shared implementation path.",
+  "pull_request": 215,
+  "latest_head_sha": "2e97e3c8142aed0318caa45d60964b1dfc371eab",
+  "validation": {
+    "dedicated_workflow_run": 32538332484,
+    "dedicated_status": "success",
+    "problem_solving_parallel_admission_run": 32538332502,
+    "problem_solving_parallel_admission_status": "fixing_missing_phase_evidence",
+    "general_validation_run": 32538332655,
+    "general_validation_status": "in_progress"
+  },
   "status": "active",
   "agi_state": "NOT_AGI"
 }

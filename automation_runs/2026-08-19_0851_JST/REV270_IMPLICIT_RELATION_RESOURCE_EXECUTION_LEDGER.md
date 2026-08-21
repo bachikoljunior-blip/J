@@ -8,7 +8,7 @@ The root state remains **NOT_AGI**.  This revision is resource-accounting infras
 
 ## Collision-safe rescope
 
-At the start of this continuation, the next visible semantic gap was the exact-empty auxiliary-image to exact-empty parent implication.  Before writing that implementation, the active registry was re-read and a fresh rev269 claim was found for exactly that scope.  Rev270 therefore moved to a disjoint resource-accounting sibling and reserves only four new files.
+At the start of this continuation, the next visible semantic gap was the exact-empty auxiliary-image to exact-empty parent implication.  Before writing that implementation, the active registry was re-read and a fresh rev269 claim was found for exactly that scope.  Rev270 therefore moved to a disjoint resource-accounting sibling and reserves four new problem-state files plus one replayable phase-admission evidence record.
 
 ## Existing machinery reused
 
