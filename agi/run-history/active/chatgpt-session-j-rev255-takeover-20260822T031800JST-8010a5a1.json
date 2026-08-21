@@ -1,0 +1,44 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1",
+  "session_id": "chatgpt-session-j-rev243-continuation-rev255-takeover-20260822T031800+0900",
+  "started_at_jst": "2026-08-22T03:18:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T03:18:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "8010a5a12399aa97920a72a1b80c28c49b465ff9",
+  "starting_agi_gi_rev": 254,
+  "target_revision": 255,
+  "scope": "CRX2/c2b2a2iii2/shared-design-caller-integration",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+    "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+    "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+    "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py",
+    "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+    "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+    ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1-attempt_solution-20260822T0318JST.json"
+  ],
+  "branch": "agi-gi-rev255-primitive-johnson-design-integration-takeover-20260822-0318",
+  "lineage": {
+    "original_session_marker": "chatgpt-session-j-rev243-20260821T194851+0900-912bbefa",
+    "original_pr": 174,
+    "resource_operator_pr": 179,
+    "complete_cover_pr": 192,
+    "complete_cover_revision": 254
+  },
+  "takeover_audit": {
+    "stale_claim": "chatgpt-session-j-rev255-20260822T011920JST-678e8517",
+    "stale_branch": "agi-gi-rev255-primitive-johnson-design-integration-session-20260822-0119",
+    "stale_branch_head": "fbe65ff48707a05be98c77d10cc7fdccb4ea60dd",
+    "stale_branch_last_commit_jst": "2026-08-22T01:21:11+09:00",
+    "stale_after_minutes": 90,
+    "observed_at_jst": "2026-08-22T03:18:00+09:00",
+    "pull_request": null,
+    "policy": "do not rewrite the stale claim or stale branch; reimplement the reserved rev255 integration from current main under this fresh takeover claim"
+  },
+  "non_interference": "Use only the listed rev255 paths. Do not modify or close PR #177, the stale rev255 branch, rev247 S1, rev248/rev250-rev253/CRX1 branches or claims, sibling workflows, or unrelated main coordination files.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
