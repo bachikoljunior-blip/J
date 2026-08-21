@@ -1,4 +1,6 @@
+from dataclasses import replace
 from itertools import combinations
+from types import SimpleNamespace
 
 import design_lemma_exact_twl_candidate_si_v1 as _candidate
 from design_pipeline_admission_ledger_v1 import (
@@ -134,6 +136,175 @@ def test_root_lift_gate_remains_fail_closed():
     assert not got.root_lift_certified
     assert not got.admitted
     assert got.status == "design_pipeline_original_root_lift_unavailable"
+
+
+def test_production_phase_caps_are_clipped_to_shared_slices(monkeypatch):
+    pipeline = replace(
+        _ledger(10**40),
+        twl_work_upper_bound=101,
+        materialization_work_upper_bound=102,
+        tuple_transport_work_upper_bound=103,
+        child_si_work_upper_bound=104,
+        union_work_upper_bound=105,
+        work_upper_bound=515,
+        max_work=515,
+        admitted=True,
+    )
+    captured = {}
+    monkeypatch.setattr(
+        _candidate,
+        "design_pipeline_admission_ledger",
+        lambda **_kwargs: pipeline,
+    )
+
+    twl_resource = SimpleNamespace(
+        admitted=True,
+        reason="ok",
+        charged_paired_work=1,
+        executed_source_runs=1,
+        executed_target_runs=1,
+        executed_source_work=1,
+        executed_target_work=1,
+    )
+
+    def fake_twl_resource(_root, _v, _k, max_work):
+        captured["twl_preflight"] = max_work
+        return twl_resource
+
+    monkeypatch.setattr(
+        _candidate, "paired_correlated_twl_resource_envelope", fake_twl_resource,
+    )
+    monkeypatch.setattr(
+        _candidate,
+        "record_paired_correlated_twl_execution",
+        lambda envelope, **_kwargs: envelope,
+    )
+
+    family = SimpleNamespace(
+        states_checked=1,
+        work_units=1,
+        exact=True,
+        theorem_parameter_gate=True,
+        symmetry_defect_gate=True,
+        status="certified_exact_twl_design_witness_family",
+    )
+    materialization = SimpleNamespace(
+        complete=True,
+        materialized_branch_count=1,
+        charged_work_upper_bound=1,
+    )
+    plan = SimpleNamespace(
+        source_family=family,
+        target_family=family,
+        exact_empty=False,
+        complete=True,
+        status="certified_complete_design_branch_plan",
+        individualization_length=0,
+        branch_count=1,
+        reason="ok",
+        materialization_resource_envelope=materialization,
+    )
+
+    def fake_plan(*_args, **kwargs):
+        captured["twl_engine"] = kwargs["max_work_units"]
+        captured["materialization"] = kwargs["max_materialization_work"]
+        return plan
+
+    monkeypatch.setattr(_candidate, "build_exact_twl_design_branch_plan", fake_plan)
+    monkeypatch.setattr(
+        _candidate,
+        "certify_design_branch_quasipoly_cost",
+        lambda *_args, **_kwargs: SimpleNamespace(certified=True, reason="ok"),
+    )
+
+    transport_resource = SimpleNamespace(admitted=True, reason="ok")
+
+    def fake_transport_resource(*args):
+        captured["transport"] = args[-1]
+        return transport_resource
+
+    monkeypatch.setattr(
+        _candidate, "design_tuple_transport_resource_envelope", fake_transport_resource,
+    )
+    executed_transport_resource = SimpleNamespace(
+        admitted=True,
+        reason="ok",
+        complete=True,
+        executed_branches=1,
+        executed_orbit_states=1,
+        executed_action_steps=1,
+        charged_work_upper_bound=1,
+    )
+    monkeypatch.setattr(
+        _candidate,
+        "record_design_tuple_transport_execution",
+        lambda _envelope, **_kwargs: executed_transport_resource,
+    )
+    transport = SimpleNamespace(
+        complete=True,
+        status="certified_complete_design_tuple_transport_cover",
+        exact_empty=False,
+        reason="ok",
+        executed_branch_count=1,
+        total_orbit_states=1,
+        total_action_steps=1,
+    )
+    monkeypatch.setattr(
+        _candidate,
+        "transport_complete_design_tuple_branches",
+        lambda *_args, **_kwargs: transport,
+    )
+
+    full = SimpleNamespace(
+        exact=False,
+        reason="sentinel after cap capture",
+        child_preflight=None,
+        union_resource_envelope=None,
+    )
+
+    def fake_full(*_args, **kwargs):
+        captured["children"] = kwargs["max_design_full_string_child_work"]
+        captured["union"] = kwargs["max_design_union_reconstruction_work"]
+        return full
+
+    monkeypatch.setattr(
+        _candidate, "solve_design_tuple_transport_full_string", fake_full,
+    )
+    monkeypatch.setattr(
+        _candidate,
+        "record_design_pipeline_execution",
+        lambda _ledger, **_kwargs: pipeline,
+    )
+
+    group = schreier_stabilizer_chain((identity(8),))
+    relation = tuple(0 for _ in combinations(range(8), 2))
+    got = _candidate.exact_twl_design_candidate_string_isomorphism(
+        group,
+        _lifted(group),
+        8,
+        2,
+        relation,
+        relation,
+        (0,) * 8,
+        (0,) * 8,
+        root_n=16,
+        max_twl_work_units=10**9,
+        max_paired_twl_work_units=10**9,
+        max_design_branch_materialization_work=10**9,
+        max_design_transport_work=10**9,
+        max_design_full_string_child_work=10**9,
+        max_design_union_reconstruction_work=10**9,
+        max_design_pipeline_work=10**9,
+    )
+    assert got.status == "undetermined_exact_twl_design_full_string"
+    assert captured == {
+        "twl_preflight": 101,
+        "twl_engine": 101,
+        "materialization": 102,
+        "transport": 103,
+        "children": 104,
+        "union": 105,
+    }
 
 
 def test_cycle11_records_all_five_pipeline_phases_exactly_once():

@@ -63,6 +63,8 @@ def exact_twl_design_candidate_string_isomorphism(
     max_design_branch_materialization_work: int = 10**30,
     max_partition_states: int = 200000,
     max_design_transport_work: int = 10**30,
+    max_design_full_string_child_work: int = 10**30,
+    max_design_union_reconstruction_work: int = 10**30,
     max_design_pipeline_work: int = 10**100,
     polylog_power: int = 2,
     max_explicit_degree: int = 8,
@@ -74,9 +76,10 @@ def exact_twl_design_candidate_string_isomorphism(
 
     The rev242 boundary first reserves one input-only original-root ledger for
     correlated t-WL, witness materialization, tuple transport, every exact child
-    terminal, and final union reconstruction.  Rejection occurs before the first
-    call that can execute correlated t-WL.  Existing per-phase and runtime caps
-    remain stricter fail-closed guards inside that single outer reservation.
+    terminal, and final union reconstruction. Rejection occurs before the first
+    call that can execute correlated t-WL. Every phase-local execution cap is
+    clipped to its slice of the admitted ledger before that phase starts; larger
+    caller or engineering caps therefore cannot escape the shared reservation.
 
     Compared with the earlier incidence-2WL execution boundary, this path verifies
     the actual correlated-replacement k-WL + Split-or-UPCC witness mechanism before
@@ -104,8 +107,12 @@ def exact_twl_design_candidate_string_isomorphism(
             pipeline_admission_ledger=pipeline,
         )
 
+    twl_phase_cap = min(
+        int(max_paired_twl_work_units),
+        int(pipeline.twl_work_upper_bound),
+    )
     twl_resource = paired_correlated_twl_resource_envelope(
-        root_n, vertex_count, arity, max_paired_twl_work_units,
+        root_n, vertex_count, arity, twl_phase_cap,
     )
     if not twl_resource.admitted:
         return ExactTWLDesignCandidateSI(
@@ -123,10 +130,16 @@ def exact_twl_design_candidate_string_isomorphism(
         max_states=max_states,
         max_tuple_states=max_tuple_states,
         max_rounds=max_twl_rounds,
-        max_work_units=max_twl_work_units,
+        max_work_units=min(
+            int(max_twl_work_units),
+            int(pipeline.twl_work_upper_bound),
+        ),
         max_branch_pairs=max_branch_pairs,
         original_root_degree=root_n,
-        max_materialization_work=max_design_branch_materialization_work,
+        max_materialization_work=min(
+            int(max_design_branch_materialization_work),
+            int(pipeline.materialization_work_upper_bound),
+        ),
     )
     source_family = plan.source_family
     target_family = plan.target_family
@@ -217,7 +230,10 @@ def exact_twl_design_candidate_string_isomorphism(
         int(plan.branch_count),
         int(group.order),
         max(1, len(tuple(group.original_generators))),
-        max_design_transport_work,
+        min(
+            int(max_design_transport_work),
+            int(pipeline.tuple_transport_work_upper_bound),
+        ),
     )
     if not transport_resource.admitted:
         return ExactTWLDesignCandidateSI(
@@ -274,6 +290,14 @@ def exact_twl_design_candidate_string_isomorphism(
         group_order_poly_power=group_order_poly_power,
         max_group_order=max_group_order,
         max_depth=max_depth,
+        max_design_full_string_child_work=min(
+            int(max_design_full_string_child_work),
+            int(pipeline.child_si_work_upper_bound),
+        ),
+        max_design_union_reconstruction_work=min(
+            int(max_design_union_reconstruction_work),
+            int(pipeline.union_work_upper_bound),
+        ),
     )
     if not full.exact:
         return ExactTWLDesignCandidateSI(

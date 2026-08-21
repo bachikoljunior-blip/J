@@ -3,12 +3,14 @@
   "event_type": "active_session_claim",
   "automation_run_id": "chatgpt-session-j-rev242-20260821T193402+0900-4e443db1",
   "started_at_jst": "2026-08-21T19:34:02+09:00",
+  "last_progress_at_jst": "2026-08-21T20:24:03+09:00",
   "request_received_at_utc": "2026-08-21T10:28:44Z",
   "clarification_received_at_utc": "2026-08-21T10:31:51Z",
   "repository": "bachikoljunior-blip/J",
   "starting_head_sha": "4e443db19d092aad9a9b26bb15574e4410a3cc3f",
   "stacked_on_pull_request": 169,
   "branch": "agi-gi-rev242-pipeline-ledger-session-20260821-1934",
+  "pull_request": 170,
   "exclusive_scope": "CRX2/c2b2a2i3b shared Design pipeline admission ledger",
   "parallel_safety": {
     "do_not_modify_other_active_branches": true,
@@ -16,10 +18,10 @@
     "skip_duplicate_scope_when_this_claim_is_active": true
   },
   "restart_guard": {
-    "schedule_title": "J rev242 session watchdog 20260821T1934JST",
-    "cadence": "hourly",
-    "stale_after_minutes": 75,
-    "behavior": "skip while a fresh heartbeat for this automation_run_id exists; re-enter the same unresolved scope only after the claim is stale"
+    "repository_workflow": ".github/workflows/j-continuation-hourly-refire.yml",
+    "cadence": "17 * * * *",
+    "stale_after_minutes": 90,
+    "behavior": "no-op while queued/running workflows, recently updated AGI-GI PRs, or fresh active claims exist; emit a durable continuation queue request only after idle/stale detection"
   },
   "status": "active",
   "agi_state": "NOT_AGI"

@@ -31,13 +31,18 @@ path is bounded separately because rev240 preserves it when certified.
 
 The five phase bounds are combined with caller `cap+1` saturation. A rejected
 ledger returns before `build_exact_twl_design_branch_plan`, so correlated t-WL
-never starts. Existing per-phase and runtime caps remain stricter fail-closed
-guards.
+never starts. After admission, every phase-local cap is clipped to its own outer
+slice before that phase starts: paired/engine t-WL, branch materialization,
+tuple transport, full-string child preflight, and union reconstruction. A larger
+caller or engineering cap can therefore stop less work, but cannot authorize
+work outside the shared reservation.
 
-After admission, rev232, rev234, rev233, rev235--240, and rev241 execution
-objects are linked back into the outer immutable ledger. Their actual run,
-branch, orbit, candidate-scan, and union-generator counts are verified and
-recorded exactly once.
+After execution, rev232, rev234, rev233, rev235--240, and rev241 proof objects
+are linked back into the immutable outer ledger. Their actual run, branch,
+orbit, candidate-scan, and union-generator counts are verified and recorded
+exactly once. Focused regressions use oversized independent inner caps and
+mechanically verify that the production caller passes only the five admitted
+outer slices.
 
 ## Claims withheld
 
