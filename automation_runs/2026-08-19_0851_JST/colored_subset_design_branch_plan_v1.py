@@ -52,17 +52,12 @@ def build_colored_subset_design_branch_plan(
 ) -> DesignBranchPlan:
     """Build a complete source/target branch family for a Design-Lemma witness level.
 
-    Before the first incidence-WL execution, one original-root ledger reserves the
-    complete correlated witness searches and every downstream phase through exact
-    union reconstruction.  A rejected ledger therefore returns fail-closed without
-    entering either source or target witness search.
-
-    The single-structure witness finder returns the *entire* first successful
-    ordered-tuple level. Under every color-preserving isomorphism that family maps
-    bijectively to the corresponding target family. Therefore the Cartesian product
-    of the two complete families is a safe exact branching cover: every true
-    isomorphism maps some source witness tuple to a target witness tuple occurring in
-    the plan. No arbitrary tuple representative is selected.
+    Supplying ``original_root_degree`` enables the rev242 production path: before
+    the first incidence-WL execution, one original-root ledger reserves the complete
+    correlated witness searches and every downstream phase through exact union
+    reconstruction. A rejected ledger therefore returns fail-closed without entering
+    either source or target witness search. Legacy callers that do not yet supply an
+    original root retain the pre-rev242 behavior and carry no ledger downstream.
     """
     v = int(vertex_count)
     t = int(arity)
@@ -70,27 +65,28 @@ def build_colored_subset_design_branch_plan(
     target = tuple(target_colors)
     if max_branch_pairs < 1:
         raise ValueError("max_branch_pairs must be positive")
-    root = v if original_root_degree is None else int(original_root_degree)
 
-    ledger = design_original_root_ledger(
-        root,
-        v,
-        t,
-        max_states=max_states,
-        max_wl_vertices=max_wl_vertices,
-        max_wl_rounds=max_wl_rounds,
-        max_branch_pairs=max_branch_pairs,
-        max_partition_states=max_partition_states,
-        max_design_full_string_child_work=max_design_full_string_child_work,
-        max_design_union_reconstruction_work=max_design_union_reconstruction_work,
-        max_work=max_original_root_design_work,
-    )
-    if not ledger.admitted:
-        return DesignBranchPlan(
-            ledger.status, v, t, None, None, None, (), 0, 0.0,
-            False, False, ledger.reason,
-            original_root_ledger=ledger,
+    ledger = None
+    if original_root_degree is not None:
+        ledger = design_original_root_ledger(
+            int(original_root_degree),
+            v,
+            t,
+            max_states=max_states,
+            max_wl_vertices=max_wl_vertices,
+            max_wl_rounds=max_wl_rounds,
+            max_branch_pairs=max_branch_pairs,
+            max_partition_states=max_partition_states,
+            max_design_full_string_child_work=max_design_full_string_child_work,
+            max_design_union_reconstruction_work=max_design_union_reconstruction_work,
+            max_work=max_original_root_design_work,
         )
+        if not ledger.admitted:
+            return DesignBranchPlan(
+                ledger.status, v, t, None, None, None, (), 0, 0.0,
+                False, False, ledger.reason,
+                original_root_ledger=ledger,
+            )
 
     source_family = find_colored_subset_design_witness_family(
         v, t, source,
@@ -113,7 +109,6 @@ def build_colored_subset_design_branch_plan(
         + 16.0
     )
 
-    # Raw relation color multiplicities are an exact isomorphism invariant.
     if Counter(source) != Counter(target):
         return DesignBranchPlan(
             "exact_empty_design_relation_color_multiplicity",
