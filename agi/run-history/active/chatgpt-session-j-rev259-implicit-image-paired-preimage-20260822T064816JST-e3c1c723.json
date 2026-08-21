@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev259-implicit-image-paired-preimage-20260822T064816JST-e3c1c723",
   "session_id": "chatgpt-session-current-conversation-rev259-20260822T064816+0900",
   "started_at_jst": "2026-08-22T06:48:16+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:48:16+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:54:00+09:00",
+  "completed_at_jst": "2026-08-22T06:54:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "e3c1c723c0456b92ad387b21ddf3016615651ab6",
   "starting_agi_gi_rev": 257,
@@ -33,7 +34,9 @@
     "rev245 imprimitive Design pipeline integration / PR #177",
     "MAIN.md and shared coordination implementation"
   ],
-  "non_interference": "Add only new rev259 paired-preimage adapter, regression, audit, path-scoped smoke, phase evidence, and this session's dedicated hourly guard. Do not modify rev257/rev258 implementation paths, existing claims, branches, PRs, MAIN.md, or unrelated workflows.",
-  "status": "active",
+  "non_interference": "No implementation write was made after the simultaneous-start recheck exposed a fresh overlapping rev259 claim.",
+  "superseded_by_claim": "chatgpt-session-j-rev259-original-preimage-20260822T0652JST-c31a94ef",
+  "supersession_reason": "The mandatory post-claim race check found a later-visible overlapping original-domain preimage claim; this session stopped before publishing implementation and rescoping to a disjoint differential verifier.",
+  "status": "superseded",
   "agi_state": "NOT_AGI"
 }
