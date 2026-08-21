@@ -1,19 +1,29 @@
 {
+  "schema_version": 2,
+  "event_type": "active_session_claim",
   "claim_id": "chatgpt-session-j-rev258-image-coset-20260822T0646JST-7d42e8b1",
-  "state": "active",
+  "session_id": "chatgpt-session-j-rev258-image-coset-20260822T0646JST-7d42e8b1",
   "started_at_jst": "2026-08-22T06:46:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:46:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:49:04+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "de762318a6dfb5483b5eca95a46c4c9bdcc7b2f8",
+  "starting_agi_gi_rev": 256,
   "target_revision": 258,
   "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/value-preserving-image-coset-intersection",
-  "base_pr": 198,
-  "base_head_sha": "7b8764e0a19cbb9b19fe449b1a874e42470491dc",
-  "branch": "codex/agi-gi-rev258-implicit-image-coset-20260822-0646jst",
   "reserved_paths": [
     ".github/workflows/rev258-implicit-image-coset-smoke.yml",
     "automation_runs/2026-08-19_0851_JST/REV258_IMPLICIT_IMAGE_COSET_INTERSECTION.md",
     "automation_runs/2026-08-19_0851_JST/implicit_relation_image_coset_intersection_v1.py",
     "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_coset_intersection_rev258.py"
   ],
+  "branch": "codex/agi-gi-rev258-implicit-image-coset-20260822-0646jst",
+  "status": "superseded",
+  "completed_at_jst": "2026-08-22T06:49:04+09:00",
+  "superseded_by_claim_id": "chatgpt-session-j-rev258-resource-envelope-20260822T064500JST-2675f756",
+  "supersession_reason": "Rejected by the durable registry: later target_revision 258 claim conflicts with the fresh canonical rev258 claim created at 2026-08-22T06:45:00+09:00; branch contents are preserved for a future distinct revision.",
+  "base_pr": 198,
+  "base_head_sha": "7b8764e0a19cbb9b19fe449b1a874e42470491dc",
   "do_not_duplicate": true,
-  "strict_boundary": "Solve only the complete value-preserving right-coset intersection inside rev257's faithful implicit auxiliary image. Original-domain preimage integration and original-root quasipolynomial accounting remain unresolved. AGI remains NOT_AGI."
+  "strict_boundary": "Solve only the complete value-preserving right-coset intersection inside rev257's faithful implicit auxiliary image. Original-domain preimage integration and original-root quasipolynomial accounting remain unresolved. AGI remains NOT_AGI.",
+  "agi_state": "NOT_AGI"
 }
