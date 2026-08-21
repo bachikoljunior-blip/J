@@ -40,3 +40,15 @@ revision and does not overlap the live rev246 technical claim.
 Root status remains **NOT_AGI**.  Repository-state consistency is necessary for
 safe parallel integration but is not evidence of AGI generality, performance,
 autonomy, or practical delivery.
+
+## Whole-mechanism extension
+
+The follow-up requirement extends recognition beyond the start marker.
+`problem_solving_parallel_admission.py` binds forecast, leaf selection,
+existing-solution audit, attempt, decomposition, evaluation, child/parent/root
+integration, problem-tree update, publication, and merge to the same registry.
+Read-only phases expose all occupied scopes; mutation phases require a fresh
+schema-v2 owner, exact revision equality, descendant-only scope, and zero live
+collision.  Parent integration therefore cannot silently absorb a child still
+owned by another session.  The registry source SHA and digest make the visible
+parallel state replayable as evidence.

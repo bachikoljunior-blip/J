@@ -54,5 +54,21 @@ the scopes differ.  Operational work that consumes no AGI-GI revision uses
   stale records do not block selection.
 - Markdown notices may mirror a claim for humans, but JSON is authoritative.
 
+## Whole problem-solving mechanism
+
+The claim is not only a start marker.  Every recursive phase must run
+`automation/problem_solving_parallel_admission.py` against a freshly re-read
+main worktree.  Observation phases (`forecast`, `select_leaf`, and
+`existing_solution_audit`) may inspect the root but return every other fresh
+claim in `parallel_active_claims`.  They must not select another claim's scope.
+
+Mutation/evidence phases (`attempt_solution`, `decompose`, `evaluate`,
+`integrate_children`, `solve_parent`, `solve_root`, `update_problem_tree`,
+`publish`, and `merge`) are admitted only inside the caller's fresh schema-v2
+scope and exact target revision.  A fresh descendant claim blocks parent
+integration.  Each result contains the registry source SHA and a digest of all
+claims; persist both with the phase evidence so a later session can reconstruct
+which parallel work was visible.
+
 `automation/parallel_claims.py validate` accepts the historical v1 records in
 this directory read-only and enforces the full contract for schema-v2 files.
