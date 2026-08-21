@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev249-20260821T220020JST-09d66cc6",
   "session_id": "chatgpt-session-j-parallel-rev249-20260821T220020+0900-09d66cc6-turn1",
   "started_at_jst": "2026-08-21T22:00:20+09:00",
-  "heartbeat_at_jst": "2026-08-21T22:00:20+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:05:32+09:00",
+  "completed_at_jst": "2026-08-21T22:05:32+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "09d66cc691e00f9cc9e1e49df1afe094ab24b1a7",
   "starting_agi_gi_rev": 244,
@@ -18,7 +19,8 @@
     ".github/workflows/rev249-phase-start-ticket-ledger-smoke.yml",
     ".github/workflows/j-rev249-session-hourly-refire.yml"
   ],
-  "non_interference": "Add only new rev249 phase-ticket, regression, audit, and session workflow paths. Do not modify rev245, rev246, rev247, rev248, CRX1 admission, MAIN.md, or shared Design/S1 implementation files.",
-  "status": "active",
+  "rescope_reason": "Post-claim registry recheck found fresh target_revision 249 claim chatgpt-session-j-rev249-20260821T220205JST-f3a215ea. No implementation branch or reserved path was written.",
+  "superseded_by": "chatgpt-session-j-rev250-20260821T220532JST-pending",
+  "status": "superseded",
   "agi_state": "NOT_AGI"
 }
