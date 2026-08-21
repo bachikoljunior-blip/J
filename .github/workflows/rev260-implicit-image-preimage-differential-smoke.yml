@@ -9,6 +9,7 @@ on:
       - .github/workflows/rev260-implicit-image-preimage-differential-smoke.yml
       - agi/run-history/phase-admissions/chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f-attempt-solution.json
       - agi/run-history/phase-admissions/chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f-publish.json
+      - agi/run-history/phase-admissions/chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f-merge.json
   workflow_dispatch:
 
 permissions:
@@ -62,3 +63,16 @@ jobs:
             --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_differential_rev260.py \
             --output /tmp/rev260-publish.json
           cat /tmp/rev260-publish.json
+      - name: Emit replayable merge evidence payload
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f \
+            --phase merge \
+            --scope crx3/replay-stable-proof-substrate/implicit-relation-image-preimage-differential-verifier \
+            --target-revision 260 \
+            --path .github/workflows/rev260-implicit-image-preimage-differential-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV260_IMPLICIT_IMAGE_PREIMAGE_DIFFERENTIAL.md \
+            --path automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_differential_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_differential_rev260.py \
+            --output /tmp/rev260-merge.json
+          cat /tmp/rev260-merge.json
