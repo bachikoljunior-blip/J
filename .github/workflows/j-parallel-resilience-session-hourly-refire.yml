@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - "automation/session_refire.py"
+      - "automation/test_session_refire.py"
       - ".github/workflows/j-parallel-resilience-session-hourly-refire.yml"
 
 permissions:
@@ -22,79 +24,72 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v4
+
       - name: Detect stale session activity without touching siblings
         id: guard
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
+          CLAIM_ID: chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba
           CLAIM_PATH: agi/run-history/active/chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba.json
           BRANCH: ops-j-parallel-resilience-20260821-215558
-          STALE_AFTER_MINUTES: "55"
         run: |
           set -euo pipefail
 
-          now_epoch="$(date -u +%s)"
-          cutoff_epoch="$((now_epoch - STALE_AFTER_MINUTES * 60))"
-
-          claim_json=""
-          if ! claim_json="$(
-            gh api "repos/${REPOSITORY}/contents/${CLAIM_PATH}?ref=main" \
-              --jq '.content' | tr -d '\n' | base64 --decode
-          )"; then
+          claim_file="$(mktemp)"
+          trap 'rm -f "${claim_file}"' EXIT
+          if ! gh api "repos/${REPOSITORY}/contents/${CLAIM_PATH}?ref=main" \
+              --jq '.content' | tr -d '\n' | base64 --decode >"${claim_file}"; then
             echo "stale=false" >>"${GITHUB_OUTPUT}"
-            echo "reason=claim is absent; no session re-fire is emitted" >>"${GITHUB_OUTPUT}"
-            echo "### J parallel resilience session guard" >>"${GITHUB_STEP_SUMMARY}"
-            echo "- Decision: claim is absent; no session re-fire is emitted" >>"${GITHUB_STEP_SUMMARY}"
+            echo "reason=claim_absent" >>"${GITHUB_OUTPUT}"
+            {
+              echo "### J parallel resilience session guard"
+              echo "- Decision: claim is absent; no session re-fire is emitted"
+              echo "- Other branches, PRs, claims, and workflows inspected or changed: none"
+            } >>"${GITHUB_STEP_SUMMARY}"
             exit 0
           fi
 
-          claim_status="$(jq -r '.status // "unknown"' <<<"${claim_json}")"
-          heartbeat="$(jq -r '.heartbeat_at_jst // .started_at_jst // empty' <<<"${claim_json}")"
-          heartbeat_epoch=0
-          if [[ -n "${heartbeat}" ]]; then
-            heartbeat_epoch="$(date -d "${heartbeat}" +%s)"
-          fi
-
-          branch_epoch=0
-          if branch_date="$(
+          branch_updated=""
+          if branch_updated="$(
             gh api "repos/${REPOSITORY}/commits/${BRANCH}" \
               --jq '.commit.committer.date // .commit.author.date' 2>/dev/null
           )"; then
-            branch_epoch="$(date -d "${branch_date}" +%s)"
+            :
+          else
+            branch_updated=""
           fi
 
           owner="${REPOSITORY%%/*}"
-          pr_epoch=0
           pr_updated="$(
             gh api "repos/${REPOSITORY}/pulls?state=open&head=${owner}:${BRANCH}&per_page=1" \
               --jq '.[0].updated_at // empty'
           )"
-          if [[ -n "${pr_updated}" ]]; then
-            pr_epoch="$(date -d "${pr_updated}" +%s)"
-          fi
 
-          latest_epoch="${heartbeat_epoch}"
-          (( branch_epoch > latest_epoch )) && latest_epoch="${branch_epoch}"
-          (( pr_epoch > latest_epoch )) && latest_epoch="${pr_epoch}"
+          args=(
+            check
+            --claim-file "${claim_file}"
+            --claim-id "${CLAIM_ID}"
+            --now "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          )
+          [[ -n "${branch_updated}" ]] && args+=(--branch-activity-at "${branch_updated}")
+          [[ -n "${pr_updated}" ]] && args+=(--pr-activity-at "${pr_updated}")
 
-          stale=false
-          reason="session activity is fresh"
-          if [[ "${claim_status}" != "active" ]]; then
-            reason="claim is ${claim_status}; no re-fire is needed"
-          elif (( latest_epoch < cutoff_epoch )); then
-            stale=true
-            reason="this session has no claim heartbeat, branch commit, or PR update within ${STALE_AFTER_MINUTES} minutes"
-          fi
-
+          decision="$(python automation/session_refire.py "${args[@]}")"
+          stale="$(jq -r '.should_refire' <<<"${decision}")"
+          reason="$(jq -r '.reason' <<<"${decision}")"
           echo "stale=${stale}" >>"${GITHUB_OUTPUT}"
           echo "reason=${reason}" >>"${GITHUB_OUTPUT}"
+
           {
             echo "### J parallel resilience session guard"
-            echo "- Claim status: ${claim_status}"
-            echo "- Claim heartbeat: ${heartbeat:-missing}"
-            echo "- Dedicated branch activity epoch: ${branch_epoch}"
-            echo "- Dedicated PR activity epoch: ${pr_epoch}"
+            echo "- Claim status: $(jq -r '.claim_status' <<<"${decision}")"
+            echo "- Latest dedicated activity: $(jq -r '.latest_activity_at_jst' <<<"${decision}")"
+            echo "- Re-fire after: $(jq -r '.refire_after_jst' <<<"${decision}")"
+            echo "- Dedicated branch activity: ${branch_updated:-missing}"
+            echo "- Dedicated PR activity: ${pr_updated:-missing}"
             echo "- Other branches, PRs, claims, and workflows inspected or changed: none"
             echo "- Decision: ${reason}"
           } >>"${GITHUB_STEP_SUMMARY}"
