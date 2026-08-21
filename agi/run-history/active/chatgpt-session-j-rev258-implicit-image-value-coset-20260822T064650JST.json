@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev258-implicit-image-value-coset-20260822T064650JST",
+  "session_id": "chatgpt-session-current-conversation-rev258-20260822T064548+0900",
+  "started_at_jst": "2026-08-22T06:46:50+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:46:50+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "40ea9221a4bbce6d13bf750d951815729b15a075",
+  "starting_agi_gi_rev": 257,
+  "target_revision": 258,
+  "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/value-preserving-image-coset-intersection",
+  "reserved_paths": [
+    ".github/workflows/rev258-implicit-image-value-coset-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev258-implicit-image-value-coset-20260822T064650JST-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev258-implicit-image-value-coset-20260822T064650JST-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV258_IMPLICIT_IMAGE_VALUE_COSET.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_image_value_coset_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_value_coset_rev258.py"
+  ],
+  "branch": "agi-gi-rev258-implicit-image-value-coset-session-20260822-0646",
+  "status": "active",
+  "parallel_exclusions": [
+    "PR #195 rev255 primitive-Johnson Design caller integration",
+    "PR #177 rev245 imprimitive Design pipeline integration",
+    "PR #198 rev257 implicit relation-image paired action"
+  ],
+  "agi_state": "NOT_AGI"
+}
