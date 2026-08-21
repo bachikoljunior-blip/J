@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev258-resource-envelope-20260822T064500JST-2675f756",
   "session_id": "chatgpt-session-j-rev258-resource-envelope-20260822T064500+0900-turn1",
   "started_at_jst": "2026-08-22T06:45:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T06:45:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T06:48:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2675f7561c3dac0d43f22de2d83261353d05132e",
   "starting_agi_gi_rev": 257,
   "target_revision": 258,
   "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-root-resource-envelope",
   "branch": "agi-gi-rev258-implicit-image-resource-envelope-session-20260822-0644",
+  "pull_request": 199,
+  "latest_head_sha": "63990d6ef574c967468bf24008bc79c065f9f268",
   "reserved_paths": [
     "automation_runs/2026-08-19_0851_JST/implicit_relation_image_resource_envelope_v1.py",
     "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_resource_envelope_rev258.py",
@@ -21,7 +23,12 @@
     "rev255 Design primitive-Johnson caller integration / PR #195",
     "rev257 implicit relation-image paired action / PR #198"
   ],
+  "validation": {
+    "local_focused_tests": "11/11 passed",
+    "py_compile": "passed",
+    "github_smoke": "awaiting pull_request run discovery"
+  },
   "non_interference": "Only new rev258 resource-envelope, test, audit, and path-scoped smoke files are reserved. Do not modify rev255/rev257 paths, MAIN.md, other active claims, branches, PRs, or running workflows.",
-  "status": "active",
+  "status": "draft_pr_open_ci_pending",
   "agi_state": "NOT_AGI"
 }
