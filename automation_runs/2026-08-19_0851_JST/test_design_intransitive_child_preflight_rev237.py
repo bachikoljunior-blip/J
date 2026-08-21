@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
 import design_tuple_full_string_union_si_v1 as _union
+import design_full_string_child_preflight_v1 as _preflight
 from coset_stabilizer_primitives import RightCoset
 from design_full_string_child_preflight_v1 import design_full_string_child_preflight
 from permutation_group_schreier import identity, schreier_stabilizer_chain
@@ -55,6 +56,21 @@ def test_intransitive_complete_cover_is_rejected_before_first_child_when_budget_
     )
     assert got.status == "design_full_string_child_work_cap_exceeded"
     assert got.branches_checked == 0
+
+
+def test_structural_audit_budget_is_checked_before_any_orbit_image(monkeypatch):
+    branch = _intransitive_branch()
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("orbit audit started before complete-cover audit reservation")
+
+    monkeypatch.setattr(_preflight, "_group_orbits", forbidden)
+    got = design_full_string_child_preflight(
+        (branch,), original_root_degree=6, original_degree=6,
+        group_order_poly_power=2, max_group_order=3, max_work=1,
+    )
+    assert got.status == "design_full_string_child_audit_work_cap_exceeded"
+    assert not got.admitted and got.executed_branch_count == 0
 
 
 def test_intransitive_parent_executes_all_small_image_children_and_records_scans():
