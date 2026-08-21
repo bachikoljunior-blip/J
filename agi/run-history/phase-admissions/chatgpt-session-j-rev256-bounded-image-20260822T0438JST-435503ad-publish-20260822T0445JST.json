@@ -1,0 +1,58 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "codex/agi-gi-rev256-bounded-relation-image-coset-20260821-193800z",
+    "claim_id": "chatgpt-session-j-rev256-bounded-image-20260822T0438JST-435503ad",
+    "heartbeat_at_jst": "2026-08-22T04:45:00+09:00",
+    "reserved_paths": [
+      ".github/workflows/rev256-bounded-relation-image-coset-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev256-bounded-image-20260822T0438JST-435503ad-attempt-solution-20260822T0438JST.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev256-bounded-image-20260822T0438JST-435503ad-merge-20260822T0445JST.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev256-bounded-image-20260822T0438JST-435503ad-publish-20260822T0445JST.json",
+      "automation_runs/2026-08-19_0851_JST/REV256_BOUNDED_RELATION_IMAGE_COSET.md",
+      "automation_runs/2026-08-19_0851_JST/bounded_relation_image_coset_v1.py",
+      "automation_runs/2026-08-19_0851_JST/test_bounded_relation_image_coset_rev256.py"
+    ],
+    "scope": "crx1/bounded-arity-relation-image/explicit-group-exact-transporter-coset",
+    "state": "active",
+    "target_revision": 256
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev255-primitive-johnson-design-integration-takeover-20260822-0318",
+      "claim_id": "chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1",
+      "heartbeat_at_jst": "2026-08-22T03:18:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-takeover-20260822T031800JST-8010a5a1-attempt_solution-20260822T0318JST.json",
+        "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+        "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+        "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+      ],
+      "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+      "state": "active",
+      "target_revision": 255
+    }
+  ],
+  "paths": [
+    ".github/workflows/rev256-bounded-relation-image-coset-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev256-bounded-image-20260822T0438JST-435503ad-publish-20260822T0445JST.json",
+    "automation_runs/2026-08-19_0851_JST/REV256_BOUNDED_RELATION_IMAGE_COSET.md",
+    "automation_runs/2026-08-19_0851_JST/bounded_relation_image_coset_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_bounded_relation_image_coset_rev256.py"
+  ],
+  "phase": "publish",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T04:45:03+09:00",
+  "registry_digest": "sha256:4bd2f52997d024671ede3de83fd7741e604826c13ee04ac2c514bf8623f15334",
+  "registry_source_sha": "a223b795b450f6e16aaf3d8fb7be5b211ac5cf8e",
+  "schema_version": 1,
+  "scope": "crx1/bounded-arity-relation-image/explicit-group-exact-transporter-coset",
+  "target_revision": 256
+}
