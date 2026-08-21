@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev264-parent-outcome-contract-20260822T0749JST-bbf53979",
   "session_id": "chatgpt-session-j-continuation-20260822T074400+0900-274ed1e5-turn1",
   "started_at_jst": "2026-08-22T07:49:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T07:49:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:51:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "bbf53979a6390cd1a1e7e3101cc3df2e50c655a1",
   "starting_agi_gi_rev": 257,
@@ -20,17 +20,13 @@
     "automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_rev264.py"
   ],
   "parallel_exclusions": [
-    "rev258 resource-envelope and legacy value-coset scopes",
-    "rev259 original-domain paired-preimage scopes",
-    "rev260 differential verifier / PR #205",
-    "rev261 nonempty parent-promotion verifier / PR #204",
-    "rev262 value-preserving image-coset scope",
-    "rev263 exact-empty parent verifier",
-    "CRX3 state-orbit proof-DAG / PR #206",
-    "MAIN.md and shared coordination implementation"
+    "all sibling branches, PRs, claims, workflows, and shared implementation"
   ],
-  "non_interference": "Add only new rev264 exact-outcome contract paths. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite sibling branches, PRs, claims, workflows, or shared implementation files.",
-  "strict_boundary": "Normalize already independently verified nonempty or exact-empty parent evidence into one fail-closed typed exact-outcome contract and reject contradictory/incomplete transcripts. This revision does not compute image/value-coset intersection, construct paired preimages, perform rev261/rev263 semantic verification, discharge original-root accounting, wire production callers, or close CRX1, GI, or AGI.",
-  "status": "active",
+  "non_interference": "No implementation was written under this claim. Do not use this target after the simultaneous rev264 collision became visible.",
+  "strict_boundary": "Superseded before implementation because a separately started rev264 primitive-Johnson proof-DAG claim became visible during the mandatory post-claim collision recheck.",
+  "status": "superseded",
+  "superseded_at_jst": "2026-08-22T07:51:00+09:00",
+  "superseded_by_target_revision": 266,
+  "supersede_reason": "simultaneous_target_revision_collision_with_chatgpt-session-j-rev264-primitive-johnson-proof-dag-20260822T074942JST-7e8c3f53",
   "agi_state": "NOT_AGI"
 }
