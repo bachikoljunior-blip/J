@@ -1,0 +1,55 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "feat/crx1-image-si-resource-admission-session-20260821-2202",
+    "claim_id": "chatgpt-session-j-crx1-image-si-takeover-20260822T024349JST-a4f328be",
+    "heartbeat_at_jst": "2026-08-22T02:43:49+09:00",
+    "reserved_paths": [
+      "agi/run-history/phase-admissions/chatgpt-session-j-crx1-image-si-takeover-20260822T024349JST-a4f328be-merge-20260822T0244JST.json",
+      "automation_runs/2026-08-19_0851_JST/CRX1_IMAGE_SI_RESOURCE_ADMISSION.md",
+      "automation_runs/2026-08-19_0851_JST/crx1_image_si_resource_admission_v1.py",
+      "automation_runs/2026-08-19_0851_JST/crx1_image_si_resource_bounds_v1.py",
+      "automation_runs/2026-08-19_0851_JST/test_crx1_image_si_resource_admission_v1.py"
+    ],
+    "scope": "crx1/node-resource-capped-image-si/resource-admission-certificate/integration",
+    "state": "active",
+    "target_revision": null
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev255-primitive-johnson-design-integration-session-20260822-0119",
+      "claim_id": "chatgpt-session-j-rev255-20260822T011920JST-678e8517",
+      "heartbeat_at_jst": "2026-08-22T01:19:20+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev255-design-primitive-johnson-caller-integration-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev255-20260822T011920JST-678e8517-attempt_solution-20260822T0119JST.json",
+        "automation_runs/2026-08-19_0851_JST/REV255_DESIGN_PRIMITIVE_JOHNSON_CALLER_INTEGRATION.md",
+        "automation_runs/2026-08-19_0851_JST/design_full_string_child_preflight_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_original_root_pipeline_resource_v1.py",
+        "automation_runs/2026-08-19_0851_JST/design_tuple_full_string_union_si_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_design_primitive_johnson_caller_integration_rev255.py",
+        "automation_runs/2026-08-19_0851_JST/u2_candidate_coset_string_iso_v2.py"
+      ],
+      "scope": "crx2/c2b2a2iii2/shared-design-caller-integration",
+      "state": "active",
+      "target_revision": 255
+    }
+  ],
+  "paths": [
+    "automation_runs/2026-08-19_0851_JST/CRX1_IMAGE_SI_RESOURCE_ADMISSION.md",
+    "automation_runs/2026-08-19_0851_JST/crx1_image_si_resource_admission_v1.py",
+    "automation_runs/2026-08-19_0851_JST/crx1_image_si_resource_bounds_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_crx1_image_si_resource_admission_v1.py"
+  ],
+  "phase": "merge",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T02:44:30+09:00",
+  "registry_digest": "sha256:08e35b889f115578d5796d3dec491561eb53715acb0b2b519dcc2b408f4656ed",
+  "registry_source_sha": "81d29cef81846e6a28669b87787ea92861549d76",
+  "schema_version": 1,
+  "scope": "crx1/node-resource-capped-image-si/resource-admission-certificate/integration",
+  "target_revision": null
+}
