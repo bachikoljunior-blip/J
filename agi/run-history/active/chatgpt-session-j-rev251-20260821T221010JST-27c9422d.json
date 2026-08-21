@@ -5,9 +5,9 @@
   "session_id": "chatgpt-session-j-parallel-rev251-20260821T221010+0900-27c9422d-turn1",
   "created_at": "2026-08-21T22:10:10+09:00",
   "started_at_jst": "2026-08-21T22:10:10+09:00",
-  "heartbeat_at": "2026-08-21T22:10:10+09:00",
-  "heartbeat_at_jst": "2026-08-21T22:10:10+09:00",
-  "expires_at": "2026-08-22T02:10:10+09:00",
+  "heartbeat_at": "2026-08-21T22:20:37+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:20:37+09:00",
+  "expires_at": "2026-08-22T02:20:37+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "edf86b5a09fc490a95c83508c82f82f430a66510",
   "starting_agi_gi_rev": 244,
@@ -15,9 +15,15 @@
   "scope": "CRX1/exact-result/replay-proof-verifier",
   "branch": "codex/j-rev251-exact-result-replay-20260821-2210JST",
   "worktree": "/tmp/J-rev251-exact-result-replay-27c9422d",
-  "target_pr": null,
-  "owner_pr": null,
+  "target_pr": 185,
+  "owner_pr": 185,
+  "implementation_head": "feee215c2139dbbb8ff7f895723fa9f3f6a47f9a",
   "verification_method": "python -m unittest automation_runs/2026-08-19_0851_JST/test_exact_result_replay_verifier_rev251.py",
+  "verification_result": {
+    "unit_tests": "11 passed",
+    "py_compile": "passed",
+    "verified_at_jst": "2026-08-21T22:20:37+09:00"
+  },
   "reserved_paths": [
     "automation_runs/2026-08-19_0851_JST/exact_result_replay_verifier_v1.py",
     "automation_runs/2026-08-19_0851_JST/test_exact_result_replay_verifier_rev251.py",
@@ -46,6 +52,6 @@
   ],
   "non_interference": "Add only the three reserved rev251 verifier/report paths on the dedicated branch; do not modify existing solvers, claims, workflows, MAIN.md, or concurrent PR branches.",
   "status": "active",
-  "notes": "Session marker is intentionally machine-readable so all parallel executions can detect this claim before writing. The existing main-branch hourly watchdog is used without modifying its shared workflow.",
+  "notes": "PR #185 is open at the verified implementation head. The machine-readable claim remains active so the hourly watchdog can reconstruct and re-fire this exact session if repository execution becomes idle.",
   "agi_state": "NOT_AGI"
 }
