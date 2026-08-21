@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-parallel-resilience-20260821T215558JST-01ad84ba",
   "session_id": "chatgpt-session-j-parallel-resilience-20260821T215558+0900-01ad84ba-turn1",
   "started_at_jst": "2026-08-21T21:55:58+09:00",
-  "heartbeat_at_jst": "2026-08-21T22:14:22+09:00",
+  "heartbeat_at_jst": "2026-08-21T22:18:33+09:00",
   "stale_after_minutes": 55,
   "starting_main_sha": "01ad84ba3b537ef4a191bcbdf3f8df709fadb320",
   "starting_agi_gi_rev": 244,
@@ -12,6 +12,8 @@
   "scope": "automation/session-specific-hourly-refire-and-parallel-safe-continuation-evidence",
   "branch": "ops-j-parallel-resilience-20260821-215558",
   "pull_request": 181,
+  "pull_request_state": "ready_for_review",
+  "ready_for_review_at_jst": "2026-08-21T22:18:14+09:00",
   "latest_head_sha": "1baedb76aad1f1edd6bf1be3c50c6d3f850c55c9",
   "validated_merge_ref_sha": "18bedb173091e2646275ef761cb5354cacaf6ee1",
   "intent": "add a non-interrupting per-session hourly re-fire guard and advance only collision-free continuation support while problem-solving revisions proceed independently",
@@ -36,6 +38,12 @@
     "concurrency_group": "j-parallel-resilience-session-hourly-refire-runtime",
     "dedupe_issue_title": "[automation] J parallel resilience session re-fire queue",
     "cancel_in_progress": false
+  },
+  "deployment_state": {
+    "hourly_schedule_on_main": true,
+    "hardened_runtime": "pending_pr_181",
+    "pull_request_ready_for_review": true,
+    "merge_performed": false
   },
   "cooperative_branch_updates": [
     {
