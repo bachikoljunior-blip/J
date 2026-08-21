@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev256-bounded-image-20260822T0438JST-435503ad",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T034116+0900-92e55a14-turn1",
+  "started_at_jst": "2026-08-22T04:38:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T04:38:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "435503adef2d26822eddbf8c6fe06e415a8a2d64",
+  "starting_agi_gi_rev": 254,
+  "target_revision": 256,
+  "scope": "CRX1/bounded-arity-relation-image/explicit-group-exact-transporter-coset",
+  "reserved_paths": [
+    ".github/workflows/rev256-bounded-relation-image-coset-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev256-bounded-image-20260822T0438JST-435503ad-attempt-solution-20260822T0438JST.json",
+    "automation_runs/2026-08-19_0851_JST/REV256_BOUNDED_RELATION_IMAGE_COSET.md",
+    "automation_runs/2026-08-19_0851_JST/bounded_relation_image_coset_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_bounded_relation_image_coset_rev256.py"
+  ],
+  "branch": "codex/agi-gi-rev256-bounded-relation-image-coset-20260821-193800z",
+  "non_interference": "Use only the listed rev256 paths. Do not modify rev253, rev255 shared Design caller paths, MAIN.md, sibling claims, or unrelated workflows.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
