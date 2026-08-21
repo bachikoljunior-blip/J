@@ -67,22 +67,9 @@ def solve_design_tuple_transport_full_string(
 ) -> DesignTupleFullStringSI:
     """Solve every exact Design-Lemma tuple branch on the original full string.
 
-    `transport_plan` is assumed to be a complete cover of all ambient tuple
-    transporters.  Every surviving right coset is intersected *exactly* with the
-    original source/target string by the proof-carrying U2 candidate solver.  If
-    even one branch remains unresolved, the entire result is withheld fail-closed.
-
-    When every branch is exact, the nonempty branch intersections are themselves
-    right cosets contained in the same full string-isomorphism set.  Choosing one
-    representative r0, their target-side automorphism subgroups together with the
-    differences r_i r0^-1 generate exactly the target automorphism subgroup covered
-    by the union.  Because the upstream tuple cover is complete, this generated
-    right coset is exactly the full ambient string-isomorphism set, not merely a
-    sampled union of branches.
-
-    This routine certifies exact set reconstruction.  Its explicit local union
-    bookkeeping bound is recorded, but theorem-scale H5 recurrence/complexity
-    closure remains a separate proof obligation.
+    A rev242 original-root ledger, when present on the transport plan, was admitted
+    before the first correlated incidence-WL step. This phase refuses any root or
+    child/union budget that exceeds that immutable reservation.
     """
     source = tuple(source_values)
     target = tuple(target_values)
@@ -91,6 +78,29 @@ def solve_design_tuple_transport_full_string(
         raise ValueError("string/group degree mismatch")
     if root_n < n:
         raise ValueError("root_n must dominate current degree")
+
+    ledger = getattr(transport_plan, "original_root_ledger", None)
+    if ledger is not None:
+        if not ledger.admitted:
+            return DesignTupleFullStringSI(
+                ledger.status, None, (), 0, 0, False, False, 0.0,
+                "full-string child cannot start from a rejected original-root ledger",
+            )
+        if int(root_n) != ledger.original_root_degree:
+            return DesignTupleFullStringSI(
+                "design_full_string_original_root_ledger_mismatch", None, (), 0, 0,
+                False, False, 0.0,
+                "the full-string child root differs from the root fixed before the first t-WL execution",
+            )
+        if (
+            int(max_design_full_string_child_work) > ledger.child_si_work_upper_bound
+            or int(max_design_union_reconstruction_work) > ledger.union_work_upper_bound
+        ):
+            return DesignTupleFullStringSI(
+                "design_full_string_exceeds_original_root_ledger", None, (), 0, 0,
+                False, False, 0.0,
+                "the child-SI or union budget exceeds the amount reserved before the first t-WL execution",
+            )
 
     if transport_plan.exact_empty:
         return DesignTupleFullStringSI(
