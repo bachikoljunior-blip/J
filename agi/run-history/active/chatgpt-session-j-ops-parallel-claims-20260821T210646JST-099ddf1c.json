@@ -3,11 +3,15 @@
   "event_type": "active_session_claim",
   "session_id": "chatgpt-session-j-ops-parallel-claims-20260821T210646+0900-099ddf1c",
   "started_at_jst": "2026-08-21T21:06:46+09:00",
-  "last_heartbeat_at_jst": "2026-08-21T21:06:46+09:00",
+  "last_heartbeat_at_jst": "2026-08-21T21:16:23+09:00",
+  "completed_at_jst": "2026-08-21T21:16:23+09:00",
   "repository": "bachikoljunior-blip/J",
   "starting_main_sha": "099ddf1c916bf58dc759a116612ae481aa6d196d",
   "target_revision": null,
   "branch": "ops-parallel-session-claims-v2",
+  "pull_request": 178,
+  "tested_head_sha": "53dd49acf697bbaaf17d1262a3b96dea787b10c8",
+  "merged_main_sha": "dac3bada448d894694ae218972a0938e50fad491",
   "exclusive_scope": "repository-coordination/parallel-session-claim-protocol-v2",
   "intent": "standardize a machine-readable start marker so independent sessions detect active parallel work before choosing a revision or problem-tree scope",
   "excluded_parallel_scopes": [
@@ -19,7 +23,13 @@
     "do_not_cancel_or_rerun_unrelated_workflows": true,
     "recheck_main_open_prs_and_claims_before_each_persistent_write": true
   },
+  "validation": {
+    "parallel_claim_workflow_run": 32480947847,
+    "exact_head_workflows_success": 6,
+    "local_unit_tests_success": 12
+  },
   "stale_after_minutes": 90,
-  "status": "active",
+  "status": "closed",
+  "coordination_state": "COMPLETED_MERGED",
   "agi_state": "NOT_AGI"
 }
