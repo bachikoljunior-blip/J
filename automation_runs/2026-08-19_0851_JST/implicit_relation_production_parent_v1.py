@@ -8,6 +8,7 @@ from typing import Callable, Optional
 RESOURCE_STATUS = "certified_implicit_relation_image_work_bound"
 IMAGE_NONEMPTY_STATUS = "exact_implicit_relation_image_value_coset"
 PREIMAGE_NONEMPTY_STATUS = "exact_original_domain_relation_preimage_coset"
+PREIMAGE_EMPTY_STATUS = "exact_empty_original_domain_relation_preimage"
 PARENT_NONEMPTY_STATUS = "exact_implicit_relation_parent_coset"
 PARENT_EMPTY_STATUSES = frozenset(
     {
@@ -16,6 +17,7 @@ PARENT_EMPTY_STATUSES = frozenset(
         "exact_empty_parent_feature_inventory_mismatch",
     }
 )
+PREFLIGHT_INCONCLUSIVE_STATUS = "inconclusive_no_structural_exact_empty_obstruction"
 NORMALIZED_NONEMPTY_STATUS = "exact_parent_outcome_nonempty"
 NORMALIZED_EMPTY_STATUS = "exact_parent_outcome_empty"
 _REQUIRED_PHASES = (
@@ -172,7 +174,16 @@ def _normalized_contract(
     source_digest: str,
     target_digest: str,
 ) -> bool:
-    if not _exact_complete(outcome) or not _same_degrees(outcome, domain, auxiliary):
+    if not _exact_complete(outcome):
+        return False
+    if _positive_int(getattr(outcome, "domain_degree", None)) != domain:
+        return False
+    normalized_auxiliary = _nonnegative_int(getattr(outcome, "auxiliary_degree", None))
+    if normalized_auxiliary is None:
+        return False
+    if kind == "nonempty" and normalized_auxiliary != auxiliary:
+        return False
+    if kind == "exact_empty" and normalized_auxiliary not in (0, auxiliary):
         return False
     if getattr(outcome, "outcome_kind", None) != kind:
         return False
@@ -188,35 +199,72 @@ def _normalized_contract(
     )
 
 
+def _accepted_empty_preflight(
+    evidence: object,
+    *,
+    domain: int,
+    auxiliary: int,
+) -> bool:
+    status = getattr(evidence, "status", None)
+    if status not in PARENT_EMPTY_STATUSES or not _exact_complete(evidence):
+        return False
+    if _positive_int(getattr(evidence, "domain_degree", None)) != domain:
+        return False
+    evidence_auxiliary = _nonnegative_int(getattr(evidence, "auxiliary_degree", None))
+    if status in {
+        "exact_empty_parent_domain_size_mismatch",
+        "exact_empty_parent_relation_signature_mismatch",
+    }:
+        return evidence_auxiliary == 0
+    return evidence_auxiliary == auxiliary
+
+
+def _accepted_inconclusive_preflight(
+    evidence: object,
+    *,
+    domain: int,
+    auxiliary: int,
+) -> bool:
+    return (
+        getattr(evidence, "status", None) == PREFLIGHT_INCONCLUSIVE_STATUS
+        and getattr(evidence, "exact", None) is False
+        and getattr(evidence, "complete", None) is False
+        and _positive_int(getattr(evidence, "domain_degree", None)) == domain
+        and _positive_int(getattr(evidence, "auxiliary_degree", None)) == auxiliary
+    )
+
+
 def exact_implicit_relation_production_parent(
     resource_envelope: object,
     *,
     expected_source_relation_digest: str,
     expected_target_relation_digest: str,
+    exact_empty_parent_preflight: Callable[[], object],
     image_solver: Callable[[], object],
     preimage_solver: Callable[[object], object],
     nonempty_parent_verifier: Callable[[object], object],
-    exact_empty_parent_verifier: Callable[[object], object],
     parent_outcome_normalizer: Callable[[object], object],
 ) -> ImplicitRelationProductionParentResult:
-    """Compose the exact implicit-relation descendants behind one fail-closed parent.
+    """Compose exact implicit-relation descendants behind one fail-closed parent.
 
-    The sibling implementations are still independently owned, so this module
-    accepts them as callables rather than importing branch-only code.  That is a
-    deliberate production-orchestration boundary: the caller closes over the
-    concrete rev262/rev267/rev261-or-rev263/rev266 implementations, while this
-    function enforces ordering, exact-result contracts, relation identity, and
-    the rev265 original-root reservation before any semantic execution begins.
+    Sibling implementations remain independently owned, so this module accepts
+    them as callables instead of importing branch-only modules.  The caller
+    closes over the concrete rev263/rev262/rev267/rev261/rev266 descendants and
+    this function enforces ordering, exact-result contracts, relation identity,
+    and the rev265 original-root reservation before promotion.
+
+    Structurally certified empty route:
+      rev265 admission -> rev263 preflight -> rev266 normalized outcome.
 
     Nonempty route:
-      rev265 admission -> rev262 image coset -> rev267 original preimage ->
-      rev261 semantic parent verifier -> rev266 normalized outcome.
-
-    Exact-empty route:
-      rev265 admission -> rev262 exact empty -> rev263 semantic empty verifier ->
+      rev265 admission -> rev263 inconclusive preflight -> rev262 image coset ->
+      rev267 original preimage -> rev261 semantic parent verifier ->
       rev266 normalized outcome.
 
-    No branch is promoted from an incomplete or merely structural result.
+    A rev262 exact-empty image is propagated through rev267, but is deliberately
+    left undetermined at the parent boundary: current rev263/rev266 contracts do
+    not accept image/preimage emptiness as semantic parent-empty evidence.  That
+    missing bridge remains a separate leaf rather than being silently assumed.
     """
     if not isinstance(expected_source_relation_digest, str) or _SHA256_RE.fullmatch(
         expected_source_relation_digest
@@ -227,10 +275,10 @@ def exact_implicit_relation_production_parent(
     ) is None:
         raise ValueError("expected_target_relation_digest must be sha256:<64 lowercase hex>")
     for callback, name in (
+        (exact_empty_parent_preflight, "exact_empty_parent_preflight"),
         (image_solver, "image_solver"),
         (preimage_solver, "preimage_solver"),
         (nonempty_parent_verifier, "nonempty_parent_verifier"),
-        (exact_empty_parent_verifier, "exact_empty_parent_verifier"),
         (parent_outcome_normalizer, "parent_outcome_normalizer"),
     ):
         if not callable(callback):
@@ -248,6 +296,91 @@ def exact_implicit_relation_production_parent(
         )
 
     steps: list[str] = []
+    ok, preflight = _call(
+        "rev263 exact-empty parent preflight", exact_empty_parent_preflight
+    )
+    steps.append("structural_exact_empty_preflight")
+    if not ok:
+        return _closed(
+            "fail_closed_exact_empty_parent_preflight_exception",
+            root=root,
+            domain=domain,
+            auxiliary=auxiliary,
+            work=work,
+            steps=tuple(steps),
+            reason=str(preflight),
+        )
+
+    if getattr(preflight, "status", None) in PARENT_EMPTY_STATUSES:
+        if not _accepted_empty_preflight(preflight, domain=domain, auxiliary=auxiliary):
+            return _closed(
+                "fail_closed_exact_empty_parent_preflight_contract",
+                root=root,
+                domain=domain,
+                auxiliary=auxiliary,
+                work=work,
+                steps=tuple(steps),
+                reason="rev263 structural exact-empty evidence does not match the admitted parent degrees",
+            )
+        ok, normalized = _call(
+            "rev266 parent outcome normalizer", parent_outcome_normalizer, preflight
+        )
+        steps.append("parent_outcome_normalization")
+        if not ok:
+            return _closed(
+                "fail_closed_parent_outcome_normalizer_exception",
+                root=root,
+                domain=domain,
+                auxiliary=auxiliary,
+                work=work,
+                steps=tuple(steps),
+                reason=str(normalized),
+            )
+        if not _normalized_contract(
+            normalized,
+            kind="exact_empty",
+            domain=domain,
+            auxiliary=auxiliary,
+            source_digest=expected_source_relation_digest,
+            target_digest=expected_target_relation_digest,
+        ):
+            return _closed(
+                "fail_closed_normalized_exact_empty_contract",
+                root=root,
+                domain=domain,
+                auxiliary=auxiliary,
+                work=work,
+                steps=tuple(steps),
+                reason="rev266 normalized outcome does not bind the requested rev263 exact-empty parent context",
+            )
+        return ImplicitRelationProductionParentResult(
+            status="exact_implicit_relation_production_parent_empty",
+            exact=True,
+            complete=True,
+            outcome_kind="exact_empty",
+            original_root_degree=root,
+            domain_degree=domain,
+            auxiliary_degree=auxiliary,
+            reserved_work_upper_bound=work,
+            parent_coset=None,
+            normalized_outcome=normalized,
+            executed_steps=tuple(steps),
+            reason="rev265 admission and the rev263->rev266 structural exact-empty route agree on one complete parent-empty outcome",
+        )
+
+    if not _accepted_inconclusive_preflight(
+        preflight, domain=domain, auxiliary=auxiliary
+    ):
+        return _closed(
+            "fail_closed_exact_empty_parent_preflight_contract",
+            root=root,
+            domain=domain,
+            auxiliary=auxiliary,
+            work=work,
+            steps=tuple(steps),
+            reason="rev263 returned neither accepted exact-empty evidence nor its exact inconclusive continuation contract",
+        )
+
     ok, image_result = _call("rev262 image solver", image_solver)
     steps.append("value_coset_intersection")
     if not ok:
@@ -294,78 +427,47 @@ def exact_implicit_relation_production_parent(
                 steps=tuple(steps),
                 reason="an exact-empty image result must not carry a right coset",
             )
-        ok, empty_evidence = _call(
-            "rev263 exact-empty parent verifier", exact_empty_parent_verifier, image_result
+        ok, empty_preimage = _call(
+            "rev267 original-domain exact-empty preimage", preimage_solver, image_result
         )
-        steps.append("exact_empty_parent_verification")
+        steps.append("paired_preimage")
         if not ok:
             return _closed(
-                "fail_closed_exact_empty_parent_verifier_exception",
+                "fail_closed_preimage_solver_exception",
                 root=root,
                 domain=domain,
                 auxiliary=auxiliary,
                 work=work,
                 steps=tuple(steps),
-                reason=str(empty_evidence),
+                reason=str(empty_preimage),
             )
         if (
-            not _exact_complete(empty_evidence)
-            or not _same_degrees(empty_evidence, domain, auxiliary)
-            or getattr(empty_evidence, "status", None) not in PARENT_EMPTY_STATUSES
+            not _exact_complete(empty_preimage)
+            or not _same_degrees(empty_preimage, domain, auxiliary)
+            or getattr(empty_preimage, "status", None) != PREIMAGE_EMPTY_STATUS
+            or getattr(empty_preimage, "coset", None) is not None
         ):
             return _closed(
-                "fail_closed_exact_empty_parent_evidence_contract",
+                "fail_closed_original_domain_exact_empty_preimage_contract",
                 root=root,
                 domain=domain,
                 auxiliary=auxiliary,
                 work=work,
                 steps=tuple(steps),
-                reason="rev263 did not return an accepted exact-empty parent verification",
+                reason="rev267 did not preserve rev262 exact emptiness as a complete original-domain preimage result",
             )
-        ok, normalized = _call(
-            "rev266 parent outcome normalizer", parent_outcome_normalizer, empty_evidence
-        )
-        steps.append("parent_outcome_normalization")
-        if not ok:
-            return _closed(
-                "fail_closed_parent_outcome_normalizer_exception",
-                root=root,
-                domain=domain,
-                auxiliary=auxiliary,
-                work=work,
-                steps=tuple(steps),
-                reason=str(normalized),
-            )
-        if not _normalized_contract(
-            normalized,
-            kind="exact_empty",
+        return _closed(
+            "undetermined_exact_empty_image_parent_semantic_bridge",
+            root=root,
             domain=domain,
             auxiliary=auxiliary,
-            source_digest=expected_source_relation_digest,
-            target_digest=expected_target_relation_digest,
-        ):
-            return _closed(
-                "fail_closed_normalized_exact_empty_contract",
-                root=root,
-                domain=domain,
-                auxiliary=auxiliary,
-                work=work,
-                steps=tuple(steps),
-                reason="rev266 normalized outcome does not bind the requested exact-empty parent context",
-            )
-        return ImplicitRelationProductionParentResult(
-            status="exact_implicit_relation_production_parent_empty",
-            exact=True,
-            complete=True,
-            outcome_kind="exact_empty",
-            original_root_degree=root,
-            domain_degree=domain,
-            auxiliary_degree=auxiliary,
-            reserved_work_upper_bound=work,
-            parent_coset=None,
-            normalized_outcome=normalized,
-            executed_steps=tuple(steps),
-            reason="rev265 admission and the rev262->rev263->rev266 exact-empty route agree on one complete parent-empty outcome",
+            work=work,
+            steps=tuple(steps),
+            reason=(
+                "rev262 and rev267 certify image/original-domain emptiness, but current "
+                "rev263/rev266 parent semantics do not certify that obstruction as an "
+                "exact parent-empty outcome"
+            ),
         )
 
     if image_status != IMAGE_NONEMPTY_STATUS or image_coset is None:
@@ -479,7 +581,7 @@ def exact_implicit_relation_production_parent(
         parent_coset=getattr(promotion, "coset"),
         normalized_outcome=normalized,
         executed_steps=tuple(steps),
-        reason="rev265 admission and the rev262->rev267->rev261->rev266 route agree on one complete exact parent right coset",
+        reason="rev265 admission and the rev263->rev262->rev267->rev261->rev266 route agree on one complete exact parent right coset",
     )
 
 
