@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev260-preimage-differential-20260822T065800JST-6c697d7f",
   "session_id": "chatgpt-session-current-conversation-rev260-20260822T065800+0900",
   "started_at_jst": "2026-08-22T06:58:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T07:30:08+09:00",
+  "heartbeat_at_jst": "2026-08-22T07:52:53+09:00",
+  "completed_at_jst": "2026-08-22T07:52:53+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "6c697d7f2aebd6ea87ffe8593981df7e3d5e7241",
   "starting_agi_gi_rev": 257,
@@ -12,6 +13,8 @@
   "scope": "crx3/replay-stable-proof-substrate/implicit-relation-image-preimage-differential-verifier",
   "branch": "agi-gi-rev260-preimage-differential-session-20260822-0658",
   "pull_request": 205,
+  "implementation_head_sha": "6feeb158f2a2296e867b8b323e17058da6a8f9f5",
+  "merged_main_sha": "7e8c3f531713475f1c4c76b788ce9e5c36c3b23d",
   "reserved_paths": [
     ".github/workflows/j-rev260-session-hourly-refire.yml",
     ".github/workflows/rev260-implicit-image-preimage-differential-smoke.yml",
@@ -24,19 +27,43 @@
   ],
   "base_strategy": {
     "base": "main",
-    "reason": "The shared evidence guard computes problem-state changes from main. The oracle is therefore expressed against the already integrated rev257 generic paired-action contract and does not include the unmerged rev258 parent diff.",
-    "supersedes_stacked_head": "b529c33ad8ab366874805e10d8d1d77fb62db703"
+    "reason": "The shared evidence guard computes problem-state changes from main. The oracle was expressed against the integrated generic paired-action contract and did not include unmerged rev258 implementation paths.",
+    "superseded_stacked_head": "b529c33ad8ab366874805e10d8d1d77fb62db703"
   },
   "verification_boundary": "For small certified groups only, independently enumerate the original domain and compare a caller-supplied direct acceptance predicate, the image right coset, and the generic paired-preimage right coset element-for-element. This is an oracle/audit, not a second production preimage solver.",
+  "validation": {
+    "focused_and_inherited_tests": "9 rev260 tests plus inherited paired-action preimage tests passed",
+    "dedicated_workflow_run_id": 32533677925,
+    "dedicated_workflow_status": "success",
+    "parallel_claims_run_id": 32533677882,
+    "parallel_claims_status": "success",
+    "phase_admission_run_id": 32533677869,
+    "phase_admission_status": "success",
+    "agi_gi_validation_run_id": 32533677846,
+    "agi_gi_validation_status": "success",
+    "independent_labelg_gate": "success",
+    "workflow_count": 13,
+    "workflow_success_count": 13,
+    "review_threads_unresolved": 0,
+    "merge_phase_conflicts": []
+  },
+  "restart_guard": {
+    "workflow": ".github/workflows/j-rev260-session-hourly-refire.yml",
+    "cron": "58 * * * *",
+    "stale_after_minutes": 55,
+    "queue_issue_title": "[automation] J rev260 preimage-differential session re-fire queue",
+    "completion_behavior": "claim status is completed, so scheduled invocations emit no continuation request"
+  },
   "parallel_exclusions": [
     "rev259 original-domain preimage integration claim",
-    "rev258 original-root resource envelope claim / PR #199",
-    "rev258 image/value-coset claims / PR #200 and PR #201",
-    "rev261 implicit-relation parent promotion claim",
-    "rev255 primitive-Johnson Design caller integration / PR #195",
+    "rev258 and later implicit relation-image resource/image claims",
+    "rev261 and later parent promotion/outcome claims",
+    "rev255 primitive-Johnson Design caller integration",
     "MAIN.md and shared coordination implementation"
   ],
-  "non_interference": "Add only the new rev260 generic small-order differential oracle, regression, audit, dedicated smoke, phase evidence, and this session's dedicated hourly guard. Do not modify production preimage implementations, active claims, sibling branches, PRs, MAIN.md, or shared workflows.",
-  "status": "active",
+  "non_interference": "The initial colliding rev259 claim was superseded before implementation publication. Rev260 changed only its dedicated oracle, regression, audit, smoke, evidence, and claim records; sibling production paths and workflows were preserved.",
+  "result": "Merged bounded generic paired-action preimage differential verifier with complete small-order replay and fail-closed cap handling.",
+  "remaining_boundary": "Unbounded/original-root resource closure, production implicit relation-image composition, CRX1, GI, and AGI remain unresolved.",
+  "status": "completed",
   "agi_state": "NOT_AGI"
 }
