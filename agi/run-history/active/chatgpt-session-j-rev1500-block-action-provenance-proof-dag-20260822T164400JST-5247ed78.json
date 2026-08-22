@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1500-block-action-provenance-proof-dag-20260822T164400JST-5247ed78",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev1500-20260822T164400+0900-turn1",
+  "started_at_jst": "2026-08-22T16:44:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:44:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "5247ed781fea5386802634ab012712950a15d821",
+  "latest_main_sha_observed": "5247ed781fea5386802634ab012712950a15d821",
+  "starting_agi_gi_rev": 952,
+  "target_revision": 1500,
+  "scope": "crx3/structural-consumers/homogeneous-block-action-provenance-proof-dag",
+  "branch": "agi-gi-rev1500-block-action-provenance-proof-dag-session-20260822-1644",
+  "current_pr": null,
+  "exact_head": null,
+  "reserved_paths": [
+    ".github/workflows/rev1500-block-action-provenance-proof-dag-smoke.yml",
+    "automation_runs/2026-08-22_1644_JST/REV1500_BLOCK_ACTION_PROVENANCE_PROOF_DAG.md",
+    "automation_runs/2026-08-22_1644_JST/block_action_provenance_proof_dag_consumer_v1.py",
+    "automation_runs/2026-08-22_1644_JST/test_block_action_provenance_proof_dag_rev1500.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1500-block-action-provenance-proof-dag-20260822T164400JST-5247ed78-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1500-block-action-provenance-proof-dag-20260822T164400JST-5247ed78-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev1400 corrected-SOJ recursive production execution proof-DAG / PR #264 and all reserved paths",
+    "rev1300 / PR #263, rev1200 / PR #260, rev1100 / PR #257, rev1000 / PR #256, rev900 / PR #254 and their reserved paths",
+    "rev950 homogeneous block-action kernel factorization proof-DAG merged implementation paths",
+    "rev952 homogeneous block relation provenance proof-DAG merged implementation paths",
+    "rev278 original-domain quotient preimage / PR #222, rev276 joint relation/action compatibility / PR #221",
+    "all corrected Split-or-Johnson, CRX1, CRX2, state-orbit, parent-outcome and sibling proof-DAG scopes",
+    "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "attach only the main-integrated rev274 exact homogeneous block-action provenance certificate to the shared conservative execution proof-DAG under a replay-stable identity, independently replaying canonical partitions, block bijection, paired original generators, paired quotient generators, intertwining, deterministic digest, finite verification-work charge, and original-root envelope without importing rev950/rev952/rev1200/rev278 sibling consumers",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_consumer_implementations": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_any_rev274_replay_identity_or_accounting_drift": true
+  },
+  "depends_on_main_integrated_contracts": [
+    "rev274 homogeneous_block_action_provenance_v1 BlockActionProvenance and replay_group_block_action_equivariance",
+    "rev220 proof_dag_accounting_v1 validate_execution_proof_dag",
+    "quasipoly_recurrence_accounting_v1 RecurrenceAccountingNode"
+  ],
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
