@@ -1,0 +1,45 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev1100-20260822T154530+0900-turn9",
+  "started_at_jst": "2026-08-22T15:45:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:45:30+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "1e9a46d7eca9ce98c7d0f97586e49766ee7d736d",
+  "starting_agi_gi_rev": 950,
+  "target_revision": 1100,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-main-post-replay-seal",
+  "branch": "agi-gi-rev1100-soj-main-post-replay-seal-session-20260822-1545",
+  "reserved_paths": [
+    ".github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml",
+    "automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md",
+    "automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py",
+    "automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-publish.json"
+  ],
+  "parallel_exclusions": [
+    "repository/main-revision-sync/rev950 and MAIN.md",
+    "rev1000 recursive production post-replay coherence envelope",
+    "rev900 provenance/total-cost binding",
+    "rev720 production construction-cost provenance",
+    "rev800 total-cost coherence",
+    "rev700 recursive production provenance join",
+    "rev600 main provenance gate",
+    "rev650 recursive caller producer provenance",
+    "rev500 caller replay envelope",
+    "rev400 production caller binding",
+    "all CRX scopes, shared proof-DAG, recurrence, coordination implementation, sibling branches/PRs/workflows"
+  ],
+  "intent": "bind an independently replay-verified rev700 main-anchored recursive production provenance join to an independently replay-verified rev1000 post-replay cost/coherence envelope, preserving exact-empty/nonempty semantics and the shared reduction/production provenance identities without importing sibling branch-only implementations",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_rebase_or_force_push": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_any_upstream_identity_or_outcome_drift": true
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
