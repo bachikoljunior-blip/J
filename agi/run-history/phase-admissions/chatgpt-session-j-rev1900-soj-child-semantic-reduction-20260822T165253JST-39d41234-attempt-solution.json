@@ -1,0 +1,197 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652",
+    "claim_id": "chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234",
+    "heartbeat_at_jst": "2026-08-22T16:54:05+09:00",
+    "reserved_paths": [
+      ".github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234-attempt-solution.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234-publish.json",
+      "automation_runs/2026-08-22_1652_JST/REV1900_SOJ_CHILD_SEMANTIC_REDUCTION.md",
+      "automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py",
+      "automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py"
+    ],
+    "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-semantic-reduction-binding",
+    "state": "active",
+    "target_revision": 1900
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev1100-soj-main-post-replay-seal-hardened-v2-session-20260822-1651",
+      "claim_id": "chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7",
+      "heartbeat_at_jst": "2026-08-22T16:51:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-publish.json",
+        "automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md",
+        "automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py",
+        "automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-main-post-replay-seal",
+      "state": "active",
+      "target_revision": 1100
+    },
+    {
+      "branch": "agi-gi-rev1200-homogeneous-block-quotient-si-session-20260822-1550",
+      "claim_id": "chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd",
+      "heartbeat_at_jst": "2026-08-22T16:03:04+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev1200-homogeneous-block-quotient-si-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-publish.json",
+        "automation_runs/2026-08-22_1550_JST/REV1200_HOMOGENEOUS_BLOCK_QUOTIENT_STRING_ISOMORPHISM.md",
+        "automation_runs/2026-08-22_1550_JST/homogeneous_block_quotient_string_isomorphism_v1.py",
+        "automation_runs/2026-08-22_1550_JST/test_homogeneous_block_quotient_string_isomorphism_rev1200.py"
+      ],
+      "scope": "crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism",
+      "state": "active",
+      "target_revision": 1200
+    },
+    {
+      "branch": "agi-gi-rev1300-soj-recursive-production-lineage-closure-session-20260822-1555-v2",
+      "claim_id": "chatgpt-session-j-rev1300-soj-recursive-production-lineage-closure-20260822T155500JST-4b4cf2ab",
+      "heartbeat_at_jst": "2026-08-22T16:09:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev1300-soj-recursive-production-lineage-closure-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1300-soj-recursive-production-lineage-closure-20260822T155500JST-4b4cf2ab-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1300-soj-recursive-production-lineage-closure-20260822T155500JST-4b4cf2ab-publish.json",
+        "automation_runs/2026-08-22_1555_JST/REV1300_SOJ_RECURSIVE_PRODUCTION_LINEAGE_CLOSURE.md",
+        "automation_runs/2026-08-22_1555_JST/soj_recursive_production_lineage_closure_v1.py",
+        "automation_runs/2026-08-22_1555_JST/test_soj_recursive_production_lineage_closure_rev1300.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-lineage-closure",
+      "state": "active",
+      "target_revision": 1300
+    },
+    {
+      "branch": "agi-gi-rev1400-soj-recursive-production-execution-proof-dag-session-20260822-1616",
+      "claim_id": "chatgpt-session-j-rev1400-soj-recursive-production-execution-proof-dag-20260822T161600JST-a8a5b96f",
+      "heartbeat_at_jst": "2026-08-22T16:27:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev1400-soj-recursive-production-execution-proof-dag-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1400-soj-recursive-production-execution-proof-dag-20260822T161600JST-a8a5b96f-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1400-soj-recursive-production-execution-proof-dag-20260822T161600JST-a8a5b96f-publish.json",
+        "automation_runs/2026-08-22_1616_JST/REV1400_SOJ_RECURSIVE_PRODUCTION_EXECUTION_PROOF_DAG.md",
+        "automation_runs/2026-08-22_1616_JST/soj_recursive_production_execution_proof_dag_v1.py",
+        "automation_runs/2026-08-22_1616_JST/test_soj_recursive_production_execution_proof_dag_rev1400.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-execution-proof-dag",
+      "state": "active",
+      "target_revision": 1400
+    },
+    {
+      "branch": "agi-gi-rev1600-block-action-provenance-proof-dag-session-20260822-1649",
+      "claim_id": "chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093",
+      "heartbeat_at_jst": "2026-08-22T16:50:30+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev1600-block-action-provenance-proof-dag-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-publish.json",
+        "automation_runs/2026-08-22_1649_JST/REV1600_BLOCK_ACTION_PROVENANCE_PROOF_DAG.md",
+        "automation_runs/2026-08-22_1649_JST/block_action_provenance_proof_dag_consumer_v1.py",
+        "automation_runs/2026-08-22_1649_JST/test_block_action_provenance_proof_dag_rev1600.py"
+      ],
+      "scope": "crx3/structural-consumers/homogeneous-block-action-provenance-proof-dag",
+      "state": "active",
+      "target_revision": 1600
+    },
+    {
+      "branch": "agi-gi-rev1700-soj-recursive-child-instance-execution-session-20260822-1650",
+      "claim_id": "chatgpt-session-j-rev1700-soj-recursive-child-instance-execution-20260822T165000JST-2d91c7e4",
+      "heartbeat_at_jst": "2026-08-22T16:50:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev1700-soj-recursive-child-instance-execution-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1700-soj-recursive-child-instance-execution-20260822T165000JST-2d91c7e4-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1700-soj-recursive-child-instance-execution-20260822T165000JST-2d91c7e4-publish.json",
+        "automation_runs/2026-08-22_1650_JST/REV1700_SOJ_RECURSIVE_CHILD_INSTANCE_EXECUTION.md",
+        "automation_runs/2026-08-22_1650_JST/soj_recursive_child_instance_execution_v1.py",
+        "automation_runs/2026-08-22_1650_JST/test_soj_recursive_child_instance_execution_rev1700.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-instance-execution-binding",
+      "state": "active",
+      "target_revision": 1700
+    },
+    {
+      "branch": "agi-gi-rev1800-homogeneous-block-quotient-si-proof-dag-session-20260822-1651",
+      "claim_id": "chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa",
+      "heartbeat_at_jst": "2026-08-22T16:51:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev1800-homogeneous-block-quotient-si-proof-dag-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-publish.json",
+        "automation_runs/2026-08-22_1651_JST/REV1800_HOMOGENEOUS_BLOCK_QUOTIENT_SI_PROOF_DAG.md",
+        "automation_runs/2026-08-22_1651_JST/homogeneous_block_quotient_si_proof_dag_consumer_v1.py",
+        "automation_runs/2026-08-22_1651_JST/test_homogeneous_block_quotient_si_proof_dag_rev1800.py"
+      ],
+      "scope": "crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism-proof-dag",
+      "state": "active",
+      "target_revision": 1800
+    },
+    {
+      "branch": "agi-gi-rev400-soj-production-caller-binding-session-20260822-1258",
+      "claim_id": "chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b",
+      "heartbeat_at_jst": "2026-08-22T16:48:35+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev400-soj-production-caller-binding-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-publish.json",
+        "automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md",
+        "automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py",
+        "automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/johnson-terminal-recursive-production-caller-binding",
+      "state": "active",
+      "target_revision": 400
+    },
+    {
+      "branch": "agi-gi-rev951-homogeneous-block-quotient-si-session-20260822-1548",
+      "claim_id": "chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b",
+      "heartbeat_at_jst": "2026-08-22T15:51:20+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev951-homogeneous-block-quotient-si-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-publish.json",
+        "automation_runs/2026-08-22_1548_JST/REV951_HOMOGENEOUS_BLOCK_QUOTIENT_SI.md",
+        "automation_runs/2026-08-22_1548_JST/homogeneous_block_quotient_si_v1.py",
+        "automation_runs/2026-08-22_1548_JST/test_homogeneous_block_quotient_si_rev951.py"
+      ],
+      "scope": "crx1/homogeneous-block-reduction/bounded-quotient-relation-si-terminal",
+      "state": "active",
+      "target_revision": 951
+    },
+    {
+      "branch": "hardening/run-start-canonical-revision-20260822-1651",
+      "claim_id": "chatgpt-session-j-run-start-canonical-revision-20260822T165127JST-1663a3c6",
+      "heartbeat_at_jst": "2026-08-22T16:51:27+09:00",
+      "reserved_paths": [
+        "agi/run-history/phase-admissions/chatgpt-session-j-run-start-canonical-revision-20260822T165127JST-1663a3c6-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-run-start-canonical-revision-20260822T165127JST-1663a3c6-publish.json",
+        "automation/agi_gi_run_start_record.py",
+        "automation/test_agi_gi_run_start_record.py",
+        "automation_runs/2026-08-22_1651_JST/RUN_START_CANONICAL_REVISION.md"
+      ],
+      "scope": "repository-coordination/run-start-record/canonical-integrated-revision",
+      "state": "active",
+      "target_revision": null
+    }
+  ],
+  "paths": [
+    ".github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml",
+    "automation_runs/2026-08-22_1652_JST/REV1900_SOJ_CHILD_SEMANTIC_REDUCTION.md",
+    "automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py",
+    "automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py"
+  ],
+  "phase": "attempt_solution",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T17:09:15.157490+09:00",
+  "registry_digest": "sha256:bae9f8ae776e37ddf9a03f4e16cc9e532456f9e7dae0525e10c053ebecde21cf",
+  "registry_source_sha": "c935438642bba01c3d91ae650850755c9f40d5c3",
+  "schema_version": 1,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-semantic-reduction-binding",
+  "target_revision": 1900
+}
