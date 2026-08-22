@@ -4,16 +4,16 @@
   "claim_id": "chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e",
   "session_id": "chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST",
   "started_at_jst": "2026-08-22T21:03:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T21:03:00+09:00",
-  "last_activity_at_jst": "2026-08-22T21:03:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:03:23+09:00",
+  "last_activity_at_jst": "2026-08-22T21:03:23+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2a893a3ebe8355c86caaaabbac6a1fdad22d3e97",
   "starting_agi_gi_rev": 3300,
   "target_revision": 3600,
   "scope": "crx3/algorithmic-consumers/homogeneous-block-public-replay-joint-coherence",
   "branch": "agi-gi-rev3600-homogeneous-block-public-replay-joint-coherence-session-20260822-2103",
-  "pull_request": null,
-  "exact_head_sha": null,
+  "pull_request": 290,
+  "exact_head_sha": "a0363172c3c90907c75c83517507997304013881",
   "merge_sha": null,
   "reserved_paths": [
     ".github/workflows/rev3600-homogeneous-block-public-replay-joint-coherence-smoke.yml",
@@ -31,6 +31,7 @@
     "rev3100/rev3000/rev2800/rev2707/rev2600/rev2200 corrected Split-or-Johnson scopes and reserved paths",
     "rev2501 relation-twin restriction replay identity / PR #278 and all reserved paths",
     "rev2300/rev2100/rev2000/rev1800/rev1200 homogeneous-block quotient/original-domain scopes and reserved paths",
+    "repository-coordination/problem-phase-evidence/current-registry-snapshot claim and its guard/workflow/test/doc/evidence paths",
     "MAIN.md, shared proof-DAG/recurrence/S1/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
   "intent": "Add one file-disjoint post-replay coherence leaf that consumes only normalized public-shaped snapshots from the merged rev3300 block-action-kernel replay seal and the independently owned rev3500 relation-provenance replay seal. Require literal replay gates, exact schema/status/digest shapes, one common original root/domain/block cardinality tuple, and distinct upstream seal identities; preserve the relation-side exact_empty versus ok outcome without inventing quotient/original-domain semantics; domain-separate the accepted tuple into a deterministic SHA-256 joint coherence identity and verify it by full reconstruction. Do not import or modify rev3300/rev3500 branch-only implementations and do not claim homogeneous-block quotient SI, original-domain lifting, CRX3, GI, or AGI closure.",
@@ -50,8 +51,38 @@
     "rev3600_repository_search": "none immediately before claim",
     "main_sha": "2a893a3ebe8355c86caaaabbac6a1fdad22d3e97"
   },
-  "validation": {},
-  "integration_boundary": "Keep draft/unmerged while rev3500 remains independently owned or unmerged. Publish only this scope's additive files and generated phase evidence; do not overtake upstream ownership.",
-  "status": "active",
+  "validation": {
+    "local_py_compile": "success",
+    "local_focused_regressions": "16/16 passed",
+    "dedicated_smoke_run_id": 32571862096,
+    "dedicated_smoke": "success",
+    "run_start_history_integrity_run_id": 32571862057,
+    "run_start_history_integrity": "success",
+    "initial_problem_solving_parallel_admission_run_id": 32571862053,
+    "initial_problem_solving_parallel_admission": "expected fail-closed because no phase-evidence file had yet been persisted",
+    "attempt_solution_preview": {
+      "admitted": true,
+      "mode": "exclusive",
+      "conflicts": [],
+      "registry_source_sha": "d1166dba0fafa40c29c2d9d79a3aab3a68f5ba3b",
+      "registry_digest": "sha256:4ae8b6664b1c4e211e25324c8fd71d57b694cd46396b38946f174b5006fa2350"
+    },
+    "publish_preview": {
+      "admitted": true,
+      "mode": "exclusive",
+      "conflicts": [],
+      "registry_source_sha": "d1166dba0fafa40c29c2d9d79a3aab3a68f5ba3b",
+      "registry_digest": "sha256:4ae8b6664b1c4e211e25324c8fd71d57b694cd46396b38946f174b5006fa2350"
+    }
+  },
+  "coordination_blocker": {
+    "claim_id": "chatgpt-session-j-phase-evidence-current-registry-20260822T210304JST-ed4dfe4a",
+    "scope": "repository-coordination/problem-phase-evidence/current-registry-snapshot",
+    "observed_main_sha": "567fea7bc740d88e0ee83edd486812bba1399a65",
+    "intent": "fail closed when PR phase evidence was generated from a registry commit older than current canonical main",
+    "decision": "do not persist the pre-hardening d1166dba phase previews; preserve the green exact head and wait for the independently owned hardening contract to settle, then regenerate canonical evidence under that contract"
+  },
+  "integration_boundary": "Keep draft/unmerged while rev3500 remains independently owned or unmerged and while current-registry phase-evidence hardening is active. Publish only this scope's additive files and, after hardening settles, fresh canonical phase evidence; do not overtake upstream or coordination ownership.",
+  "status": "active_functional_green_waiting_rev3500_and_current_registry_phase_evidence_hardening",
   "agi_state": "NOT_AGI"
 }
