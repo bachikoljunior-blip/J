@@ -4,14 +4,14 @@
   "claim_id": "chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5",
   "session_id": "chatgpt-session-j-refire-20260822T115138+0900-b1283312-turn1",
   "started_at_jst": "2026-08-22T11:55:51+09:00",
-  "heartbeat_at_jst": "2026-08-22T12:12:53+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:22:35+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "543db3a5d054e3aa9c14a3e5978b9ec652b62a07",
   "starting_agi_gi_rev": 274,
   "target_revision": 287,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-relational-reduction-construction",
   "branch": "agi-gi-rev287-soj-johnson-relational-reduction-session-20260822-1155",
-  "pull_request": null,
+  "pull_request": 237,
   "latest_head_sha": "d46b05562c70f689137ea23310c72ad10fe08698",
   "reserved_paths": [
     ".github/workflows/rev287-soj-johnson-relational-reduction-smoke.yml",
@@ -36,16 +36,18 @@
     "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
   ],
   "intent": "construct only the missing exact larger-ground Johnson relational-reduction evidence that rev291 explicitly consumes but does not construct: from a certified full J(v,k) embedding and ambient generators on the represented Johnson action, deterministically reconstruct the induced ground action from point-incidence signatures, reject non-ground/complement ambiguity fail-closed, verify exact set-action transport on every Johnson vertex, and emit a canonical exact/progress-certified reduction identity and transport certificate on ground degree v. Do not execute recursive SI, do not compose recurrence/accounting, and do not import or modify branch-only sibling implementation.",
-  "coordination_note": "Pre-claim rechecks found no prior rev287 claim, branch, or PR. Canonical attempt_solution and publish phase-admission evidence are now persisted on the dedicated branch with admitted=true and conflicts=[]. Current main includes merged rev288/rev289 while rev290/rev291 remain separately owned; the rev287 construction scope and reserved paths remain disjoint.",
+  "coordination_note": "Pre-claim rechecks found no prior rev287 claim, branch, or PR. Canonical attempt_solution and publish phase-admission evidence are persisted on the dedicated branch with admitted=true and conflicts=[]. Draft PR #237 is now open at the exact unchanged head; current main includes merged rev288/rev289 while rev290/rev291 remain separately owned and disjoint.",
   "validation": {
     "focused_local": "11/11 success",
     "py_compile": "success",
     "attempt_solution_phase_admission": "admitted; conflicts=[]",
     "publish_phase_admission": "admitted; conflicts=[]",
     "branch_compare_to_current_main": "6 additive reserved files; branch diverged only because sibling main advanced after claim",
-    "prior_pull_request_search": "none"
+    "draft_pr": 237,
+    "draft_pr_mergeable": true,
+    "exact_head_ci": "11 observed pull-request workflows in_progress including rev287 dedicated smoke and Problem-solving parallel admission"
   },
   "non_interference": "Only rev287 reserved paths may be written on the dedicated branch and only this rev287 claim may be updated on main. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
-  "status": "active_implementation_complete_attempt_publish_admitted_pr_pending",
+  "status": "active_draft_pr_exact_head_ci_in_progress",
   "agi_state": "NOT_AGI"
 }
