@@ -1,21 +1,30 @@
 name: rev2100 homogeneous-block original-domain proof-DAG smoke
 
 on:
+  push:
+    branches:
+      - agi-gi-rev2100-homogeneous-block-original-domain-proof-dag-session-20260822-1745
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py"
+      - "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py"
+      - "automation_runs/2026-08-19_0851_JST/REV2100_HOMOGENEOUS_BLOCK_QUOTIENT_ORIGINAL_DOMAIN_PROOF_DAG.md"
+      - ".github/workflows/rev2100-homogeneous-block-original-domain-proof-dag-smoke.yml"
   pull_request:
     paths:
       - "automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py"
       - "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py"
       - "automation_runs/2026-08-19_0851_JST/REV2100_HOMOGENEOUS_BLOCK_QUOTIENT_ORIGINAL_DOMAIN_PROOF_DAG.md"
       - ".github/workflows/rev2100-homogeneous-block-original-domain-proof-dag-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-*.json"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   rev2100-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,7 +49,59 @@ jobs:
             exit 1
           fi
 
+      - name: Preview canonical attempt-solution admission
+        run: |
+          git fetch origin main
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd \
+            --phase attempt_solution \
+            --scope crx3/algorithmic-consumers/homogeneous-block-quotient-result-original-domain-lift-proof-dag \
+            --target-revision 2100 \
+            --path .github/workflows/rev2100-homogeneous-block-original-domain-proof-dag-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-publish.json \
+            --path automation_runs/2026-08-19_0851_JST/REV2100_HOMOGENEOUS_BLOCK_QUOTIENT_ORIGINAL_DOMAIN_PROOF_DAG.md \
+            --path automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py \
+            --path automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py \
+            --output /tmp/rev2100-attempt-solution.json
+          cat /tmp/rev2100-attempt-solution.json
+
+      - name: Preview canonical publish admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd \
+            --phase publish \
+            --scope crx3/algorithmic-consumers/homogeneous-block-quotient-result-original-domain-lift-proof-dag \
+            --target-revision 2100 \
+            --path .github/workflows/rev2100-homogeneous-block-original-domain-proof-dag-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-publish.json \
+            --path automation_runs/2026-08-19_0851_JST/REV2100_HOMOGENEOUS_BLOCK_QUOTIENT_ORIGINAL_DOMAIN_PROOF_DAG.md \
+            --path automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py \
+            --path automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py \
+            --output /tmp/rev2100-publish.json
+          cat /tmp/rev2100-publish.json
+
+      - name: Persist canonical phase evidence on the dedicated branch
+        if: github.event_name == 'push'
+        run: |
+          mkdir -p agi/run-history/phase-admissions
+          cp /tmp/rev2100-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-attempt-solution.json
+          cp /tmp/rev2100-publish.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-publish.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-publish.json
+          if ! git diff --cached --quiet; then
+            git commit -m "rev2100: persist canonical phase admission evidence"
+            git push origin HEAD
+          fi
+
       - name: Verify reserved implementation diff
+        if: github.event_name == 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -48,6 +109,8 @@ jobs:
           git diff --name-only origin/main...HEAD | sort > /tmp/changed
           cat > /tmp/allowed <<'EOF'
           .github/workflows/rev2100-homogeneous-block-original-domain-proof-dag-smoke.yml
+          agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-attempt-solution.json
+          agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-publish.json
           automation_runs/2026-08-19_0851_JST/REV2100_HOMOGENEOUS_BLOCK_QUOTIENT_ORIGINAL_DOMAIN_PROOF_DAG.md
           automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py
           automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py
