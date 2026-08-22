@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T114229+0900-97df37a9-turn1",
   "started_at_jst": "2026-08-22T11:44:26+09:00",
-  "heartbeat_at_jst": "2026-08-22T11:57:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T11:58:10+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "eda21ac0e01d6f2f1f24881f1f4ffa883b5d807e",
   "starting_agi_gi_rev": 274,
@@ -20,7 +20,7 @@
     "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py"
   ],
   "branch": "agi-gi-rev275-block-action-kernel-takeover-20260822-1144",
-  "status": "active_draft_reachable_phase_evidence_exact_head_queued",
+  "status": "active_draft_exact_head_8_of_12_success_0_failure",
   "agi_state": "NOT_AGI",
   "takeover_of": "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
   "takeover_inspection": {
@@ -39,7 +39,7 @@
     "syntax_compile": "success",
     "diff_check": "success",
     "phase_admission": "attempt_solution and publish admitted",
-    "workflow_runs": "new exact head queued; 0 observed failures",
+    "workflow_runs": "exact head be189b124cbf71836e2fda9ce02092767a06e1cd: 8/12 success, 0 failure, 4 in progress",
     "problem_solving_parallel_admission": "previous head failed only because local-only registry SHA was unreachable; attempt_solution and publish regenerated from reachable main de687d5253a3a31e04f0bece18a3a356e93c624a"
   },
   "next_action": "wait for exact-head workflows; merge only after all required checks pass and merge admission is replayed"
