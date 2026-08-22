@@ -2,101 +2,34 @@
 
 ## Scope
 
-This revision closes only the post-admission accounting boundary for the explicit Johnson-embedding branch of the corrected Split-or-Johnson transition.
+This revision handles only post-admission recurrence accounting for the explicit Johnson-embedding branch of corrected Split-or-Johnson. It does not modify active sibling branches, decide transition admission, execute the primitive-Johnson solver, or handle partial or larger-ground recursive Johnson embeddings.
 
-It deliberately does **not**:
+## rev281 compatibility correction
 
-- import or depend on the active rev281 / PR #226 implementation module,
-- import or depend on the active rev284 terminal-admission module,
-- decide whether a Johnson transition is semantically admissible,
-- execute the primitive-Johnson terminal,
-- treat a Johnson structural transition as an `aux_shrink` recurrence edge,
-- handle partial Johnson embeddings or larger-ground recursive Johnson cases,
-- modify sibling claims, branches, PRs, workflows, or `MAIN.md`.
+The first rev286 test fixture included two synthetic fields that the real rev281 `CorrectedSOJTransitionCertificate` does not publish: `current_domain_size` and `proof_identity`. Although that first focused suite passed, it did not establish compatibility with the actual sibling certificate.
 
-The caller must supply both an externally/mechanically certified transition-cost bound and a separately certified terminal-admission decision.
+The corrected rev286 contract consumes only fields that rev281 publishes: transition status and kind, theorem gate, canonical/exact/progress flags, multiplicative actual/max cost, Johnson ground/subset/vertex counts, and reason. The pre-transition `current_domain_size` is now an explicit argument from the recurrence caller because it is accounting context rather than a rev281 certificate field. rev286 derives a deterministic transition snapshot identity locally from the fields it consumes.
 
-## Main-integrated contracts consumed
+## Main contracts
 
-The implementation consumes only contracts already present on `main`:
+The implementation consumes only main-integrated `PrimitiveJohnsonGroundProof`, `RecurrenceAccountingNode`, and `validate_quasipoly_recurrence_tree`. It intentionally does not import the active rev281 module.
 
-1. `primitive_johnson_ground_terminal_v1.PrimitiveJohnsonGroundProof`, including its exact terminal statuses and leaf accounting contract.
-2. `quasipoly_recurrence_accounting_v1.RecurrenceAccountingNode` and `validate_quasipoly_recurrence_tree`.
+## Fail-closed checks
 
-The corrected-SOJ transition is accepted structurally through a snapshot rather than by importing an active sibling branch. The expected published shape is the explicit Johnson-embedding status/kind together with theorem-gate, canonical, exact, progress, Johnson-parameter, multiplicative-cost, and proof-identity fields.
+Composition requires the certified explicit-Johnson status/kind, theorem gate, canonicality, exactness, progress certification, a full `J(v,k)` domain, strict reduction from the caller-supplied current domain, root-envelope containment, a separately certified transition cost bound, and a separately certified terminal admission. The primitive terminal must be exact, canonical, childless, cost-certified, terminal-certified, structurally matched to the same Johnson parameters, and internally consistent with its recurrence leaf.
 
-## Fail-closed admission to this composer
+For certified transition maximum multiplicative cost `B >= 1` and primitive-terminal local charge `T`, the composed terminal leaf charges `log2(B) + T` at the pre-transition current-domain measure. The main recurrence validator is replayed over that leaf.
 
-The composer rejects unless all of the following hold:
+## Replay
 
-- transition status is `certified_corrected_soj_explicit_johnson_embedding`,
-- transition kind is `johnson_embedding`,
-- theorem-input gate, canonicality, exactness, and progress are all certified,
-- Johnson parameters satisfy `v >= 4` and `2 <= k <= v-2`,
-- `johnson_vertex_count == C(v,k)`, so the embedding covers the full Johnson domain expected by the exact primitive terminal,
-- the Johnson domain is strictly smaller than the pre-transition current domain,
-- the current domain remains inside the caller's root envelope,
-- transition multiplicative cost is finite/nonnegative and no larger than its certified maximum,
-- the certified maximum is finite and at least one,
-- a separate external transition-cost-bound certificate is asserted,
-- a separate external terminal-admission certificate is asserted,
-- the supplied terminal object is a `PrimitiveJohnsonGroundProof`,
-- its status is one of the exact primitive-Johnson terminal statuses,
-- it is canonical, exact, local-cost-certified, terminal-certified, and childless,
-- its root envelope, domain size, Johnson ground, and Johnson subset match the transition exactly,
-- exact-empty carries no coset and exact-coset carries a coset,
-- the embedded primitive accounting leaf agrees exactly with the proof's operation, measures, terminal/cost flags, and local log2 charge,
-- the primitive accounting leaf independently validates under the main quasipolynomial validator.
-
-## Accounting composition
-
-For a certified transition maximum multiplicative cost `B >= 1`, the transition charge is
-
-`log2(B)`.
-
-For an already exact primitive-Johnson terminal with certified local charge `T`, the composed local charge is
-
-`log2(B) + T`.
-
-The result is one terminal recurrence leaf at the **pre-transition** current-domain measure. This is intentional: the structural Johnson embedding and the exact primitive terminal jointly terminate the admitted branch, while no unsupported recursive progress kind is invented. The main recurrence validator is replayed over the combined leaf and the composer fails closed if the root quasipolynomial envelope is exceeded.
-
-## Replay identity
-
-The certificate identity hashes a canonical JSON payload containing:
-
-- the transition snapshot,
-- the terminal accounting snapshot,
-- the transition and terminal charges,
-- the composed recurrence leaf,
-- the main-validator result.
-
-Replay recomputes the full certificate and requires dataclass equality. Any snapshot, charge, accounting, validation, or identity drift is therefore rejected.
+The transition snapshot identity is a SHA-256 hash of canonical JSON over the actual rev281 fields consumed by rev286. The outer certificate additionally binds caller `current_domain_size`, terminal snapshot, both charges, the composed recurrence leaf, and the validator result. Replay recomputes the full certificate, so caller-measure drift and certificate drift are rejected.
 
 ## Tests
 
-`test_corrected_soj_johnson_terminal_cost_rev286.py` covers sixteen cases:
+The focused suite now contains 20 cases. It includes a direct regression whose fixture matches the real rev281 field set and explicitly lacks both synthetic legacy fields. It also covers local snapshot identity, replay and caller-measure drift, full-domain and strict-shrink checks, external certification flags, cost bounds, terminal matching, accounting integrity, root-envelope validation, integer caller context, and quasipolynomial overrun.
 
-- successful full-domain composition,
-- successful replay,
-- tampered-certificate replay rejection,
-- partial Johnson-domain rejection,
-- nonshrinking Johnson transition rejection,
-- missing transition-cost certification,
-- missing terminal-admission certification,
-- actual transition cost exceeding its certified bound,
-- wrong transition status,
-- terminal Johnson-ground mismatch,
-- terminal domain mismatch,
-- nonexact terminal rejection,
-- exact-empty-with-coset rejection,
-- primitive proof/accounting mismatch,
-- parent measure outside the root envelope,
-- combined charge exceeding the quasipolynomial envelope.
+The dedicated workflow installs the existing Johnson recognizer runtime dependency, runs the focused suite, and runs `py_compile` over rev286 plus the main terminal/accounting dependencies. No sibling workflow is changed, cancelled, or manually rerun.
 
-The dedicated workflow also runs `py_compile` over the new module/test and the two main-integrated dependency modules. No workflow is manually rerun or cancelled by this revision.
+## Coordination
 
-## Coordination / phase admission
-
-The canonical phase-admission registry remains fail-closed because of the independently owned noncanonical rev275 registry record already observed by this session. The exact rev286 `attempt-solution` evidence path is reserved but is not fabricated. No sibling registry entry is edited or normalized.
-
-AGI state remains `NOT_AGI`.
+The exact rev286 phase-admission evidence path remains reserved. The shared evidence generator is still fail-closed on the independently owned rev275 registry record, so rev286 does not fabricate evidence or edit sibling registry entries.
