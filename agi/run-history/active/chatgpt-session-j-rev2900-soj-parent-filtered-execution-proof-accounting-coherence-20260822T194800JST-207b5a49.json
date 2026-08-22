@@ -4,8 +4,9 @@
   "claim_id": "chatgpt-session-j-rev2900-soj-parent-filtered-execution-proof-accounting-coherence-20260822T194800JST-207b5a49",
   "session_id": "chatgpt-session-j-rev2900-soj-parent-filtered-execution-proof-accounting-coherence-20260822T194800JST",
   "started_at_jst": "2026-08-22T19:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:48:00+09:00",
-  "last_activity_at_jst": "2026-08-22T19:48:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:52:30+09:00",
+  "last_activity_at_jst": "2026-08-22T19:52:30+09:00",
+  "completed_at_jst": "2026-08-22T19:52:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "207b5a49aeae8cf5e6a4fd678fcf6bac24dca4ff",
   "starting_agi_gi_rev": 1600,
@@ -13,7 +14,7 @@
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-execution-proof-accounting-coherence",
   "branch": "agi-gi-rev2900-soj-parent-filtered-execution-proof-accounting-coherence-session-20260822-1948",
   "pull_request": null,
-  "exact_head_sha": null,
+  "exact_head_sha": "99ea8b3c4b1b039a33565bdc10e4a1550ca03de8",
   "reserved_paths": [
     ".github/workflows/rev2900-soj-parent-filtered-execution-proof-accounting-coherence-smoke.yml",
     "automation_runs/2026-08-22_1948_JST/REV2900_SOJ_PARENT_FILTERED_EXECUTION_PROOF_ACCOUNTING_COHERENCE.md",
@@ -24,15 +25,16 @@
   ],
   "parallel_exclusions": [
     "rev2800 corrected-SOJ parent-filtered proof/accounting coherence / PR #283 and all reserved paths",
+    "superseded rev2500 corrected-SOJ parent-filtered execution proof-DAG / PR #281 and all reserved paths",
+    "replacement rev3000 parent-filtered execution proof-DAG rebase and all reserved paths",
     "rev2707 corrected-SOJ parent-filtered proof-DAG integrity / PR #280 and all reserved paths",
     "rev2600 corrected-SOJ parent-filtered result accounting coherence / PR #279 and all reserved paths",
-    "rev2500 corrected-SOJ parent-filtered execution proof-DAG / PR #281 and all reserved paths",
     "rev2200 corrected-SOJ parent-filtered child result / PR #274 and all reserved paths",
     "rev1400 recursive production execution proof-DAG / PR #264 and all reserved paths",
     "run-start history integrity / PR #284, claim-publication preflight coordination, rev400 continuation, and all reserved paths",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
-  "intent": "Add one file-disjoint post-replay coherence seal between public-shaped rev2500 parent-filtered child-execution proof-DAG binding evidence and public-shaped rev2800 parent-filtered proof/accounting coherence evidence. Independently normalize and replay both snapshots, require one parent-filtered result identity, reduction identity, child-result identity, outcome, child-ground measure and exact certified lineage across them, retain rev2500 execution proof identities and rev2800 proof/accounting identities as distinct evidence, and seal the accepted tuple into one deterministic SHA-256 identity. Do not import sibling branch-only implementations, do not execute recursive String Isomorphism, do not manufacture equality between independently defined parent-result certificates, do not combine unlike accounting units, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
+  "intent": "Originally reserved a file-disjoint post-replay coherence seal between the rev2500-shaped parent-filtered child-execution proof-DAG binding and rev2800 proof/accounting coherence. During implementation, the independent rev2500 owner superseded that claim and re-homed the same public contract at rev3000 on fresh main ancestry. This rev2900 attempt is therefore retired before publication rather than making a downstream revision depend on a later replacement target or modifying sibling history.",
   "parallel_safety": {
     "do_not_modify_other_active_branches": true,
     "do_not_cancel_or_rerun_unrelated_workflows": true,
@@ -49,8 +51,16 @@
     "rev2900_repository_commit_search": "none before claim",
     "main_sha": "207b5a49aeae8cf5e6a4fd678fcf6bac24dca4ff"
   },
-  "validation": {},
-  "integration_boundary": "Keep downstream work draft/unmerged while rev2500 / PR #281 and rev2800 / PR #283 remain independently owned and unmerged. Do not overtake shared run-start history or other coordination ownership.",
-  "status": "active_claimed_pre_implementation",
+  "validation": {
+    "local_prototype_focused_regressions": "18/18 passed",
+    "local_py_compile": "success",
+    "implemented_reserved_file_commit": "99ea8b3c4b1b039a33565bdc10e4a1550ca03de8",
+    "phase_evidence_persisted": false,
+    "pull_request_created": false,
+    "manual_rerun_or_cancel": false
+  },
+  "closure_reason": "Upstream rev2500 was independently superseded at main commit ac946914e6d72bab02d5f1083e93a3f7b6dcbf9c and replaced by active rev3000. Retire rev2900 before PR/evidence publication and re-home the already-tested downstream adapter on a fresh target after rev3000, without changing sibling claims or fabricating evidence.",
+  "replacement_claim": "chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST-ac946914",
+  "status": "superseded",
   "agi_state": "NOT_AGI"
 }
