@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev1700-soj-child-semantic-reduction-20260822T165100JST-b724712b",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1700-20260822T165100+0900-turn9",
   "started_at_jst": "2026-08-22T16:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:52:19+09:00",
+  "completed_at_jst": "2026-08-22T16:52:19+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "b724712b1dc9ca464370c7935ccce7fae97bf60d",
   "starting_agi_gi_rev": 952,
@@ -45,6 +46,11 @@
     "main-integrated permutation/group primitives used read-only for exact generator action checks"
   ],
   "integration_boundary": "file-disjoint semantic-binding leaf only; recursive solver execution and result lifting remain separately owned",
-  "status": "active",
+  "superseded_reason": "post-claim race check revealed earlier live target_revision 1700 ownership by chatgpt-session-j-rev1700-soj-recursive-child-instance-execution-20260822T165000JST-2d91c7e4; repository protocol makes the numeric target revision exclusive even for file-disjoint sibling scopes",
+  "implementation_started": false,
+  "branch_created": false,
+  "pull_request_created": false,
+  "rescope_target_revision": 1900,
+  "status": "superseded",
   "agi_state": "NOT_AGI"
 }
