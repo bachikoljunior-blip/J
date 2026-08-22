@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev280-literal-giant-proof-dag-20260822T095000JST-057e264a",
+  "session_id": "chatgpt-session-j-automation-continuation-20260822T095000+0900-rev280",
+  "started_at_jst": "2026-08-22T09:50:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:50:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "057e264aba64be35e52dc1e0d09683944475b446",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 280,
+  "scope": "crx3/algorithmic-consumers/literal-giant-exact-terminal-proof-dag",
+  "branch": "agi-gi-rev280-literal-giant-proof-dag-session-20260822-0950",
+  "reserved_paths": [
+    ".github/workflows/rev280-literal-giant-proof-dag-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev280-literal-giant-proof-dag-20260822T095000JST-057e264a-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev280-literal-giant-proof-dag-20260822T095000JST-057e264a-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV280_LITERAL_GIANT_PROOF_DAG.md",
+    "automation_runs/2026-08-19_0851_JST/literal_giant_proof_dag_consumer_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_literal_giant_proof_dag_consumer_rev280.py"
+  ],
+  "parallel_exclusions": [
+    "rev279 parent outcome proof-DAG and all reserved paths",
+    "rev278 homogeneous block quotient preimage and all reserved paths",
+    "rev277 imprimitive proof-DAG and all reserved paths",
+    "rev276 joint block reduction compatibility and all reserved paths",
+    "rev275 block-action kernel factorization and all reserved paths",
+    "rev273 homogeneous block relation provenance / PR #219 and all reserved paths",
+    "rev271 implicit image value-coset proof-DAG / PR #217 and all reserved paths",
+    "rev264 primitive-Johnson proof-DAG / PR #210 and all reserved paths",
+    "CRX3 state-orbit proof-DAG / PR #206 and all reserved paths",
+    "rev252 small-order production admission / PR #216 and all reserved paths",
+    "CRX1/CRX2 active branches, MAIN.md, every sibling claim, branch, PR, workflow, and shared implementation path"
+  ],
+  "intent": "consume only the main-integrated rev208 literal natural-domain S_n/A_n exact String-Isomorphism terminal and the main-integrated rev220 conservative execution proof-DAG substrate; attach a replay-stable immutable identity to exact nonempty and exact-empty literal-giant outcomes, independently validate identity/status/accounting before proof-DAG admission, and fail closed for nonexact, opaque, malformed, or tampered evidence without modifying either shared implementation",
+  "non_interference": "Only new rev280 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
+  "status": "active_claimed",
+  "agi_state": "NOT_AGI"
+}
