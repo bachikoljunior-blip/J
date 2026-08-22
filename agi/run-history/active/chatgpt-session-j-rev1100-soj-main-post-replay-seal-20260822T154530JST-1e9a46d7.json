@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1100-20260822T154530+0900-turn9",
   "started_at_jst": "2026-08-22T15:45:30+09:00",
-  "heartbeat_at_jst": "2026-08-22T15:51:29+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:52:04+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "1e9a46d7eca9ce98c7d0f97586e49766ee7d736d",
   "starting_agi_gi_rev": 950,
@@ -62,8 +62,8 @@
     "reserved_path_diff": "success",
     "dedicated_workflow": {"run_id": 32557974828, "conclusion": "success"},
     "parallel_admission_workflow": {"run_id": 32557974787, "conclusion": "success"},
-    "inherited_success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253", "rev254"],
-    "inherited_in_progress": ["rev246"]
+    "inherited_success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev246", "rev250", "rev253", "rev254"],
+    "all_observed_exact_head_workflows_success": true
   },
   "integration_state": {
     "pull_request_state": "draft_unmerged",
@@ -74,6 +74,6 @@
     "coordination_hardening": "active_canonical_main_phase_evidence_source",
     "downstream_rev1200_scopes": "active_file_disjoint_and_explicitly_excluding_rev1100"
   },
-  "status": "active_waiting_upstream_and_coordination_hardening",
+  "status": "active_green_waiting_upstream_and_coordination_hardening",
   "agi_state": "NOT_AGI"
 }
