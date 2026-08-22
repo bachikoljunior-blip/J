@@ -30,18 +30,17 @@
   ],
   "intent": "mechanically certify one theorem-faithful corrected bipartite Split-or-Johnson recursive edge after the existing input gate: accept only a canonical exact constant-factor reduction of the auxiliary/small part or an explicit canonical Johnson embedding, with multiplicative-cost and strict-progress evidence; reject phase labels or nonconstructive recognition fail-closed",
   "validation": {
-    "previous_exact_head": "f175a22b6bb9a1a95ff70608a2f30e28241a69cc",
-    "previous_dedicated_workflow_run": 32541898447,
-    "previous_dedicated_workflow_status": "success",
     "current_head": "89ab0c3649d093af8d8b4cbe1403b012dea0f299",
     "current_local_focused_tests": "10/10 passed",
-    "current_exact_head_ci": "pending automatic PR-triggered runs",
+    "dedicated_workflow_run": 32544584151,
+    "dedicated_workflow_status": "success",
+    "problem_solving_parallel_admission_run": 32544584150,
+    "problem_solving_parallel_admission_status": "failure",
     "hardening": "reject fractional or coercible sizes, embedding coordinates, relation distances, and non-real costs instead of truncating/coercing them into exact evidence",
-    "previous_problem_solving_parallel_admission_run": 32541898404,
-    "previous_problem_solving_parallel_admission_status": "failure",
-    "coordination_repair": "this claim is canonical schema-v2; a separately owned rev275 noncanonical claim still prevents safe canonical phase-admission generation"
+    "coordination_repair": "this claim is canonical schema-v2; a separately owned rev275 noncanonical claim still prevents safe canonical phase-admission generation",
+    "merge_policy": "remain draft and do not merge while replayable phase-admission evidence is unavailable"
   },
   "non_interference": "Only this claim record on main and the reserved rev281 paths on the existing isolated branch may be changed. Do not modify, normalize, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementation files, or MAIN.md.",
-  "status": "active_hardened_local_green_exact_head_ci_pending_phase_evidence_blocked_by_sibling_registry_error",
+  "status": "active_hardened_exact_head_smoke_green_phase_evidence_blocked_by_sibling_registry_error",
   "agi_state": "NOT_AGI"
 }
