@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-run-start-sha-correction-20260822T194348JST-190af513",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T193902+0900-135e1ef3-turn1",
   "started_at_jst": "2026-08-22T19:43:48+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:43:48+09:00",
-  "last_activity_at_jst": "2026-08-22T19:43:48+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:50:31+09:00",
+  "last_activity_at_jst": "2026-08-22T19:50:31+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "190af513b566421cee87d35ad80a47ce6da03251",
   "starting_agi_gi_rev": 1600,
@@ -17,7 +17,9 @@
     "automation/agi_gi_run_start_history_guard.py",
     "automation/test_agi_gi_run_start_history_guard.py",
     "automation_runs/2026-08-22_1943_JST/RUN_START_ORPHAN_SHA_CORRECTION.md",
-    ".github/workflows/run-start-history-integrity.yml"
+    ".github/workflows/run-start-history-integrity.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-run-start-sha-correction-20260822T194348JST-190af513-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-run-start-sha-correction-20260822T194348JST-190af513-publish.json"
   ],
   "intent": "Preserve the invalid 34c9ca6e... start record, append an explicit identity correction to the observable main commit 34c24406..., and extend independent replay so identity corrections are exact, unique, time-bound, canonical-revision-bound, and fail closed.",
   "parallel_exclusions": [
@@ -51,6 +53,8 @@
     ],
     "decision": "extend the existing append-only correction protocol; never rewrite or delete the original start record"
   },
-  "status": "active_preimplementation",
-  "agi_state": "NOT_AGI"
+  "status": "active_pr_exact_head_history_green_phase_evidence_pending",
+  "agi_state": "NOT_AGI",
+  "pull_request": 284,
+  "exact_head_sha": "323026170e4828c75f07c5d344515caad470b3f3"
 }
