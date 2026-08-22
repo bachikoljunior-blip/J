@@ -1,0 +1,92 @@
+name: rev952 block relation proof-DAG smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1553_JST/block_relation_provenance_proof_dag_consumer_v1.py'
+      - 'automation_runs/2026-08-22_1553_JST/test_block_relation_provenance_proof_dag_rev952.py'
+      - 'automation_runs/2026-08-22_1553_JST/REV952_BLOCK_RELATION_PROOF_DAG.md'
+      - '.github/workflows/rev952-block-relation-proof-dag-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev952 consumer and regressions
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1553_JST/block_relation_provenance_proof_dag_consumer_v1.py \
+            automation_runs/2026-08-22_1553_JST/test_block_relation_provenance_proof_dag_rev952.py
+      - name: Run inherited rev273 and focused rev952 regressions
+        run: |
+          python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_relation_provenance_rev273.py -v
+          python automation_runs/2026-08-22_1553_JST/test_block_relation_provenance_proof_dag_rev952.py -v
+      - name: Reject sibling branch-only dependencies
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('automation_runs/2026-08-22_1553_JST/block_relation_provenance_proof_dag_consumer_v1.py').read_text()
+          forbidden = (
+              'homogeneous_block_quotient_si',
+              'block_action_preimage_coset_rev278',
+              'joint_block_reduction_compatibility',
+              'block_action_kernel_proof_dag_consumer_v1',
+              'soj_recursive_production',
+              'implicit_relation_parent_outcome_proof_dag',
+          )
+          hits = [name for name in forbidden if name in text]
+          if hits:
+              raise SystemExit(f'sibling dependency detected: {hits}')
+          PY
+      - name: Preview canonical attempt-solution admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996 \
+            --phase attempt_solution \
+            --scope crx3/structural-consumers/homogeneous-block-relation-provenance-proof-dag \
+            --target-revision 952 \
+            --path .github/workflows/rev952-block-relation-proof-dag-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-publish.json \
+            --path automation_runs/2026-08-22_1553_JST/REV952_BLOCK_RELATION_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1553_JST/block_relation_provenance_proof_dag_consumer_v1.py \
+            --path automation_runs/2026-08-22_1553_JST/test_block_relation_provenance_proof_dag_rev952.py \
+            --output /tmp/rev952-attempt-solution.json
+          cat /tmp/rev952-attempt-solution.json
+      - name: Preview canonical publish admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996 \
+            --phase publish \
+            --scope crx3/structural-consumers/homogeneous-block-relation-provenance-proof-dag \
+            --target-revision 952 \
+            --path .github/workflows/rev952-block-relation-proof-dag-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-publish.json \
+            --path automation_runs/2026-08-22_1553_JST/REV952_BLOCK_RELATION_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1553_JST/block_relation_provenance_proof_dag_consumer_v1.py \
+            --path automation_runs/2026-08-22_1553_JST/test_block_relation_provenance_proof_dag_rev952.py \
+            --output /tmp/rev952-publish.json
+          cat /tmp/rev952-publish.json
+      - name: Verify reserved diff remains additive
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- \
+            automation_runs/2026-08-22_1553_JST/block_relation_provenance_proof_dag_consumer_v1.py \
+            automation_runs/2026-08-22_1553_JST/test_block_relation_provenance_proof_dag_rev952.py \
+            automation_runs/2026-08-22_1553_JST/REV952_BLOCK_RELATION_PROOF_DAG.md \
+            .github/workflows/rev952-block-relation-proof-dag-smoke.yml \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-publish.json
