@@ -7,7 +7,7 @@
   "model": "gpt-5.6-sol",
   "owner": "chatgpt-session-j-rev286-soj-johnson-terminal-cost-20260822T105042JST-49d7a287",
   "started_at_jst": "2026-08-22T10:50:42+09:00",
-  "heartbeat_at_jst": "2026-08-22T10:50:42+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:54:41+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
   "starting_agi_gi_rev": 274,
@@ -15,8 +15,8 @@
   "scope": "w1r-h6/corrected-split-or-johnson/explicit-johnson-terminal-cost-composition",
   "scope_kind": "leaf_local_additive",
   "branch": "agi-gi-rev286-soj-johnson-terminal-cost-session-20260822-1050",
-  "pull_request": null,
-  "latest_head_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
+  "pull_request": 231,
+  "latest_head_sha": "569dcd22fa0e33553f1d155d9bf7f7a479a91dbb",
   "reserved_paths": [
     ".github/workflows/rev286-soj-johnson-terminal-cost-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev286-soj-johnson-terminal-cost-20260822T105042JST-49d7a287-attempt-solution.json",
@@ -44,6 +44,6 @@
   "intent": "add a standalone fail-closed post-admission cost/replay composer for a corrected SOJ explicit Johnson embedding and a caller-supplied already exact primitive-Johnson terminal proof: require a full Johnson domain, exact ground/subset/domain/root-envelope match, independently certified transition multiplicative bound, and a valid main-integrated primitive-Johnson terminal accounting leaf; then charge transition plus terminal local work into one terminal recurrence leaf. Do not perform transition admission, execute primitive Johnson, import rev284 or PR #226 branch-only code, or handle partial/large-ground recursive Johnson embeddings.",
   "coordination_note": "Canonical phase-admission evidence remains blocked by the independently owned noncanonical rev275 registry record. Reserve the exact evidence path only; do not fabricate admitted evidence and do not normalize or mutate sibling records.",
   "non_interference": "Only the five rev286 reserved paths may be written for this scope. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, normalize, or otherwise mutate sibling claims, branches, PRs, workflows, shared implementation paths, or MAIN.md.",
-  "status": "active_claimed_before_implementation",
+  "status": "draft_pr_open_ci_pending",
   "agi_state": "NOT_AGI"
 }
