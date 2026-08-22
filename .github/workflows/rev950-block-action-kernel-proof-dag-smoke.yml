@@ -1,0 +1,92 @@
+name: rev950 block-action kernel proof-DAG smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1453_JST/block_action_kernel_proof_dag_consumer_v1.py'
+      - 'automation_runs/2026-08-22_1453_JST/test_block_action_kernel_proof_dag_consumer_rev950.py'
+      - 'automation_runs/2026-08-22_1453_JST/REV950_BLOCK_ACTION_KERNEL_PROOF_DAG.md'
+      - '.github/workflows/rev950-block-action-kernel-proof-dag-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev950 consumer and regressions
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1453_JST/block_action_kernel_proof_dag_consumer_v1.py \
+            automation_runs/2026-08-22_1453_JST/test_block_action_kernel_proof_dag_consumer_rev950.py
+      - name: Run inherited rev275 and focused rev950 regressions
+        run: |
+          python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py -v
+          python automation_runs/2026-08-22_1453_JST/test_block_action_kernel_proof_dag_consumer_rev950.py -v
+      - name: Reject sibling branch-only dependencies
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('automation_runs/2026-08-22_1453_JST/block_action_kernel_proof_dag_consumer_v1.py').read_text()
+          forbidden = (
+              'soj_recursive_production',
+              'small_order_production_proof_dag_consumer_v1',
+              'signed_johnson_ground_proof_dag_consumer_v1',
+              'primitive_johnson_proof_dag_consumer_v1',
+              'parent_outcome_proof_dag',
+              'state_orbit_proof_dag',
+          )
+          hits = [name for name in forbidden if name in text]
+          if hits:
+              raise SystemExit(f'sibling dependency detected: {hits}')
+          PY
+      - name: Preview canonical attempt-solution admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617 \
+            --phase attempt_solution \
+            --scope crx3/algorithmic-consumers/homogeneous-block-action-kernel-factorization-proof-dag \
+            --target-revision 950 \
+            --path .github/workflows/rev950-block-action-kernel-proof-dag-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617-publish.json \
+            --path automation_runs/2026-08-22_1453_JST/REV950_BLOCK_ACTION_KERNEL_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1453_JST/block_action_kernel_proof_dag_consumer_v1.py \
+            --path automation_runs/2026-08-22_1453_JST/test_block_action_kernel_proof_dag_consumer_rev950.py \
+            --output /tmp/rev950-attempt-solution.json
+          cat /tmp/rev950-attempt-solution.json
+      - name: Preview canonical publish admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617 \
+            --phase publish \
+            --scope crx3/algorithmic-consumers/homogeneous-block-action-kernel-factorization-proof-dag \
+            --target-revision 950 \
+            --path .github/workflows/rev950-block-action-kernel-proof-dag-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617-publish.json \
+            --path automation_runs/2026-08-22_1453_JST/REV950_BLOCK_ACTION_KERNEL_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1453_JST/block_action_kernel_proof_dag_consumer_v1.py \
+            --path automation_runs/2026-08-22_1453_JST/test_block_action_kernel_proof_dag_consumer_rev950.py \
+            --output /tmp/rev950-publish.json
+          cat /tmp/rev950-publish.json
+      - name: Verify reserved diff remains additive
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- \
+            automation_runs/2026-08-22_1453_JST/block_action_kernel_proof_dag_consumer_v1.py \
+            automation_runs/2026-08-22_1453_JST/test_block_action_kernel_proof_dag_consumer_rev950.py \
+            automation_runs/2026-08-22_1453_JST/REV950_BLOCK_ACTION_KERNEL_PROOF_DAG.md \
+            .github/workflows/rev950-block-action-kernel-proof-dag-smoke.yml \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617-publish.json

@@ -4,16 +4,16 @@
   "claim_id": "chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e",
   "session_id": "chatgpt-session-j-continuation-20260822T144636+0900-545c97be-turn4",
   "started_at_jst": "2026-08-22T14:46:56+09:00",
-  "heartbeat_at_jst": "2026-08-22T14:46:56+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:53:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "c1d9bf7ec8011f697985529b6afaa6cb24e85209",
   "starting_agi_gi_rev": 620,
   "target_revision": 900,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-provenance-total-cost-binding",
   "branch": "agi-gi-rev900-soj-recursive-production-provenance-total-cost-session-20260822-1446",
-  "pull_request": null,
-  "pull_request_state": "not_created",
-  "latest_head_sha": null,
+  "pull_request": 254,
+  "pull_request_state": "open_draft",
+  "latest_head_sha": "84ee18d3e5302bb09995641cc19a291e245af980",
   "intent": "add a file-disjoint fail-closed compatibility binding between the public rev700 recursive-production provenance certificate and this session's public rev800 recursive-production total-cost coherence certificate: independently replay both deterministic output identities, require one accounting-binding digest, one reduction identity, and compatible exact-empty/nonempty result semantics, then seal the provenance-authenticated exactly-once construction-charge statement into a separate deterministic identity without importing sibling branch implementations, re-performing Git provenance, executing recursive String Isomorphism, reconstructing Johnson semantics, or overlapping the fresh rev720 construction-cost-provenance scope",
   "reserved_paths": [
     ".github/workflows/rev900-soj-recursive-production-provenance-total-cost-smoke.yml",
@@ -33,6 +33,8 @@
     "rev720 recursive production construction-cost provenance claim and all reserved paths",
     "this session's rev800 recursive production total-cost coherence / PR #252 and all reserved paths",
     "rev620 main-revision-sync claim and MAIN.md",
+    "fresh rev950 block-action kernel proof-DAG claim and all reserved paths",
+    "fresh rev1000 recursive production post-replay envelope claim and all reserved paths",
     "all sibling claims, branches, PRs, workflows, CRX scopes, shared recurrence implementation, shared coordination implementation, and shared proof-DAG implementations"
   ],
   "parallel_safety": {
@@ -43,8 +45,17 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
   },
   "validation": {
-    "state": "claimed_not_yet_implemented",
-    "rev800_exact_head_ci": "all observed pull-request workflows completed success on d2d3e4646bd32eef196ab1eb68b9a2b8f7922df0"
+    "state": "exact_head_core_green_one_inherited_check_running",
+    "local_py_compile": "success",
+    "focused_regression": "16/16 success",
+    "attempt_solution_admission": "admitted_conflicts_empty_persisted_on_exact_branch_head",
+    "attempt_solution_registry_source_sha": "aac4bac6848d22afbd26b650d9abf8ca5fc61af0",
+    "dedicated_smoke": "success_on_84ee18d3e5302bb09995641cc19a291e245af980_run_32555439111",
+    "problem_solving_parallel_admission": "success_on_84ee18d3e5302bb09995641cc19a291e245af980_run_32555439107",
+    "inherited_success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253", "rev254"],
+    "inherited_in_progress": ["rev246"],
+    "rev800_exact_head_ci": "all observed pull-request workflows completed success on d2d3e4646bd32eef196ab1eb68b9a2b8f7922df0",
+    "workflow_policy": "all runs observed naturally; none cancelled or rerun"
   },
   "status": "active",
   "agi_state": "NOT_AGI"
