@@ -1,0 +1,40 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev1200-20260822T155000+0900-turn10",
+  "started_at_jst": "2026-08-22T15:50:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:50:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "9e8f61cd8ca8f97864180319e6bb9bf3209da109",
+  "starting_agi_gi_rev": 950,
+  "target_revision": 1200,
+  "scope": "crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism",
+  "branch": "agi-gi-rev1200-homogeneous-block-quotient-si-session-20260822-1550",
+  "reserved_paths": [
+    ".github/workflows/rev1200-homogeneous-block-quotient-si-smoke.yml",
+    "automation_runs/2026-08-22_1550_JST/REV1200_HOMOGENEOUS_BLOCK_QUOTIENT_STRING_ISOMORPHISM.md",
+    "automation_runs/2026-08-22_1550_JST/homogeneous_block_quotient_string_isomorphism_v1.py",
+    "automation_runs/2026-08-22_1550_JST/test_homogeneous_block_quotient_string_isomorphism_rev1200.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev278 homogeneous-block quotient preimage lift and all original-domain transporter lifting",
+    "rev950 block-action kernel proof-DAG implementation paths",
+    "rev1100 corrected-SOJ main post-replay seal",
+    "state-orbit proof-DAG consumer",
+    "repository coordination and phase-admission hardening",
+    "all sibling active claims, branches, PRs, workflows, MAIN.md, and revision ledgers"
+  ],
+  "intent": "consume only main-integrated rev274/rev275/rev950 certified provenance/kernel evidence and execute exact quotient-domain String Isomorphism by complete ordered-feature-partition orbit exploration in the certified quotient image; return exact-empty or a complete quotient-level cross-coordinate right coset, while deliberately stopping before any original-domain preimage/transporter lift",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_rebase_or_force_push": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_any_upstream_identity_or_resource_cap_drift": true
+  },
+  "status": "claimed_implementation_pending",
+  "agi_state": "NOT_AGI"
+}
