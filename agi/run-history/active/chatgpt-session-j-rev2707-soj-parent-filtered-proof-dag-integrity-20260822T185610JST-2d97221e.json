@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e",
   "session_id": "chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST",
   "started_at_jst": "2026-08-22T18:56:10+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:04:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:46:55+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2d97221e6f00c3c27ea92cecd6f4302ec58a741c",
   "starting_agi_gi_rev": 1600,
@@ -21,6 +21,7 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-publish.json"
   ],
   "parallel_exclusions": [
+    "rev2800 corrected-SOJ parent-filtered proof/accounting coherence / PR #283 and all reserved paths",
     "rev2600 corrected-SOJ parent-filtered result accounting coherence claim and all reserved paths",
     "rev2501 relation-twin restriction identity claim and all reserved paths",
     "rev2500 corrected-SOJ parent-filtered execution proof-DAG claim and all reserved paths",
@@ -30,6 +31,7 @@
     "rev2200 corrected-SOJ parent-filtered child result / PR #274 and all reserved paths",
     "rev1100 main/post-replay seal / PR #267 and all reserved paths",
     "run-start history integrity / PR #273 and all coordination reserved paths",
+    "run-start orphaned-start SHA correction claim chatgpt-session-j-run-start-sha-correction-20260822T194348JST-190af513 and all reserved paths",
     "claim-publication preflight coordination claim and all reserved paths",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
@@ -63,10 +65,20 @@
     "problem_solving_parallel_admission_run": 32566564081,
     "problem_solving_parallel_admission": "success",
     "inherited_rev238_rev239_rev240_rev241_rev242_rev246_rev250_rev253_rev254": "all natural runs success",
-    "run_start_history_integrity": "external failure on unresolved historical starting_main_sha 34c9ca6eafc11a0737fbacb70fd0fc244bea6973; owned by separate run-start-history hardening scope; not modified here",
+    "run_start_history_integrity": "external historical-SHA failure now has a separate active correction owner; no correction or rerun performed by rev2707",
     "manual_rerun_or_cancel": false
   },
-  "integration_boundary": "PR #280 remains draft and unmerged while direct public producer rev2200 / PR #274 is independently owned and unmerged; do not overtake upstream ownership.",
-  "status": "active_exact_head_green_waiting_upstream_and_external_history_integrity",
+  "continuation_observation": {
+    "observed_main_sha": "6cc1d9d8c336139e76a65de09a3ae4bced7adecd",
+    "branch_merge_base_sha": "620db467becad7aa9e849a3c862cf3056a605da2",
+    "branch_ahead_by": 8,
+    "branch_behind_by": 32,
+    "direct_producer_pr_274": "open_draft_unmerged",
+    "downstream_consumer_pr_283": "open_draft_unmerged_and_independently_owned",
+    "run_start_sha_correction": "active_preimplementation_and_independently_owned",
+    "reconciliation_decision": "defer branch reconciliation while the direct producer is unmerged and shared coordination history is actively changing; preserve exact-head green evidence and do not regenerate phase evidence against a moving boundary"
+  },
+  "integration_boundary": "PR #280 remains draft and unmerged while direct public producer rev2200 / PR #274 is independently owned and unmerged. A separately owned downstream rev2800 / PR #283 now consumes the public-shaped rev2707 contract, but does not transfer ownership or justify overtaking the producer. Shared run-start SHA correction is also active on disjoint coordination paths; do not race it.",
+  "status": "active_exact_head_green_waiting_upstream_with_downstream_consumer_and_coordination_hardening",
   "agi_state": "NOT_AGI"
 }
