@@ -135,33 +135,41 @@ def _validate_exact_outcome_contract(
     return True, "rev266 outcome contract is internally replay-consistent"
 
 
-def _validate_resource_envelope_arguments(
+def _finite_real_value(value: object) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, Real):
+        return None
+    try:
+        normalized = float(value)
+    except (OverflowError, TypeError, ValueError):
+        return None
+    if not isfinite(normalized):
+        return None
+    return normalized
+
+
+def _normalize_resource_envelope_arguments(
     *,
     external_log2_cost_bound: object,
     quasipoly_power: object,
     quasipoly_constant: object,
-) -> tuple[bool, str]:
-    if (
-        isinstance(external_log2_cost_bound, bool)
-        or not isinstance(external_log2_cost_bound, Real)
-        or not isfinite(float(external_log2_cost_bound))
-        or float(external_log2_cost_bound) < 0.0
-    ):
-        return False, "external_log2_cost_bound must be a finite nonnegative real"
+) -> tuple[tuple[float, int, float] | None, str]:
+    external = _finite_real_value(external_log2_cost_bound)
+    if external is None or external < 0.0:
+        return None, "external_log2_cost_bound must be a finite nonnegative real"
     if (
         isinstance(quasipoly_power, bool)
         or not isinstance(quasipoly_power, int)
         or quasipoly_power < 0
     ):
-        return False, "quasipoly_power must be a nonnegative integer"
-    if (
-        isinstance(quasipoly_constant, bool)
-        or not isinstance(quasipoly_constant, Real)
-        or not isfinite(float(quasipoly_constant))
-        or float(quasipoly_constant) <= 0.0
-    ):
-        return False, "quasipoly_constant must be a finite positive real"
-    return True, "resource envelope arguments are finite and well typed"
+        return None, "quasipoly_power must be a nonnegative integer"
+    constant = _finite_real_value(quasipoly_constant)
+    if constant is None or constant <= 0.0:
+        return None, "quasipoly_constant must be a finite positive real"
+    return (
+        external,
+        int(quasipoly_power),
+        constant,
+    ), "resource envelope arguments are finite and well typed"
 
 
 def build_parent_outcome_proof_identity(
@@ -344,12 +352,12 @@ def parent_outcome_contract_proof_dag_consumer(
     It never reconstructs the upstream right coset and therefore always keeps
     ``semantic_exactness_certified`` false and the proof's ``exact`` bit false.
     """
-    resource_valid, resource_reason = _validate_resource_envelope_arguments(
+    normalized_resource, resource_reason = _normalize_resource_envelope_arguments(
         external_log2_cost_bound=external_log2_cost_bound,
         quasipoly_power=quasipoly_power,
         quasipoly_constant=quasipoly_constant,
     )
-    if not resource_valid:
+    if normalized_resource is None:
         return ParentOutcomeProofDAGConsumerResult(
             "invalid_parent_outcome_resource_envelope",
             outcome if isinstance(outcome, ParentExactOutcomeContract) else None,
@@ -359,6 +367,11 @@ def parent_outcome_contract_proof_dag_consumer(
             False,
             resource_reason,
         )
+    (
+        normalized_external_log2_cost_bound,
+        normalized_quasipoly_power,
+        normalized_quasipoly_constant,
+    ) = normalized_resource
     try:
         identity = build_parent_outcome_proof_identity(
             outcome,
@@ -391,9 +404,9 @@ def parent_outcome_contract_proof_dag_consumer(
     dag_validation = validate_execution_proof_dag(
         proof,
         original_root_n=int(original_root_n),
-        external_log2_cost_bound=float(external_log2_cost_bound),
-        quasipoly_power=int(quasipoly_power),
-        quasipoly_constant=float(quasipoly_constant),
+        external_log2_cost_bound=normalized_external_log2_cost_bound,
+        quasipoly_power=normalized_quasipoly_power,
+        quasipoly_constant=normalized_quasipoly_constant,
     )
     if not dag_validation.certified:
         return ParentOutcomeProofDAGConsumerResult(
