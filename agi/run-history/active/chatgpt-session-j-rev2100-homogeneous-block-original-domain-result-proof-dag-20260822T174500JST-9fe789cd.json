@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T174421+0900-turn9",
   "started_at_jst": "2026-08-22T17:45:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T17:50:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:54:00+09:00",
   "stale_after_minutes": 55,
   "starting_main_sha": "9fe789cda6c34e8ecfccf31c5147188c0ff3cdce",
   "starting_agi_gi_rev": 952,
@@ -12,7 +12,7 @@
   "scope": "crx3/algorithmic-consumers/homogeneous-block-quotient-result-original-domain-lift-proof-dag",
   "branch": "agi-gi-rev2100-homogeneous-block-original-domain-proof-dag-session-20260822-1745",
   "pull_request": 272,
-  "latest_head_sha": "295b1ca8d2303040710500437fb0c2648c527b53",
+  "latest_head_sha": "61a81890364e4203a2a1be912dc7f564a233d21c",
   "reserved_paths": [
     "automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py",
     "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py",
@@ -28,6 +28,7 @@
     "rev1200 quotient String-Isomorphism / PR #260",
     "rev278 original-domain quotient preimage / PR #222",
     "all corrected Split-or-Johnson branches including fresh rev2200",
+    "crx3/algorithmic-consumers/homogeneous-block-structural-original-domain-proof-coherence (rev2300; explicitly excludes rev2100 reserved paths)",
     "MAIN.md and shared proof-DAG, recurrence, S1, and coordination implementations"
   ],
   "parallel_safety": {
@@ -42,8 +43,10 @@
     "changed_files": 4,
     "quotient_semantic_completeness_gate": "bounded exhaustive source quotient-image enumeration under caller cap",
     "parent_exactness_gate": "rev273 full relation replay + rev273 point-lift conjugacy + exact generic source/target block-action preimages + full relation transport/stabilizer checks",
-    "proof_dag": "exact parent result only; terminal accounting submitted to main-integrated execution proof-DAG validator"
+    "proof_dag": "exact parent result only; terminal accounting submitted to main-integrated execution proof-DAG validator",
+    "focused_tests": 9,
+    "initial_ci_note": "implementation tests and py_compile green; dedicated diff guard shallow-checkout merge-base issue fixed on own workflow only"
   },
-  "status": "active_validation",
+  "status": "active_validation_phase_evidence_pending",
   "agi_state": "NOT_AGI"
 }
