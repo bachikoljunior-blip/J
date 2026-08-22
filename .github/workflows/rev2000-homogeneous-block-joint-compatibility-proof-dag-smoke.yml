@@ -33,26 +33,37 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate canonical attempt-solution admission preview
+      - name: Generate canonical attempt-solution and publish admission previews
         id: admission
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin main:refs/remotes/origin/main
-          evidence="${RUNNER_TEMP}/rev2000-attempt-solution.json"
+          attempt="${RUNNER_TEMP}/rev2000-attempt-solution.json"
+          publish="${RUNNER_TEMP}/rev2000-publish.json"
+          common=(
+            --claim-id chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee
+            --scope crx3/structural-consumers/homogeneous-block-joint-reduction-compatibility-proof-dag
+            --target-revision 2000
+            --path .github/workflows/rev2000-homogeneous-block-joint-compatibility-proof-dag-smoke.yml
+            --path automation_runs/2026-08-22_1717_JST/REV2000_HOMOGENEOUS_BLOCK_JOINT_COMPATIBILITY_PROOF_DAG.md
+            --path automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py
+            --path automation_runs/2026-08-22_1717_JST/test_homogeneous_block_joint_compatibility_proof_dag_rev2000.py
+          )
           python automation/problem_solving_parallel_admission.py \
-            --claim-id chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee \
+            "${common[@]}" \
             --phase attempt_solution \
-            --scope crx3/structural-consumers/homogeneous-block-joint-reduction-compatibility-proof-dag \
-            --target-revision 2000 \
-            --path .github/workflows/rev2000-homogeneous-block-joint-compatibility-proof-dag-smoke.yml \
-            --path automation_runs/2026-08-22_1717_JST/REV2000_HOMOGENEOUS_BLOCK_JOINT_COMPATIBILITY_PROOF_DAG.md \
-            --path automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py \
-            --path automation_runs/2026-08-22_1717_JST/test_homogeneous_block_joint_compatibility_proof_dag_rev2000.py \
             --path agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-attempt_solution.json \
-            --output "${evidence}"
-          jq -e '.admitted == true and .conflicts == []' "${evidence}"
-          echo "evidence=${evidence}" >>"${GITHUB_OUTPUT}"
+            --output "${attempt}"
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" \
+            --phase publish \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-publish.json \
+            --output "${publish}"
+          jq -e '.admitted == true and .conflicts == []' "${attempt}"
+          jq -e '.admitted == true and .conflicts == []' "${publish}"
+          echo "attempt=${attempt}" >>"${GITHUB_OUTPUT}"
+          echo "publish=${publish}" >>"${GITHUB_OUTPUT}"
 
       - name: Run focused rev2000 regressions
         run: >-
@@ -77,20 +88,23 @@ jobs:
           grep -q "proof_dag_accounting_v1" "${file}"
           ! grep -Eq "joint_block_reduction_compatibility_v1|homogeneous_block_quotient_si|original_domain.*preimage|rev1800|rev276|rev278" "${file}"
 
-      - name: Persist canonical attempt-solution admission on this branch
+      - name: Persist canonical attempt-solution and publish admission on this branch
         if: github.event_name == 'push'
         shell: bash
         env:
-          PREVIEW: ${{ steps.admission.outputs.evidence }}
+          ATTEMPT_PREVIEW: ${{ steps.admission.outputs.attempt }}
+          PUBLISH_PREVIEW: ${{ steps.admission.outputs.publish }}
         run: |
           set -euo pipefail
-          evidence="agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-attempt_solution.json"
-          mkdir -p "$(dirname "${evidence}")"
-          cp "${PREVIEW}" "${evidence}"
+          attempt="agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-attempt_solution.json"
+          publish="agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-publish.json"
+          mkdir -p "$(dirname "${attempt}")"
+          cp "${ATTEMPT_PREVIEW}" "${attempt}"
+          cp "${PUBLISH_PREVIEW}" "${publish}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "${evidence}"
+          git add "${attempt}" "${publish}"
           if ! git diff --cached --quiet; then
-            git commit -m "coordination: persist rev2000 attempt-solution admission"
+            git commit -m "coordination: persist rev2000 attempt and publish admission"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
