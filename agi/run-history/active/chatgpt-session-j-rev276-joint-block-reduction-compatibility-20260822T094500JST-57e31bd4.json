@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev276-joint-block-reduction-compatibility-20260822T094500JST-57e31bd4",
   "session_id": "chatgpt-session-j-continuation-20260822T094500+0900-57e31bd4-turn3",
   "started_at_jst": "2026-08-22T09:45:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:49:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:43:42+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "57e31bd40e989f99f6895f09a5ca53f3cd5533a1",
   "starting_agi_gi_rev": 274,
@@ -12,7 +12,8 @@
   "scope": "crx1/homogeneous-block-reduction/joint-relation-action-compatibility-certificate",
   "branch": "agi-gi-rev276-joint-block-reduction-compatibility-session-20260822-0945",
   "pull_request": 221,
-  "latest_head_sha": "646aa4718eda86a36ed901529b420746a6cdc868",
+  "latest_head_sha": "a28de40870ac5f6478787ce90412ecc0c89ac715",
+  "latest_main_reconciled_sha": "9f17a7e669865cd50d21d9081580e0fa374e350d",
   "reserved_paths": [
     ".github/workflows/rev276-joint-block-reduction-compatibility-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev276-joint-block-reduction-compatibility-20260822T094500JST-57e31bd4-attempt-solution.json",
@@ -42,14 +43,19 @@
     "focused_regressions": "12/12 success",
     "py_compile": "success",
     "no_rev273_branch_import": "success",
-    "first_dedicated_run_id": 32541482186,
-    "second_dedicated_run_id": 32541518181,
-    "functional_steps": "success",
-    "parallel_admission": "fail_closed_registry_format_error",
-    "external_blocker_claim": "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
-    "external_blocker_reason": "rev275 claim event_type is absent/non-schema-v2; canonical registry loader rejects the registry before admission",
+    "latest_dedicated_run_id": 32544222970,
+    "latest_functional_proof": "success",
+    "latest_parallel_admission": "failure_fail_closed_registry_format_error",
+    "repository_phase_evidence_guard_run_id": 32544222893,
+    "repository_phase_evidence_guard": "failure_missing_admitted_evidence",
+    "external_blocker_claims": [
+      "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
+      "chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2"
+    ],
+    "external_blocker_reason": "both sibling claim records lack an accepted canonical event_type, so automation.parallel_claims rejects the registry before rev276 attempt_solution admission can be generated; no sibling record is normalized or mutated",
+    "branch_reconciliation": "non-force merge history preserves latest main through 9f17a7e669865cd50d21d9081580e0fa374e350d; PR diff remains exactly four additive rev276-reserved files",
     "sibling_modified": false
   },
-  "status": "active_functional_green_registry_blocked",
+  "status": "active_exact_head_functional_green_registry_blocked",
   "agi_state": "NOT_AGI"
 }
