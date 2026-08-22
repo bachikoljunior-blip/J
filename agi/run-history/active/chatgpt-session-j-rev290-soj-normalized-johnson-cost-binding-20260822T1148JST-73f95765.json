@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev290-soj-normalized-johnson-cost-binding-20260822T1148JST-73f95765",
   "session_id": "chatgpt-session-j-agi-gi-continuation-automation-turn1-20260822T1148+0900",
   "started_at_jst": "2026-08-22T11:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T11:48:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T11:55:06+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "73f95765020a08a7a35d3e6dd25a409543805129",
   "starting_agi_gi_rev": 274,
   "target_revision": 290,
   "scope": "w1r-h6/corrected-split-or-johnson/strict-normalized-johnson-cost-binding",
   "branch": "agi-gi-rev290-soj-normalized-johnson-cost-binding-session-20260822-1148",
+  "pull_request": 235,
+  "latest_head_sha": "2a3932a5a818e4182a105d308e43ac8b10d58539",
   "reserved_paths": [
     ".github/workflows/rev290-soj-normalized-johnson-cost-binding-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev290-soj-normalized-johnson-cost-binding-20260822T1148JST-73f95765-attempt-solution.json",
@@ -22,6 +24,7 @@
   "parallel_exclusions": [
     "rev275 takeover kernel factorization and every reserved path",
     "rev276-rev289 claims, branches, PRs, workflows, and reserved paths",
+    "rev291 larger-ground Johnson recursive handoff and every reserved path",
     "rev281 corrected SOJ transition / PR #226",
     "rev283 recurrence composition / PR #228",
     "rev284 Johnson terminal admission / PR #229",
@@ -32,7 +35,23 @@
     "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
   ],
   "intent": "add a file-disjoint post-replay binding boundary between rev288 strict normalized Johnson evidence and rev286 Johnson terminal-cost accounting: require exact replay booleans, root/domain agreement, field-for-field transition and terminal equality, certified terminal accounting shape, and deterministic cross-proof identity before any later production routing; consume sibling contracts read-only and never import or modify branch-only sibling implementation",
-  "non_interference": "Only rev290 reserved paths may be written on the dedicated branch. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
-  "status": "active",
+  "phase_admission": {
+    "attempt_solution": "admitted",
+    "evidence_path": "agi/run-history/phase-admissions/chatgpt-session-j-rev290-soj-normalized-johnson-cost-binding-20260822T1148JST-73f95765-attempt-solution.json",
+    "registry_source_sha": "5e07cdde63691b03bfaef9040442933956b8b802",
+    "conflicts": 0
+  },
+  "validation": {
+    "focused_regressions": "11/11 passed",
+    "dedicated_smoke_run": 32547531915,
+    "dedicated_smoke_status": "success",
+    "problem_solving_parallel_admission_run": 32547531996,
+    "problem_solving_parallel_admission_status": "success",
+    "mergeable": true,
+    "draft": true,
+    "merge_policy": "remain draft until rev288 and rev286 owning contracts are integrated in dependency order"
+  },
+  "non_interference": "Only this rev290 claim record on main and rev290 reserved paths on the dedicated branch may be changed. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
+  "status": "active_exact_head_smoke_green_phase_admission_green_upstream_dependencies_unmerged",
   "agi_state": "NOT_AGI"
 }

@@ -6,7 +6,7 @@
   "own_claim": {
     "branch": "agi-gi-rev275-block-action-kernel-takeover-20260822-1144",
     "claim_id": "chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0",
-    "heartbeat_at_jst": "2026-08-22T11:44:26+09:00",
+    "heartbeat_at_jst": "2026-08-22T11:55:20+09:00",
     "reserved_paths": [
       ".github/workflows/agi-gi-rev275-block-action-kernel-smoke.yml",
       "agi/run-history/phase-admissions/chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0-attempt-solution.json",
@@ -56,7 +56,7 @@
     {
       "branch": "agi-gi-rev281-corrected-bipartite-soj-transition-20260822-0954",
       "claim_id": "chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2",
-      "heartbeat_at_jst": "2026-08-22T10:47:18+09:00",
+      "heartbeat_at_jst": "2026-08-22T11:54:23+09:00",
       "reserved_paths": [
         ".github/workflows/rev281-corrected-bipartite-soj-transition-smoke.yml",
         "agi/run-history/phase-admissions/chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2-attempt-solution.json",
@@ -115,9 +115,25 @@
       "target_revision": 286
     },
     {
+      "branch": "agi-gi-rev287-soj-johnson-relational-reduction-session-20260822-1155",
+      "claim_id": "chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5",
+      "heartbeat_at_jst": "2026-08-22T11:55:51+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev287-soj-johnson-relational-reduction-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-publish.json",
+        "automation_runs/2026-08-22_1155_JST/REV287_SOJ_JOHNSON_RELATIONAL_REDUCTION.md",
+        "automation_runs/2026-08-22_1155_JST/corrected_soj_johnson_relational_reduction_v1.py",
+        "automation_runs/2026-08-22_1155_JST/test_corrected_soj_johnson_relational_reduction_rev287.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-relational-reduction-construction",
+      "state": "active",
+      "target_revision": 287
+    },
+    {
       "branch": "agi-gi-rev288-soj-strict-evidence-normalization-session-20260822-1144",
       "claim_id": "chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702",
-      "heartbeat_at_jst": "2026-08-22T11:44:00+09:00",
+      "heartbeat_at_jst": "2026-08-22T11:52:00+09:00",
       "reserved_paths": [
         ".github/workflows/rev288-soj-strict-evidence-normalization-smoke.yml",
         "agi/run-history/phase-admissions/chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702-attempt-solution.json",
@@ -133,10 +149,11 @@
     {
       "branch": "agi-gi-rev289-proof-dag-envelope-hardening-session-20260822-1146",
       "claim_id": "chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79",
-      "heartbeat_at_jst": "2026-08-22T11:46:00+09:00",
+      "heartbeat_at_jst": "2026-08-22T11:54:00+09:00",
       "reserved_paths": [
         ".github/workflows/rev289-proof-dag-envelope-hardening-smoke.yml",
         "agi/run-history/phase-admissions/chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79-merge.json",
         "agi/run-history/phase-admissions/chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79-publish.json",
         "automation_runs/2026-08-19_0851_JST/REV289_PROOF_DAG_ENVELOPE_HARDENING.md",
         "automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py",
@@ -149,7 +166,7 @@
     {
       "branch": "agi-gi-rev290-soj-normalized-johnson-cost-binding-session-20260822-1148",
       "claim_id": "chatgpt-session-j-rev290-soj-normalized-johnson-cost-binding-20260822T1148JST-73f95765",
-      "heartbeat_at_jst": "2026-08-22T11:48:00+09:00",
+      "heartbeat_at_jst": "2026-08-22T11:55:06+09:00",
       "reserved_paths": [
         ".github/workflows/rev290-soj-normalized-johnson-cost-binding-smoke.yml",
         "agi/run-history/phase-admissions/chatgpt-session-j-rev290-soj-normalized-johnson-cost-binding-20260822T1148JST-73f95765-attempt-solution.json",
@@ -165,7 +182,7 @@
     {
       "branch": "agi-gi-rev291-soj-larger-ground-recursive-handoff-session-20260822-1148",
       "claim_id": "chatgpt-session-j-rev291-soj-larger-ground-recursive-handoff-20260822T1148JST-c2a368c0",
-      "heartbeat_at_jst": "2026-08-22T11:48:31+09:00",
+      "heartbeat_at_jst": "2026-08-22T11:51:31+09:00",
       "reserved_paths": [
         ".github/workflows/rev291-soj-larger-ground-recursive-handoff-smoke.yml",
         "agi/run-history/phase-admissions/chatgpt-session-j-rev291-soj-larger-ground-recursive-handoff-20260822T1148JST-c2a368c0-attempt-solution.json",
@@ -187,9 +204,9 @@
   ],
   "phase": "attempt_solution",
   "reasons": [],
-  "recorded_at_jst": "2026-08-22T11:50:23+09:00",
-  "registry_digest": "sha256:cfaa5aee0d4341e65e62d3acfe380131b99cc9330203171517941c6e06ed15dc",
-  "registry_source_sha": "6999963a378b15a7ff2e35bc1bc6b5514eadf4d8",
+  "recorded_at_jst": "2026-08-22T11:56:37+09:00",
+  "registry_digest": "sha256:543e901f0014a6c94077fd824b99a27823893aff01cb58ebf1c976cd2a58a9e7",
+  "registry_source_sha": "de687d5253a3a31e04f0bece18a3a356e93c624a",
   "schema_version": 1,
   "scope": "crx3/block-structured-consumers/homogeneous-block-action-kernel-factorization",
   "target_revision": 275
