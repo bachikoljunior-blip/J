@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6",
   "session_id": "chatgpt-session-j-continuation-20260822T091200+0900-bbffdce6-turn2",
   "started_at_jst": "2026-08-22T09:12:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:12:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:23:36+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "bbffdce667e8a38c2f90663d4de198f12c5d2fb4",
   "starting_agi_gi_rev": 266,
   "target_revision": 274,
   "scope": "crx1/homogeneous-block-reduction/group-block-action-equivariance-certificate",
   "branch": "agi-gi-rev274-block-action-provenance-session-20260822-0912",
+  "pull_request": 220,
+  "latest_head_sha": "5902e8f64dfbe038890c7bd7f087f2491027fc07",
   "reserved_paths": [
     ".github/workflows/rev274-block-action-provenance-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6-attempt-solution.json",
@@ -36,6 +38,35 @@
   ],
   "intent": "independently certify that supplied source and target partitions are genuine block systems for paired original-domain generators, derive the induced quotient permutations exactly, and verify that a supplied block bijection intertwines every paired quotient action; fail closed on malformed partitions, non-block images, non-bijections, generator mismatch, or quotient-equivariance failure without discovering or canonically choosing a block system and without consuming rev273 relation-homogeneity ownership",
   "non_interference": "Only new rev274 reserved paths may be added on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, shared implementation path, or MAIN.md.",
-  "status": "active_claimed_preimplementation",
+  "phase_admission": {
+    "attempt_solution": "admitted",
+    "publish": "admitted",
+    "conflicts": 0,
+    "registry_source_sha": "c1f32018f97f19e33c805a0c7f228a846319c5b7",
+    "registry_digest": "sha256:47caa588fa371da7e3f21cd8c99ff6cc9faa981efcdbe6d89e3d5451d599a1ec",
+    "global_guard_run_id": 32540184423,
+    "global_guard_conclusion": "success"
+  },
+  "validation": {
+    "focused_regressions": "12/12 success",
+    "py_compile": "success",
+    "dedicated_rev274_run_id": 32540184417,
+    "dedicated_rev274_conclusion": "success",
+    "inherited_success_run_ids": [
+      32540184442,
+      32540184383,
+      32540184502,
+      32540184455,
+      32540184456,
+      32540184407,
+      32540184395,
+      32540184452,
+      32540184426
+    ],
+    "agi_gi_validation_run_id": 32540184509,
+    "validate_w1r_fast": "success",
+    "validate_rev_series": "in_progress"
+  },
+  "status": "active_validating_exact_head",
   "agi_state": "NOT_AGI"
 }
