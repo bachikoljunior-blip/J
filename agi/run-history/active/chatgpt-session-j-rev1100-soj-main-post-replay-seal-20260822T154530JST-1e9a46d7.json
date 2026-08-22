@@ -4,15 +4,15 @@
   "claim_id": "chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1100-20260822T154530+0900-turn9",
   "started_at_jst": "2026-08-22T15:45:30+09:00",
-  "heartbeat_at_jst": "2026-08-22T15:52:04+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:50:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "1e9a46d7eca9ce98c7d0f97586e49766ee7d736d",
   "starting_agi_gi_rev": 950,
   "target_revision": 1100,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-main-post-replay-seal",
-  "branch": "agi-gi-rev1100-soj-main-post-replay-seal-session-20260822-1545",
+  "branch": "agi-gi-rev1100-soj-main-post-replay-seal-hardened-session-20260822-1649",
   "pull_request": 257,
-  "latest_head_sha": "020b7705359f66928e85b7477ff7eaff9f22f718",
+  "latest_head_sha": "7f6cbecc18758aa29f76f94ca7a4d8e104c1701b",
   "reserved_paths": [
     ".github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml",
     "automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md",
@@ -31,9 +31,10 @@
     "rev650 recursive caller producer provenance / PR #249",
     "rev500 caller replay envelope / PR #247",
     "rev400 production caller binding / PR #246",
-    "repository-coordination/problem-solving-phase-admission/canonical-main-source",
-    "rev1200 recursive production lineage closure and all reserved paths",
-    "rev1200 homogeneous-block quotient String Isomorphism and all reserved paths",
+    "repository-coordination/problem-solving-phase-admission/canonical-main-source / merged PR #259",
+    "rev1200/rev1300/rev1400 corrected-SOJ downstream scopes and all reserved paths",
+    "rev1200 homogeneous-block quotient String Isomorphism and later block-action proof-DAG scopes",
+    "rev1600 block-action provenance proof-DAG and all reserved paths",
     "all CRX scopes, shared proof-DAG, recurrence, coordination implementation, sibling branches/PRs/workflows, MAIN.md and revision ledgers"
   ],
   "intent": "bind an independently replay-verified rev700 main-anchored recursive production provenance join to an independently replay-verified rev1000 post-replay cost/coherence envelope, preserving exact-empty/nonempty semantics and the shared reduction/production provenance identities without importing sibling branch-only implementations",
@@ -46,34 +47,33 @@
     "revalidate_phase_evidence_after_canonical_main_source_hardening": true
   },
   "phase_evidence": {
-    "attempt_solution_commit": "6d02797e6a2df740631cbc146d5bfe0bd01cae3b",
-    "attempt_solution_admitted": true,
-    "attempt_solution_conflicts": [],
-    "publish_commit": "ef688c584fa33c4a3bee51544e2aa3955ee00f5d",
-    "publish_admitted": true,
-    "publish_conflicts": []
+    "pre_hardening_attempt_solution_commit": "6d02797e6a2df740631cbc146d5bfe0bd01cae3b",
+    "pre_hardening_publish_commit": "ef688c584fa33c4a3bee51544e2aa3955ee00f5d",
+    "pre_hardening_registry_source_sha": "544ad9b5dc06236f29eff2ab4e2154c7a1aa656d",
+    "pre_hardening_registry_source_on_main_ancestry": false,
+    "current_state": "must_regenerate_from_hardened_canonical_main_merge_base"
   },
   "validation": {
-    "exact_head": "020b7705359f66928e85b7477ff7eaff9f22f718",
-    "focused_tests": 15,
-    "focused_tests_result": "success",
-    "py_compile": "success",
-    "branch_only_sibling_import_gate": "success",
-    "reserved_path_diff": "success",
-    "dedicated_workflow": {"run_id": 32557974828, "conclusion": "success"},
-    "parallel_admission_workflow": {"run_id": 32557974787, "conclusion": "success"},
-    "inherited_success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev246", "rev250", "rev253", "rev254"],
-    "all_observed_exact_head_workflows_success": true
+    "previous_exact_head": "020b7705359f66928e85b7477ff7eaff9f22f718",
+    "previous_focused_tests": 15,
+    "previous_focused_tests_result": "success",
+    "previous_py_compile": "success",
+    "replacement_base_main_sha": "4bb4d3799d702115eb652db8484c4317f8cf2d75",
+    "replacement_head_before_workflow": "7f6cbecc18758aa29f76f94ca7a4d8e104c1701b",
+    "hardened_phase_evidence": "pending_fresh_generation"
   },
   "integration_state": {
-    "pull_request_state": "draft_unmerged",
+    "pre_hardening_pull_request": 257,
+    "pre_hardening_pull_request_state": "open_draft_to_be_superseded_by_same-session_hardened replacement",
+    "replacement_branch": "agi-gi-rev1100-soj-main-post-replay-seal-hardened-session-20260822-1649",
     "upstream_rev700_pr": 251,
     "upstream_rev700_state": "open_draft_unmerged",
     "upstream_rev1000_pr": 256,
     "upstream_rev1000_state": "open_draft_unmerged",
-    "coordination_hardening": "active_canonical_main_phase_evidence_source",
-    "downstream_rev1200_scopes": "active_file_disjoint_and_explicitly_excluding_rev1100"
+    "coordination_hardening_pr": 259,
+    "coordination_hardening_state": "merged",
+    "downstream_scopes": "active_file_disjoint_and_explicitly_excluding_rev1100"
   },
-  "status": "active_green_waiting_upstream_and_coordination_hardening",
+  "status": "active_revalidating_on_hardened_main",
   "agi_state": "NOT_AGI"
 }
