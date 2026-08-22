@@ -1,0 +1,37 @@
+name: rev283 corrected SOJ recurrence composition smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1007_JST/**'
+      - '.github/workflows/rev283-soj-recurrence-composition-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install inherited-test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Compile rev283 adapter and regression
+        working-directory: automation_runs/2026-08-22_1007_JST
+        run: >-
+          python -m py_compile
+          corrected_soj_recurrence_composition_v1.py
+          test_corrected_soj_recurrence_composition_rev283.py
+      - name: Run focused rev283 regressions
+        working-directory: automation_runs/2026-08-22_1007_JST
+        env:
+          PYTHONPATH: ../2026-08-19_0851_JST
+        run: python -m unittest -v test_corrected_soj_recurrence_composition_rev283.py
+      - name: Run inherited main recurrence regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python -m pytest -q test_quasipoly_recurrence_accounting_v1.py
