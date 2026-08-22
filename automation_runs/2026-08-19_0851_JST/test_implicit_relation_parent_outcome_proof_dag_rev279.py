@@ -214,6 +214,74 @@ class ParentOutcomeProofDAGRev279Test(unittest.TestCase):
             validation.status, "mismatched_parent_outcome_accounting_payload"
         )
 
+    def test_joint_local_charge_understatement_is_rejected(self):
+        result = parent_outcome_contract_proof_dag_consumer(
+            nonempty_outcome(), original_root_n=7
+        )
+        tampered_accounting = replace(
+            result.proof.accounting,
+            local_log2_cost_bound=0.0,
+        )
+        tampered = replace(
+            result.proof,
+            local_log2_cost_bound=0.0,
+            accounting=tampered_accounting,
+        )
+        validation = validate_parent_outcome_proof_identity(
+            tampered, result.proof.proof_identity
+        )
+        self.assertFalse(validation.certified)
+        self.assertEqual(
+            validation.status, "mismatched_parent_outcome_accounting_payload"
+        )
+
+    def test_nonfinite_joint_local_charge_tamper_is_rejected(self):
+        result = parent_outcome_contract_proof_dag_consumer(
+            nonempty_outcome(), original_root_n=7
+        )
+        tampered_accounting = replace(
+            result.proof.accounting,
+            local_log2_cost_bound=float("nan"),
+        )
+        tampered = replace(
+            result.proof,
+            local_log2_cost_bound=float("nan"),
+            accounting=tampered_accounting,
+        )
+        validation = validate_parent_outcome_proof_identity(
+            tampered, result.proof.proof_identity
+        )
+        self.assertFalse(validation.certified)
+        self.assertEqual(
+            validation.status, "mismatched_parent_outcome_accounting_payload"
+        )
+
+    def test_evidence_leaf_execution_counter_tamper_is_rejected(self):
+        result = parent_outcome_contract_proof_dag_consumer(
+            nonempty_outcome(), original_root_n=7
+        )
+        tampered = replace(result.proof, permutation_candidates_checked=1)
+        validation = validate_parent_outcome_proof_identity(
+            tampered, result.proof.proof_identity
+        )
+        self.assertFalse(validation.certified)
+        self.assertEqual(
+            validation.status, "mismatched_parent_outcome_execution_counter"
+        )
+
+    def test_evidence_leaf_child_injection_is_rejected(self):
+        result = parent_outcome_contract_proof_dag_consumer(
+            nonempty_outcome(), original_root_n=7
+        )
+        tampered = replace(result.proof, children=(result.proof,))
+        validation = validate_parent_outcome_proof_identity(
+            tampered, result.proof.proof_identity
+        )
+        self.assertFalse(validation.certified)
+        self.assertEqual(
+            validation.status, "nonterminal_parent_outcome_evidence_leaf"
+        )
+
     def test_quasipolynomial_envelope_failure_remains_uncertified(self):
         result = parent_outcome_contract_proof_dag_consumer(
             nonempty_outcome(),
