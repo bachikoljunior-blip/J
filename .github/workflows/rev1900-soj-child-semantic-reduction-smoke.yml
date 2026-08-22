@@ -86,13 +86,17 @@ jobs:
             --path automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py \
             --path automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py
 
-      - name: Persist canonical phase evidence on this branch only
-        if: github.event_name == 'push' && github.ref_name == 'agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652'
+      - name: Persist canonical phase evidence on this dedicated branch only
+        if: >-
+          (github.event_name == 'push' && github.ref_name == 'agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652') ||
+          (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652')
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin main
+          branch=agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652
           claim=chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234
+          git fetch --no-tags origin main "${branch}"
+          git checkout -B "${branch}" "origin/${branch}"
           common=(
             --claim-id "${claim}"
             --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-semantic-reduction-binding
@@ -121,4 +125,4 @@ jobs:
             "agi/run-history/phase-admissions/${claim}-attempt-solution.json" \
             "agi/run-history/phase-admissions/${claim}-publish.json"
           git commit -m "coordination: persist rev1900 phase admission evidence"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin "HEAD:${branch}"
