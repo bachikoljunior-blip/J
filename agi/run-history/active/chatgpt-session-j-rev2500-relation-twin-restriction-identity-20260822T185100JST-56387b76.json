@@ -1,0 +1,46 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev2500-relation-twin-restriction-identity-20260822T185100JST-56387b76",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev2500-20260822T185100+0900-turn1",
+  "started_at_jst": "2026-08-22T18:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:51:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "56387b768fdc322a27dc738f0d95733e0de76098",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": 2500,
+  "scope": "crx3/structural-consumers/relation-twin-restriction-replay-identity",
+  "branch": "agi-gi-rev2500-relation-twin-restriction-identity-session-20260822-1851",
+  "reserved_paths": [
+    ".github/workflows/rev2500-relation-twin-restriction-identity-smoke.yml",
+    "automation_runs/2026-08-22_1851_JST/REV2500_RELATION_TWIN_RESTRICTION_IDENTITY.md",
+    "automation_runs/2026-08-22_1851_JST/relation_twin_restriction_identity_v1.py",
+    "automation_runs/2026-08-22_1851_JST/test_relation_twin_restriction_identity_rev2500.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2500-relation-twin-restriction-identity-20260822T185100JST-56387b76-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2500-relation-twin-restriction-identity-20260822T185100JST-56387b76-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev2400 corrected-SOJ parent-filtered result accounting coherence claim and all reserved paths",
+    "rev2300 homogeneous-block structural quotient coherence claim and all reserved paths",
+    "rev2200 corrected-SOJ parent-filtered child result claim and all reserved paths",
+    "rev2100 homogeneous-block original-domain proof-DAG claim and all reserved paths",
+    "rev2000 homogeneous-block joint compatibility proof-DAG claim and all reserved paths",
+    "rev1900 corrected-SOJ child semantic reduction claim and all reserved paths",
+    "rev1800 homogeneous-block quotient SI proof-DAG claim and all reserved paths",
+    "run-start history integrity claim and all coordination reserved paths",
+    "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "close only a replay-identity gap around main-integrated rev203 exact paired relation-twin restriction: normalize the bipartite source/target inputs, resource parameters, exact relation-twin partitions, unique over-half classes, complements, and rev200 selected proper restrictions into one immutable SHA-256 identity; independently replay rev203 and require exact structural equality before certifying reuse. Do not alter rev203/rev200, do not import sibling branch-only implementations, do not promote a local restriction to parent String Isomorphism exactness, and do not claim CRX3, GI, or AGI closure.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_schema_digest_resource_outcome_or_identity_drift": true
+  },
+  "status": "active_claimed_pre_implementation",
+  "agi_state": "NOT_AGI"
+}
