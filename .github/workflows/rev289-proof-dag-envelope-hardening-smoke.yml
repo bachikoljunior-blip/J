@@ -47,8 +47,15 @@ jobs:
           payload = Path("/tmp/rev289-attempt-solution.json").read_bytes()
           print("REV289_ATTEMPT_EVIDENCE_B64=" + base64.b64encode(payload).decode("ascii"))
           PY
-      - name: Install test runner
-        run: python -m pip install --disable-pip-version-check pytest
+      - name: Preserve generated admission evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev289-attempt-solution-evidence
+          path: /tmp/rev289-attempt-solution.json
+          if-no-files-found: error
+          retention-days: 1
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
       - name: Compile shared validator and rev289 regression
         run: |
           cd automation_runs/2026-08-19_0851_JST
