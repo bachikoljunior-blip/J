@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-phase-evidence-registry-ancestry-20260822T211326JST-5d4eb554",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
+  "started_at_jst": "2026-08-22T21:13:26+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:13:26+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "5d4eb55457a70e13443b60ed5bc727adae8e7163",
+  "starting_agi_gi_rev": 3300,
+  "target_revision": null,
+  "scope": "repository-coordination/problem-phase-evidence/current-registry-snapshot/ancestry-continuity",
+  "branch": "hardening/phase-evidence-registry-ancestry-20260822-2113",
+  "reserved_paths": [
+    ".github/workflows/problem-solving-parallel-admission.yml",
+    "automation/problem_solving_phase_evidence_guard.py",
+    "automation/test_problem_solving_phase_evidence_guard.py",
+    "automation_runs/2026-08-22_2113_JST/PHASE_EVIDENCE_REGISTRY_ANCESTRY.md",
+    "agi/run-history/active/chatgpt-session-j-phase-evidence-registry-ancestry-20260822T211326JST-5d4eb554.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-phase-evidence-registry-ancestry-20260822T211326JST-5d4eb554-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-phase-evidence-registry-ancestry-20260822T211326JST-5d4eb554-publish.json"
+  ],
+  "parallel_exclusions": [
+    "all AGI solver/proof-DAG/rev implementation scopes",
+    "MAIN.md and run-start history",
+    "all sibling claim paths"
+  ],
+  "intent": "Require the explicitly current canonical registry ref to descend from the persisted evidence source before current-registry re-admission. Reject history replacement or unrelated ref selection without weakening exact source replay. Coordination only; NOT_AGI.",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "current-registry re-admission does not yet prove history continuity from registry_source_sha",
+    "attempt": "require registry_source_sha ancestry of the resolved current registry commit and add a divergent-history regression",
+    "decomposition_if_unresolved": [
+      "ref resolution",
+      "ancestry check",
+      "divergent-history regression"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "git merge-base --is-ancestor",
+      "existing persisted-source ancestry validation",
+      "current registry re-admission from PR #291"
+    ],
+    "decision": "compose both ancestry relations so current main cannot be substituted with a disjoint registry snapshot"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
