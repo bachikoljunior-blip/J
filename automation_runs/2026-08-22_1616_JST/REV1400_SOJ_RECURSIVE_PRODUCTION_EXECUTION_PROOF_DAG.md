@@ -31,3 +31,11 @@ It does **not** run recursive String Isomorphism, construct or recognize the Joh
 ## Verification
 
 The dedicated smoke compiles the new module/test, runs focused success/failure regressions, reruns the main-integrated rev220 proof-DAG tests, rejects imports of rev1300/rev293 branch-only implementation modules, enforces the six reserved paths, and previews/materializes canonical `attempt_solution` and `publish` phase-admission evidence using only the main-integrated admission generator.
+
+## Validation heartbeat
+
+On source head `4dc259905f011701680e19f40a4bbfcda8522958`, the dedicated rev1400 smoke passed after the workflow declared NumPy as the inherited rev220 test-only dependency. The rev1400 focused suite passed 13/13 and the inherited rev220 proof-DAG regression suite completed inside the same green smoke; the earlier inherited-test failure was only `ModuleNotFoundError: numpy`, not an implementation failure.
+
+The dedicated workflow then materialized canonical `attempt_solution` and `publish` evidence. At bot-materialized head `d1f8695cb621b66a416eb13e7b50fee53ced1831`, both evidence records are `admitted: true` with `conflicts: []` against registry source `aabe08d98ad0f51965363ab85be43b15bf7ccc0c`.
+
+This documentation-only reserved-path heartbeat intentionally advances the branch after those bot-created evidence commits so exact-head checks can execute normally without manually approving, cancelling, or rerunning any workflow. No implementation, sibling claim, sibling PR, sibling workflow, shared proof-DAG code, recurrence code, or `MAIN.md` is changed by this heartbeat.
