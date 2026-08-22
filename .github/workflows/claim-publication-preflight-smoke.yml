@@ -111,7 +111,7 @@ jobs:
             exit 1
           fi
 
-      - name: Persist canonical attempt-solution and publish admission on this branch
+      - name: Persist canonical attempt-solution and publish admission once
         if: github.event_name == 'push'
         shell: bash
         env:
@@ -121,13 +121,19 @@ jobs:
           set -euo pipefail
           attempt="agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-attempt_solution.json"
           publish="agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-publish.json"
+          if [[ -e "${attempt}" || -e "${publish}" ]]; then
+            if [[ ! -f "${attempt}" || ! -f "${publish}" ]]; then
+              echo "phase evidence is partially present; fail closed instead of rewriting it" >&2
+              exit 1
+            fi
+            echo "phase evidence already exists; preserve immutable admitted records"
+            exit 0
+          fi
           mkdir -p "$(dirname "${attempt}")"
           cp "${ATTEMPT_PREVIEW}" "${attempt}"
           cp "${PUBLISH_PREVIEW}" "${publish}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "${attempt}" "${publish}"
-          if ! git diff --cached --quiet; then
-            git commit -m "coordination: persist claim-publication phase admission"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
+          git commit -m "coordination: persist claim-publication phase admission"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
