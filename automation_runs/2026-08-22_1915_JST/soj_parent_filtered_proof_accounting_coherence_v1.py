@@ -227,6 +227,8 @@ def _normalize_proof(proof_snapshot: Any, replay_verified: bool) -> dict[str, An
         raise ValueError("proof parent-filtered lineage identity drift")
     expected_node_ids = {f"lineage:{kind}" for kind in lineage_names}
     expected_edges = {("lineage:reduction", "lineage:semantic_binding"), ("lineage:semantic_binding", "lineage:child_instance"), ("lineage:child_instance", "lineage:child_result"), ("lineage:child_result", "lineage:parent_filtered_result")}
+    representative: tuple[int, ...] | None = None
+    stabilizer_elements: list[tuple[int, ...]] = []
     if outcome_kind == "nonempty":
         expected_node_ids.add("witness:representative")
         expected_edges.add(("lineage:parent_filtered_result", "witness:representative"))
@@ -242,7 +244,6 @@ def _normalize_proof(proof_snapshot: Any, replay_verified: bool) -> dict[str, An
         )
         if _digest(representative_node.get("identity"), "proof representative witness identity") != _canonical_digest(("representative", representative)):
             raise ValueError("proof representative witness identity replay failed")
-        stabilizer_elements: list[tuple[int, ...]] = []
         for index in range(accepted_count):
             node_id = f"witness:stabilizer:{index:06d}"
             expected_node_ids.add(node_id)
@@ -284,6 +285,22 @@ def _normalize_proof(proof_snapshot: Any, replay_verified: bool) -> dict[str, An
         actual_edges.add((_strict_str(edge["from"], "proof edge.from"), _strict_str(edge["to"], "proof edge.to")))
     if len(actual_edges) != len(edges) or actual_edges != expected_edges:
         raise ValueError("proof-DAG edge structure drift")
+    source_payload = {
+        "schema_version": SCHEMA_VERSION,
+        "status": source_status,
+        "reduction_identity": identities["reduction"],
+        "semantic_binding_identity": identities["semantic_binding"],
+        "child_instance_identity": identities["child_instance"],
+        "child_result_identity": identities["child_result"],
+        "action_degree": action_degree,
+        "candidate_count": candidate_count,
+        "accepted_count": accepted_count,
+        "representative": representative,
+        "parent_stabilizer_elements": tuple(stabilizer_elements),
+        "work_bound": work_bound,
+    }
+    if _canonical_digest(source_payload) != parent_result_identity:
+        raise ValueError("proof parent result identity source replay failed")
     return {"outcome_kind": outcome_kind, "source_status": source_status, "reduction_identity": identities["reduction"], "semantic_binding_identity": identities["semantic_binding"], "child_instance_identity": identities["child_instance"], "child_result_identity": identities["child_result"], "parent_result_identity": parent_result_identity, "child_ground_size": action_degree, "candidate_count": candidate_count, "accepted_count": accepted_count, "parent_filter_work_bound": work_bound, "proof_dag_identity": proof_dag_identity}
 
 

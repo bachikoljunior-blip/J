@@ -25,18 +25,38 @@ def sid(label):
     return digest({"id": label})
 
 
+def accounting_payload(accounting):
+    return {k: v for k, v in accounting.items() if k not in {"certified", "exact", "complete", "coherence_identity", "reason"}}
+
+
 def make_pair(*, empty=False):
     source_status = PARENT_EMPTY_STATUS if empty else PARENT_NONEMPTY_STATUS
     outcome = "exact_empty" if empty else "nonempty"
     candidate_count = 3
     accepted_count = 0 if empty else 2
+    representative = None if empty else (1, 0, 2)
+    stabilizer_elements = () if empty else ((0, 1, 2), (1, 0, 2))
     lineage = {
         "reduction": sid("reduction"),
         "semantic_binding": sid("semantic"),
         "child_instance": sid("child-instance"),
         "child_result": sid("child-result"),
-        "parent_filtered_result": sid("parent-result"),
     }
+    source_payload = {
+        "schema_version": 1,
+        "status": source_status,
+        "reduction_identity": lineage["reduction"],
+        "semantic_binding_identity": lineage["semantic_binding"],
+        "child_instance_identity": lineage["child_instance"],
+        "child_result_identity": lineage["child_result"],
+        "action_degree": 3,
+        "candidate_count": candidate_count,
+        "accepted_count": accepted_count,
+        "representative": representative,
+        "parent_stabilizer_elements": stabilizer_elements,
+        "work_bound": 64,
+    }
+    lineage["parent_filtered_result"] = digest(source_payload)
     nodes = [{"id": f"lineage:{kind}", "kind": kind, "identity": identity} for kind, identity in lineage.items()]
     edges = [
         {"from": "lineage:reduction", "to": "lineage:semantic_binding"},
@@ -45,7 +65,6 @@ def make_pair(*, empty=False):
         {"from": "lineage:child_result", "to": "lineage:parent_filtered_result"},
     ]
     if not empty:
-        representative = (1, 0, 2)
         nodes.append({
             "id": "witness:representative",
             "kind": "right_coset_representative",
@@ -53,7 +72,7 @@ def make_pair(*, empty=False):
             "permutation": list(representative),
         })
         edges.append({"from": "lineage:parent_filtered_result", "to": "witness:representative"})
-        for index, perm in enumerate(((0, 1, 2), (1, 0, 2))):
+        for index, perm in enumerate(stabilizer_elements):
             node_id = f"witness:stabilizer:{index:06d}"
             nodes.append({
                 "id": node_id,
@@ -212,37 +231,58 @@ class Rev2800ProofAccountingCoherenceTests(unittest.TestCase):
     def test_accounting_identity_rehash_cannot_hide_proof_mismatch(self):
         proof, accounting = make_pair()
         accounting["parent_result_identity"] = sid("forged-parent")
-        payload = {k: v for k, v in accounting.items() if k not in {"certified", "exact", "complete", "coherence_identity", "reason"}}
-        accounting["coherence_identity"] = digest(payload)
+        accounting["coherence_identity"] = digest(accounting_payload(accounting))
+        self.assertFalse(self.certify(proof, accounting).certified)
+
+    def test_joint_parent_result_identity_forgery_fails_after_full_rehash(self):
+        proof, accounting = make_pair()
+        forged = sid("forged-parent")
+        proof["result_identity"] = forged
+        proof["proof_dag"]["result_identity"] = forged
+        parent_node = next(node for node in proof["proof_dag"]["nodes"] if node["id"] == "lineage:parent_filtered_result")
+        parent_node["identity"] = forged
+        proof["proof_dag_identity"] = digest(proof["proof_dag"])
+        accounting["parent_result_identity"] = forged
+        accounting["coherence_identity"] = digest(accounting_payload(accounting))
+        cert = self.certify(proof, accounting)
+        self.assertFalse(cert.certified)
+        self.assertIn("source replay", cert.reason)
+
+    def test_joint_empty_parent_result_identity_forgery_fails_after_full_rehash(self):
+        proof, accounting = make_pair(empty=True)
+        forged = sid("forged-empty-parent")
+        proof["result_identity"] = forged
+        proof["proof_dag"]["result_identity"] = forged
+        parent_node = next(node for node in proof["proof_dag"]["nodes"] if node["id"] == "lineage:parent_filtered_result")
+        parent_node["identity"] = forged
+        proof["proof_dag_identity"] = digest(proof["proof_dag"])
+        accounting["parent_result_identity"] = forged
+        accounting["coherence_identity"] = digest(accounting_payload(accounting))
         self.assertFalse(self.certify(proof, accounting).certified)
 
     def test_lineage_reduction_mismatch_fails_even_with_valid_accounting_digest(self):
         proof, accounting = make_pair()
         accounting["reduction_identity"] = sid("other-reduction")
-        payload = {k: v for k, v in accounting.items() if k not in {"certified", "exact", "complete", "coherence_identity", "reason"}}
-        accounting["coherence_identity"] = digest(payload)
+        accounting["coherence_identity"] = digest(accounting_payload(accounting))
         self.assertFalse(self.certify(proof, accounting).certified)
 
     def test_outcome_mismatch_fails(self):
         proof, accounting = make_pair(empty=True)
         accounting["outcome_kind"] = "nonempty"
         accounting["accepted_count"] = 1
-        payload = {k: v for k, v in accounting.items() if k not in {"certified", "exact", "complete", "coherence_identity", "reason"}}
-        accounting["coherence_identity"] = digest(payload)
+        accounting["coherence_identity"] = digest(accounting_payload(accounting))
         self.assertFalse(self.certify(proof, accounting).certified)
 
     def test_child_measure_mismatch_fails(self):
         proof, accounting = make_pair()
         accounting["child_ground_size"] = 2
-        payload = {k: v for k, v in accounting.items() if k not in {"certified", "exact", "complete", "coherence_identity", "reason"}}
-        accounting["coherence_identity"] = digest(payload)
+        accounting["coherence_identity"] = digest(accounting_payload(accounting))
         self.assertFalse(self.certify(proof, accounting).certified)
 
     def test_candidate_or_accepted_count_mismatch_fails(self):
         proof, accounting = make_pair()
         accounting["candidate_count"] = 4
-        payload = {k: v for k, v in accounting.items() if k not in {"certified", "exact", "complete", "coherence_identity", "reason"}}
-        accounting["coherence_identity"] = digest(payload)
+        accounting["coherence_identity"] = digest(accounting_payload(accounting))
         self.assertFalse(self.certify(proof, accounting).certified)
 
     def test_nonfinite_negative_and_bool_cost_fail(self):
@@ -255,8 +295,7 @@ class Rev2800ProofAccountingCoherenceTests(unittest.TestCase):
     def test_non_strict_parent_to_child_shrink_fails(self):
         proof, accounting = make_pair()
         accounting["parent_action_degree"] = 3
-        payload = {k: v for k, v in accounting.items() if k not in {"certified", "exact", "complete", "coherence_identity", "reason"}}
-        accounting["coherence_identity"] = digest(payload)
+        accounting["coherence_identity"] = digest(accounting_payload(accounting))
         self.assertFalse(self.certify(proof, accounting).certified)
 
     def test_top_level_schema_smuggling_fails(self):
