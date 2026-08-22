@@ -30,6 +30,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install inherited proof-DAG test dependency
+        run: python -m pip install --disable-pip-version-check numpy
       - name: Compile rev1400 module and tests
         run: |
           python -m py_compile \
