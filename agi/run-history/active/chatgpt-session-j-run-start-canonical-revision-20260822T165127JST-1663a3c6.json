@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-run-start-canonical-revision-20260822T165127JST-1663a3c6",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T164110+0900-3610223-turn1",
   "started_at_jst": "2026-08-22T16:51:27+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:51:27+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:42:33+09:00",
   "stale_after_minutes": 45,
   "starting_main_sha": "1663a3c6e09f6a47ea48506c3e3b5490f7521279",
   "starting_agi_gi_rev": 952,
@@ -18,7 +18,7 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-run-start-canonical-revision-20260822T165127JST-1663a3c6-publish.json"
   ],
   "branch": "hardening/run-start-canonical-revision-20260822-1651",
-  "status": "active",
+  "status": "closed",
   "agi_state": "NOT_AGI",
   "problem_process": {
     "predicted_problem_count": 576,
@@ -42,5 +42,13 @@
     "decision": "reuse canonical integration parsing and emit a deterministic record; do not add another revision definition"
   },
   "non_interference": "Add only the five reserved hardening/evidence paths; do not modify MAIN.md, active rev1000-rev1400 scopes, or solver/proof-DAG implementations.",
-  "strict_boundary": "Run-history correctness only. No GI or AGI capability claim."
+  "strict_boundary": "Run-history correctness only. No GI or AGI capability claim.",
+  "completed_at_jst": "2026-08-22T17:42:33+09:00",
+  "integrated_head_sha": "a8e411f2f91b433a32ed31c78bed5bc69a4811b1",
+  "merge_commit_sha": "dd1cbb356128115de3ce895c22853bdb08930d0b",
+  "validation": {
+    "local_combined_tests": "13/13 success",
+    "exact_head_workflows": "10/10 success",
+    "failures": 0
+  }
 }
