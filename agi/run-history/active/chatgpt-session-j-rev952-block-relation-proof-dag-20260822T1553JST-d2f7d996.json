@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev952-20260822T155300+0900-turn1",
+  "started_at_jst": "2026-08-22T15:53:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:53:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "d2f7d9968e3fef0174e012005db7a479dc9d1ac7",
+  "starting_agi_gi_rev": 950,
+  "target_revision": 952,
+  "scope": "crx3/structural-consumers/homogeneous-block-relation-provenance-proof-dag",
+  "branch": "agi-gi-rev952-block-relation-proof-dag-session-20260822-1553",
+  "reserved_paths": [
+    ".github/workflows/rev952-block-relation-proof-dag-smoke.yml",
+    "automation_runs/2026-08-22_1553_JST/REV952_BLOCK_RELATION_PROOF_DAG.md",
+    "automation_runs/2026-08-22_1553_JST/block_relation_provenance_proof_dag_consumer_v1.py",
+    "automation_runs/2026-08-22_1553_JST/test_block_relation_provenance_proof_dag_rev952.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev1200 homogeneous-block quotient String-Isomorphism terminal and all of its reserved paths",
+    "rev1100 and corrected Split-or-Johnson rev1000/rev900/rev800/rev720/rev700/rev650/rev600/rev500/rev400 scopes",
+    "rev950 homogeneous-block action-kernel proof-DAG and all of its reserved paths",
+    "rev279 parent-outcome proof-DAG and sibling CRX3 exact-terminal consumers",
+    "rev278 quotient preimage, rev276 relation/action compatibility, rev275 kernel factorization, rev274 action provenance",
+    "MAIN.md, shared proof-DAG/recurrence/coordination implementation, sibling claims/branches/PRs/workflows"
+  ],
+  "intent": "attach main-integrated rev273 exact homogeneous unary/binary block-transport provenance to the shared execution proof-DAG with an independently replayed source/target/partition/block-map identity and conservative finite local/external replay charge; do not solve quotient String-Isomorphism, lift quotient transporters, or modify any sibling implementation",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_rebase_or_force_push": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_any_upstream_identity_or_outcome_drift": true
+  },
+  "status": "active",
+  "state": "active",
+  "agi_state": "NOT_AGI"
+}
