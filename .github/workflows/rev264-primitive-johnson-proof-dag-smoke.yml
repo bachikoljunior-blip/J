@@ -1,0 +1,53 @@
+name: rev264 primitive Johnson proof-DAG smoke
+
+on:
+  pull_request:
+    paths:
+      - automation_runs/2026-08-19_0851_JST/primitive_johnson_proof_dag_consumer_v1.py
+      - automation_runs/2026-08-19_0851_JST/test_primitive_johnson_proof_dag_consumer_rev264.py
+      - automation_runs/2026-08-19_0851_JST/REV264_PRIMITIVE_JOHNSON_PROOF_DAG.md
+      - .github/workflows/rev264-primitive-johnson-proof-dag-smoke.yml
+      - agi/run-history/phase-admissions/chatgpt-session-j-rev264-primitive-johnson-proof-dag-20260822T074942JST-7e8c3f53-attempt-solution.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install inherited Johnson test dependency
+        run: python -m pip install --disable-pip-version-check numpy
+      - name: Run primitive Johnson terminal, rev220 DAG, and rev264 consumer regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: >-
+          python -m unittest -v
+          test_primitive_johnson_ground_terminal_rev173.py
+          test_proof_dag_accounting_rev220.py
+          test_primitive_johnson_proof_dag_consumer_rev264.py
+      - name: Compile rev264 implementation
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/primitive_johnson_proof_dag_consumer_v1.py
+          automation_runs/2026-08-19_0851_JST/test_primitive_johnson_proof_dag_consumer_rev264.py
+      - name: Replay attempt-solution admission on the exact head
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev264-primitive-johnson-proof-dag-20260822T074942JST-7e8c3f53 \
+            --phase attempt_solution \
+            --scope crx3/algorithmic-consumers/primitive-johnson-ground-proof-dag \
+            --target-revision 264 \
+            --path .github/workflows/rev264-primitive-johnson-proof-dag-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV264_PRIMITIVE_JOHNSON_PROOF_DAG.md \
+            --path automation_runs/2026-08-19_0851_JST/primitive_johnson_proof_dag_consumer_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_primitive_johnson_proof_dag_consumer_rev264.py \
+            --output /tmp/rev264-attempt-solution.json
+          cat /tmp/rev264-attempt-solution.json
