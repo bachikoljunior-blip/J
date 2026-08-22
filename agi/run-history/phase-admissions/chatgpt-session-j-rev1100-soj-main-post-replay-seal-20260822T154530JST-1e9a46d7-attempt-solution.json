@@ -1,0 +1,131 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "agi-gi-rev1100-soj-main-post-replay-seal-session-20260822-1545",
+    "claim_id": "chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7",
+    "heartbeat_at_jst": "2026-08-22T15:45:30+09:00",
+    "reserved_paths": [
+      ".github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-attempt-solution.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-publish.json",
+      "automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md",
+      "automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py",
+      "automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py"
+    ],
+    "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-main-post-replay-seal",
+    "state": "active",
+    "target_revision": 1100
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev1000-soj-recursive-production-post-replay-envelope-session-20260822-1451",
+      "claim_id": "chatgpt-session-j-rev1000-soj-recursive-production-post-replay-envelope-20260822T1451JST-0b1c7a15",
+      "heartbeat_at_jst": "2026-08-22T14:55:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev1000-soj-recursive-production-post-replay-envelope-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1000-soj-recursive-production-post-replay-envelope-20260822T1451JST-0b1c7a15-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev1000-soj-recursive-production-post-replay-envelope-20260822T1451JST-0b1c7a15-publish.json",
+        "automation_runs/2026-08-22_1451_JST/REV1000_SOJ_RECURSIVE_PRODUCTION_POST_REPLAY_ENVELOPE.md",
+        "automation_runs/2026-08-22_1451_JST/soj_recursive_production_post_replay_envelope_v1.py",
+        "automation_runs/2026-08-22_1451_JST/test_soj_recursive_production_post_replay_envelope_rev1000.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-post-replay-coherence-envelope",
+      "state": "active",
+      "target_revision": 1000
+    },
+    {
+      "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
+      "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
+      "heartbeat_at_jst": "2026-08-22T15:44:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-merge.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-publish.json",
+        "automation_runs/2026-08-19_0851_JST/REV279_PARENT_OUTCOME_PROOF_DAG.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_proof_dag_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_proof_dag_rev279.py"
+      ],
+      "scope": "crx3/algorithmic-consumers/implicit-relation-parent-outcome-proof-dag",
+      "state": "active",
+      "target_revision": 279
+    },
+    {
+      "branch": "agi-gi-rev400-soj-production-caller-binding-session-20260822-1258",
+      "claim_id": "chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b",
+      "heartbeat_at_jst": "2026-08-22T14:49:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev400-soj-production-caller-binding-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-publish.json",
+        "automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md",
+        "automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py",
+        "automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/johnson-terminal-recursive-production-caller-binding",
+      "state": "active",
+      "target_revision": 400
+    },
+    {
+      "branch": "agi-gi-rev500-soj-caller-replay-envelope-session-20260822-1311",
+      "claim_id": "chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6",
+      "heartbeat_at_jst": "2026-08-22T14:50:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev500-soj-caller-replay-envelope-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6-publish.json",
+        "automation_runs/2026-08-22_1311_JST/REV500_SOJ_CALLER_REPLAY_ENVELOPE.md",
+        "automation_runs/2026-08-22_1311_JST/soj_caller_replay_envelope_v1.py",
+        "automation_runs/2026-08-22_1311_JST/test_soj_caller_replay_envelope_rev500.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/production-caller-binding-replay-envelope",
+      "state": "active",
+      "target_revision": 500
+    },
+    {
+      "branch": "agi-gi-rev900-soj-recursive-production-provenance-total-cost-session-20260822-1446",
+      "claim_id": "chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e",
+      "heartbeat_at_jst": "2026-08-22T14:53:30+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev900-soj-recursive-production-provenance-total-cost-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e-publish.json",
+        "automation_runs/2026-08-22_1446_JST/REV900_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_TOTAL_COST_BINDING.md",
+        "automation_runs/2026-08-22_1446_JST/soj_recursive_production_provenance_total_cost_binding_v1.py",
+        "automation_runs/2026-08-22_1446_JST/test_soj_recursive_production_provenance_total_cost_binding_rev900.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-provenance-total-cost-binding",
+      "state": "active",
+      "target_revision": 900
+    },
+    {
+      "branch": "main",
+      "claim_id": "chatgpt-session-j-rev950-main-sync-20260822T154320JST-5b7210a",
+      "heartbeat_at_jst": "2026-08-22T15:43:20+09:00",
+      "reserved_paths": [
+        "MAIN.md",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev950-main-sync-20260822T154320JST-5b7210a-update_problem_tree.json"
+      ],
+      "scope": "repository/main-revision-sync/rev950",
+      "state": "active",
+      "target_revision": 950
+    }
+  ],
+  "paths": [
+    ".github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml",
+    "automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md",
+    "automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py",
+    "automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py"
+  ],
+  "phase": "attempt_solution",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T15:47:56.456550+09:00",
+  "registry_digest": "sha256:c00cdce069f8d852355075a7ac2afee902d4bbe54ce9157c3820085762cade2e",
+  "registry_source_sha": "544ad9b5dc06236f29eff2ab4e2154c7a1aa656d",
+  "schema_version": 1,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-main-post-replay-seal",
+  "target_revision": 1100
+}
