@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev294-soj-johnson-construction-cost-binding-20260822T124800JST-e2eb2fc2",
+  "session_id": "chatgpt-session-j-continuation-automation-turn4-20260822T1248+0900",
+  "started_at_jst": "2026-08-22T12:48:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:55:00+09:00",
+  "completed_at_jst": "2026-08-22T12:55:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "e2eb2fc2c77291d6a7faa7f442285f729a506446",
+  "starting_agi_gi_rev": 289,
+  "target_revision": 294,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-reduction-construction-cost-binding",
+  "branch": "agi-gi-rev294-soj-johnson-construction-cost-binding-session-20260822-1248",
+  "pull_request": 239,
+  "latest_head_sha": "69bca772b9dcfa5be51c3d5fe49c56c874525203",
+  "reserved_paths": [
+    ".github/workflows/rev294-soj-johnson-construction-cost-binding-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev294-soj-johnson-construction-cost-binding-20260822T124800JST-e2eb2fc2-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev294-soj-johnson-construction-cost-binding-20260822T124800JST-e2eb2fc2-publish.json",
+    "automation_runs/2026-08-22_1248_JST/REV294_SOJ_JOHNSON_CONSTRUCTION_COST_BINDING.md",
+    "automation_runs/2026-08-22_1248_JST/corrected_soj_johnson_construction_cost_binding_v1.py",
+    "automation_runs/2026-08-22_1248_JST/test_corrected_soj_johnson_construction_cost_binding_rev294.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 takeover kernel factorization and every reserved path",
+    "rev276-rev293 claims, branches, PRs, workflows, and reserved paths",
+    "rev287 Johnson relational-reduction construction / PR #237",
+    "rev291 larger-ground recursive handoff / PR #234",
+    "both rev292 Johnson handoff-composition and superseded construction-cost-binding branches",
+    "rev293 Johnson recursive child result lift and every reserved path",
+    "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
+  ],
+  "intent": "re-scope the file-disjoint fail-closed Johnson construction-cost binding after rev292 collision: validate the complete retained rev287 structural certificate and deterministic construction-work formula, preserve exact/transport/reduction identity fields, and conservatively expose construction_work_bound as the rev291-compatible multiplicative-cost bound so recurrence accounting cannot silently treat nonzero reduction work as unit cost; consume rev287/rev291/rev292/rev293 sibling contracts read-only and never modify or import branch-only sibling implementation",
+  "coordination_note": "Superseded for a second target-revision collision. After this rev294 claim and draft PR #239 were created, a separately owned branch agi-gi-rev294-signed-ground-proof-dag-session-20260822-1250 appeared. Own PR #239 was closed unmerged and own branch left untouched. No sibling execution was modified. The earlier descriptive status was not one of parallel_claims.py CLOSED_STATES, so this own claim is now canonically closed with status=\"superseded\" and completed_at_jst; no sibling record is changed.",
+  "non_interference": "Only rev294 reserved paths may be written on the dedicated branch and only this rev294 claim may be updated on main. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
+  "status": "superseded",
+  "agi_state": "NOT_AGI"
+}

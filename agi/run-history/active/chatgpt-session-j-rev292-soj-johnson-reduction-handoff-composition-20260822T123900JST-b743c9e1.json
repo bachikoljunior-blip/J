@@ -1,0 +1,59 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev292-soj-johnson-reduction-handoff-composition-20260822T123900JST-b743c9e1",
+  "session_id": "chatgpt-session-j-user-parallel-continuation-20260822T123900+0900-b743c9e1",
+  "started_at_jst": "2026-08-22T12:39:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T13:10:28+09:00",
+  "stale_after_minutes": 55,
+  "starting_main_sha": "f929230743444a4b3d73f0d08b7a9df4c05d8ec0",
+  "starting_agi_gi_rev": 289,
+  "target_revision": 292,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-relational-reduction-handoff-composition",
+  "branch": "agi-gi-rev292-soj-johnson-reduction-handoff-composition-session-20260822-1239-b743c9e1",
+  "pull_request": {
+    "number": 244,
+    "url": "https://github.com/bachikoljunior-blip/J/pull/244",
+    "draft": true,
+    "mergeable": true,
+    "changed_files": 6
+  },
+  "latest_head_sha": "dc9ffbcd1ca1f88bb0cdc61076f543f860501aeb",
+  "validated_head_sha": "dc9ffbcd1ca1f88bb0cdc61076f543f860501aeb",
+  "validated_code_and_evidence_head_sha": "ffcfbca5c330a23dd526da527e54544c4278d347",
+  "progress_status": "scoped_rev292_goal_reached; draft_pr_open_and_mergeable; exact_head_smoke_green_18_of_18; exact_head_phase_admission_green; persisted_attempt_solution_and_publish_admissions_green; parallel_claim_registry_green; all_observed_exact_head_workflows_green; pending_coordinated_review_or_merge",
+  "validation": {
+    "exact_head_rev292_smoke_run_id": 32550908284,
+    "exact_head_phase_admission_run_id": 32550908442,
+    "parallel_claims_run_id": 32550629325,
+    "final_inherited_rev246_run_id": 32550908225,
+    "unit_tests": 18,
+    "py_compile": "success",
+    "result": "success"
+  },
+  "reserved_paths": [
+    ".github/workflows/j-rev292-session-hourly-refire.yml",
+    ".github/workflows/rev292-soj-johnson-reduction-handoff-composition-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev292-soj-johnson-reduction-handoff-composition-20260822T123900JST-b743c9e1-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev292-soj-johnson-reduction-handoff-composition-20260822T123900JST-b743c9e1-publish.json",
+    "automation_runs/2026-08-22_1239_JST/REV292_SOJ_JOHNSON_REDUCTION_HANDOFF_COMPOSITION.md",
+    "automation_runs/2026-08-22_1239_JST/corrected_soj_johnson_reduction_handoff_composition_v1.py",
+    "automation_runs/2026-08-22_1239_JST/test_corrected_soj_johnson_reduction_handoff_composition_rev292.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 takeover kernel factorization and every reserved path",
+    "rev276-rev291 claims, branches, PRs, workflows, and reserved paths",
+    "rev287 larger-ground Johnson relational reduction construction / PR #237",
+    "rev288 strict SOJ evidence normalization / PR #232",
+    "rev289 shared proof-DAG envelope hardening / PR #233",
+    "rev290 normalized Johnson cost binding / PR #235",
+    "rev291 larger-ground recursive handoff / PR #234",
+    "all claims, branches, PRs, workflows, and paths created after this claim, including rev293, rev294, rev295, rev320, rev340, rev360, and rev400",
+    "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
+  ],
+  "intent": "add a file-disjoint fail-closed cross-certificate composition boundary between rev287's caller-independent larger-ground Johnson relational-reduction construction evidence and rev291's caller-supplied recursive-handoff contract. Revalidate both published shapes structurally without importing or modifying branch-only sibling implementations; require exact identity, Johnson parameters, represented/ground degrees, induced ground action, complement handling, progress, transport, recurrence child, and cost context to agree before issuing one deterministic replay-stable composition certificate. Do not execute recursive String Isomorphism, do not mutate sibling contracts, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
+  "coordination_note": "Hourly re-fire workflow was installed on main first at cron minute 17 with a 55-minute stale guard and non-cancelling concurrency. The branch-side copy of this claim was restored to its branch-point blob before handoff so the claim is not part of PR #244's six-file diff; current authoritative state remains on main. Exact-head smoke and phase-admission passed after that cleanup, and every observed workflow on the mergeable final head completed successfully.",
+  "non_interference": "Only rev292 reserved paths were written on the dedicated branch and only this rev292 claim was updated on main. No sibling branch, PR, claim, workflow, or reserved path was cancelled, rerun, closed, merged, rebased, force-pushed, overwritten, or modified.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
