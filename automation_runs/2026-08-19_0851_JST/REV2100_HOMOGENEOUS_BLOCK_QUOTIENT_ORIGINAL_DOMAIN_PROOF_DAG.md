@@ -25,6 +25,16 @@ Only after all of those gates does the exact original-domain right coset become 
 - original-domain representative or target subgroup fails the full relation checks;
 - proof-DAG/accounting envelope rejects the terminal.
 
+## Canonical phase admission and validation handoff
+
+The dedicated branch has persisted canonical `attempt_solution` and `publish` phase evidence at commit `1af5c3f1763756d2b50477f4c4e3082753bc17da`. Both snapshots report `admitted=true` with `conflicts=[]` and assert that this run modifies no other worker's claimed paths.
+
+The implementation itself already passes all 9 focused success/fail-closed regressions and `py_compile`. The first dedicated PR check failed only in its own reserved diff guard because a shallow checkout had no merge base; the workflow was corrected on this branch to use complete history. No failed sibling workflow was cancelled or rerun.
+
+A subsequent active-registry recheck found no scope/path collision. In particular, the independently owned rev2300 structural-coherence claim explicitly excludes rev2100 / PR #272 and every rev2100 reserved path. This ordinary documentation commit follows the evidence-only bot commit so GitHub receives a fresh PR synchronize event naturally; it is not a manual rerun of any existing workflow.
+
+PR #272 remains draft and unmerged. rev1800 / PR #268 and rev278 / PR #222 remain independently owned upstream contracts; rev2100 consumes only their public-shaped contract and does not modify, merge, close, rebase, or force-push either branch.
+
 ## Parallel boundary
 
 rev2000 / PR #271, rev1800 / PR #268, rev1200 / PR #260, rev278 / PR #222, all corrected Split-or-Johnson work, `MAIN.md`, shared proof-DAG/recurrence/S1/coordination code, sibling claims, branches, PRs, and workflows are read-only. No sibling workflow is cancelled or manually rerun.
