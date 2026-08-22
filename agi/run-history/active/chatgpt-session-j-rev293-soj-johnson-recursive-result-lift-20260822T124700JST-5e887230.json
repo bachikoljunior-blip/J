@@ -1,0 +1,71 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev293-soj-johnson-recursive-result-lift-20260822T124700JST-5e887230",
+  "session_id": "chatgpt-session-j-refire-turn6-20260822T124700+0900-5e887230",
+  "started_at_jst": "2026-08-22T12:47:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T13:07:05+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "5e887230b030553079930d0b066a7376ff5320c4",
+  "starting_agi_gi_rev": 289,
+  "target_revision": 293,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-recursive-child-result-lift",
+  "branch": "agi-gi-rev293-soj-johnson-recursive-result-lift-session-20260822-1247",
+  "pull_request": 241,
+  "pull_request_state": "ready_for_review",
+  "ready_for_review_at_jst": "2026-08-22T13:07:05+09:00",
+  "latest_head_sha": "88b4d23185bad7cd867f1b55bd65a8e35c30adf1",
+  "latest_observed_main_sha": "34894e287668e717fae37b6770ef76c035936fc9",
+  "reserved_paths": [
+    ".github/workflows/rev293-soj-johnson-recursive-result-lift-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev293-soj-johnson-recursive-result-lift-20260822T124700JST-5e887230-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev293-soj-johnson-recursive-result-lift-20260822T124700JST-5e887230-publish.json",
+    "automation_runs/2026-08-22_1247_JST/REV293_SOJ_JOHNSON_RECURSIVE_RESULT_LIFT.md",
+    "automation_runs/2026-08-22_1247_JST/corrected_soj_johnson_recursive_result_lift_v1.py",
+    "automation_runs/2026-08-22_1247_JST/test_corrected_soj_johnson_recursive_result_lift_rev293.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 takeover kernel factorization and every reserved path",
+    "rev276-rev292 claims, branches, PRs, workflows, and reserved paths",
+    "rev287 Johnson relational-reduction construction / PR #237",
+    "rev291 larger-ground recursive handoff / PR #234",
+    "both rev292 Johnson handoff-composition and construction-cost-binding scopes",
+    "all later sibling claims including rev294/rev295/rev320/rev340/rev360/rev400 and their reserved paths",
+    "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
+  ],
+  "intent": "add a file-disjoint fail-closed post-recursion transport certificate for the larger-ground Johnson path. Consume rev287-style certified complete J(v,k) incidence/reduction evidence structurally and a caller-supplied exact recursive child result on the certified Johnson ground; lift the child representative and target-stabilizer generators canonically to the original Johnson vertex action, verify exact source-to-target and target-stabilizer transport on the supplied parent strings, bind empty and nonempty child outcomes to deterministic replay identities, and never import or modify sibling branch-only implementations. This does not execute recursive String Isomorphism or claim corrected Split-or-Johnson/GI/AGI closure.",
+  "non_interference": "Only rev293 reserved paths may be written on the dedicated branch and only this rev293 claim may be updated on main. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
+  "canonical_phase_evidence": {
+    "source_run": 32550294190,
+    "registry_source_sha": "91da849a2abda4ee29ec4e4c1810abb22c2766c3",
+    "registry_digest": "sha256:9e868e3c7557c72b6e02bde5ac73acd23ba684745fc230afd51c55f6d2fc30a7",
+    "attempt_solution": "admitted_exclusive_conflicts_zero",
+    "publish": "admitted_exclusive_conflicts_zero",
+    "persisted_from_exact_artifact": true
+  },
+  "validation": {
+    "local_focused_tests": 15,
+    "local_py_compile": "success",
+    "sibling_branch_only_imports": 0,
+    "exact_head": "88b4d23185bad7cd867f1b55bd65a8e35c30adf1",
+    "exact_head_workflows": [
+      {"run_id": 32550723492, "name": "rev293 SOJ Johnson recursive result lift smoke", "conclusion": "success"},
+      {"run_id": 32550723490, "name": "Problem-solving parallel admission", "conclusion": "success"},
+      {"run_id": 32550723525, "name": "rev238 Design nested intransitive resource smoke", "conclusion": "success"},
+      {"run_id": 32550723534, "name": "rev239 state-orbit candidate terminal smoke", "conclusion": "success"},
+      {"run_id": 32550723497, "name": "rev240 Design state-orbit complete-cover smoke", "conclusion": "success"},
+      {"run_id": 32550723484, "name": "rev241 Design union reconstruction resource smoke", "conclusion": "success"},
+      {"run_id": 32550723532, "name": "rev242 Design original-root pipeline resource smoke", "conclusion": "success"},
+      {"run_id": 32550723494, "name": "rev246 resource-bounded primitive Johnson candidate smoke", "conclusion": "success"},
+      {"run_id": 32550723495, "name": "rev250 phase-start ticket ledger smoke", "conclusion": "success"},
+      {"run_id": 32550723518, "name": "rev253 complete ordered pair-root UPCC split family smoke", "conclusion": "success"},
+      {"run_id": 32550723480, "name": "rev254 Design primitive Johnson complete-cover smoke", "conclusion": "success"}
+    ],
+    "pr_mergeable_at_ready": true,
+    "branch_force_pushes": 0,
+    "manual_workflow_reruns": 0,
+    "sibling_mutations": 0
+  },
+  "status": "active_ready_for_review",
+  "agi_state": "NOT_AGI"
+}

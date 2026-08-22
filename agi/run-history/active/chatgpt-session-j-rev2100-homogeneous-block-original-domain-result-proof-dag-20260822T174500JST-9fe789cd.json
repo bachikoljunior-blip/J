@@ -1,0 +1,81 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd",
+  "session_id": "chatgpt-session-j-parallel-continuation-20260822T174421+0900-turn9",
+  "started_at_jst": "2026-08-22T17:45:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:00:00+09:00",
+  "stale_after_minutes": 55,
+  "starting_main_sha": "9fe789cda6c34e8ecfccf31c5147188c0ff3cdce",
+  "starting_agi_gi_rev": 952,
+  "target_revision": 2100,
+  "scope": "crx3/algorithmic-consumers/homogeneous-block-quotient-result-original-domain-lift-proof-dag",
+  "branch": "agi-gi-rev2100-homogeneous-block-original-domain-proof-dag-session-20260822-1745",
+  "pull_request": 272,
+  "latest_head_sha": "83c0d721f51a8e3046b8dcfe46e8e4f35cac597d",
+  "validated_ordinary_head_sha": "e997e62c722d209839608c1de234814f9d4be243",
+  "validated_merge_ref_sha": "8ef755d8509d29f4abd666b979a49e838130f0ad",
+  "reserved_paths": [
+    "automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py",
+    "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py",
+    "automation_runs/2026-08-19_0851_JST/REV2100_HOMOGENEOUS_BLOCK_QUOTIENT_ORIGINAL_DOMAIN_PROOF_DAG.md",
+    ".github/workflows/rev2100-homogeneous-block-original-domain-proof-dag-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2100-homogeneous-block-original-domain-result-proof-dag-20260822T174500JST-9fe789cd-publish.json"
+  ],
+  "intent": "bind the public exact quotient-result proof contract to main-integrated homogeneous relation/action provenance and reconstruct the complete original-domain relation-isomorphism coset through generic paired block-action preimages without importing sibling branch implementations",
+  "parallel_exclusions": [
+    "crx3/structural-consumers/homogeneous-block-joint-reduction-compatibility-proof-dag (rev2000 / PR #271)",
+    "crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism-proof-dag (rev1800 / PR #268)",
+    "rev1200 quotient String-Isomorphism / PR #260",
+    "rev278 original-domain quotient preimage / PR #222",
+    "all corrected Split-or-Johnson branches including rev2200",
+    "crx3/algorithmic-consumers/homogeneous-block-structural-original-domain-proof-coherence (rev2300; explicitly excludes rev2100 reserved paths)",
+    "MAIN.md and shared proof-DAG, recurrence, S1, and coordination implementations"
+  ],
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_rebase_or_force_push": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "consume_sibling_public_contracts_structurally_without_branch_imports": true
+  },
+  "implementation": {
+    "changed_files": 4,
+    "quotient_semantic_completeness_gate": "bounded exhaustive source quotient-image enumeration under caller cap",
+    "parent_exactness_gate": "rev273 full relation replay + rev273 point-lift conjugacy + exact generic source/target block-action preimages + full relation transport/stabilizer checks",
+    "proof_dag": "exact parent result only; terminal accounting submitted to main-integrated execution proof-DAG validator",
+    "focused_tests": 9,
+    "py_compile": "success",
+    "sibling_branch_implementation_imports": "none"
+  },
+  "phase_admission": {
+    "evidence_commit": "83c0d721f51a8e3046b8dcfe46e8e4f35cac597d",
+    "attempt_solution": {"admitted": true, "conflicts": []},
+    "publish": {"admitted": true, "conflicts": []},
+    "central_replay_run": 32563706303,
+    "central_replay_conclusion": "success"
+  },
+  "validation": {
+    "ordinary_head": "e997e62c722d209839608c1de234814f9d4be243",
+    "merge_ref": "8ef755d8509d29f4abd666b979a49e838130f0ad",
+    "dedicated_smoke": {"run_id": 32563706224, "conclusion": "success"},
+    "parallel_admission": {"run_id": 32563706303, "conclusion": "success"},
+    "inherited_success": [
+      32563706266,
+      32563706285,
+      32563706195,
+      32563706278,
+      32563706159,
+      32563706243,
+      32563706228,
+      32563706190
+    ],
+    "inherited_in_progress": [32563706304],
+    "general_validation": {"run_id": 32563706264, "status": "in_progress"},
+    "merge_decision": "withheld while exact ordinary-head general validation and inherited natural checks are still running; upstream rev1800/rev278 contracts remain independently owned"
+  },
+  "status": "active_validation",
+  "agi_state": "NOT_AGI"
+}

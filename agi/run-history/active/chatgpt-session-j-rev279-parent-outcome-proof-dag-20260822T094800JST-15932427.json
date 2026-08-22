@@ -1,0 +1,110 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
+  "session_id": "chatgpt-session-j-parallel-continuation-20260822T094800+0900-rev279-turn2",
+  "started_at_jst": "2026-08-22T09:48:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:48:00+09:00",
+  "completed_at_jst": "2026-08-22T15:48:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "15932427fd0b83fa27d50cf83319fc88c75df564",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 279,
+  "scope": "crx3/algorithmic-consumers/implicit-relation-parent-outcome-proof-dag",
+  "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
+  "pull_request": 223,
+  "latest_head_sha": "d2e099e66ec1250b01fa7e5181725862b83e56e4",
+  "merged_main_sha": "fc1ee44781c9c883c7c3923d6bc97d51bea1c8d1",
+  "latest_observed_main_sha": "fc1ee44781c9c883c7c3923d6bc97d51bea1c8d1",
+  "reserved_paths": [
+    ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-publish.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-merge.json",
+    "automation_runs/2026-08-19_0851_JST/REV279_PARENT_OUTCOME_PROOF_DAG.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_proof_dag_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_proof_dag_rev279.py"
+  ],
+  "parallel_exclusions": [
+    "all sibling problem-tree claims and their reserved paths",
+    "CRX1/CRX2 active branches",
+    "MAIN.md",
+    "every sibling claim, branch, PR, workflow, and shared implementation path"
+  ],
+  "implementation": {
+    "head_sha": "d2e099e66ec1250b01fa7e5181725862b83e56e4",
+    "problem_state_files": 4,
+    "phase_evidence_files_persisted": 3,
+    "non_destructive_main_reconciliation_base_sha": "019c190829ea7267f638635626e98167d5dc9af7",
+    "latest_hardening_commits": [
+      "aba84e1840a0c5b01ae27f3ffa0e0809081e0d1c",
+      "d2e099e66ec1250b01fa7e5181725862b83e56e4"
+    ],
+    "latest_hardening": "exported rev279 identity validation independently rechecks the frozen identity schema, canonical solver tuple, strict integer measures, source evidence revision/status, canonical SHA-256 fields, and transcript digest after equality with the caller-provided expected identity; jointly tampering attached and expected identities therefore fails closed",
+    "resource_envelope_hardening": "consumer-side strict validation rejects non-finite, negative, boolean, malformed, and finite-Real-to-float-overflowing external cost/quasipolynomial parameters before the shared proof-DAG validator; normalized values are reused without a second coercion",
+    "replay_accounting_hardening": "identity replay independently recomputes the deterministic conservative local charge from the frozen identity and requires both the proof and recurrence-accounting leaf to equal that charge; canonical runtime types, literal certification flags, empty child lists, zero permutation-candidate count, strict integer measures, and finite nonnegative local charges are revalidated fail-closed",
+    "semantic_exactness_certified": false,
+    "semantic_boundary": "digest-only parent outcome evidence is never promoted to an SI coset; proof coset remains null and proof exact remains false"
+  },
+  "phase_admission": {
+    "attempt_solution": {"admitted": true, "conflicts": []},
+    "publish": {"admitted": true, "conflicts": []},
+    "merge": {"admitted": true, "conflicts": []},
+    "current_exact_head_problem_solving_parallel_admission": {
+      "head_sha": "d2e099e66ec1250b01fa7e5181725862b83e56e4",
+      "run_id": 32555366526,
+      "status": "completed",
+      "conclusion": "success"
+    }
+  },
+  "validation": {
+    "current_head": "d2e099e66ec1250b01fa7e5181725862b83e56e4",
+    "current_rev279_smoke": {
+      "run_id": 32555366473,
+      "status": "completed",
+      "conclusion": "success",
+      "tests": 37,
+      "joint_attached_expected_schema_tamper": "success_fail_closed",
+      "joint_attached_expected_solver_tamper": "success_fail_closed",
+      "joint_attached_expected_transcript_tamper": "success_fail_closed",
+      "py_compile": "success",
+      "additive_dependency_boundary": "success",
+      "attempt_publish_merge_preview": "success"
+    },
+    "current_problem_solving_parallel_admission": {
+      "run_id": 32555366526,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "current_general_agi_gi_validation": {
+      "run_id": 32555366514,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "inherited_exact_head_checks_observed": {
+      "rev238": "success",
+      "rev239": "success",
+      "rev240": "success",
+      "rev241": "success",
+      "rev242": "success",
+      "rev246": "success",
+      "rev250": "success",
+      "rev253": "success",
+      "rev254": "success"
+    },
+    "all_observed_exact_head_workflows_green": true
+  },
+  "integration": {
+    "pull_request": 223,
+    "expected_head_sha": "d2e099e66ec1250b01fa7e5181725862b83e56e4",
+    "merge_method": "merge",
+    "merged_main_sha": "fc1ee44781c9c883c7c3923d6bc97d51bea1c8d1",
+    "final_premerge_check": "current main, open PRs, and active claims were re-read immediately before merge; no scope or reserved-path collision was observed",
+    "postmerge_check": "current main, open PRs, and active claims were re-read before closing this claim; sibling work remained untouched"
+  },
+  "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and deterministic conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, tampered, malformed, non-finite, overflowing, undercharged, or jointly forged replay evidence without modifying shared solvers or upstream CRX1 branches",
+  "non_interference": "Only rev279 reserved paths and this claim/PR metadata were modified by this session. No sibling claim, branch, PR, workflow, reserved path, shared implementation, or MAIN.md was modified, cancelled, rerun, rebased, force-pushed, overwritten, closed, or merged.",
+  "status": "completed_merged",
+  "coordination_state": "COMPLETED_MERGED",
+  "agi_state": "NOT_AGI"
+}

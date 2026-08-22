@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c",
+  "session_id": "chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST",
+  "started_at_jst": "2026-08-22T18:51:48+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:51:16+09:00",
+  "last_activity_at_jst": "2026-08-22T19:51:16+09:00",
+  "completed_at_jst": "2026-08-22T19:51:16+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "203a568c917b3e62da13908371c6dcc96805e09b",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": 2500,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-result-execution-proof-dag-binding",
+  "reserved_paths": [
+    ".github/workflows/rev2500-soj-parent-filtered-execution-proof-dag-smoke.yml",
+    "automation_runs/2026-08-22_1851_JST/REV2500_SOJ_PARENT_FILTERED_EXECUTION_PROOF_DAG.md",
+    "automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py",
+    "automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev2800 parent-filtered proof/accounting coherence / PR #283 and all reserved paths",
+    "rev2707 parent-filtered proof-DAG integrity / PR #280 and all reserved paths",
+    "rev2600 parent-filtered result accounting coherence / PR #279 and all reserved paths",
+    "rev2501 relation-twin restriction identity / PR #278 and all reserved paths",
+    "rev2400 parent-filtered accounting coherence and all reserved paths",
+    "rev2300 homogeneous-block structural quotient coherence and all reserved paths",
+    "rev2200 parent-filtered child result / PR #274 and all reserved paths",
+    "rev1400 recursive production execution proof-DAG / PR #264 and all reserved paths",
+    "run-start history integrity and claim-publication preflight coordination scopes",
+    "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "branch": "agi-gi-rev2500-soj-parent-filtered-execution-proof-dag-session-20260822-1851",
+  "pull_request": 281,
+  "validation": {
+    "exact_head_before_retreat": "72c28f6f597eebcec7895ec92ad49465ed4b69f0",
+    "focused_regressions": "12/12 passed",
+    "py_compile": "success",
+    "dedicated_pull_request_workflow": "success",
+    "canonical_pr_preview": "attempt_solution and publish admitted=true on current main merge context",
+    "persistent_phase_evidence": false,
+    "manual_rerun_or_cancel": false
+  },
+  "closure_reason": "immutable branch merge-base still contains the earlier sibling rev2500 proof-DAG-integrity claim as active_claimed; canonical source-branch phase evidence would therefore replay a target_revision_collision. Fail closed and retreat to fresh-main rev3000 rather than modifying the sibling historical claim or fabricating evidence.",
+  "replacement_claim": "chatgpt-session-j-rev3000-soj-parent-filtered-execution-proof-dag-rebase-20260822T195023JST-26a175ae",
+  "status": "superseded",
+  "agi_state": "NOT_AGI"
+}

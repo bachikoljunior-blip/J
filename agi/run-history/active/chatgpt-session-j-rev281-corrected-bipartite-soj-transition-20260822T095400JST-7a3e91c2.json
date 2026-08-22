@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2",
+  "session_id": "chatgpt-session-j-this-session-achievement-continuation-20260822T094600JST-turn1",
+  "started_at_jst": "2026-08-22T09:54:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T11:58:44+09:00",
+  "completed_at_jst": "2026-08-22T11:58:44+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "0c8eb439f16288d1e49175283efcd1362925ff28",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 281,
+  "scope": "w1r-h6/corrected-split-or-johnson/bipartite-recursive-transition-certificate",
+  "branch": "agi-gi-rev281-corrected-bipartite-soj-transition-20260822-0954",
+  "pull_request": 226,
+  "latest_head_sha": "69d8f71a6478b90c187ca1c02290205179f0e593",
+  "merged_main_sha": "28bc0f33186334db7755af30f52a6638b800d755",
+  "reserved_paths": [
+    ".github/workflows/rev281-corrected-bipartite-soj-transition-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2-publish.json",
+    "automation_runs/2026-08-22_0954_JST/REV281_CORRECTED_BIPARTITE_SOJ_TRANSITION_CERTIFICATE.md",
+    "automation_runs/2026-08-22_0954_JST/bipartite_split_or_johnson_transition_v1.py",
+    "automation_runs/2026-08-22_0954_JST/test_bipartite_split_or_johnson_transition_rev281.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 block-action kernel factorization and all reserved paths",
+    "rev276 through rev280 sibling scopes and all reserved paths",
+    "rev282 and later sibling scopes and all reserved paths",
+    "CRX1, CRX2, CRX3, state-orbit, proof-carrying-merge, MAIN.md, every sibling claim, branch, PR, workflow, and reserved path"
+  ],
+  "intent": "mechanically certify one theorem-faithful corrected bipartite Split-or-Johnson recursive edge after the existing input gate: accept only a canonical exact constant-factor reduction of the auxiliary/small part or an explicit canonical Johnson embedding, with multiplicative-cost and strict-progress evidence; reject phase labels or nonconstructive recognition fail-closed",
+  "validation": {
+    "exact_head": "69d8f71a6478b90c187ca1c02290205179f0e593",
+    "focused_tests": "10/10 passed",
+    "dedicated_workflow_run": 32547449693,
+    "dedicated_workflow_status": "success",
+    "problem_solving_parallel_admission_run": 32547449649,
+    "problem_solving_parallel_admission_status": "success_replayed_persisted_attempt_solution_evidence",
+    "attempt_solution_evidence_path": "agi/run-history/phase-admissions/chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2-attempt-solution.json",
+    "attempt_solution_registry_source_sha": "b12833124fad20014f657b820a181e32a4aec5e8",
+    "attempt_solution_registry_digest": "sha256:8a346c21f2ac760426e1d86a36aad2c8145d712443b5ed6d9c1f746388eb44fb",
+    "all_observed_exact_head_workflows": "success: rev281 dedicated smoke, Problem-solving parallel admission, rev238, rev239, rev240, rev241, rev242, rev246, rev250, rev253, rev254",
+    "mergeability_recheck": "GitHub raw PR state clean/mergeable immediately before integration",
+    "merge_method": "squash",
+    "merge_commit": "28bc0f33186334db7755af30f52a6638b800d755",
+    "hardening": "reject fractional or coercible sizes, embedding coordinates, relation distances, and non-real costs instead of truncating/coercing them into exact evidence"
+  },
+  "non_interference": "This session changed only its claim record on main and its reserved rev281 branch paths. No sibling claim, branch, PR, workflow, reserved path, or shared implementation path was cancelled, rerun, normalized, overwritten, force-pushed, or merged by this session.",
+  "status": "completed_merged",
+  "agi_state": "NOT_AGI"
+}

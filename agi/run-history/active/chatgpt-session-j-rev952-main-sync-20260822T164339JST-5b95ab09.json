@@ -1,0 +1,55 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev952-main-sync-20260822T164339JST-5b95ab09",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T164110+0900-3610223-turn1",
+  "started_at_jst": "2026-08-22T16:43:39+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:50:25+09:00",
+  "stale_after_minutes": 45,
+  "starting_main_sha": "5b95ab09d01206519e7b091f219854f3d2063750",
+  "starting_agi_gi_rev": 952,
+  "target_revision": 952,
+  "scope": "repository/main-revision-sync/rev952",
+  "reserved_paths": [
+    "MAIN.md",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev952-main-sync-20260822T164339JST-5b95ab09-update_problem_tree.json"
+  ],
+  "branch": "main-direct",
+  "status": "closed",
+  "agi_state": "NOT_AGI",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "authoritative MAIN continuation lags the highest main-reachable integrated AGI-GI revision",
+    "attempt": "atomically synchronize MAIN to rev952 with replayable update_problem_tree evidence",
+    "decomposition_if_unresolved": [
+      "first-parent integrated-revision census",
+      "rev952 evidence replay",
+      "atomic MAIN and phase-evidence publication",
+      "post-publication revision guard"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "automation/agi_gi_main_revision_guard.py",
+      "automation/problem_solving_phase_evidence_guard.py",
+      "rev950 MAIN synchronization pattern",
+      "Git first-parent ancestry"
+    ],
+    "decision": "reuse the established fail-closed revision and phase-evidence guards; do not introduce a second revision ledger"
+  },
+  "non_interference": "Reserve only MAIN.md and this rev952 update_problem_tree evidence; all active rev1000/rev1100/rev1200/rev1300/rev1400 implementation paths remain untouched.",
+  "strict_boundary": "Authoritative continuation synchronization only. rev952 is a proof-DAG consumer and does not establish GI or AGI.",
+  "completed_at_jst": "2026-08-22T16:50:25+09:00",
+  "synchronized_main_commit_sha": "293414faa845223388c310defdce329088239f76",
+  "integrated_revision_commit_sha": "cc5e882b8a45d5e24e9878baf59639535255b4cd",
+  "validation": {
+    "first_parent_highest_integrated_revision": "952",
+    "authoritative_main_declaration": "952",
+    "phase_evidence": "admitted and source ancestry verified",
+    "registry_digest": "sha256:972781f440db7d4a14aaebff0f4db9d06ebc8c606ab7d65816552ea663198e21",
+    "conflicts": 0
+  },
+  "close_reason": "MAIN.md and replayable update_problem_tree evidence were atomically synchronized to the highest main-reachable integrated revision."
+}

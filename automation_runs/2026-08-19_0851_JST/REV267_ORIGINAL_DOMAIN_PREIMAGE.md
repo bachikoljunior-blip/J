@@ -22,3 +22,11 @@ PR #202 contained the first implementation of this child and its focused smoke w
 ## Strict boundary
 
 Rev267 does not compute the rev262 value-preserving image intersection, does not modify rev261 or rev263 parent verification, does not discharge rev265 original-root resource accounting, does not normalize rev266 parent outcomes, and does not wire a production parent.  CRX1, graph isomorphism, and AGI remain unresolved.  State remains `NOT_AGI`.
+
+## Current-main takeover checkpoint
+
+The original owner became stale with PR #212 still unmerged. A fresh takeover
+claim therefore replays the implementation on the current canonical main,
+regenerates phase evidence from the current claim registry, and requires both
+the focused tests and the complete exact-head workflow set before integration.
+The mathematical scope and strict boundary above are unchanged.

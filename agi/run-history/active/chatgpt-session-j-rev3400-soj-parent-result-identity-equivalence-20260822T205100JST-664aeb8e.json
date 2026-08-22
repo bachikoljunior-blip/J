@@ -1,0 +1,71 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST-664aeb8e",
+  "session_id": "chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST",
+  "started_at_jst": "2026-08-22T20:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:59:00+09:00",
+  "last_activity_at_jst": "2026-08-22T20:59:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "664aeb8e695bc2621f584042a5ce437bf53c86a7",
+  "starting_agi_gi_rev": 3200,
+  "target_revision": 3400,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-result-identity-equivalence",
+  "branch": "agi-gi-rev3400-soj-parent-result-identity-equivalence-session-20260822-2051",
+  "pull_request": 289,
+  "exact_head_sha": "af77dc102166a79af1e1acb0c9383e50934ac837",
+  "merge_sha": null,
+  "reserved_paths": [
+    ".github/workflows/rev3400-soj-parent-result-identity-equivalence-smoke.yml",
+    "automation_runs/2026-08-22_2051_JST/REV3400_SOJ_PARENT_RESULT_IDENTITY_EQUIVALENCE.md",
+    "automation_runs/2026-08-22_2051_JST/soj_parent_result_identity_equivalence_v1.py",
+    "automation_runs/2026-08-22_2051_JST/test_soj_parent_result_identity_equivalence_rev3400.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST-664aeb8e-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST-664aeb8e-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev3300 block-action kernel public replay seal / PR #288 and all reserved paths",
+    "rev3200 merged small-order public replay seal and all small-order paths",
+    "rev3100 parent-filtered execution proof/accounting coherence / PR #287 and all reserved paths",
+    "rev3000 parent-filtered execution proof-DAG rebase / PR #285 and all reserved paths",
+    "rev2800 parent-filtered proof/accounting coherence / PR #283 and all reserved paths",
+    "rev2707 parent-filtered proof-DAG integrity / PR #280 and all reserved paths",
+    "rev2600 parent-filtered result accounting coherence / PR #279 and all reserved paths",
+    "rev2200 parent-filtered child result / PR #274 and all reserved paths",
+    "run-start history correction and claim-publication preflight coordination scopes",
+    "MAIN.md, shared proof-DAG/recurrence/S1/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "Close only the explicit parent-result identity-equivalence gap left by rev3000/rev3100. Independently replay one public rev2200 exact parent-filtered result snapshot, independently replay the public rev3100 execution/proof-accounting coherence snapshot, require all shared reduction/semantic/child/result/count/work identities and measures to agree, and certify that the parent-result identity carried through the execution/proof-accounting chain is exactly the replayed rev2200 result identity. Do not import sibling branch-only implementations and do not claim pre-Johnson lifting, corrected Split-or-Johnson closure, GI, or AGI.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_schema_status_identity_coset_measure_count_or_accounting_drift": true
+  },
+  "preflight": {
+    "rev3400_branch_search": "none before claim",
+    "rev3400_pr_search": "none before claim",
+    "rev3400_active_claim_search": "none before claim",
+    "main_sha": "664aeb8e695bc2621f584042a5ce437bf53c86a7"
+  },
+  "validation": {
+    "local_focused_regressions": "20/20 passed",
+    "py_compile": "success",
+    "canonical_attempt_solution_evidence": "admitted=true, conflicts=[]",
+    "canonical_publish_evidence": "admitted=true, conflicts=[]",
+    "dedicated_exact_head_run": 32571653986,
+    "dedicated_exact_head": "success",
+    "repository_parallel_admission_run": 32571653824,
+    "repository_parallel_admission": "success",
+    "inherited_success_observed": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253", "rev254", "run-start-history-integrity"],
+    "inherited_in_progress_observed": ["rev246"],
+    "manual_rerun_or_cancel": false
+  },
+  "integration_boundary": "Keep PR #289 draft/unmerged while rev3100 / PR #287, rev3000 / PR #285, rev2800 / PR #283 and rev2200 / PR #274 remain independently owned/open. Exact-head rev3400 smoke and repository-wide parallel admission are green; only inherited rev246 remained naturally in progress at the latest observation. Recheck fresh claims before any further leaf work.",
+  "status": "in_progress",
+  "agi_state": "NOT_AGI"
+}

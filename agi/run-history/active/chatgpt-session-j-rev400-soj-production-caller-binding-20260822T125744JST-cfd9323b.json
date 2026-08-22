@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b",
+  "session_id": "chatgpt-session-j-achievement-continuation-20260822T125634JST-466afc64-turn1",
+  "started_at_jst": "2026-08-22T12:57:44+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:44:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "cfd9323b6327d5df24ca87efb62c18ffdfb6f2c0",
+  "starting_agi_gi_rev": 266,
+  "target_revision": 400,
+  "scope": "w1r-h6/corrected-split-or-johnson/johnson-terminal-recursive-production-caller-binding",
+  "reserved_paths": [
+    ".github/workflows/rev400-soj-production-caller-binding-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-publish.json",
+    "automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md",
+    "automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py",
+    "automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py"
+  ],
+  "branch": "agi-gi-rev400-soj-production-caller-binding-session-20260822-1258",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import log2
+from math import isfinite, log2
+from numbers import Integral, Real
 
 from quasipoly_recurrence_accounting_v4 import validate_quasipoly_recurrence_tree_v4
 from s1_proof_identity_v1 import (
@@ -262,6 +263,24 @@ def _log2_sum_exp(values):
     return top + log2(sum(2.0 ** (value - top) for value in values))
 
 
+def _strict_integral(value, *, minimum: int):
+    if isinstance(value, bool) or not isinstance(value, Integral):
+        return None
+    normalized = int(value)
+    if normalized < minimum:
+        return None
+    return normalized
+
+
+def _finite_real(value, *, minimum: float):
+    if isinstance(value, bool) or not isinstance(value, Real):
+        return None
+    normalized = float(value)
+    if not isfinite(normalized) or normalized < minimum:
+        return None
+    return normalized
+
+
 def validate_execution_proof_dag(
     proof,
     *,
@@ -276,15 +295,82 @@ def validate_execution_proof_dag(
     A repeated identity saves proof storage only.  Cost recursion deliberately
     does not memoize: every incoming edge contributes the full conservative child
     bound.  Thus cache reuse can never erase worst-case work.
+
+    Envelope inputs are validated without coercion before recurrence replay or
+    floating-point comparisons.  In particular, booleans, numeric strings,
+    fractional integer fields, NaN, infinity, and overflowing envelope values
+    fail closed instead of reaching comparisons where NaN could otherwise make
+    both ``<`` and ``>`` tests false.
     """
-    original_root_n = int(original_root_n)
-    allowed = float(quasipoly_constant) * (
-        log2(max(2, original_root_n)) ** int(quasipoly_power)
-    )
-    if original_root_n < 1 or external_log2_cost_bound < 0:
+    normalized_root_n = _strict_integral(original_root_n, minimum=1)
+    normalized_external = _finite_real(external_log2_cost_bound, minimum=0.0)
+    normalized_power = _strict_integral(quasipoly_power, minimum=0)
+    normalized_constant = _finite_real(quasipoly_constant, minimum=0.0)
+    if (
+        normalized_root_n is None
+        or normalized_external is None
+        or normalized_power is None
+        or normalized_constant is None
+    ):
         return ProofDAGValidation(
-            "invalid_proof_dag_envelope", False, 0.0, allowed, 0, 0, 0, 0,
-            "original root and external cost bound must be positive/nonnegative",
+            "invalid_proof_dag_envelope",
+            False,
+            0.0,
+            0.0,
+            0,
+            0,
+            0,
+            0,
+            "original root and quasipolynomial power must be strict integers; external cost and envelope constant must be finite nonnegative real numbers",
+        )
+
+    normalized_lift = None
+    if polynomial_lift_degree is not None:
+        normalized_lift = _strict_integral(polynomial_lift_degree, minimum=1)
+        if normalized_lift is None:
+            return ProofDAGValidation(
+                "invalid_polynomial_root_lift",
+                False,
+                0.0,
+                0.0,
+                0,
+                0,
+                0,
+                0,
+                "an explicit polynomial lift degree must be a positive strict integer",
+            )
+
+    original_root_n = normalized_root_n
+    external_log2_cost_bound = normalized_external
+    quasipoly_power = normalized_power
+    quasipoly_constant = normalized_constant
+    try:
+        allowed = quasipoly_constant * (
+            log2(max(2, original_root_n)) ** quasipoly_power
+        )
+    except (OverflowError, ValueError):
+        return ProofDAGValidation(
+            "invalid_proof_dag_envelope",
+            False,
+            0.0,
+            0.0,
+            0,
+            0,
+            0,
+            0,
+            "quasipolynomial envelope arithmetic overflowed or was not finite",
+        )
+    if not isfinite(allowed):
+        return ProofDAGValidation(
+            "invalid_proof_dag_envelope",
+            False,
+            0.0,
+            0.0,
+            0,
+            0,
+            0,
+            0,
+            "quasipolynomial envelope arithmetic must remain finite",
         )
 
     tree = validate_quasipoly_recurrence_tree_v4(proof.accounting)
@@ -293,11 +379,25 @@ def validate_execution_proof_dag(
             "accounting_" + tree.status, False, 0.0, allowed, 0, 0, 0,
             tree.max_depth, tree.reason,
         )
+    if _finite_real(tree.log2_work_bound, minimum=0.0) is None:
+        return ProofDAGValidation(
+            "accounting_nonfinite_work_bound",
+            False,
+            0.0,
+            allowed,
+            0,
+            0,
+            0,
+            tree.max_depth,
+            "the independently validated recurrence returned a non-finite work bound",
+        )
 
     execution_root = int(proof.accounting.n)
     if execution_root > original_root_n:
-        lift = None if polynomial_lift_degree is None else int(polynomial_lift_degree)
-        if lift != execution_root or lift > original_root_n + original_root_n ** 2:
+        if (
+            normalized_lift != execution_root
+            or normalized_lift > original_root_n + original_root_n ** 2
+        ):
             return ProofDAGValidation(
                 "invalid_polynomial_root_lift", False, 0.0, allowed, 0, 0, 0, 0,
                 "a larger execution root must equal an explicit degree bounded by n+n^2",
@@ -353,13 +453,37 @@ def validate_execution_proof_dag(
             max(0, occurrences - len(node_map)), max_depth,
             "the stored proof DAG contains a charge cycle",
         )
-    if abs(dag_work - tree.log2_work_bound) > 1e-8:
+    if not isfinite(dag_work):
+        return ProofDAGValidation(
+            "nonfinite_proof_dag_charge",
+            False,
+            0.0,
+            allowed,
+            len(node_map),
+            occurrences,
+            max(0, occurrences - len(node_map)),
+            max_depth,
+            "execution proof-DAG occurrence charging produced a non-finite value",
+        )
+    if abs(dag_work - float(tree.log2_work_bound)) > 1e-8:
         return ProofDAGValidation(
             "tree_dag_charge_mismatch", False, dag_work, allowed, len(node_map),
             occurrences, max(0, occurrences - len(node_map)), max_depth,
             "identity-DAG occurrence charge differs from the independently validated accounting tree",
         )
-    total = float(external_log2_cost_bound) + dag_work
+    total = external_log2_cost_bound + dag_work
+    if not isfinite(total):
+        return ProofDAGValidation(
+            "invalid_proof_dag_envelope",
+            False,
+            0.0,
+            allowed,
+            len(node_map),
+            occurrences,
+            max(0, occurrences - len(node_map)),
+            max_depth,
+            "external plus execution proof-DAG work must remain finite",
+        )
     if total > allowed + 1e-9:
         return ProofDAGValidation(
             "proof_dag_quasipolynomial_envelope_exceeded", False, total, allowed,

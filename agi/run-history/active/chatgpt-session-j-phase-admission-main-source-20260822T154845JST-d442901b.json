@@ -1,0 +1,61 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-phase-admission-main-source-20260822T154845JST-d442901b",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T154147+0900-c69d49f-turn1",
+  "started_at_jst": "2026-08-22T15:48:45+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:55:46+09:00",
+  "stale_after_minutes": 45,
+  "starting_main_sha": "d442901b739c478ecc6087fdc5b3c7defec34057",
+  "starting_agi_gi_rev": 950,
+  "target_revision": null,
+  "scope": "repository-coordination/problem-solving-phase-admission/canonical-main-source",
+  "reserved_paths": [
+    "agi/run-history/phase-admissions/chatgpt-session-j-phase-admission-main-source-20260822T154845JST-d442901b-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-phase-admission-main-source-20260822T154845JST-d442901b-publish.json",
+    "automation/problem_solving_parallel_admission.py",
+    "automation/test_problem_solving_parallel_admission.py",
+    "automation_runs/2026-08-22_1548_JST/PHASE_ADMISSION_CANONICAL_MAIN_SOURCE.md"
+  ],
+  "branch": "hardening/phase-admission-canonical-main-source-20260822-1548",
+  "status": "closed",
+  "agi_state": "NOT_AGI",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "admission generation can bind registry_source_sha to a synthetic non-main commit",
+    "attempt": "derive the registry source from the canonical main ancestry and fail closed when it cannot be proven",
+    "decomposition_if_unresolved": [
+      "canonical-main reference resolution",
+      "source-ancestry proof",
+      "exact registry snapshot loading",
+      "regression coverage"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "git merge-base --is-ancestor",
+      "git merge-base HEAD origin/main",
+      "problem_solving_phase_evidence_guard._registry_at"
+    ],
+    "decision": "extend the existing Git ancestry and replay mechanism instead of adding a parallel evidence format"
+  },
+  "strict_boundary": "Coordination evidence hardening only. No GI or AGI capability claim.",
+  "completed_at_jst": "2026-08-22T15:55:46+09:00",
+  "pull_request": 259,
+  "exact_head_sha": "c417de74d8781dde21f1a29ef9842ce84ad86ea5",
+  "merge_commit_sha": "1a4e61ca37192b4761267fbee3fc55c4f9d2b9dd",
+  "workflow_summary": "11/11 success",
+  "validation": {
+    "dedicated_unit_suite": "15/15 passed",
+    "combined_parallel_and_evidence_suite": "21/21 passed",
+    "py_compile": "passed",
+    "exact_head_workflows": "11/11 success",
+    "changed_files": 5,
+    "phase_evidence_guard": "valid",
+    "claim_registry_at_exact_head": "valid, collisions 0"
+  },
+  "deliverable": "Phase-admission generation binds registry_source_sha to merge-base(HEAD, canonical main), rejects an unavailable canonical main or missing common ancestor before evidence publication, and retains replay by the existing ancestry guard.",
+  "close_reason": "PR #259 merged from the exact workflow-verified head; this coordination hardening does not establish GI or AGI."
+}

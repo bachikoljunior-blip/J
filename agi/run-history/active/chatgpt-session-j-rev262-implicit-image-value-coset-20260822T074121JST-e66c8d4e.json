@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev262-implicit-image-value-coset-20260822T074121JST-e66c8d4e",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T073922+0900-29d1cf02-turn1",
   "started_at_jst": "2026-08-22T07:41:21+09:00",
-  "heartbeat_at_jst": "2026-08-22T07:51:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T08:49:20+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "e66c8d4e2daba7062088db7bf702d89314a1af56",
   "starting_agi_gi_rev": 257,
@@ -20,7 +20,8 @@
     "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_value_coset_rev262.py"
   ],
   "branch": "agi-gi-rev262-implicit-image-value-coset-session-20260822-0741",
-  "status": "active",
+  "status": "closed",
+  "closed_at_jst": "2026-08-22T08:49:20+09:00",
   "agi_state": "NOT_AGI",
   "existing_solution_audit": {
     "source_pr": 200,
@@ -29,7 +30,8 @@
   },
   "strict_boundary": "Only the value-preserving implicit image-group right-coset child. Original-domain preimage, original-root integration, CRX1, GI, and AGI remain unresolved.",
   "pull_request": 207,
-  "exact_head_sha": "a45b0fdae389b01f54504db987b938668ddb98db",
+  "exact_head_sha": "36b1c88ef4669504c0bd1051e995ca9b409d793f",
+  "merge_commit_sha": "086f743978a6c6fcbc19c6580d2097ff0381423b",
   "local_validation": {
     "focused_and_inherited": "13/13 success",
     "pytest_free_unittest_subset": "70/70 success",
@@ -39,5 +41,6 @@
     "whole_group_stabilizer": "order 6 exact",
     "inventory_mismatch_presearch": "exact empty with zero partition states"
   },
-  "ci_note": "publish evidence regenerated from main-visible registry source bbf53979"
+  "exact_head_ci": "12/12 success including independent labelg differential gate and parallel admission",
+  "ci_note": "merge evidence admitted from main 0e09442a; exact head fixed at merge"
 }

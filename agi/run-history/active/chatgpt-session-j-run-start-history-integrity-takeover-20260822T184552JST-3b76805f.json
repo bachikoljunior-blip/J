@@ -1,0 +1,58 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-run-start-history-integrity-takeover-20260822T184552JST-3b76805f",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T184109+0900-fc4ab5cb-turn1",
+  "started_at_jst": "2026-08-22T18:45:52+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:51:09+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "3b76805f8c91bc9b9c699448c3959f78f0db4b2a",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": null,
+  "scope": "repository-coordination/run-start-history/canonical-revision-integrity",
+  "reserved_paths": [
+    ".github/workflows/run-start-history-integrity.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-run-start-history-integrity-20260822T174325JST-56c7635a-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-run-start-history-integrity-20260822T174325JST-56c7635a-publish.json",
+    "automation/agi_gi_run_start_history_guard.py",
+    "automation/test_agi_gi_run_start_history_guard.py",
+    "automation_runs/2026-08-22_1744_JST/RUN_START_HISTORY_INTEGRITY.md"
+  ],
+  "branch": "hardening/run-start-history-integrity-20260822-1744",
+  "status": "completed_merged",
+  "agi_state": "NOT_AGI",
+  "takeover_of_claim_id": "chatgpt-session-j-run-start-history-integrity-20260822T174325JST-56c7635a",
+  "takeover_reason": "prior owner claim is stale; PR #273 exact-head CI exposed canonical rev1600 history corrections that require a fresh owner to repair and revalidate",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "append-only run-start records lack an independent replay guard that verifies recorded or corrected revisions against each immutable starting main SHA",
+    "attempt": "repair canonical correction lineage revealed by exact-head CI, replay every enforceable start, and integrate the fail-closed guard",
+    "decomposition_if_unresolved": [
+      "canonical ancestry classification",
+      "append-only correction lineage",
+      "exact-head CI replay",
+      "main integration"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "automation/agi_gi_run_start_record.py",
+      "automation/agi_gi_main_revision_guard.py",
+      "append-only correction events",
+      "Git commit ancestry"
+    ],
+    "decision": "compose the existing ancestry parser and correction protocol; no alternative revision definition"
+  },
+  "non_interference": "Take over only stale PR #273 coordination paths; do not modify active solver/proof-DAG scopes.",
+  "strict_boundary": "Run-history integrity only. No GI or AGI capability claim.",
+  "completed_at_jst": "2026-08-22T18:51:09+09:00",
+  "tested_head_sha": "2c3fc87f11c381b93d87a02723b65a1454c32f47",
+  "merge_commit_sha": "369816dd5e227835aa948ea5c4836cce42446bea",
+  "workflow_summary": {
+    "success": 11,
+    "total": 11,
+    "failure": 0
+  }
+}

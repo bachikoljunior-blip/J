@@ -1,0 +1,45 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev951-20260822T154800+0900-turn1",
+  "started_at_jst": "2026-08-22T15:48:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:51:20+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "d442901b739c478ecc6087fdc5b3c7defec34057",
+  "starting_agi_gi_rev": 950,
+  "target_revision": 951,
+  "scope": "crx1/homogeneous-block-reduction/bounded-quotient-relation-si-terminal",
+  "branch": "agi-gi-rev951-homogeneous-block-quotient-si-session-20260822-1548",
+  "reserved_paths": [
+    ".github/workflows/rev951-homogeneous-block-quotient-si-smoke.yml",
+    "automation_runs/2026-08-22_1548_JST/REV951_HOMOGENEOUS_BLOCK_QUOTIENT_SI.md",
+    "automation_runs/2026-08-22_1548_JST/homogeneous_block_quotient_si_v1.py",
+    "automation_runs/2026-08-22_1548_JST/test_homogeneous_block_quotient_si_rev951.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev1100 main post-replay seal and all corrected Split-or-Johnson rev1000/rev900/rev800/rev720/rev700/rev650/rev600/rev500/rev400 scopes",
+    "rev279 parent-outcome proof-DAG and all sibling CRX3 proof-DAG consumers",
+    "rev276 joint relation/action compatibility and rev278 quotient-preimage sibling branches",
+    "rev950 block-action kernel proof-DAG, MAIN.md, and repository main-revision sync",
+    "all shared proof-DAG, recurrence, coordination, and existing solver implementation paths",
+    "all sibling claims, branches, PRs, workflows, and reserved paths"
+  ],
+  "intent": "solve the bounded homogeneous unary/binary quotient relation String-Isomorphism leaf inside the exact rev274 quotient-image action, using rev275's replayed exact quotient-image order as the completeness gate; enumerate only under an explicit finite quotient-group cap, return a complete exact quotient transporter right coset or exact empty, and import no sibling branch-only implementation",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_rebase_or_force_push": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_any_upstream_identity_or_outcome_drift": true
+  },
+  "status": "superseded_semantic_collision_rev1200",
+  "state": "closed",
+  "closed_at_jst": "2026-08-22T15:51:20+09:00",
+  "superseded_by_claim": "chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd",
+  "closure_reason": "a separately owned rev1200 claim appeared after this branch was created and claims the same homogeneous-block quotient String-Isomorphism algorithmic leaf; stop before PR publication rather than create a semantic parallel collision",
+  "branch_state": "implementation_unpublished_no_pr",
+  "agi_state": "NOT_AGI"
+}

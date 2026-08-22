@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev268-production-parent-orchestration-20260822T082705JST-8f4c1a72",
+  "session_id": "chatgpt-session-j-agi-gi-refire-20260822T0827+0900-77173344-turn1",
+  "started_at_jst": "2026-08-22T08:27:05+09:00",
+  "heartbeat_at_jst": "2026-08-22T08:27:05+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "77173344e22db7b57ccef60d6eb8fed9deeb593a",
+  "starting_agi_gi_rev": 257,
+  "target_revision": 268,
+  "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/production-parent-orchestration",
+  "reserved_paths": [
+    ".github/workflows/rev268-implicit-relation-production-parent-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev268-production-parent-orchestration-20260822T082705JST-8f4c1a72-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev268-production-parent-orchestration-20260822T082705JST-8f4c1a72-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV268_IMPLICIT_RELATION_PRODUCTION_PARENT.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_production_parent_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_production_parent_rev268.py"
+  ],
+  "branch": "agi-gi-rev268-production-parent-orchestration-session-20260822-0827",
+  "status": "active",
+  "agi_state": "NOT_AGI",
+  "parallel_exclusions": [
+    "rev261 nonempty parent-promotion verifier / PR #204",
+    "rev262 value-preserving image-coset intersection / PR #207",
+    "rev263 exact-empty parent verifier",
+    "rev264 primitive-Johnson proof-DAG / PR #210",
+    "rev265 original-root resource envelope / PR #208",
+    "rev266 parent-outcome normalization / PR #209",
+    "rev267 original-domain paired preimage / PR #212",
+    "CRX3 state-orbit proof-DAG / PR #206",
+    "rev247 shared S1 work / PR #211",
+    "MAIN.md and all sibling implementation/workflow paths"
+  ],
+  "non_interference": "Add only the six rev268-reserved paths. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite sibling branches, PRs, claims, workflows, or shared implementation files.",
+  "strict_boundary": "Define and validate the fail-closed orchestration boundary that composes exact descendant contracts into the CRX1 relation-image parent without copying or importing branch-only sibling implementations. This revision does not recompute rev262, rev267, rev261/rev263, or rev265 evidence; it does not change rev266 normalization; and it does not claim CRX1, GI, or AGI closure."
+}

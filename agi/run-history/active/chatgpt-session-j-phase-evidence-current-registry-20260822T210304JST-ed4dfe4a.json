@@ -1,0 +1,68 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-phase-evidence-current-registry-20260822T210304JST-ed4dfe4a",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
+  "started_at_jst": "2026-08-22T21:03:04+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:12:47+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "ed4dfe4a826eaedb88b1637a7b8ddf31ac7e89c2",
+  "starting_agi_gi_rev": 3300,
+  "target_revision": null,
+  "scope": "repository-coordination/problem-phase-evidence/current-registry-snapshot",
+  "branch": "hardening/phase-evidence-current-registry-20260822-2103",
+  "reserved_paths": [
+    ".github/workflows/problem-solving-parallel-admission.yml",
+    "automation/problem_solving_phase_evidence_guard.py",
+    "automation/test_problem_solving_phase_evidence_guard.py",
+    "automation_runs/2026-08-22_2103_JST/PHASE_EVIDENCE_CURRENT_REGISTRY.md",
+    "agi/run-history/active/chatgpt-session-j-phase-evidence-current-registry-20260822T210304JST-ed4dfe4a.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-phase-evidence-current-registry-20260822T210304JST-ed4dfe4a-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-phase-evidence-current-registry-20260822T210304JST-ed4dfe4a-publish.json"
+  ],
+  "parallel_exclusions": [
+    "all AGI solver/proof-DAG/rev implementation scopes",
+    "MAIN.md and run-start history",
+    "all sibling claim paths"
+  ],
+  "intent": "Fail closed when pull-request phase evidence is internally replayable but the current canonical main claim registry now rejects the same scope, revision, or reserved paths. Re-run admission against an explicit current-registry ref while preserving exact replay of the persisted source snapshot. Do not change AGI functionality or claim AGI.",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "phase evidence can remain internally replayable after canonical main claim registry advances",
+    "attempt": "replay exact persisted source, then independently re-admit the same phase against an explicitly resolved current canonical registry ref",
+    "decomposition_if_unresolved": [
+      "ref resolution",
+      "source equality check",
+      "workflow wiring",
+      "regression tests"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "Git merge-base ancestry",
+      "required up-to-date branch checks",
+      "existing registry snapshot replay"
+    ],
+    "decision": "combine immutable source replay with a current canonical registry re-admission; tolerate unrelated heartbeat drift but reject new conflicts or missing/closed ownership"
+  },
+  "status": "completed",
+  "agi_state": "NOT_AGI",
+  "last_activity_at_jst": "2026-08-22T21:09:19+09:00",
+  "pull_request": 291,
+  "exact_head_sha": "6f63b43b01671102b064baaa96c852025a989aaf",
+  "validation": {
+    "exact_head_workflows": "12/12 success",
+    "post_merge_automation_tests": "81/81 passed",
+    "main_revision_guard": "3300 = 3300",
+    "claim_registry": "valid; collisions=0",
+    "run_start_history_guard": "79 records; 74 starts; 4 corrections; 1 identity correction",
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "overflow_triggered": false,
+    "agi_state": "NOT_AGI"
+  },
+  "completed_at_jst": "2026-08-22T21:12:47+09:00",
+  "merge_commit_sha": "b019fed25cdb0e9f31460b7267f46952f1b8b4a5"
+}

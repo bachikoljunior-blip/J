@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev1200-20260822T155100+0900-turn4",
+  "started_at_jst": "2026-08-22T15:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:54:00+09:00",
+  "completed_at_jst": "2026-08-22T15:54:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "fc1ee44781c9c883c7c3923d6bc97d51bea1c8d1",
+  "starting_agi_gi_rev": 620,
+  "target_revision": 1200,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-lineage-closure",
+  "branch": "agi-gi-rev1200-soj-recursive-production-lineage-closure-session-20260822-1551",
+  "reserved_paths": [
+    ".github/workflows/rev1200-soj-recursive-production-lineage-closure-smoke.yml",
+    "automation_runs/2026-08-22_1551_JST/REV1200_SOJ_RECURSIVE_PRODUCTION_LINEAGE_CLOSURE.md",
+    "automation_runs/2026-08-22_1551_JST/soj_recursive_production_lineage_closure_v1.py",
+    "automation_runs/2026-08-22_1551_JST/test_soj_recursive_production_lineage_closure_rev1200.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev1100 main post-replay seal active claim/branch and all reserved paths",
+    "rev1000 recursive production post-replay coherence envelope / PR #256 and all reserved paths",
+    "rev900 recursive production provenance/total-cost binding / PR #254 and all reserved paths",
+    "rev950 block-action-kernel proof-DAG and main-sync ownership",
+    "rev720 production construction-cost provenance",
+    "rev800 total-cost coherence / PR #252",
+    "rev700 recursive production provenance join / PR #251",
+    "rev620 main-revision-sync ownership and MAIN.md",
+    "all CRX scopes, shared recurrence/proof-DAG/coordination implementation, sibling branches/PRs/workflows"
+  ],
+  "intent": "add a file-disjoint fail-closed lineage-closure certificate that independently replays the deterministic identity formulas exposed by rev900 and rev1100 certificates, then accepts only when their main anchor, provenance lineage, exact-empty/nonempty outcome, reduction identity, construction-cost binding, strict shrink, and exact log2 construction charge agree; retain rev900 accounting/child/coherence lineage fields that rev1100 intentionally does not expose, without importing or modifying either sibling branch implementation",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_branch_only_rev900_rev1100_implementation": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_any_upstream_identity_or_outcome_drift": true
+  },
+  "status": "superseded",
+  "superseded_reason": "target_revision collision discovered after branch work: the pre-existing chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd claim started at 2026-08-22T15:50:00+09:00, one minute before this claim; this session lane retreats without touching the earlier claim, branch, PR, or workflows",
+  "replacement_target_revision": 1300,
+  "agi_state": "NOT_AGI"
+}

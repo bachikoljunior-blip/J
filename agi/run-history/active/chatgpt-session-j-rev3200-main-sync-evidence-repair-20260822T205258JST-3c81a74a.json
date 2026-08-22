@@ -1,0 +1,54 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev3200-main-sync-evidence-repair-20260822T205258JST-3c81a74a",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
+  "started_at_jst": "2026-08-22T20:52:58+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:54:08+09:00",
+  "completed_at_jst": "2026-08-22T20:54:08+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "3c81a74a3c1e890211bbc595eb12144a77b14036",
+  "starting_agi_gi_rev": 3200,
+  "target_revision": 3200,
+  "scope": "repository/main-revision-sync/rev3200/phase-admission-atomicity-repair",
+  "branch": "main",
+  "reserved_paths": [
+    "MAIN.md",
+    "agi/run-history/active/chatgpt-session-j-rev3200-main-sync-evidence-repair-20260822T205258JST-3c81a74a.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3200-main-sync-evidence-repair-20260822T205258JST-3c81a74a-update_problem_tree.json"
+  ],
+  "parallel_exclusions": [
+    "rev3300/rev3500 homogeneous-block replay-seal scopes and all reserved paths",
+    "rev3400 corrected Split-or-Johnson identity-equivalence scope and all reserved paths",
+    "all sibling solver, proof-DAG, branch, PR and workflow paths"
+  ],
+  "intent": "Repair the rev3200 MAIN synchronization's commit-local phase-admission evidence. Add one explicit synchronization-evidence sentence to MAIN.md and its canonical update_problem_tree admission in the same Git commit; do not change the canonical revision or any solver/proof-DAG implementation.",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "rev3200 MAIN content is correct but the direct contents-API update separated phase evidence from the changed MAIN commit",
+    "attempt": "publish one atomic two-file commit containing a meaningful MAIN synchronization-evidence note and replayable update_problem_tree evidence",
+    "decomposition_if_unresolved": [
+      "fresh claim publication",
+      "canonical registry snapshot",
+      "atomic Git tree construction",
+      "exact main ref update"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "Git blob/tree/commit atomicity",
+      "automation/problem_solving_parallel_admission.py",
+      "automation/problem_solving_phase_evidence_guard.py"
+    ],
+    "decision": "use one content-addressed Git tree rather than weakening or bypassing the phase guard"
+  },
+  "supersession": {
+    "reason": "canonical main advanced to integrated rev3300 before the atomic repair write",
+    "observed_main_sha": "604bd57f80070487f98c1c747a621987a4654c45",
+    "replacement_required": "fresh rev3300 synchronization claim and atomic MAIN/evidence commit"
+  },
+  "status": "superseded_revision_advance",
+  "agi_state": "NOT_AGI"
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T114229+0900-97df37a9-turn1",
+  "started_at_jst": "2026-08-22T11:44:26+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:45:07+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "eda21ac0e01d6f2f1f24881f1f4ffa883b5d807e",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 275,
+  "scope": "crx3/block-structured-consumers/homogeneous-block-action-kernel-factorization",
+  "reserved_paths": [
+    ".github/workflows/agi-gi-rev275-block-action-kernel-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0-publish.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0-merge.json",
+    "automation_runs/2026-08-19_0851_JST/REV275_BLOCK_ACTION_KERNEL.md",
+    "automation_runs/2026-08-19_0851_JST/homogeneous_block_action_kernel_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py"
+  ],
+  "branch": "agi-gi-rev275-block-action-kernel-takeover-20260822-1144",
+  "status": "closed_merged_exact_head_12_of_12_success",
+  "agi_state": "NOT_AGI",
+  "takeover_of": "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
+  "takeover_inspection": {
+    "stale_branch_head": "8445e89d52190c107343b05e4f247f4a855c9823",
+    "open_pull_request": null,
+    "workflow_runs": 0,
+    "preservation": "no overwrite, cancellation, deletion, or force push"
+  },
+  "strict_boundary": "Certify only the exact quotient-image/kernel order factorization for main-integrated rev274 supplied homogeneous block actions; no quotient SI/preimage integration, CRX1 closure, GI, or AGI claim.",
+  "pull_request": 236,
+  "latest_head_sha": "0d596c84db989246b5c7562003cd38d41873b84e",
+  "latest_observed_main_sha": "87651f44ec341b95ba7e8d0f8df5bc59bb9fed19",
+  "evidence": {
+    "focused_tests": "12/12 success",
+    "related_rev274_rev275_tests": "24/24 success",
+    "syntax_compile": "success",
+    "diff_check": "success",
+    "phase_admission": "attempt_solution and publish admitted",
+    "workflow_runs": "exact head 0d596c84db989246b5c7562003cd38d41873b84e: 12/12 success, 0 failure",
+    "problem_solving_parallel_admission": "latest main 6f11fcc191a7998eac59b5b67bea356f541501c1 registry valid with 0 collisions; rev275 scope/path conflicts 0",
+    "post_merge_validation": "focused 12/12 and related rev274-rev275 24/24 success; syntax compile success; registry valid with 0 collisions"
+  },
+  "next_action": "closed after exact-head-fixed merge; continue with next independent unclaimed leaf",
+  "state": "closed",
+  "merge_commit_sha": "87651f44ec341b95ba7e8d0f8df5bc59bb9fed19",
+  "completed_at_jst": "2026-08-22T14:45:07+09:00"
+}

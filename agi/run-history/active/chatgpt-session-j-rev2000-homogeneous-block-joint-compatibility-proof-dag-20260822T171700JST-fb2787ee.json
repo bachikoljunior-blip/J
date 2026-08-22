@@ -1,0 +1,65 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev2000-20260822T171700+0900-turn9",
+  "started_at_jst": "2026-08-22T17:17:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:34:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "fb2787ee28a39d7420fc0ad25c2738b75c52096c",
+  "starting_agi_gi_rev": 952,
+  "target_revision": 2000,
+  "scope": "crx3/structural-consumers/homogeneous-block-joint-reduction-compatibility-proof-dag",
+  "branch": "agi-gi-rev2000-homogeneous-block-joint-compatibility-proof-dag-session-20260822-1717",
+  "pull_request": 271,
+  "latest_head_sha": "f93ddc04251d9572d63b76e5b1175956908fdfcd",
+  "latest_observed_main_sha": "c11013448dd243e465e88bf9259a684c452628e0",
+  "reserved_paths": [
+    ".github/workflows/rev2000-homogeneous-block-joint-compatibility-proof-dag-smoke.yml",
+    "automation_runs/2026-08-22_1717_JST/REV2000_HOMOGENEOUS_BLOCK_JOINT_COMPATIBILITY_PROOF_DAG.md",
+    "automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py",
+    "automation_runs/2026-08-22_1717_JST/test_homogeneous_block_joint_compatibility_proof_dag_rev2000.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-publish.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-merge.json"
+  ],
+  "parallel_exclusions": [
+    "rev1900 corrected-SOJ child semantic reduction / PR #270 and all reserved paths",
+    "rev1800 homogeneous-block quotient-SI proof-DAG / PR #268 and all reserved paths",
+    "rev1700 recursive child execution scopes and all reserved paths",
+    "rev1600 merged homogeneous block-action provenance proof-DAG implementation paths",
+    "rev1500, rev1400, rev1300, rev1200, rev1100 and all sibling reserved paths",
+    "rev276 CRX1 joint relation/action compatibility / PR #221 and all reserved paths",
+    "rev278 original-domain quotient preimage / PR #222 and all reserved paths",
+    "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs, and workflows"
+  ],
+  "intent": "independently replay the main-integrated homogeneous relation provenance, block-action equivariance, and block-action kernel factorization contracts; bind their common canonical block reduction and deterministic identities into one conservative proof-DAG terminal without computing quotient String-Isomorphism or lifting any original-domain transporter",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_consumer_implementations": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_any_relation_action_kernel_identity_or_accounting_drift": true
+  },
+  "depends_on_main_integrated_contracts": [
+    "rev273 homogeneous block relation provenance public contract",
+    "rev274 homogeneous block-action provenance public contract",
+    "rev275 homogeneous block-action kernel factorization public contract",
+    "rev220 proof_dag_accounting_v1 validate_execution_proof_dag"
+  ],
+  "post_claim_race_check_main_sha": "4efabf7406e4501656c8ab89a0c6a73ba4a4fe2a",
+  "post_claim_race_check": "success_no_target_revision_or_scope_collision",
+  "implementation": {
+    "paths_persisted": 4,
+    "focused_regressions_authored": 10,
+    "local_py_compile": "success",
+    "draft_pr": 271,
+    "natural_attempt_solution_admission": "pending_not_fabricated",
+    "natural_ci": "pending_not_manually_rerun",
+    "merge_attempted": false
+  },
+  "strict_boundary": "Provenance and conservative accounting only. No quotient String-Isomorphism coset, no original-domain transporter lift, no AGI claim.",
+  "status": "active_draft_pr_pending_natural_admission_and_ci",
+  "agi_state": "NOT_AGI"
+}

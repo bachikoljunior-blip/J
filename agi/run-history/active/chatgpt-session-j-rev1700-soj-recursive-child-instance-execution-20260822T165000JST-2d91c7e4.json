@@ -1,0 +1,68 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1700-soj-recursive-child-instance-execution-20260822T165000JST-2d91c7e4",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev1700-20260822T165000+0900",
+  "started_at_jst": "2026-08-22T16:50:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:55:31+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "b724712b1dc9ca464370c7935ccce7fae97bf60d",
+  "latest_main_sha_observed": "3e3f056c3f06069705555147d4680848310e1600",
+  "starting_agi_gi_rev": 952,
+  "target_revision": 1700,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-instance-execution-binding",
+  "branch": "agi-gi-rev1700-soj-recursive-child-instance-execution-session-20260822-1650",
+  "current_pr": 266,
+  "exact_head": "f00c785dad05360255ad8bef36e770807590dad3",
+  "reserved_paths": [
+    ".github/workflows/rev1700-soj-recursive-child-instance-execution-smoke.yml",
+    "automation_runs/2026-08-22_1650_JST/REV1700_SOJ_RECURSIVE_CHILD_INSTANCE_EXECUTION.md",
+    "automation_runs/2026-08-22_1650_JST/soj_recursive_child_instance_execution_v1.py",
+    "automation_runs/2026-08-22_1650_JST/test_soj_recursive_child_instance_execution_rev1700.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1700-soj-recursive-child-instance-execution-20260822T165000JST-2d91c7e4-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1700-soj-recursive-child-instance-execution-20260822T165000JST-2d91c7e4-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev1500/rev1600 block-action provenance proof-DAG sibling execution and every reserved path",
+    "superseded same-session rev1500 child-execution branch and every rev1500 child-execution path",
+    "rev1400 recursive-production execution proof-DAG / PR #264 and all reserved paths",
+    "rev1300 recursive-production lineage closure / PR #263 and all reserved paths",
+    "rev1200 homogeneous-block quotient String-Isomorphism / PR #260 and all reserved paths",
+    "rev1100/rev1000/rev900/rev800/rev700/rev650/rev600/rev500/rev400 corrected-SOJ provenance/accounting leaves",
+    "rev293 Johnson recursive-result lift / PR #241 and rev287 Johnson relational-reduction construction / PR #237",
+    "rev1800 homogeneous-block quotient SI proof-DAG and every reserved path",
+    "rev1900 SOJ child semantic-reduction binding and every reserved path",
+    "rev950/rev951/rev952 homogeneous-block and MAIN revision-sync work",
+    "all CRX scopes, MAIN.md, shared S1/proof-DAG/recurrence/coordination implementation, sibling branches/PRs/workflows"
+  ],
+  "intent": "close the concrete child-execution authenticity gap left after rev1400 without importing sibling branch-only implementations: validate the public rev287-style induced-ground contract under an explicit independent-replay gate, build the exact represented child group from its induced ground generators, execute the main-integrated S1 dispatcher on one explicit child source/target instance, require the resulting execution-linked S1 proof identity to freeze that exact group/strings/root/resources, and emit a rev293-compatible exact child-result snapshot bound to the same reduction identity; deliberately do not claim that the supplied child strings are the mathematically correct reduction of the parent Johnson relation",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_branch_only_rev1400_rev1300_rev293_rev287_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_unreplayed_reduction_unstable_child_values_unresolved_s1_or_identity_drift": true
+  },
+  "depends_on_public_contracts": [
+    "rev287 JohnsonGroundRelationalReductionEvidence public field shape / PR #237",
+    "main-integrated s1_string_isomorphism_v4 execution and S1ProofIdentity v1",
+    "rev293 RecursiveGroundExactResultEvidence public snapshot/hash shape / PR #241"
+  ],
+  "validation": {
+    "focused_tests": "15/15 success on exact head",
+    "py_compile": "success on exact head",
+    "dedicated_rev1700_smoke": "success",
+    "attempt_solution_preview": "admitted=true, conflicts=[]",
+    "publish_preview": "admitted=true, conflicts=[]",
+    "canonical_attempt_solution_evidence": "present on branch",
+    "canonical_publish_evidence": "present on branch",
+    "repository_parallel_admission": "success on exact head",
+    "inherited_checks": "rev238/rev239/rev240/rev241/rev242/rev246/rev250/rev253/rev254 all success on exact head",
+    "dependency_note": "initial rev1700 smoke exposed inherited NumPy import dependency through main S1; fixed only in the rev1700-owned workflow by a new commit, without rerunning or modifying any existing sibling workflow"
+  },
+  "integration_boundary": "draft-only; this leaf executes and authenticates one explicit induced-ground S1 child instance but does not construct or prove the parent-Johnson-to-child-string semantic reduction. A fresh independently owned rev1900 claim now owns that semantic-reduction boundary, so rev1700 deliberately does not overlap it. rev1700 does not import rev1400 and does not close corrected Split-or-Johnson, GI, or AGI",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}

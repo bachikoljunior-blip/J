@@ -7,11 +7,13 @@ import argparse
 import json
 import subprocess
 import tempfile
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 try:
     from automation.parallel_claims import (
+        Claim,
         ClaimFormatError,
         load_registry,
         parse_jst_timestamp,
@@ -23,6 +25,7 @@ try:
     )
 except ModuleNotFoundError:  # Direct ``python automation/<script>.py`` invocation.
     from parallel_claims import (  # type: ignore[no-redef]
+        Claim,
         ClaimFormatError,
         load_registry,
         parse_jst_timestamp,
@@ -35,10 +38,15 @@ except ModuleNotFoundError:  # Direct ``python automation/<script>.py`` invocati
 
 
 EVIDENCE_PREFIX = "agi/run-history/phase-admissions/"
+PHASE_ADMISSION_WORKFLOW = (
+    ".github/workflows/problem-solving-parallel-admission.yml"
+)
 
 
 def is_problem_state_path(path: str) -> bool:
     if path == "MAIN.md" or path.startswith("automation_runs/"):
+        return True
+    if path == PHASE_ADMISSION_WORKFLOW:
         return True
     if path.startswith("automation/"):
         return True
@@ -94,7 +102,77 @@ def _registry_at(repo: Path, commit_sha: str):
         return load_registry(root)
 
 
-def replay_evidence(repo: Path, path: Path, head_ref: str) -> tuple[str, ...]:
+def _current_registry_observation_time(
+    claims: list[Claim], recorded_at: datetime
+) -> datetime:
+    """Choose a deterministic time that observes every current registry event."""
+
+    observed = [recorded_at]
+    for claim in claims:
+        observed.extend((claim.started_at, claim.heartbeat_at))
+        if claim.completed_at is not None:
+            observed.append(claim.completed_at)
+    return max(observed)
+
+
+def _resolve_commit(repo: Path, ref: str) -> str:
+    return _git(repo, "rev-parse", "--verify", f"{ref}^{{commit}}").strip()
+
+
+def _replay_current_registry(
+    repo: Path,
+    payload: dict[str, Any],
+    *,
+    current_registry_ref: str,
+    recorded_at: datetime,
+) -> tuple[str, ...]:
+    try:
+        current_sha = _resolve_commit(repo, current_registry_ref)
+    except subprocess.CalledProcessError:
+        return (f"current registry ref cannot be resolved: {current_registry_ref}",)
+    source_sha = payload.get("registry_source_sha")
+    continuity = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", str(source_sha), current_sha],
+        cwd=repo,
+    )
+    if continuity.returncode != 0:
+        return (
+            "current registry ref does not descend from persisted "
+            f"registry_source_sha: {current_sha}",
+        )
+    claims, registry_errors = _registry_at(repo, current_sha)
+    if registry_errors:
+        return tuple(f"current registry: {error}" for error in registry_errors)
+
+    owner = payload.get("own_claim")
+    if not isinstance(owner, dict):
+        return ("current registry replay requires an own_claim snapshot",)
+    observed_at = _current_registry_observation_time(claims, recorded_at)
+    replay = admit_problem_phase(
+        claims,
+        claim_id=str(owner.get("claim_id", "")),
+        phase=str(payload.get("phase", "")),
+        scope=str(payload.get("scope", "")),
+        target_revision=payload.get("target_revision"),
+        now=observed_at,
+        registry_source_sha=current_sha,
+        paths=payload.get("paths", []),
+    )
+    if replay.get("admitted") is True:
+        return ()
+    reasons = replay.get("reasons", [])
+    rendered = ",".join(str(reason) for reason in reasons) or "unknown"
+    return (
+        f"current registry at {current_sha} rejects persisted phase: {rendered}",
+    )
+
+
+def replay_evidence(
+    repo: Path,
+    path: Path,
+    head_ref: str,
+    current_registry_ref: str | None = None,
+) -> tuple[str, ...]:
     try:
         payload: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -142,6 +220,15 @@ def replay_evidence(repo: Path, path: Path, head_ref: str) -> tuple[str, ...]:
     ):
         if payload.get(field) != replay.get(field):
             errors.append(f"replayed {field} differs from persisted evidence")
+    if current_registry_ref is not None:
+        errors.extend(
+            _replay_current_registry(
+                repo,
+                payload,
+                current_registry_ref=current_registry_ref,
+                recorded_at=recorded,
+            )
+        )
     return tuple(errors)
 
 
@@ -150,6 +237,13 @@ def main() -> int:
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--changed-files", type=Path, required=True)
     parser.add_argument("--head-ref", default="HEAD")
+    parser.add_argument(
+        "--current-registry-ref",
+        help=(
+            "also re-admit every persisted phase against this current canonical "
+            "claim-registry ref"
+        ),
+    )
     args = parser.parse_args()
 
     repo = args.repo.resolve()
@@ -168,7 +262,14 @@ def main() -> int:
     if relevant and not evidence_paths:
         errors.append("problem-state changes require a changed phase-admission evidence file")
     for evidence_path in evidence_paths:
-        errors.extend(replay_evidence(repo, evidence_path, args.head_ref))
+        errors.extend(
+            replay_evidence(
+                repo,
+                evidence_path,
+                args.head_ref,
+                args.current_registry_ref,
+            )
+        )
     admitted_paths: list[str] = []
     for evidence_path in evidence_paths:
         try:

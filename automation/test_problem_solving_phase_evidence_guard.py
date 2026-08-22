@@ -1,9 +1,24 @@
+import json
+import subprocess
+import tempfile
 import unittest
+from contextlib import redirect_stdout
+from datetime import datetime
+from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
+from automation.parallel_claims import JST, load_registry
+from automation.problem_solving_parallel_admission import (
+    admit_problem_phase,
+    evidence_payload,
+)
 from automation.problem_solving_phase_evidence_guard import (
+    _current_registry_observation_time,
     is_problem_state_path,
+    main,
     path_is_covered,
+    replay_evidence,
 )
 
 
@@ -16,6 +31,7 @@ class ProblemSolvingPhaseEvidenceGuardTest(unittest.TestCase):
             "agi/core/runtime.py",
             ".github/workflows/rev250-smoke.yml",
             ".github/workflows/agi-gi-validation.yml",
+            ".github/workflows/problem-solving-parallel-admission.yml",
         ):
             with self.subTest(path=path):
                 self.assertTrue(is_problem_state_path(path))
@@ -40,6 +56,29 @@ class ProblemSolvingPhaseEvidenceGuardTest(unittest.TestCase):
     def test_invalid_admitted_path_fails_closed(self):
         self.assertFalse(path_is_covered("MAIN.md", ["../MAIN.md"]))
 
+    def test_workflow_only_change_without_evidence_fails_closed(self):
+        with tempfile.TemporaryDirectory() as raw:
+            changed = Path(raw) / "changed.txt"
+            changed.write_text(
+                ".github/workflows/problem-solving-parallel-admission.yml\n",
+                encoding="utf-8",
+            )
+            stdout = StringIO()
+            with patch(
+                "sys.argv",
+                ["guard", "--repo", raw, "--changed-files", str(changed)],
+            ), redirect_stdout(stdout):
+                self.assertEqual(main(), 2)
+            result = json.loads(stdout.getvalue())
+            self.assertIn(
+                "problem-state changes require a changed phase-admission evidence file",
+                result["errors"],
+            )
+            self.assertEqual(
+                result["relevant_changed_files"],
+                [".github/workflows/problem-solving-parallel-admission.yml"],
+            )
+
     def test_workflow_diffs_against_fresh_current_main(self):
         root = Path(__file__).resolve().parents[1]
         workflow = (root / ".github/workflows/problem-solving-parallel-admission.yml").read_text(
@@ -47,7 +86,146 @@ class ProblemSolvingPhaseEvidenceGuardTest(unittest.TestCase):
         )
         self.assertIn("git fetch --no-tags origin main", workflow)
         self.assertIn("git merge-base origin/main HEAD", workflow)
+        self.assertIn('if [[ "${{ github.event_name }}" == "pull_request" ]]', workflow)
+        self.assertIn('base="$(git rev-parse HEAD^)"', workflow)
+        self.assertIn('current_registry_ref="$base"', workflow)
+        self.assertIn('push:\n    branches:\n      - main', workflow)
+        self.assertIn('--current-registry-ref "$CURRENT_REGISTRY_REF"', workflow)
         self.assertNotIn("github.event.pull_request.base.sha", workflow)
+
+    def test_current_registry_observation_time_includes_later_claim_events(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            claim_dir = root / "agi/run-history/active"
+            claim_dir.mkdir(parents=True)
+            self._write_claim(
+                claim_dir / "owner.json",
+                claim_id="owner",
+                started="2026-08-22T21:00:00+09:00",
+                heartbeat="2026-08-22T21:01:00+09:00",
+                scope="scope/owner",
+                paths=["MAIN.md"],
+            )
+            claims, errors = load_registry(root)
+            self.assertEqual(errors, [])
+            recorded = datetime(2026, 8, 22, 20, 59, tzinfo=JST)
+            self.assertEqual(
+                _current_registry_observation_time(claims, recorded).isoformat(),
+                "2026-08-22T21:01:00+09:00",
+            )
+
+    def test_current_registry_replay_rejects_new_path_collision(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "test@example.com"],
+                cwd=root,
+                check=True,
+            )
+            subprocess.run(["git", "config", "user.name", "Test"], cwd=root, check=True)
+            claim_dir = root / "agi/run-history/active"
+            claim_dir.mkdir(parents=True)
+            self._write_claim(
+                claim_dir / "owner.json",
+                claim_id="owner",
+                started="2026-08-22T21:00:00+09:00",
+                heartbeat="2026-08-22T21:00:00+09:00",
+                scope="scope/owner",
+                paths=["MAIN.md"],
+            )
+            subprocess.run(["git", "add", "."], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-qm", "source"], cwd=root, check=True)
+            source = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=root, text=True
+            ).strip()
+            claims, errors = load_registry(root)
+            self.assertEqual(errors, [])
+            recorded = datetime(2026, 8, 22, 21, 0, tzinfo=JST)
+            persisted = evidence_payload(
+                admit_problem_phase(
+                    claims,
+                    claim_id="owner",
+                    phase="update_problem_tree",
+                    scope="scope/owner",
+                    target_revision=None,
+                    now=recorded,
+                    registry_source_sha=source,
+                    paths=["MAIN.md"],
+                ),
+                recorded,
+            )
+            evidence = root / "evidence.json"
+            evidence.write_text(json.dumps(persisted), encoding="utf-8")
+            self._write_claim(
+                claim_dir / "collision.json",
+                claim_id="collision",
+                started="2026-08-22T21:01:00+09:00",
+                heartbeat="2026-08-22T21:01:00+09:00",
+                scope="other/scope",
+                paths=["MAIN.md"],
+            )
+            subprocess.run(["git", "add", "."], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-qm", "current"], cwd=root, check=True)
+            current = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=root, text=True
+            ).strip()
+
+            self.assertEqual(replay_evidence(root, evidence, current), ())
+            hardened = replay_evidence(root, evidence, current, current)
+            self.assertTrue(any("parallel_claim_collision" in item for item in hardened))
+
+            self._write_claim(
+                claim_dir / "collision.json",
+                claim_id="collision",
+                started="2026-08-22T21:01:00+09:00",
+                heartbeat="2026-08-22T21:02:00+09:00",
+                scope="unrelated/scope",
+                paths=["README.md"],
+            )
+            subprocess.run(["git", "add", "."], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-qm", "unrelated"], cwd=root, check=True)
+            unrelated = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=root, text=True
+            ).strip()
+            self.assertEqual(replay_evidence(root, evidence, unrelated, unrelated), ())
+
+            tree = subprocess.check_output(
+                ["git", "show", "-s", "--format=%T", unrelated],
+                cwd=root,
+                text=True,
+            ).strip()
+            disjoint = subprocess.check_output(
+                ["git", "commit-tree", tree],
+                cwd=root,
+                input="disjoint registry history\n",
+                text=True,
+            ).strip()
+            ancestry_errors = replay_evidence(root, evidence, unrelated, disjoint)
+            self.assertTrue(
+                any("does not descend" in item for item in ancestry_errors)
+            )
+
+    @staticmethod
+    def _write_claim(path, *, claim_id, started, heartbeat, scope, paths):
+        payload = {
+            "schema_version": 2,
+            "event_type": "active_session_claim",
+            "claim_id": claim_id,
+            "session_id": f"session-{claim_id}",
+            "started_at_jst": started,
+            "heartbeat_at_jst": heartbeat,
+            "stale_after_minutes": 90,
+            "starting_main_sha": "a" * 40,
+            "starting_agi_gi_rev": 3300,
+            "target_revision": None,
+            "scope": scope,
+            "branch": f"branch-{claim_id}",
+            "reserved_paths": paths,
+            "status": "active",
+            "agi_state": "NOT_AGI",
+        }
+        path.write_text(json.dumps(payload), encoding="utf-8")
 
 
 if __name__ == "__main__":
