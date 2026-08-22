@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T094800+0900-rev279-turn2",
   "started_at_jst": "2026-08-22T09:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T10:50:29+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:55:45+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "15932427fd0b83fa27d50cf83319fc88c75df564",
   "starting_agi_gi_rev": 274,
@@ -12,8 +12,8 @@
   "scope": "crx3/algorithmic-consumers/implicit-relation-parent-outcome-proof-dag",
   "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
   "pull_request": 223,
-  "latest_head_sha": "7b194a3627bcfbb49f5b563d95cde6a326382e69",
-  "latest_observed_main_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
+  "latest_head_sha": "7a0b1669942f9b6d8c509b1eabec023cf5cb0d03",
+  "latest_observed_main_sha": "6de5a2bb9d53a4e24d9d66b93765c982e393179e",
   "reserved_paths": [
     ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
@@ -32,6 +32,8 @@
     "rev282 quotient relation/action invariance and all reserved paths",
     "rev283 SOJ recurrence composition and all reserved paths",
     "rev284 SOJ Johnson terminal admission and all reserved paths",
+    "rev285 SOJ zero-auxiliary terminal accounting and all reserved paths",
+    "rev286 SOJ Johnson terminal cost and all reserved paths",
     "rev273 homogeneous block relation provenance and all reserved paths",
     "rev271 implicit image value-coset proof-DAG and all reserved paths",
     "rev264 primitive-Johnson proof-DAG and all reserved paths",
@@ -40,29 +42,55 @@
     "CRX1/CRX2 active branches, MAIN.md, every sibling claim, branch, PR, workflow, and shared implementation path"
   ],
   "implementation": {
-    "head_sha": "7b194a3627bcfbb49f5b563d95cde6a326382e69",
+    "head_sha": "7a0b1669942f9b6d8c509b1eabec023cf5cb0d03",
     "new_reserved_files_written": 4,
     "reconciled_main_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
+    "reconciliation_commit": "7b194a3627bcfbb49f5b563d95cde6a326382e69",
     "reconciliation_kind": "non-destructive two-parent merge preserving current main plus the four rev279 additive files",
+    "resource_envelope_hardening_commits": [
+      "c4aae2fdcc5fbef1e5483a0f6ac102097ac5a8f2",
+      "7a0b1669942f9b6d8c509b1eabec023cf5cb0d03"
+    ],
+    "resource_envelope_hardening": "rev279 now rejects non-finite, negative, boolean, or malformed external cost/quasipolynomial parameters before the shared proof-DAG validator, preventing NaN/Inf fail-open behavior without modifying the shared validator",
     "semantic_exactness_certified": false,
     "semantic_boundary": "digest-only parent outcome evidence is never promoted to an SI coset; proof coset remains null and proof exact remains false"
   },
   "validation": {
     "pre_reconciliation_exact_head": "733c851778820a90decc43a0ba4ac42bd5790447",
-    "rev279_smoke": {
+    "pre_reconciliation_rev279_smoke": {
       "run_id": 32541698790,
       "conclusion": "success"
     },
-    "general_agi_gi_validation": {
+    "pre_reconciliation_general_agi_gi_validation": {
       "run_id": 32541698775,
       "conclusion": "success"
     },
-    "reconciled_head": "7b194a3627bcfbb49f5b563d95cde6a326382e69",
-    "reconciled_head_automatic_runs_observed": "none_yet",
-    "problem_solving_parallel_admission": {
-      "run_id": 32541698763,
+    "current_head": "7a0b1669942f9b6d8c509b1eabec023cf5cb0d03",
+    "current_rev279_smoke": {
+      "run_id": 32544694199,
+      "conclusion": "success",
+      "tests": 29,
+      "py_compile": "success",
+      "additive_dependency_boundary": "success"
+    },
+    "current_inherited_checks": {
+      "rev238": "success",
+      "rev239": "success",
+      "rev240": "success",
+      "rev241": "success",
+      "rev242": "success",
+      "rev246": "success",
+      "rev253": "success",
+      "rev254": "success"
+    },
+    "current_general_agi_gi_validation": {
+      "run_id": 32544694193,
+      "status": "in_progress"
+    },
+    "current_problem_solving_parallel_admission": {
+      "run_id": 32544694173,
       "conclusion": "failure",
-      "reason": "phase-admission evidence is not yet persisted; admitted evidence is intentionally not fabricated while the canonical registry contains the independently owned non-schema-v2 rev275 claim"
+      "reason": "phase-evidence guard reports no changed admission evidence file and all four rev279 problem-state paths lack admission coverage; evidence is intentionally not fabricated while canonical registry replay is blocked"
     },
     "registry_blocker": {
       "claim_id": "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
@@ -70,8 +98,8 @@
     },
     "resolved_registry_observation": "rev281 has been independently canonicalized by its owner and is no longer a rev279 registry blocker"
   },
-  "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, or tampered evidence without modifying shared solvers or upstream CRX1 branches",
+  "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, tampered, or malformed/non-finite resource evidence without modifying shared solvers or upstream CRX1 branches",
   "non_interference": "Only rev279 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
-  "status": "active_reconciled_functional_and_general_green_admission_blocked_by_rev275_registry_format",
+  "status": "active_hardened_smoke_green_general_validation_in_progress_admission_blocked_by_rev275_registry_format",
   "agi_state": "NOT_AGI"
 }
