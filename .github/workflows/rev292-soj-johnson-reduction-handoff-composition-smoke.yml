@@ -1,0 +1,45 @@
+name: Rev292 Johnson reduction handoff composition smoke
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/rev292-soj-johnson-reduction-handoff-composition-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev292-soj-johnson-reduction-handoff-composition-20260822T123900JST-b743c9e1-attempt-solution.json"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev292-soj-johnson-reduction-handoff-composition-20260822T123900JST-b743c9e1-publish.json"
+      - "automation_runs/2026-08-22_1239_JST/REV292_SOJ_JOHNSON_REDUCTION_HANDOFF_COMPOSITION.md"
+      - "automation_runs/2026-08-22_1239_JST/corrected_soj_johnson_reduction_handoff_composition_v1.py"
+      - "automation_runs/2026-08-22_1239_JST/test_corrected_soj_johnson_reduction_handoff_composition_rev292.py"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Preview deterministic attempt-solution admission
+        run: |
+          set +e
+          python3 automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev292-soj-johnson-reduction-handoff-composition-20260822T123900JST-b743c9e1 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-johnson-relational-reduction-handoff-composition \
+            --target-revision 292 \
+            --now 2026-08-22T12:58:39+09:00 \
+            --path .github/workflows/rev292-soj-johnson-reduction-handoff-composition-smoke.yml \
+            --path automation_runs/2026-08-22_1239_JST/REV292_SOJ_JOHNSON_REDUCTION_HANDOFF_COMPOSITION.md \
+            --path automation_runs/2026-08-22_1239_JST/corrected_soj_johnson_reduction_handoff_composition_v1.py \
+            --path automation_runs/2026-08-22_1239_JST/test_corrected_soj_johnson_reduction_handoff_composition_rev292.py
+          rc=$?
+          echo "admission_preview_exit_code=${rc}"
+          exit 0
+      - name: Compile rev292 files
+        run: |
+          python3 -m py_compile automation_runs/2026-08-22_1239_JST/corrected_soj_johnson_reduction_handoff_composition_v1.py automation_runs/2026-08-22_1239_JST/test_corrected_soj_johnson_reduction_handoff_composition_rev292.py
+      - name: Run rev292 regressions
+        run: python3 automation_runs/2026-08-22_1239_JST/test_corrected_soj_johnson_reduction_handoff_composition_rev292.py
