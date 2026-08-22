@@ -1,0 +1,92 @@
+name: rev951 homogeneous block quotient SI smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1548_JST/homogeneous_block_quotient_si_v1.py'
+      - 'automation_runs/2026-08-22_1548_JST/test_homogeneous_block_quotient_si_rev951.py'
+      - 'automation_runs/2026-08-22_1548_JST/REV951_HOMOGENEOUS_BLOCK_QUOTIENT_SI.md'
+      - '.github/workflows/rev951-homogeneous-block-quotient-si-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev951 terminal and regressions
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1548_JST/homogeneous_block_quotient_si_v1.py \
+            automation_runs/2026-08-22_1548_JST/test_homogeneous_block_quotient_si_rev951.py
+      - name: Run inherited rev274/rev275 and focused rev951 regressions
+        run: |
+          python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py -v
+          python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py -v
+          python automation_runs/2026-08-22_1548_JST/test_homogeneous_block_quotient_si_rev951.py -v
+      - name: Reject sibling branch-only dependencies
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('automation_runs/2026-08-22_1548_JST/homogeneous_block_quotient_si_v1.py').read_text()
+          forbidden = (
+              'joint_block_reduction_compatibility',
+              'block_action_preimage_coset_rev278',
+              'implicit_relation_parent_outcome_proof_dag',
+              'soj_recursive_production',
+              'block_action_kernel_proof_dag_consumer_v1',
+          )
+          hits = [name for name in forbidden if name in text]
+          if hits:
+              raise SystemExit(f'sibling dependency detected: {hits}')
+          PY
+      - name: Preview canonical attempt-solution admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b \
+            --phase attempt_solution \
+            --scope crx1/homogeneous-block-reduction/bounded-quotient-relation-si-terminal \
+            --target-revision 951 \
+            --path .github/workflows/rev951-homogeneous-block-quotient-si-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-publish.json \
+            --path automation_runs/2026-08-22_1548_JST/REV951_HOMOGENEOUS_BLOCK_QUOTIENT_SI.md \
+            --path automation_runs/2026-08-22_1548_JST/homogeneous_block_quotient_si_v1.py \
+            --path automation_runs/2026-08-22_1548_JST/test_homogeneous_block_quotient_si_rev951.py \
+            --output /tmp/rev951-attempt-solution.json
+          cat /tmp/rev951-attempt-solution.json
+      - name: Preview canonical publish admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b \
+            --phase publish \
+            --scope crx1/homogeneous-block-reduction/bounded-quotient-relation-si-terminal \
+            --target-revision 951 \
+            --path .github/workflows/rev951-homogeneous-block-quotient-si-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-publish.json \
+            --path automation_runs/2026-08-22_1548_JST/REV951_HOMOGENEOUS_BLOCK_QUOTIENT_SI.md \
+            --path automation_runs/2026-08-22_1548_JST/homogeneous_block_quotient_si_v1.py \
+            --path automation_runs/2026-08-22_1548_JST/test_homogeneous_block_quotient_si_rev951.py \
+            --output /tmp/rev951-publish.json
+          cat /tmp/rev951-publish.json
+      - name: Verify reserved diff remains additive
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- \
+            automation_runs/2026-08-22_1548_JST/homogeneous_block_quotient_si_v1.py \
+            automation_runs/2026-08-22_1548_JST/test_homogeneous_block_quotient_si_rev951.py \
+            automation_runs/2026-08-22_1548_JST/REV951_HOMOGENEOUS_BLOCK_QUOTIENT_SI.md \
+            .github/workflows/rev951-homogeneous-block-quotient-si-smoke.yml \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b-publish.json
