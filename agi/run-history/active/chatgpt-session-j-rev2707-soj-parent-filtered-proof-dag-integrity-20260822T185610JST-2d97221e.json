@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e",
   "session_id": "chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST",
   "started_at_jst": "2026-08-22T18:56:10+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:03:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:04:20+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2d97221e6f00c3c27ea92cecd6f4302ec58a741c",
   "starting_agi_gi_rev": 1600,
@@ -62,8 +62,7 @@
     "dedicated_workflow_run": 32566564040,
     "problem_solving_parallel_admission_run": 32566564081,
     "problem_solving_parallel_admission": "success",
-    "inherited_rev238_rev239_rev240_rev241_rev242_rev250_rev253": "success",
-    "inherited_rev246_rev254": "natural runs still settling at heartbeat time",
+    "inherited_rev238_rev239_rev240_rev241_rev242_rev246_rev250_rev253_rev254": "all natural runs success",
     "run_start_history_integrity": "external failure on unresolved historical starting_main_sha 34c9ca6eafc11a0737fbacb70fd0fc244bea6973; owned by separate run-start-history hardening scope; not modified here",
     "manual_rerun_or_cancel": false
   },
