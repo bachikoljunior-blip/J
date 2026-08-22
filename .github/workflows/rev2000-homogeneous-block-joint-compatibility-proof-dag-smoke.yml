@@ -1,0 +1,43 @@
+name: rev2000 homogeneous block joint compatibility proof-DAG smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py"
+      - "automation_runs/2026-08-22_1717_JST/test_homogeneous_block_joint_compatibility_proof_dag_rev2000.py"
+      - "automation_runs/2026-08-22_1717_JST/REV2000_HOMOGENEOUS_BLOCK_JOINT_COMPATIBILITY_PROOF_DAG.md"
+      - ".github/workflows/rev2000-homogeneous-block-joint-compatibility-proof-dag-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  rev2000-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run focused rev2000 regressions
+        run: >-
+          python -m unittest
+          automation_runs/2026-08-22_1717_JST/test_homogeneous_block_joint_compatibility_proof_dag_rev2000.py
+          -v
+
+      - name: Compile rev2000 implementation and tests
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py
+          automation_runs/2026-08-22_1717_JST/test_homogeneous_block_joint_compatibility_proof_dag_rev2000.py
+
+      - name: Enforce main-integrated dependency boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py"
+          grep -q "homogeneous_block_relation_provenance_v1" "${file}"
+          grep -q "homogeneous_block_action_provenance_v1" "${file}"
+          grep -q "homogeneous_block_action_kernel_v1" "${file}"
+          grep -q "proof_dag_accounting_v1" "${file}"
+          ! grep -Eq "joint_block_reduction_compatibility_v1|homogeneous_block_quotient_si|original_domain.*preimage|rev1800|rev276|rev278" "${file}"
