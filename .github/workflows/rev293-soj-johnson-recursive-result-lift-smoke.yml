@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           target=automation_runs/2026-08-22_1247_JST/corrected_soj_johnson_recursive_result_lift_v1.py
-          ! grep -Eq '2026-08-22_(1148|1155|1239|1243)_JST|corrected_soj_johnson_relational_reduction_v1|corrected_soj_larger_ground_recursive_handoff_v1' "${target}"
+          ! grep -Eq '2026-08-22_(1148|1155|1239|1243|1251|1254)_JST|corrected_soj_johnson_relational_reduction_v1|corrected_soj_larger_ground_recursive_handoff_v1' "${target}"
           ! grep -Eq '^from automation_runs|^import automation_runs|sys\.path' "${target}"
 
       - name: Preview canonical attempt-solution admission
@@ -71,3 +71,14 @@ jobs:
             --path automation_runs/2026-08-22_1247_JST/test_corrected_soj_johnson_recursive_result_lift_rev293.py \
             --output /tmp/rev293-publish.json
           cat /tmp/rev293-publish.json
+
+      - name: Retain exact phase-admission evidence
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev293-phase-admission-evidence-${{ github.run_id }}
+          path: |
+            /tmp/rev293-attempt.json
+            /tmp/rev293-publish.json
+          if-no-files-found: error
+          retention-days: 1
