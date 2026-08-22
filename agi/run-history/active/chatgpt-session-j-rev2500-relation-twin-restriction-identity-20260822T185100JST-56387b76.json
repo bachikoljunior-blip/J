@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev2500-relation-twin-restriction-identity-20260822T185100JST-56387b76",
   "session_id": "chatgpt-session-j-recurring-continuation-rev2500-20260822T185100+0900-turn1",
   "started_at_jst": "2026-08-22T18:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T18:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:52:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "56387b768fdc322a27dc738f0d95733e0de76098",
   "starting_agi_gi_rev": 1600,
@@ -20,6 +20,7 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev2500-relation-twin-restriction-identity-20260822T185100JST-56387b76-publish.json"
   ],
   "parallel_exclusions": [
+    "rev2500 parent-filtered proof-DAG integrity claim 95c19ec6f54963f8840fde167c26aea890ce1dd3 and all reserved paths",
     "rev2400 corrected-SOJ parent-filtered result accounting coherence claim and all reserved paths",
     "rev2300 homogeneous-block structural quotient coherence claim and all reserved paths",
     "rev2200 corrected-SOJ parent-filtered child result claim and all reserved paths",
@@ -41,6 +42,9 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
     "fail_closed_on_schema_digest_resource_outcome_or_identity_drift": true
   },
-  "status": "active_claimed_pre_implementation",
+  "status": "superseded_collision_before_implementation",
+  "superseded_by": "chatgpt-session-j-rev2500-soj-parent-filtered-proof-dag-integrity-20260822T185120JST-4f4da78f",
+  "collision_detected_from_commit": "95c19ec6f54963f8840fde167c26aea890ce1dd3",
+  "implementation_started": false,
   "agi_state": "NOT_AGI"
 }
