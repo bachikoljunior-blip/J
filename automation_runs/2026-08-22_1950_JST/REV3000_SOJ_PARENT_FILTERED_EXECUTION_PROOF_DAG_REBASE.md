@@ -31,6 +31,10 @@ The adapter rejects malformed hashes, result-identity drift, inconsistent exact-
 
 rev3000 also does not construct the parent→child semantic reduction, does not perform recurrence accounting, does not import or alter rev2200/rev1400, and does not close corrected Split-or-Johnson/GI. AGI state remains `NOT_AGI`.
 
-## Validation plan
+## Validation
 
-The focused suite preserves the 12 rev2500 regression cases: nonempty binding and replay, projection false-positive filtering, exact-empty implication, result/digest tampering, reduction/child-result mismatch, action-degree mismatch, unstable proof identity, malformed parent coset shape, and deterministic binding identity. The dedicated workflow must additionally obtain canonical `attempt_solution` and `publish` admissions from the fresh source-branch registry and persist those evidence files only after the focused smoke is green.
+The focused suite preserves the 12 rev2500 regression cases: nonempty binding and replay, projection false-positive filtering, exact-empty implication, result/digest tampering, reduction/child-result mismatch, action-degree mismatch, unstable proof identity, malformed parent coset shape, and deterministic binding identity. `py_compile` and all 12 focused cases passed on the first rev3000 implementation head.
+
+The first rev3000 PR event then failed closed before evidence publication because the newly created main-side claim omitted the required `branch` field and therefore loaded as non-schema-v2. Only this session's rev3000 claim was corrected. The corrected main claim was merged normally into the isolated rev3000 branch without force-pushing or modifying any sibling resource.
+
+After that correction, the source-branch workflow generated both reserved canonical phase-evidence files. The persisted `attempt_solution` and `publish` records each report `admitted: true`, `conflicts: []`, active ownership by this rev3000 claim, and target revision 3000. The resulting evidence commits were made by the branch's own GitHub Actions workflow. This documentation commit records that recovery and deliberately creates a normal user-authored branch update so PR workflows can validate the exact evidence-bearing head without manually rerunning or cancelling any workflow.
