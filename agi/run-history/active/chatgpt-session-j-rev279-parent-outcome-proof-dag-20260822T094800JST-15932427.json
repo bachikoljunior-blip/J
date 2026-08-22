@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T094800+0900-rev279-turn2",
   "started_at_jst": "2026-08-22T09:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T11:58:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:04:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "15932427fd0b83fa27d50cf83319fc88c75df564",
   "starting_agi_gi_rev": 274,
@@ -12,8 +12,8 @@
   "scope": "crx3/algorithmic-consumers/implicit-relation-parent-outcome-proof-dag",
   "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
   "pull_request": 223,
-  "latest_head_sha": "3ab80cb485bd376ea730fbec4dda3e7ee8da8f86",
-  "latest_observed_main_sha": "de687d5253a3a31e04f0bece18a3a356e93c624a",
+  "latest_head_sha": "27152cd5130106c9a9610161874f8b5edc94225e",
+  "latest_observed_main_sha": "52e669c371c7435f86a3dba6bd0e04e9e5ccc1a0",
   "reserved_paths": [
     ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
@@ -31,12 +31,11 @@
     "every sibling claim, branch, PR, workflow, and shared implementation path"
   ],
   "implementation": {
-    "head_sha": "3ab80cb485bd376ea730fbec4dda3e7ee8da8f86",
+    "head_sha": "27152cd5130106c9a9610161874f8b5edc94225e",
     "problem_state_files": 4,
-    "phase_evidence_files_persisted": 2,
-    "reconciled_main_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
-    "reconciliation_commit": "7b194a3627bcfbb49f5b563d95cde6a326382e69",
-    "reconciliation_kind": "non-destructive two-parent merge preserving then-current main plus rev279 additive files",
+    "phase_evidence_files_persisted": 3,
+    "last_non_destructive_main_reconciliation_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
+    "last_non_destructive_main_reconciliation_commit": "7b194a3627bcfbb49f5b563d95cde6a326382e69",
     "resource_envelope_hardening_commits": [
       "c4aae2fdcc5fbef1e5483a0f6ac102097ac5a8f2",
       "7a0b1669942f9b6d8c509b1eabec023cf5cb0d03"
@@ -49,34 +48,39 @@
     "attempt_solution": {
       "path": "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
       "admitted": true,
-      "replay_run": 32547473788,
-      "replay_conclusion": "success"
+      "conflicts": [],
+      "repository_replay_run": 32547831478,
+      "repository_replay_conclusion": "success"
     },
     "publish": {
       "path": "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-publish.json",
       "admitted": true,
-      "registry_source_sha": "3843133779ad9dc03d646f68c783ebb341c39f6f",
-      "registry_digest": "sha256:9d433473510bde1415a8bd27bee4190a34c4a009342f772a6089b47f22d092b1",
-      "replay_run": 32547648877,
-      "replay_conclusion": "success"
+      "conflicts": [],
+      "repository_replay_run": 32547831478,
+      "repository_replay_conclusion": "success"
     },
     "merge": {
       "path": "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-merge.json",
-      "status": "reserved_not_yet_executed"
+      "admitted": true,
+      "conflicts": [],
+      "registry_source_sha": "b6b06cae46f62a7bb35b9e4f18ab12dde6745bca",
+      "registry_digest": "sha256:84a11e3cfd30201ec7f5a2ca8961db1de27a1d1106c2a89ed6f9ebcd710e25d0",
+      "repository_replay_run": 32547831478,
+      "repository_replay_conclusion": "success"
     }
   },
   "validation": {
-    "functional_exact_head": "3ab80cb485bd376ea730fbec4dda3e7ee8da8f86",
+    "functional_exact_head": "27152cd5130106c9a9610161874f8b5edc94225e",
     "rev279_smoke": {
-      "run_id": 32547648856,
+      "run_id": 32547831431,
       "conclusion": "success",
       "tests": 29,
       "py_compile": "success",
       "additive_dependency_boundary": "success",
-      "attempt_and_publish_preview": "success"
+      "attempt_publish_merge_preview": "success"
     },
     "problem_solving_parallel_admission": {
-      "run_id": 32547648877,
+      "run_id": 32547831478,
       "conclusion": "success",
       "evidence_replay": "success"
     },
@@ -86,19 +90,26 @@
       "rev240": "success",
       "rev241": "success",
       "rev242": "success",
+      "rev246": "success",
       "rev250": "success",
       "rev253": "success",
-      "rev254": "success",
-      "rev246": "in_progress"
+      "rev254": "success"
     },
     "current_general_agi_gi_validation": {
-      "run_id": 32547648863,
-      "status": "queued",
+      "run_id": 32547831457,
+      "status": "in_progress",
       "conclusion": null
     }
   },
+  "integration_watch": {
+    "main_advanced_after_merge_evidence": true,
+    "observed_main_sha": "52e669c371c7435f86a3dba6bd0e04e9e5ccc1a0",
+    "main_advance": "rev288 merged independently after rev279 merge evidence snapshot",
+    "shared_dependency_owner_active": "rev289 shared proof-DAG envelope hardening remains separately owned and unmerged",
+    "policy": "do not chase sibling branches destructively; keep rev279 draft until exact current-base/shared-dependency state can be revalidated without touching siblings"
+  },
   "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, tampered, or malformed/non-finite resource evidence without modifying shared solvers or upstream CRX1 branches",
   "non_interference": "Only rev279 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
-  "status": "active_attempt_publish_green_merge_evidence_reserved_general_validation_pending",
+  "status": "active_all_phase_admissions_green_exact_head_general_validation_in_progress_main_advanced_shared_dependency_watch",
   "agi_state": "NOT_AGI"
 }
