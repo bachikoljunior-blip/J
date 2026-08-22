@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-phase-evidence-main-push-atomicity-20260822T211952JST-7ee7756b",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
   "started_at_jst": "2026-08-22T21:19:52+09:00",
-  "heartbeat_at_jst": "2026-08-22T21:23:36+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:25:39+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "7ee7756ba501a38439ecfb4c628519e835458be3",
   "starting_agi_gi_rev": 3300,
@@ -47,7 +47,7 @@
     ],
     "decision": "reuse the same guard with event-specific refs instead of creating a second verifier"
   },
-  "status": "pr_open_ci_pending",
+  "status": "merge_admitted",
   "agi_state": "NOT_AGI",
   "pull_request": 293,
   "exact_head_sha": "b5101243f1953e232b947c2199ea799755eaa576",
@@ -55,6 +55,8 @@
     "local_automation_tests": "81/81 passed",
     "diff_check": "passed",
     "phase_admission": "admitted=true; conflicts=[]",
-    "exact_head_workflows": "pending"
+    "exact_head_workflows": "12/12 success",
+    "current_registry_readmission": "valid against main de90ced5a325cf56144677718e710e7284491934",
+    "claim_registry": "valid; collisions=0"
   }
 }
