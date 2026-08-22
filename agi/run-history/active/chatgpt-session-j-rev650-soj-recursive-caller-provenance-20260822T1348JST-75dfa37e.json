@@ -1,0 +1,48 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e",
+  "session_id": "chatgpt-session-j-continuation-rev650-20260822T1348+0900-75dfa37e",
+  "started_at_jst": "2026-08-22T13:48:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T13:48:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "16c8d0a55b81bee5fb2b14eb3b5c0bb94de08950",
+  "starting_agi_gi_rev": 266,
+  "target_revision": 650,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-caller-result-provenance-binding",
+  "branch": "agi-gi-rev650-soj-recursive-caller-provenance-session-20260822-1348",
+  "pull_request": null,
+  "pull_request_state": "not_created",
+  "latest_head_sha": null,
+  "intent": "add a file-disjoint fail-closed compatibility binder between the public larger-ground recursive result-lift/accounting contracts (rev293/rev340) and the public rev400 production-caller binding: independently replay rev400's caller-binding digest, require strict certified/exact/complete upstream result and accounting evidence, require outcome/reduction/result-lift agreement, and bind rev400's recursive branch proof identities to the upstream producer digests without asserting main reachability, executing recursive SI, importing branch-only implementations, or overlapping rev600's main-provenance gate",
+  "reserved_paths": [
+    ".github/workflows/rev650-soj-recursive-caller-provenance-smoke.yml",
+    "automation_runs/2026-08-22_1348_JST/REV650_SOJ_RECURSIVE_CALLER_PROVENANCE.md",
+    "automation_runs/2026-08-22_1348_JST/soj_recursive_caller_provenance_v1.py",
+    "automation_runs/2026-08-22_1348_JST/test_soj_recursive_caller_provenance_rev650.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev293 Johnson recursive result lift / PR #241 and all of its reserved paths",
+    "rev340 recursive result/accounting binding / PR #243 and all of its reserved paths",
+    "this session's rev360 Johnson construction-cost binding / PR #245 and all of its reserved paths",
+    "rev400 production caller binding / PR #246 and all of its reserved paths",
+    "rev500 caller replay envelope / PR #247 and all of its reserved paths",
+    "rev600 production main-provenance gate and all of its reserved paths",
+    "rev620 small-order production proof-DAG and all of its reserved paths",
+    "all sibling claims, branches, PRs, workflows, MAIN.md, CRX scopes, shared coordination implementation, and shared proof-DAG implementations"
+  ],
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_branch_only_rev293_rev340_rev400_rev500_rev600_implementation": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
+  },
+  "validation": {
+    "state": "claimed_not_yet_implemented"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
