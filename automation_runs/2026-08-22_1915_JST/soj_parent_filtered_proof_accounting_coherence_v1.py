@@ -77,6 +77,13 @@ def _strict_int(value: Any, name: str, *, minimum: int = 0) -> int:
     return value
 
 
+def _strict_schema_version(value: Any, name: str) -> int:
+    version = _strict_int(value, name, minimum=1)
+    if version != SCHEMA_VERSION:
+        raise ValueError(f"{name} mismatch")
+    return version
+
+
 def _strict_str(value: Any, name: str) -> str:
     if type(value) is not str:
         raise ValueError(f"{name} must be a literal string")
@@ -118,12 +125,31 @@ def _literal_json(value: Any, name: str) -> Any:
     raise ValueError(f"{name} must contain only literal JSON values")
 
 
+def _strict_permutation(value: Any, *, degree: int, name: str) -> tuple[int, ...]:
+    if type(value) is not list or len(value) != degree:
+        raise ValueError(f"{name} must be a literal permutation list of degree {degree}")
+    permutation = tuple(_strict_int(item, f"{name}[{index}]") for index, item in enumerate(value))
+    if set(permutation) != set(range(degree)):
+        raise ValueError(f"{name} must be a permutation of 0..{degree - 1}")
+    return permutation
+
+
+def _compose(p: tuple[int, ...], q: tuple[int, ...]) -> tuple[int, ...]:
+    return tuple(q[p[index]] for index in range(len(p)))
+
+
+def _inverse(p: tuple[int, ...]) -> tuple[int, ...]:
+    out = [0] * len(p)
+    for source, target in enumerate(p):
+        out[target] = source
+    return tuple(out)
+
+
 def _normalize_proof(proof_snapshot: Any, replay_verified: bool) -> dict[str, Any]:
     if replay_verified is not True or type(replay_verified) is not bool:
         raise ValueError("rev2707-style proof-DAG certificate must be independently replay-verified")
     proof = _literal_dict(proof_snapshot, "proof_snapshot")
-    if _field(proof, "schema_version", "proof") != SCHEMA_VERSION:
-        raise ValueError("proof.schema_version mismatch")
+    _strict_schema_version(_field(proof, "schema_version", "proof"), "proof.schema_version")
     if _strict_str(_field(proof, "status", "proof"), "proof.status") != PROOF_STATUS:
         raise ValueError("proof.status mismatch")
     for flag in ("certified", "exact", "complete"):
@@ -150,8 +176,15 @@ def _normalize_proof(proof_snapshot: Any, replay_verified: bool) -> dict[str, An
     proof_dag_identity = _digest(_field(proof, "proof_dag_identity", "proof"), "proof.proof_dag_identity")
     if _canonical_digest(dag) != proof_dag_identity:
         raise ValueError("proof.proof_dag_identity replay failed")
-    if dag.get("schema_version") != SCHEMA_VERSION or dag.get("kind") != "parent_filtered_result_proof_dag_integrity_v1":
-        raise ValueError("proof.proof_dag schema/kind mismatch")
+    _strict_schema_version(dag.get("schema_version"), "proof.proof_dag.schema_version")
+    if dag.get("kind") != "parent_filtered_result_proof_dag_integrity_v1":
+        raise ValueError("proof.proof_dag kind mismatch")
+    expected_dag_keys = {
+        "schema_version", "kind", "source_status", "result_identity", "action_degree",
+        "candidate_count", "accepted_count", "work_bound", "nodes", "edges",
+    }
+    if set(dag) != expected_dag_keys:
+        raise ValueError("proof.proof_dag fields drift")
     for name, expected in (("source_status", source_status), ("result_identity", parent_result_identity), ("action_degree", action_degree), ("candidate_count", candidate_count), ("accepted_count", accepted_count)):
         if dag.get(name) != expected or type(dag.get(name)) is not type(expected):
             raise ValueError(f"proof.proof_dag {name} drift")
@@ -179,6 +212,8 @@ def _normalize_proof(proof_snapshot: Any, replay_verified: bool) -> dict[str, An
         node = node_by_id.get(node_id)
         if node is None or node.get("kind") != kind:
             raise ValueError(f"proof missing canonical {node_id}")
+        if set(node) != {"id", "kind", "identity"}:
+            raise ValueError(f"proof {node_id} fields drift")
         identities[kind] = _digest(node.get("identity"), f"proof {node_id}.identity")
     if identities["parent_filtered_result"] != parent_result_identity:
         raise ValueError("proof parent-filtered lineage identity drift")
@@ -187,10 +222,50 @@ def _normalize_proof(proof_snapshot: Any, replay_verified: bool) -> dict[str, An
     if outcome_kind == "nonempty":
         expected_node_ids.add("witness:representative")
         expected_edges.add(("lineage:parent_filtered_result", "witness:representative"))
+        representative_node = node_by_id.get("witness:representative")
+        if representative_node is None or representative_node.get("kind") != "right_coset_representative":
+            raise ValueError("proof missing canonical representative witness")
+        if set(representative_node) != {"id", "kind", "identity", "permutation"}:
+            raise ValueError("proof representative witness fields drift")
+        representative = _strict_permutation(
+            representative_node.get("permutation"),
+            degree=action_degree,
+            name="proof representative witness permutation",
+        )
+        if _digest(representative_node.get("identity"), "proof representative witness identity") != _canonical_digest(("representative", representative)):
+            raise ValueError("proof representative witness identity replay failed")
+        stabilizer_elements: list[tuple[int, ...]] = []
         for index in range(accepted_count):
             node_id = f"witness:stabilizer:{index:06d}"
             expected_node_ids.add(node_id)
             expected_edges.add(("witness:representative", node_id))
+            node = node_by_id.get(node_id)
+            if node is None or node.get("kind") != "parent_stabilizer_element":
+                raise ValueError(f"proof missing canonical {node_id}")
+            if set(node) != {"id", "kind", "identity", "permutation"}:
+                raise ValueError(f"proof {node_id} fields drift")
+            element = _strict_permutation(
+                node.get("permutation"),
+                degree=action_degree,
+                name=f"proof {node_id} permutation",
+            )
+            if _digest(node.get("identity"), f"proof {node_id}.identity") != _canonical_digest(("stabilizer_element", element)):
+                raise ValueError(f"proof {node_id} identity replay failed")
+            stabilizer_elements.append(element)
+        if stabilizer_elements != sorted(set(stabilizer_elements)):
+            raise ValueError("proof stabilizer witnesses must be unique and canonically sorted")
+        stabilizer_set = set(stabilizer_elements)
+        identity = tuple(range(action_degree))
+        if identity not in stabilizer_set:
+            raise ValueError("proof stabilizer witnesses must contain the identity")
+        for element in stabilizer_elements:
+            if _inverse(element) not in stabilizer_set:
+                raise ValueError("proof stabilizer witnesses are not inverse closed")
+            for other in stabilizer_elements:
+                if _compose(element, other) not in stabilizer_set:
+                    raise ValueError("proof stabilizer witnesses are not composition closed")
+        if len({_compose(representative, element) for element in stabilizer_elements}) != accepted_count:
+            raise ValueError("proof representative/stabilizer reconstruction is not injective")
     if set(node_by_id) != expected_node_ids:
         raise ValueError("proof carries missing or unexpected proof-DAG nodes")
     actual_edges: set[tuple[str, str]] = set()
@@ -208,8 +283,7 @@ def _normalize_accounting(accounting_snapshot: Any, replay_verified: bool) -> di
     if replay_verified is not True or type(replay_verified) is not bool:
         raise ValueError("rev2600-style accounting certificate must be independently replay-verified")
     account = _literal_dict(accounting_snapshot, "accounting_snapshot")
-    if _field(account, "schema_version", "accounting") != SCHEMA_VERSION:
-        raise ValueError("accounting.schema_version mismatch")
+    _strict_schema_version(_field(account, "schema_version", "accounting"), "accounting.schema_version")
     if _strict_str(_field(account, "status", "accounting"), "accounting.status") != ACCOUNTING_STATUS:
         raise ValueError("accounting.status mismatch")
     for flag in ("certified", "exact", "complete"):

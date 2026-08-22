@@ -45,11 +45,22 @@ def make_pair(*, empty=False):
         {"from": "lineage:child_result", "to": "lineage:parent_filtered_result"},
     ]
     if not empty:
-        nodes.append({"id": "witness:representative", "kind": "right_coset_representative", "identity": sid("rep"), "permutation": [1, 0, 2]})
+        representative = (1, 0, 2)
+        nodes.append({
+            "id": "witness:representative",
+            "kind": "right_coset_representative",
+            "identity": digest(("representative", representative)),
+            "permutation": list(representative),
+        })
         edges.append({"from": "lineage:parent_filtered_result", "to": "witness:representative"})
-        for index, perm in enumerate(([0, 1, 2], [1, 0, 2])):
+        for index, perm in enumerate(((0, 1, 2), (1, 0, 2))):
             node_id = f"witness:stabilizer:{index:06d}"
-            nodes.append({"id": node_id, "kind": "parent_stabilizer_element", "identity": sid(f"stab-{index}"), "permutation": list(perm)})
+            nodes.append({
+                "id": node_id,
+                "kind": "parent_stabilizer_element",
+                "identity": digest(("stabilizer_element", perm)),
+                "permutation": list(perm),
+            })
             edges.append({"from": "witness:representative", "to": node_id})
     nodes.sort(key=lambda item: item["id"])
     edges.sort(key=lambda item: (item["from"], item["to"]))
@@ -129,6 +140,20 @@ class Rev2800ProofAccountingCoherenceTests(unittest.TestCase):
         accounting["reduction_identity"] = StringSubclass(accounting["reduction_identity"])
         self.assertFalse(self.certify(proof, accounting).certified)
 
+    def test_schema_versions_require_strict_integer(self):
+        proof, accounting = make_pair()
+        proof["schema_version"] = True
+        self.assertFalse(self.certify(proof, accounting).certified)
+
+        proof, accounting = make_pair()
+        accounting["schema_version"] = True
+        self.assertFalse(self.certify(proof, accounting).certified)
+
+        proof, accounting = make_pair()
+        proof["proof_dag"]["schema_version"] = True
+        proof["proof_dag_identity"] = digest(proof["proof_dag"])
+        self.assertFalse(self.certify(proof, accounting).certified)
+
     def test_proof_dag_digest_tamper_fails(self):
         proof, accounting = make_pair()
         proof["proof_dag"]["work_bound"] = 65
@@ -146,6 +171,36 @@ class Rev2800ProofAccountingCoherenceTests(unittest.TestCase):
         proof, accounting = make_pair()
         proof["proof_dag"]["edges"][0] = {"from": "lineage:reduction", "to": "lineage:child_instance"}
         proof["proof_dag"]["edges"].sort(key=lambda item: (item["from"], item["to"]))
+        proof["proof_dag_identity"] = digest(proof["proof_dag"])
+        self.assertFalse(self.certify(proof, accounting).certified)
+
+    def test_witness_identity_rehash_cannot_hide_forgery(self):
+        proof, accounting = make_pair()
+        representative = next(node for node in proof["proof_dag"]["nodes"] if node["id"] == "witness:representative")
+        representative["identity"] = sid("forged-representative")
+        proof["proof_dag_identity"] = digest(proof["proof_dag"])
+        self.assertFalse(self.certify(proof, accounting).certified)
+
+    def test_non_permutation_witness_rehash_fails(self):
+        proof, accounting = make_pair()
+        representative = next(node for node in proof["proof_dag"]["nodes"] if node["id"] == "witness:representative")
+        representative["permutation"] = [0, 0, 2]
+        representative["identity"] = digest(("representative", tuple(representative["permutation"])))
+        proof["proof_dag_identity"] = digest(proof["proof_dag"])
+        self.assertFalse(self.certify(proof, accounting).certified)
+
+    def test_non_subgroup_stabilizer_rehash_fails(self):
+        proof, accounting = make_pair()
+        witness = next(node for node in proof["proof_dag"]["nodes"] if node["id"] == "witness:stabilizer:000001")
+        witness["permutation"] = [1, 2, 0]
+        witness["identity"] = digest(("stabilizer_element", tuple(witness["permutation"])))
+        proof["proof_dag_identity"] = digest(proof["proof_dag"])
+        self.assertFalse(self.certify(proof, accounting).certified)
+
+    def test_lineage_node_extra_field_rehash_fails(self):
+        proof, accounting = make_pair()
+        lineage = next(node for node in proof["proof_dag"]["nodes"] if node["id"] == "lineage:reduction")
+        lineage["unexpected"] = 1
         proof["proof_dag_identity"] = digest(proof["proof_dag"])
         self.assertFalse(self.certify(proof, accounting).certified)
 
