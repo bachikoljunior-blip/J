@@ -1,4 +1,5 @@
 import json
+import subprocess
 import tempfile
 import unittest
 from datetime import datetime
@@ -6,6 +7,8 @@ from pathlib import Path
 
 from automation.parallel_claims import ClaimFormatError, load_claim
 from automation.problem_solving_parallel_admission import (
+    _git_canonical_main_source,
+    _git_head,
     admit_problem_phase,
     evidence_payload,
     registry_digest,
@@ -272,6 +275,36 @@ class ProblemSolvingParallelAdmissionTest(unittest.TestCase):
             errors = validate_evidence_payload(evidence)
             self.assertIn("registry_digest does not match embedded active claims", errors)
             self.assertIn("exclusive evidence overlaps a parallel claim", errors)
+
+    def test_canonical_main_source_uses_merge_base_not_synthetic_head(self):
+        with tempfile.TemporaryDirectory() as raw:
+            repo = Path(raw)
+            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            subprocess.run(["git", "config", "user.name", "test"], cwd=repo, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=repo, check=True)
+            (repo / "state").write_text("base\n", encoding="utf-8")
+            subprocess.run(["git", "add", "state"], cwd=repo, check=True)
+            subprocess.run(["git", "commit", "-qm", "base"], cwd=repo, check=True)
+            base = subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=repo, check=True,
+                capture_output=True, text=True,
+            ).stdout.strip()
+            subprocess.run(
+                ["git", "update-ref", "refs/remotes/origin/main", base],
+                cwd=repo, check=True,
+            )
+            (repo / "state").write_text("synthetic\n", encoding="utf-8")
+            subprocess.run(["git", "commit", "-qam", "synthetic"], cwd=repo, check=True)
+
+            self.assertNotEqual(_git_head(repo), base)
+            self.assertEqual(_git_canonical_main_source(repo), base)
+
+    def test_canonical_main_source_fails_without_main_ref(self):
+        with tempfile.TemporaryDirectory() as raw:
+            repo = Path(raw)
+            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            with self.assertRaisesRegex(ClaimFormatError, "canonical main ref is unavailable"):
+                _git_canonical_main_source(repo)
 
 
 if __name__ == "__main__":

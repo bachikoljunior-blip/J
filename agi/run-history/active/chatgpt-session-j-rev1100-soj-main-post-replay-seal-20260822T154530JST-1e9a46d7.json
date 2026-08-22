@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1100-20260822T154530+0900-turn9",
   "started_at_jst": "2026-08-22T15:45:30+09:00",
-  "heartbeat_at_jst": "2026-08-22T15:47:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:52:04+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "1e9a46d7eca9ce98c7d0f97586e49766ee7d736d",
   "starting_agi_gi_rev": 950,
@@ -12,7 +12,7 @@
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-main-post-replay-seal",
   "branch": "agi-gi-rev1100-soj-main-post-replay-seal-session-20260822-1545",
   "pull_request": 257,
-  "latest_head_sha": "63bb6888fc2c414854441188aad7b9c8f2ed1d8e",
+  "latest_head_sha": "020b7705359f66928e85b7477ff7eaff9f22f718",
   "reserved_paths": [
     ".github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml",
     "automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md",
@@ -22,18 +22,19 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-publish.json"
   ],
   "parallel_exclusions": [
-    "repository/main-revision-sync/rev950 and MAIN.md",
-    "rev1000 recursive production post-replay coherence envelope",
-    "rev900 provenance/total-cost binding",
+    "rev1000 recursive production post-replay coherence envelope / PR #256",
+    "rev900 provenance/total-cost binding / PR #254",
     "rev720 production construction-cost provenance",
-    "rev800 total-cost coherence",
-    "rev700 recursive production provenance join",
-    "rev600 main provenance gate",
-    "rev650 recursive caller producer provenance",
-    "rev500 caller replay envelope",
-    "rev400 production caller binding",
-    "rev279 parent-outcome proof-DAG final merge check",
-    "all CRX scopes, shared proof-DAG, recurrence, coordination implementation, sibling branches/PRs/workflows"
+    "rev800 total-cost coherence / PR #252",
+    "rev700 recursive production provenance join / PR #251",
+    "rev600 main provenance gate / PR #250",
+    "rev650 recursive caller producer provenance / PR #249",
+    "rev500 caller replay envelope / PR #247",
+    "rev400 production caller binding / PR #246",
+    "repository-coordination/problem-solving-phase-admission/canonical-main-source",
+    "rev1200 recursive production lineage closure and all reserved paths",
+    "rev1200 homogeneous-block quotient String Isomorphism and all reserved paths",
+    "all CRX scopes, shared proof-DAG, recurrence, coordination implementation, sibling branches/PRs/workflows, MAIN.md and revision ledgers"
   ],
   "intent": "bind an independently replay-verified rev700 main-anchored recursive production provenance join to an independently replay-verified rev1000 post-replay cost/coherence envelope, preserving exact-empty/nonempty semantics and the shared reduction/production provenance identities without importing sibling branch-only implementations",
   "parallel_safety": {
@@ -41,16 +42,38 @@
     "do_not_cancel_or_rerun_unrelated_workflows": true,
     "do_not_rebase_or_force_push": true,
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
-    "fail_closed_on_any_upstream_identity_or_outcome_drift": true
+    "fail_closed_on_any_upstream_identity_or_outcome_drift": true,
+    "revalidate_phase_evidence_after_canonical_main_source_hardening": true
   },
-  "progress": {
-    "draft_pr": 257,
-    "implementation_paths_created": 4,
-    "branch_changed_paths": 4,
-    "branch_only_sibling_imports": "forbidden_by_dedicated_workflow",
-    "canonical_attempt_solution": "pending_natural_ci",
-    "integration_state": "draft_unmerged_while_upstream_rev700_rev1000_remain_independently_owned"
+  "phase_evidence": {
+    "attempt_solution_commit": "6d02797e6a2df740631cbc146d5bfe0bd01cae3b",
+    "attempt_solution_admitted": true,
+    "attempt_solution_conflicts": [],
+    "publish_commit": "ef688c584fa33c4a3bee51544e2aa3955ee00f5d",
+    "publish_admitted": true,
+    "publish_conflicts": []
   },
-  "status": "active_validating_exact_head",
+  "validation": {
+    "exact_head": "020b7705359f66928e85b7477ff7eaff9f22f718",
+    "focused_tests": 15,
+    "focused_tests_result": "success",
+    "py_compile": "success",
+    "branch_only_sibling_import_gate": "success",
+    "reserved_path_diff": "success",
+    "dedicated_workflow": {"run_id": 32557974828, "conclusion": "success"},
+    "parallel_admission_workflow": {"run_id": 32557974787, "conclusion": "success"},
+    "inherited_success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev246", "rev250", "rev253", "rev254"],
+    "all_observed_exact_head_workflows_success": true
+  },
+  "integration_state": {
+    "pull_request_state": "draft_unmerged",
+    "upstream_rev700_pr": 251,
+    "upstream_rev700_state": "open_draft_unmerged",
+    "upstream_rev1000_pr": 256,
+    "upstream_rev1000_state": "open_draft_unmerged",
+    "coordination_hardening": "active_canonical_main_phase_evidence_source",
+    "downstream_rev1200_scopes": "active_file_disjoint_and_explicitly_excluding_rev1100"
+  },
+  "status": "active_green_waiting_upstream_and_coordination_hardening",
   "agi_state": "NOT_AGI"
 }

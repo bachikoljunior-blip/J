@@ -1,0 +1,65 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1400-soj-recursive-production-execution-proof-dag-20260822T161600JST-a8a5b96f",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev1400-20260822T161600+0900-turn4",
+  "started_at_jst": "2026-08-22T16:16:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:27:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "6426b404df8c6ebb38c764c2de17a6f33682efc1",
+  "latest_main_sha_observed": "f81f16fb2bb073669996cefbad58e5db06a1af80",
+  "starting_agi_gi_rev": 950,
+  "target_revision": 1400,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-execution-proof-dag",
+  "branch": "agi-gi-rev1400-soj-recursive-production-execution-proof-dag-session-20260822-1616",
+  "current_pr": 264,
+  "exact_head": "32f943352ae7ae5a4fc7101dbdb5bb2e65702cba",
+  "reserved_paths": [
+    ".github/workflows/rev1400-soj-recursive-production-execution-proof-dag-smoke.yml",
+    "automation_runs/2026-08-22_1616_JST/REV1400_SOJ_RECURSIVE_PRODUCTION_EXECUTION_PROOF_DAG.md",
+    "automation_runs/2026-08-22_1616_JST/soj_recursive_production_execution_proof_dag_v1.py",
+    "automation_runs/2026-08-22_1616_JST/test_soj_recursive_production_execution_proof_dag_rev1400.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1400-soj-recursive-production-execution-proof-dag-20260822T161600JST-a8a5b96f-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1400-soj-recursive-production-execution-proof-dag-20260822T161600JST-a8a5b96f-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev1300 recursive-production lineage closure / PR #263 and all reserved paths",
+    "rev1200 homogeneous-block quotient String-Isomorphism / PR #260 and all reserved paths",
+    "rev1100 main post-replay seal / PR #257 and all reserved paths",
+    "rev1000 recursive-production post-replay coherence / PR #256 and all reserved paths",
+    "rev900 recursive-production provenance/total-cost binding / PR #254 and all reserved paths",
+    "rev800 total-cost coherence / PR #252 and rev700 provenance join / PR #251",
+    "rev293 Johnson recursive-result lift / PR #241 and all reserved paths",
+    "rev291 Johnson recursive handoff / PR #234, rev292 / PR #244, rev340 / PR #243, rev360 / PR #245, rev400 / PR #246",
+    "rev950/rev952 homogeneous-block proof-DAG work and quotient/preimage execution work",
+    "all CRX scopes, MAIN.md, shared proof-DAG/recurrence/coordination implementation, sibling branches/PRs/workflows"
+  ],
+  "intent": "add a file-disjoint fail-closed execution-composition consumer that independently replays the public rev1300 lineage-closure identity and rev293 child-result/result-lift identities, binds them to one concrete exact proof-carrying recursive child execution, reconstructs the exact lifted parent outcome, wraps the recursive edge as a strict aux_shrink recurrence node with the certified construction charge, and submits that concrete execution tree to the main-integrated conservative proof-DAG validator without invoking recursive String Isomorphism or importing sibling branch-only implementations",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_branch_only_rev1300_or_rev293_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_any_upstream_identity_result_or_accounting_drift": true
+  },
+  "depends_on_public_contracts": [
+    "rev1300 RecursiveProductionLineageClosure public certificate shape / PR #263",
+    "rev293 RecursiveGroundExactResultEvidence and JohnsonRecursiveResultLiftCertificate public shapes / PR #241",
+    "main-integrated ProofCarryingCoset, recurrence-v4, and validate_execution_proof_dag contracts"
+  ],
+  "validation": {
+    "dedicated_rev1400_smoke": "success on exact head 32f943352ae7ae5a4fc7101dbdb5bb2e65702cba",
+    "focused_regressions": "13/13 success with py_compile success",
+    "inherited_rev220_proof_dag_regressions": "success inside dedicated smoke after declaring NumPy test dependency",
+    "attempt_solution_evidence": "admitted=true conflicts=[]; canonical main-source generator",
+    "publish_evidence": "admitted=true conflicts=[]; canonical main-source generator",
+    "repository_parallel_admission": "success on exact head 32f943352ae7ae5a4fc7101dbdb5bb2e65702cba",
+    "observed_inherited_checks": "rev238/rev239/rev240/rev241/rev242/rev246/rev250/rev253/rev254 all success on exact head",
+    "workflow_policy": "no unrelated workflow was cancelled, approved, or rerun"
+  },
+  "integration_boundary": "draft-only while rev1300 and rev293 remain independently owned/open; this consumer may certify a supplied concrete child execution and its parent lift but does not execute the child solver or establish corrected Split-or-Johnson, GI, or AGI",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
