@@ -175,6 +175,18 @@ class ProductionCallerBindingTests(unittest.TestCase):
             one["caller_binding_identity"], two["caller_binding_identity"]
         )
 
+    def test_rejects_unsupported_root_fields(self) -> None:
+        value = small()
+        value["result_identity_override"] = h("f")
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(value)
+
+    def test_rejects_unsupported_selected_branch_fields(self) -> None:
+        value = recursive()
+        value["larger_ground_recursive"]["accounted_work_override"] = 0
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(value)
+
 
 if __name__ == "__main__":
     unittest.main()
