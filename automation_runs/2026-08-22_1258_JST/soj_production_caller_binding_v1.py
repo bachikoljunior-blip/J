@@ -9,6 +9,47 @@ _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _ALLOWED_MODES = frozenset({"small_ground_terminal", "larger_ground_recursive"})
 _ALLOWED_STATUSES = frozenset({"exact_nonempty", "exact_empty"})
 _SCHEMA = "corrected-soj-production-caller-binding-v1"
+_ROOT_KEYS = frozenset(
+    {
+        "canonical",
+        "exact",
+        "mode",
+        "transition_identity",
+        "original_instance_identity",
+        "result_status",
+        "result_identity",
+        "small_ground_terminal",
+        "larger_ground_recursive",
+    }
+)
+_SMALL_GROUND_KEYS = frozenset(
+    {
+        "canonical",
+        "exact",
+        "transition_identity",
+        "original_instance_identity",
+        "result_status",
+        "result_identity",
+        "terminal_certificate_identity",
+        "terminal_accounting_identity",
+        "accounting_result_identity",
+        "accounted_work",
+    }
+)
+_LARGER_GROUND_KEYS = frozenset(
+    {
+        "canonical",
+        "exact",
+        "transition_identity",
+        "original_instance_identity",
+        "result_status",
+        "result_identity",
+        "recursive_result_identity",
+        "recursive_accounting_binding_identity",
+        "accounting_result_identity",
+        "accounted_work",
+    }
+)
 
 
 class CallerBindingError(ValueError):
@@ -19,6 +60,17 @@ def _require_mapping(value: Any, key: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise CallerBindingError(f"{key} must be a mapping")
     return value
+
+
+def _reject_unknown_keys(
+    mapping: Mapping[str, Any], allowed: frozenset[str], key: str
+) -> None:
+    unexpected = set(mapping) - allowed
+    if unexpected:
+        raise CallerBindingError(
+            f"{key} contains unsupported fields: "
+            + ", ".join(sorted(str(item) for item in unexpected))
+        )
 
 
 def _strict_true(mapping: Mapping[str, Any], key: str) -> None:
@@ -73,6 +125,7 @@ def bind_production_caller(evidence: Mapping[str, Any]) -> dict[str, Any]:
     """
 
     root = _require_mapping(evidence, "evidence")
+    _reject_unknown_keys(root, _ROOT_KEYS, "evidence")
     _strict_true(root, "canonical")
     _strict_true(root, "exact")
 
@@ -97,6 +150,12 @@ def bind_production_caller(evidence: Mapping[str, Any]) -> dict[str, Any]:
 
     branch_key = mode
     branch = _require_mapping(root.get(branch_key), branch_key)
+    allowed_branch_keys = (
+        _SMALL_GROUND_KEYS
+        if mode == "small_ground_terminal"
+        else _LARGER_GROUND_KEYS
+    )
+    _reject_unknown_keys(branch, allowed_branch_keys, branch_key)
     _strict_true(branch, "canonical")
     _strict_true(branch, "exact")
 
