@@ -70,33 +70,61 @@ def fixture(*, v: int = 5, k: int = 2) -> Evidence:
     )
 
 
+def bind(source: Evidence, *, source_replay_verified: bool = True):
+    return bind_johnson_construction_cost(
+        source,
+        source_replay_verified=source_replay_verified,
+    )
+
+
 def test_success_and_replay() -> None:
     source = fixture()
-    bound = bind_johnson_construction_cost(source)
+    bound = bind(source)
     assert bound.certified, bound.reason
+    assert bound.source_replay_verified
     assert bound.source_construction_work_bound == 145
     assert bound.conservative_construction_cost_bound == 256.0
     assert bound.multiplicative_cost == 256.0
     assert bound.max_multiplicative_cost == 256.0
     assert bound.reduction_identity == source.reduction_identity
     assert bound.cost_binding_identity.startswith("sha256:")
-    assert replay_johnson_construction_cost_binding(bound, source)
+    assert replay_johnson_construction_cost_binding(
+        bound,
+        source,
+        source_replay_verified=True,
+    )
 
 
-def test_source_larger_bound_is_preserved() -> None:
+def test_source_replay_gate_fails_closed() -> None:
+    source = fixture()
+    bound = bind(source, source_replay_verified=False)
+    assert not bound.certified
+    assert "source replay" in bound.reason
+
+
+def test_nonboolean_source_replay_gate_fails_closed() -> None:
+    source = fixture()
+    bound = bind_johnson_construction_cost(
+        source,
+        source_replay_verified=1,  # type: ignore[arg-type]
+    )
+    assert not bound.certified
+
+
+def test_nonunit_source_cost_fails_closed() -> None:
     source = replace(
         fixture(),
-        multiplicative_cost=300.0,
-        max_multiplicative_cost=512.0,
+        multiplicative_cost=2.0,
+        max_multiplicative_cost=2.0,
     )
-    bound = bind_johnson_construction_cost(source)
-    assert bound.certified, bound.reason
-    assert bound.max_multiplicative_cost == 512.0
+    bound = bind(source)
+    assert not bound.certified
+    assert "exactly one" in bound.reason
 
 
 def test_bad_work_formula_fails_closed() -> None:
     source = fixture()
-    bound = bind_johnson_construction_cost(
+    bound = bind(
         replace(source, construction_work_bound=source.construction_work_bound - 1)
     )
     assert not bound.certified
@@ -108,9 +136,7 @@ def test_incomplete_johnson_vertices_fail_closed() -> None:
     vertices = source.canonical_vertex_subsets[:-1] + (
         source.canonical_vertex_subsets[-2],
     )
-    bound = bind_johnson_construction_cost(
-        replace(source, canonical_vertex_subsets=vertices)
-    )
+    bound = bind(replace(source, canonical_vertex_subsets=vertices))
     assert not bound.certified
 
 
@@ -118,9 +144,7 @@ def test_star_mismatch_fails_closed() -> None:
     source = fixture()
     stars = list(source.canonical_ground_stars)
     stars[0], stars[1] = stars[1], stars[0]
-    bound = bind_johnson_construction_cost(
-        replace(source, canonical_ground_stars=tuple(stars))
-    )
+    bound = bind(replace(source, canonical_ground_stars=tuple(stars)))
     assert not bound.certified
     assert "disagrees" in bound.reason
 
@@ -129,60 +153,54 @@ def test_nonpermutation_ground_generator_fails_closed() -> None:
     source = fixture()
     generators = list(source.induced_ground_generators)
     generators[0] = (0, 0, 1, 2, 3)
-    bound = bind_johnson_construction_cost(
-        replace(source, induced_ground_generators=tuple(generators))
-    )
+    bound = bind(replace(source, induced_ground_generators=tuple(generators)))
     assert not bound.certified
     assert "not a permutation" in bound.reason
 
 
 def test_transport_flag_failure_fails_closed() -> None:
-    bound = bind_johnson_construction_cost(
-        replace(fixture(), solution_transport_certified=False)
-    )
+    bound = bind(replace(fixture(), solution_transport_certified=False))
     assert not bound.certified
     assert "transport obligation" in bound.reason
 
 
 def test_wrong_source_degree_fails_closed() -> None:
     source = fixture()
-    bound = bind_johnson_construction_cost(
+    bound = bind(
         replace(source, source_action_degree=source.source_action_degree + 1)
     )
     assert not bound.certified
 
 
 def test_bad_reduction_identity_fails_closed() -> None:
-    bound = bind_johnson_construction_cost(
-        replace(fixture(), reduction_identity="not-a-digest")
-    )
+    bound = bind(replace(fixture(), reduction_identity="not-a-digest"))
     assert not bound.certified
 
 
 def test_source_cost_bound_failure_fails_closed() -> None:
-    bound = bind_johnson_construction_cost(
+    bound = bind(
         replace(fixture(), multiplicative_cost=2.0, max_multiplicative_cost=1.0)
     )
     assert not bound.certified
 
 
 def test_wrong_schema_fails_closed() -> None:
-    bound = bind_johnson_construction_cost(replace(fixture(), schema_version=2))
+    bound = bind(replace(fixture(), schema_version=2))
     assert not bound.certified
 
 
 def test_wrong_child_measure_fails_closed() -> None:
     source = fixture()
-    bound = bind_johnson_construction_cost(
-        replace(source, child_ground_size=source.child_ground_size + 1)
-    )
+    bound = bind(replace(source, child_ground_size=source.child_ground_size + 1))
     assert not bound.certified
 
 
 if __name__ == "__main__":
     tests = [
         test_success_and_replay,
-        test_source_larger_bound_is_preserved,
+        test_source_replay_gate_fails_closed,
+        test_nonboolean_source_replay_gate_fails_closed,
+        test_nonunit_source_cost_fails_closed,
         test_bad_work_formula_fails_closed,
         test_incomplete_johnson_vertices_fail_closed,
         test_star_mismatch_fails_closed,
