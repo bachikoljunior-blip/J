@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "event_type": "problem_solving_phase_admission",
+  "recorded_at_jst": "2026-08-22T09:21:35+09:00",
+  "phase": "attempt_solution",
+  "admitted": true,
+  "mode": "exclusive",
+  "scope": "crx1/homogeneous-block-reduction/group-block-action-equivariance-certificate",
+  "target_revision": 274,
+  "paths": [
+    ".github/workflows/rev274-block-action-provenance-smoke.yml",
+    "automation_runs/2026-08-19_0851_JST/REV274_BLOCK_ACTION_PROVENANCE.md",
+    "automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py"
+  ],
+  "registry_source_sha": "c1f32018f97f19e33c805a0c7f228a846319c5b7",
+  "registry_digest": "sha256:47caa588fa371da7e3f21cd8c99ff6cc9faa981efcdbe6d89e3d5451d599a1ec",
+  "own_claim": {
+    "claim_id": "chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6",
+    "scope": "crx1/homogeneous-block-reduction/group-block-action-equivariance-certificate",
+    "target_revision": 274,
+    "branch": "agi-gi-rev274-block-action-provenance-session-20260822-0912",
+    "heartbeat_at_jst": "2026-08-22T09:12:00+09:00",
+    "state": "active",
+    "reserved_paths": [
+      ".github/workflows/rev274-block-action-provenance-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6-attempt-solution.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6-publish.json",
+      "automation_runs/2026-08-19_0851_JST/REV274_BLOCK_ACTION_PROVENANCE.md",
+      "automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py",
+      "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py"
+    ]
+  },
+  "parallel_active_claims": [
+    {
+      "claim_id": "chatgpt-session-j-rev247-20260821T215201JST-8c4346d0",
+      "scope": "crx2/shared-s1/imprimitive-production-admission",
+      "target_revision": 247,
+      "branch": "agi-gi-rev247-s1-imprimitive-production-admission-session-20260821-2152",
+      "heartbeat_at_jst": "2026-08-22T07:54:00+09:00",
+      "state": "active",
+      "reserved_paths": [
+        ".github/workflows/rev247-s1-imprimitive-production-admission-smoke.yml",
+        "automation_runs/2026-08-19_0851_JST/REV247_S1_IMPRIMITIVE_PRODUCTION_ADMISSION.md",
+        "automation_runs/2026-08-19_0851_JST/s1_proof_identity_v1.py",
+        "automation_runs/2026-08-19_0851_JST/s1_string_isomorphism_v4.py",
+        "automation_runs/2026-08-19_0851_JST/test_s1_imprimitive_production_admission_rev247.py"
+      ]
+    },
+    {
+      "claim_id": "chatgpt-session-j-rev252-20260821T221349JST-7174b2e6",
+      "scope": "crx3/acceptance/proof-carrying-small-order-production-admission",
+      "target_revision": 252,
+      "branch": "agi-gi-rev252-proof-carrying-small-order-admission-session-20260821-2213",
+      "heartbeat_at_jst": "2026-08-22T08:54:51+09:00",
+      "state": "active",
+      "reserved_paths": [
+        ".github/workflows/j-rev252-session-hourly-refire.yml",
+        ".github/workflows/rev252-proof-carrying-small-order-production-admission.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev252-20260821T221349JST-7174b2e6-publish-20260822T0854JST.json",
+        "automation_runs/2026-08-19_0851_JST/REV252_PROOF_CARRYING_SMALL_ORDER_PRODUCTION_ADMISSION.md",
+        "automation_runs/2026-08-19_0851_JST/proof_carrying_small_order_production_admission_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_proof_carrying_small_order_production_admission_rev252.py"
+      ]
+    },
+    {
+      "claim_id": "chatgpt-session-j-rev265-resource-envelope-20260822T074900JST-f3389aa0",
+      "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-root-resource-envelope",
+      "target_revision": 265,
+      "branch": "agi-gi-rev265-implicit-image-resource-envelope-session-20260822-0749",
+      "heartbeat_at_jst": "2026-08-22T07:55:00+09:00",
+      "state": "active",
+      "reserved_paths": [
+        ".github/workflows/rev265-implicit-relation-image-resource-envelope-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev265-resource-envelope-20260822T074900JST-f3389aa0-attempt-solution.json",
+        "automation_runs/2026-08-19_0851_JST/REV265_IMPLICIT_RELATION_IMAGE_RESOURCE_ENVELOPE.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_image_resource_envelope_v2.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_resource_envelope_rev265.py"
+      ]
+    },
+    {
+      "claim_id": "chatgpt-session-j-rev267-original-domain-preimage-20260822T081520JST-2f881e95",
+      "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-domain-paired-preimage",
+      "target_revision": 267,
+      "branch": "agi-gi-rev267-original-domain-preimage-session-20260822-0815",
+      "heartbeat_at_jst": "2026-08-22T08:15:20+09:00",
+      "state": "active",
+      "reserved_paths": [
+        ".github/workflows/rev267-original-domain-preimage-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev267-original-domain-preimage-20260822T081520JST-2f881e95-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev267-original-domain-preimage-20260822T081520JST-2f881e95-publish.json",
+        "automation_runs/2026-08-19_0851_JST/REV267_ORIGINAL_DOMAIN_PREIMAGE.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_coset_v2.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_coset_rev267.py"
+      ]
+    },
+    {
+      "claim_id": "chatgpt-session-j-rev268-production-parent-orchestration-20260822T082705JST-8f4c1a72",
+      "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/production-parent-orchestration",
+      "target_revision": 268,
+      "branch": "agi-gi-rev268-production-parent-orchestration-session-20260822-0827",
+      "heartbeat_at_jst": "2026-08-22T08:27:05+09:00",
+      "state": "active",
+      "reserved_paths": [
+        ".github/workflows/rev268-implicit-relation-production-parent-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev268-production-parent-orchestration-20260822T082705JST-8f4c1a72-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev268-production-parent-orchestration-20260822T082705JST-8f4c1a72-publish.json",
+        "automation_runs/2026-08-19_0851_JST/REV268_IMPLICIT_RELATION_PRODUCTION_PARENT.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_production_parent_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_production_parent_rev268.py"
+      ]
+    },
+    {
+      "claim_id": "chatgpt-session-j-rev269-image-empty-parent-bridge-20260822T0845JST-c758f1af",
+      "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/exact-empty-image-parent-semantic-bridge",
+      "target_revision": 269,
+      "branch": "agi-gi-rev269-image-empty-parent-bridge-session-20260822-0845",
+      "heartbeat_at_jst": "2026-08-22T09:03:14+09:00",
+      "state": "active",
+      "reserved_paths": [
+        ".github/workflows/rev269-implicit-relation-image-empty-parent-smoke.yml",
+        "automation_runs/2026-08-19_0851_JST/REV269_IMPLICIT_RELATION_IMAGE_EMPTY_PARENT_BRIDGE.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_image_empty_parent_bridge_v1.py",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_empty_parent_bridge_rev269.py"
+      ]
+    },
+    {
+      "claim_id": "chatgpt-session-j-rev270-resource-execution-ledger-20260822T084700JST-38c7a699",
+      "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-root-resource-execution-ledger",
+      "target_revision": 270,
+      "branch": "agi-gi-rev270-resource-execution-ledger-session-20260822-0847",
+      "heartbeat_at_jst": "2026-08-22T08:52:00+09:00",
+      "state": "active",
+      "reserved_paths": [
+        ".github/workflows/rev270-implicit-relation-resource-execution-ledger-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev270-resource-execution-ledger-20260822T084700JST-38c7a699-attempt-solution.json",
+        "automation_runs/2026-08-19_0851_JST/REV270_IMPLICIT_RELATION_RESOURCE_EXECUTION_LEDGER.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_resource_execution_ledger_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_resource_execution_ledger_rev270.py"
+      ]
+    },
+    {
+      "claim_id": "chatgpt-session-j-rev271-image-value-proof-dag-20260822T085500JST-429b7cee",
+      "scope": "crx3/algorithmic-consumers/implicit-image-value-coset-exact-terminal-proof-dag",
+      "target_revision": 271,
+      "branch": "agi-gi-rev271-image-value-proof-dag-session-20260822-0855",
+      "heartbeat_at_jst": "2026-08-22T09:01:00+09:00",
+      "state": "active",
+      "reserved_paths": [
+        ".github/workflows/rev271-image-value-proof-dag-consumer-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev271-image-value-proof-dag-20260822T085500JST-429b7cee-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev271-image-value-proof-dag-20260822T085500JST-429b7cee-publish.json",
+        "automation_runs/2026-08-19_0851_JST/REV271_IMAGE_VALUE_PROOF_DAG_CONSUMER.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_image_value_proof_dag_consumer_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_image_value_proof_dag_consumer_rev271.py"
+      ]
+    },
+    {
+      "claim_id": "chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33",
+      "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/resource-execution-ledger-replay-verifier",
+      "target_revision": 272,
+      "branch": "agi-gi-rev272-resource-ledger-replay-verifier-session-20260822-0856",
+      "heartbeat_at_jst": "2026-08-22T09:10:00+09:00",
+      "state": "active",
+      "reserved_paths": [
+        ".github/workflows/rev272-implicit-resource-ledger-replay-verifier-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33-publish.json",
+        "automation_runs/2026-08-19_0851_JST/REV272_IMPLICIT_RELATION_RESOURCE_LEDGER_REPLAY_VERIFIER.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_resource_ledger_replay_verifier_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_resource_ledger_replay_verifier_rev272.py"
+      ]
+    },
+    {
+      "claim_id": "chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c",
+      "scope": "crx1/homogeneous-block-reduction/equivariant-quotient-provenance-certificate",
+      "target_revision": 273,
+      "branch": "agi-gi-rev273-homogeneous-block-provenance-session-20260822-0903",
+      "heartbeat_at_jst": "2026-08-22T09:09:12+09:00",
+      "state": "active",
+      "reserved_paths": [
+        ".github/workflows/rev273-homogeneous-block-provenance-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c-publish.json",
+        "automation_runs/2026-08-19_0851_JST/REV273_HOMOGENEOUS_BLOCK_RELATION_PROVENANCE.md",
+        "automation_runs/2026-08-19_0851_JST/homogeneous_block_relation_provenance_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_relation_provenance_rev273.py"
+      ]
+    }
+  ],
+  "conflicts": [],
+  "reasons": []
+}

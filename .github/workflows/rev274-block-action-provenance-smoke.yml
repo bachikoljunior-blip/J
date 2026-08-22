@@ -1,0 +1,91 @@
+name: rev274 block action provenance smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py"
+      - "automation_runs/2026-08-19_0851_JST/REV274_BLOCK_ACTION_PROVENANCE.md"
+      - ".github/workflows/rev274-block-action-provenance-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6-*.json"
+
+permissions:
+  contents: read
+
+jobs:
+  rev274-block-action-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Run focused rev274 regressions
+        run: >-
+          python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py -v
+
+      - name: Compile rev274 implementation and tests
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py
+          automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py
+
+      - name: Enforce sibling implementation independence
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py
+            automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py
+          )
+          if grep -En 'homogeneous_block_relation_provenance|implicit_relation_image|proof_dag_accounting|resource_execution_ledger' "${files[@]}"; then
+            echo "rev274 must not import or depend on sibling branch-only implementations" >&2
+            exit 1
+          fi
+
+      - name: Replay canonical attempt-solution admission against exact branch head
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6 \
+            --phase attempt_solution \
+            --scope crx1/homogeneous-block-reduction/group-block-action-equivariance-certificate \
+            --target-revision 274 \
+            --path .github/workflows/rev274-block-action-provenance-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV274_BLOCK_ACTION_PROVENANCE.md \
+            --path automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py \
+            --now "$(TZ=Asia/Tokyo date --iso-8601=seconds)"
+
+      - name: Replay canonical publish admission against exact branch head
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6 \
+            --phase publish \
+            --scope crx1/homogeneous-block-reduction/group-block-action-equivariance-certificate \
+            --target-revision 274 \
+            --path .github/workflows/rev274-block-action-provenance-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6-attempt-solution.json \
+            --path automation_runs/2026-08-19_0851_JST/REV274_BLOCK_ACTION_PROVENANCE.md \
+            --path automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py \
+            --now "$(TZ=Asia/Tokyo date --iso-8601=seconds)"
+
+      - name: Verify reserved diff remains additive
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- \
+            automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py \
+            automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py \
+            automation_runs/2026-08-19_0851_JST/REV274_BLOCK_ACTION_PROVENANCE.md \
+            .github/workflows/rev274-block-action-provenance-smoke.yml \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6-publish.json
