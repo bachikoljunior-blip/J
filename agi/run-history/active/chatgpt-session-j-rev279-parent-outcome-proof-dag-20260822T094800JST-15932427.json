@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T094800+0900-rev279-turn2",
   "started_at_jst": "2026-08-22T09:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T10:55:45+09:00",
+  "heartbeat_at_jst": "2026-08-22T11:45:31+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "15932427fd0b83fa27d50cf83319fc88c75df564",
   "starting_agi_gi_rev": 274,
@@ -13,7 +13,7 @@
   "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
   "pull_request": 223,
   "latest_head_sha": "7a0b1669942f9b6d8c509b1eabec023cf5cb0d03",
-  "latest_observed_main_sha": "6de5a2bb9d53a4e24d9d66b93765c982e393179e",
+  "latest_observed_main_sha": "6ed2fa790e426b9ff6531b4de030354bfdb21ee2",
   "reserved_paths": [
     ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
@@ -34,6 +34,7 @@
     "rev284 SOJ Johnson terminal admission and all reserved paths",
     "rev285 SOJ zero-auxiliary terminal accounting and all reserved paths",
     "rev286 SOJ Johnson terminal cost and all reserved paths",
+    "rev288 strict corrected-SOJ Johnson evidence normalization and all reserved paths",
     "rev273 homogeneous block relation provenance and all reserved paths",
     "rev271 implicit image value-coset proof-DAG and all reserved paths",
     "rev264 primitive-Johnson proof-DAG and all reserved paths",
@@ -85,21 +86,23 @@
     },
     "current_general_agi_gi_validation": {
       "run_id": 32544694193,
-      "status": "in_progress"
+      "status": "completed",
+      "conclusion": "success"
     },
     "current_problem_solving_parallel_admission": {
       "run_id": 32544694173,
       "conclusion": "failure",
-      "reason": "phase-evidence guard reports no changed admission evidence file and all four rev279 problem-state paths lack admission coverage; evidence is intentionally not fabricated while canonical registry replay is blocked"
+      "reason": "phase-evidence guard reports no changed admission evidence file and all four rev279 problem-state paths lack admission coverage; evidence was intentionally not fabricated while canonical registry replay was blocked"
     },
     "registry_blocker": {
       "claim_id": "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
-      "observation": "sibling JSON still lacks canonical schema_version/event_type and encodes target_revision as a string; rev279 does not modify sibling coordination state"
+      "status": "resolved_by_owner_takeover",
+      "observation": "legacy rev275 record is now superseded and a fresh schema-v2 takeover claim owns revision 275; rev279 did not modify sibling coordination state"
     },
-    "resolved_registry_observation": "rev281 has been independently canonicalized by its owner and is no longer a rev279 registry blocker"
+    "resolved_registry_observation": "rev281 has been independently canonicalized by its owner and the legacy rev275 record is now superseded by a canonical takeover claim"
   },
   "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, tampered, or malformed/non-finite resource evidence without modifying shared solvers or upstream CRX1 branches",
   "non_interference": "Only rev279 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
-  "status": "active_hardened_smoke_green_general_validation_in_progress_admission_blocked_by_rev275_registry_format",
+  "status": "active_hardened_smoke_and_general_validation_green_registry_replay_unblocked_phase_evidence_pending",
   "agi_state": "NOT_AGI"
 }
