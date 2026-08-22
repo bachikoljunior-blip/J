@@ -1,0 +1,83 @@
+name: rev280 literal giant proof DAG smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/rev280-literal-giant-proof-dag-smoke.yml"
+      - "automation_runs/2026-08-19_0851_JST/REV280_LITERAL_GIANT_PROOF_DAG.md"
+      - "automation_runs/2026-08-19_0851_JST/literal_giant_proof_dag_consumer_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_literal_giant_proof_dag_consumer_rev280.py"
+
+permissions:
+  contents: read
+
+jobs:
+  functional-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+
+      - name: Run focused and inherited regressions
+        run: >-
+          python -m pytest -q
+          test_literal_giant_proof_dag_consumer_rev280.py
+          test_literal_giant_candidate_si_rev208.py
+          test_proof_dag_accounting_rev220.py
+
+      - name: Compile rev280 modules
+        run: >-
+          python -m py_compile
+          literal_giant_proof_dag_consumer_v1.py
+          test_literal_giant_proof_dag_consumer_rev280.py
+
+      - name: Enforce additive main-integrated dependency boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE '(^|[[:space:]])(from|import)[[:space:]].*(primitive_johnson_proof_dag_consumer_v1|implicit_relation.*proof_dag|state_orbit.*proof|imprimitive.*proof_dag)' literal_giant_proof_dag_consumer_v1.py; then
+            echo 'rev280 must consume only main-integrated rev208/rev220 identity substrates, not sibling branch-only consumers' >&2
+            exit 1
+          fi
+
+  parallel-admission:
+    needs: functional-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+
+      - name: Recheck attempt-solution parallel admission
+        run: >-
+          python automation/problem_solving_parallel_admission.py
+          --claim-id chatgpt-session-j-rev280-literal-giant-proof-dag-20260822T095000JST-057e264a
+          --phase attempt_solution
+          --scope crx3/algorithmic-consumers/literal-giant-exact-terminal-proof-dag
+          --target-revision 280
+          --path .github/workflows/rev280-literal-giant-proof-dag-smoke.yml
+          --path automation_runs/2026-08-19_0851_JST/REV280_LITERAL_GIANT_PROOF_DAG.md
+          --path automation_runs/2026-08-19_0851_JST/literal_giant_proof_dag_consumer_v1.py
+          --path automation_runs/2026-08-19_0851_JST/test_literal_giant_proof_dag_consumer_rev280.py
+
+      - name: Recheck publish parallel admission
+        run: >-
+          python automation/problem_solving_parallel_admission.py
+          --claim-id chatgpt-session-j-rev280-literal-giant-proof-dag-20260822T095000JST-057e264a
+          --phase publish
+          --scope crx3/algorithmic-consumers/literal-giant-exact-terminal-proof-dag
+          --target-revision 280
+          --path .github/workflows/rev280-literal-giant-proof-dag-smoke.yml
+          --path automation_runs/2026-08-19_0851_JST/REV280_LITERAL_GIANT_PROOF_DAG.md
+          --path automation_runs/2026-08-19_0851_JST/literal_giant_proof_dag_consumer_v1.py
+          --path automation_runs/2026-08-19_0851_JST/test_literal_giant_proof_dag_consumer_rev280.py
