@@ -38,10 +38,15 @@ except ModuleNotFoundError:  # Direct ``python automation/<script>.py`` invocati
 
 
 EVIDENCE_PREFIX = "agi/run-history/phase-admissions/"
+PHASE_ADMISSION_WORKFLOW = (
+    ".github/workflows/problem-solving-parallel-admission.yml"
+)
 
 
 def is_problem_state_path(path: str) -> bool:
     if path == "MAIN.md" or path.startswith("automation_runs/"):
+        return True
+    if path == PHASE_ADMISSION_WORKFLOW:
         return True
     if path.startswith("automation/"):
         return True

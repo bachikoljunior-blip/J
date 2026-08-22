@@ -2,8 +2,11 @@ import json
 import subprocess
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from datetime import datetime
+from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 from automation.parallel_claims import JST, load_registry
 from automation.problem_solving_parallel_admission import (
@@ -13,6 +16,7 @@ from automation.problem_solving_parallel_admission import (
 from automation.problem_solving_phase_evidence_guard import (
     _current_registry_observation_time,
     is_problem_state_path,
+    main,
     path_is_covered,
     replay_evidence,
 )
@@ -27,6 +31,7 @@ class ProblemSolvingPhaseEvidenceGuardTest(unittest.TestCase):
             "agi/core/runtime.py",
             ".github/workflows/rev250-smoke.yml",
             ".github/workflows/agi-gi-validation.yml",
+            ".github/workflows/problem-solving-parallel-admission.yml",
         ):
             with self.subTest(path=path):
                 self.assertTrue(is_problem_state_path(path))
@@ -50,6 +55,29 @@ class ProblemSolvingPhaseEvidenceGuardTest(unittest.TestCase):
 
     def test_invalid_admitted_path_fails_closed(self):
         self.assertFalse(path_is_covered("MAIN.md", ["../MAIN.md"]))
+
+    def test_workflow_only_change_without_evidence_fails_closed(self):
+        with tempfile.TemporaryDirectory() as raw:
+            changed = Path(raw) / "changed.txt"
+            changed.write_text(
+                ".github/workflows/problem-solving-parallel-admission.yml\n",
+                encoding="utf-8",
+            )
+            stdout = StringIO()
+            with patch(
+                "sys.argv",
+                ["guard", "--repo", raw, "--changed-files", str(changed)],
+            ), redirect_stdout(stdout):
+                self.assertEqual(main(), 2)
+            result = json.loads(stdout.getvalue())
+            self.assertIn(
+                "problem-state changes require a changed phase-admission evidence file",
+                result["errors"],
+            )
+            self.assertEqual(
+                result["relevant_changed_files"],
+                [".github/workflows/problem-solving-parallel-admission.yml"],
+            )
 
     def test_workflow_diffs_against_fresh_current_main(self):
         root = Path(__file__).resolve().parents[1]
