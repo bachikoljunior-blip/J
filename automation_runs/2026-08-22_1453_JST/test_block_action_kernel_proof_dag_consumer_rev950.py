@@ -137,7 +137,7 @@ class BlockActionKernelProofDAGRev950Test(unittest.TestCase):
             quasipoly_constant=0.000001,
         )
         self.assertFalse(result.certified)
-        self.assertIn("bound", result.reason)
+        self.assertIn("envelope", result.reason)
 
     def test_attached_identity_mismatch_is_rejected(self):
         provenance, certificate = self.wreath_fixture()
