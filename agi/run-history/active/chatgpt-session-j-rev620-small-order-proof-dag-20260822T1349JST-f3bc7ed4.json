@@ -4,13 +4,17 @@
   "claim_id": "chatgpt-session-j-rev620-small-order-proof-dag-20260822T1349JST-f3bc7ed4",
   "session_id": "chatgpt-session-j-continuation-20260822T1349+0900-f3bc7ed4",
   "started_at_jst": "2026-08-22T13:49:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T13:49:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:05:48+09:00",
+  "completed_at_jst": "2026-08-22T14:05:48+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "f3bc7ed496afa2fd9c8daa417dd20c4c56e76f41",
   "starting_agi_gi_rev": 295,
   "target_revision": 620,
   "scope": "crx3/algorithmic-consumers/proof-carrying-small-order-production-proof-dag",
   "branch": "agi-gi-rev620-small-order-proof-dag-session-20260822-1349",
+  "pull_request": 248,
+  "latest_head_sha": "cdad6df522a812fbfc28ffcdc9837d23b5abc1c5",
+  "merge_sha": "f1f4ac5ff4822ce9e140956576cbd9d6dc17d28d",
   "reserved_paths": [
     ".github/workflows/rev620-small-order-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev620-small-order-proof-dag-20260822T1349JST-f3bc7ed4-attempt-solution.json",
@@ -20,8 +24,10 @@
     "automation_runs/2026-08-19_0851_JST/test_small_order_production_proof_dag_consumer_rev620.py"
   ],
   "parallel_exclusions": [
-    "all fresh sibling claims, branches, PRs, workflows, and reserved paths",
+    "all sibling claims, branches, PRs, workflows, and reserved paths",
     "rev600 corrected-SOJ main provenance gate and every reserved path",
+    "rev650 recursive caller provenance binding and every reserved path",
+    "rev700 recursive production provenance join and every reserved path",
     "rev500/rev400/rev360/rev340/rev320 corrected Split-or-Johnson caller, recursive-accounting, and Johnson construction scopes",
     "rev292/rev293 corrected Split-or-Johnson recursive handoff/result-lift scopes",
     "rev275 block-action kernel takeover and every reserved path",
@@ -29,7 +35,19 @@
     "CRX1/CRX2 implementations, MAIN.md, proof_dag_accounting_v1.py, proof_carrying_small_order_production_admission_v1.py, shared coordination implementation"
   ],
   "intent": "Attach the main-integrated rev252 proof-carrying small-order production admission to the main-integrated rev220/rev289 conservative execution proof-DAG without modifying either shared substrate. Freeze the Schreier group, oriented strings, root, production/replay caps, exact producer scan count, replay certificate digest, recurrence status and exact terminal payload into one replay-stable identity; admit only independently replay-verified exact nonempty/exact-empty outcomes; fail closed on opaque identity values, nonexact/resource-cap outcomes, identity drift, replay/certificate mismatch, accounting drift, non-finite envelope inputs, or proof-DAG rejection.",
-  "non_interference": "Only the six rev620 reserved paths may be written on the dedicated branch and only this rev620 claim may be updated on main. No sibling branch, PR, claim, workflow, reserved path, shared solver, shared proof-DAG implementation, or MAIN.md may be modified, cancelled, rerun, closed, rebased, force-pushed, or overwritten.",
-  "status": "active_claimed_before_implementation",
+  "coordination_note": "rev620 completed and squash-merged through PR #248. Exact proposed head cdad6df522a812fbfc28ffcdc9837d23b5abc1c5 merged as f1f4ac5ff4822ce9e140956576cbd9d6dc17d28d only after a fresh current-main/open-PR/claim check, fresh rev700 non-overlap confirmation, mergeable=true, dedicated 51/51 green validation, persisted publish evidence replay, repository parallel admission success, all inherited exact-head smokes success, and AGI-GI rev validation success. No sibling branch, PR, claim, workflow, or reserved path was modified, cancelled, rerun, closed, rebased, force-pushed, or overwritten.",
+  "validation": {
+    "focused_and_inherited": "51/51 success",
+    "py_compile": "success",
+    "sibling_import_gate": "success",
+    "publish_phase_admission": "admitted; conflicts=[]; persisted and replayed",
+    "attempt_solution_phase_admission": "admitted; conflicts=[]; generated artifact retained",
+    "repository_parallel_admission": "success",
+    "exact_head_rev_validation": "success",
+    "all_observed_exact_head_workflows": "success",
+    "integration": "squash merge success; merge_sha=f1f4ac5ff4822ce9e140956576cbd9d6dc17d28d"
+  },
+  "non_interference": "Only rev620 reserved paths were written on the dedicated branch and only this rev620 claim was updated on main. No sibling branch, PR, claim, workflow, reserved path, shared solver, shared proof-DAG implementation, or MAIN.md was modified, cancelled, rerun, closed, rebased, force-pushed, or overwritten.",
+  "status": "completed_merged",
   "agi_state": "NOT_AGI"
 }

@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6",
   "session_id": "chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311+0900-ed4d23f6-turn1",
   "started_at_jst": "2026-08-22T13:11:13+09:00",
-  "heartbeat_at_jst": "2026-08-22T13:18:53+09:00",
+  "heartbeat_at_jst": "2026-08-22T13:49:17+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "ed4d23f6695e443b83c6d0fe62a7d4acb236162b",
   "starting_agi_gi_rev": 266,
@@ -13,7 +13,7 @@
   "branch": "agi-gi-rev500-soj-caller-replay-envelope-session-20260822-1311",
   "pull_request": 247,
   "pull_request_state": "draft",
-  "latest_head_sha": "038b2aae3bb089b990098a30a4ff789da3616b26",
+  "latest_head_sha": "d4f8f75f0f3cceb68d66d0f0be9c597bb881c860",
   "intent": "add a strict replay-stable envelope around an already-verified corrected-SOJ production-caller binding without importing or modifying the separately owned rev400 implementation",
   "reserved_paths": [
     ".github/workflows/rev500-soj-caller-replay-envelope-smoke.yml",
@@ -26,10 +26,12 @@
   "parallel_exclusions": [
     "rev292 Johnson reduction-handoff composition / PR #244",
     "rev293 Johnson recursive result lift / PR #241",
-    "rev295 signed-ground proof-DAG / PR #242",
     "rev340 recursive-result accounting binding / PR #243",
     "rev360 Johnson construction cost binding / PR #245",
     "rev400 production caller binding / PR #246",
+    "rev600 production main provenance gate and all reserved paths",
+    "rev620 small-order production proof-DAG and all reserved paths",
+    "rev650 recursive caller provenance binding and all reserved paths",
     "all sibling claims, branches, PRs, workflows, MAIN.md, and shared coordination implementations"
   ],
   "parallel_safety": {
@@ -39,19 +41,33 @@
     "do_not_import_branch_only_rev400_implementation": true,
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
   },
+  "reconciliation": {
+    "method": "normal_two_parent_merge_commit_no_rebase_no_force_push",
+    "reconciled_main_sha": "16c8d0a55b81bee5fb2b14eb3b5c0bb94de08950",
+    "reconciled_head_sha": "d4f8f75f0f3cceb68d66d0f0be9c597bb881c860",
+    "observed_later_main_sha": "225b873670b328202d9b70a3665fdea641d695c4",
+    "later_main_changes": "rev650 claim plus rev600/rev620 coordination metadata; explicit sibling exclusions include rev500 and no rev500 reserved path was modified"
+  },
   "validation": {
-    "state": "exact_head_core_green_upstream_dependency_open",
-    "exact_head": "038b2aae3bb089b990098a30a4ff789da3616b26",
-    "registry_source_sha": "a713a81d3f4b217fe84dfb25e1a74330221ac029",
-    "registry_digest": "sha256:fad864399231c6b63b1d841f7c9a63751a12cb3fcb6b88e9a2f064d9b87c8241",
+    "state": "reconciled_exact_head_core_green_one_inherited_check_running_upstream_dependency_open",
+    "exact_head": "d4f8f75f0f3cceb68d66d0f0be9c597bb881c860",
     "focused_regressions": 15,
     "phase_admissions": {
       "attempt_solution": "admitted_conflicts_zero_persisted_and_replayed",
       "publish": "admitted_conflicts_zero_persisted_and_replayed"
     },
     "github_actions": [
-      {"run_id": 32551348859, "name": "rev500 SOJ caller replay envelope smoke", "conclusion": "success"},
-      {"run_id": 32551348881, "name": "Problem-solving parallel admission", "conclusion": "success"}
+      {"run_id": 32552672053, "name": "rev500 SOJ caller replay envelope smoke", "conclusion": "success"},
+      {"run_id": 32552672010, "name": "Problem-solving parallel admission", "conclusion": "success"},
+      {"run_id": 32552672049, "name": "rev238 Design nested intransitive resource smoke", "conclusion": "success"},
+      {"run_id": 32552672113, "name": "rev239 state-orbit candidate terminal smoke", "conclusion": "success"},
+      {"run_id": 32552672095, "name": "rev240 Design state-orbit complete-cover smoke", "conclusion": "success"},
+      {"run_id": 32552672035, "name": "rev241 Design union reconstruction resource smoke", "conclusion": "success"},
+      {"run_id": 32552672046, "name": "rev242 Design original-root pipeline resource smoke", "conclusion": "success"},
+      {"run_id": 32552672011, "name": "rev250 phase-start ticket ledger smoke", "conclusion": "success"},
+      {"run_id": 32552672047, "name": "rev253 complete ordered pair-root UPCC split family smoke", "conclusion": "success"},
+      {"run_id": 32552672079, "name": "rev254 Design primitive Johnson complete-cover smoke", "conclusion": "success"},
+      {"run_id": 32552672103, "name": "rev246 resource-bounded primitive Johnson candidate smoke", "conclusion": "in_progress"}
     ],
     "integration_dependency": "rev400 / PR #246 remains open draft; rev500 remains draft and unmerged"
   },

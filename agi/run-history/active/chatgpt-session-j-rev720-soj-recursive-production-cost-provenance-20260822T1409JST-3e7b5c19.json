@@ -1,0 +1,46 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev720-soj-recursive-production-cost-provenance-20260822T1409JST-3e7b5c19",
+  "session_id": "chatgpt-session-j-continuation-rev720-20260822T1409+0900-3e7b5c19",
+  "started_at_jst": "2026-08-22T14:09:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:09:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "11161553d624a81a8730a66c66936fe820f9f537",
+  "starting_agi_gi_rev": 266,
+  "target_revision": 720,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-construction-cost-provenance-join",
+  "branch": "agi-gi-rev720-soj-recursive-production-cost-provenance-session-20260822-1409",
+  "pull_request": null,
+  "pull_request_state": "not_created",
+  "latest_head_sha": null,
+  "intent": "add a file-disjoint fail-closed compatibility join between this session's public rev360 Johnson construction-cost binding and public rev700 recursive production provenance contract: require independent replay gates, require exact reduction-identity agreement and strict certified/canonical/exact/progress/transport cost evidence, preserve rev700 production provenance identity, and seal the construction-cost identity and conservative recurrence charge into a new deterministic production-cost provenance identity without importing sibling branch implementations, reconstructing rev287/rev360/rev700 omitted semantics, or overlapping sibling scopes",
+  "reserved_paths": [
+    ".github/workflows/rev720-soj-recursive-production-cost-provenance-smoke.yml",
+    "automation_runs/2026-08-22_1409_JST/REV720_SOJ_RECURSIVE_PRODUCTION_COST_PROVENANCE.md",
+    "automation_runs/2026-08-22_1409_JST/soj_recursive_production_cost_provenance_v1.py",
+    "automation_runs/2026-08-22_1409_JST/test_soj_recursive_production_cost_provenance_rev720.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev720-soj-recursive-production-cost-provenance-20260822T1409JST-3e7b5c19-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev720-soj-recursive-production-cost-provenance-20260822T1409JST-3e7b5c19-publish.json"
+  ],
+  "parallel_exclusions": [
+    "this session's rev360 Johnson construction-cost binding / PR #245 and all reserved paths",
+    "rev500 caller replay envelope / PR #247 and all reserved paths",
+    "rev600 production main-provenance gate / PR #250 and all reserved paths",
+    "this session's rev650 recursive caller provenance / PR #249 and all reserved paths",
+    "this session's rev700 recursive production provenance join / PR #251 and all reserved paths",
+    "all sibling claims, branches, PRs, workflows, MAIN.md, CRX scopes, shared coordination implementation, and shared proof-DAG implementations"
+  ],
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_branch_only_rev360_rev700_implementation": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
+  },
+  "validation": {
+    "state": "claimed_not_yet_implemented"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
