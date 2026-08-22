@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   focused-regression:
@@ -80,28 +80,6 @@ jobs:
             --path automation_runs/2026-08-22_1553_JST/test_block_relation_provenance_proof_dag_rev952.py \
             --output /tmp/rev952-publish.json
           cat /tmp/rev952-publish.json
-      - name: Persist canonical phase evidence on the owned PR head
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-        run: |
-          set -euo pipefail
-          attempt='agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-attempt-solution.json'
-          publish='agi/run-history/phase-admissions/chatgpt-session-j-rev952-block-relation-proof-dag-20260822T1553JST-d2f7d996-publish.json'
-          if git cat-file -e "${HEAD_SHA}:${attempt}" 2>/dev/null && git cat-file -e "${HEAD_SHA}:${publish}" 2>/dev/null; then
-            echo 'canonical phase evidence is already persisted on the owned head; preserving it unchanged'
-            exit 0
-          fi
-          git checkout --detach "${HEAD_SHA}"
-          mkdir -p "$(dirname "${attempt}")"
-          cp /tmp/rev952-attempt-solution.json "${attempt}"
-          cp /tmp/rev952-publish.json "${publish}"
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- "${attempt}" "${publish}"
-          git commit -m 'rev952: persist canonical phase admission evidence'
-          git push origin "HEAD:${HEAD_REF}"
       - name: Verify reserved diff remains additive
         if: github.event_name == 'pull_request'
         run: |
