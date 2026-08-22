@@ -136,14 +136,14 @@
   ],
   "paths": [
     ".github/workflows/rev2000-homogeneous-block-joint-compatibility-proof-dag-smoke.yml",
-    "agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-publish.json",
     "automation_runs/2026-08-22_1717_JST/REV2000_HOMOGENEOUS_BLOCK_JOINT_COMPATIBILITY_PROOF_DAG.md",
     "automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py",
     "automation_runs/2026-08-22_1717_JST/test_homogeneous_block_joint_compatibility_proof_dag_rev2000.py"
   ],
-  "phase": "attempt_solution",
+  "phase": "publish",
   "reasons": [],
-  "recorded_at_jst": "2026-08-22T17:37:22.564147+09:00",
+  "recorded_at_jst": "2026-08-22T17:37:22.615834+09:00",
   "registry_digest": "sha256:9f3fa38bcf666c73c3669a02b70f0888a7ccf0f2062d0cbed48faf3a3605a852",
   "registry_source_sha": "dac3762d6c25276e06471f6c2938043a6ff198b6",
   "schema_version": 1,
