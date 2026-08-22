@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev281-quotient-relation-action-invariance-20260822T095200JST-4cddb6f9",
   "session_id": "chatgpt-session-j-continuation-20260822T095200+0900-rev281-turn3",
   "started_at_jst": "2026-08-22T09:52:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T10:01:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:00:00+09:00",
+  "completed_at_jst": "2026-08-22T10:00:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "4cddb6f99fdc38d70612e7a37e39e7e7acb43bbe",
   "starting_agi_gi_rev": 274,
@@ -20,29 +21,17 @@
     "automation_runs/2026-08-19_0851_JST/quotient_relation_action_invariance_v1.py",
     "automation_runs/2026-08-19_0851_JST/test_quotient_relation_action_invariance_rev281.py"
   ],
-  "parallel_exclusions": [
-    "rev275 through rev280 and all of their reserved paths",
-    "rev273/rev274 shared files except read-only main-integrated rev274 API",
-    "rev271/rev270/rev269/rev268/rev267/rev265/rev264 active scopes",
-    "W1R-H6 corrected Split-or-Johnson sibling work including PR #226",
-    "CRX2, CRX3, MAIN.md, every sibling claim, branch, PR, workflow, and reserved path"
-  ],
-  "intent": "consume only main-integrated rev274 block-action provenance and independently certify that caller-supplied named quotient unary/binary relations are invariant under the exact induced quotient actions and are transported exactly by the certified block bijection; emit a deterministic replayable digest certificate and fail closed on malformed, non-invariant, mismatched, or tampered evidence",
-  "coordination_note": "The canonical registry is currently fail-closed because the fresh rev275 sibling claim is not schema-v2. This session does not modify that sibling claim. The dedicated attempt_solution evidence path is reserved now but no admitted evidence is fabricated while the canonical generator cannot load the registry.",
+  "superseded_by": "rev282 rescope of the same quotient relation/action invariance certificate",
+  "supersession_reason": "A later independently owned active claim and PR #226 also selected target_revision 281. Even though this claim started first, this session voluntarily vacates rev281 to preserve an unambiguous globally exclusive revision allocation without modifying the sibling claim, branch, PR, or workflow.",
   "validation": {
-    "implementation_diff": "four new reserved implementation/test/doc/workflow files only; 562 additions and 0 deletions",
+    "exact_head": "1919c97e2a09957a1e2044f18a06ce81e5d2461a",
     "dedicated_workflow_run": 32541828558,
     "dedicated_workflow_status": "success",
-    "dedicated_job": 96953181593,
-    "dedicated_tests": "24/24 passed: 12 focused rev281 plus 12 inherited rev274; py_compile passed",
+    "dedicated_tests": "24/24 passed; py_compile passed",
     "parallel_admission_run": 32541828454,
-    "parallel_admission_workflow_status": "failure",
-    "parallel_admission_immediate_reason": "phase_evidence_missing_for_four_problem_state_paths",
-    "canonical_evidence_generation_blocker": "parallel registry load fails on fresh malformed rev275 sibling claim; do not fabricate admitted evidence",
-    "general_validation_run": 32541828514,
-    "general_validation_status": "in_progress_at_last_observation"
+    "parallel_admission_status": "failure_before_rescope",
+    "parallel_admission_reason": "phase admission evidence missing; canonical evidence generation additionally blocked by malformed fresh rev275 registry record"
   },
-  "non_interference": "Only rev281 reserved paths may be written on the isolated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, normalize, or otherwise mutate sibling claims, branches, PRs, workflows, shared implementation paths, or MAIN.md.",
-  "status": "active_exact_head_smoke_green_phase_evidence_blocked_by_external_registry_error",
+  "status": "superseded",
   "agi_state": "NOT_AGI"
 }
