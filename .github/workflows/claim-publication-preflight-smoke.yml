@@ -1,0 +1,133 @@
+name: claim publication preflight smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "ops-claim-publication-preflight-session-20260822-1855"
+    paths:
+      - ".github/workflows/claim-publication-preflight-smoke.yml"
+      - "automation_runs/2026-08-22_1855_JST/CLAIM_PUBLICATION_PREFLIGHT_AUDIT.md"
+      - "automation_runs/2026-08-22_1855_JST/claim_publication_preflight_v1.py"
+      - "automation_runs/2026-08-22_1855_JST/test_claim_publication_preflight_v1.py"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-attempt_solution.json"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-publish.json"
+  pull_request:
+    paths:
+      - ".github/workflows/claim-publication-preflight-smoke.yml"
+      - "automation_runs/2026-08-22_1855_JST/CLAIM_PUBLICATION_PREFLIGHT_AUDIT.md"
+      - "automation_runs/2026-08-22_1855_JST/claim_publication_preflight_v1.py"
+      - "automation_runs/2026-08-22_1855_JST/test_claim_publication_preflight_v1.py"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-attempt_solution.json"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-publish.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: claim-publication-preflight-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  preflight-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate canonical attempt-solution and publish admission previews
+        id: admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main
+          attempt="${RUNNER_TEMP}/claim-preflight-attempt-solution.json"
+          publish="${RUNNER_TEMP}/claim-preflight-publish.json"
+          common=(
+            --claim-id chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e
+            --scope repository-coordination/claim-publication/preflight-collision-guard
+            --path .github/workflows/claim-publication-preflight-smoke.yml
+            --path automation_runs/2026-08-22_1855_JST/CLAIM_PUBLICATION_PREFLIGHT_AUDIT.md
+            --path automation_runs/2026-08-22_1855_JST/claim_publication_preflight_v1.py
+            --path automation_runs/2026-08-22_1855_JST/test_claim_publication_preflight_v1.py
+          )
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase attempt_solution \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-attempt_solution.json \
+            --output "${attempt}"
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase publish \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-publish.json \
+            --output "${publish}"
+          jq -e '.admitted == true and .conflicts == []' "${attempt}"
+          jq -e '.admitted == true and .conflicts == []' "${publish}"
+          echo "attempt=${attempt}" >>"${GITHUB_OUTPUT}"
+          echo "publish=${publish}" >>"${GITHUB_OUTPUT}"
+
+      - name: Run focused claim-publication regressions
+        run: python automation_runs/2026-08-22_1855_JST/test_claim_publication_preflight_v1.py
+
+      - name: Compile implementation and tests
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-22_1855_JST/claim_publication_preflight_v1.py
+          automation_runs/2026-08-22_1855_JST/test_claim_publication_preflight_v1.py
+
+      - name: Audit the published owner against this branch registry
+        run: >-
+          python automation_runs/2026-08-22_1855_JST/claim_publication_preflight_v1.py
+          --mode published-audit
+          --candidate agi/run-history/active/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e.json
+
+      - name: Enforce shared-code dependency boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="automation_runs/2026-08-22_1855_JST/claim_publication_preflight_v1.py"
+          ! grep -Eq '^(from|import) automation_runs\.' "${file}"
+          grep -q 'from automation.parallel_claims import' "${file}"
+
+      - name: Enforce reserved diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "${base}"..HEAD | sort >"${RUNNER_TEMP}/actual"
+          cat >"${RUNNER_TEMP}/allowed" <<'EOF'
+          .github/workflows/claim-publication-preflight-smoke.yml
+          agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-attempt_solution.json
+          agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-publish.json
+          automation_runs/2026-08-22_1855_JST/CLAIM_PUBLICATION_PREFLIGHT_AUDIT.md
+          automation_runs/2026-08-22_1855_JST/claim_publication_preflight_v1.py
+          automation_runs/2026-08-22_1855_JST/test_claim_publication_preflight_v1.py
+          EOF
+          sort -o "${RUNNER_TEMP}/allowed" "${RUNNER_TEMP}/allowed"
+          if comm -23 "${RUNNER_TEMP}/actual" "${RUNNER_TEMP}/allowed" | grep -q .; then
+            echo "claim-publication branch changed a non-reserved path" >&2
+            comm -23 "${RUNNER_TEMP}/actual" "${RUNNER_TEMP}/allowed" >&2
+            exit 1
+          fi
+
+      - name: Persist canonical attempt-solution and publish admission on this branch
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          ATTEMPT_PREVIEW: ${{ steps.admission.outputs.attempt }}
+          PUBLISH_PREVIEW: ${{ steps.admission.outputs.publish }}
+        run: |
+          set -euo pipefail
+          attempt="agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-attempt_solution.json"
+          publish="agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-publish.json"
+          mkdir -p "$(dirname "${attempt}")"
+          cp "${ATTEMPT_PREVIEW}" "${attempt}"
+          cp "${PUBLISH_PREVIEW}" "${publish}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${attempt}" "${publish}"
+          if ! git diff --cached --quiet; then
+            git commit -m "coordination: persist claim-publication phase admission"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
