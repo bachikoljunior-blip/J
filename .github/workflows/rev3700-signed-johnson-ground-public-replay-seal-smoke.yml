@@ -106,13 +106,23 @@ jobs:
           mkdir -p agi/run-history/phase-admissions
           ATTEMPT=agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json
           PUBLISH=agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json
-          cp /tmp/rev3700-attempt_solution.json "$ATTEMPT"
-          cp /tmp/rev3700-publish.json "$PUBLISH"
           if git ls-files --error-unmatch "$ATTEMPT" "$PUBLISH" >/dev/null 2>&1 && \
-             git diff --quiet -- "$ATTEMPT" "$PUBLISH"; then
-            echo 'canonical phase evidence already current'
+             python - "$ATTEMPT" /tmp/rev3700-attempt_solution.json "$PUBLISH" /tmp/rev3700-publish.json <<'PY'
+          import json, sys
+          def normalized(path):
+              payload = json.load(open(path))
+              payload.pop('recorded_at_jst', None)
+              return payload
+          pairs = ((sys.argv[1], sys.argv[2]), (sys.argv[3], sys.argv[4]))
+          if not all(normalized(existing) == normalized(generated) for existing, generated in pairs):
+              raise SystemExit(1)
+          PY
+          then
+            echo 'canonical phase evidence is semantically current'
             exit 0
           fi
+          cp /tmp/rev3700-attempt_solution.json "$ATTEMPT"
+          cp /tmp/rev3700-publish.json "$PUBLISH"
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -- "$ATTEMPT" "$PUBLISH"
