@@ -103,23 +103,46 @@ jobs:
             exit 1
           fi
 
-      - name: Persist canonical attempt-solution and publish admission on this branch
-        if: github.event_name == 'push'
+      - name: Persist canonical phase admission once on the source branch
+        if: >-
+          github.event_name == 'push' ||
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
         shell: bash
         env:
           ATTEMPT_PREVIEW: ${{ steps.admission.outputs.attempt }}
           PUBLISH_PREVIEW: ${{ steps.admission.outputs.publish }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           attempt="agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-attempt_solution.json"
           publish="agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-publish.json"
+
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            git fetch origin "${PR_HEAD_REF}:refs/remotes/origin/${PR_HEAD_REF}"
+            remote_sha="$(git rev-parse "refs/remotes/origin/${PR_HEAD_REF}")"
+            if [[ "${remote_sha}" != "${PR_HEAD_SHA}" ]]; then
+              echo "source branch advanced after this event; leave evidence to the newer natural run"
+              exit 0
+            fi
+            git checkout --detach "${remote_sha}"
+            target_branch="${PR_HEAD_REF}"
+          else
+            target_branch="${GITHUB_REF_NAME}"
+          fi
+
+          if [[ -e "${attempt}" || -e "${publish}" ]]; then
+            [[ -f "${attempt}" && -f "${publish}" ]]
+            echo "canonical phase evidence already exists; do not rewrite it"
+            exit 0
+          fi
+
           mkdir -p "$(dirname "${attempt}")"
           cp "${ATTEMPT_PREVIEW}" "${attempt}"
           cp "${PUBLISH_PREVIEW}" "${publish}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "${attempt}" "${publish}"
-          if ! git diff --cached --quiet; then
-            git commit -m "coordination: persist rev2707 attempt and publish admission"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
+          git commit -m "coordination: persist rev2707 attempt and publish admission"
+          git push origin "HEAD:${target_branch}"
