@@ -1,0 +1,57 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912",
+  "session_id": "chatgpt-session-j-continuation-rev700-20260822T1359+0900-c4f3a912",
+  "started_at_jst": "2026-08-22T13:59:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:08:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "fcffe0fad4dea2bf2826dbe983d67d573cb1fb5d",
+  "starting_agi_gi_rev": 266,
+  "target_revision": 700,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-provenance-join",
+  "branch": "agi-gi-rev700-soj-recursive-production-provenance-join-session-20260822-1359",
+  "pull_request": 251,
+  "pull_request_state": "open_draft",
+  "latest_head_sha": "29601623967e3f09a709dad415ca5a42243fefe1",
+  "intent": "add a file-disjoint fail-closed compatibility join across the public rev500 caller replay envelope, rev600 main-integrated provenance, and this session's public rev650 recursive producer provenance certificate; independently replay rev500 and rev600 public digests, require rev650 replay verification, bind caller/envelope/result/accounting identities across the three contracts, and emit a deterministic recursive-production provenance identity without importing sibling branch implementations, executing recursive SI, authenticating Git reachability itself, or overlapping rev600/rev620 scopes",
+  "reserved_paths": [
+    ".github/workflows/rev700-soj-recursive-production-provenance-join-smoke.yml",
+    "automation_runs/2026-08-22_1359_JST/REV700_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_JOIN.md",
+    "automation_runs/2026-08-22_1359_JST/soj_recursive_production_provenance_join_v1.py",
+    "automation_runs/2026-08-22_1359_JST/test_soj_recursive_production_provenance_join_rev700.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev293 Johnson recursive result lift / PR #241 and all reserved paths",
+    "rev340 recursive result/accounting binding / PR #243 and all reserved paths",
+    "this session's rev360 Johnson construction-cost binding / PR #245 and all reserved paths",
+    "rev400 production caller binding / PR #246 and all reserved paths",
+    "rev500 caller replay envelope / PR #247 and all reserved paths",
+    "rev600 production main-provenance gate / PR #250 and all reserved paths",
+    "rev620 small-order production proof-DAG and all reserved paths",
+    "this session's rev650 recursive caller provenance / PR #249 and all reserved paths",
+    "all sibling claims, branches, PRs, workflows, MAIN.md, CRX scopes, shared coordination implementation, and shared proof-DAG implementations"
+  ],
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_branch_only_rev500_rev600_rev650_implementation": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
+  },
+  "validation": {
+    "state": "exact_head_core_green_inherited_pending",
+    "exact_head_sha": "29601623967e3f09a709dad415ca5a42243fefe1",
+    "py_compile": "success",
+    "focused_regressions": "22/22 success",
+    "phase_admission_evidence": "attempt_solution and publish persisted from canonical generator snapshot d78613139b26e34ce38bc363d75d6da3f74a5cca with registry digest sha256:20e97ee290818bed9310e34dc4bf9443e9e004eb3eb38e61f974b6d4927831d6",
+    "problem_solving_parallel_admission": "success on exact head 29601623967e3f09a709dad415ca5a42243fefe1",
+    "dedicated_rev700_smoke": "success on exact head 29601623967e3f09a709dad415ca5a42243fefe1",
+    "inherited_ci": "rev238 and rev250 success; rev239/rev240/rev241/rev242/rev246/rev253/rev254 still running naturally at last observation",
+    "main_observation": "main advanced independently to 7715a1f01e97d35e8f064d49f106b3a9d568d215 while rev620 was closed after verified merge; no sibling workflow or branch was changed, cancelled, rerun, rebased, or force-pushed"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
