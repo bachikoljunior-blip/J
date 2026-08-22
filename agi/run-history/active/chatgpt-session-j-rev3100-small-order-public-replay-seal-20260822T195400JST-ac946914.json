@@ -6,6 +6,7 @@
   "started_at_jst": "2026-08-22T19:54:00+09:00",
   "heartbeat_at_jst": "2026-08-22T19:56:00+09:00",
   "last_activity_at_jst": "2026-08-22T19:56:00+09:00",
+  "completed_at_jst": "2026-08-22T19:56:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "ac946914e6d72bab02d5f1083e93a3f7b6dcbf9c",
   "starting_agi_gi_rev": 1600,
@@ -43,7 +44,8 @@
     "implementation_writes": 0,
     "pull_request_created": false
   },
+  "supersession_reason": "target revision collision detected before implementation",
   "integration_boundary": "Superseded permanently; do not reuse this target revision or claim.",
-  "status": "superseded_target_revision_collision_pre_implementation",
+  "status": "superseded",
   "agi_state": "NOT_AGI"
 }
