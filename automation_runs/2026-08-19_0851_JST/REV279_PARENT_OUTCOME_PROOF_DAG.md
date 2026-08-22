@@ -34,8 +34,14 @@ rev279 charges only canonical transcript serialization, digest verification, fix
 
 The consumer rejects malformed runtime types, nonexact/incomplete outcomes, zero parent degree, an undersized original root, malformed or tampered digests, outcome/status mismatches, wrong source evidence revision/status, identity tampering, proof/accounting payload mismatch, forbidden semantic promotion, and a failed global proof-DAG envelope.
 
+## Current-main dependency revalidation checkpoint
+
+The original exact rev279 head `27152cd5130106c9a9610161874f8b5edc94225e` completed the repository-wide AGI-GI validation successfully. The separately owned rev289 shared proof-DAG envelope hardening has since merged to `main` through PR #233. rev279 does not copy, modify, or override rev289; its consumer-side strict envelope validation remains a conservative pre-check in front of the now-hardened shared validator.
+
+`main` has continued to advance through independently owned claims after rev289. This documentation-only checkpoint intentionally changes no shared code and exists to trigger a fresh pull-request merge-ref validation against the current base. The dedicated smoke must again preview canonical `attempt_solution`, `publish`, and `merge` admission from that merge-ref registry before any integration decision. No sibling workflow is manually rerun or cancelled.
+
 ## Parallel safety
 
-The revision owns only the rev279 additive files recorded in `chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427`. It does not write any rev275–rev278 path, rev273/rev271/rev264/state-orbit proof-DAG path, CRX1/CRX2 implementation, shared solver, sibling claim, sibling workflow, or `MAIN.md`.
+The revision owns only the rev279 additive files recorded in `chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427`. It does not write any sibling problem-tree path, CRX1/CRX2 implementation, shared solver, sibling claim, sibling workflow, or `MAIN.md`.
 
 AGI state remains `NOT_AGI`.
