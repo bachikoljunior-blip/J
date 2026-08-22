@@ -1,0 +1,93 @@
+name: rev600 SOJ main provenance gate smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1346_JST/soj_main_provenance_gate_v1.py'
+      - 'automation_runs/2026-08-22_1346_JST/test_soj_main_provenance_gate_rev600.py'
+      - 'automation_runs/2026-08-22_1346_JST/REV600_SOJ_MAIN_PROVENANCE_GATE.md'
+      - '.github/workflows/rev600-soj-main-provenance-gate-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502-publish.json'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev600 module and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1346_JST/soj_main_provenance_gate_v1.py \
+            automation_runs/2026-08-22_1346_JST/test_soj_main_provenance_gate_rev600.py
+      - name: Run rev600 focused regressions
+        run: |
+          python -m unittest discover \
+            -s automation_runs/2026-08-22_1346_JST \
+            -p 'test_soj_main_provenance_gate_rev600.py' \
+            -v
+      - name: Reject branch-only rev400/rev500 imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '(^|[[:space:]])(from|import)[[:space:]].*(soj_production_caller_binding_v1|soj_caller_replay_envelope_v1)' \
+              automation_runs/2026-08-22_1346_JST; then
+            echo 'rev600 must not import rev400/rev500 branch-only implementation' >&2
+            exit 1
+          fi
+      - name: Canonical attempt_solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/production-main-provenance-gate \
+            --target-revision 600 \
+            --path .github/workflows/rev600-soj-main-provenance-gate-smoke.yml \
+            --path automation_runs/2026-08-22_1346_JST/REV600_SOJ_MAIN_PROVENANCE_GATE.md \
+            --path automation_runs/2026-08-22_1346_JST/soj_main_provenance_gate_v1.py \
+            --path automation_runs/2026-08-22_1346_JST/test_soj_main_provenance_gate_rev600.py \
+            --output /tmp/rev600-attempt.json
+          cat /tmp/rev600-attempt.json
+      - name: Canonical publish admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502 \
+            --phase publish \
+            --scope w1r-h6/corrected-split-or-johnson/production-main-provenance-gate \
+            --target-revision 600 \
+            --path .github/workflows/rev600-soj-main-provenance-gate-smoke.yml \
+            --path automation_runs/2026-08-22_1346_JST/REV600_SOJ_MAIN_PROVENANCE_GATE.md \
+            --path automation_runs/2026-08-22_1346_JST/soj_main_provenance_gate_v1.py \
+            --path automation_runs/2026-08-22_1346_JST/test_soj_main_provenance_gate_rev600.py \
+            --output /tmp/rev600-publish.json
+          cat /tmp/rev600-publish.json
+      - name: Enforce reserved rev600 diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --quiet
+          changed="$(git diff --name-only origin/main...HEAD)"
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              .github/workflows/rev600-soj-main-provenance-gate-smoke.yml|automation_runs/2026-08-22_1346_JST/REV600_SOJ_MAIN_PROVENANCE_GATE.md|automation_runs/2026-08-22_1346_JST/soj_main_provenance_gate_v1.py|automation_runs/2026-08-22_1346_JST/test_soj_main_provenance_gate_rev600.py|agi/run-history/phase-admissions/chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502-attempt-solution.json|agi/run-history/phase-admissions/chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502-publish.json)
+                ;;
+              *)
+                echo "unexpected non-rev600 path: $path" >&2
+                exit 1
+                ;;
+            esac
+          done <<< "$changed"
