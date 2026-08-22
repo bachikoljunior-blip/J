@@ -4,14 +4,14 @@
   "claim_id": "chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e",
   "session_id": "chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST",
   "started_at_jst": "2026-08-22T18:56:10+09:00",
-  "heartbeat_at_jst": "2026-08-22T18:56:10+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:03:20+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2d97221e6f00c3c27ea92cecd6f4302ec58a741c",
   "starting_agi_gi_rev": 1600,
   "target_revision": 2707,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-result-proof-dag-integrity",
   "branch": "agi-gi-rev2707-soj-parent-filtered-proof-dag-integrity-session-20260822-1856",
-  "pull_request": null,
+  "pull_request": 280,
   "reserved_paths": [
     ".github/workflows/rev2707-soj-parent-filtered-proof-dag-integrity-smoke.yml",
     "automation_runs/2026-08-22_1856_JST/REV2707_SOJ_PARENT_FILTERED_PROOF_DAG_INTEGRITY.md",
@@ -30,6 +30,7 @@
     "rev2200 corrected-SOJ parent-filtered child result / PR #274 and all reserved paths",
     "rev1100 main/post-replay seal / PR #267 and all reserved paths",
     "run-start history integrity / PR #273 and all coordination reserved paths",
+    "claim-publication preflight coordination claim and all reserved paths",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
   "intent": "Retry the file-disjoint post-result integrity leaf after fail-closed rev2500 revision collision: independently replay the public rev2200 ParentFilteredGroundResult identity, require strict exact/complete status semantics, bind every nonempty representative and stabilizer element into a deterministic canonical proof DAG, require empty results to carry no hidden witness, and emit a replayable SHA-256 proof-DAG identity. Do not import sibling branch-only implementations, do not redo parent filtering or accounting, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
@@ -44,11 +45,29 @@
     "fail_closed_on_schema_status_identity_or_witness_drift": true
   },
   "preflight": {
-    "rev2707_branch_search": "none",
-    "rev2707_open_pr_search": "none",
-    "rev2707_repository_search": "none",
+    "rev2707_branch_search": "none before claim",
+    "rev2707_open_pr_search": "none before claim",
+    "rev2707_repository_search": "none before claim",
     "previous_rev2500_attempt": "closed unmerged after canonical target_revision collision"
   },
-  "status": "active_claimed",
+  "validation": {
+    "exact_head": "44c72de86c9c460bc535aeea2a217f9b1ef072bd",
+    "focused_regressions": "14/14 passed",
+    "py_compile": "success",
+    "branch_only_import_boundary": "success",
+    "reserved_diff_enforcement": "success",
+    "attempt_solution": "admitted=true; mode=exclusive; conflicts=[]",
+    "publish": "admitted=true; mode=exclusive; conflicts=[]",
+    "phase_evidence_persist_commit": "96c3bb17e04ea8e31a5f1a82ea343fa7adc7bb67",
+    "dedicated_workflow_run": 32566564040,
+    "problem_solving_parallel_admission_run": 32566564081,
+    "problem_solving_parallel_admission": "success",
+    "inherited_rev238_rev239_rev240_rev241_rev242_rev250_rev253": "success",
+    "inherited_rev246_rev254": "natural runs still settling at heartbeat time",
+    "run_start_history_integrity": "external failure on unresolved historical starting_main_sha 34c9ca6eafc11a0737fbacb70fd0fc244bea6973; owned by separate run-start-history hardening scope; not modified here",
+    "manual_rerun_or_cancel": false
+  },
+  "integration_boundary": "PR #280 remains draft and unmerged while direct public producer rev2200 / PR #274 is independently owned and unmerged; do not overtake upstream ownership.",
+  "status": "active_exact_head_green_waiting_upstream_and_external_history_integrity",
   "agi_state": "NOT_AGI"
 }
