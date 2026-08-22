@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev2400-soj-parent-filtered-result-accounting-coherence-20260822T184650JST-34c24406",
+  "session_id": "chatgpt-session-j-rev2400-soj-parent-filtered-result-accounting-coherence-20260822T184650JST",
+  "started_at_jst": "2026-08-22T18:46:50+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:46:50+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "34c2440682b1f6af6d1fc78e7805ff4a656f8d06",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": 2400,
+  "scope": "crx2/corrected-soj/parent-filtered-result-accounting-coherence",
+  "reserved_paths": [
+    ".github/workflows/rev2400-soj-parent-filtered-result-accounting-coherence-smoke.yml",
+    "automation_runs/2026-08-22_1846_JST/REV2400_SOJ_PARENT_FILTERED_RESULT_ACCOUNTING_COHERENCE.md",
+    "automation_runs/2026-08-22_1846_JST/soj_parent_filtered_result_accounting_coherence_v1.py",
+    "automation_runs/2026-08-22_1846_JST/test_soj_parent_filtered_result_accounting_coherence_rev2400.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2400-soj-parent-filtered-result-accounting-coherence-20260822T184650JST-34c24406-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2400-soj-parent-filtered-result-accounting-coherence-20260822T184650JST-34c24406-publish.json"
+  ],
+  "branch": "agi-gi-rev2400-soj-parent-filtered-result-accounting-coherence-session-20260822-1846",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
