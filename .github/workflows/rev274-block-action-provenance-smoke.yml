@@ -1,0 +1,54 @@
+name: rev274 block action provenance smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py"
+      - "automation_runs/2026-08-19_0851_JST/REV274_BLOCK_ACTION_PROVENANCE.md"
+      - ".github/workflows/rev274-block-action-provenance-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6-*.json"
+
+permissions:
+  contents: read
+
+jobs:
+  rev274-block-action-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run focused rev274 regressions
+        run: >-
+          python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py -v
+
+      - name: Compile rev274 implementation and tests
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py
+          automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py
+
+      - name: Enforce sibling implementation independence
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py
+            automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py
+          )
+          if grep -En 'homogeneous_block_relation_provenance|implicit_relation_image|proof_dag_accounting|resource_execution_ledger' "${files[@]}"; then
+            echo "rev274 must not import or depend on sibling branch-only implementations" >&2
+            exit 1
+          fi
+
+      - name: Verify reserved diff remains additive
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" -- \
+            automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py \
+            automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py \
+            automation_runs/2026-08-19_0851_JST/REV274_BLOCK_ACTION_PROVENANCE.md \
+            .github/workflows/rev274-block-action-provenance-smoke.yml
