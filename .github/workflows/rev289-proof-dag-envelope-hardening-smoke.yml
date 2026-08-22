@@ -99,3 +99,29 @@ jobs:
           path: /tmp/rev289-publish.json
           if-no-files-found: error
           retention-days: 1
+      - name: Generate canonical merge admission snapshot
+        run: |
+          git fetch --no-tags origin main
+          rm -rf /tmp/rev289-main-merge
+          git worktree add --detach /tmp/rev289-main-merge origin/main
+          python automation/problem_solving_parallel_admission.py \
+            --root /tmp/rev289-main-merge \
+            --claim-id chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79 \
+            --phase merge \
+            --scope crx3/shared-proof-dag/strict-envelope-input-validation \
+            --target-revision 289 \
+            --path .github/workflows/rev289-proof-dag-envelope-hardening-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79-publish.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79-merge.json \
+            --path automation_runs/2026-08-19_0851_JST/REV289_PROOF_DAG_ENVELOPE_HARDENING.md \
+            --path automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_proof_dag_envelope_input_validation_rev289.py \
+            --output /tmp/rev289-merge.json
+      - name: Preserve generated merge admission evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev289-merge-evidence
+          path: /tmp/rev289-merge.json
+          if-no-files-found: error
+          retention-days: 1
