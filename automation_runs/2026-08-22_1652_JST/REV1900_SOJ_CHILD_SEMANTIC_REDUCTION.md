@@ -61,6 +61,24 @@ parent-string digests, exact child values and digests, profile schema, measures,
 and a conservative semantic-construction work bound. Replay reruns rev287 from
 the original embedding/generators and reconstructs the entire child binding.
 
+## Validation and admission boundary
+
+The first ordinary pull-request head (`39d59b7f4f2fd3f4bbe10c835029f307d752a8bc`)
+completed the dedicated rev1900 smoke successfully. It passed Python
+compilation, all 9 focused rev1900 regressions, all 11 inherited rev287
+relational-reduction regressions, the sibling-implementation dependency gate,
+and fresh canonical `attempt_solution` and `publish` previews. Both previews
+were `admitted=true` with `conflicts=[]` against canonical main source
+`17d6614f8791af25044c801dff24de2aa183ab0c`.
+
+The repository-wide phase-evidence guard correctly failed closed on that first
+head because the two mechanically generated evidence files had not yet been
+persisted in the branch diff. This is not treated as permission to fabricate or
+copy evidence. A subsequent ordinary push on this dedicated branch re-enters
+the same green smoke and allows only its final branch-local step to run the
+main-integrated admission generator with `--output`, committing only the two
+reserved evidence paths. No sibling workflow is rerun or cancelled.
+
 This revision does not execute recursive String-Isomorphism, lift a child
 result, perform full parent-coset filtering, change recurrence/proof-DAG
 accounting, close corrected Split-or-Johnson, prove GI, or establish AGI.
