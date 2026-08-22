@@ -166,6 +166,17 @@ class ProductionCallerBindingTests(unittest.TestCase):
         with self.assertRaises(CallerBindingError):
             bind_production_caller(value)
 
+    def test_rejects_nonstring_result_status_fail_closed(self) -> None:
+        for bad in ([], {}, 1, True, None):
+            value = recursive()
+            value["result_status"] = bad
+            with self.assertRaises(CallerBindingError):
+                bind_production_caller(value)
+            value = recursive()
+            value["larger_ground_recursive"]["result_status"] = bad
+            with self.assertRaises(CallerBindingError):
+                bind_production_caller(value)
+
     def test_tampering_changes_binding_identity(self) -> None:
         one = bind_production_caller(recursive())
         value = recursive()
