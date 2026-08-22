@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1700-soj-child-semantic-reduction-20260822T165100JST-b724712b",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev1700-20260822T165100+0900-turn9",
+  "started_at_jst": "2026-08-22T16:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:51:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "b724712b1dc9ca464370c7935ccce7fae97bf60d",
+  "starting_agi_gi_rev": 952,
+  "target_revision": 1700,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-semantic-reduction-binding",
+  "branch": "agi-gi-rev1700-soj-child-semantic-reduction-session-20260822-1651",
+  "current_pr": null,
+  "exact_head": null,
+  "reserved_paths": [
+    ".github/workflows/rev1700-soj-child-semantic-reduction-smoke.yml",
+    "automation_runs/2026-08-22_1651_JST/REV1700_SOJ_CHILD_SEMANTIC_REDUCTION.md",
+    "automation_runs/2026-08-22_1651_JST/soj_child_semantic_reduction_binding_v1.py",
+    "automation_runs/2026-08-22_1651_JST/test_soj_child_semantic_reduction_binding_rev1700.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1700-soj-child-semantic-reduction-20260822T165100JST-b724712b-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1700-soj-child-semantic-reduction-20260822T165100JST-b724712b-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev1600 homogeneous block-action provenance proof-DAG claim and all reserved paths",
+    "all rev1500 claims and their reserved paths",
+    "rev1400 corrected-SOJ recursive production execution proof-DAG / PR #264 and all reserved paths",
+    "rev1300 / PR #263, rev1200 / PR #260, rev1100 / PR #257, rev1000 / PR #256, rev900 / PR #254 and all reserved paths",
+    "rev293 Johnson recursive-result lift / PR #241 and all reserved paths",
+    "main-integrated rev287 Johnson relational-reduction implementation except read-only public contract use",
+    "all CRX1/CRX2/CRX3 scopes, homogeneous-block scopes, MAIN.md, shared S1/proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "close only the semantic child-string construction gap between the main-integrated rev287 exact larger-ground Johnson relational reduction and any later recursive-child execution: independently replay the rev287 ground-incidence transport certificate, deterministically derive source and target child strings on the certified Johnson ground from caller-supplied parent strings and certified point-incidence fibers, prove equivariance under every certified induced-ground generator, freeze parent/reduction/child-string digests into one replay-stable binding artifact, and fail closed on ambiguity or drift. Do not execute recursive String Isomorphism, do not lift a child result, do not import any sibling branch-only implementation, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_any_rev287_replay_or_child_semantic_identity_drift": true
+  },
+  "depends_on_main_integrated_contracts": [
+    "rev287 larger-ground Johnson relational-reduction certificate and induced ground-action replay",
+    "main-integrated permutation/group primitives used read-only for exact generator action checks"
+  ],
+  "integration_boundary": "file-disjoint semantic-binding leaf only; recursive solver execution and result lifting remain separately owned",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
