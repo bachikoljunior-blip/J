@@ -19,7 +19,7 @@
     "automation_runs/2026-08-22_1744_JST/RUN_START_HISTORY_INTEGRITY.md"
   ],
   "branch": "hardening/run-start-history-integrity-20260822-1744",
-  "status": "active",
+  "status": "superseded",
   "agi_state": "NOT_AGI",
   "problem_process": {
     "predicted_problem_count": 576,
@@ -43,5 +43,8 @@
     "decision": "compose existing immutable-start and explicit-correction mechanisms into a repository CI guard; do not introduce another revision definition"
   },
   "non_interference": "Reserve only the six coordination hardening/evidence paths; do not modify MAIN.md or active solver/proof-DAG scopes.",
-  "strict_boundary": "Run-history integrity only. No GI or AGI capability claim."
+  "strict_boundary": "Run-history integrity only. No GI or AGI capability claim.",
+  "completed_at_jst": "2026-08-22T18:47:35+09:00",
+  "superseded_by_claim_id": "chatgpt-session-j-run-start-history-integrity-takeover-20260822T184552JST-3b76805f",
+  "close_reason": "stale claim taken over after PR #273 exact-head replay exposed canonical rev1600 correction work"
 }
