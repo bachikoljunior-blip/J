@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-rev3000-soj-parent-filtered-execution-proof-dag-rebase-20260822T195023JST-26a175ae",
   "session_id": "chatgpt-session-j-rev3000-soj-parent-filtered-execution-proof-dag-rebase-20260822T195023JST",
   "started_at_jst": "2026-08-22T19:50:23+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:50:23+09:00",
-  "last_activity_at_jst": "2026-08-22T19:50:23+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:53:56+09:00",
+  "last_activity_at_jst": "2026-08-22T19:53:56+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "26a175ae9fb76c0f31340d43c0956392ed377e61",
   "starting_agi_gi_rev": 1600,
@@ -20,6 +20,7 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev3000-soj-parent-filtered-execution-proof-dag-rebase-20260822T195023JST-26a175ae-publish.json"
   ],
   "parallel_exclusions": [
+    "rev2900 parent-filtered execution proof/accounting coherence and all reserved paths",
     "rev2800 parent-filtered proof/accounting coherence / PR #283 and all reserved paths",
     "rev2707 parent-filtered proof-DAG integrity / PR #280 and all reserved paths",
     "rev2600 parent-filtered result accounting coherence / PR #279 and all reserved paths",
@@ -31,6 +32,8 @@
     "run-start history integrity and claim-publication preflight coordination scopes",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
+  "branch": "agi-gi-rev3000-soj-parent-filtered-execution-proof-dag-rebase-session-20260822-1950",
+  "pull_request": 285,
   "intent": "Re-home the already-tested parent-filtered-result / execution-proof-DAG binding on a fresh main ancestry after rev2500 phase evidence became unreplayable because its immutable branch base still contained a then-active sibling rev2500 claim. Preserve the same fail-closed public-certificate replay semantics without importing sibling branch-only implementations, and obtain canonical persistent attempt_solution/publish evidence on a collision-free registry snapshot.",
   "parallel_safety": {
     "do_not_modify_other_active_branches": true,
@@ -42,6 +45,15 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
     "fail_closed_on_schema_status_identity_or_witness_drift": true
   },
+  "validation": {
+    "implementation_head": "d33b1eaab7d4a1de4c786ea89b963f2e2b4747e2",
+    "focused_regressions": "12/12 passed",
+    "py_compile": "success",
+    "first_pr_workflow_run": 32568802609,
+    "first_pr_workflow_failure": "canonical admission rejected own claim because the initial claim snapshot omitted the required branch field and loaded as non-schema-v2",
+    "manual_rerun_or_cancel": false
+  },
+  "next_action": "bring this corrected main-side claim snapshot into the isolated rev3000 branch with a normal merge commit, then let natural branch/PR events regenerate canonical admission; do not touch sibling runs or workflows",
   "status": "in_progress",
   "agi_state": "NOT_AGI"
 }
