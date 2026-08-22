@@ -32,6 +32,10 @@ A pre-publication read cannot itself provide a distributed atomic compare-and-sw
 
 The focused standard-library regression suite covers clean admission, scope/revision/path collisions, path-prefix collision, stale/completed owners, stale/closed candidates, malformed candidate/registry data, duplicate claim IDs, published-owner audit, deterministic registry audit, disjoint claims, and null-target coordination claims. A dedicated workflow additionally performs canonical `attempt_solution` and `publish` admission previews for this exact reserved diff, runs the tests and `py_compile`, and enforces the reserved-path boundary.
 
+The first PR validation exposed two invalid stale-test fixtures whose heartbeat preceded their synthetic start time. The fixture chronology was corrected without weakening the canonical parser. Dedicated PR workflow run `32566585411` then completed successfully on connector-authored head `0cfb03f582e5b6e722e14073cc4c1f3691c56434`: all 18 focused regressions passed, both phase-admission previews were `admitted=true` with `conflicts=[]`, compilation and boundary checks passed, and the branch-push workflow persisted the canonical `attempt_solution` and `publish` records in commit `79090cbc3f82033c3c45ed13da2de3a832662a45`.
+
+The bot-authored evidence commit caused ordinary PR-triggered checks to appear as `action_required` with no jobs. This connector-authored audit heartbeat intentionally follows that evidence commit so ordinary checks can naturally evaluate an evidence-bearing head. No workflow is manually rerun, approved, cancelled, or otherwise changed by this session.
+
 ## Non-interference and AGI boundary
 
 No sibling branch, PR, claim, workflow, solver, proof-DAG implementation, `MAIN.md`, or shared coordination implementation is modified by this branch. Existing workflows are not cancelled or manually rerun, and sibling branches are not rebased or force-pushed. This is coordination hardening only. Repository state remains `NOT_AGI`.
