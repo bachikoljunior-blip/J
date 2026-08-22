@@ -4,10 +4,10 @@
   "claim_id": "chatgpt-session-j-rev1300-soj-recursive-production-lineage-closure-20260822T155500JST-4b4cf2ab",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1300-20260822T155500+0900-turn4",
   "started_at_jst": "2026-08-22T15:55:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:08:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:09:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "4b4cf2abffbee78917874e5065117a84df997dcc",
-  "latest_main_sha_observed": "1a62c2e0ae4982f0443b081600ba110f1a087c6a",
+  "latest_main_sha_observed": "2ddfe7eef50a130aca4699905c0a6ddc5b2458a1",
   "starting_agi_gi_rev": 620,
   "target_revision": 1300,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-lineage-closure",
@@ -69,12 +69,10 @@
     "focused_regressions": "21/21 passed",
     "py_compile": "success",
     "reserved_diff": "exactly six rev1300-reserved paths",
-    "inherited_workflows": {
-      "success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253", "rev254"],
-      "in_progress_natural_no_interference": ["rev246"]
-    }
+    "all_observed_exact_head_workflows": "success",
+    "inherited_workflows_success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev246", "rev250", "rev253", "rev254"]
   },
-  "integration_boundary": "keep PR #263 draft and unmerged while independently owned rev900/rev1100 producer contracts and remaining natural exact-head inherited CI settle; do not promote public-certificate lineage equality into corrected Split-or-Johnson, GI, or AGI completion",
+  "integration_boundary": "keep PR #263 draft and unmerged while independently owned rev900/rev1100 producer contracts remain open/draft; do not promote public-certificate lineage equality into corrected Split-or-Johnson, GI, or AGI completion",
   "supersedes_same_session_claim": "chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447",
   "status": "active",
   "agi_state": "NOT_AGI"
