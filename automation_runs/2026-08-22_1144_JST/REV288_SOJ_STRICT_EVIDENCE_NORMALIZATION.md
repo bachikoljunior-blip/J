@@ -32,12 +32,12 @@ This layer performs **no** transition admission, terminal execution, recurrence 
 
 ## Parallel boundary
 
-The active rev275 registry record remains independently owned and legacy/non-schema-v2. rev288 does not modify or normalize it and will not fabricate `attempt_solution` or `publish` evidence while canonical registry replay is unavailable.
+The formerly blocking legacy rev275 record was superseded by its independently owned schema-v2 takeover claim. rev288 did not modify either record. With the canonical registry restored, rev288 obtained exclusive `attempt_solution` and `publish` admission with zero conflicts and persisted both replayable evidence objects from registry source `e5118818cea87bfa4b04d9d1968cb5877a6d4b39`, digest `sha256:e3eb4671d7271a0a57bf095314edc12d240a5ab5546fce34601dca24108f3a74`.
 
-Likewise rev276 / PR #221, rev281 / PR #226, rev283 / PR #228, rev284 / PR #229, rev285 / PR #230, rev286 / PR #231, and any rev287 work remain untouched. No sibling workflow is cancelled or manually rerun; no sibling branch or PR is rebased, force-pushed, overwritten, closed, merged, or modified.
+rev276 / PR #221, rev281 / PR #226, rev283 / PR #228, rev284 / PR #229, rev285 / PR #230, rev286 / PR #231, rev289 and later sibling work remain untouched. No sibling workflow is cancelled or manually rerun; no sibling branch or PR is rebased, force-pushed, overwritten, closed, merged, or modified.
 
 ## Validation
 
-The dedicated rev288 smoke runs the focused strict-type/replay regression suite and `py_compile`. It also verifies that the rev288 module/test do not import the active rev281/rev283/rev284/rev285/rev286 branch-only modules.
+The dedicated rev288 smoke runs the focused strict-type/replay regression suite and `py_compile`. It also verifies that the rev288 module/test do not import active sibling corrected-SOJ branch-only implementations. On the evidence-producing exact head, all 21 focused tests passed, compile and import-boundary checks passed, and canonical `attempt_solution` / `publish` decisions were both `admitted=true`, `mode=exclusive`, `conflicts=[]`. The repository-wide phase-evidence guard subsequently replayed the persisted evidence successfully on the proposal head.
 
 AGI state remains `NOT_AGI`.
