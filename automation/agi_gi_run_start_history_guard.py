@@ -10,6 +10,7 @@ derived revision, and evidence commit.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import subprocess
 from pathlib import Path
@@ -46,13 +47,23 @@ def parse_jsonl(lines: Iterable[str]) -> list[tuple[int, dict[str, object]]]:
 def validate_history(
     lines: Iterable[str],
     revision_resolver: Callable[[str], tuple[int, str] | None],
+    identity_correction_resolver: Callable[[str, str, str, str], bool] | None = None,
 ) -> dict[str, int]:
     records = parse_jsonl(lines)
     starts: dict[str, tuple[int, dict[str, object]]] = {}
     corrections: dict[str, tuple[int, dict[str, object]]] = {}
+    identity_corrections: dict[str, tuple[int, dict[str, object]]] = {}
 
     for number, record in records:
         event = record.get("event_type")
+        if event == "automation_run_start_identity_correction":
+            run_id = record.get("correction_of_automation_run_id")
+            if not isinstance(run_id, str) or not run_id:
+                raise HistoryError(f"line {number}: identity correction run id missing")
+            if run_id in identity_corrections:
+                raise HistoryError(f"line {number}: duplicate identity correction for {run_id}")
+            identity_corrections[run_id] = (number, record)
+            continue
         if event in ("automation_run_start_correction", "start_record_correction"):
             run_id = (
                 record.get("correction_of_automation_run_id")
@@ -74,11 +85,12 @@ def validate_history(
             raise HistoryError(f"line {number}: duplicate start for {run_id}")
         starts[run_id] = (number, record)
 
-    unknown = sorted(set(corrections) - set(starts))
+    unknown = sorted((set(corrections) | set(identity_corrections)) - set(starts))
     if unknown:
         raise HistoryError(f"correction references unknown run: {unknown[0]}")
 
     corrected = 0
+    identity_corrected = 0
     legacy_unverifiable = 0
     enforcement_seen = False
     for run_id, (number, start) in starts.items():
@@ -100,11 +112,46 @@ def validate_history(
             )
         )
         correction_item = corrections.get(run_id)
-        if not (enforcement_seen or marker or correction_item is not None):
+        identity_item = identity_corrections.get(run_id)
+        if not (
+            enforcement_seen
+            or marker
+            or correction_item is not None
+            or identity_item is not None
+        ):
             legacy_unverifiable += 1
             continue
         enforcement_seen = enforcement_seen or marker
-        resolution = revision_resolver(sha)
+        effective_sha = sha
+        if identity_item is not None:
+            correction_number, correction = identity_item
+            corrected_sha = correction.get("corrected_starting_main_sha")
+            next_sha = correction.get("next_main_commit_sha")
+            checks = {
+                "supersedes_starting_main_sha": sha,
+                "started_at_jst": timestamp,
+                "starting_agi_gi_rev": recorded_rev,
+                "preserves_original_record": True,
+            }
+            for key, expected in checks.items():
+                if correction.get(key) != expected:
+                    raise HistoryError(
+                        f"line {correction_number}: identity correction {key} does not bind start"
+                    )
+            if not isinstance(corrected_sha, str) or not isinstance(next_sha, str):
+                raise HistoryError(
+                    f"line {correction_number}: corrected and next SHA are required"
+                )
+            if identity_correction_resolver is None or not identity_correction_resolver(
+                sha, corrected_sha, next_sha, timestamp
+            ):
+                raise HistoryError(
+                    f"line {correction_number}: identity correction evidence is invalid"
+                )
+            effective_sha = corrected_sha
+            identity_corrected += 1
+
+        resolution = revision_resolver(effective_sha)
         if resolution is None:
             raise HistoryError(f"line {number}: no canonical revision after enforcement")
         derived_rev, evidence_sha = resolution
@@ -144,6 +191,7 @@ def validate_history(
         "starts": len(starts),
         "corrections": len(corrections),
         "corrected_starts": corrected,
+        "identity_corrected_starts": identity_corrected,
         "legacy_unverifiable_starts": legacy_unverifiable,
     }
 
@@ -171,6 +219,42 @@ def git_revision_resolver(repo: Path) -> Callable[[str], tuple[int, str] | None]
     return resolve
 
 
+def git_identity_correction_resolver(
+    repo: Path,
+) -> Callable[[str, str, str, str], bool]:
+    def resolve(
+        superseded_sha: str, corrected_sha: str, next_sha: str, timestamp: str
+    ) -> bool:
+        del superseded_sha  # The unavailable value is bound by the correction record.
+        try:
+            corrected = _git(repo, "rev-parse", "--verify", f"{corrected_sha}^{{commit}}")
+            following = _git(repo, "rev-parse", "--verify", f"{next_sha}^{{commit}}")
+            if corrected != corrected_sha or following != next_sha:
+                return False
+            parents = _git(repo, "show", "-s", "--format=%P", following).split()
+            if parents != [corrected]:
+                return False
+            subprocess.run(
+                ["git", "merge-base", "--is-ancestor", following, "HEAD"],
+                cwd=repo,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            before = dt.datetime.fromisoformat(
+                _git(repo, "show", "-s", "--format=%cI", corrected)
+            )
+            after = dt.datetime.fromisoformat(
+                _git(repo, "show", "-s", "--format=%cI", following)
+            )
+            observed = dt.datetime.fromisoformat(parse_jst(timestamp))
+            return before <= observed <= after
+        except (subprocess.CalledProcessError, ValueError):
+            return False
+
+    return resolve
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=Path, default=Path("."))
@@ -183,6 +267,7 @@ def main() -> int:
     summary = validate_history(
         history.read_text(encoding="utf-8").splitlines(),
         git_revision_resolver(repo),
+        git_identity_correction_resolver(repo),
     )
     print(json.dumps(summary, sort_keys=True, separators=(",", ":")))
     return 0
