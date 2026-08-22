@@ -4,16 +4,16 @@
   "claim_id": "chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST-ac946914",
   "session_id": "chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST",
   "started_at_jst": "2026-08-22T19:53:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:53:00+09:00",
-  "last_activity_at_jst": "2026-08-22T19:53:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:00:10+09:00",
+  "last_activity_at_jst": "2026-08-22T20:00:10+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "11fe9c0bf47558c67f63ed818652fc5de7ab489b",
   "starting_agi_gi_rev": 1600,
   "target_revision": 3100,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-execution-proof-accounting-coherence-rebase",
   "branch": "agi-gi-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-session-20260822-1953",
-  "pull_request": null,
-  "exact_head_sha": null,
+  "pull_request": 287,
+  "exact_head_sha": "bb0b6033a9e8fa7d1b23fb10a8c1c6f625e7b49f",
   "reserved_paths": [
     ".github/workflows/rev3100-soj-parent-filtered-execution-proof-accounting-coherence-smoke.yml",
     "automation_runs/2026-08-22_1953_JST/REV3100_SOJ_PARENT_FILTERED_EXECUTION_PROOF_ACCOUNTING_COHERENCE.md",
@@ -23,7 +23,7 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST-ac946914-publish.json"
   ],
   "parallel_exclusions": [
-    "active rev3000 parent-filtered execution proof-DAG rebase and all reserved paths",
+    "active rev3000 parent-filtered execution proof-DAG rebase / PR #285 and all reserved paths",
     "rev2800 parent-filtered proof/accounting coherence / PR #283 and all reserved paths",
     "rev2707 parent-filtered proof-DAG integrity / PR #280 and all reserved paths",
     "rev2600 parent-filtered result accounting coherence / PR #279 and all reserved paths",
@@ -31,6 +31,7 @@
     "rev2200 parent-filtered child result / PR #274 and all reserved paths",
     "rev1400 recursive production execution proof-DAG / PR #264 and all reserved paths",
     "superseded rev2900 downstream attempt and all reserved paths",
+    "superseded rev3100 small-order replay claim and its branch/reserved paths; replacement rev3200 / PR #286 remains independently owned",
     "run-start history integrity / PR #284, claim-publication preflight coordination, rev400 continuation, and all reserved paths",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
@@ -50,12 +51,23 @@
     "rev3100_pr_search": "none before claim",
     "rev3100_repository_commit_search": "none before claim",
     "main_sha": "11fe9c0bf47558c67f63ed818652fc5de7ab489b",
-    "upstream_replacement_claim": "chatgpt-session-j-rev3000-soj-parent-filtered-execution-proof-dag-rebase-20260822T195023JST-26a175ae"
+    "upstream_replacement_claim": "chatgpt-session-j-rev3000-soj-parent-filtered-execution-proof-dag-rebase-20260822T195023JST-26a175ae",
+    "transient_collision_claim": "chatgpt-session-j-rev3100-small-order-public-replay-seal-20260822T195400JST-ac946914",
+    "transient_collision_resolution": "sibling owner superseded before implementation and re-homed to rev3200; verified on main before natural revalidation"
   },
   "validation": {
-    "inherited_local_prototype": "rev2900 implementation shape; 18/18 focused regressions and py_compile passed before rehome"
+    "local_focused_regressions": "18/18 passed",
+    "local_py_compile": "success",
+    "dedicated_pr_workflow_run": 32569029904,
+    "dedicated_pr_workflow_head": "bb0b6033a9e8fa7d1b23fb10a8c1c6f625e7b49f",
+    "dedicated_pr_workflow_result": "failed only at canonical admission preview because a later sibling rev3100 claim was still active in that registry snapshot; tests/compile were skipped by gate",
+    "dedicated_pr_workflow_conflict": "target_revision_collision with chatgpt-session-j-rev3100-small-order-public-replay-seal-20260822T195400JST-ac946914",
+    "collision_now_cleared_on_main": true,
+    "persistent_phase_evidence": false,
+    "manual_rerun_or_cancel": false
   },
-  "integration_boundary": "Keep rev3100 draft/unmerged while rev3000 and rev2800 remain independently owned and unmerged. Do not overtake shared run-start history or other coordination ownership.",
-  "status": "active_claimed_pre_implementation",
+  "integration_boundary": "Keep rev3100 draft/unmerged while rev3000 / PR #285 and rev2800 / PR #283 remain independently owned and unmerged. Do not overtake shared run-start history or other coordination ownership.",
+  "next_action": "Trigger a new natural source-branch validation only by a rev3100-reserved-path commit after collision clearance; do not manually rerun the failed workflow.",
+  "status": "in_progress_collision_cleared_pending_natural_revalidation",
   "agi_state": "NOT_AGI"
 }
