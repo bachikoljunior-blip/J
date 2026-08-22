@@ -8,6 +8,7 @@ on:
       - automation_runs/2026-08-19_0851_JST/REV279_PARENT_OUTCOME_PROOF_DAG.md
       - agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json
       - agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-publish.json
+      - agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-merge.json
       - .github/workflows/rev279-parent-outcome-proof-dag-smoke.yml
   workflow_dispatch:
 
@@ -44,7 +45,7 @@ jobs:
           grep -q 'implicit_relation_parent_outcome_v1' "$file"
           grep -q 'proof_dag_accounting_v1' "$file"
           ! grep -E 'homogeneous_block|imprimitive_resource_proof_dag|implicit_image_value_proof_dag_consumer|primitive_johnson_proof_dag_consumer|proof_carrying_state_orbit_candidate' "$file"
-      - name: Preview canonical attempt and publish admission from merge-base registry
+      - name: Preview canonical attempt, publish, and merge admission from merge-base registry
         if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -79,6 +80,7 @@ jobs:
           for phase, marker in (
               ("attempt_solution", "REV279_ATTEMPT_EVIDENCE"),
               ("publish", "REV279_PUBLISH_EVIDENCE"),
+              ("merge", "REV279_MERGE_EVIDENCE"),
           ):
               now = datetime.now(JST)
               result = admit_problem_phase(
