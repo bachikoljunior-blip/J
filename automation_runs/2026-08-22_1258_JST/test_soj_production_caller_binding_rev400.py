@@ -214,6 +214,17 @@ class ProductionCallerBindingTests(unittest.TestCase):
         with self.assertRaises(CallerBindingError):
             bind_production_caller(value)
 
+    def test_rejects_missing_schema_fields(self) -> None:
+        value = small()
+        del value["larger_ground_recursive"]
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(value)
+
+        value = recursive()
+        del value["small_ground_terminal"]
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(value)
+
     def test_rejects_string_subclass_values(self) -> None:
         value = recursive()
         value["mode"] = StringSubclass("larger_ground_recursive")
