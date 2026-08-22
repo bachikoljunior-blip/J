@@ -1,0 +1,48 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617",
+  "session_id": "chatgpt-session-j-scheduled-continuation-rev950-20260822T1453+0900-4eef0617",
+  "started_at_jst": "2026-08-22T14:53:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:53:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "4eef06170e5b94bec3b4a746ce1ac48f134f47a1",
+  "starting_agi_gi_rev": 620,
+  "target_revision": 950,
+  "scope": "crx3/algorithmic-consumers/homogeneous-block-action-kernel-factorization-proof-dag",
+  "branch": "agi-gi-rev950-block-action-kernel-proof-dag-session-20260822-1453",
+  "pull_request": null,
+  "pull_request_state": "not_created",
+  "latest_head_sha": null,
+  "intent": "attach the main-integrated rev275 exact homogeneous block-action kernel factorization to the shared rev220/rev289 execution proof-DAG as a separate file-disjoint terminal consumer: independently replay the rev274 provenance and rev275 factorization, freeze provenance/certificate/order/kernel/work-cap identity, charge the mechanically bounded Schreier construction and an independent replay conservatively, and admit only exact complete factorization evidence without changing rev275, shared recurrence code, shared proof-DAG code, corrected Split-or-Johnson work, or any sibling branch-only implementation",
+  "reserved_paths": [
+    ".github/workflows/rev950-block-action-kernel-proof-dag-smoke.yml",
+    "automation_runs/2026-08-22_1453_JST/REV950_BLOCK_ACTION_KERNEL_PROOF_DAG.md",
+    "automation_runs/2026-08-22_1453_JST/block_action_kernel_proof_dag_consumer_v1.py",
+    "automation_runs/2026-08-22_1453_JST/test_block_action_kernel_proof_dag_consumer_rev950.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev900 recursive production provenance/total-cost active claim and all reserved paths",
+    "rev1000 recursive production post-replay envelope active claim and all reserved paths",
+    "rev720/rev800/rev700/rev650/rev600 corrected Split-or-Johnson scopes and all reserved paths",
+    "rev620 proof-carrying small-order production proof-DAG and all reserved paths",
+    "rev279 parent/joint identity hardening and all reserved paths",
+    "state-orbit proof-DAG and other CRX proof-DAG sibling scopes",
+    "all sibling claims, branches, PRs, workflows, MAIN.md, shared recurrence implementation, shared coordination implementation, and shared proof-DAG implementations"
+  ],
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_branch_only_sibling_implementation": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
+  },
+  "validation": {
+    "state": "claimed_not_yet_implemented",
+    "rev275_main_merge_sha": "87651f44ec341b95ba7e8d0f8df5bc59bb9fed19"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
