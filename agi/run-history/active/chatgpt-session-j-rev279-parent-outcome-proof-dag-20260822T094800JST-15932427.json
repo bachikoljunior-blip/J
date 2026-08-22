@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T094800+0900-rev279-turn2",
   "started_at_jst": "2026-08-22T09:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T12:55:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:58:15+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "15932427fd0b83fa27d50cf83319fc88c75df564",
   "starting_agi_gi_rev": 274,
@@ -13,7 +13,7 @@
   "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
   "pull_request": 223,
   "latest_head_sha": "86786570a9d2b97ce3c67a5d728d49bd167c5999",
-  "latest_observed_main_sha": "ca87f6d200491037164a0b3b468d417465b5ffbb",
+  "latest_observed_main_sha": "2619b4ab2b60644ca2b9d4e72e816ee274ee34e5",
   "reserved_paths": [
     ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
@@ -69,6 +69,13 @@
       "registry_digest": "sha256:84a11e3cfd30201ec7f5a2ca8961db1de27a1d1106c2a89ed6f9ebcd710e25d0",
       "repository_replay_run": 32547831478,
       "repository_replay_conclusion": "success"
+    },
+    "current_merge_ref_preview": {
+      "merge_ref_sha": "05e5adcff8566d3399e23fbbe1f02ebfb306749a",
+      "registry_source_sha": "d4662a86ea92ab847627284214705b328b2b8d86",
+      "attempt_solution": "admitted_no_conflicts",
+      "publish": "admitted_no_conflicts",
+      "merge": "admitted_no_conflicts"
     }
   },
   "validation": {
@@ -94,21 +101,29 @@
     "current_head": "86786570a9d2b97ce3c67a5d728d49bd167c5999",
     "current_rev279_smoke": {
       "run_id": 32550233472,
-      "status": "queued",
-      "purpose": "30-test focused/inherited validation including overflowing Fraction resource-envelope regression plus current merge-ref phase previews"
+      "status": "completed",
+      "conclusion": "success",
+      "tests": 30,
+      "overflowing_fraction_regression": "success_fail_closed",
+      "py_compile": "success",
+      "additive_dependency_boundary": "success",
+      "attempt_publish_merge_preview": "success"
     },
     "current_problem_solving_parallel_admission": {
       "run_id": 32550233483,
-      "status": "queued"
+      "status": "completed",
+      "conclusion": "success"
     },
     "current_general_agi_gi_validation": {
       "run_id": 32550233458,
-      "status": "queued"
+      "status": "in_progress",
+      "validate_w1r_fast": "success",
+      "validate_rev_series": "in_progress"
     }
   },
   "integration_watch": {
     "main_advanced_after_merge_evidence": true,
-    "observed_main_sha": "ca87f6d200491037164a0b3b468d417465b5ffbb",
+    "observed_main_sha": "2619b4ab2b60644ca2b9d4e72e816ee274ee34e5",
     "main_advance": "main continues to advance through independently owned revisions while rev279 remains file-disjoint",
     "shared_dependency_owner_active": false,
     "shared_dependency_state": "rev289 shared proof-DAG envelope hardening merged independently as PR #233; rev279 has not modified that sibling branch or PR",
@@ -116,6 +131,6 @@
   },
   "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, tampered, or malformed/non-finite/overflowing resource evidence without modifying shared solvers or upstream CRX1 branches",
   "non_interference": "Only rev279 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
-  "status": "active_overflow_guard_implemented_current_head_validation_queued",
+  "status": "active_current_head_smoke_and_admission_green_full_validation_in_progress",
   "agi_state": "NOT_AGI"
 }
