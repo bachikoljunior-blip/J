@@ -4,10 +4,10 @@
   "claim_id": "chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1800-20260822T165100+0900",
   "started_at_jst": "2026-08-22T16:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:59:45+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:01:16+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "293414faa845223388c310defdce329088239f76",
-  "latest_main_sha_observed": "b39e252f5070277e6154cfd28b015a3a200b03d0",
+  "latest_main_sha_observed": "17d6614f8791af25044c801dff24de2aa183ab0c",
   "starting_agi_gi_rev": 952,
   "target_revision": 1800,
   "scope": "crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism-proof-dag",
@@ -77,14 +77,11 @@
       "run_id": 32561070171,
       "conclusion": "success"
     },
-    "inherited_success_observed": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253"],
-    "inherited_pending_observed": [
-      {"revision": "rev246", "run_id": 32561070141},
-      {"revision": "rev254", "run_id": 32561070191}
-    ],
+    "inherited_success_observed": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev246", "rev250", "rev253", "rev254"],
+    "inherited_pending_observed": [],
     "workflow_policy": "no unrelated workflow was cancelled, manually rerun, rebased, or force-pushed"
   },
   "integration_boundary": "draft-only while rev1200 / PR #260 remains open and unmerged; this leaf certifies only quotient-domain execution/replay and cannot be used as an original-domain transporter or CRX3/GI/AGI completion claim",
-  "status": "active_exact_head_green_waiting_rev1200_upstream",
+  "status": "active_exact_head_and_all_observed_ci_green_waiting_rev1200_upstream",
   "agi_state": "NOT_AGI"
 }
