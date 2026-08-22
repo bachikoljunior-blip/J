@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev3200-main-sync-20260822T204618JST-45be7083",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
   "started_at_jst": "2026-08-22T20:46:18+09:00",
-  "heartbeat_at_jst": "2026-08-22T20:46:18+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:51:01+09:00",
+  "completed_at_jst": "2026-08-22T20:51:01+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "45be70830c3e904e608c5a5af69b949d40a9a764",
   "starting_agi_gi_rev": 3200,
@@ -51,6 +52,18 @@
     ],
     "decision": "reuse the repository's canonical revision guard and Git content-addressed ancestry instead of creating a competing revision source"
   },
-  "status": "active",
+  "sync_commit_sha": "664aeb8e695bc2621f584042a5ce437bf53c86a7",
+  "validation": {
+    "declared_revision": 3200,
+    "canonical_revision": 3200,
+    "canonical_commit": "fecf9e337d04404d1ca419eeab92d37f7bb05efb",
+    "canonical_commit_is_ancestor": true,
+    "main_revision_guard": "success",
+    "run_start_history_records": 79,
+    "focused_tests": "13/13 success",
+    "problem_counts": "forecast 576, effective 571",
+    "agi_state": "NOT_AGI"
+  },
+  "status": "completed",
   "agi_state": "NOT_AGI"
 }
