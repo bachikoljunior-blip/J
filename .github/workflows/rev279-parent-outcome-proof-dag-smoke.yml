@@ -45,9 +45,13 @@ jobs:
           ! grep -E 'homogeneous_block|imprimitive_resource_proof_dag|implicit_image_value_proof_dag_consumer|primitive_johnson_proof_dag_consumer|proof_carrying_state_orbit_candidate' "$file"
       - name: Preview canonical attempt-solution admission from merge-base registry
         if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          MERGE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          source_sha="$(git show -s --format=%P HEAD | awk '{print $1}')"
+          source_sha="$(gh api "repos/${REPOSITORY}/commits/${MERGE_SHA}" --jq '.parents[0].sha')"
           test "${#source_sha}" -eq 40
           python - "${source_sha}" <<'PY'
           import json
