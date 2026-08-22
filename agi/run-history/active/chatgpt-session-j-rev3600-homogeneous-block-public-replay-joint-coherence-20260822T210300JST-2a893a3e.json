@@ -1,0 +1,57 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e",
+  "session_id": "chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST",
+  "started_at_jst": "2026-08-22T21:03:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:03:00+09:00",
+  "last_activity_at_jst": "2026-08-22T21:03:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "2a893a3ebe8355c86caaaabbac6a1fdad22d3e97",
+  "starting_agi_gi_rev": 3300,
+  "target_revision": 3600,
+  "scope": "crx3/algorithmic-consumers/homogeneous-block-public-replay-joint-coherence",
+  "branch": "agi-gi-rev3600-homogeneous-block-public-replay-joint-coherence-session-20260822-2103",
+  "pull_request": null,
+  "exact_head_sha": null,
+  "merge_sha": null,
+  "reserved_paths": [
+    ".github/workflows/rev3600-homogeneous-block-public-replay-joint-coherence-smoke.yml",
+    "automation_runs/2026-08-22_2103_JST/REV3600_HOMOGENEOUS_BLOCK_PUBLIC_REPLAY_JOINT_COHERENCE.md",
+    "automation_runs/2026-08-22_2103_JST/homogeneous_block_public_replay_joint_coherence_v1.py",
+    "automation_runs/2026-08-22_2103_JST/test_homogeneous_block_public_replay_joint_coherence_rev3600.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev3500 homogeneous block relation-provenance public replay seal and all reserved paths",
+    "rev3400 corrected-SOJ parent-result identity equivalence / PR #289 and all reserved paths",
+    "rev3300 merged block-action kernel public replay seal implementation paths",
+    "rev3200 small-order public replay seal and all reserved paths",
+    "rev3100/rev3000/rev2800/rev2707/rev2600/rev2200 corrected Split-or-Johnson scopes and reserved paths",
+    "rev2501 relation-twin restriction replay identity / PR #278 and all reserved paths",
+    "rev2300/rev2100/rev2000/rev1800/rev1200 homogeneous-block quotient/original-domain scopes and reserved paths",
+    "MAIN.md, shared proof-DAG/recurrence/S1/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "Add one file-disjoint post-replay coherence leaf that consumes only normalized public-shaped snapshots from the merged rev3300 block-action-kernel replay seal and the independently owned rev3500 relation-provenance replay seal. Require literal replay gates, exact schema/status/digest shapes, one common original root/domain/block cardinality tuple, and distinct upstream seal identities; preserve the relation-side exact_empty versus ok outcome without inventing quotient/original-domain semantics; domain-separate the accepted tuple into a deterministic SHA-256 joint coherence identity and verify it by full reconstruction. Do not import or modify rev3300/rev3500 branch-only implementations and do not claim homogeneous-block quotient SI, original-domain lifting, CRX3, GI, or AGI closure.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_schema_status_identity_digest_or_domain_drift": true
+  },
+  "preflight": {
+    "rev3600_branch_search": "none immediately before claim",
+    "rev3600_pr_search": "none immediately before claim",
+    "rev3600_repository_search": "none immediately before claim",
+    "main_sha": "2a893a3ebe8355c86caaaabbac6a1fdad22d3e97"
+  },
+  "validation": {},
+  "integration_boundary": "Keep draft/unmerged while rev3500 remains independently owned or unmerged. Publish only this scope's additive files and generated phase evidence; do not overtake upstream ownership.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
