@@ -35,4 +35,5 @@ jobs:
         run: |
           python automation/problem_solving_phase_evidence_guard.py \
             --changed-files /tmp/changed-files.txt \
-            --head-ref HEAD
+            --head-ref HEAD \
+            --current-registry-ref origin/main
