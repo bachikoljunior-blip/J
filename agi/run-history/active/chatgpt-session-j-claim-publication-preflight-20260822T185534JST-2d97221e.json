@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e",
   "session_id": "chatgpt-session-j-refire-20260822T184207+0900-fc4ab5cb-turn10",
   "started_at_jst": "2026-08-22T18:55:34+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:04:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:06:03+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2d97221e6f00c3c27ea92cecd6f4302ec58a741c",
   "starting_agi_gi_rev": 1600,
@@ -12,7 +12,7 @@
   "scope": "repository-coordination/claim-publication/preflight-collision-guard",
   "branch": "ops-claim-publication-preflight-session-20260822-1855",
   "branch_head_at_creation": "188d35143b9c041617c329cb0057ce5b3e7be398",
-  "latest_branch_head": "79090cbc3f82033c3c45ed13da2de3a832662a45",
+  "latest_branch_head": "218d404d6d0ffcd5540ef7c6061134b59bdf584b",
   "pull_request": 282,
   "pull_request_state": "open_draft",
   "reserved_paths": [
@@ -58,8 +58,9 @@
     "attempt_solution": {"admitted": true, "conflicts": []},
     "publish": {"admitted": true, "conflicts": []},
     "evidence_persist_commit": "79090cbc3f82033c3c45ed13da2de3a832662a45",
-    "evidence_commit_pr_checks": "action_required_without_jobs; a connector-authored reserved-path follow-up will be used so ordinary PR checks naturally evaluate the evidence-bearing head; no rerun requested"
+    "connector_evidence_head": "218d404d6d0ffcd5540ef7c6061134b59bdf584b",
+    "connector_evidence_checks": "pending natural evaluation; no rerun requested"
   },
-  "status": "active_validation_evidence_persisted",
+  "status": "active_validation_evidence_head",
   "agi_state": "NOT_AGI"
 }
