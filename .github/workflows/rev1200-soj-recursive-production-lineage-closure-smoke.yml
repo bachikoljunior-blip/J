@@ -1,0 +1,120 @@
+name: rev1200 SOJ recursive production lineage closure smoke
+
+on:
+  push:
+    branches:
+      - agi-gi-rev1200-soj-recursive-production-lineage-closure-session-20260822-1551
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rev1200-soj-recursive-production-lineage-closure-smoke.yml'
+      - 'automation_runs/2026-08-22_1551_JST/REV1200_SOJ_RECURSIVE_PRODUCTION_LINEAGE_CLOSURE.md'
+      - 'automation_runs/2026-08-22_1551_JST/soj_recursive_production_lineage_closure_v1.py'
+      - 'automation_runs/2026-08-22_1551_JST/test_soj_recursive_production_lineage_closure_rev1200.py'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447-publish.json'
+
+permissions:
+  contents: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev1200 module and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1551_JST/soj_recursive_production_lineage_closure_v1.py \
+            automation_runs/2026-08-22_1551_JST/test_soj_recursive_production_lineage_closure_rev1200.py
+      - name: Run rev1200 focused regressions
+        run: python automation_runs/2026-08-22_1551_JST/test_soj_recursive_production_lineage_closure_rev1200.py
+      - name: Reject branch-only sibling implementation imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -nE 'soj_recursive_production_provenance_total_cost_binding_v1|soj_main_post_replay_seal_v1' \
+            automation_runs/2026-08-22_1551_JST/soj_recursive_production_lineage_closure_v1.py
+      - name: Canonical attempt_solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-lineage-closure \
+            --target-revision 1200 \
+            --path .github/workflows/rev1200-soj-recursive-production-lineage-closure-smoke.yml \
+            --path automation_runs/2026-08-22_1551_JST/REV1200_SOJ_RECURSIVE_PRODUCTION_LINEAGE_CLOSURE.md \
+            --path automation_runs/2026-08-22_1551_JST/soj_recursive_production_lineage_closure_v1.py \
+            --path automation_runs/2026-08-22_1551_JST/test_soj_recursive_production_lineage_closure_rev1200.py \
+            --output /tmp/rev1200-attempt.json
+          test -s /tmp/rev1200-attempt.json
+          cat /tmp/rev1200-attempt.json
+      - name: Enforce reserved rev1200 diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "$base" HEAD > /tmp/rev1200-changed.txt
+          python - <<'PY'
+          from pathlib import Path
+          allowed = {
+              '.github/workflows/rev1200-soj-recursive-production-lineage-closure-smoke.yml',
+              'automation_runs/2026-08-22_1551_JST/REV1200_SOJ_RECURSIVE_PRODUCTION_LINEAGE_CLOSURE.md',
+              'automation_runs/2026-08-22_1551_JST/soj_recursive_production_lineage_closure_v1.py',
+              'automation_runs/2026-08-22_1551_JST/test_soj_recursive_production_lineage_closure_rev1200.py',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447-attempt-solution.json',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447-publish.json',
+          }
+          expected = {
+              '.github/workflows/rev1200-soj-recursive-production-lineage-closure-smoke.yml',
+              'automation_runs/2026-08-22_1551_JST/REV1200_SOJ_RECURSIVE_PRODUCTION_LINEAGE_CLOSURE.md',
+              'automation_runs/2026-08-22_1551_JST/soj_recursive_production_lineage_closure_v1.py',
+              'automation_runs/2026-08-22_1551_JST/test_soj_recursive_production_lineage_closure_rev1200.py',
+          }
+          changed = {
+              line.strip()
+              for line in Path('/tmp/rev1200-changed.txt').read_text().splitlines()
+              if line.strip()
+          }
+          extra = sorted(changed - allowed)
+          missing = sorted(expected - changed)
+          assert not extra, f'unreserved rev1200 paths changed: {extra}'
+          assert not missing, f'missing expected rev1200 paths: {missing}'
+          print('reserved-path diff ok:', sorted(changed))
+          PY
+      - name: Materialize canonical attempt_solution admission after green smoke
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          EVIDENCE: agi/run-history/phase-admissions/chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447-attempt-solution.json
+        run: |
+          set -euo pipefail
+          if [[ -f "$EVIDENCE" ]]; then
+            echo 'canonical attempt_solution evidence already present; no branch mutation'
+            exit 0
+          fi
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-lineage-closure \
+            --target-revision 1200 \
+            --path .github/workflows/rev1200-soj-recursive-production-lineage-closure-smoke.yml \
+            --path automation_runs/2026-08-22_1551_JST/REV1200_SOJ_RECURSIVE_PRODUCTION_LINEAGE_CLOSURE.md \
+            --path automation_runs/2026-08-22_1551_JST/soj_recursive_production_lineage_closure_v1.py \
+            --path automation_runs/2026-08-22_1551_JST/test_soj_recursive_production_lineage_closure_rev1200.py \
+            --output "$EVIDENCE"
+          test -s "$EVIDENCE"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add "$EVIDENCE"
+          git commit -m 'coordination: add rev1200 attempt-solution admission evidence'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
