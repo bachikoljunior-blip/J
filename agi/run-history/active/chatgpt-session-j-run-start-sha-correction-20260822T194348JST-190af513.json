@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-run-start-sha-correction-20260822T194348JST-190af513",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T193902+0900-135e1ef3-turn1",
   "started_at_jst": "2026-08-22T19:43:48+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:53:10+09:00",
-  "last_activity_at_jst": "2026-08-22T19:53:10+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:59:02+09:00",
+  "last_activity_at_jst": "2026-08-22T19:59:02+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "190af513b566421cee87d35ad80a47ce6da03251",
   "starting_agi_gi_rev": 1600,
@@ -54,15 +54,19 @@
     ],
     "decision": "extend the existing append-only correction protocol; never rewrite or delete the original start record"
   },
-  "status": "active_exact_head_all_green_merge_admission_pending",
+  "status": "completed_merged",
   "agi_state": "NOT_AGI",
   "pull_request": 284,
   "exact_head_sha": "ae9514b5e4122d46c7741c1929634539954b4c44",
   "validation": {
-    "workflows": "11/11 success",
+    "workflows": "11/11 success on exact head",
+    "focused_tests": "17/17 passed before and after merge",
+    "history_replay": "78 records; 73 starts; 4 revision corrections; 1 identity correction; 66 legacy-unverifiable",
     "run_start_history_integrity": "success",
     "problem_solving_parallel_admission": "success",
-    "focused_tests": "17/17 passed",
-    "history_replay": "78 records; 73 starts; 4 revision corrections; 1 identity correction; 66 legacy-unverifiable"
-  }
+    "merge_admission": "admitted=true; conflicts=[]"
+  },
+  "completed_at_jst": "2026-08-22T19:59:02+09:00",
+  "tested_head_sha": "20c9b62354ef1379428c4d7f94580d087cf0e2bf",
+  "merge_commit_sha": "7e83950a3189ac17306aa55c087ee2d10cc0baaa"
 }
