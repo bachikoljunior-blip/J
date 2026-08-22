@@ -50,23 +50,6 @@
       "target_revision": 1600
     },
     {
-      "branch": "agi-gi-rev2000-homogeneous-block-joint-compatibility-proof-dag-session-20260822-1717",
-      "claim_id": "chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee",
-      "heartbeat_at_jst": "2026-08-22T17:34:00+09:00",
-      "reserved_paths": [
-        ".github/workflows/rev2000-homogeneous-block-joint-compatibility-proof-dag-smoke.yml",
-        "agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-attempt_solution.json",
-        "agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-merge.json",
-        "agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-publish.json",
-        "automation_runs/2026-08-22_1717_JST/REV2000_HOMOGENEOUS_BLOCK_JOINT_COMPATIBILITY_PROOF_DAG.md",
-        "automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py",
-        "automation_runs/2026-08-22_1717_JST/test_homogeneous_block_joint_compatibility_proof_dag_rev2000.py"
-      ],
-      "scope": "crx3/structural-consumers/homogeneous-block-joint-reduction-compatibility-proof-dag",
-      "state": "active",
-      "target_revision": 2000
-    },
-    {
       "branch": "agi-gi-rev2200-soj-parent-filtered-child-result-session-20260822-1747",
       "claim_id": "chatgpt-session-j-rev2200-soj-parent-filtered-child-result-20260822T174730JST-6a2bef85",
       "heartbeat_at_jst": "2026-08-22T17:58:30+09:00",
@@ -220,8 +203,8 @@
   ],
   "phase": "publish",
   "reasons": [],
-  "recorded_at_jst": "2026-08-22T19:03:05.417484+09:00",
-  "registry_digest": "sha256:e7391c7076869797044e81db965795527ab57ccd596a326c671c1502cc2786ee",
+  "recorded_at_jst": "2026-08-22T19:05:05.182280+09:00",
+  "registry_digest": "sha256:4ef48d681d2131cde0d49b02c324424f18fedad05209b868d9b03f200dabcbee",
   "registry_source_sha": "188d35143b9c041617c329cb0057ce5b3e7be398",
   "schema_version": 1,
   "scope": "repository-coordination/claim-publication/preflight-collision-guard",
