@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c",
+  "session_id": "chatgpt-session-j-refire-20260822T085022+0900-80bf6664-turn1",
+  "started_at_jst": "2026-08-22T09:03:12+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:03:12+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "57a3d43cab4a384b2e848dcd31fa74a729d3eaca",
+  "starting_agi_gi_rev": 266,
+  "target_revision": 273,
+  "scope": "crx1/homogeneous-block-reduction/equivariant-quotient-provenance-certificate",
+  "branch": "agi-gi-rev273-homogeneous-block-provenance-session-20260822-0903",
+  "reserved_paths": [
+    ".github/workflows/rev273-homogeneous-block-provenance-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV273_HOMOGENEOUS_BLOCK_RELATION_PROVENANCE.md",
+    "automation_runs/2026-08-19_0851_JST/homogeneous_block_relation_provenance_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_relation_provenance_rev273.py"
+  ],
+  "parallel_exclusions": [
+    "rev272 resource-execution-ledger replay verifier and all reserved paths",
+    "rev271 implicit image value-coset proof-DAG and all reserved paths",
+    "rev270 original-root resource execution ledger / PR #215 and all reserved paths",
+    "rev269 exact-empty image parent bridge / PR #214 and all reserved paths",
+    "rev268 production-parent orchestration / PR #213 and all reserved paths",
+    "rev267 original-domain paired-preimage / PR #212 and all reserved paths",
+    "rev265 resource envelope / PR #208 and all reserved paths",
+    "rev264 primitive-Johnson proof-DAG / PR #210 and all reserved paths",
+    "CRX3 state-orbit proof-DAG / PR #206 and all reserved paths",
+    "rev252 small-order production admission / PR #216",
+    "MAIN.md and every sibling claim, branch, PR, and workflow"
+  ],
+  "intent": "close one upstream provenance subleaf left explicit by rev248: independently certify when unary/binary named relations are block-homogeneous, form a well-defined quotient relation structure, and are transported exactly by a supplied block bijection; fail closed on nonuniform fibers, malformed partitions, signature mismatch, or quotient transport mismatch without claiming canonical block discovery or general CRX1 closure",
+  "non_interference": "Only new rev273 reserved paths may be added on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, shared implementation path, or MAIN.md.",
+  "status": "active_claimed_preimplementation",
+  "agi_state": "NOT_AGI"
+}
