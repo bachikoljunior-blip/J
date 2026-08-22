@@ -106,23 +106,20 @@ jobs:
             --path automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py
             --path automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py
           )
+          attempt_path="agi/run-history/phase-admissions/${claim}-attempt-solution.json"
+          publish_path="agi/run-history/phase-admissions/${claim}-publish.json"
           python automation/problem_solving_parallel_admission.py \
             "${common[@]}" --phase attempt_solution \
-            --output "agi/run-history/phase-admissions/${claim}-attempt-solution.json"
+            --output "${attempt_path}"
           python automation/problem_solving_parallel_admission.py \
             "${common[@]}" --phase publish \
-            --output "agi/run-history/phase-admissions/${claim}-publish.json"
-
-          if git diff --quiet -- \
-            "agi/run-history/phase-admissions/${claim}-attempt-solution.json" \
-            "agi/run-history/phase-admissions/${claim}-publish.json"; then
-            exit 0
-          fi
+            --output "${publish_path}"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            "agi/run-history/phase-admissions/${claim}-attempt-solution.json" \
-            "agi/run-history/phase-admissions/${claim}-publish.json"
+          git add "${attempt_path}" "${publish_path}"
+          if git diff --cached --quiet -- "${attempt_path}" "${publish_path}"; then
+            exit 0
+          fi
           git commit -m "coordination: persist rev1900 phase admission evidence"
           git push origin "HEAD:${branch}"
