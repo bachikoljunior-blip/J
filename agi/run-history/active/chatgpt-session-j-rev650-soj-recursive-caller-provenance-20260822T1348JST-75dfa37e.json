@@ -4,16 +4,16 @@
   "claim_id": "chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e",
   "session_id": "chatgpt-session-j-continuation-rev650-20260822T1348+0900-75dfa37e",
   "started_at_jst": "2026-08-22T13:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T13:48:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T13:53:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "16c8d0a55b81bee5fb2b14eb3b5c0bb94de08950",
   "starting_agi_gi_rev": 266,
   "target_revision": 650,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-caller-result-provenance-binding",
   "branch": "agi-gi-rev650-soj-recursive-caller-provenance-session-20260822-1348",
-  "pull_request": null,
-  "pull_request_state": "not_created",
-  "latest_head_sha": null,
+  "pull_request": 249,
+  "pull_request_state": "open_draft",
+  "latest_head_sha": "8030f78e36408b560b5b3ba11f15aff438dc7134",
   "intent": "add a file-disjoint fail-closed compatibility binder between the public larger-ground recursive result-lift/accounting contracts (rev293/rev340) and the public rev400 production-caller binding: independently replay rev400's caller-binding digest, require strict certified/exact/complete upstream result and accounting evidence, require outcome/reduction/result-lift agreement, and bind rev400's recursive branch proof identities to the upstream producer digests without asserting main reachability, executing recursive SI, importing branch-only implementations, or overlapping rev600's main-provenance gate",
   "reserved_paths": [
     ".github/workflows/rev650-soj-recursive-caller-provenance-smoke.yml",
@@ -41,7 +41,11 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
   },
   "validation": {
-    "state": "claimed_not_yet_implemented"
+    "state": "local_green_pr_open_ci_pending",
+    "py_compile": "success",
+    "focused_regressions": "16/16 success",
+    "phase_admission_evidence": "not_yet_persisted",
+    "natural_ci": "not_observed_yet"
   },
   "status": "active",
   "agi_state": "NOT_AGI"
