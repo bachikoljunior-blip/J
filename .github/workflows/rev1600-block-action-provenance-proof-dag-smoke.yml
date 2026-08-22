@@ -1,0 +1,118 @@
+name: rev1600 block-action provenance proof-DAG smoke
+
+on:
+  push:
+    branches:
+      - agi-gi-rev1600-block-action-provenance-proof-dag-session-20260822-1649
+    paths:
+      - 'automation_runs/2026-08-22_1649_JST/block_action_provenance_proof_dag_consumer_v1.py'
+      - 'automation_runs/2026-08-22_1649_JST/test_block_action_provenance_proof_dag_rev1600.py'
+      - 'automation_runs/2026-08-22_1649_JST/REV1600_BLOCK_ACTION_PROVENANCE_PROOF_DAG.md'
+      - '.github/workflows/rev1600-block-action-provenance-proof-dag-smoke.yml'
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1649_JST/block_action_provenance_proof_dag_consumer_v1.py'
+      - 'automation_runs/2026-08-22_1649_JST/test_block_action_provenance_proof_dag_rev1600.py'
+      - 'automation_runs/2026-08-22_1649_JST/REV1600_BLOCK_ACTION_PROVENANCE_PROOF_DAG.md'
+      - '.github/workflows/rev1600-block-action-provenance-proof-dag-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev1600 consumer and regressions
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1649_JST/block_action_provenance_proof_dag_consumer_v1.py \
+            automation_runs/2026-08-22_1649_JST/test_block_action_provenance_proof_dag_rev1600.py
+      - name: Run inherited rev274 and focused rev1600 regressions
+        run: |
+          python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py -v
+          python automation_runs/2026-08-22_1649_JST/test_block_action_provenance_proof_dag_rev1600.py -v
+      - name: Reject sibling consumer dependencies
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('automation_runs/2026-08-22_1649_JST/block_action_provenance_proof_dag_consumer_v1.py').read_text()
+          forbidden = (
+              'block_action_kernel_proof_dag_consumer_v1',
+              'block_relation_provenance_proof_dag_consumer_v1',
+              'homogeneous_block_quotient_string_isomorphism',
+              'block_action_preimage_coset_rev278',
+              'joint_block_reduction_compatibility',
+              'soj_recursive_production',
+          )
+          hits = [name for name in forbidden if name in text]
+          if hits:
+              raise SystemExit(f'sibling dependency detected: {hits}')
+          PY
+      - name: Preview canonical attempt-solution admission
+        run: |
+          git fetch origin main
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093 \
+            --phase attempt_solution \
+            --scope crx3/structural-consumers/homogeneous-block-action-provenance-proof-dag \
+            --target-revision 1600 \
+            --path .github/workflows/rev1600-block-action-provenance-proof-dag-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-publish.json \
+            --path automation_runs/2026-08-22_1649_JST/REV1600_BLOCK_ACTION_PROVENANCE_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1649_JST/block_action_provenance_proof_dag_consumer_v1.py \
+            --path automation_runs/2026-08-22_1649_JST/test_block_action_provenance_proof_dag_rev1600.py \
+            --output /tmp/rev1600-attempt-solution.json
+          cat /tmp/rev1600-attempt-solution.json
+      - name: Preview canonical publish admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093 \
+            --phase publish \
+            --scope crx3/structural-consumers/homogeneous-block-action-provenance-proof-dag \
+            --target-revision 1600 \
+            --path .github/workflows/rev1600-block-action-provenance-proof-dag-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-publish.json \
+            --path automation_runs/2026-08-22_1649_JST/REV1600_BLOCK_ACTION_PROVENANCE_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1649_JST/block_action_provenance_proof_dag_consumer_v1.py \
+            --path automation_runs/2026-08-22_1649_JST/test_block_action_provenance_proof_dag_rev1600.py \
+            --output /tmp/rev1600-publish.json
+          cat /tmp/rev1600-publish.json
+      - name: Persist canonical phase evidence on the dedicated branch
+        if: github.event_name == 'push'
+        run: |
+          mkdir -p agi/run-history/phase-admissions
+          cp /tmp/rev1600-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-attempt-solution.json
+          cp /tmp/rev1600-publish.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-publish.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-publish.json
+          if ! git diff --cached --quiet; then
+            git commit -m "rev1600: persist canonical phase admission evidence"
+            git push origin HEAD
+          fi
+      - name: Verify reserved diff remains additive
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- \
+            automation_runs/2026-08-22_1649_JST/block_action_provenance_proof_dag_consumer_v1.py \
+            automation_runs/2026-08-22_1649_JST/test_block_action_provenance_proof_dag_rev1600.py \
+            automation_runs/2026-08-22_1649_JST/REV1600_BLOCK_ACTION_PROVENANCE_PROOF_DAG.md \
+            .github/workflows/rev1600-block-action-provenance-proof-dag-smoke.yml \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093-publish.json
