@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T094800+0900-rev279-turn2",
   "started_at_jst": "2026-08-22T09:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T12:58:15+09:00",
+  "heartbeat_at_jst": "2026-08-22T13:47:54+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "15932427fd0b83fa27d50cf83319fc88c75df564",
   "starting_agi_gi_rev": 274,
@@ -13,7 +13,7 @@
   "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
   "pull_request": 223,
   "latest_head_sha": "86786570a9d2b97ce3c67a5d728d49bd167c5999",
-  "latest_observed_main_sha": "2619b4ab2b60644ca2b9d4e72e816ee274ee34e5",
+  "latest_observed_main_sha": "16c8d0a55b81bee5fb2b14eb3b5c0bb94de08950",
   "reserved_paths": [
     ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
@@ -116,21 +116,21 @@
     },
     "current_general_agi_gi_validation": {
       "run_id": 32550233458,
-      "status": "in_progress",
+      "status": "in_progress_at_prior_observation",
       "validate_w1r_fast": "success",
-      "validate_rev_series": "in_progress"
+      "validate_rev_series": "in_progress_at_prior_observation"
     }
   },
   "integration_watch": {
     "main_advanced_after_merge_evidence": true,
-    "observed_main_sha": "2619b4ab2b60644ca2b9d4e72e816ee274ee34e5",
-    "main_advance": "main continues to advance through independently owned revisions while rev279 remains file-disjoint",
+    "observed_main_sha": "16c8d0a55b81bee5fb2b14eb3b5c0bb94de08950",
+    "main_advance": "main now includes independently owned coordination and revision work through a rev620 claim while rev279 remains on its dedicated reserved paths",
     "shared_dependency_owner_active": false,
     "shared_dependency_state": "rev289 shared proof-DAG envelope hardening merged independently as PR #233; rev279 has not modified that sibling branch or PR",
-    "policy": "use naturally created pull-request merge refs for current-base validation; do not rebase, force-push, manually rerun/cancel sibling workflows, or mutate sibling work"
+    "policy": "recheck current main/open PRs/active claims before persistent writes; use naturally created pull-request merge refs for current-base validation where available; do not rebase, force-push, manually rerun/cancel sibling workflows, or mutate sibling work"
   },
   "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, tampered, or malformed/non-finite/overflowing resource evidence without modifying shared solvers or upstream CRX1 branches",
   "non_interference": "Only rev279 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
-  "status": "active_current_head_smoke_and_admission_green_full_validation_in_progress",
+  "status": "active_reconstructed_current_main_revalidation_pending",
   "agi_state": "NOT_AGI"
 }
