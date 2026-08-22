@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST-664aeb8e",
   "session_id": "chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST",
   "started_at_jst": "2026-08-22T20:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T20:58:00+09:00",
-  "last_activity_at_jst": "2026-08-22T20:58:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:59:00+09:00",
+  "last_activity_at_jst": "2026-08-22T20:59:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "664aeb8e695bc2621f584042a5ce437bf53c86a7",
   "starting_agi_gi_rev": 3200,
@@ -61,11 +61,11 @@
     "dedicated_exact_head": "success",
     "repository_parallel_admission_run": 32571653824,
     "repository_parallel_admission": "success",
-    "inherited_success_observed": ["rev238", "rev250"],
-    "inherited_in_progress_observed": ["rev239", "rev240", "rev241", "rev242", "rev246", "rev253", "rev254", "run-start-history-integrity"],
+    "inherited_success_observed": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253", "rev254", "run-start-history-integrity"],
+    "inherited_in_progress_observed": ["rev246"],
     "manual_rerun_or_cancel": false
   },
-  "integration_boundary": "Keep PR #289 draft/unmerged while rev3100 / PR #287, rev3000 / PR #285, rev2800 / PR #283 and rev2200 / PR #274 remain independently owned/open. Exact-head rev3400 smoke and repository-wide parallel admission are green; observe remaining inherited checks naturally and recheck fresh claims before any further leaf work.",
+  "integration_boundary": "Keep PR #289 draft/unmerged while rev3100 / PR #287, rev3000 / PR #285, rev2800 / PR #283 and rev2200 / PR #274 remain independently owned/open. Exact-head rev3400 smoke and repository-wide parallel admission are green; only inherited rev246 remained naturally in progress at the latest observation. Recheck fresh claims before any further leaf work.",
   "status": "in_progress",
   "agi_state": "NOT_AGI"
 }
