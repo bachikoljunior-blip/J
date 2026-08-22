@@ -1,0 +1,68 @@
+name: rev272 implicit resource ledger replay verifier smoke
+
+on:
+  pull_request:
+    paths:
+      - automation_runs/2026-08-19_0851_JST/implicit_relation_resource_ledger_replay_verifier_v1.py
+      - automation_runs/2026-08-19_0851_JST/test_implicit_relation_resource_ledger_replay_verifier_rev272.py
+      - automation_runs/2026-08-19_0851_JST/REV272_IMPLICIT_RELATION_RESOURCE_LEDGER_REPLAY_VERIFIER.md
+      - .github/workflows/rev272-implicit-resource-ledger-replay-verifier-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compute replayable rev272 attempt admission
+        run: |
+          rm -rf /tmp/rev272-registry
+          mkdir -p /tmp/rev272-registry
+          git archive 51678bf720f4a009aa4820c637d984c46cd2e80a agi/run-history/active | tar -x -C /tmp/rev272-registry
+          PYTHONPATH="$PWD" python - <<'PY'
+          import json
+          from datetime import datetime
+          from pathlib import Path
+          from automation.parallel_claims import load_registry
+          from automation.problem_solving_parallel_admission import admit_problem_phase, evidence_payload
+          source = "51678bf720f4a009aa4820c637d984c46cd2e80a"
+          now = datetime.fromisoformat("2026-08-22T08:57:30+09:00")
+          claims, errors = load_registry(Path("/tmp/rev272-registry"))
+          if errors:
+              raise SystemExit("registry errors: " + repr(errors))
+          result = admit_problem_phase(
+              claims,
+              claim_id="chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33",
+              phase="attempt_solution",
+              scope="crx1/bounded-arity-relation-image/implicit-generator-group/resource-execution-ledger-replay-verifier",
+              target_revision=272,
+              now=now,
+              registry_source_sha=source,
+              paths=[
+                  ".github/workflows/rev272-implicit-resource-ledger-replay-verifier-smoke.yml",
+                  "automation_runs/2026-08-19_0851_JST/REV272_IMPLICIT_RELATION_RESOURCE_LEDGER_REPLAY_VERIFIER.md",
+                  "automation_runs/2026-08-19_0851_JST/implicit_relation_resource_ledger_replay_verifier_v1.py",
+                  "automation_runs/2026-08-19_0851_JST/test_implicit_relation_resource_ledger_replay_verifier_rev272.py",
+              ],
+          )
+          print(json.dumps(evidence_payload(result, now), ensure_ascii=False, indent=2, sort_keys=True))
+          if not result["admitted"]:
+              raise SystemExit(2)
+          PY
+      - name: Run rev272 focused regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python -m unittest -v test_implicit_relation_resource_ledger_replay_verifier_rev272.py
+      - name: Compile rev272 verifier
+        run: python -m py_compile automation_runs/2026-08-19_0851_JST/implicit_relation_resource_ledger_replay_verifier_v1.py automation_runs/2026-08-19_0851_JST/test_implicit_relation_resource_ledger_replay_verifier_rev272.py
+      - name: Enforce structural independence from sibling branch modules
+        run: |
+          ! grep -E 'implicit_relation_resource_execution_ledger_v1|implicit_relation_image_resource_envelope_v2|implicit_image_value_proof_dag_consumer_v1|implicit_relation_parent_outcome_v1' automation_runs/2026-08-19_0851_JST/implicit_relation_resource_ledger_replay_verifier_v1.py
