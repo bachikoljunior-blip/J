@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/rev320-soj-johnson-construction-cost-binding-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev320-soj-johnson-construction-cost-binding-20260822T125100JST-36adfce3-attempt-solution.json'
       - 'automation_runs/2026-08-22_1251_JST/REV320_SOJ_JOHNSON_CONSTRUCTION_COST_BINDING.md'
       - 'automation_runs/2026-08-22_1251_JST/corrected_soj_johnson_construction_cost_binding_v1.py'
       - 'automation_runs/2026-08-22_1251_JST/test_corrected_soj_johnson_construction_cost_binding_rev320.py'
@@ -19,6 +20,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -29,6 +31,23 @@ jobs:
             automation_runs/2026-08-22_1251_JST/test_corrected_soj_johnson_construction_cost_binding_rev320.py
       - name: Run focused regressions
         run: python automation_runs/2026-08-22_1251_JST/test_corrected_soj_johnson_construction_cost_binding_rev320.py
+      - name: Canonical attempt_solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev320-soj-johnson-construction-cost-binding-20260822T125100JST-36adfce3 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-johnson-reduction-construction-cost-binding \
+            --target-revision 320 \
+            --path .github/workflows/rev320-soj-johnson-construction-cost-binding-smoke.yml \
+            --path automation_runs/2026-08-22_1251_JST/REV320_SOJ_JOHNSON_CONSTRUCTION_COST_BINDING.md \
+            --path automation_runs/2026-08-22_1251_JST/corrected_soj_johnson_construction_cost_binding_v1.py \
+            --path automation_runs/2026-08-22_1251_JST/test_corrected_soj_johnson_construction_cost_binding_rev320.py \
+            --output /tmp/rev320-attempt-solution.json
+          echo '---BEGIN REV320 ATTEMPT EVIDENCE---'
+          cat /tmp/rev320-attempt-solution.json
+          echo '---END REV320 ATTEMPT EVIDENCE---'
       - name: Enforce reserved problem-state diff
         shell: bash
         run: |
@@ -38,10 +57,10 @@ jobs:
           while IFS= read -r path; do
             [ -z "$path" ] && continue
             case "$path" in
-              .github/workflows/rev320-soj-johnson-construction-cost-binding-smoke.yml|automation_runs/2026-08-22_1251_JST/REV320_SOJ_JOHNSON_CONSTRUCTION_COST_BINDING.md|automation_runs/2026-08-22_1251_JST/corrected_soj_johnson_construction_cost_binding_v1.py|automation_runs/2026-08-22_1251_JST/test_corrected_soj_johnson_construction_cost_binding_rev320.py)
+              .github/workflows/rev320-soj-johnson-construction-cost-binding-smoke.yml|agi/run-history/phase-admissions/chatgpt-session-j-rev320-soj-johnson-construction-cost-binding-20260822T125100JST-36adfce3-attempt-solution.json|automation_runs/2026-08-22_1251_JST/REV320_SOJ_JOHNSON_CONSTRUCTION_COST_BINDING.md|automation_runs/2026-08-22_1251_JST/corrected_soj_johnson_construction_cost_binding_v1.py|automation_runs/2026-08-22_1251_JST/test_corrected_soj_johnson_construction_cost_binding_rev320.py)
                 ;;
               *)
-                echo "unexpected non-rev320 problem-state path: $path" >&2
+                echo "unexpected non-rev320 path: $path" >&2
                 exit 1
                 ;;
             esac
