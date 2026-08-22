@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev951-homogeneous-block-quotient-si-20260822T154800JST-d442901b",
   "session_id": "chatgpt-session-j-recurring-continuation-rev951-20260822T154800+0900-turn1",
   "started_at_jst": "2026-08-22T15:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T15:48:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:51:20+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "d442901b739c478ecc6087fdc5b3c7defec34057",
   "starting_agi_gi_rev": 950,
@@ -35,7 +35,11 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
     "fail_closed_on_any_upstream_identity_or_outcome_drift": true
   },
-  "status": "active",
-  "state": "active",
+  "status": "superseded_semantic_collision_rev1200",
+  "state": "closed",
+  "closed_at_jst": "2026-08-22T15:51:20+09:00",
+  "superseded_by_claim": "chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd",
+  "closure_reason": "a separately owned rev1200 claim appeared after this branch was created and claims the same homogeneous-block quotient String-Isomorphism algorithmic leaf; stop before PR publication rather than create a semantic parallel collision",
+  "branch_state": "implementation_unpublished_no_pr",
   "agi_state": "NOT_AGI"
 }
