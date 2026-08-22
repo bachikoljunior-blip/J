@@ -1,0 +1,57 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5",
+  "session_id": "chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST",
+  "started_at_jst": "2026-08-22T20:42:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:42:00+09:00",
+  "last_activity_at_jst": "2026-08-22T20:42:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "b61887e5cc86aac0eaf7e583694f8cd44fb73470",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": 3300,
+  "scope": "crx3/algorithmic-consumers/homogeneous-block-action-kernel-factorization-public-replay-seal",
+  "branch": "agi-gi-rev3300-block-action-kernel-public-replay-seal-session-20260822-2042",
+  "pull_request": null,
+  "exact_head_sha": null,
+  "merge_sha": null,
+  "reserved_paths": [
+    ".github/workflows/rev3300-block-action-kernel-public-replay-seal-smoke.yml",
+    "automation_runs/2026-08-22_2042_JST/REV3300_BLOCK_ACTION_KERNEL_PUBLIC_REPLAY_SEAL.md",
+    "automation_runs/2026-08-22_2042_JST/block_action_kernel_public_replay_seal_v1.py",
+    "automation_runs/2026-08-22_2042_JST/test_block_action_kernel_public_replay_seal_rev3300.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev2501 relation-twin restriction replay identity and its reserved paths",
+    "rev2600/rev2707/rev2800/rev3000/rev3100 corrected Split-or-Johnson parent-filtered scopes and reserved paths",
+    "rev2000/rev2100/rev2300/rev1800/rev1200 homogeneous-block quotient/original-domain structural and execution scopes and reserved paths",
+    "rev1600 block-action provenance proof-DAG and rev952 relation provenance proof-DAG source paths",
+    "rev3200 small-order public replay seal and all small-order solver/admission paths",
+    "rev400 corrected-SOJ production caller and all W1R-H6 sibling scopes",
+    "run-start history correction, claim-publication preflight, main revision/declaration coordination and all coordination reserved paths",
+    "MAIN.md, shared proof-DAG/recurrence/S1/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "Add one additive public replay seal for the already-main-integrated rev950 homogeneous block-action kernel-factorization proof-DAG consumer. Re-execute rev950 from explicit rev274 provenance and rev275 factorization evidence, require exact complete replay and a certified shared proof-DAG result, canonically freeze provenance/factorization digests, domain/block/work/order/kernel-generator identities, external replay charge, and proof-DAG validation metrics into deterministic domain-separated SHA-256 digests, and provide an independent verify-by-reexecution entry point. Do not change rev274/rev275/rev950/shared proof-DAG code, do not import sibling branch-only homogeneous-block or corrected-SOJ implementations, and do not claim quotient SI/original-domain lift/CRX3/GI/AGI closure.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_schema_status_identity_digest_kernel_order_work_or_accounting_drift": true
+  },
+  "preflight": {
+    "rev3300_branch_search": "none before claim",
+    "rev3300_pr_search": "none before claim",
+    "rev3300_active_claim_search": "none before claim",
+    "main_sha": "b61887e5cc86aac0eaf7e583694f8cd44fb73470"
+  },
+  "validation": {},
+  "integration_boundary": "Keep draft/unmerged until exact-head dedicated smoke, canonical attempt/publish admission, repository-wide parallel admission, and observed inherited checks are green. Merge only with expected-head protection and only if no later sibling claim overlaps this exact scope or reserved paths.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
