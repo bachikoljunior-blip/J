@@ -4,16 +4,16 @@
   "claim_id": "chatgpt-session-j-rev1600-block-action-provenance-proof-dag-20260822T164900JST-64254093",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1600-20260822T164900+0900-turn1",
   "started_at_jst": "2026-08-22T16:49:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:49:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:50:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "64254093be3448a0b1e56e1952be06bd3ee39b9a",
-  "latest_main_sha_observed": "64254093be3448a0b1e56e1952be06bd3ee39b9a",
+  "latest_main_sha_observed": "cd808232e224924035f02ffc60f931a632fb32ea",
   "starting_agi_gi_rev": 952,
   "target_revision": 1600,
   "scope": "crx3/structural-consumers/homogeneous-block-action-provenance-proof-dag",
   "branch": "agi-gi-rev1600-block-action-provenance-proof-dag-session-20260822-1649",
-  "current_pr": null,
-  "exact_head": null,
+  "current_pr": 265,
+  "exact_head": "dc318ead5422475cf146bc46de21950e19308145",
   "reserved_paths": [
     ".github/workflows/rev1600-block-action-provenance-proof-dag-smoke.yml",
     "automation_runs/2026-08-22_1649_JST/REV1600_BLOCK_ACTION_PROVENANCE_PROOF_DAG.md",
@@ -24,6 +24,7 @@
   ],
   "parallel_exclusions": [
     "rev1500 sibling recursive child-instance execution claim/branch and all reserved paths",
+    "rev1700 sibling SOJ child semantic reduction claim/branch and all reserved paths",
     "rev1400 corrected-SOJ recursive production execution proof-DAG / PR #264 and all reserved paths",
     "rev1300 / PR #263, rev1200 / PR #260, rev1100 / PR #257, rev1000 / PR #256, rev900 / PR #254 and their reserved paths",
     "rev950 homogeneous block-action kernel factorization proof-DAG merged implementation paths",
@@ -47,6 +48,12 @@
     "rev220 proof_dag_accounting_v1 validate_execution_proof_dag",
     "quasipoly_recurrence_accounting_v1 RecurrenceAccountingNode"
   ],
+  "validation": {
+    "implementation_head": "dc318ead5422475cf146bc46de21950e19308145",
+    "draft_pr": 265,
+    "dedicated_smoke": "pending natural GitHub Actions execution",
+    "workflow_policy": "no unrelated workflow was cancelled, approved, or rerun"
+  },
   "status": "active",
   "agi_state": "NOT_AGI"
 }
