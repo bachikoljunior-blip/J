@@ -4,13 +4,16 @@
   "claim_id": "chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702",
   "session_id": "chatgpt-session-j-continuation-20260822T1144+0900-d409a702-turn5",
   "started_at_jst": "2026-08-22T11:44:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T11:44:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T11:52:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "d409a702c94432526d13906fedb116fb15cec80f",
   "starting_agi_gi_rev": 274,
   "target_revision": 288,
   "scope": "w1r-h6/corrected-split-or-johnson/strict-johnson-transition-terminal-evidence-normalization",
   "branch": "agi-gi-rev288-soj-strict-evidence-normalization-session-20260822-1144",
+  "pull_request": 232,
+  "latest_head_sha": "be6fc01d20580f570404cd4008f668f102870884",
+  "reconciled_main_sha": "b12833124fad20014f657b820a181e32a4aec5e8",
   "reserved_paths": [
     ".github/workflows/rev288-soj-strict-evidence-normalization-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702-attempt-solution.json",
@@ -20,19 +23,39 @@
     "automation_runs/2026-08-22_1144_JST/test_corrected_soj_strict_evidence_rev288.py"
   ],
   "parallel_exclusions": [
-    "rev275 legacy block-action-kernel claim and every reserved path",
+    "rev275 takeover claim and every reserved path",
     "rev276 joint block-reduction compatibility / PR #221 and every reserved path",
     "rev277-rev287 claims, branches, PRs, workflows, and reserved paths",
-    "rev281 corrected SOJ transition / PR #226",
-    "rev283 recurrence composition / PR #228",
-    "rev284 Johnson terminal admission / PR #229",
-    "rev285 zero-aux terminal accounting / PR #230",
-    "rev286 Johnson terminal cost / PR #231",
+    "rev289 and later sibling claims, branches, PRs, workflows, and reserved paths",
     "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
   ],
   "intent": "add a file-disjoint strict structural normalization boundary for corrected-SOJ Johnson transition/terminal evidence: reject coercible booleans, numeric strings, fractional integer fields, NaN/Inf, malformed statuses, and non-canonical shapes before downstream accounting or production dispatch; consume active sibling contracts only as read-only public field shapes and do not import or modify branch-only sibling implementations",
-  "non_interference": "Only rev288 reserved paths may be written on the dedicated branch. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
-  "known_shared_blocker": "The independently owned rev275 active registry record is still legacy/non-schema-v2 and can make canonical phase-admission generation fail closed; rev288 will not normalize or mutate it and will not fabricate phase evidence.",
-  "status": "active",
+  "non_interference": "Only rev288 reserved paths may be written on the dedicated branch. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths. Main reconciliation uses ordinary two-parent merge commits with force=false.",
+  "registry_blocker_resolution": {
+    "former_rev275_legacy_blocker": "resolved by independently owned schema-v2 rev275 takeover claim",
+    "rev288_mutated_rev275": false,
+    "canonical_registry_available": true
+  },
+  "phase_admission": {
+    "registry_source_sha": "e5118818cea87bfa4b04d9d1968cb5877a6d4b39",
+    "registry_digest": "sha256:e3eb4671d7271a0a57bf095314edc12d240a5ab5546fce34601dca24108f3a74",
+    "attempt_solution": {"admitted": true, "mode": "exclusive", "conflicts": 0, "persisted": true},
+    "publish": {"admitted": true, "mode": "exclusive", "conflicts": 0, "persisted": true},
+    "repository_phase_evidence_guard_run": 32547301079,
+    "repository_phase_evidence_guard_conclusion": "success"
+  },
+  "validation": {
+    "focused_tests": 21,
+    "focused_tests_conclusion": "success",
+    "py_compile": "success",
+    "static_sibling_import_boundary": "success",
+    "evidence_persisting_head": "3cfeeee823fb8db91ec0cab40dcca0d92d7fdb1a",
+    "evidence_persisting_rev288_smoke_run": 32547301052,
+    "evidence_persisting_rev288_smoke_conclusion": "success",
+    "evidence_persisting_inherited_success_runs": [32547301031, 32547301062, 32547301039, 32547301055, 32547301045, 32547301065, 32547301034, 32547301036],
+    "current_reconciled_head": "be6fc01d20580f570404cd4008f668f102870884",
+    "current_exact_head_checks": "naturally_triggered_in_progress"
+  },
+  "status": "active_exact_head_validating",
   "agi_state": "NOT_AGI"
 }
