@@ -43,7 +43,7 @@ jobs:
             echo 'active sibling branch-only dependency detected' >&2
             exit 1
           fi
-      - name: Verify live canonical attempt and publish admission
+      - name: Verify and emit live canonical attempt and publish admission
         shell: bash
         env:
           CLAIM_ID: chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702
@@ -57,13 +57,18 @@ jobs:
             --path automation_runs/2026-08-22_1144_JST/test_corrected_soj_strict_evidence_rev288.py
           )
           for phase in attempt_solution publish; do
+            output="/tmp/rev288-${phase}-evidence.json"
             python automation/problem_solving_parallel_admission.py \
               --claim-id "${CLAIM_ID}" \
               --phase "${phase}" \
               --scope "${CLAIM_SCOPE}" \
               --target-revision 288 \
               "${paths[@]}" \
-              | tee "/tmp/rev288-${phase}.json"
+              --output "${output}" \
+              | tee "/tmp/rev288-${phase}-decision.json"
             jq -e '.admitted == true and (.conflicts | length == 0)' \
-              "/tmp/rev288-${phase}.json"
+              "/tmp/rev288-${phase}-decision.json"
+            echo "REV288_${phase^^}_EVIDENCE_BEGIN"
+            cat "${output}"
+            echo "REV288_${phase^^}_EVIDENCE_END"
           done
