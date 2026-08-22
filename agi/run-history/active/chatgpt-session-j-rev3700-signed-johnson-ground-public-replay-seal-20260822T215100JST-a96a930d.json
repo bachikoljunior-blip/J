@@ -4,16 +4,16 @@
   "claim_id": "chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d",
   "session_id": "chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST",
   "started_at_jst": "2026-08-22T21:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T21:51:00+09:00",
-  "last_activity_at_jst": "2026-08-22T21:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T22:06:55+09:00",
+  "last_activity_at_jst": "2026-08-22T22:06:55+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "a96a930d9d94089417578c5d853c092d8da61439",
   "starting_agi_gi_rev": 1600,
   "target_revision": 3700,
   "scope": "crx3/algorithmic-consumers/signed-johnson-ground-exact-terminal-public-replay-seal",
   "branch": "agi-gi-rev3700-signed-johnson-ground-public-replay-seal-session-20260822-2151",
-  "pull_request": null,
-  "exact_head_sha": null,
+  "pull_request": 295,
+  "exact_head_sha": "363c85b7bd17f0875cc8e20f564d1bec05f6d46d",
   "reserved_paths": [
     ".github/workflows/rev3700-signed-johnson-ground-public-replay-seal-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json",
@@ -56,6 +56,19 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
     "fail_closed_on_schema_status_identity_or_accounting_drift": true
   },
-  "status": "active_claimed_preimplementation",
+  "validation": {
+    "dedicated_smoke_parent_head": "427ac3c94c476d9d22eb0d339f8253d3f43801b0",
+    "focused_and_inherited_tests": "18/18 passed",
+    "py_compile": "passed",
+    "dependency_guard": "passed",
+    "reserved_diff_guard": "passed",
+    "phase_admission": "attempt_solution and publish admitted=true; conflicts=[]",
+    "repository_parallel_admission_on_parent_head": "success",
+    "latest_head_note": "363c85b7bd17f0875cc8e20f564d1bec05f6d46d is an evidence-only github-actions[bot] follow-up after canonical registry refresh; no integration was attempted after the global user stop was observed"
+  },
+  "status": "stopped_by_user_global_j_stop",
+  "state": "closed",
+  "stopped_at_jst": "2026-08-22T22:06:55+09:00",
+  "stop_reason": "Current main records an explicit user request that all J parallel executions stop. PR #295 remains draft and unmerged; this claim is closed without merging, rerunning, cancelling, rebasing, force-pushing, overwriting, or closing sibling work.",
   "agi_state": "NOT_AGI"
 }
