@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev620-small-order-proof-dag-20260822T1349JST-f3bc7ed4",
   "session_id": "chatgpt-session-j-continuation-20260822T1349+0900-f3bc7ed4",
   "started_at_jst": "2026-08-22T13:49:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T13:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:02:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "f3bc7ed496afa2fd9c8daa417dd20c4c56e76f41",
   "starting_agi_gi_rev": 295,
@@ -12,7 +12,7 @@
   "scope": "crx3/algorithmic-consumers/proof-carrying-small-order-production-proof-dag",
   "branch": "agi-gi-rev620-small-order-proof-dag-session-20260822-1349",
   "pull_request": 248,
-  "latest_head_sha": "e262b1a50cebf5b565dc4f6eaae17e530347b415",
+  "latest_head_sha": "cdad6df522a812fbfc28ffcdc9837d23b5abc1c5",
   "reserved_paths": [
     ".github/workflows/rev620-small-order-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev620-small-order-proof-dag-20260822T1349JST-f3bc7ed4-attempt-solution.json",
@@ -32,8 +32,17 @@
     "CRX1/CRX2 implementations, MAIN.md, proof_dag_accounting_v1.py, proof_carrying_small_order_production_admission_v1.py, shared coordination implementation"
   ],
   "intent": "Attach the main-integrated rev252 proof-carrying small-order production admission to the main-integrated rev220/rev289 conservative execution proof-DAG without modifying either shared substrate. Freeze the Schreier group, oriented strings, root, production/replay caps, exact producer scan count, replay certificate digest, recurrence status and exact terminal payload into one replay-stable identity; admit only independently replay-verified exact nonempty/exact-empty outcomes; fail closed on opaque identity values, nonexact/resource-cap outcomes, identity drift, replay/certificate mismatch, accounting drift, non-finite envelope inputs, or proof-DAG rejection.",
-  "coordination_note": "Draft PR #248 is published from exact head e262b1a50cebf5b565dc4f6eaae17e530347b415 with four rev620-only additive paths. Dedicated and repository-wide CI are running. Concurrent rev600 explicitly updated its own coordination record to exclude rev620; fresh rev650 is also excluded here. No sibling artifact has been mutated.",
-  "non_interference": "Only the six rev620 reserved paths may be written on the dedicated branch and only this rev620 claim may be updated on main. No sibling branch, PR, claim, workflow, reserved path, shared solver, shared proof-DAG implementation, or MAIN.md may be modified, cancelled, rerun, closed, rebased, force-pushed, or overwritten.",
-  "status": "active_pr_248_exact_head_e262b1a5_ci_running",
+  "coordination_note": "Draft PR #248 exact head cdad6df522a812fbfc28ffcdc9837d23b5abc1c5 contains only rev620 additive reserved paths. Canonical publish evidence is persisted and replayed successfully by the repository-wide Problem-solving parallel admission gate. Dedicated rev620 smoke is green: 51/51 inherited+focused tests, py_compile, sibling-dependency gate, and both generated phase snapshots succeeded. All observed inherited exact-head smokes except the still-running repository AGI-GI rev validation are green; PR is mergeable=true and remains draft until that final validation completes. No sibling artifact has been mutated or existing run rerun/cancelled.",
+  "validation": {
+    "focused_and_inherited": "51/51 success",
+    "py_compile": "success",
+    "sibling_import_gate": "success",
+    "publish_phase_admission": "admitted; conflicts=[]; persisted and replayed",
+    "attempt_solution_phase_admission": "admitted; conflicts=[]; generated artifact retained",
+    "repository_parallel_admission": "success",
+    "exact_head_rev_validation": "in_progress"
+  },
+  "non_interference": "Only rev620 reserved paths were written on the dedicated branch and only this rev620 claim was updated on main. No sibling branch, PR, claim, workflow, reserved path, shared solver, shared proof-DAG implementation, or MAIN.md was modified, cancelled, rerun, closed, rebased, force-pushed, or overwritten.",
+  "status": "active_pr_248_exact_head_cdad6df5_final_rev_validation_running",
   "agi_state": "NOT_AGI"
 }
