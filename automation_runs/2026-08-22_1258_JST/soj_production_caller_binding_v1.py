@@ -65,11 +65,14 @@ def _require_mapping(value: Any, key: str) -> dict[str, Any]:
 def _reject_unknown_keys(
     mapping: Mapping[str, Any], allowed: frozenset[str], key: str
 ) -> None:
-    unexpected = set(mapping) - allowed
+    keys = tuple(mapping)
+    if any(type(item) is not str for item in keys):
+        raise CallerBindingError(f"{key} keys must be literal JSON strings")
+    unexpected = set(keys) - allowed
     if unexpected:
         raise CallerBindingError(
             f"{key} contains unsupported fields: "
-            + ", ".join(sorted(str(item) for item in unexpected))
+            + ", ".join(sorted(unexpected))
         )
 
 
@@ -79,9 +82,16 @@ def _strict_true(mapping: Mapping[str, Any], key: str) -> None:
         raise CallerBindingError(f"{key} must be literal true")
 
 
-def _strict_sha(mapping: Mapping[str, Any], key: str) -> str:
+def _strict_string(mapping: Mapping[str, Any], key: str) -> str:
     value = mapping.get(key)
-    if not isinstance(value, str) or _SHA256_RE.fullmatch(value) is None:
+    if type(value) is not str:
+        raise CallerBindingError(f"{key} must be a literal JSON string")
+    return value
+
+
+def _strict_sha(mapping: Mapping[str, Any], key: str) -> str:
+    value = _strict_string(mapping, key)
+    if _SHA256_RE.fullmatch(value) is None:
         raise CallerBindingError(f"{key} must be a lowercase 64-hex SHA-256 identity")
     return value
 
@@ -94,8 +104,8 @@ def _strict_nonnegative_int(mapping: Mapping[str, Any], key: str) -> int:
 
 
 def _strict_status(mapping: Mapping[str, Any], key: str = "result_status") -> str:
-    value = mapping.get(key)
-    if not isinstance(value, str) or value not in _ALLOWED_STATUSES:
+    value = _strict_string(mapping, key)
+    if value not in _ALLOWED_STATUSES:
         raise CallerBindingError(
             f"{key} must be one of {sorted(_ALLOWED_STATUSES)}"
         )
@@ -122,8 +132,9 @@ def bind_production_caller(evidence: Mapping[str, Any]) -> dict[str, Any]:
     Johnson reduction, authenticate SHA-looking identities, or prove the semantic
     truth of caller-supplied certificates. It only creates a deterministic binding
     across evidence that an upstream replay/verification layer has already accepted.
-    Literal dict snapshots are required so custom Mapping implementations cannot
-    change values or iteration semantics across validation steps.
+    Literal dict snapshots, literal JSON-string keys, and literal string values are
+    required so Python subclasses cannot change equality, hashing, or lookup
+    semantics across validation steps.
     """
 
     root = _require_mapping(evidence, "evidence")
@@ -131,8 +142,8 @@ def bind_production_caller(evidence: Mapping[str, Any]) -> dict[str, Any]:
     _strict_true(root, "canonical")
     _strict_true(root, "exact")
 
-    mode = root.get("mode")
-    if not isinstance(mode, str) or mode not in _ALLOWED_MODES:
+    mode = _strict_string(root, "mode")
+    if mode not in _ALLOWED_MODES:
         raise CallerBindingError(f"mode must be one of {sorted(_ALLOWED_MODES)}")
 
     transition_identity = _strict_sha(root, "transition_identity")
