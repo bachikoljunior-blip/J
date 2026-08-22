@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "event_type": "scheduled_run_start_fallback",
+  "started_at_jst": "2026-08-22T14:46:36+09:00",
+  "starting_main_sha": "545c97bea3edf45b41700e2f0ffdeacdaab260b0",
+  "starting_agi_gi_rev": 620,
+  "automation_run_id": "chatgpt-session-j-continuation-20260822T144636+0900-545c97be-turn4",
+  "invocation_kind": "scheduled_automation",
+  "automation_turn": 4,
+  "execution_surface": "chatgpt_work_mode_same_conversation",
+  "session_schedule_title": "J セッション継続",
+  "agi_state": "NOT_AGI",
+  "protocol_note": "The connector exposes create/replace file operations but no append primitive, and the append-only STARTS.jsonl cannot be safely reconstructed without risking concurrent-record loss. This additive main-visible record is therefore used as a non-destructive fallback before implementation writes; STARTS.jsonl itself is left untouched."
+}
