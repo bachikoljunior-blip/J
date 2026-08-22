@@ -27,7 +27,7 @@ jobs:
       - name: Generate canonical attempt-solution admission snapshot
         run: |
           rm -rf /tmp/rev3200-main-attempt
-          git worktree add --detach /tmp/rev3200-main-attempt 8c23c96a0f3a480e9ad54a6fe38be5bbb03141d2
+          git worktree add --detach /tmp/rev3200-main-attempt f197e4c8e159a36c312202b2a7f5ab510dc6a035
           python automation/problem_solving_parallel_admission.py \
             --root /tmp/rev3200-main-attempt \
             --claim-id chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f \
@@ -82,7 +82,7 @@ jobs:
       - name: Generate canonical publish admission snapshot
         run: |
           rm -rf /tmp/rev3200-main-publish
-          git worktree add --detach /tmp/rev3200-main-publish 8c23c96a0f3a480e9ad54a6fe38be5bbb03141d2
+          git worktree add --detach /tmp/rev3200-main-publish f197e4c8e159a36c312202b2a7f5ab510dc6a035
           python automation/problem_solving_parallel_admission.py \
             --root /tmp/rev3200-main-publish \
             --claim-id chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f \
