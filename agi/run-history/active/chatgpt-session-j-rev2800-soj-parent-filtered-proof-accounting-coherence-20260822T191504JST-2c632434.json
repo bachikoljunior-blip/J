@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434",
   "session_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST",
   "started_at_jst": "2026-08-22T19:15:04+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:55:45+09:00",
-  "last_activity_at_jst": "2026-08-22T19:55:45+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:46:00+09:00",
+  "last_activity_at_jst": "2026-08-22T20:46:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
   "starting_agi_gi_rev": 1600,
@@ -26,15 +26,16 @@
     "rev2707 corrected-SOJ parent-filtered proof-DAG integrity / PR #280 and all reserved paths",
     "rev2600 corrected-SOJ parent-filtered result accounting coherence / PR #279 and all reserved paths",
     "rev3000 parent-filtered execution proof-DAG binding / PR #285 and all reserved paths",
+    "rev3100 parent-filtered execution proof/accounting coherence / PR #287 and all reserved paths",
     "rev2500 corrected-SOJ parent-filtered execution proof-DAG historical scope and all reserved paths",
     "rev2501 relation-twin restriction identity / PR #278 and all reserved paths",
     "rev2400 corrected-SOJ accounting coherence / PR #276 and all reserved paths",
     "rev2300 homogeneous-block structural quotient coherence / PR #275 and all reserved paths",
     "rev2200 corrected-SOJ parent-filtered child result / PR #274 and all reserved paths",
     "rev1400 recursive production execution proof-DAG / PR #264 and all reserved paths",
-    "run-start history integrity and claim-publication preflight coordination scopes and all reserved paths",
-    "run-start SHA correction / PR #284 and all reserved paths",
-    "rev3100/rev3200 and later moving-main claim-rescope coordination scopes and all reserved paths",
+    "claim-publication preflight coordination scope and all reserved paths",
+    "completed run-start SHA correction / merged PR #284 history paths remain read-only",
+    "rev3200 and later moving-main claim-rescope / MAIN sync coordination scopes and all reserved paths",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
   "intent": "Add one file-disjoint post-replay coherence seal between public-shaped rev2707 parent-filtered result proof-DAG integrity evidence and public-shaped rev2600 parent-filtered result recurrence-accounting coherence evidence. Independently normalize and replay both snapshots, require one exact result/reduction/semantic/child lineage, outcome, child ground, candidate/accepted counts and filtering-work bound across them, retain rev2600's strict parent-to-child measure separately, preserve proof-DAG and accounting identities as distinct evidence, reject malformed/tampered/nonliteral data fail-closed, and emit one deterministic SHA-256 cross-certificate coherence identity. Do not import sibling branch-only implementations, do not execute recursive SI, do not combine unlike accounting units, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
@@ -55,7 +56,8 @@
     "main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
     "claim_commit": "c3ab35d3825a0458e8f8c4ae9ceb494f6810e9f3",
     "pre_implementation_heartbeat_commit": "b7f6947be5c7130bec795638996037263b7306e0",
-    "continuation_main_sha": "8c23c96a0f3a480e9ad54a6fe38be5bbb03141d2"
+    "continuation_main_sha": "f022a711a3fa1720d0cf6c3bb85a5bf513def2c0",
+    "continuation_observation": "main now includes the independently owned run-start SHA correction and later rev3200 MAIN-sync coordination; direct producer PR #279 and proof-integrity PR #280 remain open/draft; downstream rev3000/#285 and rev3100/#287 are also open/draft and explicitly remain sibling-owned"
   },
   "hardening": {
     "strict_schema_version": "schema_version is now an exact built-in int equal to schema v1; bool-coercion such as true == 1 is rejected",
@@ -79,10 +81,10 @@
     "inherited_rev246_run": 32568742676,
     "inherited_rev246": "success",
     "run_start_history_integrity_run": 32568742679,
-    "run_start_history_integrity": "failure on this exact head in separately owned shared coordination workflow; separate PR #284 owns the correction and remains untouched",
+    "run_start_history_integrity": "historical failure on this exact head; separately owned correction PR #284 is now merged as 7e83950a3189ac17306aa55c087ee2d10cc0baaa; no rerun or sibling-history mutation is performed from rev2800",
     "manual_rerun_or_cancel": false
   },
-  "integration_boundary": "PR #283 remains draft and unmerged while independently owned upstream public contracts rev2707 / PR #280 and rev2600 / PR #279 remain open. The hardening head is functionally green, phase-admission green, parallel-admission green, and all inherited path-sensitive checks are green. Its naturally triggered run-start-history integrity check predates the separately owned correction and remains red. Do not overtake upstream or coordination ownership; do not reconcile against moving main solely to absorb sibling coordination work.",
-  "status": "active_hardened_head_all_functional_inherited_and_parallel_admission_green_waiting_upstreams_and_external_history_repair",
+  "integration_boundary": "PR #283 remains draft and unmerged because independently owned direct upstream public contracts rev2707 / PR #280 and rev2600 / PR #279 are still open/draft. The previous shared run-start-history blocker has been repaired independently and merged, but rev2800 will not overtake producer ownership or rewrite its exact-head phase evidence merely to absorb moving main coordination. Downstream rev3000 / PR #285 and rev3100 / PR #287 remain sibling-owned and are not modified.",
+  "status": "active_hardened_head_green_history_repair_merged_waiting_direct_upstream_contracts",
   "agi_state": "NOT_AGI"
 }
