@@ -158,6 +158,22 @@ class ProblemSolvingPhaseEvidenceGuardTest(unittest.TestCase):
             ).strip()
             self.assertEqual(replay_evidence(root, evidence, unrelated, unrelated), ())
 
+            tree = subprocess.check_output(
+                ["git", "show", "-s", "--format=%T", unrelated],
+                cwd=root,
+                text=True,
+            ).strip()
+            disjoint = subprocess.check_output(
+                ["git", "commit-tree", tree],
+                cwd=root,
+                input="disjoint registry history\n",
+                text=True,
+            ).strip()
+            ancestry_errors = replay_evidence(root, evidence, unrelated, disjoint)
+            self.assertTrue(
+                any("does not descend" in item for item in ancestry_errors)
+            )
+
     @staticmethod
     def _write_claim(path, *, claim_id, started, heartbeat, scope, paths):
         payload = {

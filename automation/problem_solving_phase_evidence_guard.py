@@ -123,9 +123,19 @@ def _replay_current_registry(
 ) -> tuple[str, ...]:
     try:
         current_sha = _resolve_commit(repo, current_registry_ref)
-        claims, registry_errors = _registry_at(repo, current_sha)
     except subprocess.CalledProcessError:
         return (f"current registry ref cannot be resolved: {current_registry_ref}",)
+    source_sha = payload.get("registry_source_sha")
+    continuity = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", str(source_sha), current_sha],
+        cwd=repo,
+    )
+    if continuity.returncode != 0:
+        return (
+            "current registry ref does not descend from persisted "
+            f"registry_source_sha: {current_sha}",
+        )
+    claims, registry_errors = _registry_at(repo, current_sha)
     if registry_errors:
         return tuple(f"current registry: {error}" for error in registry_errors)
 
