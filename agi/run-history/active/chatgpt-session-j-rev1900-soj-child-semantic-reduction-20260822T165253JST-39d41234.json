@@ -1,0 +1,53 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev1900-20260822T165253+0900-turn9",
+  "started_at_jst": "2026-08-22T16:52:53+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:52:53+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "39d41234d4d7d73ed39a773afc01fe2a59e5820d",
+  "starting_agi_gi_rev": 952,
+  "target_revision": 1900,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-semantic-reduction-binding",
+  "branch": "agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652",
+  "current_pr": null,
+  "exact_head": null,
+  "reserved_paths": [
+    ".github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml",
+    "automation_runs/2026-08-22_1652_JST/REV1900_SOJ_CHILD_SEMANTIC_REDUCTION.md",
+    "automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py",
+    "automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev1800 homogeneous-block quotient-SI proof-DAG claim and all reserved paths",
+    "rev1700 recursive child-instance execution / PR #266 and all reserved paths",
+    "superseded same-session rev1700 semantic claim and all its abandoned reserved paths",
+    "rev1600 homogeneous block-action provenance proof-DAG / PR #265 and all reserved paths",
+    "all rev1500 claims and their reserved paths",
+    "rev1400 corrected-SOJ recursive production execution proof-DAG / PR #264 and all reserved paths",
+    "rev1300 / PR #263, rev1200 / PR #260, rev1100 / PR #257, rev1000 / PR #256, rev900 / PR #254 and all reserved paths",
+    "rev293 Johnson recursive-result lift / PR #241 and all reserved paths",
+    "main-integrated rev287 Johnson relational-reduction implementation except read-only public contract use",
+    "all CRX1/CRX2/CRX3 scopes, homogeneous-block scopes, MAIN.md, shared S1/proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "close only the semantic child-string construction gap between the main-integrated rev287 exact larger-ground Johnson relational reduction and the separately owned rev1700 child-instance executor: independently replay the rev287 ground-incidence transport certificate, deterministically derive source and target child strings on the certified Johnson ground from caller-supplied parent strings and certified point-incidence fibers, prove equivariance under every certified induced-ground generator, freeze parent/reduction/child-string digests into one replay-stable binding artifact, and fail closed on ambiguity or drift. Do not execute recursive String Isomorphism, do not lift a child result, do not import any sibling branch-only implementation, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_any_rev287_replay_or_child_semantic_identity_drift": true
+  },
+  "depends_on_main_integrated_contracts": [
+    "rev287 larger-ground Johnson relational-reduction certificate and induced ground-action replay",
+    "main-integrated permutation/group primitives used read-only for exact generator action checks"
+  ],
+  "integration_boundary": "file-disjoint semantic-binding leaf only; recursive solver execution and result lifting remain separately owned",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
