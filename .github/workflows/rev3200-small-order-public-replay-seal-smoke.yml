@@ -1,0 +1,126 @@
+name: rev3200 small-order public replay seal smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1957_JST/small_order_public_replay_seal_v1.py'
+      - 'automation_runs/2026-08-22_1957_JST/test_small_order_public_replay_seal_rev3200.py'
+      - 'automation_runs/2026-08-22_1957_JST/REV3200_SMALL_ORDER_PUBLIC_REPLAY_SEAL.md'
+      - '.github/workflows/rev3200-small-order-public-replay-seal-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate canonical attempt-solution admission snapshot
+        run: |
+          rm -rf /tmp/rev3200-main-attempt
+          git worktree add --detach /tmp/rev3200-main-attempt 8c23c96a0f3a480e9ad54a6fe38be5bbb03141d2
+          python automation/problem_solving_parallel_admission.py \
+            --root /tmp/rev3200-main-attempt \
+            --claim-id chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f \
+            --phase attempt_solution \
+            --scope crx3/algorithmic-consumers/proof-carrying-small-order-production-public-replay-seal \
+            --target-revision 3200 \
+            --path .github/workflows/rev3200-small-order-public-replay-seal-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f-attempt_solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f-publish.json \
+            --path automation_runs/2026-08-22_1957_JST/REV3200_SMALL_ORDER_PUBLIC_REPLAY_SEAL.md \
+            --path automation_runs/2026-08-22_1957_JST/small_order_public_replay_seal_v1.py \
+            --path automation_runs/2026-08-22_1957_JST/test_small_order_public_replay_seal_rev3200.py \
+            --output /tmp/rev3200-attempt-solution.json
+          cat /tmp/rev3200-attempt-solution.json
+      - name: Preserve generated attempt evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev3200-attempt-solution-evidence
+          path: /tmp/rev3200-attempt-solution.json
+          if-no-files-found: error
+          retention-days: 1
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
+      - name: Compile rev3200 consumer and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1957_JST/small_order_public_replay_seal_v1.py \
+            automation_runs/2026-08-22_1957_JST/test_small_order_public_replay_seal_rev3200.py
+      - name: Run inherited rev620 and focused rev3200 tests
+        env:
+          PYTHONPATH: automation_runs/2026-08-22_1957_JST:automation_runs/2026-08-19_0851_JST
+        run: |
+          python -m pytest -q \
+            automation_runs/2026-08-19_0851_JST/test_small_order_production_proof_dag_consumer_rev620.py \
+            automation_runs/2026-08-22_1957_JST/test_small_order_public_replay_seal_rev3200.py
+      - name: Reject sibling branch-only dependencies
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('automation_runs/2026-08-22_1957_JST/small_order_public_replay_seal_v1.py').read_text()
+          forbidden = (
+              'soj_parent_filtered',
+              'homogeneous_block',
+              'relation_twin_restriction',
+              'corrected_soj',
+              'rev3100',
+          )
+          hits = [name for name in forbidden if name in text]
+          if hits:
+              raise SystemExit(f'sibling branch-only dependency detected: {hits}')
+          PY
+      - name: Generate canonical publish admission snapshot
+        run: |
+          rm -rf /tmp/rev3200-main-publish
+          git worktree add --detach /tmp/rev3200-main-publish 8c23c96a0f3a480e9ad54a6fe38be5bbb03141d2
+          python automation/problem_solving_parallel_admission.py \
+            --root /tmp/rev3200-main-publish \
+            --claim-id chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f \
+            --phase publish \
+            --scope crx3/algorithmic-consumers/proof-carrying-small-order-production-public-replay-seal \
+            --target-revision 3200 \
+            --path .github/workflows/rev3200-small-order-public-replay-seal-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f-attempt_solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f-publish.json \
+            --path automation_runs/2026-08-22_1957_JST/REV3200_SMALL_ORDER_PUBLIC_REPLAY_SEAL.md \
+            --path automation_runs/2026-08-22_1957_JST/small_order_public_replay_seal_v1.py \
+            --path automation_runs/2026-08-22_1957_JST/test_small_order_public_replay_seal_rev3200.py \
+            --output /tmp/rev3200-publish.json
+          cat /tmp/rev3200-publish.json
+      - name: Preserve generated publish evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev3200-publish-evidence
+          path: /tmp/rev3200-publish.json
+          if-no-files-found: error
+          retention-days: 1
+      - name: Enforce reserved-path diff
+        shell: bash
+        run: |
+          python - <<'PY'
+          import subprocess
+          allowed = {
+              '.github/workflows/rev3200-small-order-public-replay-seal-smoke.yml',
+              'automation_runs/2026-08-22_1957_JST/REV3200_SMALL_ORDER_PUBLIC_REPLAY_SEAL.md',
+              'automation_runs/2026-08-22_1957_JST/small_order_public_replay_seal_v1.py',
+              'automation_runs/2026-08-22_1957_JST/test_small_order_public_replay_seal_rev3200.py',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f-attempt_solution.json',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f-publish.json',
+          }
+          base = subprocess.check_output(['git', 'merge-base', 'HEAD', 'origin/main'], text=True).strip()
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only', f'{base}..HEAD'], text=True).splitlines())
+          extra = sorted(changed - allowed)
+          if extra:
+              raise SystemExit(f'unreserved paths: {extra}')
+          print(f'reserved diff ok: {sorted(changed)}')
+          PY
