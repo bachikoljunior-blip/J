@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev291-soj-larger-ground-recursive-handoff-20260822T1148JST-c2a368c0",
+  "session_id": "chatgpt-session-j-continuation-automation-turn4-20260822T1148+0900",
+  "started_at_jst": "2026-08-22T11:48:31+09:00",
+  "heartbeat_at_jst": "2026-08-22T11:48:31+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "c2a368c0003578c7045cce4cd1c6106f373fc800",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 291,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-recursive-handoff",
+  "branch": "agi-gi-rev291-soj-larger-ground-recursive-handoff-session-20260822-1148",
+  "reserved_paths": [
+    ".github/workflows/rev291-soj-larger-ground-recursive-handoff-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev291-soj-larger-ground-recursive-handoff-20260822T1148JST-c2a368c0-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev291-soj-larger-ground-recursive-handoff-20260822T1148JST-c2a368c0-publish.json",
+    "automation_runs/2026-08-22_1148_JST/REV291_SOJ_LARGER_GROUND_RECURSIVE_HANDOFF.md",
+    "automation_runs/2026-08-22_1148_JST/corrected_soj_larger_ground_recursive_handoff_v1.py",
+    "automation_runs/2026-08-22_1148_JST/test_corrected_soj_larger_ground_recursive_handoff_rev291.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 takeover kernel factorization and every reserved path",
+    "rev276-rev290 claims, branches, PRs, workflows, and reserved paths",
+    "rev281 corrected SOJ transition / PR #226",
+    "rev283 recurrence composition / PR #228",
+    "rev284 Johnson terminal admission / PR #229",
+    "rev285 zero-aux terminal accounting / PR #230",
+    "rev286 Johnson terminal cost / PR #231",
+    "rev288 strict SOJ evidence normalization / PR #232",
+    "rev289 shared proof-DAG envelope hardening",
+    "rev290 normalized Johnson cost binding",
+    "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
+  ],
+  "intent": "add a file-disjoint fail-closed recursive handoff for the main-integrated primitive Johnson ground-cap case: accept only exact/canonical caller-supplied relational reduction evidence that binds J(v,k) action degree C(v,k) to the certified ground v, requires solution-transport/complement handling certification and a strictly shrinking child accounting measure, then compose that handoff through the main quasipolynomial recurrence validator without claiming construction of the reduction itself; consume sibling contracts read-only and never import or modify branch-only sibling implementation",
+  "non_interference": "Only rev291 reserved paths may be written on the dedicated branch. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
