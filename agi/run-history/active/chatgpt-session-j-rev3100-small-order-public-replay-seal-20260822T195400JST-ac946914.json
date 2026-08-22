@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-rev3100-small-order-public-replay-seal-20260822T195400JST-ac946914",
   "session_id": "chatgpt-session-j-rev3100-small-order-public-replay-seal-20260822T195400JST",
   "started_at_jst": "2026-08-22T19:54:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:54:00+09:00",
-  "last_activity_at_jst": "2026-08-22T19:54:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:56:00+09:00",
+  "last_activity_at_jst": "2026-08-22T19:56:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "ac946914e6d72bab02d5f1083e93a3f7b6dcbf9c",
   "starting_agi_gi_rev": 1600,
@@ -13,7 +13,7 @@
   "scope": "crx3/algorithmic-consumers/proof-carrying-small-order-production-public-replay-seal",
   "branch": "agi-gi-rev3100-small-order-public-replay-seal-session-20260822-1954",
   "pull_request": null,
-  "exact_head_sha": null,
+  "exact_head_sha": "fa384a5500822642996d261ba75e2340f6350da8",
   "reserved_paths": [
     ".github/workflows/rev3100-small-order-public-replay-seal-smoke.yml",
     "automation_runs/2026-08-22_1954_JST/REV3100_SMALL_ORDER_PUBLIC_REPLAY_SEAL.md",
@@ -23,33 +23,27 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev3100-small-order-public-replay-seal-20260822T195400JST-ac946914-publish.json"
   ],
   "parallel_exclusions": [
-    "rev3000/rev2900 and all corrected Split-or-Johnson parent-filtered execution/proof/accounting scopes and reserved paths",
-    "rev2300/rev2100/rev2000/rev1800/rev1200 homogeneous-block quotient/original-domain structural scopes and reserved paths",
-    "rev2800/rev2707/rev2600/rev2500/rev2400/rev2200 corrected-SOJ scopes and reserved paths",
-    "rev1600/rev952/rev950 homogeneous-block proof-DAG scopes and reserved paths",
-    "rev600 corrected-SOJ main provenance, rev650 recursive provenance, and all sibling small-order-independent scopes",
-    "run-start history integrity, claim-publication preflight, main revision guard/declaration sync, sibling coordination claims and reserved paths",
-    "MAIN.md, shared proof-DAG/recurrence/S1/coordination implementations, sibling claims, branches, PRs and workflows"
+    "all sibling branches, PRs, claims, workflows, and reserved paths"
   ],
-  "intent": "Add one additive public replay seal for the already-main-integrated rev620 proof-carrying small-order production proof-DAG consumer. Re-execute rev620 from explicit group/strings/resource inputs, require a certified exact nonempty or exact-empty result, canonically freeze the rev620 proof identity, exact outcome, replay certificate identity, and proof-DAG validation metrics, domain-separate them into deterministic SHA-256 digests, and provide an independent verify-by-reexecution entry point. Do not change the small-order solver, rev252 admission, shared proof-DAG accounting, or any sibling branch-only contract; do not promote resource-cap or nonexact outcomes; do not claim CRX3/GI/AGI closure.",
+  "intent": "Retired before implementation after the mandatory collision recheck found an independently owned rev3100 corrected-SOJ branch. No reserved implementation, test, workflow, documentation, or phase-evidence path was written on this branch.",
   "parallel_safety": {
     "do_not_modify_other_active_branches": true,
     "do_not_cancel_or_rerun_unrelated_workflows": true,
     "do_not_merge_or_close_sibling_prs": true,
     "do_not_force_push_or_rebase_siblings": true,
     "do_not_import_sibling_branch_only_implementation": true,
-    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
-    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
-    "fail_closed_on_schema_status_identity_outcome_digest_or_accounting_drift": true
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
   },
   "preflight": {
-    "rev3100_branch_search": "none before claim",
-    "rev3100_pr_search": "none before claim",
-    "rev3100_active_claim_search": "none before claim",
-    "main_sha": "ac946914e6d72bab02d5f1083e93a3f7b6dcbf9c"
+    "rev3100_branch_search_before_claim": "none",
+    "post_claim_collision_recheck": "found agi-gi-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-session-20260822-1953",
+    "collision_action": "superseded before implementation"
   },
-  "validation": {},
-  "integration_boundary": "May merge only if the dedicated exact-head smoke, canonical phase evidence replay, repository-wide parallel admission, and ordinary required checks are green on an exact mergeable head. Otherwise keep draft/unmerged and preserve the durable heartbeat.",
-  "status": "active_claimed_pre_implementation",
+  "validation": {
+    "implementation_writes": 0,
+    "pull_request_created": false
+  },
+  "integration_boundary": "Superseded permanently; do not reuse this target revision or claim.",
+  "status": "superseded_target_revision_collision_pre_implementation",
   "agi_state": "NOT_AGI"
 }
