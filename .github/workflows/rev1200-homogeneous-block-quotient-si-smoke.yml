@@ -1,0 +1,91 @@
+name: rev1200 homogeneous-block quotient String-Isomorphism smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1550_JST/homogeneous_block_quotient_string_isomorphism_v1.py'
+      - 'automation_runs/2026-08-22_1550_JST/test_homogeneous_block_quotient_string_isomorphism_rev1200.py'
+      - 'automation_runs/2026-08-22_1550_JST/REV1200_HOMOGENEOUS_BLOCK_QUOTIENT_STRING_ISOMORPHISM.md'
+      - '.github/workflows/rev1200-homogeneous-block-quotient-si-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev1200 executor and regressions
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1550_JST/homogeneous_block_quotient_string_isomorphism_v1.py \
+            automation_runs/2026-08-22_1550_JST/test_homogeneous_block_quotient_string_isomorphism_rev1200.py
+      - name: Run inherited block-action and focused rev1200 regressions
+        run: |
+          python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py -v
+          python automation_runs/2026-08-22_1453_JST/test_block_action_kernel_proof_dag_consumer_rev950.py -v
+          python automation_runs/2026-08-22_1550_JST/test_homogeneous_block_quotient_string_isomorphism_rev1200.py -v
+      - name: Reject sibling branch-only dependencies and original-domain lifting
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('automation_runs/2026-08-22_1550_JST/homogeneous_block_quotient_string_isomorphism_v1.py').read_text()
+          forbidden = (
+              'block_action_quotient_preimage_lift',
+              'homogeneous_block_quotient_preimage',
+              'soj_main_post_replay_seal',
+              'state_orbit_proof_dag',
+          )
+          hits = [name for name in forbidden if name in text]
+          if hits:
+              raise SystemExit(f'sibling or lift dependency detected: {hits}')
+          PY
+      - name: Preview canonical attempt-solution admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd \
+            --phase attempt_solution \
+            --scope crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism \
+            --target-revision 1200 \
+            --path .github/workflows/rev1200-homogeneous-block-quotient-si-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-publish.json \
+            --path automation_runs/2026-08-22_1550_JST/REV1200_HOMOGENEOUS_BLOCK_QUOTIENT_STRING_ISOMORPHISM.md \
+            --path automation_runs/2026-08-22_1550_JST/homogeneous_block_quotient_string_isomorphism_v1.py \
+            --path automation_runs/2026-08-22_1550_JST/test_homogeneous_block_quotient_string_isomorphism_rev1200.py \
+            --output /tmp/rev1200-attempt-solution.json
+          cat /tmp/rev1200-attempt-solution.json
+      - name: Preview canonical publish admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd \
+            --phase publish \
+            --scope crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism \
+            --target-revision 1200 \
+            --path .github/workflows/rev1200-homogeneous-block-quotient-si-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-publish.json \
+            --path automation_runs/2026-08-22_1550_JST/REV1200_HOMOGENEOUS_BLOCK_QUOTIENT_STRING_ISOMORPHISM.md \
+            --path automation_runs/2026-08-22_1550_JST/homogeneous_block_quotient_string_isomorphism_v1.py \
+            --path automation_runs/2026-08-22_1550_JST/test_homogeneous_block_quotient_string_isomorphism_rev1200.py \
+            --output /tmp/rev1200-publish.json
+          cat /tmp/rev1200-publish.json
+      - name: Verify reserved diff remains additive
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- \
+            automation_runs/2026-08-22_1550_JST/homogeneous_block_quotient_string_isomorphism_v1.py \
+            automation_runs/2026-08-22_1550_JST/test_homogeneous_block_quotient_string_isomorphism_rev1200.py \
+            automation_runs/2026-08-22_1550_JST/REV1200_HOMOGENEOUS_BLOCK_QUOTIENT_STRING_ISOMORPHISM.md \
+            .github/workflows/rev1200-homogeneous-block-quotient-si-smoke.yml \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd-publish.json
