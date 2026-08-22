@@ -4,16 +4,17 @@
   "claim_id": "chatgpt-session-j-rev1500-soj-recursive-child-instance-execution-20260822T164800JST-6c4b9e21",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1500-20260822T164800+0900",
   "started_at_jst": "2026-08-22T16:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:48:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:49:17+09:00",
+  "completed_at_jst": "2026-08-22T16:49:17+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "5247ed781fea5386802634ab012712950a15d821",
-  "latest_main_sha_observed": "5247ed781fea5386802634ab012712950a15d821",
+  "latest_main_sha_observed": "ac399573071804ddf4daf82a99d45a3f109664a6",
   "starting_agi_gi_rev": 952,
   "target_revision": 1500,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-instance-execution-binding",
   "branch": "agi-gi-rev1500-soj-recursive-child-instance-execution-session-20260822-1648",
   "current_pr": null,
-  "exact_head": null,
+  "exact_head": "013fbd4526d09d2f96c2297a8fd0367a5636b407",
   "reserved_paths": [
     ".github/workflows/rev1500-soj-recursive-child-instance-execution-smoke.yml",
     "automation_runs/2026-08-22_1648_JST/REV1500_SOJ_RECURSIVE_CHILD_INSTANCE_EXECUTION.md",
@@ -47,6 +48,7 @@
     "rev293 RecursiveGroundExactResultEvidence public snapshot/hash shape / PR #241"
   ],
   "integration_boundary": "draft-only; this leaf executes and authenticates one explicit induced-ground S1 child instance but does not construct or prove the parent-Johnson-to-child-string semantic reduction, does not import rev1400, and does not close corrected Split-or-Johnson, GI, or AGI",
-  "status": "active",
+  "superseded_reason": "A separately owned earlier rev1500 branch, agi-gi-rev1500-block-action-provenance-proof-dag-session-20260822-1644 at 202aba395358862c68ce0bf3f3209a118637f8bf, became visible during the mandatory refresh after this claim was created. This session retired only its own rev1500 claim before workflow/PR/evidence publication and will retreat to a collision-free target revision.",
+  "status": "superseded",
   "agi_state": "NOT_AGI"
 }

@@ -1,0 +1,70 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev2200-soj-parent-filtered-child-result-20260822T174730JST-6a2bef85",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev2200-20260822T174730+0900-turn4",
+  "started_at_jst": "2026-08-22T17:47:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:58:30+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "6a2bef858d13157192852b50c8df256b4d60bb94",
+  "starting_agi_gi_rev": 952,
+  "target_revision": 2200,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-child-result-binding",
+  "branch": "agi-gi-rev2200-soj-parent-filtered-child-result-session-20260822-1747",
+  "current_pr": 274,
+  "exact_head_sha": "c021fdd513c906833055fc51ed4748c1aa918fe5",
+  "reserved_paths": [
+    ".github/workflows/rev2200-soj-parent-filtered-child-result-smoke.yml",
+    "automation_runs/2026-08-22_1747_JST/REV2200_SOJ_PARENT_FILTERED_CHILD_RESULT.md",
+    "automation_runs/2026-08-22_1747_JST/soj_parent_filtered_child_result_v1.py",
+    "automation_runs/2026-08-22_1747_JST/test_soj_parent_filtered_child_result_rev2200.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2200-soj-parent-filtered-child-result-20260822T174730JST-6a2bef85-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2200-soj-parent-filtered-child-result-20260822T174730JST-6a2bef85-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev2300 homogeneous-block structural/proof coherence claim and all reserved paths",
+    "rev2100 homogeneous-block original-domain result proof-DAG / PR #272 and all reserved paths",
+    "rev2000 homogeneous-block joint compatibility proof-DAG / PR #271 and all reserved paths",
+    "rev1900 Johnson child semantic reduction / PR #270 and all reserved paths",
+    "rev1800 homogeneous-block quotient-SI proof-DAG and all reserved paths",
+    "rev1700 recursive child-instance execution / PR #266 and all reserved paths",
+    "all rev1600 and homogeneous-block scopes and reserved paths",
+    "rev1400, rev1300, rev1200, rev1100, rev1000, rev900 and all sibling reserved paths",
+    "rev293 recursive-result lift and all reserved paths",
+    "run-start-history integrity hardening / PR #273 and all reserved paths",
+    "MAIN.md, shared S1/proof-DAG/recurrence/coordination implementations, CRX1/CRX2/CRX3 scopes, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "close only the exact parent-filtering boundary left explicit by rev1900: structurally bind a rev1900-shaped semantic projection to a rev1700-shaped exact child-result coset, enumerate that child coset only under an explicit finite work cap, exactly test every candidate ground permutation against the original parent Johnson string, and certify only an empty set or a reconstructed right coset of parent-valid ground permutations. Do not import sibling branch-only implementations, do not execute recursive String Isomorphism, do not lift to the original pre-Johnson domain, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_schema_identity_coset_or_parent_transport_drift": true
+  },
+  "depends_on_main_integrated_contracts": [
+    "permutation_group_schreier compose/inverse/schreier_stabilizer_chain",
+    "coset_stabilizer_primitives right-coset convention"
+  ],
+  "consumes_sibling_public_contracts_structurally": [
+    "rev1900 JohnsonChildSemanticBinding public field/hash semantics",
+    "rev1700 RecursiveChildInstanceExecution and RecursiveGroundExactResultSnapshot public field semantics"
+  ],
+  "validation": {
+    "local_py_compile": "success",
+    "local_focused_regressions": "9/9 success",
+    "projection_false_positive_witness": "J(4,2): 24 exact child-profile transporters filtered to 8 exact parent-valid transporters",
+    "attempt_solution_admission": "admitted=true conflicts=[] persisted",
+    "publish_admission": "admitted=true conflicts=[] persisted",
+    "dedicated_rev2200_smoke_run": "32563536836 success on exact head",
+    "repository_parallel_admission_run": "32563536920 success on exact head",
+    "changed_paths": "exactly six reserved rev2200 paths including both canonical phase-evidence records",
+    "exact_head_workflows": "all observed rev2200, parallel-admission, rev238, rev239, rev240, rev241, rev242, rev246, rev250, rev253 and rev254 runs completed success",
+    "workflow_interference": "none; no existing run cancelled or manually rerun"
+  },
+  "status": "pr_open_exact_head_all_observed_ci_green",
+  "agi_state": "NOT_AGI"
+}
