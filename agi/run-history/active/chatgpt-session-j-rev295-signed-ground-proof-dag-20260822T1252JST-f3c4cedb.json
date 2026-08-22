@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev295-signed-ground-proof-dag-20260822T1252JST-f3c4cedb",
+  "session_id": "chatgpt-session-j-refire-turn7-20260822T1252+0900-f3c4cedb",
+  "started_at_jst": "2026-08-22T12:52:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:52:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "f3c4cedb4a1846147578015fb4afd0ed5b003453",
+  "starting_agi_gi_rev": 289,
+  "target_revision": 295,
+  "scope": "crx3/algorithmic-consumers/signed-johnson-ground-exact-terminal-proof-dag",
+  "branch": "agi-gi-rev295-signed-ground-proof-dag-session-20260822-1252",
+  "reserved_paths": [
+    ".github/workflows/rev295-signed-ground-proof-dag-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev295-signed-ground-proof-dag-20260822T1252JST-f3c4cedb-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev295-signed-ground-proof-dag-20260822T1252JST-f3c4cedb-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV295_SIGNED_GROUND_PROOF_DAG.md",
+    "automation_runs/2026-08-19_0851_JST/signed_johnson_ground_proof_dag_consumer_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_signed_johnson_ground_proof_dag_consumer_rev295.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 takeover kernel factorization and every reserved path",
+    "rev276-rev294 claims, branches, PRs, workflows, and reserved paths",
+    "rev264 primitive-Johnson proof-DAG, rev280 literal-giant proof-DAG, rev279 parent-outcome proof-DAG, state-orbit proof-DAG",
+    "rev287-rev294 corrected Split-or-Johnson scopes including Johnson cost binding and recursive result lift",
+    "CRX1/CRX2 implementations, MAIN.md, shared proof_dag_accounting_v1.py, shared coordination implementation"
+  ],
+  "intent": "Attach the main-integrated rev176 exact small-order signed Johnson ground relational String-Isomorphism terminal to the main-integrated rev220/rev289 conservative execution proof-DAG without changing either shared implementation. Freeze the deterministic Schreier group, oriented strings, root/domain, solver/resource gates and exact terminal structural payload into a replay-stable identity; admit only exact canonical locally cost-certified terminal outcomes; fail closed on opaque values, nonexact outcomes, identity drift, malformed proof measures, non-finite envelopes, or proof-DAG rejection.",
+  "non_interference": "Only rev295 reserved paths may be written on the dedicated branch and only this rev295 claim may be updated on main. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
+  "status": "active_claimed_preimplementation",
+  "agi_state": "NOT_AGI"
+}
