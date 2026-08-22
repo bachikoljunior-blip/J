@@ -206,7 +206,7 @@
   "reasons": [],
   "recorded_at_jst": "2026-08-22T14:56:32.530653+09:00",
   "registry_digest": "sha256:f4ede0a1e5ff3bfeab531d1aabd5390a5d67276632b9f7814f34740eedf124d4",
-  "registry_source_sha": "427b36b793fc2334067ffbdbb64693134095a18f",
+  "registry_source_sha": "f15471308d2a1207a54922d8312e898b4844b183",
   "schema_version": 1,
   "scope": "crx3/algorithmic-consumers/homogeneous-block-action-kernel-factorization-proof-dag",
   "target_revision": 950
