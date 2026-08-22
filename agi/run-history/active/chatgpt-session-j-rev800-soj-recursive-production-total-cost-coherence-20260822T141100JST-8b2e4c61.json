@@ -4,16 +4,16 @@
   "claim_id": "chatgpt-session-j-rev800-soj-recursive-production-total-cost-coherence-20260822T141100JST-8b2e4c61",
   "session_id": "chatgpt-session-j-continuation-rev800-20260822T1411+0900-8b2e4c61",
   "started_at_jst": "2026-08-22T14:11:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T14:11:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:16:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "6300ce9e857e4b30a61a87e835055c50b3329fa8",
   "starting_agi_gi_rev": 266,
   "target_revision": 800,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-total-cost-coherence",
   "branch": "agi-gi-rev800-soj-recursive-production-total-cost-coherence-session-20260822-1411",
-  "pull_request": null,
-  "pull_request_state": "not_created",
-  "latest_head_sha": null,
+  "pull_request": 252,
+  "pull_request_state": "open_draft",
+  "latest_head_sha": "d2d3e4646bd32eef196ab1eb68b9a2b8f7922df0",
   "intent": "add a file-disjoint fail-closed compatibility join between the public rev340 recursive-result accounting-binding contract and this session's public rev360 Johnson construction-cost-binding contract: independently replay both supplied certificate identities, require exact reduction-identity and recurrence-measure agreement, keep construction work distinct from recursive child accounting, reject double-counted or unit-incoherent charges, and seal only an explicit conservative total-cost coherence identity without importing sibling branch implementations, executing recursive String Isomorphism, reconstructing omitted Johnson semantics, or overlapping rev700/rev720 provenance scopes",
   "reserved_paths": [
     ".github/workflows/rev800-soj-recursive-production-total-cost-coherence-smoke.yml",
@@ -41,7 +41,13 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
   },
   "validation": {
-    "state": "claimed_not_yet_implemented"
+    "state": "draft_pr_open_ci_in_progress_attempt_solution_admitted",
+    "local_py_compile": "success",
+    "focused_regression": "13/13 success",
+    "attempt_solution_admission": "admitted_conflicts_empty",
+    "dedicated_smoke": "in_progress",
+    "problem_solving_parallel_admission": "in_progress",
+    "inherited_ci": "in_progress_naturally_no_reruns_or_cancellations"
   },
   "status": "active",
   "agi_state": "NOT_AGI"
