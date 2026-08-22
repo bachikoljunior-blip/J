@@ -5,8 +5,9 @@
   "session_id": "chatgpt-session-j-parallel-rev252-20260821T221349+0900-7174b2e6-turn3",
   "created_at": "2026-08-21T22:13:49+09:00",
   "started_at_jst": "2026-08-21T22:13:49+09:00",
-  "heartbeat_at": "2026-08-22T09:45:33+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:45:33+09:00",
+  "heartbeat_at": "2026-08-22T09:58:56+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:58:56+09:00",
+  "completed_at_jst": "2026-08-22T09:58:56+09:00",
   "expires_at": "2026-08-22T13:45:33+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "7174b2e612ed510cb3acb3c94588c41ab4a90bd9",
@@ -17,6 +18,9 @@
   "worktree": null,
   "target_pr": 216,
   "owner_pr": 216,
+  "pull_request_state": "merged",
+  "latest_head_sha": "32d04085eea0f407fbc781858599e82ac8fa8a86",
+  "merged_main_sha": "d30fe290c14333d611a39edd6b940ff93a18774c",
   "verification_method": "python -m unittest automation_runs/2026-08-19_0851_JST/test_proof_carrying_small_order_production_admission_rev252.py",
   "reserved_paths": [
     "automation_runs/2026-08-19_0851_JST/proof_carrying_small_order_production_admission_v1.py",
@@ -73,8 +77,19 @@
     "rev274 concurrent work",
     "MAIN.md and all existing shared workflow or coordination files"
   ],
-  "non_interference": "Write only the dedicated rev252 implementation, test, memo, smoke, already-main-visible hourly-refire path, phase-admission evidence, and this claim; do not modify existing solvers, shared workflows, MAIN.md, sibling claims, or concurrent PR branches.",
-  "status": "active_validating_exact_head",
-  "notes": "PR #216 remains draft on the dedicated branch. The branch was advanced with a no-conflict merge of main into exact head 32d04085eea0f407fbc781858599e82ac8fa8a86 while preserving exactly the five rev252-only added paths. On that head, the dedicated rev252 workflow and Problem-solving parallel admission are green; repository-wide AGI-GI rev validation and inherited smoke workflows are still completing.",
+  "non_interference": "Only the dedicated rev252 implementation, tests, memo, smoke workflow, phase-admission evidence, and this claim were changed. No shared solver, shared workflow, MAIN.md, sibling claim, or concurrent PR branch was modified by rev252 completion.",
+  "validation": {
+    "exact_head_sha": "32d04085eea0f407fbc781858599e82ac8fa8a86",
+    "rev252_workflow_run_id": 32541337789,
+    "rev252_workflow": "success",
+    "parallel_admission_run_id": 32541337831,
+    "parallel_admission": "success",
+    "agi_gi_validation_run_id": 32541337775,
+    "validate_w1r_fast": "success",
+    "validate_rev_series": "success",
+    "all_exact_head_pull_request_runs": "success"
+  },
+  "status": "completed_merged",
+  "notes": "PR #216 was advanced to exact head 32d04085eea0f407fbc781858599e82ac8fa8a86 with a no-conflict merge from main while preserving exactly five rev252-only added paths. Every exact-head pull-request workflow completed successfully, including the dedicated rev252 production-admission workflow, Problem-solving parallel admission, and both AGI-GI rev validation jobs. PR #216 was then merged to main as d30fe290c14333d611a39edd6b940ff93a18774c.",
   "agi_state": "NOT_AGI"
 }
