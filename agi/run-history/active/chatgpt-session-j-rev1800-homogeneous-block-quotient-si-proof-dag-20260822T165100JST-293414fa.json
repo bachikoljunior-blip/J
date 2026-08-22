@@ -1,0 +1,54 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev1800-20260822T165100+0900",
+  "started_at_jst": "2026-08-22T16:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:51:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "293414faa845223388c310defdce329088239f76",
+  "latest_main_sha_observed": "293414faa845223388c310defdce329088239f76",
+  "starting_agi_gi_rev": 952,
+  "target_revision": 1800,
+  "scope": "crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism-proof-dag",
+  "branch": "agi-gi-rev1800-homogeneous-block-quotient-si-proof-dag-session-20260822-1651",
+  "current_pr": null,
+  "exact_head": null,
+  "reserved_paths": [
+    ".github/workflows/rev1800-homogeneous-block-quotient-si-proof-dag-smoke.yml",
+    "automation_runs/2026-08-22_1651_JST/REV1800_HOMOGENEOUS_BLOCK_QUOTIENT_SI_PROOF_DAG.md",
+    "automation_runs/2026-08-22_1651_JST/homogeneous_block_quotient_si_proof_dag_consumer_v1.py",
+    "automation_runs/2026-08-22_1651_JST/test_homogeneous_block_quotient_si_proof_dag_rev1800.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev1700 corrected-SOJ child semantic-reduction and child-execution claims/branches and all reserved paths",
+    "rev1600 homogeneous block-action provenance proof-DAG claim/branch and all reserved paths",
+    "rev1200 homogeneous-block quotient String-Isomorphism / PR #260 and all reserved paths",
+    "rev278 homogeneous-block quotient preimage / PR #222 and all reserved paths",
+    "rev276 relation/action compatibility / PR #221 and all reserved paths",
+    "rev950 block-action kernel proof-DAG and rev952 relation-provenance proof-DAG main-integrated paths",
+    "all corrected Split-or-Johnson scopes, CRX1 original-domain lift scopes, MAIN.md, shared proof-DAG/recurrence/coordination implementation, sibling claims/branches/PRs/workflows"
+  ],
+  "intent": "close only the proof-carrying execution boundary for the public rev1200 quotient-domain String-Isomorphism result without importing its branch-only implementation: independently replay the quotient feature-transporter computation from main-integrated rev274/rev275/rev950 contracts and public result fields, admit only exact complete success or exact-empty outcomes, freeze the replay/state-cap/result identity, charge the quotient replay conservatively, and attach the exact quotient-domain result to the shared execution proof-DAG; deliberately do not lift the quotient transporter to the original domain, do not modify rev1200/rev278, and do not claim CRX3/GI/AGI closure",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_branch_only_rev1200_rev278_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_nonexact_undetermined_unreplayed_identity_or_accounting_drift": true
+  },
+  "depends_on_public_contracts": [
+    "rev274 BlockActionProvenance main-integrated contract",
+    "rev275 BlockActionKernelFactorization main-integrated contract",
+    "rev950 block-action kernel proof-DAG main-integrated contract",
+    "rev1200 HomogeneousBlockQuotientStringIsomorphism public field/status contract / PR #260",
+    "main-integrated proof_dag_accounting_v1 and quasipoly_recurrence_accounting_v1"
+  ],
+  "integration_boundary": "draft-only while rev1200 / PR #260 remains open and unmerged; this leaf certifies only quotient-domain execution/replay and cannot be used as an original-domain transporter or CRX3/GI/AGI completion claim",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
