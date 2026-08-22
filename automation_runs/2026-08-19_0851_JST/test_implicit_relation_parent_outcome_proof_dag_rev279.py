@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import unittest
 from dataclasses import replace
+from fractions import Fraction
 from types import SimpleNamespace
 
 from implicit_relation_parent_outcome_proof_dag_v1 import (
@@ -242,6 +243,25 @@ class ParentOutcomeProofDAGRev279Test(unittest.TestCase):
                     nonempty_outcome(),
                     original_root_n=7,
                     external_log2_cost_bound=value,
+                )
+                self.assertEqual(
+                    result.status, "invalid_parent_outcome_resource_envelope"
+                )
+                self.assertIsNone(result.proof)
+                self.assertIsNone(result.dag_validation)
+
+    def test_overflowing_real_envelope_values_fail_closed_without_exception(self):
+        huge = Fraction(10**1000, 1)
+        cases = (
+            {"external_log2_cost_bound": huge},
+            {"quasipoly_constant": huge},
+        )
+        for kwargs in cases:
+            with self.subTest(kwargs=kwargs):
+                result = parent_outcome_contract_proof_dag_consumer(
+                    nonempty_outcome(),
+                    original_root_n=7,
+                    **kwargs,
                 )
                 self.assertEqual(
                     result.status, "invalid_parent_outcome_resource_envelope"
