@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434",
   "session_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST",
   "started_at_jst": "2026-08-22T19:15:04+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:15:04+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:15:32+09:00",
+  "last_activity_at_jst": "2026-08-22T19:15:32+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
   "starting_agi_gi_rev": 1600,
@@ -47,10 +48,11 @@
     "rev2800_branch_search": "none before claim",
     "rev2800_pr_search": "none before claim",
     "rev2800_repository_search": "none before claim",
-    "main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72"
+    "main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
+    "claim_commit": "c3ab35d3825a0458e8f8c4ae9ceb494f6810e9f3"
   },
   "validation": {},
   "integration_boundary": "Keep this leaf draft and unmerged while independently owned upstream public contracts rev2707 / PR #280 and rev2600 / PR #279 remain open; do not overtake upstream ownership.",
-  "status": "active_claimed_pre_implementation_heartbeat_required",
+  "status": "active_implementation_preflight_heartbeat_recorded",
   "agi_state": "NOT_AGI"
 }
