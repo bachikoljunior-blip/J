@@ -1,0 +1,84 @@
+name: rev1300 SOJ recursive production lineage closure smoke
+
+on:
+  push:
+    branches:
+      - agi-gi-rev1300-soj-recursive-production-lineage-closure-session-20260822-1555
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rev1300-soj-recursive-production-lineage-closure-smoke.yml'
+      - 'automation_runs/2026-08-22_1555_JST/REV1300_SOJ_RECURSIVE_PRODUCTION_LINEAGE_CLOSURE.md'
+      - 'automation_runs/2026-08-22_1555_JST/soj_recursive_production_lineage_closure_v1.py'
+      - 'automation_runs/2026-08-22_1555_JST/test_soj_recursive_production_lineage_closure_rev1300.py'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev1300-soj-recursive-production-lineage-closure-20260822T155500JST-4b4cf2ab-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev1300-soj-recursive-production-lineage-closure-20260822T155500JST-4b4cf2ab-publish.json'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev1300 module and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1555_JST/soj_recursive_production_lineage_closure_v1.py \
+            automation_runs/2026-08-22_1555_JST/test_soj_recursive_production_lineage_closure_rev1300.py
+      - name: Run rev1300 focused regressions
+        run: python automation_runs/2026-08-22_1555_JST/test_soj_recursive_production_lineage_closure_rev1300.py
+      - name: Reject sibling branch-only implementation imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -nE 'soj_recursive_production_provenance_total_cost_binding_v1|soj_main_post_replay_seal_v1' \
+            automation_runs/2026-08-22_1555_JST/soj_recursive_production_lineage_closure_v1.py
+      - name: Keep phase evidence unmaterialized during canonical-main-source hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e agi/run-history/phase-admissions/chatgpt-session-j-rev1300-soj-recursive-production-lineage-closure-20260822T155500JST-4b4cf2ab-attempt-solution.json
+          test ! -e agi/run-history/phase-admissions/chatgpt-session-j-rev1300-soj-recursive-production-lineage-closure-20260822T155500JST-4b4cf2ab-publish.json
+          echo 'phase evidence intentionally deferred to separately owned canonical-main-source coordination hardening'
+      - name: Enforce reserved rev1300 diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "$base" HEAD > /tmp/rev1300-changed.txt
+          python - <<'PY'
+          from pathlib import Path
+          allowed = {
+              '.github/workflows/rev1300-soj-recursive-production-lineage-closure-smoke.yml',
+              'automation_runs/2026-08-22_1555_JST/REV1300_SOJ_RECURSIVE_PRODUCTION_LINEAGE_CLOSURE.md',
+              'automation_runs/2026-08-22_1555_JST/soj_recursive_production_lineage_closure_v1.py',
+              'automation_runs/2026-08-22_1555_JST/test_soj_recursive_production_lineage_closure_rev1300.py',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev1300-soj-recursive-production-lineage-closure-20260822T155500JST-4b4cf2ab-attempt-solution.json',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev1300-soj-recursive-production-lineage-closure-20260822T155500JST-4b4cf2ab-publish.json',
+          }
+          expected = {
+              '.github/workflows/rev1300-soj-recursive-production-lineage-closure-smoke.yml',
+              'automation_runs/2026-08-22_1555_JST/REV1300_SOJ_RECURSIVE_PRODUCTION_LINEAGE_CLOSURE.md',
+              'automation_runs/2026-08-22_1555_JST/soj_recursive_production_lineage_closure_v1.py',
+              'automation_runs/2026-08-22_1555_JST/test_soj_recursive_production_lineage_closure_rev1300.py',
+          }
+          changed = {
+              line.strip()
+              for line in Path('/tmp/rev1300-changed.txt').read_text().splitlines()
+              if line.strip()
+          }
+          extra = sorted(changed - allowed)
+          missing = sorted(expected - changed)
+          assert not extra, f'unreserved rev1300 paths changed: {extra}'
+          assert not missing, f'missing expected rev1300 paths: {missing}'
+          print('reserved-path diff ok:', sorted(changed))
+          PY
