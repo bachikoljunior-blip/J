@@ -1,0 +1,40 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f",
+  "session_id": "chatgpt-session-j-continuation-automation-turn1-20260822T1254+0900",
+  "started_at_jst": "2026-08-22T12:54:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:54:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "03e2010f77c573be8da86565f43a6d3464e28478",
+  "starting_agi_gi_rev": 289,
+  "target_revision": 340,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-recursive-result-accounting-binding",
+  "branch": "agi-gi-rev340-soj-johnson-recursive-result-accounting-binding-session-20260822-1254",
+  "pull_request": null,
+  "latest_head_sha": null,
+  "reserved_paths": [
+    ".github/workflows/rev340-soj-johnson-recursive-result-accounting-binding-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-publish.json",
+    "automation_runs/2026-08-22_1254_JST/REV340_SOJ_JOHNSON_RECURSIVE_RESULT_ACCOUNTING_BINDING.md",
+    "automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py",
+    "automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 takeover kernel factorization and every reserved path",
+    "rev276-rev320 claims, branches, PRs, workflows, and reserved paths",
+    "rev287 Johnson relational-reduction construction / PR #237",
+    "rev291 larger-ground recursive handoff / PR #234",
+    "rev292 Johnson reduction-handoff composition",
+    "rev293 Johnson recursive child result lift and every reserved path",
+    "rev295 signed-ground proof-DAG and every reserved path",
+    "rev320 Johnson construction-cost binding and every reserved path",
+    "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
+  ],
+  "intent": "add a file-disjoint fail-closed post-recursion cross-certificate that binds an independently replayed rev291-style larger-ground Johnson recursive-handoff accounting certificate to an independently replayed rev293-style exact recursive-child result-lift certificate. Require identical reduction identity, represented parent action degree, Johnson child-ground measure, certified recurrence shape, and exact result semantics before issuing one replay-stable binding digest; accept both exact-empty and nonempty lifted parent outcomes without executing recursive String Isomorphism, constructing a reduction, changing recurrence accounting, or importing sibling branch-only implementations.",
+  "coordination_note": "Target revision 340 was deliberately chosen after fresh main/open-PR/active-claim/branch checks showed adjacent revision numbers through rev320 were being claimed concurrently. No rev340 claim, branch, or PR existed immediately before this claim was written.",
+  "non_interference": "Only rev340 reserved paths may be written on the dedicated branch and only this rev340 claim may be updated on main. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
+  "status": "active_claimed_preimplementation",
+  "agi_state": "NOT_AGI"
+}
