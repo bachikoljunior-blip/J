@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5",
   "session_id": "chatgpt-session-j-refire-20260822T115138+0900-b1283312-turn1",
   "started_at_jst": "2026-08-22T11:55:51+09:00",
-  "heartbeat_at_jst": "2026-08-22T12:49:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:54:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "543db3a5d054e3aa9c14a3e5978b9ec652b62a07",
   "starting_agi_gi_rev": 274,
@@ -12,7 +12,7 @@
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-relational-reduction-construction",
   "branch": "agi-gi-rev287-soj-johnson-relational-reduction-session-20260822-1155",
   "pull_request": 237,
-  "latest_head_sha": "d46b05562c70f689137ea23310c72ad10fe08698",
+  "latest_head_sha": "9617b8edc3a952f8835a17a9893f80976ff582af",
   "reserved_paths": [
     ".github/workflows/rev287-soj-johnson-relational-reduction-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-attempt-solution.json",
@@ -24,7 +24,7 @@
   ],
   "parallel_exclusions": [
     "rev275 takeover kernel factorization and every reserved path",
-    "rev276-rev295 claims, branches, PRs, workflows, and reserved paths",
+    "all fresh sibling claims, branches, PRs, workflows, and reserved paths including rev276-rev320+ coordination",
     "rev281 corrected SOJ transition / PR #226",
     "rev283 recurrence composition / PR #228",
     "rev284 Johnson terminal admission / PR #229",
@@ -34,23 +34,23 @@
     "rev289 shared proof-DAG envelope hardening / PR #233",
     "rev290 normalized Johnson cost binding / PR #235",
     "rev291 larger-ground recursive handoff / PR #234",
-    "rev292-rev295 fresh sibling scopes and their branches/PRs/workflows",
     "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
   ],
   "intent": "construct only the missing exact larger-ground Johnson relational-reduction evidence that rev291's larger-ground recursive handoff deliberately leaves caller-supplied: from a certified full J(v,k) embedding and ambient generators on the represented Johnson action, deterministically reconstruct the induced ground action from point-incidence signatures, reject non-ground/complement ambiguity fail-closed, verify exact set-action transport on every Johnson vertex, and emit a canonical exact/progress-certified reduction identity and transport certificate on ground degree v. Do not execute recursive SI, do not compose recurrence/accounting, and do not import or modify branch-only sibling implementation.",
-  "coordination_note": "Pre-claim rechecks found no prior rev287 claim, branch, or PR. Canonical attempt_solution and publish phase-admission evidence are persisted on the dedicated branch with admitted=true and conflicts=[]. Draft PR #237 is open at exact head d46b05562c70f689137ea23310c72ad10fe08698; exact-head dedicated and shared admission CI are green. Current main has advanced through separate sibling coordination/rev289 integration and fresh rev292-rev295 claims. This heartbeat adds only this claim's own canonical merge-admission evidence path so the merge phase can be replayed without touching sibling work.",
+  "coordination_note": "Canonical attempt_solution, publish, and merge phase-admission evidence are now persisted on the dedicated branch with admitted=true and conflicts=[]. Merge evidence replays against historical registry source 875baaba36c28b8bce12412e1c15a660391951c4. Draft PR #237 is open at exact head 9617b8edc3a952f8835a17a9893f80976ff582af and is mergeable. Current main continues to advance through unrelated sibling coordination; compare-to-main remains seven additive rev287 reserved paths only. Final exact-head CI was naturally triggered and is queued/in progress; no workflow was rerun or cancelled.",
   "validation": {
     "focused_local": "11/11 success",
     "py_compile": "success",
     "attempt_solution_phase_admission": "admitted; conflicts=[]",
     "publish_phase_admission": "admitted; conflicts=[]",
-    "branch_compare_to_current_main": "6 additive reserved files before merge-evidence reservation; branch diverged only because sibling main advanced after claim",
+    "merge_phase_admission": "admitted; conflicts=[]; registry_source_sha=875baaba36c28b8bce12412e1c15a660391951c4; registry_digest=sha256:b6e128ec0ff912ee852907b3b3b946f3f619bc182f6ebc6ad93015abc72158a3",
+    "branch_compare_to_current_main": "7 additive reserved files only; no sibling path overlap",
     "draft_pr": 237,
-    "draft_pr_mergeable": false,
-    "exact_head_ci": "rev287 dedicated smoke success; Problem-solving parallel admission success at d46b05562c70f689137ea23310c72ad10fe08698",
-    "merge_phase_admission": "reserved path added; evidence not yet persisted"
+    "draft_pr_mergeable": true,
+    "previous_exact_head_ci": "rev287 dedicated smoke success; Problem-solving parallel admission success at d46b05562c70f689137ea23310c72ad10fe08698",
+    "final_exact_head_ci": "naturally triggered at 9617b8edc3a952f8835a17a9893f80976ff582af; queued/in progress"
   },
   "non_interference": "Only rev287 reserved paths may be written on the dedicated branch and only this rev287 claim may be updated on main. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
-  "status": "active_preparing_merge_phase_admission",
+  "status": "active_merge_admission_persisted_final_ci_pending",
   "agi_state": "NOT_AGI"
 }
