@@ -19,6 +19,11 @@ from quasipoly_recurrence_accounting_v1 import RecurrenceAccountingNode
 _SCHEMA = "implicit-relation-parent-outcome-proof-identity-v1"
 _OPERATION = "implicit_relation_parent_outcome_contract_terminal"
 _NONEMPTY_STATUS = "exact_implicit_relation_parent_coset"
+_SOLVER_IDENTITY = (
+    "implicit_relation_parent_outcome_v1",
+    "proof_dag_accounting_v1",
+    279,
+)
 _SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
@@ -83,6 +88,100 @@ def _canonical_transcript_digest(outcome: ParentExactOutcomeContract) -> str:
         ensure_ascii=True,
     ).encode("utf-8")
     return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
+
+
+def _canonical_identity_transcript_digest(identity: ParentOutcomeProofIdentity) -> str:
+    payload = {
+        "schema_version": 1,
+        "source_evidence_revision": identity.source_evidence_revision,
+        "source_evidence_status": identity.source_evidence_status,
+        "outcome_kind": identity.outcome_kind,
+        "exact": True,
+        "complete": True,
+        "domain_degree": identity.domain_degree,
+        "auxiliary_degree": identity.auxiliary_degree,
+        "source_relation_digest": identity.source_relation_digest,
+        "target_relation_digest": identity.target_relation_digest,
+        "upstream_artifact_digest": identity.upstream_artifact_digest,
+    }
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    ).encode("utf-8")
+    return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
+
+
+def _validate_proof_identity_shape(
+    identity: object,
+) -> tuple[bool, str]:
+    if type(identity) is not ParentOutcomeProofIdentity:
+        return False, "proof identity must use the canonical ParentOutcomeProofIdentity runtime type"
+    if identity.schema != _SCHEMA or identity.solver_identity != _SOLVER_IDENTITY:
+        return False, "proof identity schema or solver identity is not the rev279 canonical contract"
+    if identity.replay_stable is not True:
+        return False, "parent outcome identity is not replay-stable"
+    if (
+        isinstance(identity.source_evidence_revision, bool)
+        or not isinstance(identity.source_evidence_revision, int)
+    ):
+        return False, "source evidence revision must be a canonical integer"
+    if (
+        isinstance(identity.domain_degree, bool)
+        or not isinstance(identity.domain_degree, int)
+        or identity.domain_degree < 1
+    ):
+        return False, "identity domain degree must be a positive integer"
+    if (
+        isinstance(identity.auxiliary_degree, bool)
+        or not isinstance(identity.auxiliary_degree, int)
+        or identity.auxiliary_degree < 0
+    ):
+        return False, "identity auxiliary degree must be a nonnegative integer"
+    if (
+        isinstance(identity.original_root_n, bool)
+        or not isinstance(identity.original_root_n, int)
+        or identity.original_root_n < identity.domain_degree
+    ):
+        return False, "identity original root must be an integer dominating the domain"
+    for field in (
+        "source_relation_digest",
+        "target_relation_digest",
+        "upstream_artifact_digest",
+        "transcript_digest",
+    ):
+        if not _valid_digest(getattr(identity, field, None)):
+            return False, f"identity {field} is not a canonical lowercase sha256 digest"
+    if identity.transcript_digest != _canonical_identity_transcript_digest(identity):
+        return False, "identity transcript digest does not replay from its frozen rev266 fields"
+
+    if identity.outcome_kind == "nonempty":
+        if identity.outcome_status != "exact_parent_outcome_nonempty":
+            return False, "nonempty identity carries the wrong rev266 outcome status"
+        if (
+            identity.source_evidence_revision != 261
+            or identity.source_evidence_status != _NONEMPTY_STATUS
+            or identity.auxiliary_degree < 1
+        ):
+            return False, "nonempty identity is not bound to canonical rev261 evidence"
+    elif identity.outcome_kind == "exact_empty":
+        if identity.outcome_status != "exact_parent_outcome_empty":
+            return False, "exact-empty identity carries the wrong rev266 outcome status"
+        if (
+            identity.source_evidence_revision != 263
+            or identity.source_evidence_status not in EXACT_EMPTY_STATUSES
+        ):
+            return False, "exact-empty identity is not bound to an accepted rev263 status"
+        if (
+            identity.source_evidence_status
+            == "exact_empty_parent_feature_inventory_mismatch"
+            and identity.auxiliary_degree < 1
+        ):
+            return False, "feature-inventory exact-empty identity requires a positive auxiliary degree"
+    else:
+        return False, "proof identity outcome kind is not recognized"
+    return True, "proof identity shape and frozen rev266 transcript are canonical"
 
 
 def _validate_exact_outcome_contract(
@@ -185,11 +284,7 @@ def build_parent_outcome_proof_identity(
         raise ValueError(reason)
     return ParentOutcomeProofIdentity(
         schema=_SCHEMA,
-        solver_identity=(
-            "implicit_relation_parent_outcome_v1",
-            "proof_dag_accounting_v1",
-            279,
-        ),
+        solver_identity=_SOLVER_IDENTITY,
         outcome_kind=outcome.outcome_kind,
         outcome_status=outcome.status,
         source_evidence_revision=int(outcome.source_evidence_revision),
@@ -281,11 +376,12 @@ def validate_parent_outcome_proof_identity(
             False,
             "rev266 transcript, root, source evidence, or relation identity differs",
         )
-    if not actual.replay_stable:
+    identity_valid, identity_reason = _validate_proof_identity_shape(actual)
+    if not identity_valid:
         return ParentOutcomeProofIdentityValidation(
-            "unstable_parent_outcome_proof_identity",
+            "malformed_parent_outcome_proof_identity",
             False,
-            "parent outcome identity is not replay-stable",
+            identity_reason,
         )
     try:
         hash(actual)
