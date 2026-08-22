@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702",
   "session_id": "chatgpt-session-j-continuation-20260822T1144+0900-d409a702-turn5",
   "started_at_jst": "2026-08-22T11:44:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T11:52:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T11:57:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "d409a702c94432526d13906fedb116fb15cec80f",
   "starting_agi_gi_rev": 274,
@@ -12,8 +12,9 @@
   "scope": "w1r-h6/corrected-split-or-johnson/strict-johnson-transition-terminal-evidence-normalization",
   "branch": "agi-gi-rev288-soj-strict-evidence-normalization-session-20260822-1144",
   "pull_request": 232,
-  "latest_head_sha": "be6fc01d20580f570404cd4008f668f102870884",
-  "reconciled_main_sha": "b12833124fad20014f657b820a181e32a4aec5e8",
+  "pull_request_state": "ready_for_review",
+  "latest_head_sha": "0fec9464eb2b9722ed60838f05960298dc4bc8de",
+  "latest_reconciled_main_sha": "543db3a5d054e3aa9c14a3e5978b9ec652b62a07",
   "reserved_paths": [
     ".github/workflows/rev288-soj-strict-evidence-normalization-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702-attempt-solution.json",
@@ -29,7 +30,7 @@
     "rev289 and later sibling claims, branches, PRs, workflows, and reserved paths",
     "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
   ],
-  "intent": "add a file-disjoint strict structural normalization boundary for corrected-SOJ Johnson transition/terminal evidence: reject coercible booleans, numeric strings, fractional integer fields, NaN/Inf, malformed statuses, and non-canonical shapes before downstream accounting or production dispatch; consume active sibling contracts only as read-only public field shapes and do not import or modify branch-only sibling implementations",
+  "intent": "add a file-disjoint strict structural normalization boundary for corrected-SOJ Johnson transition/terminal evidence: reject coercible booleans, numeric strings, fractional integer fields, NaN/Inf, overflowing finite-envelope numbers, malformed statuses, and non-canonical shapes before downstream accounting or production dispatch; consume active sibling contracts only as read-only public field shapes and do not import or modify branch-only sibling implementations",
   "non_interference": "Only rev288 reserved paths may be written on the dedicated branch. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths. Main reconciliation uses ordinary two-parent merge commits with force=false.",
   "registry_blocker_resolution": {
     "former_rev275_legacy_blocker": "resolved by independently owned schema-v2 rev275 takeover claim",
@@ -37,25 +38,40 @@
     "canonical_registry_available": true
   },
   "phase_admission": {
-    "registry_source_sha": "e5118818cea87bfa4b04d9d1968cb5877a6d4b39",
-    "registry_digest": "sha256:e3eb4671d7271a0a57bf095314edc12d240a5ab5546fce34601dca24108f3a74",
+    "persisted_registry_source_sha": "e5118818cea87bfa4b04d9d1968cb5877a6d4b39",
+    "persisted_registry_digest": "sha256:e3eb4671d7271a0a57bf095314edc12d240a5ab5546fce34601dca24108f3a74",
     "attempt_solution": {"admitted": true, "mode": "exclusive", "conflicts": 0, "persisted": true},
     "publish": {"admitted": true, "mode": "exclusive", "conflicts": 0, "persisted": true},
-    "repository_phase_evidence_guard_run": 32547301079,
+    "current_live_source_sha": "3b5c34a4581b2c2c115c13e05e9f2d24a543540a",
+    "current_live_registry_digest": "sha256:8a346c21f2ac760426e1d86a36aad2c8145d712443b5ed6d9c1f746388eb44fb",
+    "current_live_attempt_solution": {"admitted": true, "mode": "exclusive", "conflicts": 0},
+    "current_live_publish": {"admitted": true, "mode": "exclusive", "conflicts": 0},
+    "repository_phase_evidence_guard_run": 32547459727,
     "repository_phase_evidence_guard_conclusion": "success"
   },
   "validation": {
-    "focused_tests": 21,
+    "focused_tests": 23,
     "focused_tests_conclusion": "success",
     "py_compile": "success",
     "static_sibling_import_boundary": "success",
-    "evidence_persisting_head": "3cfeeee823fb8db91ec0cab40dcca0d92d7fdb1a",
-    "evidence_persisting_rev288_smoke_run": 32547301052,
-    "evidence_persisting_rev288_smoke_conclusion": "success",
-    "evidence_persisting_inherited_success_runs": [32547301031, 32547301062, 32547301039, 32547301055, 32547301045, 32547301065, 32547301034, 32547301036],
-    "current_reconciled_head": "be6fc01d20580f570404cd4008f668f102870884",
-    "current_exact_head_checks": "naturally_triggered_in_progress"
+    "validated_functional_head": "3b5c34a4581b2c2c115c13e05e9f2d24a543540a",
+    "validated_rev288_smoke_run": 32547459738,
+    "validated_rev288_smoke_conclusion": "success",
+    "validated_parallel_admission_run": 32547459727,
+    "validated_parallel_admission_conclusion": "success",
+    "validated_inherited_success_runs": [32547459696, 32547459733, 32547459715, 32547459684, 32547459700, 32547459714, 32547459710, 32547459701, 32547459739],
+    "validated_inherited_conclusion": "all_success",
+    "current_reconciled_head": "0fec9464eb2b9722ed60838f05960298dc4bc8de",
+    "current_reconciled_head_mergeable": true,
+    "current_reconciled_head_checks": "naturally_triggered",
+    "manual_workflow_reruns": 0
   },
-  "status": "active_exact_head_validating",
+  "deployment_state": {
+    "ready_for_review": true,
+    "merge_performed": false,
+    "force_push_performed": false,
+    "sibling_mutation_performed": false
+  },
+  "status": "active_ready_for_review",
   "agi_state": "NOT_AGI"
 }
