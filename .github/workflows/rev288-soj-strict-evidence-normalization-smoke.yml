@@ -7,6 +7,8 @@ on:
       - 'automation_runs/2026-08-22_1144_JST/REV288_SOJ_STRICT_EVIDENCE_NORMALIZATION.md'
       - 'automation_runs/2026-08-22_1144_JST/corrected_soj_strict_evidence_v1.py'
       - 'automation_runs/2026-08-22_1144_JST/test_corrected_soj_strict_evidence_rev288.py'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702-publish.json'
 
 permissions:
   contents: read
@@ -17,6 +19,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -38,3 +43,27 @@ jobs:
             echo 'active sibling branch-only dependency detected' >&2
             exit 1
           fi
+      - name: Verify live canonical attempt and publish admission
+        shell: bash
+        env:
+          CLAIM_ID: chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702
+          CLAIM_SCOPE: w1r-h6/corrected-split-or-johnson/strict-johnson-transition-terminal-evidence-normalization
+        run: |
+          set -euo pipefail
+          paths=(
+            --path .github/workflows/rev288-soj-strict-evidence-normalization-smoke.yml
+            --path automation_runs/2026-08-22_1144_JST/REV288_SOJ_STRICT_EVIDENCE_NORMALIZATION.md
+            --path automation_runs/2026-08-22_1144_JST/corrected_soj_strict_evidence_v1.py
+            --path automation_runs/2026-08-22_1144_JST/test_corrected_soj_strict_evidence_rev288.py
+          )
+          for phase in attempt_solution publish; do
+            python automation/problem_solving_parallel_admission.py \
+              --claim-id "${CLAIM_ID}" \
+              --phase "${phase}" \
+              --scope "${CLAIM_SCOPE}" \
+              --target-revision 288 \
+              "${paths[@]}" \
+              | tee "/tmp/rev288-${phase}.json"
+            jq -e '.admitted == true and (.conflicts | length == 0)' \
+              "/tmp/rev288-${phase}.json"
+          done
