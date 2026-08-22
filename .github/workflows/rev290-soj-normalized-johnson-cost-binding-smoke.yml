@@ -4,13 +4,14 @@ on:
   pull_request:
     paths:
       - '.github/workflows/rev290-soj-normalized-johnson-cost-binding-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev290-soj-normalized-johnson-cost-binding-20260822T1148JST-73f95765-attempt-solution.json'
       - 'automation_runs/2026-08-22_1148_JST/REV290_SOJ_NORMALIZED_JOHNSON_COST_BINDING.md'
       - 'automation_runs/2026-08-22_1148_JST/corrected_soj_normalized_johnson_cost_binding_v1.py'
       - 'automation_runs/2026-08-22_1148_JST/test_corrected_soj_normalized_johnson_cost_binding_rev290.py'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   smoke:
@@ -19,9 +20,33 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Materialize canonical attempt-solution admission once
+        shell: bash
+        env:
+          EVIDENCE: agi/run-history/phase-admissions/chatgpt-session-j-rev290-soj-normalized-johnson-cost-binding-20260822T1148JST-73f95765-attempt-solution.json
+        run: |
+          set -euo pipefail
+          if [ ! -f "$EVIDENCE" ]; then
+            python automation/problem_solving_parallel_admission.py \
+              --claim-id chatgpt-session-j-rev290-soj-normalized-johnson-cost-binding-20260822T1148JST-73f95765 \
+              --phase attempt_solution \
+              --scope w1r-h6/corrected-split-or-johnson/strict-normalized-johnson-cost-binding \
+              --target-revision 290 \
+              --path .github/workflows/rev290-soj-normalized-johnson-cost-binding-smoke.yml \
+              --path automation_runs/2026-08-22_1148_JST/REV290_SOJ_NORMALIZED_JOHNSON_COST_BINDING.md \
+              --path automation_runs/2026-08-22_1148_JST/corrected_soj_normalized_johnson_cost_binding_v1.py \
+              --path automation_runs/2026-08-22_1148_JST/test_corrected_soj_normalized_johnson_cost_binding_rev290.py \
+              --output "$EVIDENCE"
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git add "$EVIDENCE"
+            git commit -m "coordination: record rev290 attempt-solution admission"
+            git push origin "HEAD:${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          fi
       - name: Compile rev290
         run: |
           python -m py_compile \
@@ -38,7 +63,7 @@ jobs:
           while IFS= read -r path; do
             [ -z "$path" ] && continue
             case "$path" in
-              .github/workflows/rev290-soj-normalized-johnson-cost-binding-smoke.yml|automation_runs/2026-08-22_1148_JST/REV290_SOJ_NORMALIZED_JOHNSON_COST_BINDING.md|automation_runs/2026-08-22_1148_JST/corrected_soj_normalized_johnson_cost_binding_v1.py|automation_runs/2026-08-22_1148_JST/test_corrected_soj_normalized_johnson_cost_binding_rev290.py)
+              .github/workflows/rev290-soj-normalized-johnson-cost-binding-smoke.yml|agi/run-history/phase-admissions/chatgpt-session-j-rev290-soj-normalized-johnson-cost-binding-20260822T1148JST-73f95765-attempt-solution.json|automation_runs/2026-08-22_1148_JST/REV290_SOJ_NORMALIZED_JOHNSON_COST_BINDING.md|automation_runs/2026-08-22_1148_JST/corrected_soj_normalized_johnson_cost_binding_v1.py|automation_runs/2026-08-22_1148_JST/test_corrected_soj_normalized_johnson_cost_binding_rev290.py)
                 ;;
               *)
                 echo "unexpected non-rev290 path: $path" >&2
