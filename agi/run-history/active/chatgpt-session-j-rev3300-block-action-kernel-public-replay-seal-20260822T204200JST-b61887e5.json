@@ -4,16 +4,16 @@
   "claim_id": "chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5",
   "session_id": "chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST",
   "started_at_jst": "2026-08-22T20:42:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T20:42:00+09:00",
-  "last_activity_at_jst": "2026-08-22T20:42:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:48:30+09:00",
+  "last_activity_at_jst": "2026-08-22T20:48:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "b61887e5cc86aac0eaf7e583694f8cd44fb73470",
-  "starting_agi_gi_rev": 1600,
+  "starting_agi_gi_rev": 3200,
   "target_revision": 3300,
   "scope": "crx3/algorithmic-consumers/homogeneous-block-action-kernel-factorization-public-replay-seal",
   "branch": "agi-gi-rev3300-block-action-kernel-public-replay-seal-session-20260822-2042",
-  "pull_request": null,
-  "exact_head_sha": null,
+  "pull_request": 288,
+  "exact_head_sha": "08f0f7ff15f26b6a99c22d79f1df0025be7a41f0",
   "merge_sha": null,
   "reserved_paths": [
     ".github/workflows/rev3300-block-action-kernel-public-replay-seal-smoke.yml",
@@ -48,9 +48,19 @@
     "rev3300_branch_search": "none before claim",
     "rev3300_pr_search": "none before claim",
     "rev3300_active_claim_search": "none before claim",
-    "main_sha": "b61887e5cc86aac0eaf7e583694f8cd44fb73470"
+    "first_observed_main_sha": "b61887e5cc86aac0eaf7e583694f8cd44fb73470",
+    "claim_publication_main_parent_sha": "b7f6499f659156273d0599120b704ea3b38642e3",
+    "claim_publication_commit_sha": "45be70830c3e904e608c5a5af69b949d40a9a764",
+    "later_rev3200_main_sync_claim": "explicitly excludes rev3300 and its reserved paths"
   },
-  "validation": {},
+  "validation": {
+    "pr": 288,
+    "current_head": "08f0f7ff15f26b6a99c22d79f1df0025be7a41f0",
+    "dedicated_smoke": "pending",
+    "phase_admission": "pending",
+    "repository_wide_parallel_admission": "pending",
+    "manual_rerun_or_cancel": false
+  },
   "integration_boundary": "Keep draft/unmerged until exact-head dedicated smoke, canonical attempt/publish admission, repository-wide parallel admission, and observed inherited checks are green. Merge only with expected-head protection and only if no later sibling claim overlaps this exact scope or reserved paths.",
   "status": "active",
   "agi_state": "NOT_AGI"
