@@ -1,0 +1,167 @@
+name: rev2500 SOJ parent-filtered execution proof-DAG smoke
+
+on:
+  push:
+    branches:
+      - agi-gi-rev2500-soj-parent-filtered-execution-proof-dag-session-20260822-1851
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rev2500-soj-parent-filtered-execution-proof-dag-smoke.yml'
+      - 'automation_runs/2026-08-22_1851_JST/REV2500_SOJ_PARENT_FILTERED_EXECUTION_PROOF_DAG.md'
+      - 'automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py'
+      - 'automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-attempt_solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-publish.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rev2500-soj-parent-filtered-execution-proof-dag-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONPATH: automation_runs/2026-08-22_1851_JST
+      CLAIM_ID: chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c
+      SCOPE: w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-result-execution-proof-dag-binding
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev2500 module and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py \
+            automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py
+      - name: Run rev2500 focused regressions
+        run: python automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py
+      - name: Reject sibling branch-only implementation imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          target=automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py
+          ! grep -nE '^[[:space:]]*(from|import)[[:space:]].*(soj_parent_filtered_child_result_v1|soj_recursive_production_execution_proof_dag_v1)' "$target"
+      - name: Canonical attempt_solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id "$CLAIM_ID" \
+            --phase attempt_solution \
+            --scope "$SCOPE" \
+            --target-revision 2500 \
+            --path .github/workflows/rev2500-soj-parent-filtered-execution-proof-dag-smoke.yml \
+            --path automation_runs/2026-08-22_1851_JST/REV2500_SOJ_PARENT_FILTERED_EXECUTION_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py \
+            --path automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py \
+            --output /tmp/rev2500-attempt.json
+          test -s /tmp/rev2500-attempt.json
+          cat /tmp/rev2500-attempt.json
+      - name: Canonical publish admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id "$CLAIM_ID" \
+            --phase publish \
+            --scope "$SCOPE" \
+            --target-revision 2500 \
+            --path .github/workflows/rev2500-soj-parent-filtered-execution-proof-dag-smoke.yml \
+            --path automation_runs/2026-08-22_1851_JST/REV2500_SOJ_PARENT_FILTERED_EXECUTION_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py \
+            --path automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py \
+            --output /tmp/rev2500-publish.json
+          test -s /tmp/rev2500-publish.json
+          cat /tmp/rev2500-publish.json
+      - name: Enforce reserved rev2500 diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "$base" HEAD > /tmp/rev2500-changed.txt
+          python - <<'PY'
+          from pathlib import Path
+          allowed = {
+              '.github/workflows/rev2500-soj-parent-filtered-execution-proof-dag-smoke.yml',
+              'automation_runs/2026-08-22_1851_JST/REV2500_SOJ_PARENT_FILTERED_EXECUTION_PROOF_DAG.md',
+              'automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py',
+              'automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-attempt_solution.json',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-publish.json',
+          }
+          expected = {
+              '.github/workflows/rev2500-soj-parent-filtered-execution-proof-dag-smoke.yml',
+              'automation_runs/2026-08-22_1851_JST/REV2500_SOJ_PARENT_FILTERED_EXECUTION_PROOF_DAG.md',
+              'automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py',
+              'automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py',
+          }
+          changed = {line.strip() for line in Path('/tmp/rev2500-changed.txt').read_text().splitlines() if line.strip()}
+          extra = sorted(changed - allowed)
+          missing = sorted(expected - changed)
+          assert not extra, f'unreserved rev2500 paths changed: {extra}'
+          assert not missing, f'missing expected rev2500 paths: {missing}'
+          print('reserved-path diff ok:', sorted(changed))
+          PY
+      - name: Materialize canonical attempt_solution admission after green smoke
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          EVIDENCE: agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-attempt_solution.json
+        run: |
+          set -euo pipefail
+          if [[ -f "$EVIDENCE" ]]; then
+            echo 'canonical attempt_solution evidence already present; no branch mutation'
+          else
+            python automation/problem_solving_parallel_admission.py \
+              --claim-id "$CLAIM_ID" \
+              --phase attempt_solution \
+              --scope "$SCOPE" \
+              --target-revision 2500 \
+              --path .github/workflows/rev2500-soj-parent-filtered-execution-proof-dag-smoke.yml \
+              --path automation_runs/2026-08-22_1851_JST/REV2500_SOJ_PARENT_FILTERED_EXECUTION_PROOF_DAG.md \
+              --path automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py \
+              --path automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py \
+              --output "$EVIDENCE"
+            test -s "$EVIDENCE"
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git add "$EVIDENCE"
+            git commit -m 'coordination: add rev2500 attempt-solution admission evidence'
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+      - name: Materialize canonical publish admission after green smoke
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          EVIDENCE: agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-publish.json
+        run: |
+          set -euo pipefail
+          if [[ -f "$EVIDENCE" ]]; then
+            echo 'canonical publish evidence already present; no branch mutation'
+            exit 0
+          fi
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id "$CLAIM_ID" \
+            --phase publish \
+            --scope "$SCOPE" \
+            --target-revision 2500 \
+            --path .github/workflows/rev2500-soj-parent-filtered-execution-proof-dag-smoke.yml \
+            --path automation_runs/2026-08-22_1851_JST/REV2500_SOJ_PARENT_FILTERED_EXECUTION_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py \
+            --path automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py \
+            --output "$EVIDENCE"
+          test -s "$EVIDENCE"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add "$EVIDENCE"
+          git commit -m 'coordination: add rev2500 publish admission evidence'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
