@@ -40,16 +40,16 @@ class CorrectedSOJJohnsonTransitionSnapshot:
     status: str
     transition_kind: str
     theorem_input_gate: bool
-    current_domain_size: int
-    johnson_ground_size: int
-    johnson_subset_size: int
-    johnson_vertex_count: int
     canonical: bool
     exact: bool
     progress_certified: bool
     multiplicative_cost: float
     max_multiplicative_cost: float
-    proof_identity: str
+    johnson_ground_size: int
+    johnson_subset_size: int
+    johnson_vertex_count: int
+    reason: str
+    snapshot_identity: str
 
 
 @dataclass(frozen=True)
@@ -73,6 +73,7 @@ class PrimitiveJohnsonTerminalSnapshot:
 @dataclass(frozen=True)
 class CorrectedSOJJohnsonTerminalCostCertificate:
     certified: bool
+    current_domain_size: int
     transition: CorrectedSOJJohnsonTransitionSnapshot
     terminal: PrimitiveJohnsonTerminalSnapshot
     transition_log2_charge: float
@@ -91,32 +92,63 @@ def _require_attr(value: Any, name: str) -> Any:
     return getattr(value, name)
 
 
-def _snapshot_transition(value: Any) -> CorrectedSOJJohnsonTransitionSnapshot:
-    identity = _require_attr(value, "proof_identity")
-    if not isinstance(identity, str) or not identity:
+def _require_positive_int(name: str, value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise CorrectedSOJJohnsonTerminalCostError(f"{name} must be a positive integer")
+    return value
+
+
+def _transition_snapshot_identity(payload: dict[str, Any]) -> str:
+    try:
+        encoded = json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+    except (TypeError, ValueError) as exc:
         raise CorrectedSOJJohnsonTerminalCostError(
-            "transition proof_identity must be a nonempty string"
+            "transition snapshot is not canonically serializable"
+        ) from exc
+    return sha256(encoded).hexdigest()
+
+
+def _snapshot_transition(value: Any) -> CorrectedSOJJohnsonTransitionSnapshot:
+    actual = float(_require_attr(value, "multiplicative_cost"))
+    bound = float(_require_attr(value, "max_multiplicative_cost"))
+    if not math.isfinite(actual) or actual < 0.0:
+        raise CorrectedSOJJohnsonTerminalCostError(
+            "transition multiplicative cost must be finite and nonnegative"
         )
+    if not math.isfinite(bound) or bound < 1.0:
+        raise CorrectedSOJJohnsonTerminalCostError(
+            "transition maximum multiplicative cost must be finite and at least one"
+        )
+
+    payload = {
+        "status": str(_require_attr(value, "status")),
+        "transition_kind": str(_require_attr(value, "transition_kind")),
+        "theorem_input_gate": bool(_require_attr(value, "theorem_input_gate")),
+        "canonical": bool(_require_attr(value, "canonical")),
+        "exact": bool(_require_attr(value, "exact")),
+        "progress_certified": bool(_require_attr(value, "progress_certified")),
+        "multiplicative_cost": actual,
+        "max_multiplicative_cost": bound,
+        "johnson_ground_size": int(_require_attr(value, "johnson_ground_size")),
+        "johnson_subset_size": int(_require_attr(value, "johnson_subset_size")),
+        "johnson_vertex_count": int(_require_attr(value, "johnson_vertex_count")),
+        "reason": str(_require_attr(value, "reason")),
+    }
     return CorrectedSOJJohnsonTransitionSnapshot(
-        status=str(_require_attr(value, "status")),
-        transition_kind=str(_require_attr(value, "transition_kind")),
-        theorem_input_gate=bool(_require_attr(value, "theorem_input_gate")),
-        current_domain_size=int(_require_attr(value, "current_domain_size")),
-        johnson_ground_size=int(_require_attr(value, "johnson_ground_size")),
-        johnson_subset_size=int(_require_attr(value, "johnson_subset_size")),
-        johnson_vertex_count=int(_require_attr(value, "johnson_vertex_count")),
-        canonical=bool(_require_attr(value, "canonical")),
-        exact=bool(_require_attr(value, "exact")),
-        progress_certified=bool(_require_attr(value, "progress_certified")),
-        multiplicative_cost=float(_require_attr(value, "multiplicative_cost")),
-        max_multiplicative_cost=float(_require_attr(value, "max_multiplicative_cost")),
-        proof_identity=identity,
+        **payload,
+        snapshot_identity=_transition_snapshot_identity(payload),
     )
 
 
 def _validate_transition(
     transition: CorrectedSOJJohnsonTransitionSnapshot,
     *,
+    current_domain_size: int,
     transition_cost_bound_certified: bool,
 ) -> int:
     if not transition_cost_bound_certified:
@@ -152,22 +184,11 @@ def _validate_transition(
         raise CorrectedSOJJohnsonTerminalCostError(
             "only a full Johnson domain can be composed with the exact primitive-Johnson terminal"
         )
-    if transition.current_domain_size <= full_vertex_count:
+    if current_domain_size <= full_vertex_count:
         raise CorrectedSOJJohnsonTerminalCostError(
-            "Johnson embedding must strictly reduce the current domain before terminal execution"
+            "Johnson embedding must strictly reduce the caller-supplied current domain before terminal execution"
         )
-
-    actual = transition.multiplicative_cost
-    bound = transition.max_multiplicative_cost
-    if not math.isfinite(actual) or actual < 0.0:
-        raise CorrectedSOJJohnsonTerminalCostError(
-            "transition multiplicative cost must be finite and nonnegative"
-        )
-    if not math.isfinite(bound) or bound < 1.0:
-        raise CorrectedSOJJohnsonTerminalCostError(
-            "transition maximum multiplicative cost must be finite and at least one"
-        )
-    if actual > bound + 1e-12:
+    if transition.multiplicative_cost > transition.max_multiplicative_cost + 1e-12:
         raise CorrectedSOJJohnsonTerminalCostError(
             "transition actual multiplicative cost exceeds its certified maximum"
         )
@@ -212,10 +233,6 @@ def _validate_terminal(
     if not terminal_admission_certified:
         raise CorrectedSOJJohnsonTerminalCostError(
             "Johnson terminal admission must be certified by an external caller"
-        )
-    if not isinstance(proof, PrimitiveJohnsonGroundProof):
-        raise CorrectedSOJJohnsonTerminalCostError(
-            "terminal proof must be a PrimitiveJohnsonGroundProof"
         )
     if terminal.status not in EXACT_TERMINAL_STATUSES:
         raise CorrectedSOJJohnsonTerminalCostError(
@@ -309,6 +326,7 @@ def _validate_terminal(
 
 def _certificate_identity(
     *,
+    current_domain_size: int,
     transition: CorrectedSOJJohnsonTransitionSnapshot,
     terminal: PrimitiveJohnsonTerminalSnapshot,
     transition_log2_charge: float,
@@ -317,7 +335,8 @@ def _certificate_identity(
     validation: QuasipolyAccountingValidation,
 ) -> str:
     payload = {
-        "schema": "rev286_corrected_soj_johnson_terminal_cost_v1",
+        "schema": "rev286_corrected_soj_johnson_terminal_cost_v2",
+        "current_domain_size": current_domain_size,
         "transition": asdict(transition),
         "terminal": asdict(terminal),
         "transition_log2_charge": transition_log2_charge,
@@ -348,6 +367,7 @@ def compose_corrected_soj_johnson_terminal_cost(
     terminal_proof: PrimitiveJohnsonGroundProof,
     *,
     root_n: int,
+    current_domain_size: int,
     transition_cost_bound_certified: bool,
     terminal_admission_certified: bool,
     quasipoly_power: int = 5,
@@ -355,36 +375,36 @@ def compose_corrected_soj_johnson_terminal_cost(
 ) -> CorrectedSOJJohnsonTerminalCostCertificate:
     """Compose an admitted full Johnson embedding with an exact primitive terminal.
 
-    This function is deliberately post-admission. It does not decide whether a
-    corrected Split-or-Johnson transition is semantically admissible, and it does
-    not execute the primitive-Johnson terminal. The caller must separately
-    certify both the transition cost bound and terminal admission.
-
-    A full Johnson embedding followed by an already exact primitive-Johnson proof
-    is represented as one terminal recurrence leaf at the pre-transition current
-    domain measure. This charges both steps without pretending that the Johnson
-    structural transition is an ``aux_shrink`` recurrence edge.
+    The active corrected-SOJ transition certificate does not publish a parent
+    domain measure or a proof identity. Therefore the caller supplies the
+    pre-transition ``current_domain_size`` as recurrence context, while rev286
+    derives a deterministic identity from the actual transition fields it
+    consumes. This function remains post-admission: it neither decides transition
+    admissibility nor executes primitive Johnson.
     """
-    if root_n <= 0:
-        raise CorrectedSOJJohnsonTerminalCostError("root_n must be positive")
+    root_n = _require_positive_int("root_n", root_n)
+    current_domain_size = _require_positive_int(
+        "current_domain_size", current_domain_size
+    )
+    if current_domain_size > root_n:
+        raise CorrectedSOJJohnsonTerminalCostError(
+            "caller-supplied current domain exceeds the root envelope"
+        )
     if quasipoly_power < 1 or quasipoly_constant <= 0:
         raise CorrectedSOJJohnsonTerminalCostError(
             "invalid quasipolynomial validation parameters"
-        )
-
-    transition = _snapshot_transition(transition_value)
-    full_vertex_count = _validate_transition(
-        transition,
-        transition_cost_bound_certified=transition_cost_bound_certified,
-    )
-    if transition.current_domain_size > root_n:
-        raise CorrectedSOJJohnsonTerminalCostError(
-            "transition current domain exceeds the root envelope"
         )
     if not isinstance(terminal_proof, PrimitiveJohnsonGroundProof):
         raise CorrectedSOJJohnsonTerminalCostError(
             "terminal proof must be a PrimitiveJohnsonGroundProof"
         )
+
+    transition = _snapshot_transition(transition_value)
+    full_vertex_count = _validate_transition(
+        transition,
+        current_domain_size=current_domain_size,
+        transition_cost_bound_certified=transition_cost_bound_certified,
+    )
     terminal = _snapshot_terminal(terminal_proof)
     _validate_terminal(
         terminal_proof,
@@ -407,7 +427,7 @@ def compose_corrected_soj_johnson_terminal_cost(
 
     accounting_root = RecurrenceAccountingNode(
         n=root_n,
-        m=transition.current_domain_size,
+        m=current_domain_size,
         operation_kind="corrected_soj_johnson_terminal_composition",
         canonical=True,
         cost_certified=True,
@@ -431,6 +451,7 @@ def compose_corrected_soj_johnson_terminal_cost(
         )
 
     identity = _certificate_identity(
+        current_domain_size=current_domain_size,
         transition=transition,
         terminal=terminal,
         transition_log2_charge=transition_charge,
@@ -440,6 +461,7 @@ def compose_corrected_soj_johnson_terminal_cost(
     )
     return CorrectedSOJJohnsonTerminalCostCertificate(
         certified=True,
+        current_domain_size=current_domain_size,
         transition=transition,
         terminal=terminal,
         transition_log2_charge=transition_charge,
@@ -460,6 +482,7 @@ def replay_corrected_soj_johnson_terminal_cost(
     terminal_proof: PrimitiveJohnsonGroundProof,
     *,
     root_n: int,
+    current_domain_size: int,
     transition_cost_bound_certified: bool,
     terminal_admission_certified: bool,
     quasipoly_power: int = 5,
@@ -473,6 +496,7 @@ def replay_corrected_soj_johnson_terminal_cost(
             transition_value,
             terminal_proof,
             root_n=root_n,
+            current_domain_size=current_domain_size,
             transition_cost_bound_certified=transition_cost_bound_certified,
             terminal_admission_certified=terminal_admission_certified,
             quasipoly_power=quasipoly_power,
