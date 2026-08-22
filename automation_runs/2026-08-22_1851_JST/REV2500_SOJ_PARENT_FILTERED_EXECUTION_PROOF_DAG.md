@@ -28,3 +28,7 @@ rev2500 also does not construct the parent→child semantic reduction, does not 
 ## Validation
 
 The focused suite covers nonempty binding, projection-false-positive filtering, exact-empty implication, result/digest tampering, reduction and child-result mismatch, action-degree mismatch, unstable proof identity, malformed parent coset shape, and deterministic replay.
+
+## Canonical phase-evidence recovery
+
+The first repository-wide parallel-admission check failed closed only because this branch did not yet contain its two reserved phase-admission evidence files. The dedicated workflow had already passed its focused tests and canonical admission previews, but the initial source-branch materialization raced with the then-concurrent rev2500 target-revision collision that was later resolved by the other scope moving to rev2707. This documentation-only commit intentionally triggers a new natural run of this claim's own dedicated workflow; that workflow may materialize only the already-reserved `attempt_solution` and `publish` evidence paths. No sibling claim, branch, PR, workflow, or run is modified, cancelled, or manually rerun.
