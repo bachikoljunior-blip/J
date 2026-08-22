@@ -17,6 +17,12 @@ This closes a cross-certificate/TOCTOU gap only. It does not admit or execute co
 
 ## Parallel safety
 
-The implementation imports standard-library modules only. rev275 takeover, rev276-rev289 branches/claims/PRs/workflows, PR #226, PR #228, PR #229, PR #230, PR #231, PR #232, CRX1/CRX2/CRX3 implementation paths, proof-DAG paths, `MAIN.md`, and shared coordination implementation are read-only/excluded.
+The implementation imports standard-library modules only. rev275 takeover, rev276-rev289 branches/claims/PRs/workflows, PR #226, PR #228, PR #229, PR #230, PR #231, PR #232, rev291 larger-ground Johnson handoff, CRX1/CRX2/CRX3 implementation paths, proof-DAG paths, `MAIN.md`, and shared coordination implementation are read-only/excluded.
+
+## Validation state
+
+The first dedicated rev290 smoke completed successfully with compile, all 11 focused regressions, and the reserved-diff gate green. The dedicated smoke then materialized the canonical `attempt_solution` phase-admission evidence on the rev290 branch using the repository admission generator; that evidence records `admitted=true`, no conflicts, and an exact registry source SHA. A follow-up connector-authored commit intentionally touches only this reserved document so the PR checks run again against a head that already contains the replayable admission evidence.
+
+rev290 remains a draft dependency adapter until the owning rev288 and rev286 contracts are integrated in dependency order. No sibling branch, claim, PR, or workflow is modified or rerun.
 
 AGI state remains `NOT_AGI`.
