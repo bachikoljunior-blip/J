@@ -4,15 +4,15 @@
   "claim_id": "chatgpt-session-j-rev284-soj-johnson-terminal-admission-20260822T104315JST-9f17a7e6",
   "session_id": "chatgpt-session-j-continuation-20260822T104315+0900-rev284-turn1",
   "started_at_jst": "2026-08-22T10:43:15+09:00",
-  "heartbeat_at_jst": "2026-08-22T10:43:15+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:48:01+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "9f17a7e669865cd50d21d9081580e0fa374e350d",
   "starting_agi_gi_rev": 274,
   "target_revision": 284,
   "scope": "w1r-h6/corrected-split-or-johnson/explicit-johnson-embedding-terminal-admission",
   "branch": "agi-gi-rev284-soj-johnson-terminal-admission-session-20260822-1043",
-  "pull_request": null,
-  "latest_head_sha": "9f17a7e669865cd50d21d9081580e0fa374e350d",
+  "pull_request": 229,
+  "latest_head_sha": "97d63ad967bdc1e021e95271af517ce157807e51",
   "reserved_paths": [
     ".github/workflows/rev284-soj-johnson-terminal-admission-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev284-soj-johnson-terminal-admission-20260822T104315JST-9f17a7e6-attempt-solution.json",
@@ -29,7 +29,17 @@
   ],
   "intent": "add a standalone fail-closed adapter that structurally revalidates the certified explicit Johnson-embedding transition shape from active PR #226 and admits only small-ground embeddings to the already-main-integrated exact primitive-Johnson terminal interface; freeze the structural embedding/ambient-action/string identity, require exact ambient compatibility, and leave larger-ground recursive Johnson handling unresolved",
   "coordination_note": "The canonical phase-admission generator remains blocked by the independently owned noncanonical fresh rev275 registry record. The exact rev284 evidence path is reserved; no admitted evidence will be fabricated and no sibling claim will be normalized or mutated.",
+  "validation": {
+    "implementation_diff": "four new reserved problem-state files only; no shared implementation or sibling path changes",
+    "exact_head": "97d63ad967bdc1e021e95271af517ce157807e51",
+    "pull_request": 229,
+    "dedicated_workflow_run": 32544451867,
+    "dedicated_workflow_status": "in_progress",
+    "parallel_admission_run": 32544451831,
+    "parallel_admission_status": "queued",
+    "expected_parallel_admission_blocker": "reserved phase evidence is intentionally absent because the canonical registry loader is blocked by the independently owned legacy rev275 record"
+  },
   "non_interference": "Only the five rev284 reserved paths may be written on the isolated branch. Do not import active sibling branch-only modules; do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, normalize, or otherwise mutate sibling claims, branches, PRs, workflows, shared implementation paths, or MAIN.md.",
-  "status": "active_claimed_before_implementation",
+  "status": "active_pr_open_exact_head_validation_running",
   "agi_state": "NOT_AGI"
 }
