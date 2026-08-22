@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev950-main-sync-20260822T154320JST-5b7210a",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T154147+0900-c69d49f-turn1",
   "started_at_jst": "2026-08-22T15:43:20+09:00",
-  "heartbeat_at_jst": "2026-08-22T15:43:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:46:40+09:00",
   "stale_after_minutes": 30,
   "starting_main_sha": "5b7210a208c6f4533161b04b3d7efcee2a0ba6da",
   "starting_agi_gi_rev": 950,
@@ -15,8 +15,18 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev950-main-sync-20260822T154320JST-5b7210a-update_problem_tree.json"
   ],
   "branch": "main",
-  "status": "active",
+  "status": "closed_synchronized_and_replayed",
+  "state": "closed",
+  "closed_at_jst": "2026-08-22T15:46:40+09:00",
+  "synchronized_main_sha": "3e5d92a527d504eae49c1f39b71a4860f7e5e232",
   "agi_state": "NOT_AGI",
+  "validation": {
+    "main_revision_guard": "valid: declared 950 = latest integrated 950",
+    "phase_evidence_guard": "valid",
+    "claim_registry": "valid; collisions 0",
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571
+  },
   "problem_process": {
     "predicted_problem_count": 576,
     "effective_problem_count": 571,
