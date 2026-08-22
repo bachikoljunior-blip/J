@@ -1,0 +1,93 @@
+name: rev650 SOJ recursive caller provenance smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1348_JST/soj_recursive_caller_provenance_v1.py'
+      - 'automation_runs/2026-08-22_1348_JST/test_soj_recursive_caller_provenance_rev650.py'
+      - 'automation_runs/2026-08-22_1348_JST/REV650_SOJ_RECURSIVE_CALLER_PROVENANCE.md'
+      - '.github/workflows/rev650-soj-recursive-caller-provenance-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e-publish.json'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev650 module and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1348_JST/soj_recursive_caller_provenance_v1.py \
+            automation_runs/2026-08-22_1348_JST/test_soj_recursive_caller_provenance_rev650.py
+      - name: Run rev650 focused regressions
+        run: |
+          python -m unittest discover \
+            -s automation_runs/2026-08-22_1348_JST \
+            -p 'test_soj_recursive_caller_provenance_rev650.py' \
+            -v
+      - name: Reject branch-only sibling imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '(^|[[:space:]])(from|import)[[:space:]].*(corrected_soj_johnson_recursive_result_lift_v1|corrected_soj_johnson_recursive_result_accounting_binding_v1|soj_production_caller_binding_v1|soj_caller_replay_envelope_v1|soj_main_provenance_gate_v1)' \
+              automation_runs/2026-08-22_1348_JST; then
+            echo 'rev650 must not import branch-only sibling implementations' >&2
+            exit 1
+          fi
+      - name: Canonical attempt_solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-caller-result-provenance-binding \
+            --target-revision 650 \
+            --path .github/workflows/rev650-soj-recursive-caller-provenance-smoke.yml \
+            --path automation_runs/2026-08-22_1348_JST/REV650_SOJ_RECURSIVE_CALLER_PROVENANCE.md \
+            --path automation_runs/2026-08-22_1348_JST/soj_recursive_caller_provenance_v1.py \
+            --path automation_runs/2026-08-22_1348_JST/test_soj_recursive_caller_provenance_rev650.py \
+            --output /tmp/rev650-attempt.json
+          cat /tmp/rev650-attempt.json
+      - name: Canonical publish admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e \
+            --phase publish \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-caller-result-provenance-binding \
+            --target-revision 650 \
+            --path .github/workflows/rev650-soj-recursive-caller-provenance-smoke.yml \
+            --path automation_runs/2026-08-22_1348_JST/REV650_SOJ_RECURSIVE_CALLER_PROVENANCE.md \
+            --path automation_runs/2026-08-22_1348_JST/soj_recursive_caller_provenance_v1.py \
+            --path automation_runs/2026-08-22_1348_JST/test_soj_recursive_caller_provenance_rev650.py \
+            --output /tmp/rev650-publish.json
+          cat /tmp/rev650-publish.json
+      - name: Enforce reserved rev650 diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --quiet
+          changed="$(git diff --name-only origin/main...HEAD)"
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              .github/workflows/rev650-soj-recursive-caller-provenance-smoke.yml|automation_runs/2026-08-22_1348_JST/REV650_SOJ_RECURSIVE_CALLER_PROVENANCE.md|automation_runs/2026-08-22_1348_JST/soj_recursive_caller_provenance_v1.py|automation_runs/2026-08-22_1348_JST/test_soj_recursive_caller_provenance_rev650.py|agi/run-history/phase-admissions/chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e-attempt-solution.json|agi/run-history/phase-admissions/chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e-publish.json)
+                ;;
+              *)
+                echo "unexpected non-rev650 path: $path" >&2
+                exit 1
+                ;;
+            esac
+          done <<< "$changed"
