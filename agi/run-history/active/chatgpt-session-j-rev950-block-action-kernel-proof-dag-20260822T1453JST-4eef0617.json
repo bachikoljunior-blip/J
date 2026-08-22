@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev950-block-action-kernel-proof-dag-20260822T1453JST-4eef0617",
   "session_id": "chatgpt-session-j-scheduled-continuation-rev950-20260822T1453+0900-4eef0617",
   "started_at_jst": "2026-08-22T14:53:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T14:56:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:06:00+09:00",
+  "completed_at_jst": "2026-08-22T15:06:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "4eef06170e5b94bec3b4a746ce1ac48f134f47a1",
   "starting_agi_gi_rev": 620,
@@ -12,8 +13,9 @@
   "scope": "crx3/algorithmic-consumers/homogeneous-block-action-kernel-factorization-proof-dag",
   "branch": "agi-gi-rev950-block-action-kernel-proof-dag-session-20260822-1453",
   "pull_request": 255,
-  "pull_request_state": "open_draft",
-  "latest_head_sha": "6e417ad569e5d5c7483a10c2093206f462395f98",
+  "pull_request_state": "merged",
+  "latest_head_sha": "eaf9a6334665cd5b4348d9a4194db3b7a671f8ed",
+  "merge_sha": "facd950f776281f99b2cbe5f91bd45d45f947442",
   "intent": "attach the main-integrated rev275 exact homogeneous block-action kernel factorization to the shared rev220/rev289 execution proof-DAG as a separate file-disjoint terminal consumer: independently replay the rev274 provenance and rev275 factorization, freeze provenance/certificate/order/kernel/work-cap identity, charge the mechanically bounded Schreier construction and an independent replay conservatively, and admit only exact complete factorization evidence without changing rev275, shared recurrence code, shared proof-DAG code, corrected Split-or-Johnson work, or any sibling branch-only implementation",
   "reserved_paths": [
     ".github/workflows/rev950-block-action-kernel-proof-dag-smoke.yml",
@@ -40,12 +42,19 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
   },
   "validation": {
-    "state": "exact_head_ci_running_after_regression_assertion_fix",
+    "state": "completed_merged",
     "rev275_main_merge_sha": "87651f44ec341b95ba7e8d0f8df5bc59bb9fed19",
-    "proposed_exact_head_sha": "6e417ad569e5d5c7483a10c2093206f462395f98",
-    "previous_head_observation": "compile success; inherited rev275 12/12 success; rev950 12/13 success; only failure was a test assertion expecting the word bound while the correct fail-closed reason said envelope",
-    "workflow_policy": "naturally triggered checks only; no sibling workflow cancellation or rerun"
+    "exact_head_sha": "eaf9a6334665cd5b4348d9a4194db3b7a671f8ed",
+    "merge_sha": "facd950f776281f99b2cbe5f91bd45d45f947442",
+    "focused_and_inherited_tests": "25/25 success (13 rev950 + 12 rev275)",
+    "py_compile": "success",
+    "sibling_dependency_gate": "success",
+    "attempt_solution_admission": "admitted true; conflicts []",
+    "publish_admission": "admitted true; conflicts []",
+    "problem_solving_parallel_admission": "success on exact head",
+    "observed_exact_head_workflows": "all completed success",
+    "workflow_policy": "natural checks only; no sibling workflow cancellation or rerun"
   },
-  "status": "active",
+  "status": "completed_merged",
   "agi_state": "NOT_AGI"
 }
