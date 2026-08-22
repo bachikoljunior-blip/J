@@ -1,0 +1,56 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f",
+  "session_id": "chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST",
+  "started_at_jst": "2026-08-22T19:57:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:57:00+09:00",
+  "last_activity_at_jst": "2026-08-22T19:57:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "cab8029f0dbdb32eb18fb7ed220c9a79913ab538",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": 3200,
+  "scope": "crx3/algorithmic-consumers/proof-carrying-small-order-production-public-replay-seal",
+  "branch": "agi-gi-rev3200-small-order-public-replay-seal-session-20260822-1957",
+  "pull_request": null,
+  "exact_head_sha": null,
+  "reserved_paths": [
+    ".github/workflows/rev3200-small-order-public-replay-seal-smoke.yml",
+    "automation_runs/2026-08-22_1957_JST/REV3200_SMALL_ORDER_PUBLIC_REPLAY_SEAL.md",
+    "automation_runs/2026-08-22_1957_JST/small_order_public_replay_seal_v1.py",
+    "automation_runs/2026-08-22_1957_JST/test_small_order_public_replay_seal_rev3200.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3200-small-order-public-replay-seal-20260822T195700JST-cab8029f-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev3100 corrected-SOJ sibling and superseded same-session rev3100 claim/branch",
+    "rev3000/rev2900 and all corrected Split-or-Johnson parent-filtered execution/proof/accounting scopes and reserved paths",
+    "rev2300/rev2100/rev2000/rev1800/rev1200 homogeneous-block quotient/original-domain structural scopes and reserved paths",
+    "rev2800/rev2707/rev2600/rev2500/rev2400/rev2200 corrected-SOJ scopes and reserved paths",
+    "rev1600/rev952/rev950 homogeneous-block proof-DAG scopes and reserved paths",
+    "rev600 corrected-SOJ main provenance, rev650 recursive provenance, and all sibling small-order-independent scopes",
+    "run-start history integrity/SHA repair, claim-publication preflight, main revision guard/declaration sync, sibling coordination claims and reserved paths",
+    "MAIN.md, shared proof-DAG/recurrence/S1/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "Add one additive public replay seal for the already-main-integrated rev620 proof-carrying small-order production proof-DAG consumer. Re-execute rev620 from explicit group/strings/resource inputs, require a certified exact nonempty or exact-empty result, canonically freeze the rev620 proof identity, exact outcome, replay certificate identity, and proof-DAG validation metrics, domain-separate them into deterministic SHA-256 digests, and provide an independent verify-by-reexecution entry point. Do not change the small-order solver, rev252 admission, shared proof-DAG accounting, or any sibling branch-only contract; do not promote resource-cap or nonexact outcomes; do not claim CRX3/GI/AGI closure.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_schema_status_identity_outcome_digest_or_accounting_drift": true
+  },
+  "preflight": {
+    "rev3200_branch_search": "none before claim",
+    "rev3200_pr_search": "none before claim",
+    "rev3200_active_claim_search": "none before claim",
+    "main_sha": "cab8029f0dbdb32eb18fb7ed220c9a79913ab538"
+  },
+  "validation": {},
+  "integration_boundary": "May merge only if the dedicated exact-head smoke, canonical phase evidence replay, repository-wide parallel admission, and ordinary required checks are green on an exact mergeable head. Otherwise keep draft/unmerged and preserve the durable heartbeat.",
+  "status": "active_claimed_pre_implementation",
+  "agi_state": "NOT_AGI"
+}
