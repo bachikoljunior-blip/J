@@ -1,0 +1,121 @@
+name: rev3700 signed-Johnson public replay seal smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_2151_JST/signed_johnson_ground_public_replay_seal_v1.py'
+      - 'automation_runs/2026-08-22_2151_JST/test_signed_johnson_ground_public_replay_seal_rev3700.py'
+      - 'automation_runs/2026-08-22_2151_JST/REV3700_SIGNED_JOHNSON_GROUND_PUBLIC_REPLAY_SEAL.md'
+      - '.github/workflows/rev3700-signed-johnson-ground-public-replay-seal-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refresh canonical main
+        run: git fetch --no-tags origin main
+      - name: Generate canonical admission previews
+        run: |
+          rm -rf /tmp/rev3700-main
+          git worktree add --detach /tmp/rev3700-main origin/main
+          for phase in attempt_solution publish; do
+            python automation/problem_solving_parallel_admission.py \
+              --root /tmp/rev3700-main \
+              --claim-id chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d \
+              --phase "$phase" \
+              --scope crx3/algorithmic-consumers/signed-johnson-ground-exact-terminal-public-replay-seal \
+              --target-revision 3700 \
+              --path .github/workflows/rev3700-signed-johnson-ground-public-replay-seal-smoke.yml \
+              --path agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json \
+              --path agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json \
+              --path automation_runs/2026-08-22_2151_JST/REV3700_SIGNED_JOHNSON_GROUND_PUBLIC_REPLAY_SEAL.md \
+              --path automation_runs/2026-08-22_2151_JST/signed_johnson_ground_public_replay_seal_v1.py \
+              --path automation_runs/2026-08-22_2151_JST/test_signed_johnson_ground_public_replay_seal_rev3700.py \
+              --output "/tmp/rev3700-${phase}.json"
+            cat "/tmp/rev3700-${phase}.json"
+            python - "/tmp/rev3700-${phase}.json" <<'PY'
+          import json, sys
+          payload = json.load(open(sys.argv[1]))
+          assert payload.get('admitted') is True, payload
+          assert payload.get('conflicts') == [], payload
+          PY
+          done
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
+      - name: Compile rev3700 consumer and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_2151_JST/signed_johnson_ground_public_replay_seal_v1.py \
+            automation_runs/2026-08-22_2151_JST/test_signed_johnson_ground_public_replay_seal_rev3700.py
+      - name: Run inherited rev295 and focused rev3700 tests
+        env:
+          PYTHONPATH: automation_runs/2026-08-22_2151_JST:automation_runs/2026-08-19_0851_JST
+        run: |
+          python -m pytest -q \
+            automation_runs/2026-08-19_0851_JST/test_signed_johnson_ground_proof_dag_consumer_rev295.py \
+            automation_runs/2026-08-22_2151_JST/test_signed_johnson_ground_public_replay_seal_rev3700.py
+      - name: Reject sibling branch-only dependencies
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('automation_runs/2026-08-22_2151_JST/signed_johnson_ground_public_replay_seal_v1.py').read_text()
+          forbidden = (
+              'homogeneous_block', 'corrected_soj', 'soj_parent_filtered',
+              'relation_twin_restriction', 'original_domain_lift', 'rev3600', 'rev3400',
+          )
+          hits = [name for name in forbidden if name in text]
+          if hits:
+              raise SystemExit(f'sibling branch-only dependency detected: {hits}')
+          PY
+      - name: Enforce reserved diff
+        run: |
+          python - <<'PY'
+          import subprocess
+          allowed = {
+              '.github/workflows/rev3700-signed-johnson-ground-public-replay-seal-smoke.yml',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json',
+              'automation_runs/2026-08-22_2151_JST/REV3700_SIGNED_JOHNSON_GROUND_PUBLIC_REPLAY_SEAL.md',
+              'automation_runs/2026-08-22_2151_JST/signed_johnson_ground_public_replay_seal_v1.py',
+              'automation_runs/2026-08-22_2151_JST/test_signed_johnson_ground_public_replay_seal_rev3700.py',
+          }
+          base = subprocess.check_output(['git', 'merge-base', 'HEAD', 'origin/main'], text=True).strip()
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only', f'{base}..HEAD'], text=True).splitlines())
+          extra = sorted(changed - allowed)
+          if extra:
+              raise SystemExit(f'unreserved paths: {extra}')
+          print(f'reserved diff ok: {sorted(changed)}')
+          PY
+      - name: Persist canonical phase evidence on own PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+        run: |
+          mkdir -p agi/run-history/phase-admissions
+          cp /tmp/rev3700-attempt_solution.json agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json
+          cp /tmp/rev3700-publish.json agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json
+          if git diff --quiet -- \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json; then
+            echo 'canonical phase evidence already current'
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -- \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json
+          git commit -m 'rev3700: persist canonical phase evidence'
+          git push origin "HEAD:${HEAD_BRANCH}"
