@@ -1,0 +1,115 @@
+name: rev340 SOJ Johnson recursive result accounting binding smoke
+
+on:
+  push:
+    branches:
+      - agi-gi-rev340-soj-johnson-recursive-result-accounting-binding-session-20260822-1254
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rev340-soj-johnson-recursive-result-accounting-binding-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-publish.json'
+      - 'automation_runs/2026-08-22_1254_JST/REV340_SOJ_JOHNSON_RECURSIVE_RESULT_ACCOUNTING_BINDING.md'
+      - 'automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py'
+      - 'automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py'
+
+permissions:
+  contents: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile rev340 module and test
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py \
+            automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py
+      - name: Focused rev340 regression
+        run: |
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+
+          path = Path('automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py')
+          spec = importlib.util.spec_from_file_location('rev340_tests', path)
+          assert spec is not None and spec.loader is not None
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          tests = [
+              (name, getattr(module, name))
+              for name in sorted(dir(module))
+              if name.startswith('test_') and callable(getattr(module, name))
+          ]
+          assert tests, 'no rev340 focused tests discovered'
+          for name, test in tests:
+              test()
+              print('PASS', name)
+          print(f'{len(tests)}/{len(tests)} passed')
+          PY
+      - name: Reject sibling branch-only implementation imports
+        run: |
+          ! grep -nE 'corrected_soj_larger_ground_recursive_handoff_v1|corrected_soj_johnson_recursive_result_lift_v1|corrected_soj_johnson_construction_cost_binding_v1' \
+            automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py
+      - name: Enforce reserved-path diff
+        shell: bash
+        run: |
+          git fetch --no-tags origin main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "$base" HEAD > /tmp/rev340-changed.txt
+          python - <<'PY'
+          from pathlib import Path
+          allowed = {
+              '.github/workflows/rev340-soj-johnson-recursive-result-accounting-binding-smoke.yml',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-attempt-solution.json',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-publish.json',
+              'automation_runs/2026-08-22_1254_JST/REV340_SOJ_JOHNSON_RECURSIVE_RESULT_ACCOUNTING_BINDING.md',
+              'automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py',
+              'automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py',
+          }
+          changed = {line.strip() for line in Path('/tmp/rev340-changed.txt').read_text().splitlines() if line.strip()}
+          extra = sorted(changed - allowed)
+          assert not extra, f'unreserved rev340 paths changed: {extra}'
+          expected = {
+              '.github/workflows/rev340-soj-johnson-recursive-result-accounting-binding-smoke.yml',
+              'automation_runs/2026-08-22_1254_JST/REV340_SOJ_JOHNSON_RECURSIVE_RESULT_ACCOUNTING_BINDING.md',
+              'automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py',
+              'automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py',
+          }
+          missing = sorted(expected - changed)
+          assert not missing, f'missing expected rev340 paths: {missing}'
+          print('reserved-path diff ok:', sorted(changed))
+          PY
+      - name: Materialize canonical attempt-solution admission after green smoke
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          EVIDENCE: agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-attempt-solution.json
+        run: |
+          if [[ -f "$EVIDENCE" ]]; then
+            echo "canonical attempt-solution evidence already present; no branch mutation"
+            exit 0
+          fi
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-johnson-recursive-result-accounting-binding \
+            --target-revision 340 \
+            --path .github/workflows/rev340-soj-johnson-recursive-result-accounting-binding-smoke.yml \
+            --path automation_runs/2026-08-22_1254_JST/REV340_SOJ_JOHNSON_RECURSIVE_RESULT_ACCOUNTING_BINDING.md \
+            --path automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py \
+            --path automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py \
+            --output "$EVIDENCE"
+          test -s "$EVIDENCE"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add "$EVIDENCE"
+          git commit -m "coordination: add rev340 attempt-solution admission evidence"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
