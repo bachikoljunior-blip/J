@@ -1,0 +1,66 @@
+name: rev276 joint block reduction compatibility smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/rev276-joint-block-reduction-compatibility-smoke.yml"
+      - "automation_runs/2026-08-19_0851_JST/REV276_JOINT_BLOCK_REDUCTION_COMPATIBILITY.md"
+      - "automation_runs/2026-08-19_0851_JST/joint_block_reduction_compatibility_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_joint_block_reduction_compatibility_rev276.py"
+
+permissions:
+  contents: read
+
+jobs:
+  rev276-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run focused rev276 regressions
+        run: >-
+          python -m unittest
+          automation_runs/2026-08-19_0851_JST/test_joint_block_reduction_compatibility_rev276.py
+          -v
+
+      - name: Compile rev276 modules
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/joint_block_reduction_compatibility_v1.py
+          automation_runs/2026-08-19_0851_JST/test_joint_block_reduction_compatibility_rev276.py
+
+      - name: Enforce no branch-only rev273 implementation import
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE '(^|[[:space:]])(from|import)[[:space:]].*homogeneous_block_relation_provenance_v1' \
+              automation_runs/2026-08-19_0851_JST/joint_block_reduction_compatibility_v1.py; then
+            echo 'rev276 must structurally consume rev273 evidence without importing its branch-only module' >&2
+            exit 1
+          fi
+
+      - name: Recheck attempt-solution parallel admission
+        run: >-
+          python automation/problem_solving_parallel_admission.py
+          --claim-id chatgpt-session-j-rev276-joint-block-reduction-compatibility-20260822T094500JST-57e31bd4
+          --phase attempt_solution
+          --scope crx1/homogeneous-block-reduction/joint-relation-action-compatibility-certificate
+          --target-revision 276
+          --path .github/workflows/rev276-joint-block-reduction-compatibility-smoke.yml
+          --path automation_runs/2026-08-19_0851_JST/REV276_JOINT_BLOCK_REDUCTION_COMPATIBILITY.md
+          --path automation_runs/2026-08-19_0851_JST/joint_block_reduction_compatibility_v1.py
+          --path automation_runs/2026-08-19_0851_JST/test_joint_block_reduction_compatibility_rev276.py
+
+      - name: Recheck publish parallel admission
+        run: >-
+          python automation/problem_solving_parallel_admission.py
+          --claim-id chatgpt-session-j-rev276-joint-block-reduction-compatibility-20260822T094500JST-57e31bd4
+          --phase publish
+          --scope crx1/homogeneous-block-reduction/joint-relation-action-compatibility-certificate
+          --target-revision 276
+          --path .github/workflows/rev276-joint-block-reduction-compatibility-smoke.yml
+          --path automation_runs/2026-08-19_0851_JST/REV276_JOINT_BLOCK_REDUCTION_COMPATIBILITY.md
+          --path automation_runs/2026-08-19_0851_JST/joint_block_reduction_compatibility_v1.py
+          --path automation_runs/2026-08-19_0851_JST/test_joint_block_reduction_compatibility_rev276.py
