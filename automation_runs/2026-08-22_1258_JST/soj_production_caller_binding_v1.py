@@ -95,7 +95,7 @@ def _strict_nonnegative_int(mapping: Mapping[str, Any], key: str) -> int:
 
 def _strict_status(mapping: Mapping[str, Any], key: str = "result_status") -> str:
     value = mapping.get(key)
-    if value not in _ALLOWED_STATUSES or not isinstance(value, str):
+    if not isinstance(value, str) or value not in _ALLOWED_STATUSES:
         raise CallerBindingError(
             f"{key} must be one of {sorted(_ALLOWED_STATUSES)}"
         )
