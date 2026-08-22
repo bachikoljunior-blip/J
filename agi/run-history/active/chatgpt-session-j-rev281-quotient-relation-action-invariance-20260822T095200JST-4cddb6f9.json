@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev281-quotient-relation-action-invariance-20260822T095200JST-4cddb6f9",
   "session_id": "chatgpt-session-j-continuation-20260822T095200+0900-rev281-turn3",
   "started_at_jst": "2026-08-22T09:52:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:55:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:58:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "4cddb6f99fdc38d70612e7a37e39e7e7acb43bbe",
   "starting_agi_gi_rev": 274,
@@ -23,16 +23,23 @@
     "rev275 through rev280 and all of their reserved paths",
     "rev273/rev274 shared files except read-only main-integrated rev274 API",
     "rev271/rev270/rev269/rev268/rev267/rev265/rev264 active scopes",
+    "W1R-H6 corrected Split-or-Johnson sibling work including PR #226",
     "CRX2, CRX3, MAIN.md, every sibling claim, branch, PR, workflow, and reserved path"
   ],
   "intent": "consume only main-integrated rev274 block-action provenance and independently certify that caller-supplied named quotient unary/binary relations are invariant under the exact induced quotient actions and are transported exactly by the certified block bijection; emit a deterministic replayable digest certificate and fail closed on malformed, non-invariant, mismatched, or tampered evidence",
   "coordination_note": "The canonical registry is currently fail-closed because the fresh rev275 sibling claim is not schema-v2. This session does not modify that sibling claim; collision safety is additionally checked by fresh manual target/scope/path inspection.",
   "validation": {
-    "implementation_diff": "four new reserved files only",
-    "dedicated_workflow": "pending_or_not_yet_visible",
-    "parallel_admission": "externally_blocked_by_rev275_registry_format"
+    "implementation_diff": "four new reserved files only; 562 additions and 0 deletions",
+    "dedicated_workflow_run": 32541828558,
+    "dedicated_workflow_status": "success",
+    "dedicated_job": 96953181593,
+    "dedicated_tests": "24/24 passed: 12 focused rev281 plus 12 inherited rev274; py_compile passed",
+    "parallel_admission_run": 32541828454,
+    "parallel_admission_status": "failure_external_registry_format_error_rev275",
+    "general_validation_run": 32541828514,
+    "general_validation_status": "queued_at_last_observation"
   },
   "non_interference": "Only new rev281 reserved paths may be written on the isolated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, shared implementation paths, or MAIN.md.",
-  "status": "active_draft_pr_open_registry_blocked_external_rev275",
+  "status": "active_exact_head_smoke_green_registry_blocked_external_rev275",
   "agi_state": "NOT_AGI"
 }
