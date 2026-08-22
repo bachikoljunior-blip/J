@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev2300-homogeneous-block-structural-quotient-coherence-20260822T175000JST-5ee6ec94",
+  "session_id": "chatgpt-session-j-recurring-continuation-rev2300-20260822T175000+0900-turn1",
+  "started_at_jst": "2026-08-22T17:50:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:50:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "5ee6ec94da5536bb59b388ecf8c4d30b3c07255e",
+  "starting_agi_gi_rev": 952,
+  "target_revision": 2300,
+  "scope": "crx3/algorithmic-consumers/homogeneous-block-structural-quotient-execution-coherence",
+  "branch": "agi-gi-rev2300-homogeneous-block-structural-quotient-coherence-session-20260822-1750",
+  "reserved_paths": [
+    ".github/workflows/rev2300-homogeneous-block-structural-quotient-coherence-smoke.yml",
+    "automation_runs/2026-08-22_1750_JST/REV2300_HOMOGENEOUS_BLOCK_STRUCTURAL_QUOTIENT_COHERENCE.md",
+    "automation_runs/2026-08-22_1750_JST/homogeneous_block_structural_quotient_coherence_v1.py",
+    "automation_runs/2026-08-22_1750_JST/test_homogeneous_block_structural_quotient_coherence_rev2300.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2300-homogeneous-block-structural-quotient-coherence-20260822T175000JST-5ee6ec94-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2300-homogeneous-block-structural-quotient-coherence-20260822T175000JST-5ee6ec94-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev2100 homogeneous-block original-domain result proof-DAG claim and all reserved paths",
+    "rev2200 corrected-SOJ parent-filtered child result claim and all reserved paths",
+    "rev2000 homogeneous-block joint compatibility proof-DAG / PR #271 and all reserved paths",
+    "rev1800 homogeneous-block quotient SI proof-DAG / PR #268 and all reserved paths",
+    "rev1200 quotient String-Isomorphism / PR #260 and all reserved paths",
+    "rev278 original-domain quotient preimage / PR #222 and all reserved paths",
+    "run-start history integrity claim and all coordination reserved paths",
+    "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "close only the post-replay TOCTOU/coherence gap between a rev2000-shaped structural homogeneous-block joint proof and a rev1800-shaped exact quotient String-Isomorphism proof: structurally snapshot both public proof identities, require one exact rev274 action provenance digest, one exact rev275 kernel-factorization digest, one quotient block count and one original-root accounting context, preserve exact-empty versus nonempty quotient outcomes, and emit a deterministic cross-proof coherence identity. Do not import sibling branch-only implementations, do not lift any quotient transporter to the original domain, do not promote quotient exactness to parent relation exactness, and do not claim CRX3, GI or AGI closure.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_schema_digest_measure_outcome_or_identity_drift": true
+  },
+  "consumes_sibling_public_contracts_structurally": [
+    "rev2000 HomogeneousBlockJointCompatibilityResult / proof identity public field semantics",
+    "rev1800 HomogeneousBlockQuotientSIProofDAGConsumerResult / proof identity public field semantics"
+  ],
+  "status": "active_claimed_pre_implementation",
+  "agi_state": "NOT_AGI"
+}
