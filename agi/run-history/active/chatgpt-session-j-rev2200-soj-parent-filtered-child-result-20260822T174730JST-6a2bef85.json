@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev2200-soj-parent-filtered-child-result-20260822T174730JST-6a2bef85",
   "session_id": "chatgpt-session-j-recurring-continuation-rev2200-20260822T174730+0900-turn4",
   "started_at_jst": "2026-08-22T17:47:30+09:00",
-  "heartbeat_at_jst": "2026-08-22T17:56:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:58:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "6a2bef858d13157192852b50c8df256b4d60bb94",
   "starting_agi_gi_rev": 952,
@@ -62,8 +62,9 @@
     "dedicated_rev2200_smoke_run": "32563536836 success on exact head",
     "repository_parallel_admission_run": "32563536920 success on exact head",
     "changed_paths": "exactly six reserved rev2200 paths including both canonical phase-evidence records",
-    "inherited_ci": "naturally running/settling; no cancellation or manual rerun"
+    "exact_head_workflows": "all observed rev2200, parallel-admission, rev238, rev239, rev240, rev241, rev242, rev246, rev250, rev253 and rev254 runs completed success",
+    "workflow_interference": "none; no existing run cancelled or manually rerun"
   },
-  "status": "pr_open_exact_head_core_and_admission_green_inherited_ci_running",
+  "status": "pr_open_exact_head_all_observed_ci_green",
   "agi_state": "NOT_AGI"
 }
