@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1200-20260822T155000+0900-turn10",
   "started_at_jst": "2026-08-22T15:50:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T15:56:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:03:04+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "9e8f61cd8ca8f97864180319e6bb9bf3209da109",
   "starting_agi_gi_rev": 950,
@@ -37,7 +37,7 @@
     "fail_closed_on_any_upstream_identity_or_resource_cap_drift": true
   },
   "pr_number": 260,
-  "current_head_sha": "681c29927b091f3d84e0367e4ccbd7fd791c21aa",
+  "current_head_sha": "36d2d2ec04ab3da6225c15e70ee521e61dca8072",
   "functional_validation": {
     "compile": "passed",
     "rev275_regressions": "12/12 passed",
@@ -45,7 +45,30 @@
     "rev1200_focused_regressions": "12/12 passed",
     "sibling_and_original_domain_lift_dependency_guard": "passed"
   },
-  "coordination_note": "The first canonical admission preview failed only because a later same-number corrected-SOJ claim temporarily targeted revision 1200. That later claim has now marked itself superseded and moved to a fresh rev1300 claim, explicitly preserving this earlier rev1200 quotient-SI ownership. No sibling resource was modified by this session.",
-  "status": "implementation_functionally_green_coordination_recheck_pending",
+  "canonical_phase_evidence": {
+    "registry_source_sha": "8abb5beb1c88cd7350648b71aab67da2557b22a9",
+    "registry_digest": "sha256:0a4f4ae8b88ee1a03b9dd20e912f63cb609a15e81560dbf801f7a3a992c7feb4",
+    "attempt_solution": {
+      "admitted": true,
+      "conflicts": [],
+      "persisted": true,
+      "replayed": true
+    },
+    "publish": {
+      "admitted": true,
+      "conflicts": [],
+      "persisted": true,
+      "replayed": true
+    }
+  },
+  "exact_head_ci": {
+    "rev1200_smoke_run": 32558525106,
+    "rev1200_smoke_conclusion": "success",
+    "parallel_admission_run": 32558525172,
+    "parallel_admission_conclusion": "success"
+  },
+  "coordination_note": "The first canonical admission preview failed only because a later same-number corrected-SOJ claim temporarily targeted revision 1200. That later lane retired its own collision and moved to rev1300, explicitly preserving this earlier rev1200 quotient-SI ownership. Both canonical phase snapshots generated from main source 8abb5beb1c88cd7350648b71aab67da2557b22a9 are now persisted on the exact PR head and replay successfully. No sibling resource was modified, cancelled, manually rerun, rebased, force-pushed, or merged by this session.",
+  "integration_note": "PR #260 remains draft. The exact quotient-domain leaf is functionally and coordination-green, while original-domain transporter/preimage lifting remains the independently owned rev278 scope. Other inherited path-sensitive workflows on this head are allowed to finish naturally.",
+  "status": "implementation_and_canonical_phase_evidence_green_pr_draft",
   "agi_state": "NOT_AGI"
 }
