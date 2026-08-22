@@ -1,0 +1,32 @@
+name: rev400 SOJ production caller binding smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py'
+      - 'automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py'
+      - 'automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md'
+      - '.github/workflows/rev400-soj-production-caller-binding-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev400 module and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py \
+            automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py
+      - name: Run rev400 focused regressions
+        run: |
+          python -m unittest discover \
+            -s automation_runs/2026-08-22_1258_JST \
+            -p 'test_soj_production_caller_binding_rev400.py' \
+            -v
