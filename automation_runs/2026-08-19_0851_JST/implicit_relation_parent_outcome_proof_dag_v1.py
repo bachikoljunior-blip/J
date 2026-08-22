@@ -4,7 +4,8 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
-from math import log2
+from math import isfinite, log2
+from numbers import Real
 
 from implicit_relation_parent_outcome_v1 import (
     EXACT_EMPTY_STATUSES,
@@ -132,6 +133,35 @@ def _validate_exact_outcome_contract(
     else:
         return False, "rev266 parent outcome kind is not recognized"
     return True, "rev266 outcome contract is internally replay-consistent"
+
+
+def _validate_resource_envelope_arguments(
+    *,
+    external_log2_cost_bound: object,
+    quasipoly_power: object,
+    quasipoly_constant: object,
+) -> tuple[bool, str]:
+    if (
+        isinstance(external_log2_cost_bound, bool)
+        or not isinstance(external_log2_cost_bound, Real)
+        or not isfinite(float(external_log2_cost_bound))
+        or float(external_log2_cost_bound) < 0.0
+    ):
+        return False, "external_log2_cost_bound must be a finite nonnegative real"
+    if (
+        isinstance(quasipoly_power, bool)
+        or not isinstance(quasipoly_power, int)
+        or quasipoly_power < 0
+    ):
+        return False, "quasipoly_power must be a nonnegative integer"
+    if (
+        isinstance(quasipoly_constant, bool)
+        or not isinstance(quasipoly_constant, Real)
+        or not isfinite(float(quasipoly_constant))
+        or float(quasipoly_constant) <= 0.0
+    ):
+        return False, "quasipoly_constant must be a finite positive real"
+    return True, "resource envelope arguments are finite and well typed"
 
 
 def build_parent_outcome_proof_identity(
@@ -314,8 +344,21 @@ def parent_outcome_contract_proof_dag_consumer(
     It never reconstructs the upstream right coset and therefore always keeps
     ``semantic_exactness_certified`` false and the proof's ``exact`` bit false.
     """
-    if external_log2_cost_bound < 0:
-        raise ValueError("external_log2_cost_bound must be nonnegative")
+    resource_valid, resource_reason = _validate_resource_envelope_arguments(
+        external_log2_cost_bound=external_log2_cost_bound,
+        quasipoly_power=quasipoly_power,
+        quasipoly_constant=quasipoly_constant,
+    )
+    if not resource_valid:
+        return ParentOutcomeProofDAGConsumerResult(
+            "invalid_parent_outcome_resource_envelope",
+            outcome if isinstance(outcome, ParentExactOutcomeContract) else None,
+            None,
+            None,
+            None,
+            False,
+            resource_reason,
+        )
     try:
         identity = build_parent_outcome_proof_identity(
             outcome,
