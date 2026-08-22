@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T094800+0900-rev279-turn2",
   "started_at_jst": "2026-08-22T09:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T12:04:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:44:36+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "15932427fd0b83fa27d50cf83319fc88c75df564",
   "starting_agi_gi_rev": 274,
@@ -13,7 +13,7 @@
   "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
   "pull_request": 223,
   "latest_head_sha": "27152cd5130106c9a9610161874f8b5edc94225e",
-  "latest_observed_main_sha": "52e669c371c7435f86a3dba6bd0e04e9e5ccc1a0",
+  "latest_observed_main_sha": "5e887230b030553079930d0b066a7376ff5320c4",
   "reserved_paths": [
     ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
@@ -25,7 +25,6 @@
   ],
   "parallel_exclusions": [
     "all sibling problem-tree claims and their reserved paths",
-    "rev289 shared proof-DAG envelope hardening and its shared implementation path",
     "CRX1/CRX2 active branches",
     "MAIN.md",
     "every sibling claim, branch, PR, workflow, and shared implementation path"
@@ -97,19 +96,20 @@
     },
     "current_general_agi_gi_validation": {
       "run_id": 32547831457,
-      "status": "in_progress",
-      "conclusion": null
+      "status": "completed",
+      "conclusion": "success"
     }
   },
   "integration_watch": {
     "main_advanced_after_merge_evidence": true,
-    "observed_main_sha": "52e669c371c7435f86a3dba6bd0e04e9e5ccc1a0",
-    "main_advance": "rev288 merged independently after rev279 merge evidence snapshot",
-    "shared_dependency_owner_active": "rev289 shared proof-DAG envelope hardening remains separately owned and unmerged",
-    "policy": "do not chase sibling branches destructively; keep rev279 draft until exact current-base/shared-dependency state can be revalidated without touching siblings"
+    "observed_main_sha": "5e887230b030553079930d0b066a7376ff5320c4",
+    "main_advance": "main has advanced substantially beyond the rev279 evidence snapshot through later independently owned revisions",
+    "shared_dependency_owner_active": false,
+    "shared_dependency_state": "rev289 shared proof-DAG envelope hardening merged independently as PR #233; rev279 has not modified that sibling branch or PR",
+    "policy": "reconcile current main into the dedicated rev279 branch non-destructively, then allow naturally triggered exact-head validation; do not mutate sibling work"
   },
   "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, tampered, or malformed/non-finite resource evidence without modifying shared solvers or upstream CRX1 branches",
   "non_interference": "Only rev279 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
-  "status": "active_all_phase_admissions_green_exact_head_general_validation_in_progress_main_advanced_shared_dependency_watch",
+  "status": "active_general_validation_green_rev289_merged_current_main_reconciliation_pending",
   "agi_state": "NOT_AGI"
 }
