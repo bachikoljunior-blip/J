@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev292-soj-johnson-construction-cost-binding-20260822T124300JST-a77c5b2e",
   "session_id": "chatgpt-session-j-continuation-automation-turn4-20260822T1243+0900",
   "started_at_jst": "2026-08-22T12:43:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T12:43:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:46:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "f929230743444a4b3d73f0d08b7a9df4c05d8ec0",
   "starting_agi_gi_rev": 274,
   "target_revision": 292,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-reduction-construction-cost-binding",
   "branch": "agi-gi-rev292-soj-johnson-construction-cost-binding-session-20260822-1243",
+  "pull_request": 238,
+  "latest_head_sha": "8434f249194a6061f37ebb18a776439031d39445",
   "reserved_paths": [
     ".github/workflows/rev292-soj-johnson-construction-cost-binding-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev292-soj-johnson-construction-cost-binding-20260822T124300JST-a77c5b2e-attempt-solution.json",
@@ -27,7 +29,8 @@
     "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
   ],
   "intent": "add a file-disjoint fail-closed cost-binding adapter between the separately-owned rev287 larger-ground Johnson relational-reduction evidence and the separately-owned rev291 recursive-handoff contract: validate the complete rev287 structural certificate and its deterministic construction-work formula, preserve its exact/transport/reduction identity fields, and conservatively expose construction_work_bound as the handoff multiplicative-cost bound so recurrence accounting cannot silently treat nonzero reduction work as unit cost; consume sibling branch contracts read-only and never modify or import their branch-only implementation",
+  "coordination_note": "Fresh main/open-PR/active-claim checks found rev287 and rev291 separately owned and no rev292 claim or branch. rev287 exact head d46b05562c70f689137ea23310c72ad10fe08698 has dedicated smoke and parallel admission green; rev291 exact head 088ba30eac3a86faea2cfdf39a488661c55016e2 has dedicated smoke green and parallel admission fail-closed for missing evidence. Rev292 was claimed on main before implementation, created from the claim commit, and changes only four reserved problem-state paths. Draft PR #238 is open at exact head 8434f249194a6061f37ebb18a776439031d39445. Dedicated rev292 smoke run 32549857194 and naturally triggered inherited checks are in progress; Problem-solving parallel admission run 32549857079 is also in progress. No workflow was manually rerun or cancelled.",
   "non_interference": "Only rev292 reserved paths may be written on the dedicated branch and only this rev292 claim may be updated on main. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
-  "status": "active_claimed_preimplementation",
+  "status": "active_draft_pr_ci_running",
   "agi_state": "NOT_AGI"
 }
