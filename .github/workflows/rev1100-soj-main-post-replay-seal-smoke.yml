@@ -1,0 +1,116 @@
+name: rev1100 SOJ main post-replay seal smoke
+
+on:
+  push:
+    branches:
+      - agi-gi-rev1100-soj-main-post-replay-seal-session-20260822-1545
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml'
+      - 'automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md'
+      - 'automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py'
+      - 'automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-publish.json'
+
+permissions:
+  contents: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev1100 module and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py \
+            automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py
+      - name: Run rev1100 focused regressions
+        run: python automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py
+      - name: Reject branch-only sibling implementation imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -nE 'soj_recursive_production_provenance_join_v1|soj_recursive_production_post_replay_envelope_v1' \
+            automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py
+      - name: Canonical attempt_solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-main-post-replay-seal \
+            --target-revision 1100 \
+            --path .github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml \
+            --path automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md \
+            --path automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py \
+            --path automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py \
+            --output /tmp/rev1100-attempt.json
+          test -s /tmp/rev1100-attempt.json
+          cat /tmp/rev1100-attempt.json
+      - name: Enforce reserved rev1100 diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "$base" HEAD > /tmp/rev1100-changed.txt
+          python - <<'PY'
+          from pathlib import Path
+          allowed = {
+              '.github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml',
+              'automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md',
+              'automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py',
+              'automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-attempt-solution.json',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-publish.json',
+          }
+          changed={line.strip() for line in Path('/tmp/rev1100-changed.txt').read_text().splitlines() if line.strip()}
+          extra=sorted(changed-allowed)
+          assert not extra, f'unreserved rev1100 paths changed: {extra}'
+          expected={
+              '.github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml',
+              'automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md',
+              'automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py',
+              'automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py',
+          }
+          missing=sorted(expected-changed)
+          assert not missing, f'missing expected rev1100 paths: {missing}'
+          print('reserved-path diff ok:', sorted(changed))
+          PY
+      - name: Materialize canonical attempt_solution admission after green smoke
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          EVIDENCE: agi/run-history/phase-admissions/chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7-attempt-solution.json
+        run: |
+          set -euo pipefail
+          if [[ -f "$EVIDENCE" ]]; then
+            echo 'canonical attempt_solution evidence already present; no branch mutation'
+            exit 0
+          fi
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-main-post-replay-seal \
+            --target-revision 1100 \
+            --path .github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml \
+            --path automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md \
+            --path automation_runs/2026-08-22_1545_JST/soj_main_post_replay_seal_v1.py \
+            --path automation_runs/2026-08-22_1545_JST/test_soj_main_post_replay_seal_rev1100.py \
+            --output "$EVIDENCE"
+          test -s "$EVIDENCE"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add "$EVIDENCE"
+          git commit -m 'coordination: add rev1100 attempt-solution admission evidence'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
