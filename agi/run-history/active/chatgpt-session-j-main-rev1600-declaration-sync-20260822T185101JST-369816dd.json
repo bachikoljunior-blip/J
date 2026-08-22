@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-main-rev1600-declaration-sync-20260822T185101JST-369816dd",
   "session_id": "chatgpt-session-j-refire-20260822T184207+0900-fc4ab5cb-turn10",
   "started_at_jst": "2026-08-22T18:51:01+09:00",
-  "heartbeat_at_jst": "2026-08-22T18:51:01+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:53:51+09:00",
+  "completed_at_jst": "2026-08-22T18:53:51+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "369816dd5e227835aa948ea5c4836cce42446bea",
   "starting_agi_gi_rev": 1600,
@@ -35,8 +36,9 @@
   "problem_process": {
     "selected_unsolved_leaf": "MAIN.md declares rev952 although canonical main ancestry contains merged AGI-GI rev1600",
     "attempt": "update only the operational declaration and explanatory continuation paragraph to the already-integrated rev1600 boundary",
-    "overflow_triggered": false
+    "overflow_triggered": false,
+    "collision_retreat": "A later independently owned live claim chatgpt-session-j-rev1600-main-sync-20260822T185120JST-27ea521d reserved MAIN.md at 2026-08-22T18:51:20+09:00. This session therefore relinquishes the overlapping scope without touching that claim or MAIN.md."
   },
-  "status": "active_claimed",
+  "status": "superseded_collision_retreat",
   "agi_state": "NOT_AGI"
 }

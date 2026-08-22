@@ -4,14 +4,15 @@
   "claim_id": "chatgpt-session-j-rev2500-soj-parent-filtered-proof-dag-integrity-20260822T185120JST-4f4da78f",
   "session_id": "chatgpt-session-j-rev2500-soj-parent-filtered-proof-dag-integrity-20260822T185120JST",
   "started_at_jst": "2026-08-22T18:51:20+09:00",
-  "heartbeat_at_jst": "2026-08-22T18:51:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:58:20+09:00",
+  "completed_at_jst": "2026-08-22T18:58:20+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "4f4da78f9a5ccb6504e9e299e769af6477bfce9c",
   "starting_agi_gi_rev": 1600,
   "target_revision": 2500,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-result-proof-dag-integrity",
   "branch": "agi-gi-rev2500-soj-parent-filtered-proof-dag-integrity-session-20260822-1851",
-  "pull_request": null,
+  "pull_request": 277,
   "reserved_paths": [
     ".github/workflows/rev2500-soj-parent-filtered-proof-dag-integrity-smoke.yml",
     "automation_runs/2026-08-22_1851_JST/REV2500_SOJ_PARENT_FILTERED_PROOF_DAG_INTEGRITY.md",
@@ -21,24 +22,34 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-proof-dag-integrity-20260822T185120JST-4f4da78f-publish.json"
   ],
   "parallel_exclusions": [
+    "rev2500 corrected-SOJ parent-filtered execution proof-DAG claim and all reserved paths",
+    "rev2500 relation-twin restriction identity claim and all reserved paths",
     "rev2400 corrected-SOJ parent-filtered result accounting coherence claim and all reserved paths",
     "rev2300 homogeneous-block structural quotient coherence / PR #275 and all reserved paths",
-    "rev2200 corrected-SOJ parent-filtered child result / PR #271 and all reserved paths",
+    "rev2200 corrected-SOJ parent-filtered child result / PR #274 and all reserved paths",
     "rev1100 main/post-replay seal / PR #267 and all reserved paths",
     "run-start history integrity / PR #273 and all coordination reserved paths",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
-  "intent": "Close only a post-result integrity gap for the public rev2200 ParentFilteredGroundResult shape: independently replay the public result identity, require strict exact/complete status semantics, bind every nonempty representative and stabilizer element into a deterministic canonical proof DAG, require empty results to carry no hidden witness, and emit a replayable SHA-256 proof-DAG identity. Do not import rev2200 or rev2400 branch-only implementations, do not redo parent filtering, do not alter accounting, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
+  "intent": "Historical audit record for the post-result proof-DAG integrity attempt that failed closed on a canonical rev2500 target-revision collision. No canonical phase evidence was persisted and the replacement work moved to a separately claimed revision without touching sibling resources.",
   "parallel_safety": {
     "do_not_modify_other_active_branches": true,
     "do_not_cancel_or_rerun_unrelated_workflows": true,
     "do_not_merge_or_close_sibling_prs": true,
     "do_not_force_push_or_rebase_siblings": true,
-    "do_not_import_sibling_branch_only_implementation": true,
-    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
-    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
-    "fail_closed_on_schema_status_identity_or_witness_drift": true
+    "do_not_import_sibling_branch_only_implementation": true
   },
-  "status": "active_claimed",
+  "implementation": {
+    "local_focused_regressions": "14/14 passed",
+    "local_py_compile": "success",
+    "implementation_head_before_phase_evidence": "134923b32954941c25c45fd17eac17f8373cf5e6",
+    "dedicated_workflow_run": 32566151004,
+    "canonical_admission": "admitted=false due target_revision_collision",
+    "phase_evidence_persisted": false,
+    "manual_rerun_or_cancel": false
+  },
+  "closure_reason": "canonical_target_revision_collision_detected; fail_closed_retreat; PR #277 closed unmerged",
+  "replacement_claim": "chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e",
+  "status": "abandoned",
   "agi_state": "NOT_AGI"
 }

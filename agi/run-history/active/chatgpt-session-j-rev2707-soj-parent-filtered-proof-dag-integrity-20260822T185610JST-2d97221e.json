@@ -1,0 +1,54 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e",
+  "session_id": "chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST",
+  "started_at_jst": "2026-08-22T18:56:10+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:56:10+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "2d97221e6f00c3c27ea92cecd6f4302ec58a741c",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": 2707,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-result-proof-dag-integrity",
+  "branch": "agi-gi-rev2707-soj-parent-filtered-proof-dag-integrity-session-20260822-1856",
+  "pull_request": null,
+  "reserved_paths": [
+    ".github/workflows/rev2707-soj-parent-filtered-proof-dag-integrity-smoke.yml",
+    "automation_runs/2026-08-22_1856_JST/REV2707_SOJ_PARENT_FILTERED_PROOF_DAG_INTEGRITY.md",
+    "automation_runs/2026-08-22_1856_JST/soj_parent_filtered_proof_dag_integrity_v1.py",
+    "automation_runs/2026-08-22_1856_JST/test_soj_parent_filtered_proof_dag_integrity_rev2707.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev2600 corrected-SOJ parent-filtered result accounting coherence claim and all reserved paths",
+    "rev2501 relation-twin restriction identity claim and all reserved paths",
+    "rev2500 corrected-SOJ parent-filtered execution proof-DAG claim and all reserved paths",
+    "rev2500 relation-twin restriction identity claim and all reserved paths",
+    "rev2400 corrected-SOJ parent-filtered result accounting coherence claim and all reserved paths",
+    "rev2300 homogeneous-block structural quotient coherence / PR #275 and all reserved paths",
+    "rev2200 corrected-SOJ parent-filtered child result / PR #274 and all reserved paths",
+    "rev1100 main/post-replay seal / PR #267 and all reserved paths",
+    "run-start history integrity / PR #273 and all coordination reserved paths",
+    "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "Retry the file-disjoint post-result integrity leaf after fail-closed rev2500 revision collision: independently replay the public rev2200 ParentFilteredGroundResult identity, require strict exact/complete status semantics, bind every nonempty representative and stabilizer element into a deterministic canonical proof DAG, require empty results to carry no hidden witness, and emit a replayable SHA-256 proof-DAG identity. Do not import sibling branch-only implementations, do not redo parent filtering or accounting, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_schema_status_identity_or_witness_drift": true
+  },
+  "preflight": {
+    "rev2707_branch_search": "none",
+    "rev2707_open_pr_search": "none",
+    "rev2707_repository_search": "none",
+    "previous_rev2500_attempt": "closed unmerged after canonical target_revision collision"
+  },
+  "status": "active_claimed",
+  "agi_state": "NOT_AGI"
+}

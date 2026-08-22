@@ -27,7 +27,7 @@ jobs:
       - name: Generate canonical attempt-solution admission snapshot
         run: |
           rm -rf /tmp/rev2501-main-attempt
-          git worktree add --detach /tmp/rev2501-main-attempt 27ea521d5e007a56275dcd50a3e7e1d61d302f10
+          git worktree add --detach /tmp/rev2501-main-attempt 0ccff9facec0b4a0a15746e27410631206a3c29e
           python automation/problem_solving_parallel_admission.py \
             --root /tmp/rev2501-main-attempt \
             --claim-id chatgpt-session-j-rev2501-relation-twin-restriction-identity-20260822T185200JST-13b33de7 \
@@ -84,7 +84,7 @@ jobs:
       - name: Generate canonical publish admission snapshot
         run: |
           rm -rf /tmp/rev2501-main-publish
-          git worktree add --detach /tmp/rev2501-main-publish 27ea521d5e007a56275dcd50a3e7e1d61d302f10
+          git worktree add --detach /tmp/rev2501-main-publish 0ccff9facec0b4a0a15746e27410631206a3c29e
           python automation/problem_solving_parallel_admission.py \
             --root /tmp/rev2501-main-publish \
             --claim-id chatgpt-session-j-rev2501-relation-twin-restriction-identity-20260822T185200JST-13b33de7 \

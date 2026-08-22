@@ -5,6 +5,7 @@
   "session_id": "chatgpt-session-j-recurring-continuation-rev2400-20260822T184900+0900-turn1",
   "started_at_jst": "2026-08-22T18:49:00+09:00",
   "heartbeat_at_jst": "2026-08-22T18:50:00+09:00",
+  "completed_at_jst": "2026-08-22T18:56:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "46e782d9c87a53f03928404ec03326fe1c59cfc7",
   "starting_agi_gi_rev": 952,
@@ -41,7 +42,7 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
     "fail_closed_on_schema_digest_resource_outcome_or_identity_drift": true
   },
-  "status": "superseded_collision_before_implementation",
+  "status": "superseded",
   "superseded_by": "chatgpt-session-j-rev2400-soj-parent-filtered-result-accounting-coherence-20260822T184650JST-34c24406",
   "collision_detected_from_commit": "bf47653ff17b50d1f5f405d43a5c6929a491aa79",
   "implementation_started": false,
