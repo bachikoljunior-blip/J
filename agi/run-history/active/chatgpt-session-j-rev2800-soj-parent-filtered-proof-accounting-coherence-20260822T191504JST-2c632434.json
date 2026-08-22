@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434",
   "session_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST",
   "started_at_jst": "2026-08-22T19:15:04+09:00",
-  "heartbeat_at_jst": "2026-08-22T20:58:00+09:00",
-  "last_activity_at_jst": "2026-08-22T20:58:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:46:21+09:00",
+  "last_activity_at_jst": "2026-08-22T21:46:21+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
   "starting_agi_gi_rev": 1600,
@@ -28,6 +28,7 @@
     "rev3000 parent-filtered execution proof-DAG binding / PR #285 and all reserved paths",
     "rev3100 parent-filtered execution proof/accounting coherence / PR #287 and all reserved paths",
     "rev3400 parent-result identity equivalence / PR #289 and all reserved paths",
+    "rev3600 homogeneous-block public replay joint coherence / PR #290 and all reserved paths",
     "rev2500 corrected-SOJ parent-filtered execution proof-DAG historical scope and all reserved paths",
     "rev2501 relation-twin restriction identity / PR #278 and all reserved paths",
     "rev2400 corrected-SOJ accounting coherence / PR #276 and all reserved paths",
@@ -57,8 +58,8 @@
     "main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
     "claim_commit": "c3ab35d3825a0458e8f8c4ae9ceb494f6810e9f3",
     "pre_implementation_heartbeat_commit": "b7f6947be5c7130bec795638996037263b7306e0",
-    "continuation_main_sha": "49f9bc2a1ff53238ee5b605bd642fbb1d55ad9b5",
-    "continuation_observation": "fresh pre-write reconstruction shows moving main through separately owned rev3400 coordination; direct producer PR #279 and proof-integrity PR #280 remain open/draft; downstream rev3000/#285, rev3100/#287, rev3400/#289 and later claims remain sibling-owned and file-disjoint from rev2800"
+    "continuation_main_sha": "f4b4520b1d1dec9c4da1a521b29c635a48b009fe",
+    "continuation_observation": "fresh pre-write reconstruction shows canonical main advanced through separately owned rev267 takeover coordination and additional later sibling claims; direct producer PR #279 and proof-integrity PR #280 remain open/draft; downstream rev3000/#285, rev3100/#287, rev3400/#289, rev3600/#290 and later claims remain sibling-owned and file-disjoint from rev2800"
   },
   "hardening": {
     "strict_schema_version": "schema_version is an exact built-in int equal to schema v1; bool-coercion such as true == 1 is rejected",
@@ -89,7 +90,7 @@
     "run_start_history_integrity": "success on exact head after independently owned merged repair; no rerun, cancellation, or sibling-history mutation was performed from rev2800",
     "manual_rerun_or_cancel": false
   },
-  "integration_boundary": "PR #283 remains draft and unmerged because independently owned direct upstream public contracts rev2707 / PR #280 and rev2600 / PR #279 remain open/draft. The old run-start-history blocker is now naturally green on the exact rev2800 head after its independently owned repair. rev2800 will not overtake producer ownership or reconcile/regenerate exact-head evidence merely to absorb moving sibling coordination. Downstream rev3000 / PR #285, rev3100 / PR #287, rev3400 / PR #289 and later sibling work remain untouched.",
+  "integration_boundary": "PR #283 remains draft and unmerged because independently owned direct upstream public contracts rev2707 / PR #280 and rev2600 / PR #279 remain open/draft. The old run-start-history blocker is now naturally green on the exact rev2800 head after its independently owned repair. rev2800 will not overtake producer ownership or reconcile/regenerate exact-head evidence merely to absorb moving sibling coordination. Downstream rev3000 / PR #285, rev3100 / PR #287, rev3400 / PR #289, rev3600 / PR #290 and later sibling work remain untouched.",
   "status": "active_schema_closed_exact_head_all_functional_inherited_history_and_parallel_admission_green_waiting_direct_upstream_contracts",
   "agi_state": "NOT_AGI"
 }
