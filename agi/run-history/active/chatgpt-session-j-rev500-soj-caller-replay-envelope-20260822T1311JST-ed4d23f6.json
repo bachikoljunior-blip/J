@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6",
   "session_id": "chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311+0900-ed4d23f6-turn1",
   "started_at_jst": "2026-08-22T13:11:13+09:00",
-  "heartbeat_at_jst": "2026-08-22T13:14:03+09:00",
+  "heartbeat_at_jst": "2026-08-22T13:18:53+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "ed4d23f6695e443b83c6d0fe62a7d4acb236162b",
   "starting_agi_gi_rev": 266,
@@ -13,7 +13,7 @@
   "branch": "agi-gi-rev500-soj-caller-replay-envelope-session-20260822-1311",
   "pull_request": 247,
   "pull_request_state": "draft",
-  "latest_head_sha": "a713a81d3f4b217fe84dfb25e1a74330221ac029",
+  "latest_head_sha": "038b2aae3bb089b990098a30a4ff789da3616b26",
   "intent": "add a strict replay-stable envelope around an already-verified corrected-SOJ production-caller binding without importing or modifying the separately owned rev400 implementation",
   "reserved_paths": [
     ".github/workflows/rev500-soj-caller-replay-envelope-smoke.yml",
@@ -40,8 +40,20 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
   },
   "validation": {
-    "state": "exact_head_ci_in_progress",
-    "workflow_run": 32551150304
+    "state": "exact_head_core_green_upstream_dependency_open",
+    "exact_head": "038b2aae3bb089b990098a30a4ff789da3616b26",
+    "registry_source_sha": "a713a81d3f4b217fe84dfb25e1a74330221ac029",
+    "registry_digest": "sha256:fad864399231c6b63b1d841f7c9a63751a12cb3fcb6b88e9a2f064d9b87c8241",
+    "focused_regressions": 15,
+    "phase_admissions": {
+      "attempt_solution": "admitted_conflicts_zero_persisted_and_replayed",
+      "publish": "admitted_conflicts_zero_persisted_and_replayed"
+    },
+    "github_actions": [
+      {"run_id": 32551348859, "name": "rev500 SOJ caller replay envelope smoke", "conclusion": "success"},
+      {"run_id": 32551348881, "name": "Problem-solving parallel admission", "conclusion": "success"}
+    ],
+    "integration_dependency": "rev400 / PR #246 remains open draft; rev500 remains draft and unmerged"
   },
   "status": "active",
   "agi_state": "NOT_AGI"
