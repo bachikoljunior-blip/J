@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-phase-evidence-registry-ancestry-20260822T211326JST-5d4eb554",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
   "started_at_jst": "2026-08-22T21:13:26+09:00",
-  "heartbeat_at_jst": "2026-08-22T21:13:26+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:16:02+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "5d4eb55457a70e13443b60ed5bc727adae8e7163",
   "starting_agi_gi_rev": 3300,
@@ -46,6 +46,16 @@
     ],
     "decision": "compose both ancestry relations so current main cannot be substituted with a disjoint registry snapshot"
   },
-  "status": "active",
-  "agi_state": "NOT_AGI"
+  "status": "in_progress",
+  "agi_state": "NOT_AGI",
+  "last_activity_at_jst": "2026-08-22T21:16:02+09:00",
+  "pull_request": 292,
+  "exact_head_sha": "48f98ba0901365f111a46642d96e04f36a83a357",
+  "validation": {
+    "automation_tests": "81/81 passed",
+    "phase_guard_current_registry": "valid; conflicts=0",
+    "py_compile": "success",
+    "diff_check": "success",
+    "exact_head_workflows": "pending"
+  }
 }
