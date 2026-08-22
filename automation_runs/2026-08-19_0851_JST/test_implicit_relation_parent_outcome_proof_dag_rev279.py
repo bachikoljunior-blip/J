@@ -225,13 +225,52 @@ class ParentOutcomeProofDAGRev279Test(unittest.TestCase):
         self.assertFalse(result.dag_validation.certified)
         self.assertFalse(result.semantic_exactness_certified)
 
-    def test_external_negative_cost_is_rejected(self):
-        with self.assertRaisesRegex(ValueError, "nonnegative"):
-            parent_outcome_contract_proof_dag_consumer(
-                nonempty_outcome(),
-                original_root_n=7,
-                external_log2_cost_bound=-1.0,
-            )
+    def test_external_negative_cost_fails_closed_before_shared_validator(self):
+        result = parent_outcome_contract_proof_dag_consumer(
+            nonempty_outcome(),
+            original_root_n=7,
+            external_log2_cost_bound=-1.0,
+        )
+        self.assertEqual(result.status, "invalid_parent_outcome_resource_envelope")
+        self.assertIsNone(result.proof)
+        self.assertIsNone(result.dag_validation)
+
+    def test_nonfinite_or_malformed_external_cost_never_fails_open(self):
+        for value in (float("nan"), float("inf"), float("-inf"), True, "1.0"):
+            with self.subTest(value=value):
+                result = parent_outcome_contract_proof_dag_consumer(
+                    nonempty_outcome(),
+                    original_root_n=7,
+                    external_log2_cost_bound=value,
+                )
+                self.assertEqual(
+                    result.status, "invalid_parent_outcome_resource_envelope"
+                )
+                self.assertIsNone(result.proof)
+                self.assertIsNone(result.dag_validation)
+
+    def test_malformed_quasipolynomial_parameters_never_reach_shared_validator(self):
+        cases = (
+            {"quasipoly_power": True},
+            {"quasipoly_power": -1},
+            {"quasipoly_power": 2.5},
+            {"quasipoly_constant": float("nan")},
+            {"quasipoly_constant": float("inf")},
+            {"quasipoly_constant": 0.0},
+            {"quasipoly_constant": True},
+        )
+        for kwargs in cases:
+            with self.subTest(kwargs=kwargs):
+                result = parent_outcome_contract_proof_dag_consumer(
+                    nonempty_outcome(),
+                    original_root_n=7,
+                    **kwargs,
+                )
+                self.assertEqual(
+                    result.status, "invalid_parent_outcome_resource_envelope"
+                )
+                self.assertIsNone(result.proof)
+                self.assertIsNone(result.dag_validation)
 
     def test_wrong_runtime_type_fails_closed(self):
         result = parent_outcome_contract_proof_dag_consumer(
