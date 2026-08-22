@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1900-20260822T165253+0900-turn9",
   "started_at_jst": "2026-08-22T16:52:53+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:52:53+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:54:05+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "39d41234d4d7d73ed39a773afc01fe2a59e5820d",
   "starting_agi_gi_rev": 952,
@@ -47,7 +47,13 @@
     "rev287 larger-ground Johnson relational-reduction certificate and induced ground-action replay",
     "main-integrated permutation/group primitives used read-only for exact generator action checks"
   ],
+  "post_claim_race_check": {
+    "checked_main_sha": "d5ae3876a2081528749b810c2b3849a84f3fd47d",
+    "competing_target_revision_1900_claims": 0,
+    "open_rev1900_pull_requests": 0,
+    "result": "collision_free"
+  },
   "integration_boundary": "file-disjoint semantic-binding leaf only; recursive solver execution and result lifting remain separately owned",
-  "status": "active",
+  "status": "active_claimed_preimplementation",
   "agi_state": "NOT_AGI"
 }
