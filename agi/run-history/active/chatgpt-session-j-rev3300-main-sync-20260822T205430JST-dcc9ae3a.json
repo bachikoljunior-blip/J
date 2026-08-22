@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev3300-main-sync-20260822T205430JST-dcc9ae3a",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
   "started_at_jst": "2026-08-22T20:54:30+09:00",
-  "heartbeat_at_jst": "2026-08-22T20:54:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:01:32+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "dcc9ae3a971dc68d25cfc8a6d12bf8c2d76913de",
   "starting_agi_gi_rev": 3300,
@@ -27,7 +27,11 @@
     "effective_problem_count": 571,
     "selected_unsolved_leaf": "canonical main advanced to rev3300 while MAIN.md still declares rev3200",
     "attempt": "create one atomic Git tree containing the rev3300 declaration and canonical phase evidence",
-    "decomposition_if_unresolved": ["registry replay", "canonical revision audit", "atomic Git tree update"],
+    "decomposition_if_unresolved": [
+      "registry replay",
+      "canonical revision audit",
+      "atomic Git tree update"
+    ],
     "overflow_triggered": false
   },
   "existing_solution_audit": {
@@ -38,6 +42,23 @@
     ],
     "decision": "reuse canonical ancestry and one content-addressed two-file commit"
   },
-  "status": "active",
-  "agi_state": "NOT_AGI"
+  "status": "completed",
+  "agi_state": "NOT_AGI",
+  "completed_at_jst": "2026-08-22T21:01:32+09:00",
+  "sync_commit_sha": "f48049f9103b67c4536390ece93de5a7c866c003",
+  "validation": {
+    "declared_revision": 3300,
+    "canonical_revision": 3300,
+    "canonical_commit": "604bd57f80070487f98c1c747a621987a4654c45",
+    "main_revision_guard": "success",
+    "phase_evidence_guard": "success",
+    "phase_evidence_atomic_with_main": true,
+    "claim_registry": "valid; collisions=0",
+    "run_start_history_guard": "79 records; 74 starts; 4 corrections; 1 identity correction",
+    "focused_tests": "42/42 passed (13 coordination + 16 rev3300 + 13 rev950)",
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "overflow_triggered": false,
+    "agi_state": "NOT_AGI"
+  }
 }
