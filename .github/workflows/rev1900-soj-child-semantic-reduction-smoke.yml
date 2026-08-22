@@ -1,0 +1,125 @@
+name: rev1900 SOJ child semantic reduction smoke
+
+on:
+  push:
+    branches:
+      - agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652
+    paths:
+      - "automation_runs/2026-08-22_1652_JST/**"
+      - ".github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234-*.json"
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-22_1652_JST/**"
+      - ".github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234-*.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rev1900-soj-child-semantic-reduction-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rev1900-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compile rev1900
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py
+          automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py
+
+      - name: Run rev1900 focused regressions
+        run: >-
+          python
+          automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py
+          -v
+
+      - name: Rerun inherited rev287 reduction regressions
+        run: >-
+          python
+          automation_runs/2026-08-22_1155_JST/test_corrected_soj_johnson_relational_reduction_rev287.py
+          -v
+
+      - name: Enforce main-integrated dependency boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target=automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py
+          ! grep -E '2026-08-22_1650_JST|recursive_child_instance_execution|rev1700|rev293|2026-08-22_1247_JST' "${target}"
+          grep -q '2026-08-22_1155_JST' "${target}"
+
+      - name: Preview canonical attempt-solution admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-semantic-reduction-binding \
+            --target-revision 1900 \
+            --path .github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml \
+            --path automation_runs/2026-08-22_1652_JST/REV1900_SOJ_CHILD_SEMANTIC_REDUCTION.md \
+            --path automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py \
+            --path automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py
+
+      - name: Preview canonical publish admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234 \
+            --phase publish \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-semantic-reduction-binding \
+            --target-revision 1900 \
+            --path .github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml \
+            --path automation_runs/2026-08-22_1652_JST/REV1900_SOJ_CHILD_SEMANTIC_REDUCTION.md \
+            --path automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py \
+            --path automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py
+
+      - name: Persist canonical phase evidence on this dedicated branch only
+        if: >-
+          (github.event_name == 'push' && github.ref_name == 'agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652') ||
+          (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652')
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch=agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652
+          claim=chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234
+          git fetch --no-tags origin main "${branch}"
+          git checkout -B "${branch}" "origin/${branch}"
+          common=(
+            --claim-id "${claim}"
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-semantic-reduction-binding
+            --target-revision 1900
+            --path .github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml
+            --path automation_runs/2026-08-22_1652_JST/REV1900_SOJ_CHILD_SEMANTIC_REDUCTION.md
+            --path automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py
+            --path automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py
+          )
+          attempt_path="agi/run-history/phase-admissions/${claim}-attempt-solution.json"
+          publish_path="agi/run-history/phase-admissions/${claim}-publish.json"
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase attempt_solution \
+            --output "${attempt_path}"
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase publish \
+            --output "${publish_path}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${attempt_path}" "${publish_path}"
+          if git diff --cached --quiet -- "${attempt_path}" "${publish_path}"; then
+            exit 0
+          fi
+          git commit -m "coordination: persist rev1900 phase admission evidence"
+          git push origin "HEAD:${branch}"
