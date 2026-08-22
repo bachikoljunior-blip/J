@@ -8,6 +8,7 @@ on:
       - 'automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md'
       - '.github/workflows/rev400-soj-production-caller-binding-smoke.yml'
       - 'agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-publish.json'
 
 permissions:
   contents: read
@@ -46,11 +47,24 @@ jobs:
             --path .github/workflows/rev400-soj-production-caller-binding-smoke.yml \
             --path automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md \
             --path automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py \
+            --path automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py
+      - name: Canonical publish admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b \
+            --phase publish \
+            --scope w1r-h6/corrected-split-or-johnson/johnson-terminal-recursive-production-caller-binding \
+            --target-revision 400 \
+            --path .github/workflows/rev400-soj-production-caller-binding-smoke.yml \
+            --path automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md \
+            --path automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py \
             --path automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py \
-            --output /tmp/rev400-attempt-solution.json
-          echo '---BEGIN REV400 ATTEMPT EVIDENCE---'
-          cat /tmp/rev400-attempt-solution.json
-          echo '---END REV400 ATTEMPT EVIDENCE---'
+            --output /tmp/rev400-publish.json
+          echo '---BEGIN REV400 PUBLISH EVIDENCE---'
+          cat /tmp/rev400-publish.json
+          echo '---END REV400 PUBLISH EVIDENCE---'
       - name: Enforce reserved problem-state diff
         shell: bash
         run: |
@@ -60,7 +74,7 @@ jobs:
           while IFS= read -r path; do
             [ -z "$path" ] && continue
             case "$path" in
-              .github/workflows/rev400-soj-production-caller-binding-smoke.yml|agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-attempt-solution.json|automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md|automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py|automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py)
+              .github/workflows/rev400-soj-production-caller-binding-smoke.yml|agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-attempt-solution.json|agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-publish.json|automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md|automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py|automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py)
                 ;;
               *)
                 echo "unexpected non-rev400 path: $path" >&2
