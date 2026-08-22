@@ -33,6 +33,8 @@ The dedicated smoke compiles the rev1700 module/test, runs focused exact-success
 
 Focused coverage includes exact nonempty and exact-empty S1 execution, deterministic execution identity, resource-identity drift, strict independent-replay gating, malformed theorem flags/dimensions/permutations/Johnson families, wrong child string length, opaque values, invalid root/resource gates, malformed reduction digests, and the invariant that semantic parent-to-child transport is never fabricated.
 
+The first PR smoke exposed an inherited runtime dependency rather than a rev1700 logic failure: importing the main-integrated S1 dispatcher reaches `johnson_pair_relation_recognizer.py`, which imports NumPy. The rev1700-owned workflow now declares NumPy explicitly instead of changing or rerunning any existing sibling workflow. A fresh branch commit is used to obtain exact-head checks after canonical admission evidence is materialized.
+
 ## Strict boundary
 
 This revision does not import sibling branch-only implementations, discover a Johnson embedding, construct the parent-to-child colored relational reduction, execute rev1400 composition, modify shared S1/proof-DAG/recurrence code, merge sibling PRs, close corrected Split-or-Johnson, prove quasipolynomial GI, or establish AGI. State remains `NOT_AGI`.
