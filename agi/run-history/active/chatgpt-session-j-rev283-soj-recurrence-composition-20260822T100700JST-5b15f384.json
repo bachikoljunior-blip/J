@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev283-soj-recurrence-composition-20260822T100700JST-5b15f384",
   "session_id": "chatgpt-session-j-continuation-20260822T100700+0900-rev283-turn3",
   "started_at_jst": "2026-08-22T10:07:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T10:07:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:11:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "5b15f384e2509bd9f32b77e245770e0506fb1a84",
   "starting_agi_gi_rev": 274,
   "target_revision": 283,
   "scope": "w1r-h6/corrected-split-or-johnson/recursive-transition-recurrence-composition",
   "branch": "agi-gi-rev283-soj-recurrence-composition-session-20260822-1007",
+  "pull_request": 228,
+  "latest_head_sha": "62ffe27036b2ca9b725994bd555b9bae5ac62967",
   "reserved_paths": [
     ".github/workflows/rev283-soj-recurrence-composition-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev283-soj-recurrence-composition-20260822T100700JST-5b15f384-attempt-solution.json",
@@ -26,7 +28,13 @@
   ],
   "intent": "add a standalone fail-closed recurrence-composition adapter for the corrected Split-or-Johnson transition contract documented by active PR #226 without importing or modifying its branch-only module; admit only its exact canonical constant-factor small-part reduction shape into the main-integrated quasipolynomial recurrence accounting substrate, verify multiplicative-cost/log-cost and child-measure consistency, and deliberately leave Johnson-embedding caller integration unresolved",
   "coordination_note": "The canonical phase-admission generator is currently blocked by the independently owned noncanonical fresh rev275 registry record. The exact rev283 evidence path is reserved but no admitted evidence will be fabricated while the registry cannot be loaded canonically.",
+  "validation": {
+    "implementation_diff": "four new reserved problem-state files only; 579 additions and 0 deletions",
+    "exact_head": "62ffe27036b2ca9b725994bd555b9bae5ac62967",
+    "dedicated_workflow": "automatic pull_request trigger pending/not yet visible at last observation",
+    "parallel_admission_evidence": "reserved but canonical generation blocked by external rev275 registry format"
+  },
   "non_interference": "Only new rev283 reserved paths may be written on the isolated branch. Do not import branch-only PR #226 modules; do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, normalize, or otherwise mutate sibling claims, branches, PRs, workflows, shared implementation paths, or MAIN.md.",
-  "status": "active",
+  "status": "active_draft_pr_open_waiting_for_automatic_ci",
   "agi_state": "NOT_AGI"
 }
