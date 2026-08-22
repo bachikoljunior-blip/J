@@ -14,6 +14,20 @@
   "pull_request": 218,
   "latest_head_sha": "66a3f9c866b55df464172f3d4d9b00edea5beea4",
   "latest_observed_main_sha": "6c58aa6b4c83d21d45dd2bb07614ce5c00c0e2f8",
+  "reserved_paths": [
+    ".github/workflows/rev272-implicit-resource-ledger-replay-verifier-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV272_IMPLICIT_RELATION_RESOURCE_LEDGER_REPLAY_VERIFIER.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_resource_ledger_replay_verifier_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_resource_ledger_replay_verifier_rev272.py"
+  ],
+  "validation": {
+    "rev272_smoke": {"run_id": 32539326999, "conclusion": "success"},
+    "problem_solving_parallel_admission": {"run_id": 32539327017, "conclusion": "success"},
+    "agi_gi_rev_validation": {"run_id": 32539327024, "conclusion": "success"},
+    "rev246": {"run_id": 32539326984, "conclusion": "success"}
+  },
   "status": "active_validation",
   "agi_state": "NOT_AGI"
 }
