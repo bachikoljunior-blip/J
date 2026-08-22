@@ -41,6 +41,13 @@ jobs:
             exit 1
           fi
 
+      - name: Checkout exact PR branch head for registry admission
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+
       - name: Recheck attempt-solution parallel admission
         run: >-
           python automation/problem_solving_parallel_admission.py
