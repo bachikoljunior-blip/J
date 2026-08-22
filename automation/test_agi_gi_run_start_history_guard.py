@@ -119,6 +119,67 @@ class RunStartHistoryGuardTest(unittest.TestCase):
                 lambda sha: (952, self.evidence) if sha == self.sha else None,
             )
 
+    def test_exact_identity_correction_is_accepted(self):
+        unavailable = {**self.start, "starting_main_sha": "c" * 40}
+        corrected_sha = "d" * 40
+        next_sha = "e" * 40
+        correction = {
+            "event_type": "automation_run_start_identity_correction",
+            "correction_of_automation_run_id": "run-1",
+            "started_at_jst": unavailable["started_at_jst"],
+            "supersedes_starting_main_sha": unavailable["starting_main_sha"],
+            "corrected_starting_main_sha": corrected_sha,
+            "next_main_commit_sha": next_sha,
+            "starting_agi_gi_rev": 952,
+            "preserves_original_record": True,
+        }
+        summary = validate_history(
+            [line(**unavailable), line(**correction)],
+            lambda sha: (952, self.evidence) if sha == corrected_sha else None,
+            lambda old, corrected, following, timestamp: (
+                old == unavailable["starting_main_sha"]
+                and corrected == corrected_sha
+                and following == next_sha
+                and timestamp == unavailable["started_at_jst"]
+            ),
+        )
+        self.assertEqual(summary["identity_corrected_starts"], 1)
+
+    def test_identity_correction_requires_independent_evidence(self):
+        unavailable = {**self.start, "starting_main_sha": "c" * 40}
+        correction = {
+            "event_type": "automation_run_start_identity_correction",
+            "correction_of_automation_run_id": "run-1",
+            "started_at_jst": unavailable["started_at_jst"],
+            "supersedes_starting_main_sha": unavailable["starting_main_sha"],
+            "corrected_starting_main_sha": "d" * 40,
+            "next_main_commit_sha": "e" * 40,
+            "starting_agi_gi_rev": 952,
+            "preserves_original_record": True,
+        }
+        with self.assertRaisesRegex(HistoryError, "identity correction evidence"):
+            validate_history(
+                [line(**unavailable), line(**correction)],
+                lambda sha: (952, self.evidence),
+                lambda old, corrected, following, timestamp: False,
+            )
+
+    def test_duplicate_and_orphan_identity_corrections_fail_closed(self):
+        correction = {
+            "event_type": "automation_run_start_identity_correction",
+            "correction_of_automation_run_id": "run-1",
+        }
+        with self.assertRaisesRegex(HistoryError, "duplicate identity correction"):
+            validate_history(
+                [line(**self.start), line(**correction), line(**correction)],
+                self.resolver,
+            )
+        with self.assertRaisesRegex(HistoryError, "unknown run"):
+            validate_history(
+                [line(**{**correction, "correction_of_automation_run_id": "missing"})],
+                self.resolver,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

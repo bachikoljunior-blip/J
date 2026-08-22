@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev3100-small-order-public-replay-seal-20260822T195400JST-ac946914",
+  "session_id": "chatgpt-session-j-rev3100-small-order-public-replay-seal-20260822T195400JST",
+  "started_at_jst": "2026-08-22T19:54:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:56:00+09:00",
+  "last_activity_at_jst": "2026-08-22T19:56:00+09:00",
+  "completed_at_jst": "2026-08-22T19:56:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "ac946914e6d72bab02d5f1083e93a3f7b6dcbf9c",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": 3100,
+  "scope": "crx3/algorithmic-consumers/proof-carrying-small-order-production-public-replay-seal",
+  "branch": "agi-gi-rev3100-small-order-public-replay-seal-session-20260822-1954",
+  "pull_request": null,
+  "exact_head_sha": "fa384a5500822642996d261ba75e2340f6350da8",
+  "reserved_paths": [
+    ".github/workflows/rev3100-small-order-public-replay-seal-smoke.yml",
+    "automation_runs/2026-08-22_1954_JST/REV3100_SMALL_ORDER_PUBLIC_REPLAY_SEAL.md",
+    "automation_runs/2026-08-22_1954_JST/small_order_public_replay_seal_v1.py",
+    "automation_runs/2026-08-22_1954_JST/test_small_order_public_replay_seal_rev3100.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3100-small-order-public-replay-seal-20260822T195400JST-ac946914-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3100-small-order-public-replay-seal-20260822T195400JST-ac946914-publish.json"
+  ],
+  "parallel_exclusions": [
+    "all sibling branches, PRs, claims, workflows, and reserved paths"
+  ],
+  "intent": "Retired before implementation after the mandatory collision recheck found an independently owned rev3100 corrected-SOJ branch. No reserved implementation, test, workflow, documentation, or phase-evidence path was written on this branch.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
+  },
+  "preflight": {
+    "rev3100_branch_search_before_claim": "none",
+    "post_claim_collision_recheck": "found agi-gi-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-session-20260822-1953",
+    "collision_action": "superseded before implementation"
+  },
+  "validation": {
+    "implementation_writes": 0,
+    "pull_request_created": false
+  },
+  "supersession_reason": "target revision collision detected before implementation",
+  "integration_boundary": "Superseded permanently; do not reuse this target revision or claim.",
+  "status": "superseded",
+  "agi_state": "NOT_AGI"
+}

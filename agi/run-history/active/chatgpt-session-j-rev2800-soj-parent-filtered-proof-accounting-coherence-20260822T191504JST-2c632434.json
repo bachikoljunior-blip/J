@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434",
   "session_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST",
   "started_at_jst": "2026-08-22T19:15:04+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:45:30+09:00",
-  "last_activity_at_jst": "2026-08-22T19:45:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:55:45+09:00",
+  "last_activity_at_jst": "2026-08-22T19:55:45+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
   "starting_agi_gi_rev": 1600,
@@ -13,7 +13,7 @@
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-proof-accounting-coherence",
   "branch": "agi-gi-rev2800-soj-parent-filtered-proof-accounting-coherence-session-20260822-1915",
   "pull_request": 283,
-  "exact_head_sha": "f93aab38ac216a097c71e88e9b93224cf257aabc",
+  "exact_head_sha": "6a1979775b7ae9137e95ff21876261d051ce49ad",
   "reserved_paths": [
     ".github/workflows/rev2800-soj-parent-filtered-proof-accounting-coherence-smoke.yml",
     "automation_runs/2026-08-22_1915_JST/REV2800_SOJ_PARENT_FILTERED_PROOF_ACCOUNTING_COHERENCE.md",
@@ -25,7 +25,8 @@
   "parallel_exclusions": [
     "rev2707 corrected-SOJ parent-filtered proof-DAG integrity / PR #280 and all reserved paths",
     "rev2600 corrected-SOJ parent-filtered result accounting coherence / PR #279 and all reserved paths",
-    "rev2500 corrected-SOJ parent-filtered execution proof-DAG / PR #281 and all reserved paths",
+    "rev3000 parent-filtered execution proof-DAG binding / PR #285 and all reserved paths",
+    "rev2500 corrected-SOJ parent-filtered execution proof-DAG historical scope and all reserved paths",
     "rev2501 relation-twin restriction identity / PR #278 and all reserved paths",
     "rev2400 corrected-SOJ accounting coherence / PR #276 and all reserved paths",
     "rev2300 homogeneous-block structural quotient coherence / PR #275 and all reserved paths",
@@ -33,6 +34,7 @@
     "rev1400 recursive production execution proof-DAG / PR #264 and all reserved paths",
     "run-start history integrity and claim-publication preflight coordination scopes and all reserved paths",
     "run-start SHA correction / PR #284 and all reserved paths",
+    "rev3100/rev3200 and later moving-main claim-rescope coordination scopes and all reserved paths",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
   "intent": "Add one file-disjoint post-replay coherence seal between public-shaped rev2707 parent-filtered result proof-DAG integrity evidence and public-shaped rev2600 parent-filtered result recurrence-accounting coherence evidence. Independently normalize and replay both snapshots, require one exact result/reduction/semantic/child lineage, outcome, child ground, candidate/accepted counts and filtering-work bound across them, retain rev2600's strict parent-to-child measure separately, preserve proof-DAG and accounting identities as distinct evidence, reject malformed/tampered/nonliteral data fail-closed, and emit one deterministic SHA-256 cross-certificate coherence identity. Do not import sibling branch-only implementations, do not execute recursive SI, do not combine unlike accounting units, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
@@ -53,26 +55,34 @@
     "main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
     "claim_commit": "c3ab35d3825a0458e8f8c4ae9ceb494f6810e9f3",
     "pre_implementation_heartbeat_commit": "b7f6947be5c7130bec795638996037263b7306e0",
-    "continuation_main_sha": "1616e25a85d990068e3b5bfabb9ea8f29a81b84b"
+    "continuation_main_sha": "8c23c96a0f3a480e9ad54a6fe38be5bbb03141d2"
+  },
+  "hardening": {
+    "strict_schema_version": "schema_version is now an exact built-in int equal to schema v1; bool-coercion such as true == 1 is rejected",
+    "proof_witness_semantic_replay": "nonempty proof snapshots now independently revalidate representative/stabilizer permutations, witness identities, canonical exact node fields, subgroup identity membership, inverse closure, composition closure, and representative-times-stabilizer injectivity after proof-DAG digest replay",
+    "sibling_implementation_imports": false,
+    "shared_implementation_edits": false
   },
   "validation": {
-    "local_focused_regressions": "17/17 passed",
+    "local_focused_regressions": "22/22 passed",
     "local_py_compile": "success",
     "reserved_diff": "exactly six reserved paths on PR #283",
     "attempt_solution": "admitted=true; mode=exclusive; conflicts=[]; persisted by natural workflow",
     "publish": "admitted=true; mode=exclusive; conflicts=[]; persisted by natural workflow",
     "phase_evidence_persist_commit": "f93aab38ac216a097c71e88e9b93224cf257aabc",
-    "dedicated_workflow_run": 32567299028,
+    "hardening_commit": "6a1979775b7ae9137e95ff21876261d051ce49ad",
+    "dedicated_workflow_run": 32568742665,
     "dedicated_workflow_conclusion": "success",
-    "problem_solving_parallel_admission_run": 32567298993,
+    "problem_solving_parallel_admission_run": 32568742659,
     "problem_solving_parallel_admission": "success",
-    "inherited_rev238_rev239_rev240_rev241_rev242_rev250_rev253_rev254": "success on exact head",
-    "inherited_rev246": "still running naturally at last observation",
-    "run_start_history_integrity_run": 32567298998,
-    "run_start_history_integrity": "failure in separately owned shared coordination workflow; left untouched",
+    "inherited_rev238_rev239_rev240_rev241_rev242_rev246_rev250_rev253_rev254": "all success on hardening head",
+    "inherited_rev246_run": 32568742676,
+    "inherited_rev246": "success",
+    "run_start_history_integrity_run": 32568742679,
+    "run_start_history_integrity": "failure on this exact head in separately owned shared coordination workflow; separate PR #284 owns the correction and remains untouched",
     "manual_rerun_or_cancel": false
   },
-  "integration_boundary": "PR #283 remains draft and unmerged while independently owned upstream public contracts rev2707 / PR #280 and rev2600 / PR #279 remain open; the separately owned run-start-history integrity workflow is also not green on this head. Do not overtake upstream or coordination ownership.",
-  "status": "active_exact_head_functional_and_phase_admission_green_waiting_upstream_and_external_history_integrity",
+  "integration_boundary": "PR #283 remains draft and unmerged while independently owned upstream public contracts rev2707 / PR #280 and rev2600 / PR #279 remain open. The hardening head is functionally green, phase-admission green, parallel-admission green, and all inherited path-sensitive checks are green. Its naturally triggered run-start-history integrity check predates the separately owned correction and remains red. Do not overtake upstream or coordination ownership; do not reconcile against moving main solely to absorb sibling coordination work.",
+  "status": "active_hardened_head_all_functional_inherited_and_parallel_admission_green_waiting_upstreams_and_external_history_repair",
   "agi_state": "NOT_AGI"
 }
