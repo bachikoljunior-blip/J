@@ -26,7 +26,9 @@ The finite handoff cost is the next power of two at least as large as the determ
 
 The earlier rev292 attempt was closed unmerged after a naturally triggered runner exposed a separately owned pre-existing rev292 handoff-composition branch that had not appeared in the pre-claim branch search. A later rev294 attempt was also closed unmerged when another owner created a rev294 signed-ground proof-DAG branch after this session had claimed rev294. Both own branches were left untouched and no sibling execution was modified.
 
-Rev320 deliberately uses a non-adjacent target revision, a fresh main-visible claim, a fresh run directory, workflow, and evidence paths. Its dedicated workflow also invokes the repository's canonical phase-admission generator on the exact PR head and prints the replayable attempt-solution payload; the payload is only persisted after the generator itself admits the phase.
+The first rev320 admission preview exposed a lifecycle bug in this session's own earlier records: their descriptive status strings began with `superseded_...` but `automation/parallel_claims.py` only treats exact closed-state tokens such as `superseded` as closed. The session corrected only its own rev292/rev294 claim records on main to canonical `status: superseded` plus `completed_at_jst`, then carried the identical closed records into the rev320 branch snapshot. No sibling claim was edited.
+
+Rev320 deliberately uses a non-adjacent target revision, a fresh main-visible claim, a fresh run directory, workflow, and evidence paths. Its dedicated workflow invokes the repository's canonical phase-admission generator on the exact PR head and prints the replayable attempt-solution payload; the payload is persisted only after the generator itself admits the phase.
 
 ## Strict boundary
 
