@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev950-main-sync-20260822T154320JST-5b7210a",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T154147+0900-c69d49f-turn1",
+  "started_at_jst": "2026-08-22T15:43:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:43:20+09:00",
+  "stale_after_minutes": 30,
+  "starting_main_sha": "5b7210a208c6f4533161b04b3d7efcee2a0ba6da",
+  "starting_agi_gi_rev": 950,
+  "target_revision": 950,
+  "scope": "repository/main-revision-sync/rev950",
+  "reserved_paths": [
+    "MAIN.md",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev950-main-sync-20260822T154320JST-5b7210a-update_problem_tree.json"
+  ],
+  "branch": "main",
+  "status": "active",
+  "agi_state": "NOT_AGI",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "authoritative MAIN continuation lags highest canonically integrated revision",
+    "attempt": "reuse the existing fail-closed main revision guard and atomically publish replayable update_problem_tree evidence",
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "source": "automation/agi_gi_main_revision_guard.py",
+    "observation": "declared rev620, highest canonically integrated rev950",
+    "decision": "reuse the existing guard and synchronize authoritative continuation without adding a new problem branch"
+  },
+  "strict_boundary": "Synchronize only MAIN.md to already integrated rev950 evidence. No algorithmic, GI, or AGI achievement claim."
+}
