@@ -256,6 +256,38 @@ def _git_head(root: Path) -> str:
     ).stdout.strip()
 
 
+def _git_canonical_main_source(root: Path, main_ref: str = "origin/main") -> str:
+    """Return the real main-ancestry commit whose registry may be replayed.
+
+    ``HEAD`` can be a temporary merge, cherry-pick, or amended commit that will
+    never become an ancestor of the published result.  Binding evidence to it
+    creates an apparently valid payload that the repository-wide replay guard
+    must later reject.  The merge base with the configured main ref is instead
+    guaranteed to be on both the current work and canonical main histories.
+    """
+
+    resolved = subprocess.run(
+        ["git", "rev-parse", "--verify", f"{main_ref}^{{commit}}"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+    if resolved.returncode != 0:
+        raise ClaimFormatError(f"canonical main ref is unavailable: {main_ref}")
+    source = subprocess.run(
+        ["git", "merge-base", "HEAD", resolved.stdout.strip()],
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+    source_sha = source.stdout.strip()
+    if source.returncode != 0 or len(source_sha) != 40:
+        raise ClaimFormatError(
+            f"HEAD has no provable common ancestor with canonical main ref: {main_ref}"
+        )
+    return source_sha
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path.cwd())
@@ -266,6 +298,11 @@ def main() -> int:
     parser.add_argument("--path", action="append", default=[])
     parser.add_argument("--now")
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--main-ref",
+        default="origin/main",
+        help="canonical main ref used to derive the replayable registry source",
+    )
     args = parser.parse_args()
 
     root = args.root.resolve()
@@ -286,7 +323,7 @@ def main() -> int:
             scope=args.scope,
             target_revision=args.target_revision,
             now=now,
-            registry_source_sha=_git_head(root),
+            registry_source_sha=_git_canonical_main_source(root, args.main_ref),
             paths=args.path,
         )
     except ClaimFormatError as exc:
