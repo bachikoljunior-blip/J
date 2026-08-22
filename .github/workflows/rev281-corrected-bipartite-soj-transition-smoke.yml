@@ -22,3 +22,33 @@ jobs:
       - name: Run rev281 regression tests
         working-directory: automation_runs/2026-08-22_0954_JST
         run: python -m unittest -v test_bipartite_split_or_johnson_transition_rev281.py
+
+  draft-phase-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate exact rev281 attempt-solution admission payload
+        shell: bash
+        run: |
+          now="$(TZ=Asia/Tokyo date --iso-8601=seconds)"
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/bipartite-recursive-transition-certificate \
+            --target-revision 281 \
+            --path .github/workflows/rev281-corrected-bipartite-soj-transition-smoke.yml \
+            --path automation_runs/2026-08-22_0954_JST/REV281_CORRECTED_BIPARTITE_SOJ_TRANSITION_CERTIFICATE.md \
+            --path automation_runs/2026-08-22_0954_JST/bipartite_split_or_johnson_transition_v1.py \
+            --path automation_runs/2026-08-22_0954_JST/test_bipartite_split_or_johnson_transition_rev281.py \
+            --now "$now" \
+            --output /tmp/rev281-attempt-solution.json
+          echo '--- REV281_ADMISSION_EVIDENCE_BEGIN ---'
+          cat /tmp/rev281-attempt-solution.json
+          echo '--- REV281_ADMISSION_EVIDENCE_END ---'
