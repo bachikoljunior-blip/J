@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1100-20260822T154530+0900-turn9",
   "started_at_jst": "2026-08-22T15:45:30+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:55:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:56:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "1e9a46d7eca9ce98c7d0f97586e49766ee7d736d",
   "starting_agi_gi_rev": 950,
@@ -67,11 +67,15 @@
     "previous_py_compile": "success",
     "replacement_base_main_sha": "1663a3c6e09f6a47ea48506c3e3b5490f7521279",
     "replacement_evidence_head": "6091739951241553a489c0fc98c1c98c34466872",
-    "replacement_connector_heartbeat_head": "9530aaef0a08cc4718a2cc2263c478336b7b19fb",
+    "replacement_exact_head": "9530aaef0a08cc4718a2cc2263c478336b7b19fb",
     "reserved_diff_paths": 6,
     "reserved_diff_only": true,
     "hardened_phase_evidence": "success",
-    "ordinary_pr_checks_after_connector_heartbeat": "pending_natural_evaluation"
+    "dedicated_workflow": {"run_id": 32560877471, "conclusion": "success"},
+    "parallel_admission_workflow": {"run_id": 32560877503, "conclusion": "success"},
+    "inherited_success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253", "rev254"],
+    "inherited_pending": [{"revision": "rev246", "run_id": 32560877485}],
+    "latest_observed_main_sha": "3e3f056c3f06069705555147d4680848310e1600"
   },
   "integration_state": {
     "pre_hardening_pull_request": 257,
@@ -88,6 +92,6 @@
     "coordination_hardening_state": "merged",
     "downstream_scopes": "active_file_disjoint_and_explicitly_excluding_rev1100"
   },
-  "status": "active_hardened_evidence_green_waiting_pr_checks_and_upstreams",
+  "status": "active_hardened_exact_head_green_waiting_rev246_and_upstreams",
   "agi_state": "NOT_AGI"
 }
