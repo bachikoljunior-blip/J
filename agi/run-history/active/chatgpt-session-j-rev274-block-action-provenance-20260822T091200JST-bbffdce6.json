@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6",
+  "session_id": "chatgpt-session-j-continuation-20260822T091200+0900-bbffdce6-turn2",
+  "started_at_jst": "2026-08-22T09:12:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:12:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "bbffdce667e8a38c2f90663d4de198f12c5d2fb4",
+  "starting_agi_gi_rev": 266,
+  "target_revision": 274,
+  "scope": "crx1/homogeneous-block-reduction/group-block-action-equivariance-certificate",
+  "branch": "agi-gi-rev274-block-action-provenance-session-20260822-0912",
+  "reserved_paths": [
+    ".github/workflows/rev274-block-action-provenance-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev274-block-action-provenance-20260822T091200JST-bbffdce6-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV274_BLOCK_ACTION_PROVENANCE.md",
+    "automation_runs/2026-08-19_0851_JST/homogeneous_block_action_provenance_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_provenance_rev274.py"
+  ],
+  "parallel_exclusions": [
+    "rev273 homogeneous block relation provenance / PR #219 and all reserved paths",
+    "rev272 resource-ledger replay verifier / PR #218 and all reserved paths",
+    "rev271 implicit image value-coset proof-DAG / PR #217 and all reserved paths",
+    "rev270 resource execution ledger / PR #215 and all reserved paths",
+    "rev269 exact-empty image parent bridge / PR #214 and all reserved paths",
+    "rev268 production-parent orchestration / PR #213 and all reserved paths",
+    "rev267 original-domain paired-preimage / PR #212 and all reserved paths",
+    "rev265 resource envelope / PR #208 and all reserved paths",
+    "rev264 primitive-Johnson proof-DAG / PR #210 and all reserved paths",
+    "CRX3 state-orbit proof-DAG / PR #206 and all reserved paths",
+    "rev252 small-order production admission / PR #216",
+    "rev247 shared S1 / PR #211",
+    "MAIN.md and every sibling claim, branch, PR, and workflow"
+  ],
+  "intent": "independently certify that supplied source and target partitions are genuine block systems for paired original-domain generators, derive the induced quotient permutations exactly, and verify that a supplied block bijection intertwines every paired quotient action; fail closed on malformed partitions, non-block images, non-bijections, generator mismatch, or quotient-equivariance failure without discovering or canonically choosing a block system and without consuming rev273 relation-homogeneity ownership",
+  "non_interference": "Only new rev274 reserved paths may be added on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, shared implementation path, or MAIN.md.",
+  "status": "active_claimed_preimplementation",
+  "agi_state": "NOT_AGI"
+}
