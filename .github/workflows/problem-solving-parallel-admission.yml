@@ -10,6 +10,17 @@ on:
       - .github/workflows/agi-gi*.yml
       - .github/workflows/rev*.yml
       - .github/workflows/problem-solving-parallel-admission.yml
+  push:
+    branches:
+      - main
+    paths:
+      - MAIN.md
+      - agi/**
+      - automation/**
+      - automation_runs/**
+      - .github/workflows/agi-gi*.yml
+      - .github/workflows/rev*.yml
+      - .github/workflows/problem-solving-parallel-admission.yml
   workflow_dispatch:
 
 permissions:
@@ -26,14 +37,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: List pull-request changes
+      - name: Select commit-local changes and current registry
         run: |
           git fetch --no-tags origin main
-          base="$(git merge-base origin/main HEAD)"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="$(git merge-base origin/main HEAD)"
+            current_registry_ref="origin/main"
+          else
+            base="$(git rev-parse HEAD^)"
+            current_registry_ref="$base"
+          fi
           git diff --name-only "$base" HEAD > /tmp/changed-files.txt
+          echo "CURRENT_REGISTRY_REF=$current_registry_ref" >> "$GITHUB_ENV"
       - name: Replay phase-admission evidence
         run: |
           python automation/problem_solving_phase_evidence_guard.py \
             --changed-files /tmp/changed-files.txt \
             --head-ref HEAD \
-            --current-registry-ref origin/main
+            --current-registry-ref "$CURRENT_REGISTRY_REF"

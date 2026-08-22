@@ -58,7 +58,11 @@ class ProblemSolvingPhaseEvidenceGuardTest(unittest.TestCase):
         )
         self.assertIn("git fetch --no-tags origin main", workflow)
         self.assertIn("git merge-base origin/main HEAD", workflow)
-        self.assertIn("--current-registry-ref origin/main", workflow)
+        self.assertIn('if [[ "${{ github.event_name }}" == "pull_request" ]]', workflow)
+        self.assertIn('base="$(git rev-parse HEAD^)"', workflow)
+        self.assertIn('current_registry_ref="$base"', workflow)
+        self.assertIn('push:\n    branches:\n      - main', workflow)
+        self.assertIn('--current-registry-ref "$CURRENT_REGISTRY_REF"', workflow)
         self.assertNotIn("github.event.pull_request.base.sha", workflow)
 
     def test_current_registry_observation_time_includes_later_claim_events(self):
