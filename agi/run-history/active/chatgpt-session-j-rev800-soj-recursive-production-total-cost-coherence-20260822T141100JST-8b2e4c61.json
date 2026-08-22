@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev800-soj-recursive-production-total-cost-coherence-20260822T141100JST-8b2e4c61",
   "session_id": "chatgpt-session-j-continuation-rev800-20260822T1411+0900-8b2e4c61",
   "started_at_jst": "2026-08-22T14:11:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T14:16:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:17:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "6300ce9e857e4b30a61a87e835055c50b3329fa8",
   "starting_agi_gi_rev": 266,
@@ -41,13 +41,15 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
   },
   "validation": {
-    "state": "draft_pr_open_ci_in_progress_attempt_solution_admitted",
+    "state": "exact_head_green_core_ci_inherited_ci_partially_running",
     "local_py_compile": "success",
     "focused_regression": "13/13 success",
     "attempt_solution_admission": "admitted_conflicts_empty",
-    "dedicated_smoke": "in_progress",
-    "problem_solving_parallel_admission": "in_progress",
-    "inherited_ci": "in_progress_naturally_no_reruns_or_cancellations"
+    "dedicated_smoke": "success_on_d2d3e4646bd32eef196ab1eb68b9a2b8f7922df0",
+    "problem_solving_parallel_admission": "success_on_d2d3e4646bd32eef196ab1eb68b9a2b8f7922df0",
+    "inherited_success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253"],
+    "inherited_in_progress": ["rev246", "rev254"],
+    "workflow_policy": "all runs observed naturally; none cancelled or rerun"
   },
   "status": "active",
   "agi_state": "NOT_AGI"
