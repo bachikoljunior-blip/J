@@ -1,0 +1,93 @@
+name: rev500 SOJ caller replay envelope smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1311_JST/soj_caller_replay_envelope_v1.py'
+      - 'automation_runs/2026-08-22_1311_JST/test_soj_caller_replay_envelope_rev500.py'
+      - 'automation_runs/2026-08-22_1311_JST/REV500_SOJ_CALLER_REPLAY_ENVELOPE.md'
+      - '.github/workflows/rev500-soj-caller-replay-envelope-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6-publish.json'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev500 module and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1311_JST/soj_caller_replay_envelope_v1.py \
+            automation_runs/2026-08-22_1311_JST/test_soj_caller_replay_envelope_rev500.py
+      - name: Run rev500 focused regressions
+        run: |
+          python -m unittest discover \
+            -s automation_runs/2026-08-22_1311_JST \
+            -p 'test_soj_caller_replay_envelope_rev500.py' \
+            -v
+      - name: Reject branch-only rev400 imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '(^|[[:space:]])(from|import)[[:space:]].*soj_production_caller_binding_v1' \
+              automation_runs/2026-08-22_1311_JST; then
+            echo 'rev500 must not import rev400 branch-only implementation' >&2
+            exit 1
+          fi
+      - name: Canonical attempt_solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/production-caller-binding-replay-envelope \
+            --target-revision 500 \
+            --path .github/workflows/rev500-soj-caller-replay-envelope-smoke.yml \
+            --path automation_runs/2026-08-22_1311_JST/REV500_SOJ_CALLER_REPLAY_ENVELOPE.md \
+            --path automation_runs/2026-08-22_1311_JST/soj_caller_replay_envelope_v1.py \
+            --path automation_runs/2026-08-22_1311_JST/test_soj_caller_replay_envelope_rev500.py \
+            --output /tmp/rev500-attempt.json
+          cat /tmp/rev500-attempt.json
+      - name: Canonical publish admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6 \
+            --phase publish \
+            --scope w1r-h6/corrected-split-or-johnson/production-caller-binding-replay-envelope \
+            --target-revision 500 \
+            --path .github/workflows/rev500-soj-caller-replay-envelope-smoke.yml \
+            --path automation_runs/2026-08-22_1311_JST/REV500_SOJ_CALLER_REPLAY_ENVELOPE.md \
+            --path automation_runs/2026-08-22_1311_JST/soj_caller_replay_envelope_v1.py \
+            --path automation_runs/2026-08-22_1311_JST/test_soj_caller_replay_envelope_rev500.py \
+            --output /tmp/rev500-publish.json
+          cat /tmp/rev500-publish.json
+      - name: Enforce reserved rev500 diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --quiet
+          changed="$(git diff --name-only origin/main...HEAD)"
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              .github/workflows/rev500-soj-caller-replay-envelope-smoke.yml|automation_runs/2026-08-22_1311_JST/REV500_SOJ_CALLER_REPLAY_ENVELOPE.md|automation_runs/2026-08-22_1311_JST/soj_caller_replay_envelope_v1.py|automation_runs/2026-08-22_1311_JST/test_soj_caller_replay_envelope_rev500.py|agi/run-history/phase-admissions/chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6-attempt-solution.json|agi/run-history/phase-admissions/chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6-publish.json)
+                ;;
+              *)
+                echo "unexpected non-rev500 path: $path" >&2
+                exit 1
+                ;;
+            esac
+          done <<< "$changed"
