@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c",
   "session_id": "chatgpt-session-j-refire-20260822T085022+0900-80bf6664-turn1",
   "started_at_jst": "2026-08-22T09:03:12+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:09:12+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:13:11+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "57a3d43cab4a384b2e848dcd31fa74a729d3eaca",
   "starting_agi_gi_rev": 266,
@@ -36,6 +36,17 @@
   ],
   "intent": "close one upstream provenance subleaf left explicit by rev248: independently certify when unary/binary named relations are block-homogeneous, form a well-defined quotient relation structure, and are transported exactly by a supplied block bijection; fail closed on nonuniform fibers, malformed partitions, signature mismatch, or quotient transport mismatch without claiming canonical block discovery or general CRX1 closure",
   "non_interference": "Only new rev273 reserved paths may be added on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, shared implementation path, or MAIN.md.",
-  "status": "active_draft_pr_validation",
+  "validation": {
+    "focused_local": "8/8 unittest success and py_compile success",
+    "dedicated_smoke_run": 32539366258,
+    "dedicated_smoke": "success",
+    "parallel_admission_run": 32539366129,
+    "parallel_admission": "success",
+    "inherited_rev246_run": 32539366128,
+    "inherited_rev246": "success",
+    "general_validation_run": 32539366173,
+    "general_validation": "in_progress"
+  },
+  "status": "active_draft_pr_general_validation_pending",
   "agi_state": "NOT_AGI"
 }
