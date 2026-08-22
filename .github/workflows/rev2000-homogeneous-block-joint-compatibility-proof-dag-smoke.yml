@@ -33,12 +33,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate canonical attempt-solution admission
+      - name: Generate canonical attempt-solution admission preview
+        id: admission
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin main:refs/remotes/origin/main
-          evidence="agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-attempt_solution.json"
+          evidence="${RUNNER_TEMP}/rev2000-attempt-solution.json"
           python automation/problem_solving_parallel_admission.py \
             --claim-id chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee \
             --phase attempt_solution \
@@ -48,18 +49,10 @@ jobs:
             --path automation_runs/2026-08-22_1717_JST/REV2000_HOMOGENEOUS_BLOCK_JOINT_COMPATIBILITY_PROOF_DAG.md \
             --path automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py \
             --path automation_runs/2026-08-22_1717_JST/test_homogeneous_block_joint_compatibility_proof_dag_rev2000.py \
-            --path "${evidence}" \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-attempt_solution.json \
             --output "${evidence}"
-          python automation/problem_solving_phase_evidence_guard.py "${evidence}"
-          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add "${evidence}"
-            if ! git diff --cached --quiet; then
-              git commit -m "coordination: persist rev2000 attempt-solution admission"
-              git push origin "HEAD:${GITHUB_REF_NAME}"
-            fi
-          fi
+          jq -e '.admitted == true and .conflicts == []' "${evidence}"
+          echo "evidence=${evidence}" >>"${GITHUB_OUTPUT}"
 
       - name: Run focused rev2000 regressions
         run: >-
@@ -83,3 +76,21 @@ jobs:
           grep -q "homogeneous_block_action_kernel_v1" "${file}"
           grep -q "proof_dag_accounting_v1" "${file}"
           ! grep -Eq "joint_block_reduction_compatibility_v1|homogeneous_block_quotient_si|original_domain.*preimage|rev1800|rev276|rev278" "${file}"
+
+      - name: Persist canonical attempt-solution admission on this branch
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          PREVIEW: ${{ steps.admission.outputs.evidence }}
+        run: |
+          set -euo pipefail
+          evidence="agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-attempt_solution.json"
+          mkdir -p "$(dirname "${evidence}")"
+          cp "${PREVIEW}" "${evidence}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${evidence}"
+          if ! git diff --cached --quiet; then
+            git commit -m "coordination: persist rev2000 attempt-solution admission"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
