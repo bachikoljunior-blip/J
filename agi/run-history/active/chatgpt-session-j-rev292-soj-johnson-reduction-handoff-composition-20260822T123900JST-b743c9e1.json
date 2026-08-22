@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev292-soj-johnson-reduction-handoff-composition-20260822T123900JST-b743c9e1",
   "session_id": "chatgpt-session-j-user-parallel-continuation-20260822T123900+0900-b743c9e1",
   "started_at_jst": "2026-08-22T12:39:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T12:58:39+09:00",
+  "heartbeat_at_jst": "2026-08-22T13:05:04+09:00",
   "stale_after_minutes": 55,
   "starting_main_sha": "f929230743444a4b3d73f0d08b7a9df4c05d8ec0",
   "starting_agi_gi_rev": 289,
@@ -16,8 +16,16 @@
     "url": "https://github.com/bachikoljunior-blip/J/pull/244",
     "draft": true
   },
-  "latest_head_sha": "1f0428960ea3632a25d3b416408e10a41239164a",
-  "progress_status": "draft_pr_open; exact_head_smoke_green_18_of_18; exact_head_phase_admission_materialization_pending",
+  "latest_head_sha": "ffcfbca5c330a23dd526da527e54544c4278d347",
+  "validated_head_sha": "ffcfbca5c330a23dd526da527e54544c4278d347",
+  "progress_status": "draft_pr_open; attempt_solution_and_publish_admissions_green; exact_head_smoke_green_18_of_18; parallel_claim_registry_green; scoped_rev292_goal_reached_pending_review_or_merge",
+  "validation": {
+    "rev292_smoke_run_id": 32550629476,
+    "phase_admission_run_id": 32550629313,
+    "parallel_claims_run_id": 32550629325,
+    "unit_tests": 18,
+    "result": "success"
+  },
   "reserved_paths": [
     ".github/workflows/j-rev292-session-hourly-refire.yml",
     ".github/workflows/rev292-soj-johnson-reduction-handoff-composition-smoke.yml",
