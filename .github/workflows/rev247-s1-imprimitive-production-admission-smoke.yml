@@ -1,0 +1,40 @@
+name: rev247 shared S1 imprimitive production admission smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/s1_string_isomorphism_v4.py'
+      - 'automation_runs/2026-08-19_0851_JST/s1_proof_identity_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_s1_imprimitive_production_admission_rev247.py'
+      - 'automation_runs/2026-08-19_0851_JST/REV247_S1_IMPRIMITIVE_PRODUCTION_ADMISSION.md'
+      - '.github/workflows/rev247-s1-imprimitive-production-admission-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev247-shared-s1-imprimitive-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --disable-pip-version-check pytest numpy
+      - name: Run rev247 and inherited resource/identity regressions
+        run: >-
+          python -m pytest -q
+          test_s1_imprimitive_production_admission_rev247.py
+          test_imprimitive_quotient_kernel_resource_rev244.py
+          test_nested_s1_proof_identity_rev219.py
+      - name: Compile shared S1 admission modules
+        run: >-
+          python -m py_compile
+          s1_string_isomorphism_v4.py
+          s1_proof_identity_v1.py
+          test_s1_imprimitive_production_admission_rev247.py
