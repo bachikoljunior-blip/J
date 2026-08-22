@@ -9,6 +9,10 @@ from types import MappingProxyType
 from soj_production_caller_binding_v1 import CallerBindingError, bind_production_caller
 
 
+class StringSubclass(str):
+    pass
+
+
 def h(ch: str) -> str:
     return ch * 64
 
@@ -207,6 +211,35 @@ class ProductionCallerBindingTests(unittest.TestCase):
         value["larger_ground_recursive"] = MappingProxyType(
             dict(value["larger_ground_recursive"])
         )
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(value)
+
+    def test_rejects_string_subclass_values(self) -> None:
+        value = recursive()
+        value["mode"] = StringSubclass("larger_ground_recursive")
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(value)
+
+        value = recursive()
+        value["result_status"] = StringSubclass("exact_nonempty")
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(value)
+
+        value = recursive()
+        value["larger_ground_recursive"]["result_identity"] = StringSubclass(h("8"))
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(value)
+
+    def test_rejects_string_subclass_keys(self) -> None:
+        value = small()
+        canonical = value.pop("canonical")
+        value[StringSubclass("canonical")] = canonical
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(value)
+
+        value = recursive()
+        exact = value["larger_ground_recursive"].pop("exact")
+        value["larger_ground_recursive"][StringSubclass("exact")] = exact
         with self.assertRaises(CallerBindingError):
             bind_production_caller(value)
 
