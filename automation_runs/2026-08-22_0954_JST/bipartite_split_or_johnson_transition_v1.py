@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import isfinite
+from numbers import Real
 from typing import Iterable, Mapping
 
 
@@ -24,6 +25,20 @@ class CorrectedSOJTransitionCertificate:
     reason: str
 
 
+def _strict_int(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _strict_real(value: object) -> bool:
+    return isinstance(value, Real) and not isinstance(value, bool)
+
+
+def _certificate_float(value: object) -> float:
+    if _strict_real(value):
+        return float(value)
+    return float("nan")
+
+
 def _base_gate(
     *,
     theorem_input_gate: bool,
@@ -38,11 +53,17 @@ def _base_gate(
         return "recursive transition is not certified canonical"
     if not exact:
         return "recursive transition is not certified exact"
-    if not isfinite(multiplicative_cost) or multiplicative_cost <= 0:
+    if not _strict_real(multiplicative_cost):
+        return "multiplicative cost must be a real number"
+    if not _strict_real(max_multiplicative_cost):
+        return "multiplicative cost bound must be a real number"
+    cost = float(multiplicative_cost)
+    max_cost = float(max_multiplicative_cost)
+    if not isfinite(cost) or cost <= 0:
         return "multiplicative cost must be finite and positive"
-    if not isfinite(max_multiplicative_cost) or max_multiplicative_cost <= 0:
+    if not isfinite(max_cost) or max_cost <= 0:
         return "multiplicative cost bound must be finite and positive"
-    if multiplicative_cost > max_multiplicative_cost:
+    if cost > max_cost:
         return "multiplicative cost exceeds the certified bound"
     return None
 
@@ -72,15 +93,22 @@ def certify_small_part_reduction(
         multiplicative_cost=multiplicative_cost,
         max_multiplicative_cost=max_multiplicative_cost,
     )
-    before = int(small_size_before)
-    after = int(small_size_after)
+    before = small_size_before if _strict_int(small_size_before) else None
+    after = small_size_after if _strict_int(small_size_after) else None
+    alpha_value = float(alpha) if _strict_real(alpha) else None
+    if reason is None and before is None:
+        reason = "small_size_before must be an integer"
+    if reason is None and after is None:
+        reason = "small_size_after must be an integer"
     if reason is None and before <= 0:
         reason = "small_size_before must be positive"
     if reason is None and not 0 <= after < before:
         reason = "recursive edge must strictly reduce the auxiliary part"
-    if reason is None and not 2 / 3 <= alpha < 1.0:
+    if reason is None and (alpha_value is None or not isfinite(alpha_value)):
+        reason = "alpha must be a finite real number"
+    if reason is None and not 2 / 3 <= alpha_value < 1.0:
         reason = "alpha must lie in [2/3,1)"
-    if reason is None and not after < alpha * before:
+    if reason is None and not after < alpha_value * before:
         reason = "constant-factor auxiliary-part reduction is not certified"
     ok = reason is None
     return CorrectedSOJTransitionCertificate(
@@ -90,11 +118,11 @@ def certify_small_part_reduction(
         bool(canonical),
         bool(exact),
         ok,
-        float(multiplicative_cost),
-        float(max_multiplicative_cost),
+        _certificate_float(multiplicative_cost),
+        _certificate_float(max_multiplicative_cost),
         before,
         after,
-        float(alpha),
+        alpha_value,
         None,
         None,
         None,
@@ -128,27 +156,47 @@ def certify_explicit_johnson_embedding(
         multiplicative_cost=multiplicative_cost,
         max_multiplicative_cost=max_multiplicative_cost,
     )
-    m = int(johnson_ground_size)
-    k = int(johnson_subset_size)
-    coords = tuple(frozenset(int(x) for x in xs) for xs in embedding)
+    m = johnson_ground_size if _strict_int(johnson_ground_size) else None
+    k = johnson_subset_size if _strict_int(johnson_subset_size) else None
+    coords: tuple[frozenset[int], ...] = ()
+    try:
+        raw_coords = tuple(tuple(xs) for xs in embedding)
+    except (TypeError, ValueError):
+        raw_coords = ()
+        if reason is None:
+            reason = "explicit Johnson embedding must be an iterable of integer iterables"
+    if reason is None and m is None:
+        reason = "Johnson ground size must be an integer"
+    if reason is None and k is None:
+        reason = "Johnson subset size must be an integer"
     if reason is None and m < 4:
         reason = "Johnson ground must have size at least 4"
     if reason is None and not 2 <= k <= m - 2:
         reason = "Johnson subset size must be nontrivial"
-    if reason is None and not coords:
+    if reason is None and not raw_coords:
         reason = "explicit Johnson embedding is empty"
+    if reason is None and any(not all(_strict_int(x) for x in xs) for xs in raw_coords):
+        reason = "embedding coordinates must be integers"
+    if reason is None:
+        coords = tuple(frozenset(xs) for xs in raw_coords)
     if reason is None and any(len(xs) != k or any(x < 0 or x >= m for x in xs) for xs in coords):
         reason = "embedding contains a malformed Johnson coordinate"
     if reason is None and len(set(coords)) != len(coords):
         reason = "Johnson embedding is not injective"
     expected_keys = {(i, j) for i in range(len(coords)) for j in range(i + 1, len(coords))}
-    supplied_keys = set(pair_relation_distance)
+    try:
+        supplied_keys = set(pair_relation_distance)
+    except TypeError:
+        supplied_keys = set()
+        if reason is None:
+            reason = "pair relation certificate must be a mapping"
     if reason is None and supplied_keys != expected_keys:
         reason = "pair relation certificate must cover every unordered embedded pair exactly once"
     if reason is None:
         for i, j in sorted(expected_keys):
+            value = pair_relation_distance[(i, j)]
             expected = k - len(coords[i] & coords[j])
-            if int(pair_relation_distance[(i, j)]) != expected:
+            if not _strict_int(value) or value != expected:
                 reason = "pair relation does not equal the explicit Johnson intersection relation"
                 break
     ok = reason is None
@@ -159,8 +207,8 @@ def certify_explicit_johnson_embedding(
         bool(canonical),
         bool(exact),
         ok,
-        float(multiplicative_cost),
-        float(max_multiplicative_cost),
+        _certificate_float(multiplicative_cost),
+        _certificate_float(max_multiplicative_cost),
         None,
         None,
         None,
