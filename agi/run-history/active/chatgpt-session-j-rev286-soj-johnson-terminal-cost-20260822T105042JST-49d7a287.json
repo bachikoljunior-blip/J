@@ -7,7 +7,7 @@
   "model": "gpt-5.6-sol",
   "owner": "chatgpt-session-j-rev286-soj-johnson-terminal-cost-20260822T105042JST-49d7a287",
   "started_at_jst": "2026-08-22T10:50:42+09:00",
-  "heartbeat_at_jst": "2026-08-22T10:54:41+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:56:15+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
   "starting_agi_gi_rev": 274,
@@ -16,7 +16,7 @@
   "scope_kind": "leaf_local_additive",
   "branch": "agi-gi-rev286-soj-johnson-terminal-cost-session-20260822-1050",
   "pull_request": 231,
-  "latest_head_sha": "569dcd22fa0e33553f1d155d9bf7f7a479a91dbb",
+  "latest_head_sha": "1bae3879efd4b6bbf938fa25b26979bf8cf29b53",
   "reserved_paths": [
     ".github/workflows/rev286-soj-johnson-terminal-cost-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev286-soj-johnson-terminal-cost-20260822T105042JST-49d7a287-attempt-solution.json",
@@ -37,13 +37,13 @@
     "w1r-h6/corrected-split-or-johnson/bipartite-recursive-transition-certificate (rev281 / PR #226) and all reserved paths",
     "w1r-h6/corrected-split-or-johnson/recursive-transition-recurrence-composition (rev283 / PR #228) and all reserved paths",
     "w1r-h6/corrected-split-or-johnson/explicit-johnson-embedding-terminal-admission (rev284) and all reserved paths",
-    "w1r-h6/corrected-split-or-johnson/zero-auxiliary-output-terminal-accounting (rev285) and all reserved paths",
+    "w1r-h6/corrected-split-or-johnson/zero-auxiliary-output-terminal-accounting (rev285 / PR #230) and all reserved paths",
     "rev275 conflicts_with set: CRX1, CRX2, CRX3, state-orbit, proof-carrying-merge",
     "CRX1, CRX2, CRX3, state-orbit, proof-carrying-merge, MAIN.md, every sibling claim, branch, PR, workflow, and reserved path"
   ],
   "intent": "add a standalone fail-closed post-admission cost/replay composer for a corrected SOJ explicit Johnson embedding and a caller-supplied already exact primitive-Johnson terminal proof: require a full Johnson domain, exact ground/subset/domain/root-envelope match, independently certified transition multiplicative bound, and a valid main-integrated primitive-Johnson terminal accounting leaf; then charge transition plus terminal local work into one terminal recurrence leaf. Do not perform transition admission, execute primitive Johnson, import rev284 or PR #226 branch-only code, or handle partial/large-ground recursive Johnson embeddings.",
-  "coordination_note": "Canonical phase-admission evidence remains blocked by the independently owned noncanonical rev275 registry record. Reserve the exact evidence path only; do not fabricate admitted evidence and do not normalize or mutate sibling records.",
+  "coordination_note": "Draft PR #231 is mergeable at exact head 1bae3879efd4b6bbf938fa25b26979bf8cf29b53. The first dedicated smoke exposed only a missing numpy runtime dependency of the already-main Johnson recognizer; the rev286 workflow was corrected on the isolated branch and naturally triggered run 32544831595, which is green with all 16 focused regressions plus py_compile. Shared Problem-solving parallel admission run 32544831584 fails only because the reserved rev286 attempt_solution evidence file is absent. Independently owned rev285 records that the canonical evidence generator cannot be used safely while non-schema-v2 rev275 remains active, so rev286 does not fabricate evidence or normalize/mutate any sibling record. Inherited rev246/rev254 smoke checks were still in progress at the last exact-head poll.",
   "non_interference": "Only the five rev286 reserved paths may be written for this scope. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, normalize, or otherwise mutate sibling claims, branches, PRs, workflows, shared implementation paths, or MAIN.md.",
-  "status": "draft_pr_open_ci_pending",
+  "status": "dedicated_smoke_green_phase_admission_blocked_inherited_ci_pending",
   "agi_state": "NOT_AGI"
 }
