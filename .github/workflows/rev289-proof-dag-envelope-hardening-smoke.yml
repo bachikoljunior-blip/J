@@ -19,9 +19,34 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Generate canonical attempt-solution admission snapshot
+        run: |
+          git fetch --no-tags origin main
+          rm -rf /tmp/rev289-main
+          git worktree add --detach /tmp/rev289-main origin/main
+          python automation/problem_solving_parallel_admission.py \
+            --root /tmp/rev289-main \
+            --claim-id chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79 \
+            --phase attempt_solution \
+            --scope crx3/shared-proof-dag/strict-envelope-input-validation \
+            --target-revision 289 \
+            --path .github/workflows/rev289-proof-dag-envelope-hardening-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79-attempt-solution.json \
+            --path automation_runs/2026-08-19_0851_JST/REV289_PROOF_DAG_ENVELOPE_HARDENING.md \
+            --path automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_proof_dag_envelope_input_validation_rev289.py \
+            --output /tmp/rev289-attempt-solution.json
+          python - <<'PY'
+          import base64
+          from pathlib import Path
+          payload = Path("/tmp/rev289-attempt-solution.json").read_bytes()
+          print("REV289_ATTEMPT_EVIDENCE_B64=" + base64.b64encode(payload).decode("ascii"))
+          PY
       - name: Install test runner
         run: python -m pip install --disable-pip-version-check pytest
       - name: Compile shared validator and rev289 regression
