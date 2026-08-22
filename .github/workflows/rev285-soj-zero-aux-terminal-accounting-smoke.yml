@@ -1,0 +1,43 @@
+name: rev285 corrected SOJ zero-aux terminal accounting smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1049_JST/**'
+      - '.github/workflows/rev285-soj-zero-aux-terminal-accounting-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install inherited-test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Compile rev285 adapter and regression
+        working-directory: automation_runs/2026-08-22_1049_JST
+        run: >-
+          python -m py_compile
+          corrected_soj_zero_aux_terminal_accounting_v1.py
+          test_corrected_soj_zero_aux_terminal_accounting_rev285.py
+      - name: Reject branch-only sibling imports
+        working-directory: automation_runs/2026-08-22_1049_JST
+        run: >-
+          ! grep -nE '2026-08-22_(0954|1007|1043)_JST|bipartite_split_or_johnson_transition_v1|corrected_soj_recurrence_composition_v1|corrected_soj_johnson_terminal_admission_v1'
+          corrected_soj_zero_aux_terminal_accounting_v1.py
+          test_corrected_soj_zero_aux_terminal_accounting_rev285.py
+      - name: Run focused rev285 regressions
+        working-directory: automation_runs/2026-08-22_1049_JST
+        env:
+          PYTHONPATH: ../2026-08-19_0851_JST
+        run: python -m unittest -v test_corrected_soj_zero_aux_terminal_accounting_rev285.py
+      - name: Run inherited main recurrence regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python -m pytest -q test_quasipoly_recurrence_accounting_v1.py
