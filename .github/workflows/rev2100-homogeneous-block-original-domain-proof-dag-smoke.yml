@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Compile rev2100 modules
         run: >-
@@ -42,7 +44,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin main --depth=1
+          git fetch origin main
           git diff --name-only origin/main...HEAD | sort > /tmp/changed
           cat > /tmp/allowed <<'EOF'
           .github/workflows/rev2100-homogeneous-block-original-domain-proof-dag-smoke.yml
