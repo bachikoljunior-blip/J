@@ -1,0 +1,71 @@
+name: rev340 SOJ Johnson recursive result accounting binding smoke
+
+on:
+  push:
+    branches:
+      - agi-gi-rev340-soj-johnson-recursive-result-accounting-binding-session-20260822-1254
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rev340-soj-johnson-recursive-result-accounting-binding-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-publish.json'
+      - 'automation_runs/2026-08-22_1254_JST/REV340_SOJ_JOHNSON_RECURSIVE_RESULT_ACCOUNTING_BINDING.md'
+      - 'automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py'
+      - 'automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile rev340 module and test
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py \
+            automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py
+      - name: Focused rev340 regression
+        run: |
+          python -m pytest -q \
+            automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py
+      - name: Reject sibling branch-only implementation imports
+        run: |
+          ! grep -nE 'corrected_soj_larger_ground_recursive_handoff_v1|corrected_soj_johnson_recursive_result_lift_v1|corrected_soj_johnson_construction_cost_binding_v1' \
+            automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py
+      - name: Enforce reserved-path diff
+        shell: bash
+        run: |
+          git fetch --no-tags origin main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "$base" HEAD > /tmp/rev340-changed.txt
+          python - <<'PY'
+          from pathlib import Path
+          allowed = {
+              '.github/workflows/rev340-soj-johnson-recursive-result-accounting-binding-smoke.yml',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-attempt-solution.json',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-publish.json',
+              'automation_runs/2026-08-22_1254_JST/REV340_SOJ_JOHNSON_RECURSIVE_RESULT_ACCOUNTING_BINDING.md',
+              'automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py',
+              'automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py',
+          }
+          changed = {line.strip() for line in Path('/tmp/rev340-changed.txt').read_text().splitlines() if line.strip()}
+          extra = sorted(changed - allowed)
+          assert not extra, f'unreserved rev340 paths changed: {extra}'
+          expected = {
+              '.github/workflows/rev340-soj-johnson-recursive-result-accounting-binding-smoke.yml',
+              'automation_runs/2026-08-22_1254_JST/REV340_SOJ_JOHNSON_RECURSIVE_RESULT_ACCOUNTING_BINDING.md',
+              'automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py',
+              'automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py',
+          }
+          missing = sorted(expected - changed)
+          assert not missing, f'missing expected rev340 paths: {missing}'
+          print('reserved-path diff ok:', sorted(changed))
+          PY
