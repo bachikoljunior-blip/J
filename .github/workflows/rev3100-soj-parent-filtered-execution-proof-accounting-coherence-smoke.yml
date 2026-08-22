@@ -1,0 +1,146 @@
+name: rev3100 SOJ parent-filtered execution proof-accounting coherence smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "agi-gi-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-session-20260822-1953"
+    paths:
+      - "automation_runs/2026-08-22_1953_JST/soj_parent_filtered_execution_proof_accounting_coherence_v1.py"
+      - "automation_runs/2026-08-22_1953_JST/test_soj_parent_filtered_execution_proof_accounting_coherence_rev3100.py"
+      - "automation_runs/2026-08-22_1953_JST/REV3100_SOJ_PARENT_FILTERED_EXECUTION_PROOF_ACCOUNTING_COHERENCE.md"
+      - ".github/workflows/rev3100-soj-parent-filtered-execution-proof-accounting-coherence-smoke.yml"
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-22_1953_JST/soj_parent_filtered_execution_proof_accounting_coherence_v1.py"
+      - "automation_runs/2026-08-22_1953_JST/test_soj_parent_filtered_execution_proof_accounting_coherence_rev3100.py"
+      - "automation_runs/2026-08-22_1953_JST/REV3100_SOJ_PARENT_FILTERED_EXECUTION_PROOF_ACCOUNTING_COHERENCE.md"
+      - ".github/workflows/rev3100-soj-parent-filtered-execution-proof-accounting-coherence-smoke.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rev3100-soj-parent-filtered-execution-proof-accounting-coherence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rev3100-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate canonical attempt-solution and publish admission previews
+        id: admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main
+          attempt="${RUNNER_TEMP}/rev3100-attempt-solution.json"
+          publish="${RUNNER_TEMP}/rev3100-publish.json"
+          common=(
+            --claim-id chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST-ac946914
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-execution-proof-accounting-coherence-rebase
+            --target-revision 3100
+            --path .github/workflows/rev3100-soj-parent-filtered-execution-proof-accounting-coherence-smoke.yml
+            --path automation_runs/2026-08-22_1953_JST/REV3100_SOJ_PARENT_FILTERED_EXECUTION_PROOF_ACCOUNTING_COHERENCE.md
+            --path automation_runs/2026-08-22_1953_JST/soj_parent_filtered_execution_proof_accounting_coherence_v1.py
+            --path automation_runs/2026-08-22_1953_JST/test_soj_parent_filtered_execution_proof_accounting_coherence_rev3100.py
+          )
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase attempt_solution \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST-ac946914-attempt_solution.json \
+            --output "${attempt}"
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase publish \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST-ac946914-publish.json \
+            --output "${publish}"
+          jq -e '.admitted == true and .conflicts == []' "${attempt}"
+          jq -e '.admitted == true and .conflicts == []' "${publish}"
+          echo "attempt=${attempt}" >>"${GITHUB_OUTPUT}"
+          echo "publish=${publish}" >>"${GITHUB_OUTPUT}"
+
+      - name: Run focused rev3100 regressions
+        run: python automation_runs/2026-08-22_1953_JST/test_soj_parent_filtered_execution_proof_accounting_coherence_rev3100.py
+
+      - name: Compile rev3100 implementation and tests
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-22_1953_JST/soj_parent_filtered_execution_proof_accounting_coherence_v1.py
+          automation_runs/2026-08-22_1953_JST/test_soj_parent_filtered_execution_proof_accounting_coherence_rev3100.py
+
+      - name: Enforce branch-only dependency boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="automation_runs/2026-08-22_1953_JST/soj_parent_filtered_execution_proof_accounting_coherence_v1.py"
+          ! grep -Eq '^(from|import) .*soj_parent_filtered_execution_proof_dag' "${file}"
+          ! grep -Eq '^(from|import) .*soj_parent_filtered_proof_accounting_coherence' "${file}"
+          ! grep -Eq '^(from|import) .*soj_parent_filtered_result_accounting_coherence' "${file}"
+          ! grep -Eq '^(from|import) .*soj_parent_filtered_proof_dag_integrity' "${file}"
+
+      - name: Enforce reserved diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "${base}"..HEAD | sort >"${RUNNER_TEMP}/actual"
+          cat >"${RUNNER_TEMP}/allowed" <<'EOF'
+          .github/workflows/rev3100-soj-parent-filtered-execution-proof-accounting-coherence-smoke.yml
+          agi/run-history/phase-admissions/chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST-ac946914-attempt_solution.json
+          agi/run-history/phase-admissions/chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST-ac946914-publish.json
+          automation_runs/2026-08-22_1953_JST/REV3100_SOJ_PARENT_FILTERED_EXECUTION_PROOF_ACCOUNTING_COHERENCE.md
+          automation_runs/2026-08-22_1953_JST/soj_parent_filtered_execution_proof_accounting_coherence_v1.py
+          automation_runs/2026-08-22_1953_JST/test_soj_parent_filtered_execution_proof_accounting_coherence_rev3100.py
+          EOF
+          sort -o "${RUNNER_TEMP}/allowed" "${RUNNER_TEMP}/allowed"
+          if comm -23 "${RUNNER_TEMP}/actual" "${RUNNER_TEMP}/allowed" | grep -q .; then
+            echo "rev3100 branch changed a non-reserved path" >&2
+            comm -23 "${RUNNER_TEMP}/actual" "${RUNNER_TEMP}/allowed" >&2
+            exit 1
+          fi
+
+      - name: Persist canonical phase admission once on the source branch
+        if: >-
+          github.event_name == 'push' ||
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+        shell: bash
+        env:
+          ATTEMPT_PREVIEW: ${{ steps.admission.outputs.attempt }}
+          PUBLISH_PREVIEW: ${{ steps.admission.outputs.publish }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          attempt="agi/run-history/phase-admissions/chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST-ac946914-attempt_solution.json"
+          publish="agi/run-history/phase-admissions/chatgpt-session-j-rev3100-soj-parent-filtered-execution-proof-accounting-coherence-rebase-20260822T195300JST-ac946914-publish.json"
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            git fetch origin "${PR_HEAD_REF}:refs/remotes/origin/${PR_HEAD_REF}"
+            remote_sha="$(git rev-parse "refs/remotes/origin/${PR_HEAD_REF}")"
+            if [[ "${remote_sha}" != "${PR_HEAD_SHA}" ]]; then
+              echo "source branch advanced after this event; leave evidence to the newer natural run"
+              exit 0
+            fi
+            git checkout --detach "${remote_sha}"
+            target_branch="${PR_HEAD_REF}"
+          else
+            target_branch="${GITHUB_REF_NAME}"
+          fi
+          if [[ -e "${attempt}" || -e "${publish}" ]]; then
+            [[ -f "${attempt}" && -f "${publish}" ]]
+            echo "canonical phase evidence already exists; do not rewrite it"
+            exit 0
+          fi
+          mkdir -p "$(dirname "${attempt}")"
+          cp "${ATTEMPT_PREVIEW}" "${attempt}"
+          cp "${PUBLISH_PREVIEW}" "${publish}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${attempt}" "${publish}"
+          git commit -m "coordination: persist rev3100 attempt and publish admission"
+          git push origin "HEAD:${target_branch}"
