@@ -1,0 +1,59 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev3500-block-relation-provenance-public-replay-seal-20260822T205200JST-9d2cfbbe",
+  "session_id": "chatgpt-session-j-rev3500-block-relation-provenance-public-replay-seal-20260822T205200JST",
+  "started_at_jst": "2026-08-22T20:52:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:52:00+09:00",
+  "last_activity_at_jst": "2026-08-22T20:52:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "9d2cfbbe3c25fab9ffcd2cc98a3fd009ee387f3f",
+  "starting_agi_gi_rev": 3200,
+  "target_revision": 3500,
+  "scope": "crx3/algorithmic-consumers/homogeneous-block-relation-provenance-public-replay-seal",
+  "branch": "agi-gi-rev3500-block-relation-provenance-public-replay-seal-session-20260822-2052",
+  "pull_request": null,
+  "exact_head_sha": null,
+  "merge_sha": null,
+  "reserved_paths": [
+    ".github/workflows/rev3500-block-relation-provenance-public-replay-seal-smoke.yml",
+    "automation_runs/2026-08-22_2052_JST/REV3500_BLOCK_RELATION_PROVENANCE_PUBLIC_REPLAY_SEAL.md",
+    "automation_runs/2026-08-22_2052_JST/block_relation_provenance_public_replay_seal_v1.py",
+    "automation_runs/2026-08-22_2052_JST/test_block_relation_provenance_public_replay_seal_rev3500.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3500-block-relation-provenance-public-replay-seal-20260822T205200JST-9d2cfbbe-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3500-block-relation-provenance-public-replay-seal-20260822T205200JST-9d2cfbbe-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev3400 corrected-SOJ parent-result identity equivalence and all reserved paths",
+    "rev3300 block-action kernel public replay seal / PR #288 and all reserved paths",
+    "rev3200 merged small-order public replay seal and all small-order solver/admission paths",
+    "rev2501 relation-twin restriction replay identity / PR #278 and all reserved paths",
+    "rev2000/rev2100/rev2300/rev1800/rev1200 homogeneous-block quotient/original-domain structural and execution scopes and reserved paths",
+    "rev3100/rev3000/rev2800/rev2707/rev2600/rev2200 corrected Split-or-Johnson parent-filtered scopes and reserved paths",
+    "rev3300 block-action kernel replay implementation, rev950 block-action proof-DAG source paths, and all block-action kernel scopes",
+    "MAIN.md, shared proof-DAG/recurrence/S1/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
+  "intent": "Add one additive public replay seal above the already-main-integrated rev952 homogeneous block relation-provenance proof-DAG consumer. Independently re-execute rev952 from explicit paired homogeneous relation provenance input, require exact witness replay and strict public projection equality, preserve ok versus exact_empty semantics, validate canonical relation names/transcript/digest and proof-DAG metrics, and domain-separate the accepted public projection into a deterministic SHA-256 seal with independent verify-by-reexecution. Do not modify rev952/rev203/shared proof-DAG code, do not import sibling branch-only homogeneous-block or corrected-SOJ implementations, do not implement block-action kernel replay/original-domain SI, and do not claim CRX3/GI/AGI closure.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_sibling_branch_only_implementation": true,
+    "generate_phase_evidence_only_from_canonical_main_source_generator": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "fail_closed_on_schema_status_identity_relation_digest_or_accounting_drift": true
+  },
+  "preflight": {
+    "rev3500_branch_search": "none before claim",
+    "rev3500_pr_search": "none before claim",
+    "rev3500_commit_search": "none before claim",
+    "rev3500_active_claim_search": "none before claim",
+    "semantic_scope_search": "none before claim",
+    "main_sha": "9d2cfbbe3c25fab9ffcd2cc98a3fd009ee387f3f"
+  },
+  "validation": {},
+  "integration_boundary": "Keep draft/unmerged until exact-head dedicated smoke, canonical attempt/publish admission, repository-wide parallel admission, and observed inherited checks are green. Merge only if no later sibling overlaps this exact scope or reserved paths; rev952 is already main-integrated.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
