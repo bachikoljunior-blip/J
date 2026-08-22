@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c",
   "session_id": "chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST",
   "started_at_jst": "2026-08-22T18:51:48+09:00",
-  "heartbeat_at_jst": "2026-08-22T18:51:48+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:43:52+09:00",
+  "last_activity_at_jst": "2026-08-22T19:43:52+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "203a568c917b3e62da13908371c6dcc96805e09b",
   "starting_agi_gi_rev": 1600,
@@ -18,7 +19,29 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-attempt_solution.json",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-publish.json"
   ],
+  "parallel_exclusions": [
+    "rev2800 parent-filtered proof/accounting coherence / PR #283 and all reserved paths",
+    "rev2707 parent-filtered proof-DAG integrity / PR #280 and all reserved paths",
+    "rev2600 parent-filtered result accounting coherence / PR #279 and all reserved paths",
+    "rev2501 relation-twin restriction identity / PR #278 and all reserved paths",
+    "rev2400 parent-filtered accounting coherence and all reserved paths",
+    "rev2300 homogeneous-block structural quotient coherence and all reserved paths",
+    "rev2200 parent-filtered child result / PR #274 and all reserved paths",
+    "rev1400 recursive production execution proof-DAG / PR #264 and all reserved paths",
+    "run-start history integrity and claim-publication preflight coordination scopes",
+    "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
+  ],
   "branch": "agi-gi-rev2500-soj-parent-filtered-execution-proof-dag-session-20260822-1851",
+  "pull_request": 281,
+  "validation": {
+    "exact_head_before_evidence_recovery": "578e1ee1cd5c7948cac4c6ecca8fc97036b9488a",
+    "focused_regressions": "12/12 passed",
+    "py_compile": "success",
+    "dedicated_pull_request_workflow": "success",
+    "repository_parallel_admission": "failure only because persistent phase-admission evidence files are absent",
+    "manual_rerun_or_cancel": false
+  },
+  "next_action": "repair this claim's own dedicated workflow persistence path so canonical attempt_solution and publish evidence can be materialized by a new natural source-branch run; do not touch sibling workflows",
   "status": "in_progress",
   "agi_state": "NOT_AGI"
 }
