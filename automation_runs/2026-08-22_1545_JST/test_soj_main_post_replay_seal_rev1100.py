@@ -5,6 +5,7 @@ import importlib.util
 import json
 import math
 import pathlib
+import sys
 import unittest
 from dataclasses import replace
 
@@ -12,6 +13,7 @@ MODULE = pathlib.Path(__file__).with_name("soj_main_post_replay_seal_v1.py")
 spec = importlib.util.spec_from_file_location("rev1100", MODULE)
 rev1100 = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
+sys.modules[spec.name] = rev1100
 spec.loader.exec_module(rev1100)
 
 
@@ -153,17 +155,36 @@ class Rev1100MainPostReplaySealTest(unittest.TestCase):
 
     def test_power_of_two_cost_required(self):
         r700 = rev700_fixture()
-        self.assertFalse(self.certify(r700, rev1000_fixture(r700, bound=6.0, charge=math.log2(6))).certified)
-        self.assertFalse(self.certify(r700, rev1000_fixture(r700, bound=8.5, charge=3.0)).certified)
+        self.assertFalse(
+            self.certify(
+                r700,
+                rev1000_fixture(r700, bound=6.0, charge=math.log2(6)),
+            ).certified
+        )
+        self.assertFalse(
+            self.certify(r700, rev1000_fixture(r700, bound=8.5, charge=3.0)).certified
+        )
 
     def test_exact_log2_charge_required(self):
         r700 = rev700_fixture()
-        self.assertFalse(self.certify(r700, rev1000_fixture(r700, bound=8.0, charge=2.999)).certified)
+        self.assertFalse(
+            self.certify(r700, rev1000_fixture(r700, bound=8.0, charge=2.999)).certified
+        )
 
     def test_nonfinite_cost_fails_closed(self):
         r700 = rev700_fixture()
-        self.assertFalse(self.certify(r700, rev1000_fixture(r700, bound=float("inf"), charge=3.0)).certified)
-        self.assertFalse(self.certify(r700, rev1000_fixture(r700, bound=8.0, charge=float("nan"))).certified)
+        self.assertFalse(
+            self.certify(
+                r700,
+                rev1000_fixture(r700, bound=float("inf"), charge=3.0),
+            ).certified
+        )
+        self.assertFalse(
+            self.certify(
+                r700,
+                rev1000_fixture(r700, bound=8.0, charge=float("nan")),
+            ).certified
+        )
 
     def test_digest_formats_are_strict(self):
         r700 = rev700_fixture()
