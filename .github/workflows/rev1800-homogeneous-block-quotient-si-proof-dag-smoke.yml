@@ -1,0 +1,91 @@
+name: rev1800 homogeneous-block quotient SI proof-DAG smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1651_JST/homogeneous_block_quotient_si_proof_dag_consumer_v1.py'
+      - 'automation_runs/2026-08-22_1651_JST/test_homogeneous_block_quotient_si_proof_dag_rev1800.py'
+      - 'automation_runs/2026-08-22_1651_JST/REV1800_HOMOGENEOUS_BLOCK_QUOTIENT_SI_PROOF_DAG.md'
+      - '.github/workflows/rev1800-homogeneous-block-quotient-si-proof-dag-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev1800 consumer and regressions
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1651_JST/homogeneous_block_quotient_si_proof_dag_consumer_v1.py \
+            automation_runs/2026-08-22_1651_JST/test_homogeneous_block_quotient_si_proof_dag_rev1800.py
+      - name: Run inherited rev950 and focused rev1800 regressions
+        run: |
+          python automation_runs/2026-08-22_1453_JST/test_block_action_kernel_proof_dag_consumer_rev950.py -v
+          python automation_runs/2026-08-22_1651_JST/test_homogeneous_block_quotient_si_proof_dag_rev1800.py -v
+      - name: Reject branch-only rev1200/rev278 and original-domain lift dependencies
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('automation_runs/2026-08-22_1651_JST/homogeneous_block_quotient_si_proof_dag_consumer_v1.py').read_text()
+          forbidden = (
+              'from homogeneous_block_quotient_string_isomorphism_v1 import',
+              'import homogeneous_block_quotient_string_isomorphism_v1',
+              'from homogeneous_block_quotient_preimage_v1 import',
+              'import homogeneous_block_quotient_preimage_v1',
+              'lift_certified_block_quotient_preimage(',
+          )
+          hits = [needle for needle in forbidden if needle in text]
+          if hits:
+              raise SystemExit(f'branch-only or original-domain lift dependency detected: {hits}')
+          PY
+      - name: Preview canonical attempt-solution admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa \
+            --phase attempt_solution \
+            --scope crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism-proof-dag \
+            --target-revision 1800 \
+            --path .github/workflows/rev1800-homogeneous-block-quotient-si-proof-dag-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-publish.json \
+            --path automation_runs/2026-08-22_1651_JST/REV1800_HOMOGENEOUS_BLOCK_QUOTIENT_SI_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1651_JST/homogeneous_block_quotient_si_proof_dag_consumer_v1.py \
+            --path automation_runs/2026-08-22_1651_JST/test_homogeneous_block_quotient_si_proof_dag_rev1800.py \
+            --output /tmp/rev1800-attempt-solution.json
+          cat /tmp/rev1800-attempt-solution.json
+      - name: Preview canonical publish admission
+        run: |
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa \
+            --phase publish \
+            --scope crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism-proof-dag \
+            --target-revision 1800 \
+            --path .github/workflows/rev1800-homogeneous-block-quotient-si-proof-dag-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-publish.json \
+            --path automation_runs/2026-08-22_1651_JST/REV1800_HOMOGENEOUS_BLOCK_QUOTIENT_SI_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1651_JST/homogeneous_block_quotient_si_proof_dag_consumer_v1.py \
+            --path automation_runs/2026-08-22_1651_JST/test_homogeneous_block_quotient_si_proof_dag_rev1800.py \
+            --output /tmp/rev1800-publish.json
+          cat /tmp/rev1800-publish.json
+      - name: Verify reserved diff remains additive
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- \
+            automation_runs/2026-08-22_1651_JST/homogeneous_block_quotient_si_proof_dag_consumer_v1.py \
+            automation_runs/2026-08-22_1651_JST/test_homogeneous_block_quotient_si_proof_dag_rev1800.py \
+            automation_runs/2026-08-22_1651_JST/REV1800_HOMOGENEOUS_BLOCK_QUOTIENT_SI_PROOF_DAG.md \
+            .github/workflows/rev1800-homogeneous-block-quotient-si-proof-dag-smoke.yml \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa-publish.json
