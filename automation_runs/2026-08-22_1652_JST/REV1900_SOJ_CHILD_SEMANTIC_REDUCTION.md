@@ -67,17 +67,28 @@ The first ordinary pull-request head (`39d59b7f4f2fd3f4bbe10c835029f307d752a8bc`
 completed the dedicated rev1900 smoke successfully. It passed Python
 compilation, all 9 focused rev1900 regressions, all 11 inherited rev287
 relational-reduction regressions, the sibling-implementation dependency gate,
-and fresh canonical `attempt_solution` and `publish` previews. Both previews
-were `admitted=true` with `conflicts=[]` against canonical main source
-`17d6614f8791af25044c801dff24de2aa183ab0c`.
+and fresh canonical `attempt_solution` and `publish` previews.
 
-The repository-wide phase-evidence guard correctly failed closed on that first
-head because the two mechanically generated evidence files had not yet been
-persisted in the branch diff. This is not treated as permission to fabricate or
-copy evidence. A subsequent ordinary push on this dedicated branch re-enters
-the same green smoke and allows only its final branch-local step to run the
-main-integrated admission generator with `--output`, committing only the two
-reserved evidence paths. No sibling workflow is rerun or cancelled.
+The first evidence-persistence workflow version generated the two new JSON
+files correctly but used `git diff --quiet` before staging them; Git does not
+report untracked files through that check. The rev1900-owned workflow was fixed
+without touching or rerunning any sibling workflow: it now stages exactly the
+two reserved evidence paths first and tests `git diff --cached --quiet`.
+
+That ordinary PR-triggered run then committed both canonical records on the
+dedicated branch as bot commit
+`533d8c9133cc8167781b71696cfd987d35aca561`. Both records are
+`event_type=problem_solving_phase_admission`, `mode=exclusive`,
+`admitted=true`, and `conflicts=[]`; they bind target revision 1900, this exact
+scope/claim, and the four rev1900 problem-state paths. They were mechanically
+generated from canonical registry source
+`c935438642bba01c3d91ae650850755c9f40d5c3` with registry digest
+`sha256:bae9f8ae776e37ddf9a03f4e16cc9e532456f9e7dae0525e10c053ebecde21cf`.
+No evidence was copied or fabricated from a sibling.
+
+This connector-authored documentation heartbeat follows the bot evidence commit
+so normal pull-request checks evaluate a head that already contains replayable
+phase evidence; no workflow is manually rerun.
 
 This revision does not execute recursive String-Isomorphism, lift a child
 result, perform full parent-coset filtering, change recurrence/proof-DAG
