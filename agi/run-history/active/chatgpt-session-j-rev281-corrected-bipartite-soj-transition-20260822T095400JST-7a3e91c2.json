@@ -12,8 +12,8 @@
   "scope": "w1r-h6/corrected-split-or-johnson/bipartite-recursive-transition-certificate",
   "branch": "agi-gi-rev281-corrected-bipartite-soj-transition-20260822-0954",
   "pull_request": 226,
-  "latest_head_sha": "f175a22b6bb9a1a95ff70608a2f30e28241a69cc",
-  "latest_observed_main_sha": "d5ddeec4db6ac9156ca6e72ea7a45d14a38366a7",
+  "latest_head_sha": "89ab0c3649d093af8d8b4cbe1403b012dea0f299",
+  "latest_observed_main_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
   "reserved_paths": [
     ".github/workflows/rev281-corrected-bipartite-soj-transition-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2-attempt-solution.json",
@@ -30,14 +30,18 @@
   ],
   "intent": "mechanically certify one theorem-faithful corrected bipartite Split-or-Johnson recursive edge after the existing input gate: accept only a canonical exact constant-factor reduction of the auxiliary/small part or an explicit canonical Johnson embedding, with multiplicative-cost and strict-progress evidence; reject phase labels or nonconstructive recognition fail-closed",
   "validation": {
-    "dedicated_workflow_run": 32541898447,
-    "dedicated_workflow_status": "success",
-    "exact_head": "f175a22b6bb9a1a95ff70608a2f30e28241a69cc",
-    "problem_solving_parallel_admission_run": 32541898404,
-    "problem_solving_parallel_admission_status": "failure",
-    "coordination_repair": "this claim is now canonical schema-v2; a separately owned rev275 noncanonical claim still prevents safe canonical phase-admission generation"
+    "previous_exact_head": "f175a22b6bb9a1a95ff70608a2f30e28241a69cc",
+    "previous_dedicated_workflow_run": 32541898447,
+    "previous_dedicated_workflow_status": "success",
+    "current_head": "89ab0c3649d093af8d8b4cbe1403b012dea0f299",
+    "current_local_focused_tests": "10/10 passed",
+    "current_exact_head_ci": "pending automatic PR-triggered runs",
+    "hardening": "reject fractional or coercible sizes, embedding coordinates, relation distances, and non-real costs instead of truncating/coercing them into exact evidence",
+    "previous_problem_solving_parallel_admission_run": 32541898404,
+    "previous_problem_solving_parallel_admission_status": "failure",
+    "coordination_repair": "this claim is canonical schema-v2; a separately owned rev275 noncanonical claim still prevents safe canonical phase-admission generation"
   },
   "non_interference": "Only this claim record on main and the reserved rev281 paths on the existing isolated branch may be changed. Do not modify, normalize, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementation files, or MAIN.md.",
-  "status": "active_functional_green_phase_evidence_blocked_by_sibling_registry_error",
+  "status": "active_hardened_local_green_exact_head_ci_pending_phase_evidence_blocked_by_sibling_registry_error",
   "agi_state": "NOT_AGI"
 }
