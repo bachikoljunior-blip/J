@@ -149,6 +149,14 @@ def _normalize_proof(proof_snapshot: Any, replay_verified: bool) -> dict[str, An
     if replay_verified is not True or type(replay_verified) is not bool:
         raise ValueError("rev2707-style proof-DAG certificate must be independently replay-verified")
     proof = _literal_dict(proof_snapshot, "proof_snapshot")
+    expected_proof_keys = {
+        "schema_version", "status", "certified", "exact", "complete", "source_status",
+        "result_identity", "action_degree", "candidate_count", "accepted_count", "node_count",
+        "edge_count", "proof_dag", "proof_dag_identity", "reason",
+    }
+    if set(proof) != expected_proof_keys:
+        raise ValueError("proof top-level fields drift")
+    _strict_str(proof["reason"], "proof.reason")
     _strict_schema_version(_field(proof, "schema_version", "proof"), "proof.schema_version")
     if _strict_str(_field(proof, "status", "proof"), "proof.status") != PROOF_STATUS:
         raise ValueError("proof.status mismatch")
@@ -283,6 +291,16 @@ def _normalize_accounting(accounting_snapshot: Any, replay_verified: bool) -> di
     if replay_verified is not True or type(replay_verified) is not bool:
         raise ValueError("rev2600-style accounting certificate must be independently replay-verified")
     account = _literal_dict(accounting_snapshot, "accounting_snapshot")
+    expected_accounting_keys = {
+        "schema_version", "status", "certified", "exact", "complete", "outcome_kind",
+        "reduction_identity", "semantic_binding_identity", "child_instance_identity",
+        "child_result_identity", "parent_result_identity", "handoff_digest", "parent_action_degree",
+        "child_ground_size", "candidate_count", "accepted_count", "parent_filter_work_bound",
+        "charged_log2_reduction_cost", "coherence_identity", "reason",
+    }
+    if set(account) != expected_accounting_keys:
+        raise ValueError("accounting top-level fields drift")
+    _strict_str(account["reason"], "accounting.reason")
     _strict_schema_version(_field(account, "schema_version", "accounting"), "accounting.schema_version")
     if _strict_str(_field(account, "status", "accounting"), "accounting.status") != ACCOUNTING_STATUS:
         raise ValueError("accounting.status mismatch")
