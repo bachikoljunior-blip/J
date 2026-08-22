@@ -23,7 +23,7 @@
     {
       "branch": "agi-gi-rev267-original-domain-preimage-session-20260822-0815",
       "claim_id": "chatgpt-session-j-rev267-original-domain-preimage-takeover-20260822T213801JST-442493a3",
-      "heartbeat_at_jst": "2026-08-22T21:42:42+09:00",
+      "heartbeat_at_jst": "2026-08-22T21:58:16+09:00",
       "reserved_paths": [
         ".github/workflows/rev267-original-domain-preimage-smoke.yml",
         "agi/run-history/active/chatgpt-session-j-rev267-original-domain-preimage-takeover-20260822T213801JST-442493a3.json",
@@ -41,7 +41,7 @@
     {
       "branch": "agi-gi-rev2800-soj-parent-filtered-proof-accounting-coherence-session-20260822-1915",
       "claim_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434",
-      "heartbeat_at_jst": "2026-08-22T21:46:21+09:00",
+      "heartbeat_at_jst": "2026-08-22T21:57:36+09:00",
       "reserved_paths": [
         ".github/workflows/rev2800-soj-parent-filtered-proof-accounting-coherence-smoke.yml",
         "agi/run-history/phase-admissions/chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434-attempt_solution.json",
@@ -129,9 +129,9 @@
   ],
   "phase": "attempt_solution",
   "reasons": [],
-  "recorded_at_jst": "2026-08-22T21:57:35.693201+09:00",
-  "registry_digest": "sha256:da397824f0df99672e13234639777ce339e7424819c10b246028fb396554a796",
-  "registry_source_sha": "f2acbf5683920dab76f58c6825fd7cd68f275261",
+  "recorded_at_jst": "2026-08-22T22:00:27.672074+09:00",
+  "registry_digest": "sha256:76bf4b788c44b871c5924523b1d4912dd736161005658eebe0a6fa557695df78",
+  "registry_source_sha": "11d429ed48b5af902416fd0c35be0f63cc558073",
   "schema_version": 1,
   "scope": "crx3/algorithmic-consumers/signed-johnson-ground-exact-terminal-public-replay-seal",
   "target_revision": 3700
