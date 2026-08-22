@@ -62,17 +62,24 @@ def _require_mapping(value: Any, key: str) -> dict[str, Any]:
     return value
 
 
-def _reject_unknown_keys(
-    mapping: Mapping[str, Any], allowed: frozenset[str], key: str
+def _require_schema_keys(
+    mapping: Mapping[str, Any], expected: frozenset[str], key: str
 ) -> None:
     keys = tuple(mapping)
     if any(type(item) is not str for item in keys):
         raise CallerBindingError(f"{key} keys must be literal JSON strings")
-    unexpected = set(keys) - allowed
+    actual = set(keys)
+    unexpected = actual - expected
     if unexpected:
         raise CallerBindingError(
             f"{key} contains unsupported fields: "
             + ", ".join(sorted(unexpected))
+        )
+    missing = expected - actual
+    if missing:
+        raise CallerBindingError(
+            f"{key} is missing required fields: "
+            + ", ".join(sorted(missing))
         )
 
 
@@ -132,13 +139,13 @@ def bind_production_caller(evidence: Mapping[str, Any]) -> dict[str, Any]:
     Johnson reduction, authenticate SHA-looking identities, or prove the semantic
     truth of caller-supplied certificates. It only creates a deterministic binding
     across evidence that an upstream replay/verification layer has already accepted.
-    Literal dict snapshots, literal JSON-string keys, and literal string values are
-    required so Python subclasses cannot change equality, hashing, or lookup
-    semantics across validation steps.
+    Literal dict snapshots, complete closed schemas, literal JSON-string keys, and
+    literal string values are required so Python subclasses or omitted null branch
+    slots cannot create multiple accepted representations of the same binding.
     """
 
     root = _require_mapping(evidence, "evidence")
-    _reject_unknown_keys(root, _ROOT_KEYS, "evidence")
+    _require_schema_keys(root, _ROOT_KEYS, "evidence")
     _strict_true(root, "canonical")
     _strict_true(root, "exact")
 
@@ -163,12 +170,12 @@ def bind_production_caller(evidence: Mapping[str, Any]) -> dict[str, Any]:
 
     branch_key = mode
     branch = _require_mapping(root.get(branch_key), branch_key)
-    allowed_branch_keys = (
+    expected_branch_keys = (
         _SMALL_GROUND_KEYS
         if mode == "small_ground_terminal"
         else _LARGER_GROUND_KEYS
     )
-    _reject_unknown_keys(branch, allowed_branch_keys, branch_key)
+    _require_schema_keys(branch, expected_branch_keys, branch_key)
     _strict_true(branch, "canonical")
     _strict_true(branch, "exact")
 
