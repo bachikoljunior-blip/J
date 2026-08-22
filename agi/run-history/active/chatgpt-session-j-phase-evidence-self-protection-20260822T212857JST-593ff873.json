@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-phase-evidence-self-protection-20260822T212857JST-593ff873",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
   "started_at_jst": "2026-08-22T21:28:57+09:00",
-  "heartbeat_at_jst": "2026-08-22T21:33:28+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:34:42+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "593ff873a53732f67b3f62a5442820cdac40d277",
   "starting_agi_gi_rev": 3300,
@@ -45,8 +45,8 @@
     ],
     "decision": "extend the single shared classifier instead of introducing a second workflow-specific verifier"
   },
-  "status": "merge_admitted",
-  "state": "active",
+  "status": "closed",
+  "state": "closed",
   "agi_state": "NOT_AGI",
   "pull_request": 294,
   "exact_head_sha": "0cb8ffbb4231799764577c463aaacd6d7cd45001",
@@ -56,6 +56,13 @@
     "phase_admission": "valid; conflicts=[]",
     "exact_head_workflows": "12/12 success",
     "current_registry_readmission": "valid against main cc3b1b43d92ef1aa012080e3b15eced9ef3f9d70",
-    "claim_registry": "valid; collisions=0"
-  }
+    "claim_registry": "valid; collisions=0",
+    "postmerge_automation_tests": "82/82 passed",
+    "postmerge_revision_guard": "3300 = 3300",
+    "postmerge_claim_registry": "valid; collisions=0",
+    "postmerge_run_history": "79 records; 74 starts; 4 corrections; 1 identity correction",
+    "main_push_workflow": "Problem-solving parallel admission run 32573342409: success"
+  },
+  "closed_at_jst": "2026-08-22T21:34:42+09:00",
+  "merge_commit_sha": "485a479e03344b15530b13dd2af72d9d0387aed6"
 }
