@@ -1,0 +1,45 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1600-main-sync-retry-20260822T185646JST-620db467",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T184109+0900-fc4ab5cb-turn1",
+  "started_at_jst": "2026-08-22T18:56:46+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:56:46+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "620db467becad7aa9e849a3c862cf3056a605da2",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": 1600,
+  "scope": "repository/main-revision-sync/rev1600",
+  "reserved_paths": [
+    "MAIN.md",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1600-main-sync-retry-20260822T185646JST-620db467-update_problem_tree.json"
+  ],
+  "branch": "main",
+  "status": "active",
+  "agi_state": "NOT_AGI",
+  "predecessor_collision_resolution": [
+    "chatgpt-session-j-main-rev1600-declaration-sync-20260822T185101JST-369816dd is superseded_collision_retreat",
+    "chatgpt-session-j-rev1600-main-sync-20260822T185120JST-27ea521d is abandoned"
+  ],
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "MAIN.md declaration lags canonical integrated rev1600",
+    "attempt": "synchronize the authoritative declaration after both colliding predecessor claims closed",
+    "decomposition_if_unresolved": [
+      "registry replay",
+      "canonical revision audit",
+      "atomic declaration update"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "automation/agi_gi_main_revision_guard.py",
+      "canonical AGI-GI integration ancestry"
+    ],
+    "decision": "reuse the sole canonical revision definition"
+  },
+  "non_interference": "Only MAIN.md and one phase evidence file are reserved.",
+  "strict_boundary": "No AGI claim; status remains NOT_AGI."
+}
