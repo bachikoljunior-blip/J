@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T094800+0900-rev279-turn2",
   "started_at_jst": "2026-08-22T09:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T10:47:24+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:50:29+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "15932427fd0b83fa27d50cf83319fc88c75df564",
   "starting_agi_gi_rev": 274,
@@ -12,8 +12,8 @@
   "scope": "crx3/algorithmic-consumers/implicit-relation-parent-outcome-proof-dag",
   "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
   "pull_request": 223,
-  "latest_head_sha": "733c851778820a90decc43a0ba4ac42bd5790447",
-  "latest_observed_main_sha": "d5ddeec4db6ac9156ca6e72ea7a45d14a38366a7",
+  "latest_head_sha": "7b194a3627bcfbb49f5b563d95cde6a326382e69",
+  "latest_observed_main_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
   "reserved_paths": [
     ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
@@ -40,12 +40,15 @@
     "CRX1/CRX2 active branches, MAIN.md, every sibling claim, branch, PR, workflow, and shared implementation path"
   ],
   "implementation": {
-    "head_sha": "733c851778820a90decc43a0ba4ac42bd5790447",
+    "head_sha": "7b194a3627bcfbb49f5b563d95cde6a326382e69",
     "new_reserved_files_written": 4,
+    "reconciled_main_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
+    "reconciliation_kind": "non-destructive two-parent merge preserving current main plus the four rev279 additive files",
     "semantic_exactness_certified": false,
     "semantic_boundary": "digest-only parent outcome evidence is never promoted to an SI coset; proof coset remains null and proof exact remains false"
   },
   "validation": {
+    "pre_reconciliation_exact_head": "733c851778820a90decc43a0ba4ac42bd5790447",
     "rev279_smoke": {
       "run_id": 32541698790,
       "conclusion": "success"
@@ -54,24 +57,21 @@
       "run_id": 32541698775,
       "conclusion": "success"
     },
+    "reconciled_head": "7b194a3627bcfbb49f5b563d95cde6a326382e69",
+    "reconciled_head_automatic_runs_observed": "none_yet",
     "problem_solving_parallel_admission": {
       "run_id": 32541698763,
       "conclusion": "failure",
-      "reason": "phase-admission evidence is not yet persisted; admitted evidence is intentionally not fabricated while the canonical registry contains independently owned non-schema-v2 claims"
+      "reason": "phase-admission evidence is not yet persisted; admitted evidence is intentionally not fabricated while the canonical registry contains the independently owned non-schema-v2 rev275 claim"
     },
-    "registry_blockers": [
-      {
-        "claim_id": "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
-        "observation": "sibling JSON lacks canonical schema_version/event_type and encodes target_revision as a string; rev279 does not modify sibling coordination state"
-      },
-      {
-        "claim_id": "chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2",
-        "observation": "sibling JSON lacks canonical schema_version/event_type required by automation.parallel_claims; rev279 does not modify sibling coordination state"
-      }
-    ]
+    "registry_blocker": {
+      "claim_id": "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
+      "observation": "sibling JSON still lacks canonical schema_version/event_type and encodes target_revision as a string; rev279 does not modify sibling coordination state"
+    },
+    "resolved_registry_observation": "rev281 has been independently canonicalized by its owner and is no longer a rev279 registry blocker"
   },
   "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, or tampered evidence without modifying shared solvers or upstream CRX1 branches",
   "non_interference": "Only rev279 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
-  "status": "active_functional_and_general_green_admission_blocked_by_noncanonical_sibling_registry",
+  "status": "active_reconciled_functional_and_general_green_admission_blocked_by_rev275_registry_format",
   "agi_state": "NOT_AGI"
 }
