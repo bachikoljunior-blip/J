@@ -41,13 +41,7 @@ jobs:
             --path automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py \
             --path automation_runs/2026-08-19_0851_JST/test_proof_dag_envelope_input_validation_rev289.py \
             --output /tmp/rev289-attempt-solution.json
-          python - <<'PY'
-          import base64
-          from pathlib import Path
-          payload = Path("/tmp/rev289-attempt-solution.json").read_bytes()
-          print("REV289_ATTEMPT_EVIDENCE_B64=" + base64.b64encode(payload).decode("ascii"))
-          PY
-      - name: Preserve generated admission evidence
+      - name: Preserve generated attempt admission evidence
         uses: actions/upload-artifact@v4
         with:
           name: rev289-attempt-solution-evidence
@@ -80,3 +74,28 @@ jobs:
           if hits:
               raise SystemExit(f"branch-only/sibling dependency detected: {hits}")
           PY
+      - name: Generate canonical publish admission snapshot
+        run: |
+          git fetch --no-tags origin main
+          rm -rf /tmp/rev289-main-publish
+          git worktree add --detach /tmp/rev289-main-publish origin/main
+          python automation/problem_solving_parallel_admission.py \
+            --root /tmp/rev289-main-publish \
+            --claim-id chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79 \
+            --phase publish \
+            --scope crx3/shared-proof-dag/strict-envelope-input-validation \
+            --target-revision 289 \
+            --path .github/workflows/rev289-proof-dag-envelope-hardening-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79-attempt-solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79-publish.json \
+            --path automation_runs/2026-08-19_0851_JST/REV289_PROOF_DAG_ENVELOPE_HARDENING.md \
+            --path automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_proof_dag_envelope_input_validation_rev289.py \
+            --output /tmp/rev289-publish.json
+      - name: Preserve generated publish admission evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev289-publish-evidence
+          path: /tmp/rev289-publish.json
+          if-no-files-found: error
+          retention-days: 1
