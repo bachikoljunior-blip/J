@@ -1,0 +1,179 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "agi-gi-rev900-soj-recursive-production-provenance-total-cost-session-20260822-1446",
+    "claim_id": "chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e",
+    "heartbeat_at_jst": "2026-08-22T14:46:56+09:00",
+    "reserved_paths": [
+      ".github/workflows/rev900-soj-recursive-production-provenance-total-cost-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e-attempt-solution.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e-publish.json",
+      "automation_runs/2026-08-22_1446_JST/REV900_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_TOTAL_COST_BINDING.md",
+      "automation_runs/2026-08-22_1446_JST/soj_recursive_production_provenance_total_cost_binding_v1.py",
+      "automation_runs/2026-08-22_1446_JST/test_soj_recursive_production_provenance_total_cost_binding_rev900.py"
+    ],
+    "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-provenance-total-cost-binding",
+    "state": "active",
+    "target_revision": 900
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
+      "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
+      "heartbeat_at_jst": "2026-08-22T14:41:25+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-merge.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-publish.json",
+        "automation_runs/2026-08-19_0851_JST/REV279_PARENT_OUTCOME_PROOF_DAG.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_proof_dag_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_proof_dag_rev279.py"
+      ],
+      "scope": "crx3/algorithmic-consumers/implicit-relation-parent-outcome-proof-dag",
+      "state": "active",
+      "target_revision": 279
+    },
+    {
+      "branch": "agi-gi-rev400-soj-production-caller-binding-session-20260822-1258",
+      "claim_id": "chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b",
+      "heartbeat_at_jst": "2026-08-22T13:49:43+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev400-soj-production-caller-binding-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-publish.json",
+        "automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md",
+        "automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py",
+        "automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/johnson-terminal-recursive-production-caller-binding",
+      "state": "active",
+      "target_revision": 400
+    },
+    {
+      "branch": "agi-gi-rev500-soj-caller-replay-envelope-session-20260822-1311",
+      "claim_id": "chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6",
+      "heartbeat_at_jst": "2026-08-22T13:49:17+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev500-soj-caller-replay-envelope-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev500-soj-caller-replay-envelope-20260822T1311JST-ed4d23f6-publish.json",
+        "automation_runs/2026-08-22_1311_JST/REV500_SOJ_CALLER_REPLAY_ENVELOPE.md",
+        "automation_runs/2026-08-22_1311_JST/soj_caller_replay_envelope_v1.py",
+        "automation_runs/2026-08-22_1311_JST/test_soj_caller_replay_envelope_rev500.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/production-caller-binding-replay-envelope",
+      "state": "active",
+      "target_revision": 500
+    },
+    {
+      "branch": "agi-gi-rev600-soj-main-provenance-gate-session-20260822-1346",
+      "claim_id": "chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502",
+      "heartbeat_at_jst": "2026-08-22T13:58:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev600-soj-main-provenance-gate-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502-publish.json",
+        "automation_runs/2026-08-22_1346_JST/REV600_SOJ_MAIN_PROVENANCE_GATE.md",
+        "automation_runs/2026-08-22_1346_JST/soj_main_provenance_gate_v1.py",
+        "automation_runs/2026-08-22_1346_JST/test_soj_main_provenance_gate_rev600.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/production-main-provenance-gate",
+      "state": "active",
+      "target_revision": 600
+    },
+    {
+      "branch": "main",
+      "claim_id": "chatgpt-session-j-rev620-main-sync-20260822T144601JST-9cb90e23",
+      "heartbeat_at_jst": "2026-08-22T14:46:01+09:00",
+      "reserved_paths": [
+        "MAIN.md",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev620-main-sync-20260822T144601JST-9cb90e23-update_problem_tree.json"
+      ],
+      "scope": "repository/main-revision-sync/rev620",
+      "state": "active",
+      "target_revision": 620
+    },
+    {
+      "branch": "agi-gi-rev650-soj-recursive-caller-provenance-session-20260822-1348",
+      "claim_id": "chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e",
+      "heartbeat_at_jst": "2026-08-22T13:58:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev650-soj-recursive-caller-provenance-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev650-soj-recursive-caller-provenance-20260822T1348JST-75dfa37e-publish.json",
+        "automation_runs/2026-08-22_1348_JST/REV650_SOJ_RECURSIVE_CALLER_PROVENANCE.md",
+        "automation_runs/2026-08-22_1348_JST/soj_recursive_caller_provenance_v1.py",
+        "automation_runs/2026-08-22_1348_JST/test_soj_recursive_caller_provenance_rev650.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-caller-result-provenance-binding",
+      "state": "active",
+      "target_revision": 650
+    },
+    {
+      "branch": "agi-gi-rev700-soj-recursive-production-provenance-join-session-20260822-1359",
+      "claim_id": "chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912",
+      "heartbeat_at_jst": "2026-08-22T14:08:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev700-soj-recursive-production-provenance-join-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912-publish.json",
+        "automation_runs/2026-08-22_1359_JST/REV700_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_JOIN.md",
+        "automation_runs/2026-08-22_1359_JST/soj_recursive_production_provenance_join_v1.py",
+        "automation_runs/2026-08-22_1359_JST/test_soj_recursive_production_provenance_join_rev700.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-provenance-join",
+      "state": "active",
+      "target_revision": 700
+    },
+    {
+      "branch": "agi-gi-rev720-soj-recursive-production-cost-provenance-session-20260822-1409",
+      "claim_id": "chatgpt-session-j-rev720-soj-recursive-production-cost-provenance-20260822T1409JST-3e7b5c19",
+      "heartbeat_at_jst": "2026-08-22T14:09:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev720-soj-recursive-production-cost-provenance-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev720-soj-recursive-production-cost-provenance-20260822T1409JST-3e7b5c19-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev720-soj-recursive-production-cost-provenance-20260822T1409JST-3e7b5c19-publish.json",
+        "automation_runs/2026-08-22_1409_JST/REV720_SOJ_RECURSIVE_PRODUCTION_COST_PROVENANCE.md",
+        "automation_runs/2026-08-22_1409_JST/soj_recursive_production_cost_provenance_v1.py",
+        "automation_runs/2026-08-22_1409_JST/test_soj_recursive_production_cost_provenance_rev720.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-construction-cost-provenance-join",
+      "state": "active",
+      "target_revision": 720
+    },
+    {
+      "branch": "agi-gi-rev800-soj-recursive-production-total-cost-coherence-session-20260822-1411",
+      "claim_id": "chatgpt-session-j-rev800-soj-recursive-production-total-cost-coherence-20260822T141100JST-8b2e4c61",
+      "heartbeat_at_jst": "2026-08-22T14:17:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev800-soj-recursive-production-total-cost-coherence-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev800-soj-recursive-production-total-cost-coherence-20260822T141100JST-8b2e4c61-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev800-soj-recursive-production-total-cost-coherence-20260822T141100JST-8b2e4c61-publish.json",
+        "automation_runs/2026-08-22_1411_JST/REV800_SOJ_RECURSIVE_PRODUCTION_TOTAL_COST_COHERENCE.md",
+        "automation_runs/2026-08-22_1411_JST/soj_recursive_production_total_cost_coherence_v1.py",
+        "automation_runs/2026-08-22_1411_JST/test_soj_recursive_production_total_cost_coherence_rev800.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-total-cost-coherence",
+      "state": "active",
+      "target_revision": 800
+    }
+  ],
+  "paths": [
+    ".github/workflows/rev900-soj-recursive-production-provenance-total-cost-smoke.yml",
+    "automation_runs/2026-08-22_1446_JST/REV900_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_TOTAL_COST_BINDING.md",
+    "automation_runs/2026-08-22_1446_JST/soj_recursive_production_provenance_total_cost_binding_v1.py",
+    "automation_runs/2026-08-22_1446_JST/test_soj_recursive_production_provenance_total_cost_binding_rev900.py"
+  ],
+  "phase": "attempt_solution",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T14:50:43.235804+09:00",
+  "registry_digest": "sha256:6075b4d907ca8d3d4edeff5a48621454844d77c860eb92d16ffcf18af946f716",
+  "registry_source_sha": "aac4bac6848d22afbd26b650d9abf8ca5fc61af0",
+  "schema_version": 1,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-provenance-total-cost-binding",
+  "target_revision": 900
+}
