@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-phase-evidence-current-registry-20260822T210304JST-ed4dfe4a",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
   "started_at_jst": "2026-08-22T21:03:04+09:00",
-  "heartbeat_at_jst": "2026-08-22T21:09:19+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:12:47+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "ed4dfe4a826eaedb88b1637a7b8ddf31ac7e89c2",
   "starting_agi_gi_rev": 3300,
@@ -47,16 +47,22 @@
     ],
     "decision": "combine immutable source replay with a current canonical registry re-admission; tolerate unrelated heartbeat drift but reject new conflicts or missing/closed ownership"
   },
-  "status": "in_progress",
+  "status": "completed",
   "agi_state": "NOT_AGI",
   "last_activity_at_jst": "2026-08-22T21:09:19+09:00",
   "pull_request": 291,
-  "exact_head_sha": "713f2deed87fe83468cafb8a0d558ae1398b1777",
+  "exact_head_sha": "6f63b43b01671102b064baaa96c852025a989aaf",
   "validation": {
-    "local_focused_tests": "30/30 passed",
-    "phase_guard_current_registry": "valid; conflicts=0",
-    "py_compile": "success",
-    "diff_check": "success",
-    "exact_head_workflows": "pending"
-  }
+    "exact_head_workflows": "12/12 success",
+    "post_merge_automation_tests": "81/81 passed",
+    "main_revision_guard": "3300 = 3300",
+    "claim_registry": "valid; collisions=0",
+    "run_start_history_guard": "79 records; 74 starts; 4 corrections; 1 identity correction",
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "overflow_triggered": false,
+    "agi_state": "NOT_AGI"
+  },
+  "completed_at_jst": "2026-08-22T21:12:47+09:00",
+  "merge_commit_sha": "b019fed25cdb0e9f31460b7267f46952f1b8b4a5"
 }
