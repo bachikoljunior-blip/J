@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-phase-evidence-current-registry-20260822T210304JST-ed4dfe4a",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
+  "started_at_jst": "2026-08-22T21:03:04+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:03:04+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "ed4dfe4a826eaedb88b1637a7b8ddf31ac7e89c2",
+  "starting_agi_gi_rev": 3300,
+  "target_revision": null,
+  "scope": "repository-coordination/problem-phase-evidence/current-registry-snapshot",
+  "branch": "hardening/phase-evidence-current-registry-20260822-2103",
+  "reserved_paths": [
+    ".github/workflows/problem-solving-parallel-admission.yml",
+    "automation/problem_solving_phase_evidence_guard.py",
+    "automation/test_problem_solving_phase_evidence_guard.py",
+    "automation_runs/2026-08-22_2103_JST/PHASE_EVIDENCE_CURRENT_REGISTRY.md",
+    "agi/run-history/active/chatgpt-session-j-phase-evidence-current-registry-20260822T210304JST-ed4dfe4a.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-phase-evidence-current-registry-20260822T210304JST-ed4dfe4a-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-phase-evidence-current-registry-20260822T210304JST-ed4dfe4a-publish.json"
+  ],
+  "parallel_exclusions": [
+    "all AGI solver/proof-DAG/rev implementation scopes",
+    "MAIN.md and run-start history",
+    "all sibling claim paths"
+  ],
+  "intent": "Fail closed when pull-request phase evidence was generated from a registry commit older than the current canonical main, while retaining exact replay of the persisted source snapshot. Require an explicit current-registry ref in CI and add regression coverage. Do not change AGI functionality or claim AGI.",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "phase evidence can remain internally replayable after canonical main claim registry advances",
+    "attempt": "bind PR evidence source SHA to an explicitly resolved current canonical registry ref",
+    "decomposition_if_unresolved": [
+      "ref resolution",
+      "source equality check",
+      "workflow wiring",
+      "regression tests"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "Git merge-base ancestry",
+      "required up-to-date branch checks",
+      "existing registry snapshot replay"
+    ],
+    "decision": "add current canonical ref equality without weakening existing replay checks"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
