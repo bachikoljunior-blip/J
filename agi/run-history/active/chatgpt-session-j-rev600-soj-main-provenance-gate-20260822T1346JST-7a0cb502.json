@@ -1,0 +1,61 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502",
+  "session_id": "chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346+0900-7a0cb502-turn1",
+  "started_at_jst": "2026-08-22T13:46:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T13:58:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "7a0cb5024170e1447bd299382e088f20be22690a",
+  "starting_agi_gi_rev": 295,
+  "target_revision": 600,
+  "scope": "w1r-h6/corrected-split-or-johnson/production-main-provenance-gate",
+  "branch": "agi-gi-rev600-soj-main-provenance-gate-session-20260822-1346",
+  "pull_request": 250,
+  "pull_request_state": "draft_open_upstream_rev400_rev500_unmerged",
+  "latest_head_sha": "0ad80e12e29360efe9a547280e08da07ed8da0d4",
+  "intent": "add a fail-closed production-integration provenance gate that independently replays the public rev400/rev500 caller contracts and accepts their proof identities only when each is anchored to unchanged main-reachable JSON evidence content, without importing or modifying separately owned branch-only implementations",
+  "reserved_paths": [
+    ".github/workflows/rev600-soj-main-provenance-gate-smoke.yml",
+    "automation_runs/2026-08-22_1346_JST/REV600_SOJ_MAIN_PROVENANCE_GATE.md",
+    "automation_runs/2026-08-22_1346_JST/soj_main_provenance_gate_v1.py",
+    "automation_runs/2026-08-22_1346_JST/test_soj_main_provenance_gate_rev600.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev291 Johnson recursive handoff / PR #234",
+    "rev293 Johnson recursive result lift / PR #241",
+    "rev340 recursive-result accounting binding / PR #243",
+    "rev360 Johnson construction cost binding / PR #245",
+    "rev400 production caller binding / PR #246",
+    "rev500 caller replay envelope / PR #247",
+    "rev620 CRX3 small-order production proof-DAG and every reserved path",
+    "rev650 larger-ground recursive caller-result producer provenance and every reserved path",
+    "all sibling claims, branches, PRs, workflows, MAIN.md, proof-DAG, recurrence, and shared coordination implementations"
+  ],
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_branch_only_rev400_or_rev500_implementation": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
+  },
+  "validation": {
+    "state": "exact_head_green_draft_upstream_blocked",
+    "exact_head_sha": "0ad80e12e29360efe9a547280e08da07ed8da0d4",
+    "focused_regressions": "17/17 passed",
+    "compile": "success",
+    "sibling_import_rejection": "success",
+    "reserved_diff": "success",
+    "attempt_solution_admission": "persisted_replayed_admitted_true_conflicts_empty",
+    "publish_admission": "persisted_replayed_admitted_true_conflicts_empty",
+    "dedicated_smoke_run": 32553038803,
+    "dedicated_smoke_conclusion": "success",
+    "parallel_admission_run": 32553038795,
+    "parallel_admission_conclusion": "success",
+    "merge_blocker": "rev400 PR #246 and rev500 PR #247 remain open draft unmerged"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
