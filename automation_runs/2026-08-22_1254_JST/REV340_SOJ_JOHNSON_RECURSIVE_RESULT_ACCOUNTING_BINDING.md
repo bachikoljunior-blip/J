@@ -19,6 +19,10 @@ A successful result is a deterministic `certified_johnson_recursive_result_accou
 
 Only rev340 reserved paths are changed. rev275–rev320 sibling claims/branches/PRs/workflows, including rev291, rev292, rev293, rev295, and rev320, are read-only. `MAIN.md`, CRX1/CRX2/CRX3 implementation paths, shared proof-DAG code, recurrence-accounting code, and shared coordination implementation are untouched.
 
-## Validation target
+## Validation
 
-The dedicated smoke compiles the module, runs the focused rev340 tests, checks that the implementation does not import sibling branch-only modules, and verifies that the branch diff is restricted to the rev340 reserved paths. The repository-wide phase-admission workflow remains authoritative for coordination evidence; no evidence is fabricated by this leaf.
+The implementation and focused test module compile successfully. The first dedicated PR smoke exposed only an environment assumption: the hosted Python image did not include `pytest`. The rev340 workflow was therefore made dependency-free and now discovers and executes the plain-assert focused tests with the standard library; the corrected dedicated smoke passed compile, focused regression, sibling-import rejection, and reserved-path enforcement.
+
+After the corrected push smoke was green, the workflow invoked the repository's authoritative `automation/problem_solving_parallel_admission.py` against the exact rev340 claim/scope/paths. The generator admitted `attempt_solution` with `conflicts=[]` and committed the generated payload at the reserved phase-admission path. No admission payload was hand-authored or inferred from stale state.
+
+A connector-authored follow-up documentation commit intentionally follows the bot evidence commit so pull-request checks are evaluated on an ordinary branch head containing that exact generated evidence. The repository-wide phase-evidence guard remains authoritative for the final head.
