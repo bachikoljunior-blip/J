@@ -4,13 +4,16 @@
   "claim_id": "chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T085326+0900-429b7cee-turn1",
   "started_at_jst": "2026-08-22T08:56:16+09:00",
-  "heartbeat_at_jst": "2026-08-22T08:56:16+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:04:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "48376a3316d5ea62643baa635f10acd0bf84c190",
   "starting_agi_gi_rev": 266,
   "target_revision": 272,
   "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/resource-execution-ledger-replay-verifier",
   "branch": "agi-gi-rev272-resource-ledger-replay-verifier-session-20260822-0856",
+  "pull_request": 218,
+  "latest_head_sha": "f08675e9a9a837c1b2627396056e747926601e01",
+  "latest_observed_main_sha": "fb88880036938cc5f9b2f6917e3bb3562dddfa51",
   "reserved_paths": [
     ".github/workflows/rev272-implicit-resource-ledger-replay-verifier-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33-attempt-solution.json",
@@ -32,6 +35,19 @@
   ],
   "intent": "add an independent replay verifier for a serialized six-phase implicit relation resource-execution ledger contract: require a canonical prefix, exactly-once phases, immutable context identity, per-phase and total admitted bounds, preserved unexecuted suffix, and complete-only finalization while remaining structurally independent of the active rev270 branch implementation",
   "non_interference": "Only new rev272 reserved paths may be added on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, or shared implementation path.",
-  "status": "active_claimed_preimplementation",
+  "implementation": {
+    "commit": "f08675e9a9a837c1b2627396056e747926601e01",
+    "files_added": 4,
+    "local_unit_tests": 19,
+    "local_py_compile": "success",
+    "attempt_admission_registry_source_sha": "51678bf720f4a009aa4820c637d984c46cd2e80a",
+    "attempt_admission_replay_at_jst": "2026-08-22T08:57:30+09:00",
+    "semantic_exactness_certified": false
+  },
+  "validation": {
+    "local": "19 focused tests passed; py_compile passed",
+    "github_actions": "pending_no_run_observed_at_2026-08-22T09:04:00+09:00"
+  },
+  "status": "active_validation",
   "agi_state": "NOT_AGI"
 }
