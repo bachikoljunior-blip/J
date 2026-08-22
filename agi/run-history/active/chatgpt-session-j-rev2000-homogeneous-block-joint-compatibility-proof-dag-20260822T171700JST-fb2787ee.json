@@ -4,14 +4,16 @@
   "claim_id": "chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee",
   "session_id": "chatgpt-session-j-recurring-continuation-rev2000-20260822T171700+0900-turn9",
   "started_at_jst": "2026-08-22T17:17:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T17:28:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:34:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "fb2787ee28a39d7420fc0ad25c2738b75c52096c",
   "starting_agi_gi_rev": 952,
   "target_revision": 2000,
   "scope": "crx3/structural-consumers/homogeneous-block-joint-reduction-compatibility-proof-dag",
   "branch": "agi-gi-rev2000-homogeneous-block-joint-compatibility-proof-dag-session-20260822-1717",
-  "latest_head_sha": "ab067282af2ae71ea2a2a83cbeafe010aa5c3015",
+  "pull_request": 271,
+  "latest_head_sha": "f93ddc04251d9572d63b76e5b1175956908fdfcd",
+  "latest_observed_main_sha": "c11013448dd243e465e88bf9259a684c452628e0",
   "reserved_paths": [
     ".github/workflows/rev2000-homogeneous-block-joint-compatibility-proof-dag-smoke.yml",
     "automation_runs/2026-08-22_1717_JST/REV2000_HOMOGENEOUS_BLOCK_JOINT_COMPATIBILITY_PROOF_DAG.md",
@@ -50,11 +52,14 @@
   "post_claim_race_check": "success_no_target_revision_or_scope_collision",
   "implementation": {
     "paths_persisted": 4,
-    "push_admission_preview": true,
+    "focused_regressions_authored": 10,
     "local_py_compile": "success",
-    "runtime_ci": "pending_natural_workflow"
+    "draft_pr": 271,
+    "natural_attempt_solution_admission": "pending_not_fabricated",
+    "natural_ci": "pending_not_manually_rerun",
+    "merge_attempted": false
   },
   "strict_boundary": "Provenance and conservative accounting only. No quotient String-Isomorphism coset, no original-domain transporter lift, no AGI claim.",
-  "status": "active_implementation_persisted",
+  "status": "active_draft_pr_pending_natural_admission_and_ci",
   "agi_state": "NOT_AGI"
 }
