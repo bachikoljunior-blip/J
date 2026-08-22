@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346JST-7a0cb502",
   "session_id": "chatgpt-session-j-rev600-soj-main-provenance-gate-20260822T1346+0900-7a0cb502-turn1",
   "started_at_jst": "2026-08-22T13:46:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T13:46:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T13:54:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "7a0cb5024170e1447bd299382e088f20be22690a",
   "starting_agi_gi_rev": 295,
@@ -30,6 +30,7 @@
     "rev360 Johnson construction cost binding / PR #245",
     "rev400 production caller binding / PR #246",
     "rev500 caller replay envelope / PR #247",
+    "rev620 CRX3 small-order production proof-DAG and every reserved path",
     "all sibling claims, branches, PRs, workflows, MAIN.md, proof-DAG, recurrence, and shared coordination implementations"
   ],
   "parallel_safety": {
@@ -40,7 +41,7 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
   },
   "validation": {
-    "state": "claimed_not_yet_implemented"
+    "state": "local_compile_and_17_focused_regressions_green_pending_branch_publish"
   },
   "status": "active",
   "agi_state": "NOT_AGI"
