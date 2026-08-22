@@ -4,13 +4,16 @@
   "claim_id": "chatgpt-session-j-rev2300-homogeneous-block-structural-quotient-coherence-20260822T175000JST-5ee6ec94",
   "session_id": "chatgpt-session-j-recurring-continuation-rev2300-20260822T175000+0900-turn1",
   "started_at_jst": "2026-08-22T17:50:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T17:52:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:58:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "5ee6ec94da5536bb59b388ecf8c4d30b3c07255e",
   "starting_agi_gi_rev": 952,
   "target_revision": 2300,
   "scope": "crx3/algorithmic-consumers/homogeneous-block-structural-original-domain-proof-coherence",
   "branch": "agi-gi-rev2300-homogeneous-block-structural-quotient-coherence-session-20260822-1750",
+  "pull_request": 275,
+  "latest_head_sha": "a5209d4806f2ae4d4acfcc3868688c838f85d854",
+  "latest_observed_main_sha": "c37a76e9897d49858b530847e38c040e359a7d8c",
   "reserved_paths": [
     ".github/workflows/rev2300-homogeneous-block-structural-quotient-coherence-smoke.yml",
     "automation_runs/2026-08-22_1750_JST/REV2300_HOMOGENEOUS_BLOCK_STRUCTURAL_QUOTIENT_COHERENCE.md",
@@ -44,6 +47,20 @@
     "rev2000 HomogeneousBlockJointCompatibilityResult / proof identity public field semantics",
     "rev2100 HomogeneousBlockOriginalDomainResult / proof identity public field semantics"
   ],
-  "status": "active_claimed_pre_implementation_scope_narrowed_after_rev2100_publication",
+  "implementation": {
+    "focused_regressions": "16/16 passed locally and in dedicated CI",
+    "py_compile": "success locally and in dedicated CI",
+    "branch_only_sibling_import_gate": "success",
+    "reserved_diff_gate": "success",
+    "attempt_solution_admission": "admitted=true conflicts=[] persisted and replayed",
+    "publish_admission": "admitted=true conflicts=[] persisted and replayed",
+    "dedicated_workflow_run": 32563608833,
+    "dedicated_workflow": "success",
+    "parallel_admission_workflow_run": 32563608781,
+    "parallel_admission_workflow": "success",
+    "merge_attempted": false
+  },
+  "integration_hold": "rev2000 / PR #271 and rev2100 / PR #272 remain independently owned, open, draft and unmerged; rev2300 is therefore kept draft/unmerged despite its own exact-head green evidence",
+  "status": "active_draft_pr_exact_head_green_upstream_integration_wait",
   "agi_state": "NOT_AGI"
 }
