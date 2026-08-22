@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-run-start-history-integrity-20260822T174325JST-56c7635a",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T174107+0900-d984ef7-turn1",
+  "started_at_jst": "2026-08-22T17:43:25+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:43:25+09:00",
+  "stale_after_minutes": 45,
+  "starting_main_sha": "56c7635aaab34c5e9705650af135334acdf25ea4",
+  "starting_agi_gi_rev": 952,
+  "target_revision": null,
+  "scope": "repository-coordination/run-start-history/canonical-revision-integrity",
+  "reserved_paths": [
+    ".github/workflows/run-start-history-integrity.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-run-start-history-integrity-20260822T174325JST-56c7635a-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-run-start-history-integrity-20260822T174325JST-56c7635a-publish.json",
+    "automation/agi_gi_run_start_history_guard.py",
+    "automation/test_agi_gi_run_start_history_guard.py",
+    "automation_runs/2026-08-22_1744_JST/RUN_START_HISTORY_INTEGRITY.md"
+  ],
+  "branch": "hardening/run-start-history-integrity-20260822-1744",
+  "status": "active",
+  "agi_state": "NOT_AGI",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "append-only run-start records lack an independent replay guard that verifies recorded or corrected revisions against each immutable starting main SHA",
+    "attempt": "replay every start SHA through canonical integration ancestry, apply explicit correction events, and fail closed on mismatches or malformed lineage",
+    "decomposition_if_unresolved": [
+      "JSONL structural validation",
+      "canonical ancestry replay",
+      "correction-lineage validation",
+      "CI enforcement"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "automation/agi_gi_run_start_record.py canonical ancestry parser",
+      "append-only STARTS.jsonl correction events",
+      "Git object reachability"
+    ],
+    "decision": "compose existing immutable-start and explicit-correction mechanisms into a repository CI guard; do not introduce another revision definition"
+  },
+  "non_interference": "Reserve only the six coordination hardening/evidence paths; do not modify MAIN.md or active solver/proof-DAG scopes.",
+  "strict_boundary": "Run-history integrity only. No GI or AGI capability claim."
+}
