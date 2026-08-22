@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev280-literal-giant-proof-dag-20260822T095000JST-057e264a",
   "session_id": "chatgpt-session-j-automation-continuation-20260822T095000+0900-rev280",
   "started_at_jst": "2026-08-22T09:50:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:50:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:53:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "057e264aba64be35e52dc1e0d09683944475b446",
   "starting_agi_gi_rev": 274,
   "target_revision": 280,
   "scope": "crx3/algorithmic-consumers/literal-giant-exact-terminal-proof-dag",
   "branch": "agi-gi-rev280-literal-giant-proof-dag-session-20260822-0950",
+  "pull_request": 224,
+  "latest_head_sha": "76d44d1c0148bbad9360ea62366903f3ec610723",
   "reserved_paths": [
     ".github/workflows/rev280-literal-giant-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev280-literal-giant-proof-dag-20260822T095000JST-057e264a-attempt-solution.json",
@@ -25,7 +27,7 @@
     "rev277 imprimitive proof-DAG and all reserved paths",
     "rev276 joint block reduction compatibility and all reserved paths",
     "rev275 block-action kernel factorization and all reserved paths",
-    "rev273 homogeneous block relation provenance / PR #219 and all reserved paths",
+    "rev273 homogeneous block relation provenance lifecycle and all reserved paths",
     "rev271 implicit image value-coset proof-DAG / PR #217 and all reserved paths",
     "rev264 primitive-Johnson proof-DAG / PR #210 and all reserved paths",
     "CRX3 state-orbit proof-DAG / PR #206 and all reserved paths",
@@ -34,6 +36,12 @@
   ],
   "intent": "consume only the main-integrated rev208 literal natural-domain S_n/A_n exact String-Isomorphism terminal and the main-integrated rev220 conservative execution proof-DAG substrate; attach a replay-stable immutable identity to exact nonempty and exact-empty literal-giant outcomes, independently validate identity/status/accounting before proof-DAG admission, and fail closed for nonexact, opaque, malformed, or tampered evidence without modifying either shared implementation",
   "non_interference": "Only new rev280 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
-  "status": "active_claimed",
+  "validation": {
+    "dedicated_run_id": 32541713114,
+    "dedicated_status": "in_progress",
+    "parallel_registry_known_external_blocker": "rev275 claim is currently non-schema-v2 according to rev276 heartbeat; do not mutate sibling claim",
+    "sibling_modified": false
+  },
+  "status": "active_pr_open_validation_running",
   "agi_state": "NOT_AGI"
 }
