@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
+  "session_id": "chatgpt-session-j-parallel-continuation-20260822T094800+0900-rev279-turn2",
+  "started_at_jst": "2026-08-22T09:48:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:48:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "15932427fd0b83fa27d50cf83319fc88c75df564",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 279,
+  "scope": "crx3/algorithmic-consumers/implicit-relation-parent-outcome-proof-dag",
+  "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
+  "reserved_paths": [
+    ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV279_PARENT_OUTCOME_PROOF_DAG.md",
+    "automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_proof_dag_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_proof_dag_rev279.py"
+  ],
+  "parallel_exclusions": [
+    "rev278 homogeneous block quotient preimage and all reserved paths",
+    "rev277 imprimitive proof-DAG and all reserved paths",
+    "rev276 joint block reduction compatibility and all reserved paths",
+    "rev275 block-action kernel factorization and all reserved paths",
+    "rev273 homogeneous block relation provenance / PR #219 and all reserved paths",
+    "rev271 implicit image value-coset proof-DAG / PR #217 and all reserved paths",
+    "rev264 primitive-Johnson proof-DAG / PR #210 and all reserved paths",
+    "CRX3 state-orbit proof-DAG / PR #206 and all reserved paths",
+    "rev252 small-order production admission / PR #216",
+    "CRX1/CRX2 active branches, MAIN.md, every sibling claim, branch, PR, workflow, and shared implementation path"
+  ],
+  "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, or tampered evidence without modifying shared solvers or upstream CRX1 branches",
+  "non_interference": "Only new rev279 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
+  "status": "active_claimed",
+  "agi_state": "NOT_AGI"
+}
