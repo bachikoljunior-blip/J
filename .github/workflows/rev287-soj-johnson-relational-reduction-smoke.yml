@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/rev287-soj-johnson-relational-reduction-smoke.yml'
       - 'agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-merge.json'
       - 'agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-publish.json'
       - 'automation_runs/2026-08-22_1155_JST/REV287_SOJ_JOHNSON_RELATIONAL_REDUCTION.md'
       - 'automation_runs/2026-08-22_1155_JST/corrected_soj_johnson_relational_reduction_v1.py'
@@ -40,7 +41,7 @@ jobs:
           while IFS= read -r path; do
             [ -z "$path" ] && continue
             case "$path" in
-              .github/workflows/rev287-soj-johnson-relational-reduction-smoke.yml|agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-attempt-solution.json|agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-publish.json|automation_runs/2026-08-22_1155_JST/REV287_SOJ_JOHNSON_RELATIONAL_REDUCTION.md|automation_runs/2026-08-22_1155_JST/corrected_soj_johnson_relational_reduction_v1.py|automation_runs/2026-08-22_1155_JST/test_corrected_soj_johnson_relational_reduction_rev287.py)
+              .github/workflows/rev287-soj-johnson-relational-reduction-smoke.yml|agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-attempt-solution.json|agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-merge.json|agi/run-history/phase-admissions/chatgpt-session-j-rev287-soj-johnson-relational-reduction-20260822T115551JST-543db3a5-publish.json|automation_runs/2026-08-22_1155_JST/REV287_SOJ_JOHNSON_RELATIONAL_REDUCTION.md|automation_runs/2026-08-22_1155_JST/corrected_soj_johnson_relational_reduction_v1.py|automation_runs/2026-08-22_1155_JST/test_corrected_soj_johnson_relational_reduction_rev287.py)
                 ;;
               *)
                 echo "unexpected non-rev287 path: $path" >&2
