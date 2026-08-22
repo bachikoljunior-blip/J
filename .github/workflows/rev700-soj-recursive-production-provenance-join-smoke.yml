@@ -1,0 +1,93 @@
+name: rev700 SOJ recursive production provenance join smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_1359_JST/soj_recursive_production_provenance_join_v1.py'
+      - 'automation_runs/2026-08-22_1359_JST/test_soj_recursive_production_provenance_join_rev700.py'
+      - 'automation_runs/2026-08-22_1359_JST/REV700_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_JOIN.md'
+      - '.github/workflows/rev700-soj-recursive-production-provenance-join-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912-publish.json'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev700 module and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1359_JST/soj_recursive_production_provenance_join_v1.py \
+            automation_runs/2026-08-22_1359_JST/test_soj_recursive_production_provenance_join_rev700.py
+      - name: Run rev700 focused regressions
+        run: |
+          python -m unittest discover \
+            -s automation_runs/2026-08-22_1359_JST \
+            -p 'test_soj_recursive_production_provenance_join_rev700.py' \
+            -v
+      - name: Reject branch-only sibling imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '(^|[[:space:]])(from|import)[[:space:]].*(soj_caller_replay_envelope_v1|soj_main_provenance_gate_v1|soj_recursive_caller_provenance_v1)' \
+              automation_runs/2026-08-22_1359_JST; then
+            echo 'rev700 must not import branch-only sibling implementations' >&2
+            exit 1
+          fi
+      - name: Canonical attempt_solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-provenance-join \
+            --target-revision 700 \
+            --path .github/workflows/rev700-soj-recursive-production-provenance-join-smoke.yml \
+            --path automation_runs/2026-08-22_1359_JST/REV700_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_JOIN.md \
+            --path automation_runs/2026-08-22_1359_JST/soj_recursive_production_provenance_join_v1.py \
+            --path automation_runs/2026-08-22_1359_JST/test_soj_recursive_production_provenance_join_rev700.py \
+            --output /tmp/rev700-attempt.json
+          cat /tmp/rev700-attempt.json
+      - name: Canonical publish admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912 \
+            --phase publish \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-provenance-join \
+            --target-revision 700 \
+            --path .github/workflows/rev700-soj-recursive-production-provenance-join-smoke.yml \
+            --path automation_runs/2026-08-22_1359_JST/REV700_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_JOIN.md \
+            --path automation_runs/2026-08-22_1359_JST/soj_recursive_production_provenance_join_v1.py \
+            --path automation_runs/2026-08-22_1359_JST/test_soj_recursive_production_provenance_join_rev700.py \
+            --output /tmp/rev700-publish.json
+          cat /tmp/rev700-publish.json
+      - name: Enforce reserved rev700 diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --quiet
+          changed="$(git diff --name-only origin/main...HEAD)"
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              .github/workflows/rev700-soj-recursive-production-provenance-join-smoke.yml|automation_runs/2026-08-22_1359_JST/REV700_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_JOIN.md|automation_runs/2026-08-22_1359_JST/soj_recursive_production_provenance_join_v1.py|automation_runs/2026-08-22_1359_JST/test_soj_recursive_production_provenance_join_rev700.py|agi/run-history/phase-admissions/chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912-attempt-solution.json|agi/run-history/phase-admissions/chatgpt-session-j-rev700-soj-recursive-production-provenance-join-20260822T1359JST-c4f3a912-publish.json)
+                ;;
+              *)
+                echo "unexpected non-rev700 path: $path" >&2
+                exit 1
+                ;;
+            esac
+          done <<< "$changed"
