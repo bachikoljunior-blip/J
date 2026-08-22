@@ -1,0 +1,31 @@
+name: rev286 SOJ Johnson terminal cost smoke
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/rev286-soj-johnson-terminal-cost-smoke.yml'
+      - 'automation_runs/2026-08-22_1050_JST/REV286_SOJ_JOHNSON_TERMINAL_COST.md'
+      - 'automation_runs/2026-08-22_1050_JST/corrected_soj_johnson_terminal_cost_v1.py'
+      - 'automation_runs/2026-08-22_1050_JST/test_corrected_soj_johnson_terminal_cost_rev286.py'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run rev286 focused regression
+        run: python automation_runs/2026-08-22_1050_JST/test_corrected_soj_johnson_terminal_cost_rev286.py -v
+      - name: Compile rev286 and main-integrated dependencies
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1050_JST/corrected_soj_johnson_terminal_cost_v1.py \
+            automation_runs/2026-08-22_1050_JST/test_corrected_soj_johnson_terminal_cost_rev286.py \
+            automation_runs/2026-08-19_0851_JST/primitive_johnson_ground_terminal_v1.py \
+            automation_runs/2026-08-19_0851_JST/quasipoly_recurrence_accounting_v1.py
