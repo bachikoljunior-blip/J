@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-phase-evidence-self-protection-20260822T212857JST-593ff873",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
+  "started_at_jst": "2026-08-22T21:28:57+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:28:57+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "593ff873a53732f67b3f62a5442820cdac40d277",
+  "starting_agi_gi_rev": 3300,
+  "target_revision": null,
+  "scope": "repository-coordination/problem-phase-evidence/self-protecting-workflow",
+  "branch": "hardening/phase-evidence-self-protection-20260822-2128",
+  "reserved_paths": [
+    "automation/problem_solving_phase_evidence_guard.py",
+    "automation/test_problem_solving_phase_evidence_guard.py",
+    "automation_runs/2026-08-22_2128_JST/PHASE_EVIDENCE_SELF_PROTECTION.md",
+    "agi/run-history/active/chatgpt-session-j-phase-evidence-self-protection-20260822T212857JST-593ff873.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-phase-evidence-self-protection-20260822T212857JST-593ff873-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-phase-evidence-self-protection-20260822T212857JST-593ff873-publish.json"
+  ],
+  "parallel_exclusions": [
+    "all AGI solver/proof-DAG/rev implementation scopes",
+    "MAIN.md and run-start history",
+    "all sibling claim paths"
+  ],
+  "intent": "Treat the phase-admission workflow itself as protected problem state so a workflow-only change cannot disable enforcement without replayable admission evidence. Coordination only; NOT_AGI.",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "the phase-admission workflow triggers on its own changes but the guard does not classify that workflow as problem state",
+    "attempt": "classify the enforcement workflow itself as protected and add regression coverage",
+    "decomposition_if_unresolved": [
+      "protected workflow path classification",
+      "workflow-only changed-file rejection without evidence",
+      "self-change evidence replay"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "self-protecting CI configuration patterns",
+      "existing is_problem_state_path classifier",
+      "commit-local push enforcement from PR #293"
+    ],
+    "decision": "extend the single shared classifier instead of introducing a second workflow-specific verifier"
+  },
+  "status": "active",
+  "state": "active",
+  "agi_state": "NOT_AGI"
+}
