@@ -1,0 +1,67 @@
+name: rev360 SOJ Johnson construction cost binding smoke
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/rev360-soj-johnson-construction-cost-binding-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev360-soj-johnson-construction-cost-binding-20260822T130000JST-5d4f8c11-attempt-solution.json'
+      - 'automation_runs/2026-08-22_1300_JST/REV360_SOJ_JOHNSON_CONSTRUCTION_COST_BINDING.md'
+      - 'automation_runs/2026-08-22_1300_JST/corrected_soj_johnson_construction_cost_binding_v1.py'
+      - 'automation_runs/2026-08-22_1300_JST/test_corrected_soj_johnson_construction_cost_binding_rev360.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev360
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1300_JST/corrected_soj_johnson_construction_cost_binding_v1.py \
+            automation_runs/2026-08-22_1300_JST/test_corrected_soj_johnson_construction_cost_binding_rev360.py
+      - name: Run focused regressions
+        run: python automation_runs/2026-08-22_1300_JST/test_corrected_soj_johnson_construction_cost_binding_rev360.py
+      - name: Canonical attempt_solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev360-soj-johnson-construction-cost-binding-20260822T130000JST-5d4f8c11 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-johnson-reduction-construction-cost-binding \
+            --target-revision 360 \
+            --path .github/workflows/rev360-soj-johnson-construction-cost-binding-smoke.yml \
+            --path automation_runs/2026-08-22_1300_JST/REV360_SOJ_JOHNSON_CONSTRUCTION_COST_BINDING.md \
+            --path automation_runs/2026-08-22_1300_JST/corrected_soj_johnson_construction_cost_binding_v1.py \
+            --path automation_runs/2026-08-22_1300_JST/test_corrected_soj_johnson_construction_cost_binding_rev360.py \
+            --output /tmp/rev360-attempt-solution.json
+          echo '---BEGIN REV360 ATTEMPT EVIDENCE---'
+          cat /tmp/rev360-attempt-solution.json
+          echo '---END REV360 ATTEMPT EVIDENCE---'
+      - name: Enforce reserved problem-state diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --quiet
+          changed="$(git diff --name-only origin/main...HEAD)"
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              .github/workflows/rev360-soj-johnson-construction-cost-binding-smoke.yml|agi/run-history/phase-admissions/chatgpt-session-j-rev360-soj-johnson-construction-cost-binding-20260822T130000JST-5d4f8c11-attempt-solution.json|automation_runs/2026-08-22_1300_JST/REV360_SOJ_JOHNSON_CONSTRUCTION_COST_BINDING.md|automation_runs/2026-08-22_1300_JST/corrected_soj_johnson_construction_cost_binding_v1.py|automation_runs/2026-08-22_1300_JST/test_corrected_soj_johnson_construction_cost_binding_rev360.py)
+                ;;
+              *)
+                echo "unexpected non-rev360 path: $path" >&2
+                exit 1
+                ;;
+            esac
+          done <<< "$changed"
