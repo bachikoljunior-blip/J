@@ -4,20 +4,15 @@
   "claim_id": "chatgpt-session-j-rev292-soj-johnson-reduction-handoff-composition-20260822T123900JST-b743c9e1",
   "session_id": "chatgpt-session-j-user-parallel-continuation-20260822T123900+0900-b743c9e1",
   "started_at_jst": "2026-08-22T12:39:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T12:58:39+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:44:00+09:00",
   "stale_after_minutes": 55,
   "starting_main_sha": "f929230743444a4b3d73f0d08b7a9df4c05d8ec0",
   "starting_agi_gi_rev": 289,
   "target_revision": 292,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-relational-reduction-handoff-composition",
   "branch": "agi-gi-rev292-soj-johnson-reduction-handoff-composition-session-20260822-1239-b743c9e1",
-  "pull_request": {
-    "number": 244,
-    "url": "https://github.com/bachikoljunior-blip/J/pull/244",
-    "draft": true
-  },
-  "latest_head_sha": "1f0428960ea3632a25d3b416408e10a41239164a",
-  "progress_status": "draft_pr_open; exact_head_smoke_green_18_of_18; exact_head_phase_admission_materialization_pending",
+  "pull_request": null,
+  "latest_head_sha": null,
   "reserved_paths": [
     ".github/workflows/j-rev292-session-hourly-refire.yml",
     ".github/workflows/rev292-soj-johnson-reduction-handoff-composition-smoke.yml",
@@ -35,7 +30,6 @@
     "rev289 shared proof-DAG envelope hardening / PR #233",
     "rev290 normalized Johnson cost binding / PR #235",
     "rev291 larger-ground recursive handoff / PR #234",
-    "all claims, branches, PRs, workflows, and paths created after this claim, including rev293, rev295, rev320, and rev340",
     "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
   ],
   "intent": "add a file-disjoint fail-closed cross-certificate composition boundary between rev287's caller-independent larger-ground Johnson relational-reduction construction evidence and rev291's caller-supplied recursive-handoff contract. Revalidate both published shapes structurally without importing or modifying branch-only sibling implementations; require exact identity, Johnson parameters, represented/ground degrees, induced ground action, complement handling, progress, transport, recurrence child, and cost context to agree before issuing one deterministic replay-stable composition certificate. Do not execute recursive String Isomorphism, do not mutate sibling contracts, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
