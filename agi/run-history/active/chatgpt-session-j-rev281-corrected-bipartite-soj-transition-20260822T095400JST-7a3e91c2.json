@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2",
+  "session_id": "chatgpt-session-j-this-session-achievement-continuation-20260822T094600JST-turn1",
+  "started_at_jst": "2026-08-22T09:54:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:47:18+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "0c8eb439f16288d1e49175283efcd1362925ff28",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 281,
+  "scope": "w1r-h6/corrected-split-or-johnson/bipartite-recursive-transition-certificate",
+  "branch": "agi-gi-rev281-corrected-bipartite-soj-transition-20260822-0954",
+  "pull_request": 226,
+  "latest_head_sha": "f175a22b6bb9a1a95ff70608a2f30e28241a69cc",
+  "latest_observed_main_sha": "d5ddeec4db6ac9156ca6e72ea7a45d14a38366a7",
+  "reserved_paths": [
+    ".github/workflows/rev281-corrected-bipartite-soj-transition-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev281-corrected-bipartite-soj-transition-20260822T095400JST-7a3e91c2-publish.json",
+    "automation_runs/2026-08-22_0954_JST/REV281_CORRECTED_BIPARTITE_SOJ_TRANSITION_CERTIFICATE.md",
+    "automation_runs/2026-08-22_0954_JST/bipartite_split_or_johnson_transition_v1.py",
+    "automation_runs/2026-08-22_0954_JST/test_bipartite_split_or_johnson_transition_rev281.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 block-action kernel factorization and all reserved paths",
+    "rev276 through rev280 sibling scopes and all reserved paths",
+    "rev282 through rev284 sibling scopes and all reserved paths",
+    "CRX1, CRX2, CRX3, state-orbit, proof-carrying-merge, MAIN.md, every sibling claim, branch, PR, workflow, and reserved path"
+  ],
+  "intent": "mechanically certify one theorem-faithful corrected bipartite Split-or-Johnson recursive edge after the existing input gate: accept only a canonical exact constant-factor reduction of the auxiliary/small part or an explicit canonical Johnson embedding, with multiplicative-cost and strict-progress evidence; reject phase labels or nonconstructive recognition fail-closed",
+  "validation": {
+    "dedicated_workflow_run": 32541898447,
+    "dedicated_workflow_status": "success",
+    "exact_head": "f175a22b6bb9a1a95ff70608a2f30e28241a69cc",
+    "problem_solving_parallel_admission_run": 32541898404,
+    "problem_solving_parallel_admission_status": "failure",
+    "coordination_repair": "this claim is now canonical schema-v2; a separately owned rev275 noncanonical claim still prevents safe canonical phase-admission generation"
+  },
+  "non_interference": "Only this claim record on main and the reserved rev281 paths on the existing isolated branch may be changed. Do not modify, normalize, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementation files, or MAIN.md.",
+  "status": "active_functional_green_phase_evidence_blocked_by_sibling_registry_error",
+  "agi_state": "NOT_AGI"
+}

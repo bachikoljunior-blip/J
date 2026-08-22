@@ -1,0 +1,47 @@
+name: rev252 proof-carrying small-order production admission
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/proof_carrying_small_order_production_admission_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_proof_carrying_small_order_production_admission_rev252.py"
+      - "automation_runs/2026-08-19_0851_JST/REV252_PROOF_CARRYING_SMALL_ORDER_PRODUCTION_ADMISSION.md"
+      - ".github/workflows/rev252-proof-carrying-small-order-production-admission.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rev252-proof-carrying-small-order-production-admission-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile rev252 production admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="automation_runs/2026-08-19_0851_JST"
+          python -m py_compile \
+            "${root}/proof_carrying_small_order_production_admission_v1.py" \
+            "${root}/test_proof_carrying_small_order_production_admission_rev252.py"
+      - name: Run rev252 and inherited exactness regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="automation_runs/2026-08-19_0851_JST"
+          (
+            cd "${root}"
+            python -m unittest -v \
+              test_proof_carrying_small_order_production_admission_rev252.py \
+              test_proof_carrying_small_order_si_v1.py \
+              test_exact_result_replay_verifier_rev251.py
+          )

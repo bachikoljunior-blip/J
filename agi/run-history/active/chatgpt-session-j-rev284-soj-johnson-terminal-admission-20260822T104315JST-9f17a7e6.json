@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev284-soj-johnson-terminal-admission-20260822T104315JST-9f17a7e6",
+  "session_id": "chatgpt-session-j-continuation-20260822T104315+0900-rev284-turn1",
+  "started_at_jst": "2026-08-22T10:43:15+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:49:12+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "9f17a7e669865cd50d21d9081580e0fa374e350d",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 284,
+  "scope": "w1r-h6/corrected-split-or-johnson/explicit-johnson-embedding-terminal-admission",
+  "branch": "agi-gi-rev284-soj-johnson-terminal-admission-session-20260822-1043",
+  "pull_request": 229,
+  "latest_head_sha": "97d63ad967bdc1e021e95271af517ce157807e51",
+  "reserved_paths": [
+    ".github/workflows/rev284-soj-johnson-terminal-admission-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev284-soj-johnson-terminal-admission-20260822T104315JST-9f17a7e6-attempt-solution.json",
+    "automation_runs/2026-08-22_1043_JST/REV284_SOJ_JOHNSON_TERMINAL_ADMISSION.md",
+    "automation_runs/2026-08-22_1043_JST/corrected_soj_johnson_terminal_admission_v1.py",
+    "automation_runs/2026-08-22_1043_JST/test_corrected_soj_johnson_terminal_admission_rev284.py"
+  ],
+  "parallel_exclusions": [
+    "w1r-h6/corrected-split-or-johnson/bipartite-recursive-transition-certificate (rev281 / PR #226) and all reserved paths",
+    "w1r-h6/corrected-split-or-johnson/recursive-transition-recurrence-composition (rev283 / PR #228) and all reserved paths",
+    "rev275 conflicts_with set: CRX1, CRX2, CRX3, state-orbit, proof-carrying-merge",
+    "rev276 through rev283 sibling scopes and all reserved paths",
+    "CRX1, CRX2, CRX3, state-orbit, proof-carrying-merge, MAIN.md, every sibling claim, branch, PR, workflow, and reserved path"
+  ],
+  "intent": "add a standalone fail-closed adapter that structurally revalidates the certified explicit Johnson-embedding transition shape from active PR #226 and admits only small-ground embeddings to the already-main-integrated exact primitive-Johnson terminal interface; freeze the structural embedding/ambient-action/string identity, require exact ambient compatibility, and leave larger-ground recursive Johnson handling unresolved",
+  "coordination_note": "The canonical phase-admission generator remains blocked by the independently owned noncanonical fresh rev275 registry record. The exact rev284 evidence path is reserved; no admitted evidence is fabricated and no sibling claim is normalized or mutated.",
+  "validation": {
+    "implementation_diff": "four new reserved problem-state files only; 804 additions and 0 deletions; no shared implementation or sibling path changes",
+    "exact_head": "97d63ad967bdc1e021e95271af517ce157807e51",
+    "pull_request": 229,
+    "dedicated_workflow_run": 32544451867,
+    "dedicated_workflow_status": "success",
+    "inherited_main_primitive_johnson_regressions": "success",
+    "focused_rev284_regressions": "success",
+    "compile": "py_compile success",
+    "active_sibling_dependency_gate": "success",
+    "parallel_admission_run": 32544451831,
+    "parallel_admission_status": "failure",
+    "parallel_admission_reason": "four changed problem-state paths have no changed phase-admission evidence file",
+    "canonical_evidence_generation_blocker": "independently owned fresh rev275 registry file lacks event_type/schema-v2 canonical shape and causes the canonical registry loader to fail; rev284 does not mutate sibling evidence",
+    "latest_main_observed": "9f142b5c2f7e50e31eb3eab18fc530f743219fc0"
+  },
+  "non_interference": "Only the five rev284 reserved paths may be written on the isolated branch. Do not import active sibling branch-only modules; do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, normalize, or otherwise mutate sibling claims, branches, PRs, workflows, shared implementation paths, or MAIN.md.",
+  "status": "active_exact_head_smoke_green_phase_evidence_blocked_by_external_registry_error",
+  "agi_state": "NOT_AGI"
+}

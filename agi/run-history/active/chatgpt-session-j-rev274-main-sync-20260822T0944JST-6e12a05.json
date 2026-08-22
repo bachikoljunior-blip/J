@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev274-main-sync-20260822T0944JST-6e12a05",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T094235+0900-42a21542-turn1",
   "started_at_jst": "2026-08-22T09:44:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:44:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:58:06+09:00",
   "stale_after_minutes": 30,
   "starting_main_sha": "6e12a05a6280a4a72fe30e6e0e4e78951d65205e",
   "starting_agi_gi_rev": 266,
@@ -15,12 +15,29 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev274-main-sync-20260822T0944JST-6e12a05-update_problem_tree.json"
   ],
   "branch": "main",
-  "status": "active",
+  "status": "closed",
   "agi_state": "NOT_AGI",
   "existing_solution_audit": {
     "source": "automation/agi_gi_main_revision_guard.py",
     "observation": "declared rev266, highest canonically integrated rev274",
     "decision": "synchronize authoritative continuation without changing problem count"
   },
-  "strict_boundary": "Synchronize only MAIN.md to already integrated rev274 evidence. No algorithmic claim, sibling path, or AGI achievement."
+  "strict_boundary": "Synchronize only MAIN.md to already integrated rev274 evidence. No algorithmic claim, sibling path, or AGI achievement.",
+  "closed_at_jst": "2026-08-22T09:58:06+09:00",
+  "outcome": "blocked_fail_closed",
+  "blocker": {
+    "observation": "parallel claim registry invalid",
+    "errors": [
+      "rev275 claim missing canonical event_type",
+      "rev281 claim missing canonical event_type"
+    ],
+    "decision": "did not mutate sibling claims or publish MAIN.md without replayable update_problem_tree admission"
+  },
+  "validation": {
+    "focused_rev272_and_rev274": "31/31 success",
+    "all_modules_excluding_external_labelg": "717 passed, 13 subtests passed",
+    "main_revision_guard": "invalid: declared 266, integrated 274",
+    "forecast": 576,
+    "effective": 571
+  }
 }
