@@ -20,4 +20,6 @@ No rev3000, rev2800, rev2707, rev2600, rev2200, rev1400, run-start-history, coor
 
 The focused suite contains 18 regressions covering nonempty and exact-empty success paths, post-filter empty after a nonempty child execution, deterministic replay, literal replay gates, subclass rejection, digest tampering, cross-certificate lineage drift, outcome/source-status drift, strict shrink, accounting-cost validation, and output mutation. Local execution: 18/18 passed; `py_compile` passed.
 
+The first natural PR workflow at head `bb0b6033a9e8fa7d1b23fb10a8c1c6f625e7b49f` failed closed before tests because a later independent small-order session temporarily held the same target revision in the registry. That sibling detected the collision itself, wrote no implementation paths, marked its rev3100 claim `superseded`, and re-homed to rev3200. Main now records that retirement. This reserved-path documentation commit intentionally starts a new natural validation after the registry collision cleared; the failed workflow is not manually rerun and no sibling claim, branch, PR, or workflow is changed.
+
 This leaf is not a proof of corrected Split-or-Johnson closure, GI completion, or AGI. State remains `NOT_AGI`. Keep it draft/unmerged while rev3000 and rev2800 are independently owned and unmerged.
