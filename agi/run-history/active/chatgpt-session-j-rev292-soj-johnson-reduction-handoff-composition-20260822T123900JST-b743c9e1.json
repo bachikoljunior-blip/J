@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev292-soj-johnson-reduction-handoff-composition-20260822T123900JST-b743c9e1",
   "session_id": "chatgpt-session-j-user-parallel-continuation-20260822T123900+0900-b743c9e1",
   "started_at_jst": "2026-08-22T12:39:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T12:44:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:55:35+09:00",
   "stale_after_minutes": 55,
   "starting_main_sha": "f929230743444a4b3d73f0d08b7a9df4c05d8ec0",
   "starting_agi_gi_rev": 289,
@@ -12,7 +12,8 @@
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-relational-reduction-handoff-composition",
   "branch": "agi-gi-rev292-soj-johnson-reduction-handoff-composition-session-20260822-1239-b743c9e1",
   "pull_request": null,
-  "latest_head_sha": null,
+  "latest_head_sha": "bf719625e680a4d33a3e4d7c5732f293e88b59db",
+  "progress_status": "implementation_tests_docs_and_isolated_smoke_published; phase_admission_and_draft_pr_pending",
   "reserved_paths": [
     ".github/workflows/j-rev292-session-hourly-refire.yml",
     ".github/workflows/rev292-soj-johnson-reduction-handoff-composition-smoke.yml",
