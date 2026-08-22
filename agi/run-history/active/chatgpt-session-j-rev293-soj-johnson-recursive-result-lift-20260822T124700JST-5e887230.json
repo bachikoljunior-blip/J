@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev293-soj-johnson-recursive-result-lift-20260822T124700JST-5e887230",
+  "session_id": "chatgpt-session-j-refire-turn6-20260822T124700+0900-5e887230",
+  "started_at_jst": "2026-08-22T12:47:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:47:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "5e887230b030553079930d0b066a7376ff5320c4",
+  "starting_agi_gi_rev": 289,
+  "target_revision": 293,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-recursive-child-result-lift",
+  "branch": "agi-gi-rev293-soj-johnson-recursive-result-lift-session-20260822-1247",
+  "reserved_paths": [
+    ".github/workflows/rev293-soj-johnson-recursive-result-lift-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev293-soj-johnson-recursive-result-lift-20260822T124700JST-5e887230-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev293-soj-johnson-recursive-result-lift-20260822T124700JST-5e887230-publish.json",
+    "automation_runs/2026-08-22_1247_JST/REV293_SOJ_JOHNSON_RECURSIVE_RESULT_LIFT.md",
+    "automation_runs/2026-08-22_1247_JST/corrected_soj_johnson_recursive_result_lift_v1.py",
+    "automation_runs/2026-08-22_1247_JST/test_corrected_soj_johnson_recursive_result_lift_rev293.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 takeover kernel factorization and every reserved path",
+    "rev276-rev292 claims, branches, PRs, workflows, and reserved paths",
+    "rev287 Johnson relational-reduction construction / PR #237",
+    "rev291 larger-ground recursive handoff / PR #234",
+    "both active rev292 Johnson handoff-composition and construction-cost-binding scopes",
+    "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
+  ],
+  "intent": "add a file-disjoint fail-closed post-recursion transport certificate for the larger-ground Johnson path. Consume rev287-style certified complete J(v,k) incidence/reduction evidence structurally and a caller-supplied exact recursive child result on the certified Johnson ground; lift the child representative and target-stabilizer generators canonically to the original Johnson vertex action, verify exact source-to-target and target-stabilizer transport on the supplied parent strings, bind empty and nonempty child outcomes to deterministic replay identities, and never import or modify sibling branch-only implementations. This does not execute recursive String Isomorphism or claim corrected Split-or-Johnson/GI/AGI closure.",
+  "non_interference": "Only rev293 reserved paths may be written on the dedicated branch and only this rev293 claim may be updated on main. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
+  "status": "active_claimed_preimplementation",
+  "agi_state": "NOT_AGI"
+}
