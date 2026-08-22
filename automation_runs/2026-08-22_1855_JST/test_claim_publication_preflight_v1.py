@@ -27,6 +27,7 @@ def canonical_claim(
     scope: str,
     target_revision: int | None,
     reserved_paths: list[str],
+    started: str = "2026-08-22T18:00:00+09:00",
     heartbeat: str = "2026-08-22T18:55:00+09:00",
     status: str = "active",
     branch: str | None = None,
@@ -37,7 +38,7 @@ def canonical_claim(
         "event_type": "active_session_claim",
         "claim_id": claim_id,
         "session_id": f"session-{claim_id}",
-        "started_at_jst": "2026-08-22T18:00:00+09:00",
+        "started_at_jst": started,
         "heartbeat_at_jst": heartbeat,
         "stale_after_minutes": 90,
         "starting_main_sha": "a" * 40,
@@ -116,6 +117,7 @@ class ClaimPublicationPreflightTests(unittest.TestCase):
             scope="coordination/candidate",
             target_revision=2601,
             reserved_paths=["candidate/path.txt"],
+            started="2026-08-22T15:00:00+09:00",
             heartbeat="2026-08-22T16:00:00+09:00",
         ))
         self.assertTrue(preflight_candidate(self.candidate, self.fx.root, NOW)["admitted"])
@@ -129,6 +131,7 @@ class ClaimPublicationPreflightTests(unittest.TestCase):
 
     def test_stale_candidate_is_rejected(self) -> None:
         candidate = deepcopy(self.candidate)
+        candidate["started_at_jst"] = "2026-08-22T15:00:00+09:00"
         candidate["heartbeat_at_jst"] = "2026-08-22T16:00:00+09:00"
         result = preflight_candidate(candidate, self.fx.root, NOW)
         self.assertFalse(result["admitted"])
