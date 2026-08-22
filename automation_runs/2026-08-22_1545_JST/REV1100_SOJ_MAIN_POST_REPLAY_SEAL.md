@@ -20,7 +20,10 @@ Canonical-main hardening reconciliation:
 - PR #259 merged the canonical-main-source hardening after the original rev1100 evidence was generated.
 - The original attempt/publish evidence used branch commit `544ad9b5dc06236f29eff2ab4e2154c7a1aa656d` as `registry_source_sha`; comparison with current main shows that commit is on a diverged branch, not canonical main ancestry, so it is retained only as audit history.
 - This replacement branch is cut from main commit `1663a3c6e09f6a47ea48506c3e3b5490f7521279`, after the durable rev1100 claim was moved to this exact replacement branch and after PR #259 was integrated.
-- No pre-hardening phase evidence is copied. The dedicated workflow must generate fresh `attempt_solution` and `publish` evidence through the hardened merge-base rule before repository-wide admission can be treated as green.
-- The mathematical implementation and 15 focused fail-closed regressions are unchanged from the previously green rev1100 code; only the coordination base/evidence lifecycle is repaired.
+- No pre-hardening phase evidence was copied. The dedicated branch-push smoke generated fresh `attempt_solution` and `publish` evidence through the hardened merge-base rule.
+- Both fresh phase records are `admitted=true`, `mode=exclusive`, `conflicts=[]`, and bind `registry_source_sha` to the canonical-main ancestor `1663a3c6e09f6a47ea48506c3e3b5490f7521279` with registry digest `sha256:a4bcd9cbdcde49e7793f146278d68a3be95af939555ba7e3bd9636b206de7d0e`.
+- The PR diff now contains exactly the six reserved rev1100 paths and no claim, sibling, `MAIN.md`, or shared implementation path.
+- The mathematical implementation and 15 focused fail-closed regressions are unchanged from the previously green rev1100 code; only the coordination base/evidence lifecycle was repaired.
+- This connector-authored documentation heartbeat follows the bot evidence commits so ordinary pull-request checks can evaluate an evidence-bearing head without manually rerunning any workflow.
 
 Integration boundary: rev700 / PR #251 and rev1000 / PR #256 remain independently owned, draft, and unmerged. Even after fresh hardened phase evidence is green, rev1100 remains draft until those producer contracts stabilize on main.
