@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev282-quotient-relation-action-invariance-20260822T100030JST-26485fa7",
+  "session_id": "chatgpt-session-j-continuation-20260822T100030+0900-rev282-turn3",
+  "started_at_jst": "2026-08-22T10:00:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:00:30+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "26485fa740c98ce36547fb43ff8abe00486db9dd",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 282,
+  "scope": "crx1/homogeneous-block-reduction/quotient-relation-action-invariance-certificate",
+  "branch": "agi-gi-rev282-quotient-relation-action-invariance-session-20260822-1000",
+  "reserved_paths": [
+    ".github/workflows/rev282-quotient-relation-action-invariance-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev282-quotient-relation-action-invariance-20260822T100030JST-26485fa7-attempt-solution.json",
+    "automation_runs/2026-08-19_0851_JST/REV282_QUOTIENT_RELATION_ACTION_INVARIANCE.md",
+    "automation_runs/2026-08-19_0851_JST/quotient_relation_action_invariance_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_quotient_relation_action_invariance_rev282.py"
+  ],
+  "rescope_from": "chatgpt-session-j-rev281-quotient-relation-action-invariance-20260822T095200JST-4cddb6f9",
+  "rescope_reason": "target revision 281 became occupied by a later independently owned active sibling claim and PR #226; this session vacated rev281 without touching the sibling and selected verified-free rev282",
+  "parallel_exclusions": [
+    "rev275 through rev281 sibling scopes and all their reserved paths, including PR #226",
+    "rev273/rev274 shared files except read-only main-integrated rev274 API",
+    "rev271/rev270/rev269/rev268/rev267/rev265/rev264 active scopes",
+    "CRX2, CRX3, W1R-H6 sibling work, MAIN.md, every sibling claim, branch, PR, workflow, and reserved path"
+  ],
+  "intent": "consume only main-integrated rev274 block-action provenance and independently certify that caller-supplied named quotient unary/binary relations are invariant under the exact induced quotient actions and are transported exactly by the certified block bijection; emit a deterministic replayable digest certificate and fail closed on malformed, non-invariant, mismatched, or tampered evidence",
+  "coordination_note": "Canonical phase-admission evidence generation remains fail-closed while the independently owned fresh rev275 registry record is noncanonical. Reserve the exact evidence path but do not fabricate an admitted payload.",
+  "non_interference": "Only rev282 reserved paths may be written on the isolated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, normalize, or otherwise mutate sibling claims, branches, PRs, workflows, shared implementation paths, or MAIN.md.",
+  "status": "active_rescoped_from_rev281",
+  "agi_state": "NOT_AGI"
+}
