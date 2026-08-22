@@ -1,0 +1,24 @@
+{
+  "session_id": "chatgpt-session-j-this-session-achievement-continuation-20260822T094600JST-turn1",
+  "target_revision": 281,
+  "scope": "W1R-H6/corrected general UPCC Split-or-Johnson/bipartite recursive transition certificate",
+  "status": "active",
+  "started_at_jst": "2026-08-22T09:54:00+09:00",
+  "base_main_sha": "0c8eb439f16288d1e49175283efcd1362925ff28",
+  "branch": "agi-gi-rev281-corrected-bipartite-soj-transition-20260822-0954",
+  "reserved_paths": [
+    "automation_runs/2026-08-22_0954_JST/REV281_CORRECTED_BIPARTITE_SOJ_TRANSITION_CERTIFICATE.md",
+    "automation_runs/2026-08-22_0954_JST/bipartite_split_or_johnson_transition_v1.py",
+    "automation_runs/2026-08-22_0954_JST/test_bipartite_split_or_johnson_transition_rev281.py",
+    ".github/workflows/rev281-corrected-bipartite-soj-transition-smoke.yml"
+  ],
+  "excluded_shared_paths": [
+    "MAIN.md",
+    "automation_runs/2026-08-19_0851_JST/bipartite_split_or_johnson_gate_v1.py",
+    "automation_runs/2026-08-19_0851_JST/s1_string_isomorphism_v4.py",
+    "automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py"
+  ],
+  "goal": "Mechanically certify one theorem-faithful corrected bipartite Split-or-Johnson recursive edge after the existing input gate: accept only a canonical exact constant-factor reduction of the auxiliary/small part or an explicit canonical Johnson embedding, with multiplicative-cost and strict progress evidence; reject phase labels or nonconstructive recognition fail-closed.",
+  "claim_boundary": "Standalone certificate/validator and regression tests only; does not claim full Split-or-Johnson closure, GI, or AGI and does not modify active rev252/rev264/rev267-rev280 scopes.",
+  "heartbeat_at_jst": "2026-08-22T09:54:00+09:00"
+}
