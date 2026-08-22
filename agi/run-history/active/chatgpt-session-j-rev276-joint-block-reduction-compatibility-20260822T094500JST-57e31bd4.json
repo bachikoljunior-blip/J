@@ -1,0 +1,40 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev276-joint-block-reduction-compatibility-20260822T094500JST-57e31bd4",
+  "session_id": "chatgpt-session-j-continuation-20260822T094500+0900-57e31bd4-turn3",
+  "started_at_jst": "2026-08-22T09:45:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:45:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "57e31bd40e989f99f6895f09a5ca53f3cd5533a1",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 276,
+  "scope": "crx1/homogeneous-block-reduction/joint-relation-action-compatibility-certificate",
+  "branch": "agi-gi-rev276-joint-block-reduction-compatibility-session-20260822-0945",
+  "reserved_paths": [
+    ".github/workflows/rev276-joint-block-reduction-compatibility-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev276-joint-block-reduction-compatibility-20260822T094500JST-57e31bd4-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev276-joint-block-reduction-compatibility-20260822T094500JST-57e31bd4-publish.json",
+    "automation_runs/2026-08-19_0851_JST/REV276_JOINT_BLOCK_REDUCTION_COMPATIBILITY.md",
+    "automation_runs/2026-08-19_0851_JST/joint_block_reduction_compatibility_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_joint_block_reduction_compatibility_rev276.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 and any scope claimed by the separately started 2026-08-22T09:42:35+09:00 continuation",
+    "rev273 homogeneous block relation provenance / PR #219 and all reserved paths",
+    "merged rev274 implementation paths except read-only structural compatibility input",
+    "rev272 resource-ledger replay verifier / PR #218",
+    "rev271 implicit image value-coset proof-DAG / PR #217",
+    "rev270 resource execution ledger and its merge/claim lifecycle",
+    "rev269 exact-empty image parent bridge / PR #214",
+    "rev268 production-parent orchestration / PR #213",
+    "rev267 original-domain paired-preimage / PR #212",
+    "rev265 resource envelope / PR #208",
+    "rev264 primitive-Johnson proof-DAG / PR #210",
+    "CRX3 proof-DAG scopes, rev252, rev247, MAIN.md, all sibling claims, branches, PRs, and workflows"
+  ],
+  "intent": "certify only that an already-exact homogeneous relation block-transport artifact and an already-exact group block-action artifact refer to the identical canonical source/target block reduction and block bijection; freeze the compatible upstream identities into a deterministic replayable joint certificate, fail closed on mismatched partitions/maps/degrees/quotient sizes or invalid rev274 digest, and do not re-prove rev273 relation semantics or import its branch-only implementation",
+  "non_interference": "Only new rev276 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, shared implementation path, or MAIN.md.",
+  "status": "active_claimed",
+  "agi_state": "NOT_AGI"
+}
