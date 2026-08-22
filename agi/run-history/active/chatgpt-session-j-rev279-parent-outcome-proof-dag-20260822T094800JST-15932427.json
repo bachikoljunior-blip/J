@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T094800+0900-rev279-turn2",
   "started_at_jst": "2026-08-22T09:48:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T15:44:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:47:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "15932427fd0b83fa27d50cf83319fc88c75df564",
   "starting_agi_gi_rev": 274,
@@ -13,7 +13,7 @@
   "branch": "agi-gi-rev279-parent-outcome-proof-dag-session-20260822-0948",
   "pull_request": 223,
   "latest_head_sha": "d2e099e66ec1250b01fa7e5181725862b83e56e4",
-  "latest_observed_main_sha": "5b7210a208c6f4533161b04b3d7efcee2a0ba6da",
+  "latest_observed_main_sha": "1a51c93b8b0640ffd6adbe45763b184c23ff9897",
   "reserved_paths": [
     ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427-attempt-solution.json",
@@ -83,10 +83,8 @@
     },
     "current_general_agi_gi_validation": {
       "run_id": 32555366514,
-      "status": "in_progress",
-      "conclusion": null,
-      "validate_w1r_fast": "in_progress",
-      "validate_rev_series": "in_progress"
+      "status": "completed",
+      "conclusion": "success"
     },
     "inherited_exact_head_checks_observed": {
       "rev238": "success",
@@ -94,23 +92,25 @@
       "rev240": "success",
       "rev241": "success",
       "rev242": "success",
+      "rev246": "success",
       "rev250": "success",
       "rev253": "success",
-      "rev254": "success",
-      "rev246": "in_progress"
-    }
+      "rev254": "success"
+    },
+    "all_observed_exact_head_workflows_green": true
   },
   "integration_watch": {
     "main_advanced_after_last_reconciliation": true,
-    "observed_main_sha": "5b7210a208c6f4533161b04b3d7efcee2a0ba6da",
+    "observed_main_sha": "1a51c93b8b0640ffd6adbe45763b184c23ff9897",
     "reconciled_main_sha": "019c190829ea7267f638635626e98167d5dc9af7",
-    "fresh_parallel_review": "2026-08-22T15:44:00+09:00: current main, open PRs, and active registry were re-read before continuation; no sibling work was mutated",
+    "fresh_parallel_review": "2026-08-22T15:47:00+09:00: current main, open PRs, and active registry were re-read after exact-head CI completed. New rev1000/rev1100 and other W1R-H6 claims are scope/path-disjoint; the active rev950 CRX3 block-action-kernel proof-DAG scope is a sibling and does not reserve any rev279 path. No sibling work was mutated.",
+    "current_main_delta_review": "since reconciled main, no rev279 implementation/test/doc/workflow or main-integrated rev266/proof-DAG dependency path was modified; observed changes are sibling scopes, coordination records, MAIN.md, and this claim heartbeat",
     "shared_dependency_owner_active": false,
     "shared_dependency_state": "rev289 shared proof-DAG envelope hardening is main-integrated; rev279 does not modify that sibling implementation",
-    "policy": "do not merge while exact-head AGI-GI validation or inherited exact-head checks are still running; after they complete, re-read current main/open PRs/active claims and either non-destructively reconcile again if needed or merge only on a fresh no-conflict green head; never rebase, force-push, rerun/cancel sibling workflows, or mutate sibling work"
+    "policy": "merge only with expected rev279 head after a final immediate current-main/open-PR/active-claim check; never rebase, force-push, rerun/cancel sibling workflows, or mutate sibling work"
   },
   "intent": "consume only the main-integrated rev266 parent exact-outcome contract plus the shared conservative execution proof-DAG substrate; bind exact nonempty and exact-empty parent outcomes to a replay-stable immutable identity, independently validate the identity and deterministic conservative local charge before proof-DAG admission, and fail closed on contradictory, nonexact, opaque, tampered, malformed, non-finite, overflowing, undercharged, or jointly forged replay evidence without modifying shared solvers or upstream CRX1 branches",
   "non_interference": "Only rev279 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, or otherwise mutate sibling claims, branches, PRs, workflows, reserved paths, shared implementations, or MAIN.md.",
-  "status": "active_recheck_in_progress",
+  "status": "active_exact_head_all_green_final_merge_check",
   "agi_state": "NOT_AGI"
 }
