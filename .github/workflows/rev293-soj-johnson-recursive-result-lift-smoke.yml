@@ -1,0 +1,84 @@
+name: rev293 SOJ Johnson recursive result lift smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-22_1247_JST/**"
+      - ".github/workflows/rev293-soj-johnson-recursive-result-lift-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev293-soj-johnson-recursive-result-lift-20260822T124700JST-5e887230-*.json"
+
+permissions:
+  contents: read
+
+jobs:
+  rev293-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Run focused rev293 regressions
+        run: python automation_runs/2026-08-22_1247_JST/test_corrected_soj_johnson_recursive_result_lift_rev293.py -v
+
+      - name: Compile rev293 implementation and tests
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-22_1247_JST/corrected_soj_johnson_recursive_result_lift_v1.py
+          automation_runs/2026-08-22_1247_JST/test_corrected_soj_johnson_recursive_result_lift_rev293.py
+
+      - name: Enforce branch-only sibling independence
+        shell: bash
+        run: |
+          set -euo pipefail
+          target=automation_runs/2026-08-22_1247_JST/corrected_soj_johnson_recursive_result_lift_v1.py
+          ! grep -Eq '2026-08-22_(1148|1155|1239|1243|1251|1254)_JST|corrected_soj_johnson_relational_reduction_v1|corrected_soj_larger_ground_recursive_handoff_v1' "${target}"
+          ! grep -Eq '^from automation_runs|^import automation_runs|sys\.path' "${target}"
+
+      - name: Preview canonical attempt-solution admission
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev293-soj-johnson-recursive-result-lift-20260822T124700JST-5e887230 \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-johnson-recursive-child-result-lift \
+            --target-revision 293 \
+            --path .github/workflows/rev293-soj-johnson-recursive-result-lift-smoke.yml \
+            --path automation_runs/2026-08-22_1247_JST/REV293_SOJ_JOHNSON_RECURSIVE_RESULT_LIFT.md \
+            --path automation_runs/2026-08-22_1247_JST/corrected_soj_johnson_recursive_result_lift_v1.py \
+            --path automation_runs/2026-08-22_1247_JST/test_corrected_soj_johnson_recursive_result_lift_rev293.py \
+            --output /tmp/rev293-attempt.json
+          cat /tmp/rev293-attempt.json
+
+      - name: Preview canonical publish admission
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev293-soj-johnson-recursive-result-lift-20260822T124700JST-5e887230 \
+            --phase publish \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-johnson-recursive-child-result-lift \
+            --target-revision 293 \
+            --path .github/workflows/rev293-soj-johnson-recursive-result-lift-smoke.yml \
+            --path automation_runs/2026-08-22_1247_JST/REV293_SOJ_JOHNSON_RECURSIVE_RESULT_LIFT.md \
+            --path automation_runs/2026-08-22_1247_JST/corrected_soj_johnson_recursive_result_lift_v1.py \
+            --path automation_runs/2026-08-22_1247_JST/test_corrected_soj_johnson_recursive_result_lift_rev293.py \
+            --output /tmp/rev293-publish.json
+          cat /tmp/rev293-publish.json
+
+      - name: Retain exact phase-admission evidence
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev293-phase-admission-evidence-${{ github.run_id }}
+          path: |
+            /tmp/rev293-attempt.json
+            /tmp/rev293-publish.json
+          if-no-files-found: error
+          retention-days: 1
