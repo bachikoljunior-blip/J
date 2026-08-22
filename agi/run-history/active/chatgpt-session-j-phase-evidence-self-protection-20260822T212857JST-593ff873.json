@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-phase-evidence-self-protection-20260822T212857JST-593ff873",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
   "started_at_jst": "2026-08-22T21:28:57+09:00",
-  "heartbeat_at_jst": "2026-08-22T21:31:45+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:33:28+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "593ff873a53732f67b3f62a5442820cdac40d277",
   "starting_agi_gi_rev": 3300,
@@ -45,7 +45,7 @@
     ],
     "decision": "extend the single shared classifier instead of introducing a second workflow-specific verifier"
   },
-  "status": "pr_open_ci_pending",
+  "status": "merge_admitted",
   "state": "active",
   "agi_state": "NOT_AGI",
   "pull_request": 294,
@@ -54,6 +54,8 @@
     "local_automation_tests": "82/82 passed",
     "diff_check": "passed",
     "phase_admission": "valid; conflicts=[]",
-    "exact_head_workflows": "pending"
+    "exact_head_workflows": "12/12 success",
+    "current_registry_readmission": "valid against main cc3b1b43d92ef1aa012080e3b15eced9ef3f9d70",
+    "claim_registry": "valid; collisions=0"
   }
 }
