@@ -1,0 +1,50 @@
+name: rev289 proof-DAG envelope hardening smoke
+
+on:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_proof_dag_envelope_input_validation_rev289.py"
+      - "automation_runs/2026-08-19_0851_JST/REV289_PROOF_DAG_ENVELOPE_HARDENING.md"
+      - ".github/workflows/rev289-proof-dag-envelope-hardening-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev289-proof-dag-envelope-hardening-20260822T1146JST-6ed2fa79-*.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Compile shared validator and rev289 regression
+        run: |
+          cd automation_runs/2026-08-19_0851_JST
+          python -m py_compile proof_dag_accounting_v1.py test_proof_dag_envelope_input_validation_rev289.py
+      - name: Run inherited rev220 and focused rev289 proof-DAG tests
+        run: |
+          cd automation_runs/2026-08-19_0851_JST
+          python -m pytest -q test_proof_dag_accounting_rev220.py test_proof_dag_envelope_input_validation_rev289.py
+      - name: Reject branch-only sibling dependencies
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("automation_runs/2026-08-19_0851_JST/proof_dag_accounting_v1.py")
+          text = path.read_text()
+          forbidden = (
+              "parent_outcome_proof_dag",
+              "literal_giant_proof_dag",
+              "corrected_soj",
+              "homogeneous_block_action_kernel_v1",
+          )
+          hits = [name for name in forbidden if name in text]
+          if hits:
+              raise SystemExit(f"branch-only/sibling dependency detected: {hits}")
+          PY
