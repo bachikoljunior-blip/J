@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev2400-soj-parent-filtered-result-accounting-coherence-20260822T184650JST-34c24406",
   "session_id": "chatgpt-session-j-rev2400-soj-parent-filtered-result-accounting-coherence-20260822T184650JST",
   "started_at_jst": "2026-08-22T18:46:50+09:00",
-  "heartbeat_at_jst": "2026-08-22T18:49:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:54:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "34c2440682b1f6af6d1fc78e7805ff4a656f8d06",
   "starting_agi_gi_rev": 1600,
@@ -19,6 +19,9 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev2400-soj-parent-filtered-result-accounting-coherence-20260822T184650JST-34c24406-publish.json"
   ],
   "branch": "agi-gi-rev2400-soj-parent-filtered-result-accounting-coherence-session-20260822-1846",
-  "status": "active",
+  "status": "superseded",
+  "completed_at_jst": "2026-08-22T18:54:30+09:00",
+  "superseded_by": "chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6",
+  "supersession_reason": "canonical phase admission remained fail-closed because a later sibling rev2400 claim used a noncanonical superseded status that the registry continued to treat as active; this claim is rescaled to an unoccupied revision without modifying the sibling record",
   "agi_state": "NOT_AGI"
 }
