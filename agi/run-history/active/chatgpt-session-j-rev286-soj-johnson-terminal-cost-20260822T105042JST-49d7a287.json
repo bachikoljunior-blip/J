@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev286-soj-johnson-terminal-cost-20260822T105042JST-49d7a287",
+  "session_id": "chatgpt-session-j-continuation-20260822T105042+0900-rev286-turn4",
+  "actor": "chatgpt",
+  "model": "gpt-5.6-sol",
+  "owner": "chatgpt-session-j-rev286-soj-johnson-terminal-cost-20260822T105042JST-49d7a287",
+  "started_at_jst": "2026-08-22T10:50:42+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:50:42+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 286,
+  "scope": "w1r-h6/corrected-split-or-johnson/explicit-johnson-terminal-cost-composition",
+  "scope_kind": "leaf_local_additive",
+  "branch": "agi-gi-rev286-soj-johnson-terminal-cost-session-20260822-1050",
+  "pull_request": null,
+  "latest_head_sha": "ef049b7edb99c7e616d256bce21f6ed327692f99",
+  "reserved_paths": [
+    ".github/workflows/rev286-soj-johnson-terminal-cost-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev286-soj-johnson-terminal-cost-20260822T105042JST-49d7a287-attempt-solution.json",
+    "automation_runs/2026-08-22_1050_JST/REV286_SOJ_JOHNSON_TERMINAL_COST.md",
+    "automation_runs/2026-08-22_1050_JST/corrected_soj_johnson_terminal_cost_v1.py",
+    "automation_runs/2026-08-22_1050_JST/test_corrected_soj_johnson_terminal_cost_rev286.py"
+  ],
+  "future_files_touched": [
+    ".github/workflows/rev286-soj-johnson-terminal-cost-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev286-soj-johnson-terminal-cost-20260822T105042JST-49d7a287-attempt-solution.json",
+    "automation_runs/2026-08-22_1050_JST/REV286_SOJ_JOHNSON_TERMINAL_COST.md",
+    "automation_runs/2026-08-22_1050_JST/corrected_soj_johnson_terminal_cost_v1.py",
+    "automation_runs/2026-08-22_1050_JST/test_corrected_soj_johnson_terminal_cost_rev286.py"
+  ],
+  "exclusive_files": [],
+  "conflict_revisions": [275, 281, 283, 284, 285],
+  "parallel_exclusions": [
+    "w1r-h6/corrected-split-or-johnson/bipartite-recursive-transition-certificate (rev281 / PR #226) and all reserved paths",
+    "w1r-h6/corrected-split-or-johnson/recursive-transition-recurrence-composition (rev283 / PR #228) and all reserved paths",
+    "w1r-h6/corrected-split-or-johnson/explicit-johnson-embedding-terminal-admission (rev284) and all reserved paths",
+    "w1r-h6/corrected-split-or-johnson/zero-auxiliary-output-terminal-accounting (rev285) and all reserved paths",
+    "rev275 conflicts_with set: CRX1, CRX2, CRX3, state-orbit, proof-carrying-merge",
+    "CRX1, CRX2, CRX3, state-orbit, proof-carrying-merge, MAIN.md, every sibling claim, branch, PR, workflow, and reserved path"
+  ],
+  "intent": "add a standalone fail-closed post-admission cost/replay composer for a corrected SOJ explicit Johnson embedding and a caller-supplied already exact primitive-Johnson terminal proof: require a full Johnson domain, exact ground/subset/domain/root-envelope match, independently certified transition multiplicative bound, and a valid main-integrated primitive-Johnson terminal accounting leaf; then charge transition plus terminal local work into one terminal recurrence leaf. Do not perform transition admission, execute primitive Johnson, import rev284 or PR #226 branch-only code, or handle partial/large-ground recursive Johnson embeddings.",
+  "coordination_note": "Canonical phase-admission evidence remains blocked by the independently owned noncanonical rev275 registry record. Reserve the exact evidence path only; do not fabricate admitted evidence and do not normalize or mutate sibling records.",
+  "non_interference": "Only the five rev286 reserved paths may be written for this scope. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, normalize, or otherwise mutate sibling claims, branches, PRs, workflows, shared implementation paths, or MAIN.md.",
+  "status": "active_claimed_before_implementation",
+  "agi_state": "NOT_AGI"
+}
