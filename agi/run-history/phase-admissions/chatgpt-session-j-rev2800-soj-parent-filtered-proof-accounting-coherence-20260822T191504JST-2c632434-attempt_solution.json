@@ -1,0 +1,168 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "agi-gi-rev2800-soj-parent-filtered-proof-accounting-coherence-session-20260822-1915",
+    "claim_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434",
+    "heartbeat_at_jst": "2026-08-22T19:15:32+09:00",
+    "reserved_paths": [
+      ".github/workflows/rev2800-soj-parent-filtered-proof-accounting-coherence-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434-attempt_solution.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434-publish.json",
+      "automation_runs/2026-08-22_1915_JST/REV2800_SOJ_PARENT_FILTERED_PROOF_ACCOUNTING_COHERENCE.md",
+      "automation_runs/2026-08-22_1915_JST/soj_parent_filtered_proof_accounting_coherence_v1.py",
+      "automation_runs/2026-08-22_1915_JST/test_soj_parent_filtered_proof_accounting_coherence_rev2800.py"
+    ],
+    "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-proof-accounting-coherence",
+    "state": "active",
+    "target_revision": 2800
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "ops-claim-publication-preflight-session-20260822-1855",
+      "claim_id": "chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e",
+      "heartbeat_at_jst": "2026-08-22T19:06:03+09:00",
+      "reserved_paths": [
+        ".github/workflows/claim-publication-preflight-smoke.yml",
+        "agi/run-history/active/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-publish.json",
+        "automation_runs/2026-08-22_1855_JST/CLAIM_PUBLICATION_PREFLIGHT_AUDIT.md",
+        "automation_runs/2026-08-22_1855_JST/claim_publication_preflight_v1.py",
+        "automation_runs/2026-08-22_1855_JST/test_claim_publication_preflight_v1.py"
+      ],
+      "scope": "repository-coordination/claim-publication/preflight-collision-guard",
+      "state": "active",
+      "target_revision": null
+    },
+    {
+      "branch": "agi-gi-rev2200-soj-parent-filtered-child-result-session-20260822-1747",
+      "claim_id": "chatgpt-session-j-rev2200-soj-parent-filtered-child-result-20260822T174730JST-6a2bef85",
+      "heartbeat_at_jst": "2026-08-22T17:58:30+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev2200-soj-parent-filtered-child-result-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2200-soj-parent-filtered-child-result-20260822T174730JST-6a2bef85-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2200-soj-parent-filtered-child-result-20260822T174730JST-6a2bef85-publish.json",
+        "automation_runs/2026-08-22_1747_JST/REV2200_SOJ_PARENT_FILTERED_CHILD_RESULT.md",
+        "automation_runs/2026-08-22_1747_JST/soj_parent_filtered_child_result_v1.py",
+        "automation_runs/2026-08-22_1747_JST/test_soj_parent_filtered_child_result_rev2200.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-child-result-binding",
+      "state": "active",
+      "target_revision": 2200
+    },
+    {
+      "branch": "agi-gi-rev2300-homogeneous-block-structural-quotient-coherence-session-20260822-1750",
+      "claim_id": "chatgpt-session-j-rev2300-homogeneous-block-structural-quotient-coherence-20260822T175000JST-5ee6ec94",
+      "heartbeat_at_jst": "2026-08-22T17:58:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev2300-homogeneous-block-structural-quotient-coherence-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2300-homogeneous-block-structural-quotient-coherence-20260822T175000JST-5ee6ec94-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2300-homogeneous-block-structural-quotient-coherence-20260822T175000JST-5ee6ec94-publish.json",
+        "automation_runs/2026-08-22_1750_JST/REV2300_HOMOGENEOUS_BLOCK_STRUCTURAL_QUOTIENT_COHERENCE.md",
+        "automation_runs/2026-08-22_1750_JST/homogeneous_block_structural_quotient_coherence_v1.py",
+        "automation_runs/2026-08-22_1750_JST/test_homogeneous_block_structural_quotient_coherence_rev2300.py"
+      ],
+      "scope": "crx3/algorithmic-consumers/homogeneous-block-structural-original-domain-proof-coherence",
+      "state": "active",
+      "target_revision": 2300
+    },
+    {
+      "branch": "agi-gi-rev2500-soj-parent-filtered-execution-proof-dag-session-20260822-1851",
+      "claim_id": "chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c",
+      "heartbeat_at_jst": "2026-08-22T18:51:48+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev2500-soj-parent-filtered-execution-proof-dag-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2500-soj-parent-filtered-execution-proof-dag-20260822T185148JST-a364353c-publish.json",
+        "automation_runs/2026-08-22_1851_JST/REV2500_SOJ_PARENT_FILTERED_EXECUTION_PROOF_DAG.md",
+        "automation_runs/2026-08-22_1851_JST/soj_parent_filtered_execution_proof_dag_binding_v1.py",
+        "automation_runs/2026-08-22_1851_JST/test_soj_parent_filtered_execution_proof_dag_binding_rev2500.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-result-execution-proof-dag-binding",
+      "state": "active",
+      "target_revision": 2500
+    },
+    {
+      "branch": "agi-gi-rev2501-relation-twin-restriction-identity-session-20260822-1852",
+      "claim_id": "chatgpt-session-j-rev2501-relation-twin-restriction-identity-20260822T185200JST-13b33de7",
+      "heartbeat_at_jst": "2026-08-22T18:55:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev2501-relation-twin-restriction-identity-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2501-relation-twin-restriction-identity-20260822T185200JST-13b33de7-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2501-relation-twin-restriction-identity-20260822T185200JST-13b33de7-publish.json",
+        "automation_runs/2026-08-22_1852_JST/REV2501_RELATION_TWIN_RESTRICTION_IDENTITY.md",
+        "automation_runs/2026-08-22_1852_JST/relation_twin_restriction_identity_v1.py",
+        "automation_runs/2026-08-22_1852_JST/test_relation_twin_restriction_identity_rev2501.py"
+      ],
+      "scope": "crx3/structural-consumers/relation-twin-restriction-replay-identity",
+      "state": "active",
+      "target_revision": 2501
+    },
+    {
+      "branch": "agi-gi-rev2600-soj-parent-filtered-result-accounting-coherence-session-20260822-1854",
+      "claim_id": "chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6",
+      "heartbeat_at_jst": "2026-08-22T18:57:10+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev2600-soj-parent-filtered-result-accounting-coherence-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6-publish.json",
+        "automation_runs/2026-08-22_1854_JST/REV2600_SOJ_PARENT_FILTERED_RESULT_ACCOUNTING_COHERENCE.md",
+        "automation_runs/2026-08-22_1854_JST/soj_parent_filtered_result_accounting_coherence_v1.py",
+        "automation_runs/2026-08-22_1854_JST/test_soj_parent_filtered_result_accounting_coherence_rev2600.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-result-accounting-coherence",
+      "state": "active",
+      "target_revision": 2600
+    },
+    {
+      "branch": "agi-gi-rev2707-soj-parent-filtered-proof-dag-integrity-session-20260822-1856",
+      "claim_id": "chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e",
+      "heartbeat_at_jst": "2026-08-22T19:04:20+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev2707-soj-parent-filtered-proof-dag-integrity-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-publish.json",
+        "automation_runs/2026-08-22_1856_JST/REV2707_SOJ_PARENT_FILTERED_PROOF_DAG_INTEGRITY.md",
+        "automation_runs/2026-08-22_1856_JST/soj_parent_filtered_proof_dag_integrity_v1.py",
+        "automation_runs/2026-08-22_1856_JST/test_soj_parent_filtered_proof_dag_integrity_rev2707.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-result-proof-dag-integrity",
+      "state": "active",
+      "target_revision": 2707
+    },
+    {
+      "branch": "agi-gi-rev400-soj-production-caller-binding-session-20260822-1258",
+      "claim_id": "chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b",
+      "heartbeat_at_jst": "2026-08-22T18:49:54+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev400-soj-production-caller-binding-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-publish.json",
+        "automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md",
+        "automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py",
+        "automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/johnson-terminal-recursive-production-caller-binding",
+      "state": "active",
+      "target_revision": 400
+    }
+  ],
+  "paths": [
+    ".github/workflows/rev2800-soj-parent-filtered-proof-accounting-coherence-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434-attempt_solution.json",
+    "automation_runs/2026-08-22_1915_JST/REV2800_SOJ_PARENT_FILTERED_PROOF_ACCOUNTING_COHERENCE.md",
+    "automation_runs/2026-08-22_1915_JST/soj_parent_filtered_proof_accounting_coherence_v1.py",
+    "automation_runs/2026-08-22_1915_JST/test_soj_parent_filtered_proof_accounting_coherence_rev2800.py"
+  ],
+  "phase": "attempt_solution",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T19:19:03.549614+09:00",
+  "registry_digest": "sha256:68b0bca664907f6c24af1b781da39dd3de33df9a262bcccc9e9d7cff13dfe6e3",
+  "registry_source_sha": "b7f6947be5c7130bec795638996037263b7306e0",
+  "schema_version": 1,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-proof-accounting-coherence",
+  "target_revision": 2800
+}
