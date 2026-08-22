@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1100-20260822T154530+0900-turn9",
   "started_at_jst": "2026-08-22T15:45:30+09:00",
-  "heartbeat_at_jst": "2026-08-22T15:45:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:47:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "1e9a46d7eca9ce98c7d0f97586e49766ee7d736d",
   "starting_agi_gi_rev": 950,
   "target_revision": 1100,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-main-post-replay-seal",
   "branch": "agi-gi-rev1100-soj-main-post-replay-seal-session-20260822-1545",
+  "pull_request": 257,
+  "latest_head_sha": "63bb6888fc2c414854441188aad7b9c8f2ed1d8e",
   "reserved_paths": [
     ".github/workflows/rev1100-soj-main-post-replay-seal-smoke.yml",
     "automation_runs/2026-08-22_1545_JST/REV1100_SOJ_MAIN_POST_REPLAY_SEAL.md",
@@ -30,6 +32,7 @@
     "rev650 recursive caller producer provenance",
     "rev500 caller replay envelope",
     "rev400 production caller binding",
+    "rev279 parent-outcome proof-DAG final merge check",
     "all CRX scopes, shared proof-DAG, recurrence, coordination implementation, sibling branches/PRs/workflows"
   ],
   "intent": "bind an independently replay-verified rev700 main-anchored recursive production provenance join to an independently replay-verified rev1000 post-replay cost/coherence envelope, preserving exact-empty/nonempty semantics and the shared reduction/production provenance identities without importing sibling branch-only implementations",
@@ -40,6 +43,14 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
     "fail_closed_on_any_upstream_identity_or_outcome_drift": true
   },
-  "status": "active",
+  "progress": {
+    "draft_pr": 257,
+    "implementation_paths_created": 4,
+    "branch_changed_paths": 4,
+    "branch_only_sibling_imports": "forbidden_by_dedicated_workflow",
+    "canonical_attempt_solution": "pending_natural_ci",
+    "integration_state": "draft_unmerged_while_upstream_rev700_rev1000_remain_independently_owned"
+  },
+  "status": "active_validating_exact_head",
   "agi_state": "NOT_AGI"
 }
