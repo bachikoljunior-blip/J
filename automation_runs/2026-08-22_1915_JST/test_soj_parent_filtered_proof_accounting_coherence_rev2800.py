@@ -259,6 +259,24 @@ class Rev2800ProofAccountingCoherenceTests(unittest.TestCase):
         accounting["coherence_identity"] = digest(payload)
         self.assertFalse(self.certify(proof, accounting).certified)
 
+    def test_top_level_schema_smuggling_fails(self):
+        proof, accounting = make_pair()
+        proof["semantic_exactness_promoted"] = True
+        self.assertFalse(self.certify(proof, accounting).certified)
+
+        proof, accounting = make_pair()
+        accounting["charged_total_cost"] = 0
+        self.assertFalse(self.certify(proof, accounting).certified)
+
+    def test_reason_must_be_literal_string(self):
+        proof, accounting = make_pair()
+        proof["reason"] = StringSubclass("fixture")
+        self.assertFalse(self.certify(proof, accounting).certified)
+
+        proof, accounting = make_pair()
+        accounting["reason"] = 1
+        self.assertFalse(self.certify(proof, accounting).certified)
+
     def test_output_mutation_breaks_replay(self):
         proof, accounting = make_pair()
         cert = self.certify(proof, accounting)
