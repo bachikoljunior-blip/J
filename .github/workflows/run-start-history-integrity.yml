@@ -1,0 +1,19 @@
+name: Run-start history integrity
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m unittest automation.test_agi_gi_run_start_record automation.test_agi_gi_run_start_history_guard
+      - run: python automation/agi_gi_run_start_history_guard.py --repo .

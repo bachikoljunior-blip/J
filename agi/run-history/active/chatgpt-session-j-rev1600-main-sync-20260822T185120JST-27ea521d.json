@@ -1,0 +1,42 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev1600-main-sync-20260822T185120JST-27ea521d",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T184109+0900-fc4ab5cb-turn1",
+  "started_at_jst": "2026-08-22T18:51:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:51:20+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "27ea521d5e007a56275dcd50a3e7e1d61d302f10",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": 1600,
+  "scope": "repository/main-revision-sync/rev1600",
+  "reserved_paths": [
+    "MAIN.md",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev1600-main-sync-20260822T185120JST-27ea521d-update_problem_tree.json"
+  ],
+  "branch": "main",
+  "status": "active",
+  "agi_state": "NOT_AGI",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "authoritative MAIN.md continuation lags the highest canonical integrated revision rev1600",
+    "attempt": "atomically update the continuation declaration and evidence text without changing AGI status or active problem count",
+    "decomposition_if_unresolved": [
+      "canonical revision replay",
+      "main declaration update",
+      "post-update revision guard"
+    ],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "automation/agi_gi_main_revision_guard.py",
+      "canonical AGI-GI revN ancestry",
+      "append-only run-start history guard"
+    ],
+    "decision": "use the repository's single canonical revision definition and synchronize only the lagging declaration"
+  },
+  "non_interference": "Reserve only MAIN.md and the rev1600 update_problem_tree evidence; active solver scopes remain untouched.",
+  "strict_boundary": "Authoritative continuation sync only. AGI remains NOT_AGI."
+}
