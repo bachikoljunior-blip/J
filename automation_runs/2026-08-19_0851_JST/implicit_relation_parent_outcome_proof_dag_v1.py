@@ -295,12 +295,25 @@ def validate_parent_outcome_proof_identity(
             False,
             "proof-DAG identity must be immutable and hashable",
         )
+    if not isinstance(proof, ProofCarryingCoset):
+        return ParentOutcomeProofIdentityValidation(
+            "wrong_parent_outcome_proof_type",
+            False,
+            "identity replay requires the canonical ProofCarryingCoset runtime type",
+        )
+    accounting = getattr(proof, "accounting", None)
+    if not isinstance(accounting, RecurrenceAccountingNode):
+        return ParentOutcomeProofIdentityValidation(
+            "malformed_parent_outcome_accounting_payload",
+            False,
+            "parent outcome proof must carry one canonical recurrence accounting leaf",
+        )
     if (
         proof.status != "certified_parent_outcome_contract_evidence"
         or proof.operation_kind != _OPERATION
-        or not proof.canonical
-        or not proof.local_cost_certified
-        or not proof.terminal_certified
+        or proof.canonical is not True
+        or proof.local_cost_certified is not True
+        or proof.terminal_certified is not True
     ):
         return ParentOutcomeProofIdentityValidation(
             "uncertified_parent_outcome_contract_execution",
@@ -313,27 +326,72 @@ def validate_parent_outcome_proof_identity(
             False,
             "rev279 must not reinterpret a digest-only rev266 contract as an SI coset proof",
         )
-    if proof.root_n != actual.original_root_n or proof.domain_size != actual.domain_degree:
+    if (
+        isinstance(proof.root_n, bool)
+        or not isinstance(proof.root_n, int)
+        or isinstance(proof.domain_size, bool)
+        or not isinstance(proof.domain_size, int)
+        or proof.root_n != actual.original_root_n
+        or proof.domain_size != actual.domain_degree
+    ):
         return ParentOutcomeProofIdentityValidation(
             "inconsistent_parent_outcome_proof_measure",
             False,
             "proof recurrence measure differs from its frozen parent outcome identity",
         )
+    if proof.children != () or accounting.children != ():
+        return ParentOutcomeProofIdentityValidation(
+            "nonterminal_parent_outcome_evidence_leaf",
+            False,
+            "rev279 evidence is a terminal replay leaf and cannot carry child executions",
+        )
     if (
-        proof.accounting.operation_kind != _OPERATION
-        or proof.accounting.n != actual.original_root_n
-        or proof.accounting.m != actual.domain_degree
-        or abs(proof.accounting.local_log2_cost_bound - proof.local_log2_cost_bound) > 1e-12
+        isinstance(proof.permutation_candidates_checked, bool)
+        or not isinstance(proof.permutation_candidates_checked, int)
+        or proof.permutation_candidates_checked != 0
+    ):
+        return ParentOutcomeProofIdentityValidation(
+            "mismatched_parent_outcome_execution_counter",
+            False,
+            "evidence-only replay must not claim permutation-candidate execution",
+        )
+    if (
+        accounting.operation_kind != _OPERATION
+        or isinstance(accounting.n, bool)
+        or not isinstance(accounting.n, int)
+        or isinstance(accounting.m, bool)
+        or not isinstance(accounting.m, int)
+        or accounting.n != actual.original_root_n
+        or accounting.m != actual.domain_degree
+        or accounting.canonical is not True
+        or accounting.cost_certified is not True
+        or accounting.terminal_certified is not True
     ):
         return ParentOutcomeProofIdentityValidation(
             "mismatched_parent_outcome_accounting_payload",
             False,
-            "proof and accounting leaf do not describe the same contract validation execution",
+            "proof and accounting leaf do not describe the same canonical contract-validation execution",
+        )
+    proof_local = _finite_real_value(proof.local_log2_cost_bound)
+    accounting_local = _finite_real_value(accounting.local_log2_cost_bound)
+    expected_local = _local_log2_cost_bound(actual)
+    if (
+        proof_local is None
+        or accounting_local is None
+        or proof_local < 0.0
+        or accounting_local < 0.0
+        or abs(accounting_local - proof_local) > 1e-12
+        or abs(proof_local - expected_local) > 1e-12
+    ):
+        return ParentOutcomeProofIdentityValidation(
+            "mismatched_parent_outcome_accounting_payload",
+            False,
+            "proof/accounting local charge must equal the deterministic conservative charge recomputed from the frozen identity",
         )
     return ParentOutcomeProofIdentityValidation(
         "verified_parent_outcome_proof_identity",
         True,
-        "the rev266 outcome contract is bound to the expected replay-stable evidence-only proof identity",
+        "the rev266 outcome contract is bound to the expected replay-stable evidence-only proof identity and its deterministic conservative local charge",
     )
 
 
