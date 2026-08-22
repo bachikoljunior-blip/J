@@ -1,0 +1,48 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev800-soj-recursive-production-total-cost-coherence-20260822T141100JST-8b2e4c61",
+  "session_id": "chatgpt-session-j-continuation-rev800-20260822T1411+0900-8b2e4c61",
+  "started_at_jst": "2026-08-22T14:11:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:11:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "6300ce9e857e4b30a61a87e835055c50b3329fa8",
+  "starting_agi_gi_rev": 266,
+  "target_revision": 800,
+  "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-total-cost-coherence",
+  "branch": "agi-gi-rev800-soj-recursive-production-total-cost-coherence-session-20260822-1411",
+  "pull_request": null,
+  "pull_request_state": "not_created",
+  "latest_head_sha": null,
+  "intent": "add a file-disjoint fail-closed compatibility join between the public rev340 recursive-result accounting-binding contract and this session's public rev360 Johnson construction-cost-binding contract: independently replay both supplied certificate identities, require exact reduction-identity and recurrence-measure agreement, keep construction work distinct from recursive child accounting, reject double-counted or unit-incoherent charges, and seal only an explicit conservative total-cost coherence identity without importing sibling branch implementations, executing recursive String Isomorphism, reconstructing omitted Johnson semantics, or overlapping rev700/rev720 provenance scopes",
+  "reserved_paths": [
+    ".github/workflows/rev800-soj-recursive-production-total-cost-coherence-smoke.yml",
+    "automation_runs/2026-08-22_1411_JST/REV800_SOJ_RECURSIVE_PRODUCTION_TOTAL_COST_COHERENCE.md",
+    "automation_runs/2026-08-22_1411_JST/soj_recursive_production_total_cost_coherence_v1.py",
+    "automation_runs/2026-08-22_1411_JST/test_soj_recursive_production_total_cost_coherence_rev800.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev800-soj-recursive-production-total-cost-coherence-20260822T141100JST-8b2e4c61-attempt-solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev800-soj-recursive-production-total-cost-coherence-20260822T141100JST-8b2e4c61-publish.json"
+  ],
+  "parallel_exclusions": [
+    "rev340 recursive-result accounting binding / PR #243 and all reserved paths",
+    "this session's rev360 Johnson construction-cost binding / PR #245 and all reserved paths",
+    "rev500 caller replay envelope / PR #247 and all reserved paths",
+    "rev600 production main-provenance gate / PR #250 and all reserved paths",
+    "this session's rev650 recursive caller provenance / PR #249 and all reserved paths",
+    "this session's rev700 recursive production provenance join / PR #251 and all reserved paths",
+    "rev720 recursive production construction-cost provenance claim and all reserved paths",
+    "all sibling claims, branches, PRs, workflows, MAIN.md, CRX scopes, shared recurrence implementation, shared coordination implementation, and shared proof-DAG implementations"
+  ],
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "do_not_import_branch_only_rev340_rev360_implementation": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
+  },
+  "validation": {
+    "state": "claimed_not_yet_implemented"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
