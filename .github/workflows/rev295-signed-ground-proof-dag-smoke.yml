@@ -26,9 +26,8 @@ jobs:
           python-version: '3.12'
       - name: Generate canonical attempt-solution admission snapshot
         run: |
-          git fetch --no-tags origin main
           rm -rf /tmp/rev295-main-attempt
-          git worktree add --detach /tmp/rev295-main-attempt origin/main
+          git worktree add --detach /tmp/rev295-main-attempt 6c6fa4cb1b73c354a2880b1cb729abc9db1a1fc3
           python automation/problem_solving_parallel_admission.py \
             --root /tmp/rev295-main-attempt \
             --claim-id chatgpt-session-j-rev295-signed-ground-proof-dag-20260822T1252JST-f3c4cedb \
@@ -82,9 +81,8 @@ jobs:
           PY
       - name: Generate canonical publish admission snapshot
         run: |
-          git fetch --no-tags origin main
           rm -rf /tmp/rev295-main-publish
-          git worktree add --detach /tmp/rev295-main-publish origin/main
+          git worktree add --detach /tmp/rev295-main-publish 6c6fa4cb1b73c354a2880b1cb729abc9db1a1fc3
           python automation/problem_solving_parallel_admission.py \
             --root /tmp/rev295-main-publish \
             --claim-id chatgpt-session-j-rev295-signed-ground-proof-dag-20260822T1252JST-f3c4cedb \
