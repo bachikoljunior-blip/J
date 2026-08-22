@@ -1,0 +1,148 @@
+name: rev2707 SOJ parent-filtered result proof-DAG integrity smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "agi-gi-rev2707-soj-parent-filtered-proof-dag-integrity-session-20260822-1856"
+    paths:
+      - "automation_runs/2026-08-22_1856_JST/soj_parent_filtered_proof_dag_integrity_v1.py"
+      - "automation_runs/2026-08-22_1856_JST/test_soj_parent_filtered_proof_dag_integrity_rev2707.py"
+      - "automation_runs/2026-08-22_1856_JST/REV2707_SOJ_PARENT_FILTERED_PROOF_DAG_INTEGRITY.md"
+      - ".github/workflows/rev2707-soj-parent-filtered-proof-dag-integrity-smoke.yml"
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-22_1856_JST/soj_parent_filtered_proof_dag_integrity_v1.py"
+      - "automation_runs/2026-08-22_1856_JST/test_soj_parent_filtered_proof_dag_integrity_rev2707.py"
+      - "automation_runs/2026-08-22_1856_JST/REV2707_SOJ_PARENT_FILTERED_PROOF_DAG_INTEGRITY.md"
+      - ".github/workflows/rev2707-soj-parent-filtered-proof-dag-integrity-smoke.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rev2707-soj-parent-filtered-result-proof-dag-integrity-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rev2707-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate canonical attempt-solution and publish admission previews
+        id: admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main
+          attempt="${RUNNER_TEMP}/rev2707-attempt-solution.json"
+          publish="${RUNNER_TEMP}/rev2707-publish.json"
+          common=(
+            --claim-id chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-result-proof-dag-integrity
+            --target-revision 2707
+            --path .github/workflows/rev2707-soj-parent-filtered-proof-dag-integrity-smoke.yml
+            --path automation_runs/2026-08-22_1856_JST/REV2707_SOJ_PARENT_FILTERED_PROOF_DAG_INTEGRITY.md
+            --path automation_runs/2026-08-22_1856_JST/soj_parent_filtered_proof_dag_integrity_v1.py
+            --path automation_runs/2026-08-22_1856_JST/test_soj_parent_filtered_proof_dag_integrity_rev2707.py
+          )
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase attempt_solution \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-attempt_solution.json \
+            --output "${attempt}"
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase publish \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-publish.json \
+            --output "${publish}"
+          jq -e '.admitted == true and .conflicts == []' "${attempt}"
+          jq -e '.admitted == true and .conflicts == []' "${publish}"
+          echo "attempt=${attempt}" >>"${GITHUB_OUTPUT}"
+          echo "publish=${publish}" >>"${GITHUB_OUTPUT}"
+
+      - name: Run focused rev2707 regressions
+        run: python automation_runs/2026-08-22_1856_JST/test_soj_parent_filtered_proof_dag_integrity_rev2707.py
+
+      - name: Compile rev2707 implementation and tests
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-22_1856_JST/soj_parent_filtered_proof_dag_integrity_v1.py
+          automation_runs/2026-08-22_1856_JST/test_soj_parent_filtered_proof_dag_integrity_rev2707.py
+
+      - name: Enforce branch-only dependency boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="automation_runs/2026-08-22_1856_JST/soj_parent_filtered_proof_dag_integrity_v1.py"
+          ! grep -Eq '^(from|import) .*soj_parent_filtered_child_result_v1' "${file}"
+          ! grep -Eq '^(from|import) .*soj_parent_filtered_result_accounting_coherence' "${file}"
+          ! grep -Eq '^(from|import) .*soj_parent_filtered_execution_proof_dag' "${file}"
+
+      - name: Enforce reserved diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "${base}"..HEAD | sort >"${RUNNER_TEMP}/actual"
+          cat >"${RUNNER_TEMP}/allowed" <<'EOF'
+          .github/workflows/rev2707-soj-parent-filtered-proof-dag-integrity-smoke.yml
+          agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-attempt_solution.json
+          agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-publish.json
+          automation_runs/2026-08-22_1856_JST/REV2707_SOJ_PARENT_FILTERED_PROOF_DAG_INTEGRITY.md
+          automation_runs/2026-08-22_1856_JST/soj_parent_filtered_proof_dag_integrity_v1.py
+          automation_runs/2026-08-22_1856_JST/test_soj_parent_filtered_proof_dag_integrity_rev2707.py
+          EOF
+          sort -o "${RUNNER_TEMP}/allowed" "${RUNNER_TEMP}/allowed"
+          if comm -23 "${RUNNER_TEMP}/actual" "${RUNNER_TEMP}/allowed" | grep -q .; then
+            echo "rev2707 branch changed a non-reserved path" >&2
+            comm -23 "${RUNNER_TEMP}/actual" "${RUNNER_TEMP}/allowed" >&2
+            exit 1
+          fi
+
+      - name: Persist canonical phase admission once on the source branch
+        if: >-
+          github.event_name == 'push' ||
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+        shell: bash
+        env:
+          ATTEMPT_PREVIEW: ${{ steps.admission.outputs.attempt }}
+          PUBLISH_PREVIEW: ${{ steps.admission.outputs.publish }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          attempt="agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-attempt_solution.json"
+          publish="agi/run-history/phase-admissions/chatgpt-session-j-rev2707-soj-parent-filtered-proof-dag-integrity-20260822T185610JST-2d97221e-publish.json"
+
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            git fetch origin "${PR_HEAD_REF}:refs/remotes/origin/${PR_HEAD_REF}"
+            remote_sha="$(git rev-parse "refs/remotes/origin/${PR_HEAD_REF}")"
+            if [[ "${remote_sha}" != "${PR_HEAD_SHA}" ]]; then
+              echo "source branch advanced after this event; leave evidence to the newer natural run"
+              exit 0
+            fi
+            git checkout --detach "${remote_sha}"
+            target_branch="${PR_HEAD_REF}"
+          else
+            target_branch="${GITHUB_REF_NAME}"
+          fi
+
+          if [[ -e "${attempt}" || -e "${publish}" ]]; then
+            [[ -f "${attempt}" && -f "${publish}" ]]
+            echo "canonical phase evidence already exists; do not rewrite it"
+            exit 0
+          fi
+
+          mkdir -p "$(dirname "${attempt}")"
+          cp "${ATTEMPT_PREVIEW}" "${attempt}"
+          cp "${PUBLISH_PREVIEW}" "${publish}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${attempt}" "${publish}"
+          git commit -m "coordination: persist rev2707 attempt and publish admission"
+          git push origin "HEAD:${target_branch}"
