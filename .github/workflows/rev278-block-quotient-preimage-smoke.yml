@@ -1,0 +1,58 @@
+name: rev278 block quotient preimage smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_preimage_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_preimage_rev278.py"
+      - "automation_runs/2026-08-19_0851_JST/REV278_BLOCK_QUOTIENT_PREIMAGE.md"
+      - ".github/workflows/rev278-block-quotient-preimage-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev278-block-quotient-preimage-20260822T094649JST-215dba06-*.json"
+
+permissions:
+  contents: read
+
+jobs:
+  rev278-block-quotient-preimage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Run focused rev278 regressions
+        run: >-
+          python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_preimage_rev278.py -v
+
+      - name: Compile rev278 implementation and tests
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_preimage_v1.py
+          automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_preimage_rev278.py
+
+      - name: Enforce sibling implementation independence
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_preimage_v1.py
+            automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_preimage_rev278.py
+          )
+          if grep -En 'homogeneous_block_action_kernel|joint_block_reduction_compatibility|imprimitive_resource_proof_dag_consumer|homogeneous_block_relation_provenance' "${files[@]}"; then
+            echo "rev278 must not import sibling branch-only implementations" >&2
+            exit 1
+          fi
+
+      - name: Verify reserved diff remains additive
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- \
+            automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_preimage_v1.py \
+            automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_preimage_rev278.py \
+            automation_runs/2026-08-19_0851_JST/REV278_BLOCK_QUOTIENT_PREIMAGE.md \
+            .github/workflows/rev278-block-quotient-preimage-smoke.yml
