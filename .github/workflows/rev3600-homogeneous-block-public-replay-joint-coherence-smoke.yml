@@ -1,0 +1,162 @@
+name: rev3600 homogeneous-block public replay joint coherence smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "agi-gi-rev3600-homogeneous-block-public-replay-joint-coherence-session-20260822-2103"
+    paths:
+      - "automation_runs/2026-08-22_2103_JST/homogeneous_block_public_replay_joint_coherence_v1.py"
+      - "automation_runs/2026-08-22_2103_JST/test_homogeneous_block_public_replay_joint_coherence_rev3600.py"
+      - "automation_runs/2026-08-22_2103_JST/REV3600_HOMOGENEOUS_BLOCK_PUBLIC_REPLAY_JOINT_COHERENCE.md"
+      - ".github/workflows/rev3600-homogeneous-block-public-replay-joint-coherence-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-attempt_solution.json"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-publish.json"
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-22_2103_JST/homogeneous_block_public_replay_joint_coherence_v1.py"
+      - "automation_runs/2026-08-22_2103_JST/test_homogeneous_block_public_replay_joint_coherence_rev3600.py"
+      - "automation_runs/2026-08-22_2103_JST/REV3600_HOMOGENEOUS_BLOCK_PUBLIC_REPLAY_JOINT_COHERENCE.md"
+      - ".github/workflows/rev3600-homogeneous-block-public-replay-joint-coherence-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-attempt_solution.json"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-publish.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rev3600-homogeneous-block-public-replay-joint-coherence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate canonical attempt-solution and publish admission previews
+        id: admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main
+          attempt="${RUNNER_TEMP}/rev3600-attempt-solution.json"
+          publish="${RUNNER_TEMP}/rev3600-publish.json"
+          common=(
+            --claim-id chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e
+            --scope crx3/algorithmic-consumers/homogeneous-block-public-replay-joint-coherence
+            --target-revision 3600
+            --path .github/workflows/rev3600-homogeneous-block-public-replay-joint-coherence-smoke.yml
+            --path automation_runs/2026-08-22_2103_JST/REV3600_HOMOGENEOUS_BLOCK_PUBLIC_REPLAY_JOINT_COHERENCE.md
+            --path automation_runs/2026-08-22_2103_JST/homogeneous_block_public_replay_joint_coherence_v1.py
+            --path automation_runs/2026-08-22_2103_JST/test_homogeneous_block_public_replay_joint_coherence_rev3600.py
+          )
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase attempt_solution \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-attempt_solution.json \
+            --output "${attempt}"
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase publish \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-publish.json \
+            --output "${publish}"
+          jq -e '.admitted == true and .conflicts == []' "${attempt}"
+          jq -e '.admitted == true and .conflicts == []' "${publish}"
+          echo "attempt=${attempt}" >>"${GITHUB_OUTPUT}"
+          echo "publish=${publish}" >>"${GITHUB_OUTPUT}"
+
+      - name: Compile rev3600 implementation and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_2103_JST/homogeneous_block_public_replay_joint_coherence_v1.py \
+            automation_runs/2026-08-22_2103_JST/test_homogeneous_block_public_replay_joint_coherence_rev3600.py
+
+      - name: Run focused rev3600 regressions
+        env:
+          PYTHONPATH: automation_runs/2026-08-22_2103_JST
+        run: python -m unittest -v automation_runs/2026-08-22_2103_JST/test_homogeneous_block_public_replay_joint_coherence_rev3600.py
+
+      - name: Reject sibling branch-only dependencies
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('automation_runs/2026-08-22_2103_JST/homogeneous_block_public_replay_joint_coherence_v1.py').read_text()
+          forbidden = (
+              'block_relation_provenance_public_replay_seal_v1',
+              'block_action_kernel_public_replay_seal_v1',
+              'soj_parent_filtered',
+              'homogeneous_block_quotient',
+              'original_domain_lift',
+          )
+          hits = [name for name in forbidden if name in text]
+          if hits:
+              raise SystemExit(f'sibling branch-only dependency detected: {hits}')
+          PY
+
+      - name: Enforce reserved diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "${base}"..HEAD | sort >"${RUNNER_TEMP}/actual"
+          cat >"${RUNNER_TEMP}/allowed" <<'EOF'
+          .github/workflows/rev3600-homogeneous-block-public-replay-joint-coherence-smoke.yml
+          agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-attempt_solution.json
+          agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-publish.json
+          automation_runs/2026-08-22_2103_JST/REV3600_HOMOGENEOUS_BLOCK_PUBLIC_REPLAY_JOINT_COHERENCE.md
+          automation_runs/2026-08-22_2103_JST/homogeneous_block_public_replay_joint_coherence_v1.py
+          automation_runs/2026-08-22_2103_JST/test_homogeneous_block_public_replay_joint_coherence_rev3600.py
+          EOF
+          sort -o "${RUNNER_TEMP}/allowed" "${RUNNER_TEMP}/allowed"
+          if comm -23 "${RUNNER_TEMP}/actual" "${RUNNER_TEMP}/allowed" | grep -q .; then
+            echo "rev3600 branch changed a non-reserved path" >&2
+            comm -23 "${RUNNER_TEMP}/actual" "${RUNNER_TEMP}/allowed" >&2
+            exit 1
+          fi
+
+      - name: Persist canonical phase admission once on the source branch
+        if: >-
+          github.event_name == 'push' ||
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+        shell: bash
+        env:
+          ATTEMPT_PREVIEW: ${{ steps.admission.outputs.attempt }}
+          PUBLISH_PREVIEW: ${{ steps.admission.outputs.publish }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          attempt="agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-attempt_solution.json"
+          publish="agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-publish.json"
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            git fetch origin "${PR_HEAD_REF}:refs/remotes/origin/${PR_HEAD_REF}"
+            remote_sha="$(git rev-parse "refs/remotes/origin/${PR_HEAD_REF}")"
+            if [[ "${remote_sha}" != "${PR_HEAD_SHA}" ]]; then
+              echo "source branch advanced after this event; leave evidence to the newer natural run"
+              exit 0
+            fi
+            git checkout --detach "${remote_sha}"
+            target_branch="${PR_HEAD_REF}"
+          else
+            target_branch="${GITHUB_REF_NAME}"
+          fi
+          if [[ -e "${attempt}" || -e "${publish}" ]]; then
+            [[ -f "${attempt}" && -f "${publish}" ]]
+            echo "canonical phase evidence already exists; do not rewrite it"
+            exit 0
+          fi
+          mkdir -p "$(dirname "${attempt}")"
+          cp "${ATTEMPT_PREVIEW}" "${attempt}"
+          cp "${PUBLISH_PREVIEW}" "${publish}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${attempt}" "${publish}"
+          git commit -m "coordination: persist rev3600 attempt and publish admission"
+          git push origin "HEAD:${target_branch}"
