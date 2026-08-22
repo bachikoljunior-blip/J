@@ -1,0 +1,54 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "agi-gi-rev252-proof-carrying-small-order-admission-session-20260821-2213",
+    "claim_id": "chatgpt-session-j-rev252-20260821T221349JST-7174b2e6",
+    "heartbeat_at_jst": "2026-08-22T08:54:51+09:00",
+    "reserved_paths": [
+      ".github/workflows/j-rev252-session-hourly-refire.yml",
+      ".github/workflows/rev252-proof-carrying-small-order-production-admission.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev252-20260821T221349JST-7174b2e6-publish-20260822T0854JST.json",
+      "automation_runs/2026-08-19_0851_JST/REV252_PROOF_CARRYING_SMALL_ORDER_PRODUCTION_ADMISSION.md",
+      "automation_runs/2026-08-19_0851_JST/proof_carrying_small_order_production_admission_v1.py",
+      "automation_runs/2026-08-19_0851_JST/test_proof_carrying_small_order_production_admission_rev252.py"
+    ],
+    "scope": "crx3/acceptance/proof-carrying-small-order-production-admission",
+    "state": "active",
+    "target_revision": 252
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev271-image-value-proof-dag-session-20260822-0855",
+      "claim_id": "chatgpt-session-j-rev271-image-value-proof-dag-20260822T085500JST-429b7cee",
+      "heartbeat_at_jst": "2026-08-22T08:55:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev271-image-value-proof-dag-consumer-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev271-image-value-proof-dag-20260822T085500JST-429b7cee-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev271-image-value-proof-dag-20260822T085500JST-429b7cee-publish.json",
+        "automation_runs/2026-08-19_0851_JST/REV271_IMAGE_VALUE_PROOF_DAG_CONSUMER.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_image_value_proof_dag_consumer_v1.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_image_value_proof_dag_consumer_rev271.py"
+      ],
+      "scope": "crx3/algorithmic-consumers/implicit-image-value-coset-exact-terminal-proof-dag",
+      "state": "active",
+      "target_revision": 271
+    }
+  ],
+  "paths": [
+    ".github/workflows/rev252-proof-carrying-small-order-production-admission.yml",
+    "automation_runs/2026-08-19_0851_JST/REV252_PROOF_CARRYING_SMALL_ORDER_PRODUCTION_ADMISSION.md",
+    "automation_runs/2026-08-19_0851_JST/proof_carrying_small_order_production_admission_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_proof_carrying_small_order_production_admission_rev252.py"
+  ],
+  "phase": "publish",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T10:24:51+09:00",
+  "registry_digest": "sha256:8985991e52281aa20315de38aa07dc75d09afb43b069cb3f569dfb6d3744777a",
+  "registry_source_sha": "48376a3316d5ea62643baa635f10acd0bf84c190",
+  "schema_version": 1,
+  "scope": "crx3/acceptance/proof-carrying-small-order-production-admission",
+  "target_revision": 252
+}

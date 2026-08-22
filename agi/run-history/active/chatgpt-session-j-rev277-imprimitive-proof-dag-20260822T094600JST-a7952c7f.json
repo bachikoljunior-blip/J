@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev277-imprimitive-proof-dag-20260822T094600JST-a7952c7f",
+  "session_id": "chatgpt-session-j-continuation-automation-turn3-rev277",
+  "started_at_jst": "2026-08-22T09:46:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:46:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "a7952c7fe0b22b1934095aecd4fe502519c9a553",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 277,
+  "scope": "crx3/algorithmic-consumers/resource-bounded-imprimitive-terminal-proof-dag",
+  "branch": "agi-gi-rev277-imprimitive-proof-dag-session-20260822-0946",
+  "reserved_paths": [
+    ".github/workflows/rev277-imprimitive-resource-proof-dag-smoke.yml",
+    "automation_runs/2026-08-19_0851_JST/REV277_IMPRIMITIVE_RESOURCE_PROOF_DAG.md",
+    "automation_runs/2026-08-19_0851_JST/imprimitive_resource_proof_dag_consumer_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_imprimitive_resource_proof_dag_consumer_rev277.py"
+  ],
+  "parallel_exclusions": [
+    "rev275 block-action-kernel work",
+    "rev276 joint block reduction compatibility",
+    "rev271 implicit image value-coset proof DAG",
+    "rev264 primitive Johnson proof DAG",
+    "CRX3 state-orbit proof DAG",
+    "rev269/rev268/rev267/rev265 CRX1 work",
+    "MAIN.md"
+  ],
+  "intent": "attach only the already integrated resource-bounded unique transitive-imprimitive exact SI execution to the integrated shared proof DAG using a replay-stable identity and independently checked complete resource evidence; do not modify shared solvers",
+  "non_interference": "Only new rev277 reserved paths may be written on the isolated branch; do not modify, cancel, rerun, merge, close, rebase, force-push, or overwrite sibling claims, branches, PRs, workflows, or shared implementation files.",
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}

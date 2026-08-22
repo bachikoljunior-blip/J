@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev281-quotient-relation-action-invariance-20260822T095200JST-4cddb6f9",
+  "session_id": "chatgpt-session-j-continuation-20260822T095200+0900-rev281-turn3",
+  "started_at_jst": "2026-08-22T09:52:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:00:00+09:00",
+  "completed_at_jst": "2026-08-22T10:00:00+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "4cddb6f99fdc38d70612e7a37e39e7e7acb43bbe",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 281,
+  "scope": "crx1/homogeneous-block-reduction/quotient-relation-action-invariance-certificate",
+  "branch": "agi-gi-rev281-quotient-relation-action-invariance-session-20260822-0952",
+  "pull_request": 225,
+  "latest_head_sha": "1919c97e2a09957a1e2044f18a06ce81e5d2461a",
+  "reserved_paths": [
+    ".github/workflows/rev281-quotient-relation-action-invariance-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev281-quotient-relation-action-invariance-20260822T095200JST-4cddb6f9-attempt-solution.json",
+    "automation_runs/2026-08-19_0851_JST/REV281_QUOTIENT_RELATION_ACTION_INVARIANCE.md",
+    "automation_runs/2026-08-19_0851_JST/quotient_relation_action_invariance_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_quotient_relation_action_invariance_rev281.py"
+  ],
+  "superseded_by": "rev282 rescope of the same quotient relation/action invariance certificate",
+  "supersession_reason": "A later independently owned active claim and PR #226 also selected target_revision 281. Even though this claim started first, this session voluntarily vacates rev281 to preserve an unambiguous globally exclusive revision allocation without modifying the sibling claim, branch, PR, or workflow.",
+  "validation": {
+    "exact_head": "1919c97e2a09957a1e2044f18a06ce81e5d2461a",
+    "dedicated_workflow_run": 32541828558,
+    "dedicated_workflow_status": "success",
+    "dedicated_tests": "24/24 passed; py_compile passed",
+    "parallel_admission_run": 32541828454,
+    "parallel_admission_status": "failure_before_rescope",
+    "parallel_admission_reason": "phase admission evidence missing; canonical evidence generation additionally blocked by malformed fresh rev275 registry record"
+  },
+  "status": "superseded",
+  "agi_state": "NOT_AGI"
+}

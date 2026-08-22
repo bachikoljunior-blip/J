@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T085326+0900-429b7cee-turn1",
   "started_at_jst": "2026-08-22T08:56:16+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:43:17+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:47:11+09:00",
+  "completed_at_jst": "2026-08-22T09:47:11+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "48376a3316d5ea62643baa635f10acd0bf84c190",
   "starting_agi_gi_rev": 266,
@@ -13,7 +14,8 @@
   "branch": "agi-gi-rev272-resource-ledger-replay-verifier-session-20260822-0856",
   "pull_request": 218,
   "latest_head_sha": "66a3f9c866b55df464172f3d4d9b00edea5beea4",
-  "latest_observed_main_sha": "6c58aa6b4c83d21d45dd2bb07614ce5c00c0e2f8",
+  "latest_observed_main_sha": "7ed4edf9affd0cfacafeb7c7aa01c9f7b40a73d7",
+  "merge_commit_sha": "7ed4edf9affd0cfacafeb7c7aa01c9f7b40a73d7",
   "reserved_paths": [
     ".github/workflows/rev272-implicit-resource-ledger-replay-verifier-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33-attempt-solution.json",
@@ -28,6 +30,6 @@
     "agi_gi_rev_validation": {"run_id": 32539327024, "conclusion": "success"},
     "rev246": {"run_id": 32539326984, "conclusion": "success"}
   },
-  "status": "active_validation",
+  "status": "completed_merged",
   "agi_state": "NOT_AGI"
 }

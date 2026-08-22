@@ -1,0 +1,33 @@
+name: rev273 homogeneous block provenance smoke
+
+on:
+  pull_request:
+    paths:
+      - automation_runs/2026-08-19_0851_JST/homogeneous_block_relation_provenance_v1.py
+      - automation_runs/2026-08-19_0851_JST/test_homogeneous_block_relation_provenance_rev273.py
+      - automation_runs/2026-08-19_0851_JST/REV273_HOMOGENEOUS_BLOCK_RELATION_PROVENANCE.md
+      - agi/run-history/phase-admissions/chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c-attempt-solution.json
+      - agi/run-history/phase-admissions/chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c-publish.json
+      - .github/workflows/rev273-homogeneous-block-provenance-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run rev273 focused regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python -m unittest -v test_homogeneous_block_relation_provenance_rev273.py
+      - name: Compile rev273 verifier
+        run: python -m py_compile automation_runs/2026-08-19_0851_JST/homogeneous_block_relation_provenance_v1.py automation_runs/2026-08-19_0851_JST/test_homogeneous_block_relation_provenance_rev273.py
+      - name: Enforce standalone sibling boundary
+        run: |
+          ! grep -E 'implicit_relation_|primitive_johnson_|proof_carrying_state_orbit|s1_string_isomorphism' automation_runs/2026-08-19_0851_JST/homogeneous_block_relation_provenance_v1.py

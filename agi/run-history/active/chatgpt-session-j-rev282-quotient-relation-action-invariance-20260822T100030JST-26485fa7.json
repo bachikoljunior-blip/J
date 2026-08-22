@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev282-quotient-relation-action-invariance-20260822T100030JST-26485fa7",
+  "session_id": "chatgpt-session-j-continuation-20260822T100030+0900-rev282-turn3",
+  "started_at_jst": "2026-08-22T10:00:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:04:30+09:00",
+  "completed_at_jst": "2026-08-22T10:04:30+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "26485fa740c98ce36547fb43ff8abe00486db9dd",
+  "starting_agi_gi_rev": 274,
+  "target_revision": 282,
+  "scope": "crx1/homogeneous-block-reduction/quotient-relation-action-invariance-certificate",
+  "branch": "agi-gi-rev282-quotient-relation-action-invariance-session-20260822-1000",
+  "pull_request": 227,
+  "latest_head_sha": "80d868defef60d99199945d231023e8148aeb838",
+  "reserved_paths": [
+    ".github/workflows/rev282-quotient-relation-action-invariance-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev282-quotient-relation-action-invariance-20260822T100030JST-26485fa7-attempt-solution.json",
+    "automation_runs/2026-08-19_0851_JST/REV282_QUOTIENT_RELATION_ACTION_INVARIANCE.md",
+    "automation_runs/2026-08-19_0851_JST/quotient_relation_action_invariance_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_quotient_relation_action_invariance_rev282.py"
+  ],
+  "rescope_from": "chatgpt-session-j-rev281-quotient-relation-action-invariance-20260822T095200JST-4cddb6f9",
+  "supersession_reason": "A fresh independent rev275 claim is noncanonical but explicitly declares conflicts_with including CRX1. This session's rev282 scope is CRX1, so manual semantic conflict inspection supersedes the canonical path-only comparison. To preserve non-interference, this session vacates rev282 and closes its draft PR unmerged without modifying rev275 or any sibling execution.",
+  "validation": {
+    "exact_head": "80d868defef60d99199945d231023e8148aeb838",
+    "dedicated_workflow_run": 32542207137,
+    "dedicated_workflow_status": "success",
+    "dedicated_tests": "24/24 passed plus py_compile",
+    "parallel_admission_run": 32542207013,
+    "parallel_admission_status": "failure",
+    "general_validation_run": 32542207038,
+    "general_validation_status_at_supersession": "in_progress"
+  },
+  "status": "superseded",
+  "agi_state": "NOT_AGI"
+}
