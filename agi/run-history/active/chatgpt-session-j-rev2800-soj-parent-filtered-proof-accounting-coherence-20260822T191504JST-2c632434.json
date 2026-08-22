@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434",
   "session_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST",
   "started_at_jst": "2026-08-22T19:15:04+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:20:11+09:00",
-  "last_activity_at_jst": "2026-08-22T19:20:11+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:45:30+09:00",
+  "last_activity_at_jst": "2026-08-22T19:45:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
   "starting_agi_gi_rev": 1600,
@@ -32,6 +32,7 @@
     "rev2200 corrected-SOJ parent-filtered child result / PR #274 and all reserved paths",
     "rev1400 recursive production execution proof-DAG / PR #264 and all reserved paths",
     "run-start history integrity and claim-publication preflight coordination scopes and all reserved paths",
+    "run-start SHA correction / PR #284 and all reserved paths",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
   "intent": "Add one file-disjoint post-replay coherence seal between public-shaped rev2707 parent-filtered result proof-DAG integrity evidence and public-shaped rev2600 parent-filtered result recurrence-accounting coherence evidence. Independently normalize and replay both snapshots, require one exact result/reduction/semantic/child lineage, outcome, child ground, candidate/accepted counts and filtering-work bound across them, retain rev2600's strict parent-to-child measure separately, preserve proof-DAG and accounting identities as distinct evidence, reject malformed/tampered/nonliteral data fail-closed, and emit one deterministic SHA-256 cross-certificate coherence identity. Do not import sibling branch-only implementations, do not execute recursive SI, do not combine unlike accounting units, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
@@ -51,7 +52,8 @@
     "rev2800_repository_search": "none before claim",
     "main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
     "claim_commit": "c3ab35d3825a0458e8f8c4ae9ceb494f6810e9f3",
-    "pre_implementation_heartbeat_commit": "b7f6947be5c7130bec795638996037263b7306e0"
+    "pre_implementation_heartbeat_commit": "b7f6947be5c7130bec795638996037263b7306e0",
+    "continuation_main_sha": "1616e25a85d990068e3b5bfabb9ea8f29a81b84b"
   },
   "validation": {
     "local_focused_regressions": "17/17 passed",
