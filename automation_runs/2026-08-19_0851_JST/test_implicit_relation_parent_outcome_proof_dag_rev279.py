@@ -183,6 +183,58 @@ class ParentOutcomeProofDAGRev279Test(unittest.TestCase):
             validation.status, "mismatched_parent_outcome_proof_identity"
         )
 
+    def test_joint_expected_and_attached_schema_tamper_is_rejected(self):
+        result = parent_outcome_contract_proof_dag_consumer(
+            nonempty_outcome(), original_root_n=7
+        )
+        tampered_identity = replace(
+            result.proof.proof_identity,
+            schema="attacker-controlled-proof-identity-v1",
+        )
+        tampered_proof = replace(result.proof, proof_identity=tampered_identity)
+        validation = validate_parent_outcome_proof_identity(
+            tampered_proof, tampered_identity
+        )
+        self.assertFalse(validation.certified)
+        self.assertEqual(
+            validation.status, "malformed_parent_outcome_proof_identity"
+        )
+
+    def test_joint_expected_and_attached_solver_tamper_is_rejected(self):
+        result = parent_outcome_contract_proof_dag_consumer(
+            nonempty_outcome(), original_root_n=7
+        )
+        tampered_identity = replace(
+            result.proof.proof_identity,
+            solver_identity=("implicit_relation_parent_outcome_v1", "other-dag", 279),
+        )
+        tampered_proof = replace(result.proof, proof_identity=tampered_identity)
+        validation = validate_parent_outcome_proof_identity(
+            tampered_proof, tampered_identity
+        )
+        self.assertFalse(validation.certified)
+        self.assertEqual(
+            validation.status, "malformed_parent_outcome_proof_identity"
+        )
+
+    def test_joint_expected_and_attached_transcript_tamper_is_rejected(self):
+        result = parent_outcome_contract_proof_dag_consumer(
+            nonempty_outcome(), original_root_n=7
+        )
+        tampered_identity = replace(
+            result.proof.proof_identity,
+            transcript_digest=digest("jointly-tampered-transcript"),
+        )
+        tampered_proof = replace(result.proof, proof_identity=tampered_identity)
+        validation = validate_parent_outcome_proof_identity(
+            tampered_proof, tampered_identity
+        )
+        self.assertFalse(validation.certified)
+        self.assertEqual(
+            validation.status, "malformed_parent_outcome_proof_identity"
+        )
+        self.assertIn("transcript", validation.reason)
+
     def test_semantic_exactness_bit_or_coset_injection_is_forbidden(self):
         result = parent_outcome_contract_proof_dag_consumer(
             nonempty_outcome(), original_root_n=7
