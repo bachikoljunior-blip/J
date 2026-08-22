@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  rev276-smoke:
+  functional-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -41,11 +41,14 @@ jobs:
             exit 1
           fi
 
-      - name: Checkout exact PR branch head for registry admission
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v4
+  parallel-admission:
+    needs: functional-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 1
 
       - name: Recheck attempt-solution parallel admission
