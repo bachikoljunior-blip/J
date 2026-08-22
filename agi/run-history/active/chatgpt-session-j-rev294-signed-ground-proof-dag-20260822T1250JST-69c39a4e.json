@@ -29,7 +29,7 @@
   ],
   "intent": "Attach the main-integrated rev176 exact small-order signed Johnson ground relational String-Isomorphism terminal to the main-integrated rev220/rev289 conservative execution proof-DAG without changing either shared implementation.",
   "non_interference": "No implementation writes were made after collision detection. The dedicated rev294 branch remains an untouched pointer to the claim commit. Never modify the independently owned rev294 Johnson-construction-cost-binding claim or any sibling work.",
-  "status": "superseded_before_implementation_target_revision_collision",
-  "superseded_reason": "A separately owned rev294 Johnson construction cost-binding claim at commit ab2c7ba4a3c07cba50493ac25aa839017360aa2c became visible immediately after this claim was published. This session stops rev294 before implementation and rescoping occurs on a new revision.",
+  "status": "superseded",
+  "superseded_reason": "A separately owned rev294 Johnson construction cost-binding claim at commit ab2c7ba4a3c07cba50493ac25aa839017360aa2c became visible immediately after this claim was published. This session stopped rev294 before implementation and rescaled to rev295.",
   "agi_state": "NOT_AGI"
 }
