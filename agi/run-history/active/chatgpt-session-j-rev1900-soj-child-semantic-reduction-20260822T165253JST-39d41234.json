@@ -4,15 +4,15 @@
   "claim_id": "chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1900-20260822T165253+0900-turn9",
   "started_at_jst": "2026-08-22T16:52:53+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:54:05+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:03:04+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "39d41234d4d7d73ed39a773afc01fe2a59e5820d",
   "starting_agi_gi_rev": 952,
   "target_revision": 1900,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-semantic-reduction-binding",
   "branch": "agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652",
-  "current_pr": null,
-  "exact_head": null,
+  "current_pr": 270,
+  "exact_head": "39d59b7f4f2fd3f4bbe10c835029f307d752a8bc",
   "reserved_paths": [
     ".github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml",
     "automation_runs/2026-08-22_1652_JST/REV1900_SOJ_CHILD_SEMANTIC_REDUCTION.md",
@@ -28,7 +28,7 @@
     "rev1600 homogeneous block-action provenance proof-DAG / PR #265 and all reserved paths",
     "all rev1500 claims and their reserved paths",
     "rev1400 corrected-SOJ recursive production execution proof-DAG / PR #264 and all reserved paths",
-    "rev1300 / PR #263, rev1200 / PR #260, rev1100 / PR #257, rev1000 / PR #256, rev900 / PR #254 and all reserved paths",
+    "rev1300 / PR #263, rev1200 / PR #260, rev1100 / PR #267, rev1000 / PR #256, rev900 / PR #254 and all reserved paths",
     "rev293 Johnson recursive-result lift / PR #241 and all reserved paths",
     "main-integrated rev287 Johnson relational-reduction implementation except read-only public contract use",
     "all CRX1/CRX2/CRX3 scopes, homogeneous-block scopes, MAIN.md, shared S1/proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
@@ -53,7 +53,21 @@
     "open_rev1900_pull_requests": 0,
     "result": "collision_free"
   },
+  "validation": {
+    "dedicated_pr_run_id": 32561151014,
+    "dedicated_pr_conclusion": "success",
+    "focused_rev1900_tests": 9,
+    "inherited_rev287_tests": 11,
+    "py_compile": "success",
+    "dependency_boundary": "success",
+    "attempt_solution_preview": "admitted_true_conflicts_empty",
+    "publish_preview": "admitted_true_conflicts_empty",
+    "preview_registry_source_sha": "17d6614f8791af25044c801dff24de2aa183ab0c",
+    "preview_registry_digest": "sha256:db26b8855b0dde9f91c8710b46fa94bf956dd3956db20d838dff6a174787a52a",
+    "repository_phase_evidence_run_id": 32561151084,
+    "repository_phase_evidence_state": "expected_fail_closed_missing_persisted_evidence"
+  },
   "integration_boundary": "file-disjoint semantic-binding leaf only; recursive solver execution and result lifting remain separately owned",
-  "status": "active_claimed_preimplementation",
+  "status": "active_functional_green_evidence_pending",
   "agi_state": "NOT_AGI"
 }
