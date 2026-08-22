@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev1100-soj-main-post-replay-seal-20260822T154530JST-1e9a46d7",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1100-20260822T154530+0900-turn9",
   "started_at_jst": "2026-08-22T15:45:30+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:56:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:43:41+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "1e9a46d7eca9ce98c7d0f97586e49766ee7d736d",
   "starting_agi_gi_rev": 950,
@@ -32,11 +32,13 @@
     "rev500 caller replay envelope / PR #247",
     "rev400 production caller binding / PR #246",
     "repository-coordination/problem-solving-phase-admission/canonical-main-source / merged PR #259",
+    "repository-coordination/run-start-history/canonical-revision-integrity / active claim chatgpt-session-j-run-start-history-integrity-20260822T174325JST-56c7635a",
     "rev1200/rev1300/rev1400 corrected-SOJ downstream scopes and all reserved paths",
     "rev1600 block-action provenance proof-DAG and all reserved paths",
     "rev1700 corrected-SOJ child semantic/execution scopes and all reserved paths",
     "rev1800 homogeneous-block quotient SI proof DAG and all reserved paths",
     "rev1900 corrected-SOJ child semantic reduction and all reserved paths",
+    "rev2000 homogeneous-block joint compatibility proof DAG and all reserved paths",
     "all CRX scopes, shared proof-DAG, recurrence, coordination implementation, sibling branches/PRs/workflows, MAIN.md and revision ledgers"
   ],
   "intent": "bind an independently replay-verified rev700 main-anchored recursive production provenance join to an independently replay-verified rev1000 post-replay cost/coherence envelope, preserving exact-empty/nonempty semantics and the shared reduction/production provenance identities without importing sibling branch-only implementations",
@@ -46,7 +48,8 @@
     "do_not_rebase_or_force_push": true,
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
     "fail_closed_on_any_upstream_identity_or_outcome_drift": true,
-    "revalidate_phase_evidence_after_canonical_main_source_hardening": true
+    "revalidate_phase_evidence_after_canonical_main_source_hardening": true,
+    "hold_branch_reconciliation_while_new_coordination_integrity_contract_is_active": true
   },
   "phase_evidence": {
     "pre_hardening_attempt_solution_commit": "6d02797e6a2df740631cbc146d5bfe0bd01cae3b",
@@ -73,9 +76,15 @@
     "hardened_phase_evidence": "success",
     "dedicated_workflow": {"run_id": 32560877471, "conclusion": "success"},
     "parallel_admission_workflow": {"run_id": 32560877503, "conclusion": "success"},
-    "inherited_success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253", "rev254"],
-    "inherited_pending": [{"revision": "rev246", "run_id": 32560877485}],
-    "latest_observed_main_sha": "3e3f056c3f06069705555147d4680848310e1600"
+    "inherited_success": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev246", "rev250", "rev253", "rev254"],
+    "inherited_pending": [],
+    "latest_observed_main_sha": "9fe789cda6c34e8ecfccf31c5147188c0ff3cdce",
+    "latest_main_comparison": {
+      "merge_base": "1663a3c6e09f6a47ea48506c3e3b5490f7521279",
+      "branch_ahead_by": 7,
+      "branch_behind_by": 24,
+      "status": "diverged"
+    }
   },
   "integration_state": {
     "pre_hardening_pull_request": 257,
@@ -90,8 +99,10 @@
     "upstream_rev1000_state": "open_draft_unmerged",
     "coordination_hardening_pr": 259,
     "coordination_hardening_state": "merged",
+    "run_start_history_integrity_claim": "chatgpt-session-j-run-start-history-integrity-20260822T174325JST-56c7635a",
+    "run_start_history_integrity_state": "active_disjoint_hold_reconciliation",
     "downstream_scopes": "active_file_disjoint_and_explicitly_excluding_rev1100"
   },
-  "status": "active_hardened_exact_head_green_waiting_rev246_and_upstreams",
+  "status": "active_hardened_exact_head_all_green_waiting_upstreams_and_history_integrity_hardening",
   "agi_state": "NOT_AGI"
 }
