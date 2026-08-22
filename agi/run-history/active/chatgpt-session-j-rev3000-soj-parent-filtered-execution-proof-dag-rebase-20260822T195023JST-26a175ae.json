@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-rev3000-soj-parent-filtered-execution-proof-dag-rebase-20260822T195023JST-26a175ae",
   "session_id": "chatgpt-session-j-rev3000-soj-parent-filtered-execution-proof-dag-rebase-20260822T195023JST",
   "started_at_jst": "2026-08-22T19:50:23+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:57:00+09:00",
-  "last_activity_at_jst": "2026-08-22T19:57:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:58:00+09:00",
+  "last_activity_at_jst": "2026-08-22T19:58:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "26a175ae9fb76c0f31340d43c0956392ed377e61",
   "starting_agi_gi_rev": 1600,
@@ -58,12 +58,12 @@
     "dedicated_pr_workflow": "success",
     "repository_parallel_admission_run": 32568926863,
     "repository_parallel_admission": "success",
-    "inherited_success_observed": ["rev238", "rev239", "rev240", "rev250"],
-    "inherited_in_progress_observed": ["rev241", "rev242", "rev246", "rev253", "rev254"],
-    "run_start_history_integrity": "failure in independently owned guard while resolving orphan SHA 34c9ca6eafc11a0737fbacb70fd0fc244bea6973; rev3000 implementation tests and phase-evidence replay are unaffected",
+    "inherited_success_observed": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253", "rev254"],
+    "inherited_in_progress_observed": ["rev246"],
+    "run_start_history_integrity": "failure in independently owned guard while resolving orphan SHA 34c9ca6eafc11a0737fbacb70fd0fc244bea6973; its 14 unit tests passed before the repository-history replay failed; rev3000 implementation tests and phase-evidence replay are unaffected",
     "manual_rerun_or_cancel": false
   },
-  "next_action": "keep PR #285 draft and unmerged; observe remaining inherited checks and independent run-start hardening without changing their runs or workflows; recheck fresh main/claims before any further leaf work",
+  "next_action": "keep PR #285 draft and unmerged; observe rev246 and independent run-start hardening without changing their runs or workflows; recheck fresh main/claims before any further leaf work",
   "status": "in_progress",
   "agi_state": "NOT_AGI"
 }
