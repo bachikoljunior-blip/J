@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev291-soj-larger-ground-recursive-handoff-20260822T1148JST-c2a368c0",
   "session_id": "chatgpt-session-j-continuation-automation-turn4-20260822T1148+0900",
   "started_at_jst": "2026-08-22T11:48:31+09:00",
-  "heartbeat_at_jst": "2026-08-22T11:48:31+09:00",
+  "heartbeat_at_jst": "2026-08-22T11:51:31+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "c2a368c0003578c7045cce4cd1c6106f373fc800",
   "starting_agi_gi_rev": 274,
   "target_revision": 291,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-johnson-recursive-handoff",
   "branch": "agi-gi-rev291-soj-larger-ground-recursive-handoff-session-20260822-1148",
+  "pull_request": 234,
+  "latest_head_sha": "088ba30eac3a86faea2cfdf39a488661c55016e2",
   "reserved_paths": [
     ".github/workflows/rev291-soj-larger-ground-recursive-handoff-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev291-soj-larger-ground-recursive-handoff-20260822T1148JST-c2a368c0-attempt-solution.json",
@@ -33,7 +35,8 @@
     "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
   ],
   "intent": "add a file-disjoint fail-closed recursive handoff for the main-integrated primitive Johnson ground-cap case: accept only exact/canonical caller-supplied relational reduction evidence that binds J(v,k) action degree C(v,k) to the certified ground v, requires solution-transport/complement handling certification and a strictly shrinking child accounting measure, then compose that handoff through the main quasipolynomial recurrence validator without claiming construction of the reduction itself; consume sibling contracts read-only and never import or modify branch-only sibling implementation",
-  "non_interference": "Only rev291 reserved paths may be written on the dedicated branch. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
-  "status": "active",
+  "coordination_note": "Fresh main recheck found rev290 already claimed, so this session moved to rev291 before implementation. Dedicated branch changes only the four rev291 problem-state files. Local focused regression passed 17/17 and py_compile passed. Draft PR #234 is open at exact head 088ba30eac3a86faea2cfdf39a488661c55016e2. Dedicated rev291 smoke run 32547370763 completed success. Problem-solving parallel admission run 32547370723 failed because the PR has problem-state changes but no changed phase-admission evidence file yet. The previously active non-schema-v2 rev275 blocker has now been superseded by a canonical takeover, but rev291 does not fabricate admission evidence; the reserved attempt_solution evidence path remains untouched for a canonical replay from a compatible registry source. Other inherited workflows are left to run naturally and are not rerun or cancelled.",
+  "non_interference": "Only rev291 reserved paths may be written on the dedicated branch and only this rev291 claim may be updated on main. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths.",
+  "status": "active_draft_pr_smoke_green_phase_admission_evidence_pending",
   "agi_state": "NOT_AGI"
 }
