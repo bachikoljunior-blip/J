@@ -15,7 +15,7 @@ on:
       - 'automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   smoke:
@@ -69,3 +69,29 @@ jobs:
           assert not missing, f'missing expected rev340 paths: {missing}'
           print('reserved-path diff ok:', sorted(changed))
           PY
+      - name: Materialize canonical attempt-solution admission after green smoke
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          EVIDENCE: agi/run-history/phase-admissions/chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f-attempt-solution.json
+        run: |
+          if [[ -f "$EVIDENCE" ]]; then
+            echo "canonical attempt-solution evidence already present; no branch mutation"
+            exit 0
+          fi
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev340-soj-johnson-recursive-result-accounting-binding-20260822T125400JST-03e2010f \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-johnson-recursive-result-accounting-binding \
+            --target-revision 340 \
+            --path .github/workflows/rev340-soj-johnson-recursive-result-accounting-binding-smoke.yml \
+            --path automation_runs/2026-08-22_1254_JST/REV340_SOJ_JOHNSON_RECURSIVE_RESULT_ACCOUNTING_BINDING.md \
+            --path automation_runs/2026-08-22_1254_JST/corrected_soj_johnson_recursive_result_accounting_binding_v1.py \
+            --path automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py \
+            --output "$EVIDENCE"
+          test -s "$EVIDENCE"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add "$EVIDENCE"
+          git commit -m "coordination: add rev340 attempt-solution admission evidence"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
