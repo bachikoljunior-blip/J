@@ -120,12 +120,18 @@ def _strict_status(mapping: Mapping[str, Any], key: str = "result_status") -> st
 
 
 def _canonical_bytes(value: Mapping[str, Any]) -> bytes:
-    return json.dumps(
-        value,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    ).encode("ascii")
+    try:
+        serialized = json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        )
+    except (TypeError, ValueError) as exc:
+        raise CallerBindingError(
+            "binding payload is not canonically JSON serializable"
+        ) from exc
+    return serialized.encode("ascii")
 
 
 def _digest(value: Mapping[str, Any]) -> str:

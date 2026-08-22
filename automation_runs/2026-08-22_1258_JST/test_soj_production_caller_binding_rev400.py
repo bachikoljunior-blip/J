@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import sys
 import unittest
 from types import MappingProxyType
 
@@ -253,6 +254,19 @@ class ProductionCallerBindingTests(unittest.TestCase):
         value["larger_ground_recursive"][StringSubclass("exact")] = exact
         with self.assertRaises(CallerBindingError):
             bind_production_caller(value)
+
+    def test_serialization_limits_fail_closed_as_binding_error(self) -> None:
+        if not hasattr(sys, "get_int_max_str_digits"):
+            self.skipTest("interpreter has no integer string conversion limit")
+        original_limit = sys.get_int_max_str_digits()
+        try:
+            sys.set_int_max_str_digits(640)
+            value = recursive()
+            value["larger_ground_recursive"]["accounted_work"] = 10**700
+            with self.assertRaises(CallerBindingError):
+                bind_production_caller(value)
+        finally:
+            sys.set_int_max_str_digits(original_limit)
 
 
 if __name__ == "__main__":
