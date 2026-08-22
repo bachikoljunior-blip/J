@@ -4,8 +4,8 @@
   "claim_id": "chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST-664aeb8e",
   "session_id": "chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST",
   "started_at_jst": "2026-08-22T20:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T20:56:00+09:00",
-  "last_activity_at_jst": "2026-08-22T20:56:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:58:00+09:00",
+  "last_activity_at_jst": "2026-08-22T20:58:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "664aeb8e695bc2621f584042a5ce437bf53c86a7",
   "starting_agi_gi_rev": 3200,
@@ -13,7 +13,7 @@
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-result-identity-equivalence",
   "branch": "agi-gi-rev3400-soj-parent-result-identity-equivalence-session-20260822-2051",
   "pull_request": 289,
-  "exact_head_sha": "3b97b2a32213ff5b81f96881b2db4a5f3f1694c2",
+  "exact_head_sha": "af77dc102166a79af1e1acb0c9383e50934ac837",
   "merge_sha": null,
   "reserved_paths": [
     ".github/workflows/rev3400-soj-parent-result-identity-equivalence-smoke.yml",
@@ -55,10 +55,17 @@
   "validation": {
     "local_focused_regressions": "20/20 passed",
     "py_compile": "success",
-    "dedicated_exact_head_observation": "not yet returned by GitHub at heartbeat",
+    "canonical_attempt_solution_evidence": "admitted=true, conflicts=[]",
+    "canonical_publish_evidence": "admitted=true, conflicts=[]",
+    "dedicated_exact_head_run": 32571653986,
+    "dedicated_exact_head": "success",
+    "repository_parallel_admission_run": 32571653824,
+    "repository_parallel_admission": "success",
+    "inherited_success_observed": ["rev238", "rev250"],
+    "inherited_in_progress_observed": ["rev239", "rev240", "rev241", "rev242", "rev246", "rev253", "rev254", "run-start-history-integrity"],
     "manual_rerun_or_cancel": false
   },
-  "integration_boundary": "Keep draft/unmerged while rev3100 / PR #287, rev3000 / PR #285, rev2800 / PR #283 and rev2200 / PR #274 remain independently owned/open. Merge only after exact-head dedicated and repository-wide admission checks are green and only if no later sibling overlaps this exact scope or reserved paths.",
+  "integration_boundary": "Keep PR #289 draft/unmerged while rev3100 / PR #287, rev3000 / PR #285, rev2800 / PR #283 and rev2200 / PR #274 remain independently owned/open. Exact-head rev3400 smoke and repository-wide parallel admission are green; observe remaining inherited checks naturally and recheck fresh claims before any further leaf work.",
   "status": "in_progress",
   "agi_state": "NOT_AGI"
 }
