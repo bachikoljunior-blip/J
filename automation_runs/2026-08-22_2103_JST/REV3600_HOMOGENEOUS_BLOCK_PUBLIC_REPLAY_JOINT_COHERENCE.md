@@ -23,4 +23,8 @@ The PR must remain draft and unmerged while rev3500 is independently owned or un
 
 ## Validation
 
-Before publication, the module and tests were independently materialized in a clean local temporary directory: `py_compile` succeeded and all 16 standard-library focused regressions passed. The dedicated GitHub workflow repeats compile/regression checks, rejects branch-only dependency strings, previews canonical `attempt_solution` and `publish` admission against the claim-aligned main source, and enforces the reserved-path diff.
+The implementation passed `py_compile` and all 16 standard-library focused regressions. The dedicated GitHub workflow repeats compile/regression checks, rejects branch-only dependency strings, generates canonical `attempt_solution` and `publish` admission previews from the repository admission generator, enforces the reserved-path diff, and persists the two reserved evidence records only once on the source branch.
+
+The independently owned current-registry hardening series has now merged. Under that hardened contract, a natural rev3600 run persisted both canonical phase records at bot commit `6fe9222e00b66d9c79ef41095b253c9d991fc6e6`. Both phases record `admitted=true`, `mode=exclusive`, `conflicts=[]`, `registry_source_sha=d1166dba0fafa40c29c2d9d79a3aab3a68f5ba3b`, and registry digest `sha256:4f2ef3dced57e7ec51c32ad93a966c9c12bc8a3db6e84a97a451b80818e52728`.
+
+The evidence-producing implementation head `d9efe2ba2f25bac4d433ab0a48e193f2faeca731` passed the dedicated rev3600 smoke naturally. This connector-authored reserved documentation heartbeat follows the bot evidence commit so ordinary PR checks can evaluate an evidence-bearing exact head without any manual workflow rerun.
