@@ -1,0 +1,87 @@
+name: rev269 implicit relation image-empty parent bridge smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/rev269-implicit-relation-image-empty-parent-smoke.yml"
+      - "automation_runs/2026-08-19_0851_JST/REV269_IMPLICIT_RELATION_IMAGE_EMPTY_PARENT_BRIDGE.md"
+      - "automation_runs/2026-08-19_0851_JST/implicit_relation_image_empty_parent_bridge_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_empty_parent_bridge_rev269.py"
+
+permissions:
+  contents: read
+
+jobs:
+  rev269-image-empty-parent-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Run focused rev269 semantic regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python test_implicit_relation_image_empty_parent_bridge_rev269.py -v
+
+      - name: Re-run inherited rev257 faithful-action regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python test_implicit_relation_image_action_rev257.py -v
+
+      - name: Compile rev269 implementation and regression
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: >-
+          python -m py_compile
+          implicit_relation_image_empty_parent_bridge_v1.py
+          test_implicit_relation_image_empty_parent_bridge_rev269.py
+
+      - name: Assert independent sibling dependency boundary
+        working-directory: automation_runs/2026-08-19_0851_JST
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'from (implicit_relation_image_value_coset_v2|implicit_relation_image_preimage_coset_v2|implicit_relation_production_parent_v1)|import (implicit_relation_image_value_coset_v2|implicit_relation_image_preimage_coset_v2|implicit_relation_production_parent_v1)' implicit_relation_image_empty_parent_bridge_v1.py
+          grep -q 'from implicit_relation_image_action_v1 import ImplicitRelationImageAction' implicit_relation_image_empty_parent_bridge_v1.py
+          grep -q 'from implicit_relation_parent_outcome_v1 import ParentExactOutcomeContract' implicit_relation_image_empty_parent_bridge_v1.py
+          grep -q 'SOURCE_REVISION = 269' implicit_relation_image_empty_parent_bridge_v1.py
+          grep -q 'exact_empty_original_domain_relation_coset' implicit_relation_image_empty_parent_bridge_v1.py
+
+      - name: Generate replayable attempt-solution admission evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="/tmp/rev269-attempt-solution.json"
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev269-image-empty-parent-bridge-20260822T0845JST-c758f1af \
+            --phase attempt_solution \
+            --scope crx1/bounded-arity-relation-image/implicit-generator-group/exact-empty-image-parent-semantic-bridge \
+            --target-revision 269 \
+            --path .github/workflows/rev269-implicit-relation-image-empty-parent-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV269_IMPLICIT_RELATION_IMAGE_EMPTY_PARENT_BRIDGE.md \
+            --path automation_runs/2026-08-19_0851_JST/implicit_relation_image_empty_parent_bridge_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_empty_parent_bridge_rev269.py \
+            --output "${evidence}"
+          echo '---REV269_ATTEMPT_EVIDENCE_BEGIN---'
+          cat "${evidence}"
+          echo '---REV269_ATTEMPT_EVIDENCE_END---'
+
+      - name: Generate replayable publish admission evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="/tmp/rev269-publish.json"
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev269-image-empty-parent-bridge-20260822T0845JST-c758f1af \
+            --phase publish \
+            --scope crx1/bounded-arity-relation-image/implicit-generator-group/exact-empty-image-parent-semantic-bridge \
+            --target-revision 269 \
+            --path .github/workflows/rev269-implicit-relation-image-empty-parent-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV269_IMPLICIT_RELATION_IMAGE_EMPTY_PARENT_BRIDGE.md \
+            --path automation_runs/2026-08-19_0851_JST/implicit_relation_image_empty_parent_bridge_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_empty_parent_bridge_rev269.py \
+            --output "${evidence}"
+          echo '---REV269_PUBLISH_EVIDENCE_BEGIN---'
+          cat "${evidence}"
+          echo '---REV269_PUBLISH_EVIDENCE_END---'
