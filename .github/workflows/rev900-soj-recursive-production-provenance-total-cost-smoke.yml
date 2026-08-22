@@ -1,0 +1,116 @@
+name: rev900 SOJ recursive production provenance total cost smoke
+
+on:
+  push:
+    branches:
+      - agi-gi-rev900-soj-recursive-production-provenance-total-cost-session-20260822-1446
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rev900-soj-recursive-production-provenance-total-cost-smoke.yml'
+      - 'automation_runs/2026-08-22_1446_JST/REV900_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_TOTAL_COST_BINDING.md'
+      - 'automation_runs/2026-08-22_1446_JST/soj_recursive_production_provenance_total_cost_binding_v1.py'
+      - 'automation_runs/2026-08-22_1446_JST/test_soj_recursive_production_provenance_total_cost_binding_rev900.py'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e-attempt-solution.json'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e-publish.json'
+
+permissions:
+  contents: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev900 module and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1446_JST/soj_recursive_production_provenance_total_cost_binding_v1.py \
+            automation_runs/2026-08-22_1446_JST/test_soj_recursive_production_provenance_total_cost_binding_rev900.py
+      - name: Run rev900 focused regressions
+        run: python automation_runs/2026-08-22_1446_JST/test_soj_recursive_production_provenance_total_cost_binding_rev900.py
+      - name: Reject branch-only sibling implementation imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -nE 'soj_recursive_production_provenance_join_v1|soj_recursive_production_total_cost_coherence_v1' \
+            automation_runs/2026-08-22_1446_JST/soj_recursive_production_provenance_total_cost_binding_v1.py
+      - name: Canonical attempt_solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-provenance-total-cost-binding \
+            --target-revision 900 \
+            --path .github/workflows/rev900-soj-recursive-production-provenance-total-cost-smoke.yml \
+            --path automation_runs/2026-08-22_1446_JST/REV900_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_TOTAL_COST_BINDING.md \
+            --path automation_runs/2026-08-22_1446_JST/soj_recursive_production_provenance_total_cost_binding_v1.py \
+            --path automation_runs/2026-08-22_1446_JST/test_soj_recursive_production_provenance_total_cost_binding_rev900.py \
+            --output /tmp/rev900-attempt.json
+          test -s /tmp/rev900-attempt.json
+          cat /tmp/rev900-attempt.json
+      - name: Enforce reserved rev900 diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "$base" HEAD > /tmp/rev900-changed.txt
+          python - <<'PY'
+          from pathlib import Path
+          allowed = {
+              '.github/workflows/rev900-soj-recursive-production-provenance-total-cost-smoke.yml',
+              'automation_runs/2026-08-22_1446_JST/REV900_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_TOTAL_COST_BINDING.md',
+              'automation_runs/2026-08-22_1446_JST/soj_recursive_production_provenance_total_cost_binding_v1.py',
+              'automation_runs/2026-08-22_1446_JST/test_soj_recursive_production_provenance_total_cost_binding_rev900.py',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e-attempt-solution.json',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e-publish.json',
+          }
+          changed = {line.strip() for line in Path('/tmp/rev900-changed.txt').read_text().splitlines() if line.strip()}
+          extra = sorted(changed - allowed)
+          assert not extra, f'unreserved rev900 paths changed: {extra}'
+          expected = {
+              '.github/workflows/rev900-soj-recursive-production-provenance-total-cost-smoke.yml',
+              'automation_runs/2026-08-22_1446_JST/REV900_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_TOTAL_COST_BINDING.md',
+              'automation_runs/2026-08-22_1446_JST/soj_recursive_production_provenance_total_cost_binding_v1.py',
+              'automation_runs/2026-08-22_1446_JST/test_soj_recursive_production_provenance_total_cost_binding_rev900.py',
+          }
+          missing = sorted(expected - changed)
+          assert not missing, f'missing expected rev900 paths: {missing}'
+          print('reserved-path diff ok:', sorted(changed))
+          PY
+      - name: Materialize canonical attempt_solution admission after green smoke
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          EVIDENCE: agi/run-history/phase-admissions/chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e-attempt-solution.json
+        run: |
+          set -euo pipefail
+          if [[ -f "$EVIDENCE" ]]; then
+            echo 'canonical attempt_solution evidence already present; no branch mutation'
+            exit 0
+          fi
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev900-soj-recursive-production-provenance-total-cost-20260822T144656JST-c1d9bf7e \
+            --phase attempt_solution \
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-provenance-total-cost-binding \
+            --target-revision 900 \
+            --path .github/workflows/rev900-soj-recursive-production-provenance-total-cost-smoke.yml \
+            --path automation_runs/2026-08-22_1446_JST/REV900_SOJ_RECURSIVE_PRODUCTION_PROVENANCE_TOTAL_COST_BINDING.md \
+            --path automation_runs/2026-08-22_1446_JST/soj_recursive_production_provenance_total_cost_binding_v1.py \
+            --path automation_runs/2026-08-22_1446_JST/test_soj_recursive_production_provenance_total_cost_binding_rev900.py \
+            --output "$EVIDENCE"
+          test -s "$EVIDENCE"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add "$EVIDENCE"
+          git commit -m 'coordination: add rev900 attempt-solution admission evidence'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
