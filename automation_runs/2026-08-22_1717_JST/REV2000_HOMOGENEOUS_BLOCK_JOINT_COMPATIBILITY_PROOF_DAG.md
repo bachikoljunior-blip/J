@@ -26,3 +26,11 @@ The terminal proof carries no coset and sets `exact=False`. Its conservative loc
 ## Parallel safety
 
 Only the rev2000 reserved paths are modified. `MAIN.md`, shared proof-DAG/recurrence/coordination code, rev1800 quotient-SI work, rev278 original-domain preimage work, rev276's branch-only joint certificate, and every sibling claim/branch/PR/workflow remain untouched.
+
+## Admission and validation progress
+
+The branch-push smoke on implementation head `e4edebf754ddf9179c999829a9c0c81f4c9b76d3` completed successfully as run `32562618988`. Because the canonical attempt-solution evidence is persisted only after the functional regressions, compilation, and dependency-boundary gate succeed, the subsequent bot commit `ccd50fae49305ea544a05a23570d28cbcb8ff8e5` is execution-linked evidence that those preceding gates were green.
+
+The persisted `attempt_solution` record reports `admitted=true`, `conflicts=[]`, target revision `2000`, and this exact dedicated scope. The repository-wide admission run on the pre-evidence implementation head (`32562619060`) failed closed as expected because the evidence file was not yet part of that head; no run was cancelled or manually rerun. GitHub does not recursively execute normal PR workflows for the evidence commit authored with the workflow token, so this connector-authored reserved-document heartbeat follows the bot evidence commit to let ordinary PR checks evaluate an evidence-bearing head naturally.
+
+Publication and merge admission remain unclaimed. The PR stays draft until the evidence-bearing exact-head checks settle.
