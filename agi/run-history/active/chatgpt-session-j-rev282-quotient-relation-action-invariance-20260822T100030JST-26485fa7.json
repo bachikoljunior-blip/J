@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev282-quotient-relation-action-invariance-20260822T100030JST-26485fa7",
   "session_id": "chatgpt-session-j-continuation-20260822T100030+0900-rev282-turn3",
   "started_at_jst": "2026-08-22T10:00:30+09:00",
-  "heartbeat_at_jst": "2026-08-22T10:02:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T10:03:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "26485fa740c98ce36547fb43ff8abe00486db9dd",
   "starting_agi_gi_rev": 274,
@@ -32,13 +32,19 @@
   "coordination_note": "Canonical phase-admission evidence generation remains fail-closed while the independently owned fresh rev275 registry record is noncanonical. Reserve the exact evidence path but do not fabricate an admitted payload.",
   "validation": {
     "implementation_diff": "four new reserved problem-state files only; 564 additions and 0 deletions",
-    "prior_equivalent_rev281_exact_head": "1919c97e2a09957a1e2044f18a06ce81e5d2461a",
-    "prior_equivalent_dedicated_run": 32541828558,
-    "prior_equivalent_tests": "24/24 passed plus py_compile before rescope",
-    "rev282_dedicated_workflow": "not_yet_visible_at_last_observation",
-    "parallel_admission_evidence": "reserved_but_canonical_generation_blocked_by_external_rev275_registry_format"
+    "exact_head": "80d868defef60d99199945d231023e8148aeb838",
+    "dedicated_workflow_run": 32542207137,
+    "dedicated_workflow_status": "success",
+    "dedicated_job": 96954246836,
+    "dedicated_tests": "24/24 passed: 12 focused rev282 plus 12 inherited rev274; py_compile passed",
+    "parallel_admission_run": 32542207013,
+    "parallel_admission_status": "failure",
+    "parallel_admission_immediate_reason": "the four changed problem-state paths have no changed phase-admission evidence file",
+    "canonical_evidence_generation_blocker": "the fresh independently owned rev275 registry record is noncanonical; do not fabricate or normalize sibling evidence",
+    "general_validation_run": 32542207038,
+    "general_validation_status": "in_progress"
   },
   "non_interference": "Only rev282 reserved paths may be written on the isolated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, overwrite, normalize, or otherwise mutate sibling claims, branches, PRs, workflows, shared implementation paths, or MAIN.md.",
-  "status": "active_draft_pr_open_exact_head_waiting_for_automatic_ci",
+  "status": "active_exact_head_smoke_green_phase_evidence_blocked_by_external_registry_error",
   "agi_state": "NOT_AGI"
 }
