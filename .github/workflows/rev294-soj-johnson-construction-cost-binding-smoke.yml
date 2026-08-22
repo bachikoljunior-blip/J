@@ -1,0 +1,48 @@
+name: rev294 SOJ Johnson construction cost binding smoke
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/rev294-soj-johnson-construction-cost-binding-smoke.yml'
+      - 'automation_runs/2026-08-22_1248_JST/REV294_SOJ_JOHNSON_CONSTRUCTION_COST_BINDING.md'
+      - 'automation_runs/2026-08-22_1248_JST/corrected_soj_johnson_construction_cost_binding_v1.py'
+      - 'automation_runs/2026-08-22_1248_JST/test_corrected_soj_johnson_construction_cost_binding_rev294.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev294
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1248_JST/corrected_soj_johnson_construction_cost_binding_v1.py \
+            automation_runs/2026-08-22_1248_JST/test_corrected_soj_johnson_construction_cost_binding_rev294.py
+      - name: Run focused regressions
+        run: python automation_runs/2026-08-22_1248_JST/test_corrected_soj_johnson_construction_cost_binding_rev294.py
+      - name: Enforce reserved problem-state diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --quiet
+          changed="$(git diff --name-only origin/main...HEAD)"
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              .github/workflows/rev294-soj-johnson-construction-cost-binding-smoke.yml|automation_runs/2026-08-22_1248_JST/REV294_SOJ_JOHNSON_CONSTRUCTION_COST_BINDING.md|automation_runs/2026-08-22_1248_JST/corrected_soj_johnson_construction_cost_binding_v1.py|automation_runs/2026-08-22_1248_JST/test_corrected_soj_johnson_construction_cost_binding_rev294.py)
+                ;;
+              *)
+                echo "unexpected non-rev294 problem-state path: $path" >&2
+                exit 1
+                ;;
+            esac
+          done <<< "$changed"
