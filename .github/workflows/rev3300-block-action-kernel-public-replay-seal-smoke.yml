@@ -1,0 +1,129 @@
+name: rev3300 block-action kernel public replay seal smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_2042_JST/block_action_kernel_public_replay_seal_v1.py'
+      - 'automation_runs/2026-08-22_2042_JST/test_block_action_kernel_public_replay_seal_rev3300.py'
+      - 'automation_runs/2026-08-22_2042_JST/REV3300_BLOCK_ACTION_KERNEL_PUBLIC_REPLAY_SEAL.md'
+      - '.github/workflows/rev3300-block-action-kernel-public-replay-seal-smoke.yml'
+      - 'agi/run-history/phase-admissions/chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate canonical attempt-solution admission snapshot
+        run: |
+          rm -rf /tmp/rev3300-main-attempt
+          git worktree add --detach /tmp/rev3300-main-attempt f022a711a3fa1720d0cf6c3bb85a5bf513def2c0
+          python automation/problem_solving_parallel_admission.py \
+            --root /tmp/rev3300-main-attempt \
+            --claim-id chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5 \
+            --phase attempt_solution \
+            --scope crx3/algorithmic-consumers/homogeneous-block-action-kernel-factorization-public-replay-seal \
+            --target-revision 3300 \
+            --path .github/workflows/rev3300-block-action-kernel-public-replay-seal-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5-attempt_solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5-publish.json \
+            --path automation_runs/2026-08-22_2042_JST/REV3300_BLOCK_ACTION_KERNEL_PUBLIC_REPLAY_SEAL.md \
+            --path automation_runs/2026-08-22_2042_JST/block_action_kernel_public_replay_seal_v1.py \
+            --path automation_runs/2026-08-22_2042_JST/test_block_action_kernel_public_replay_seal_rev3300.py \
+            --output /tmp/rev3300-attempt-solution.json
+          cat /tmp/rev3300-attempt-solution.json
+      - name: Preserve generated attempt evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev3300-attempt-solution-evidence
+          path: /tmp/rev3300-attempt-solution.json
+          if-no-files-found: error
+          retention-days: 1
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
+      - name: Compile rev3300 consumer and tests
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_2042_JST/block_action_kernel_public_replay_seal_v1.py \
+            automation_runs/2026-08-22_2042_JST/test_block_action_kernel_public_replay_seal_rev3300.py
+      - name: Run inherited rev950 and focused rev3300 tests
+        env:
+          PYTHONPATH: automation_runs/2026-08-22_2042_JST:automation_runs/2026-08-22_1453_JST:automation_runs/2026-08-19_0851_JST
+        run: |
+          python -m pytest -q \
+            automation_runs/2026-08-22_1453_JST/test_block_action_kernel_proof_dag_consumer_rev950.py \
+            automation_runs/2026-08-22_2042_JST/test_block_action_kernel_public_replay_seal_rev3300.py
+      - name: Reject sibling branch-only dependencies
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('automation_runs/2026-08-22_2042_JST/block_action_kernel_public_replay_seal_v1.py').read_text()
+          forbidden = (
+              'soj_parent_filtered',
+              'relation_twin_restriction',
+              'homogeneous_block_quotient',
+              'original_domain_lift',
+              'small_order_public_replay',
+              'rev3100',
+              'rev3000',
+              'rev2501',
+          )
+          hits = [name for name in forbidden if name in text]
+          if hits:
+              raise SystemExit(f'sibling branch-only dependency detected: {hits}')
+          PY
+      - name: Generate canonical publish admission snapshot
+        run: |
+          rm -rf /tmp/rev3300-main-publish
+          git worktree add --detach /tmp/rev3300-main-publish f022a711a3fa1720d0cf6c3bb85a5bf513def2c0
+          python automation/problem_solving_parallel_admission.py \
+            --root /tmp/rev3300-main-publish \
+            --claim-id chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5 \
+            --phase publish \
+            --scope crx3/algorithmic-consumers/homogeneous-block-action-kernel-factorization-public-replay-seal \
+            --target-revision 3300 \
+            --path .github/workflows/rev3300-block-action-kernel-public-replay-seal-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5-attempt_solution.json \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5-publish.json \
+            --path automation_runs/2026-08-22_2042_JST/REV3300_BLOCK_ACTION_KERNEL_PUBLIC_REPLAY_SEAL.md \
+            --path automation_runs/2026-08-22_2042_JST/block_action_kernel_public_replay_seal_v1.py \
+            --path automation_runs/2026-08-22_2042_JST/test_block_action_kernel_public_replay_seal_rev3300.py \
+            --output /tmp/rev3300-publish.json
+          cat /tmp/rev3300-publish.json
+      - name: Preserve generated publish evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev3300-publish-evidence
+          path: /tmp/rev3300-publish.json
+          if-no-files-found: error
+          retention-days: 1
+      - name: Enforce reserved-path diff
+        shell: bash
+        run: |
+          python - <<'PY'
+          import subprocess
+          allowed = {
+              '.github/workflows/rev3300-block-action-kernel-public-replay-seal-smoke.yml',
+              'automation_runs/2026-08-22_2042_JST/REV3300_BLOCK_ACTION_KERNEL_PUBLIC_REPLAY_SEAL.md',
+              'automation_runs/2026-08-22_2042_JST/block_action_kernel_public_replay_seal_v1.py',
+              'automation_runs/2026-08-22_2042_JST/test_block_action_kernel_public_replay_seal_rev3300.py',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5-attempt_solution.json',
+              'agi/run-history/phase-admissions/chatgpt-session-j-rev3300-block-action-kernel-public-replay-seal-20260822T204200JST-b61887e5-publish.json',
+          }
+          base = subprocess.check_output(['git', 'merge-base', 'HEAD', 'origin/main'], text=True).strip()
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only', f'{base}..HEAD'], text=True).splitlines())
+          extra = sorted(changed - allowed)
+          if extra:
+              raise SystemExit(f'unreserved paths: {extra}')
+          print(f'reserved diff ok: {sorted(changed)}')
+          PY
