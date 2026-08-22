@@ -9,7 +9,7 @@ The accepted alternatives are deliberately exclusive:
 1. a small-ground exact terminal with its terminal accounting record; or
 2. a larger-ground exact recursive result with its recursive-result accounting binding.
 
-The binder requires literal boolean `canonical`/`exact` flags, lowercase 64-hex identities, exact transition and original-instance identity agreement, exact result/status agreement, and nonnegative integer work accounting. It rejects both branches, neither branch, mode drift, transport/original-instance drift, result/accounting drift, malformed identities, implicit boolean/integer coercions, unresolved statuses, and unsupported root or selected-branch fields. Rejecting unknown fields prevents shadow/override data from crossing the production caller boundary without participating in the deterministic binding identity. Its output is normalized to a fixed schema and receives a deterministic SHA-256 `caller_binding_identity`.
+The binder requires literal `dict` JSON-object snapshots, literal boolean `canonical`/`exact` flags, lowercase 64-hex identities, exact transition and original-instance identity agreement, exact result/status agreement, and nonnegative integer work accounting. Literal dicts are required so custom `Mapping` implementations or wrappers cannot vary iteration/value semantics across validation steps. It rejects both branches, neither branch, mode drift, transport/original-instance drift, result/accounting drift, malformed identities, implicit boolean/integer coercions, unresolved statuses, nonliteral mapping snapshots, and unsupported root or selected-branch fields. Rejecting unknown fields prevents shadow/override data from crossing the production caller boundary without participating in the deterministic binding identity. Its output is normalized to a fixed schema and receives a deterministic SHA-256 `caller_binding_identity`.
 
 ## Relationship to concurrent corrected-SOJ work
 
@@ -25,6 +25,6 @@ Consequently, passing this binder is not evidence that corrected Split-or-Johnso
 
 ## Verification
 
-The focused regression suite contains valid exact-empty and exact-nonempty cases for both alternatives plus fail-closed checks for mutual exclusivity, mode mismatch, transition/original/result/accounting drift, malformed SHA identities, nonliteral boolean evidence, noninteger/negative accounting, unresolved status, unsupported shadow fields at the root and selected branch, deterministic replay, and tamper-sensitive binding identity.
+The focused regression suite contains valid exact-empty and exact-nonempty cases for both alternatives plus fail-closed checks for mutual exclusivity, mode mismatch, transition/original/result/accounting drift, malformed SHA identities, nonliteral boolean evidence, noninteger/negative accounting, unresolved or non-string status, unsupported shadow fields at the root and selected branch, nonliteral mapping snapshots at the root and selected branch, deterministic replay, and tamper-sensitive binding identity.
 
 Before publication, the branch must also satisfy repository parallel-admission requirements. No phase-admission JSON is fabricated by this revision: if the repository replay gate cannot verify a real admission record from the exact registry source, the PR must remain unmerged.

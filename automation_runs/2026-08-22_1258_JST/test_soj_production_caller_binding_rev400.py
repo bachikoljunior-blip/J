@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 import unittest
+from types import MappingProxyType
 
 from soj_production_caller_binding_v1 import CallerBindingError, bind_production_caller
 
@@ -195,6 +196,17 @@ class ProductionCallerBindingTests(unittest.TestCase):
     def test_rejects_unsupported_selected_branch_fields(self) -> None:
         value = recursive()
         value["larger_ground_recursive"]["accounted_work_override"] = 0
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(value)
+
+    def test_rejects_nonliteral_mapping_snapshots(self) -> None:
+        with self.assertRaises(CallerBindingError):
+            bind_production_caller(MappingProxyType(small()))
+
+        value = recursive()
+        value["larger_ground_recursive"] = MappingProxyType(
+            dict(value["larger_ground_recursive"])
+        )
         with self.assertRaises(CallerBindingError):
             bind_production_caller(value)
 

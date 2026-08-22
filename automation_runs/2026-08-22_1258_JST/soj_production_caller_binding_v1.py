@@ -56,9 +56,9 @@ class CallerBindingError(ValueError):
     """Raised when caller-supplied proof/accounting evidence is not exactly bindable."""
 
 
-def _require_mapping(value: Any, key: str) -> Mapping[str, Any]:
-    if not isinstance(value, Mapping):
-        raise CallerBindingError(f"{key} must be a mapping")
+def _require_mapping(value: Any, key: str) -> dict[str, Any]:
+    if type(value) is not dict:
+        raise CallerBindingError(f"{key} must be a literal JSON-object dict")
     return value
 
 
@@ -122,6 +122,8 @@ def bind_production_caller(evidence: Mapping[str, Any]) -> dict[str, Any]:
     Johnson reduction, authenticate SHA-looking identities, or prove the semantic
     truth of caller-supplied certificates. It only creates a deterministic binding
     across evidence that an upstream replay/verification layer has already accepted.
+    Literal dict snapshots are required so custom Mapping implementations cannot
+    change values or iteration semantics across validation steps.
     """
 
     root = _require_mapping(evidence, "evidence")
