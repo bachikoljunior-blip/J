@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev1200-soj-recursive-production-lineage-closure-20260822T155100JST-fc1ee447",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1200-20260822T155100+0900-turn4",
   "started_at_jst": "2026-08-22T15:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T15:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T15:54:00+09:00",
+  "completed_at_jst": "2026-08-22T15:54:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "fc1ee44781c9c883c7c3923d6bc97d51bea1c8d1",
   "starting_agi_gi_rev": 620,
@@ -39,6 +40,8 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
     "fail_closed_on_any_upstream_identity_or_outcome_drift": true
   },
-  "status": "active",
+  "status": "superseded",
+  "superseded_reason": "target_revision collision discovered after branch work: the pre-existing chatgpt-session-j-rev1200-homogeneous-block-quotient-si-20260822T155000JST-9e8f61cd claim started at 2026-08-22T15:50:00+09:00, one minute before this claim; this session lane retreats without touching the earlier claim, branch, PR, or workflows",
+  "replacement_target_revision": 1300,
   "agi_state": "NOT_AGI"
 }
