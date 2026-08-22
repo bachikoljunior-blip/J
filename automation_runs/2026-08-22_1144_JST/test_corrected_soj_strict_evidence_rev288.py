@@ -113,6 +113,12 @@ class StrictCorrectedSOJEvidenceTests(unittest.TestCase):
     def test_infinite_transition_bound_is_rejected(self):
         self.assert_rejected(t=transition(max_multiplicative_cost=float("inf")))
 
+    def test_huge_integer_transition_cost_fails_closed(self):
+        self.assert_rejected(t=transition(multiplicative_cost=10**10000))
+
+    def test_huge_integer_terminal_cost_fails_closed(self):
+        self.assert_rejected(q=terminal(local_log2_cost_bound=10**10000))
+
     def test_actual_cost_above_bound_is_rejected(self):
         self.assert_rejected(
             t=transition(multiplicative_cost=17.0, max_multiplicative_cost=16.0)
