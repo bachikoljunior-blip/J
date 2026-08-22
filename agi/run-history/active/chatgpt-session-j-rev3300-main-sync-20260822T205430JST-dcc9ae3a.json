@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-rev3300-main-sync-20260822T205430JST-dcc9ae3a",
+  "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
+  "started_at_jst": "2026-08-22T20:54:30+09:00",
+  "heartbeat_at_jst": "2026-08-22T20:54:30+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "dcc9ae3a971dc68d25cfc8a6d12bf8c2d76913de",
+  "starting_agi_gi_rev": 3300,
+  "target_revision": 3300,
+  "scope": "repository/main-revision-sync/rev3300",
+  "branch": "main",
+  "reserved_paths": [
+    "MAIN.md",
+    "agi/run-history/active/chatgpt-session-j-rev3300-main-sync-20260822T205430JST-dcc9ae3a.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3300-main-sync-20260822T205430JST-dcc9ae3a-update_problem_tree.json"
+  ],
+  "parallel_exclusions": [
+    "rev3500 block-relation replay seal and all reserved paths",
+    "rev3400 corrected Split-or-Johnson identity-equivalence scope and all reserved paths",
+    "all sibling solver, proof-DAG, branch, PR and workflow paths"
+  ],
+  "intent": "Atomically synchronize MAIN.md from canonical rev3200 to newly integrated rev3300 and include its replayable update_problem_tree evidence in the same Git commit. Preserve NOT_AGI and do not count active rev3400/rev3500 work as integrated.",
+  "problem_process": {
+    "predicted_problem_count": 576,
+    "effective_problem_count": 571,
+    "selected_unsolved_leaf": "canonical main advanced to rev3300 while MAIN.md still declares rev3200",
+    "attempt": "create one atomic Git tree containing the rev3300 declaration and canonical phase evidence",
+    "decomposition_if_unresolved": ["registry replay", "canonical revision audit", "atomic Git tree update"],
+    "overflow_triggered": false
+  },
+  "existing_solution_audit": {
+    "reused_components": [
+      "automation/agi_gi_main_revision_guard.py",
+      "automation/problem_solving_parallel_admission.py",
+      "Git blob/tree/commit atomicity"
+    ],
+    "decision": "reuse canonical ancestry and one content-addressed two-file commit"
+  },
+  "status": "active",
+  "agi_state": "NOT_AGI"
+}
