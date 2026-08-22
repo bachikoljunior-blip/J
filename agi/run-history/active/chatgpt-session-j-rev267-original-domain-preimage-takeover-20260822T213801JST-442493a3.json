@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev267-original-domain-preimage-takeover-20260822T213801JST-442493a3",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T204106+0900-b61887e5-turn1",
   "started_at_jst": "2026-08-22T21:38:01+09:00",
-  "heartbeat_at_jst": "2026-08-22T21:38:01+09:00",
+  "heartbeat_at_jst": "2026-08-22T21:42:42+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "442493a3b33358cbb6fe45bda89d336887aff690",
   "starting_agi_gi_rev": 3300,
@@ -54,7 +54,16 @@
     "supersedes_claim_id": "chatgpt-session-j-rev267-original-domain-preimage-20260822T081520JST-2f881e95",
     "reason": "prior claim is stale and PR #212 is unmerged"
   },
-  "status": "active",
+  "status": "pr_open_ci_pending",
   "state": "active",
-  "agi_state": "NOT_AGI"
+  "agi_state": "NOT_AGI",
+  "pull_request": 212,
+  "exact_head_sha": "31bd9ecb4e4fe4359b6964be36b5d89995317db6",
+  "validation": {
+    "focused_and_inherited": "23/23 passed",
+    "coordination_automation": "82/82 passed",
+    "diff_check": "passed",
+    "phase_admission": "valid; conflicts=[]",
+    "exact_head_workflows": "pending"
+  }
 }
