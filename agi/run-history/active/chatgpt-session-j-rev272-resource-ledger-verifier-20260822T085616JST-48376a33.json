@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33",
   "session_id": "chatgpt-session-j-parallel-continuation-20260822T085326+0900-429b7cee-turn1",
   "started_at_jst": "2026-08-22T08:56:16+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:10:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:43:17+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "48376a3316d5ea62643baa635f10acd0bf84c190",
   "starting_agi_gi_rev": 266,
@@ -13,69 +13,7 @@
   "branch": "agi-gi-rev272-resource-ledger-replay-verifier-session-20260822-0856",
   "pull_request": 218,
   "latest_head_sha": "66a3f9c866b55df464172f3d4d9b00edea5beea4",
-  "latest_observed_main_sha": "9670e513f737bd2f981687862f4839b2013b6bd2",
-  "reserved_paths": [
-    ".github/workflows/rev272-implicit-resource-ledger-replay-verifier-smoke.yml",
-    "agi/run-history/phase-admissions/chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33-attempt-solution.json",
-    "agi/run-history/phase-admissions/chatgpt-session-j-rev272-resource-ledger-verifier-20260822T085616JST-48376a33-publish.json",
-    "automation_runs/2026-08-19_0851_JST/REV272_IMPLICIT_RELATION_RESOURCE_LEDGER_REPLAY_VERIFIER.md",
-    "automation_runs/2026-08-19_0851_JST/implicit_relation_resource_ledger_replay_verifier_v1.py",
-    "automation_runs/2026-08-19_0851_JST/test_implicit_relation_resource_ledger_replay_verifier_rev272.py"
-  ],
-  "parallel_exclusions": [
-    "rev271 implicit image value-coset proof-DAG claim / PR #217 and all reserved paths",
-    "rev270 original-root resource execution ledger / PR #215 and all reserved paths",
-    "rev269 exact-empty image parent bridge / PR #214 and all reserved paths",
-    "rev268 production-parent orchestration / PR #213 and all reserved paths",
-    "rev267 original-domain paired-preimage / PR #212 and all reserved paths",
-    "rev265 resource envelope / PR #208 and all reserved paths",
-    "CRX3 proof-DAG consumers including PR #206 and PR #210",
-    "rev252 small-order production admission / PR #216",
-    "rev273 homogeneous block provenance / PR #219 and all reserved paths",
-    "MAIN.md and every sibling claim, branch, PR, and workflow"
-  ],
-  "intent": "add an independent replay verifier for a serialized six-phase implicit relation resource-execution ledger contract: require a canonical prefix, exactly-once phases, immutable context identity, per-phase and total admitted bounds, preserved unexecuted suffix, and complete-only finalization while remaining structurally independent of the active rev270 branch implementation",
-  "non_interference": "Only new rev272 reserved paths may be added on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, or shared implementation path.",
-  "implementation": {
-    "code_commit": "f08675e9a9a837c1b2627396056e747926601e01",
-    "latest_head_commit": "66a3f9c866b55df464172f3d4d9b00edea5beea4",
-    "implementation_files_added": 4,
-    "attempt_admission_evidence_persisted": true,
-    "attempt_admission_registry_source_sha": "51678bf720f4a009aa4820c637d984c46cd2e80a",
-    "attempt_admission_registry_digest": "sha256:813d21e0327011f75281e187631ed3404741ee1e074dec3b7c1c22719aae4876",
-    "attempt_admission_replay_at_jst": "2026-08-22T08:57:30+09:00",
-    "local_unit_tests": 19,
-    "local_py_compile": "success",
-    "semantic_exactness_certified": false
-  },
-  "validation": {
-    "rev272_smoke": {
-      "run_id": 32539326999,
-      "conclusion": "success"
-    },
-    "problem_solving_parallel_admission": {
-      "run_id": 32539327017,
-      "conclusion": "success"
-    },
-    "inherited_success_runs": [
-      32539326996,
-      32539326960,
-      32539327056,
-      32539327008,
-      32539327054,
-      32539326990,
-      32539326978,
-      32539327053
-    ],
-    "agi_gi_rev_validation": {
-      "run_id": 32539327024,
-      "status": "in_progress"
-    },
-    "other_inherited_validation": {
-      "rev246_run_id": 32539326984,
-      "status": "in_progress"
-    }
-  },
+  "latest_observed_main_sha": "6c58aa6b4c83d21d45dd2bb07614ce5c00c0e2f8",
   "status": "active_validation",
   "agi_state": "NOT_AGI"
 }
