@@ -1,0 +1,30 @@
+name: rev291 SOJ larger-ground recursive handoff smoke
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/rev291-soj-larger-ground-recursive-handoff-smoke.yml'
+      - 'automation_runs/2026-08-22_1148_JST/REV291_SOJ_LARGER_GROUND_RECURSIVE_HANDOFF.md'
+      - 'automation_runs/2026-08-22_1148_JST/corrected_soj_larger_ground_recursive_handoff_v1.py'
+      - 'automation_runs/2026-08-22_1148_JST/test_corrected_soj_larger_ground_recursive_handoff_rev291.py'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run rev291 focused regression
+        run: python automation_runs/2026-08-22_1148_JST/test_corrected_soj_larger_ground_recursive_handoff_rev291.py -v
+      - name: Compile rev291 and recurrence dependency
+        run: |
+          python -m py_compile \
+            automation_runs/2026-08-22_1148_JST/corrected_soj_larger_ground_recursive_handoff_v1.py \
+            automation_runs/2026-08-22_1148_JST/test_corrected_soj_larger_ground_recursive_handoff_rev291.py \
+            automation_runs/2026-08-19_0851_JST/quasipoly_recurrence_accounting_v1.py
