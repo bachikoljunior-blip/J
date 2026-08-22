@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c",
   "session_id": "chatgpt-session-j-refire-20260822T085022+0900-80bf6664-turn1",
   "started_at_jst": "2026-08-22T09:03:12+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:03:12+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:09:12+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "57a3d43cab4a384b2e848dcd31fa74a729d3eaca",
   "starting_agi_gi_rev": 266,
   "target_revision": 273,
   "scope": "crx1/homogeneous-block-reduction/equivariant-quotient-provenance-certificate",
   "branch": "agi-gi-rev273-homogeneous-block-provenance-session-20260822-0903",
+  "pull_request": 219,
+  "latest_head_sha": "32c53619319855689de797d053b04a67bb4d5b67",
   "reserved_paths": [
     ".github/workflows/rev273-homogeneous-block-provenance-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev273-homogeneous-block-provenance-20260822T090312JST-57a3d43c-attempt-solution.json",
@@ -34,6 +36,6 @@
   ],
   "intent": "close one upstream provenance subleaf left explicit by rev248: independently certify when unary/binary named relations are block-homogeneous, form a well-defined quotient relation structure, and are transported exactly by a supplied block bijection; fail closed on nonuniform fibers, malformed partitions, signature mismatch, or quotient transport mismatch without claiming canonical block discovery or general CRX1 closure",
   "non_interference": "Only new rev273 reserved paths may be added on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, shared implementation path, or MAIN.md.",
-  "status": "active_claimed_preimplementation",
+  "status": "active_draft_pr_validation",
   "agi_state": "NOT_AGI"
 }
