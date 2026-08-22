@@ -37,22 +37,6 @@
       "target_revision": 1100
     },
     {
-      "branch": "agi-gi-rev1400-soj-recursive-production-execution-proof-dag-session-20260822-1616",
-      "claim_id": "chatgpt-session-j-rev1400-soj-recursive-production-execution-proof-dag-20260822T161600JST-a8a5b96f",
-      "heartbeat_at_jst": "2026-08-22T16:27:00+09:00",
-      "reserved_paths": [
-        ".github/workflows/rev1400-soj-recursive-production-execution-proof-dag-smoke.yml",
-        "agi/run-history/phase-admissions/chatgpt-session-j-rev1400-soj-recursive-production-execution-proof-dag-20260822T161600JST-a8a5b96f-attempt-solution.json",
-        "agi/run-history/phase-admissions/chatgpt-session-j-rev1400-soj-recursive-production-execution-proof-dag-20260822T161600JST-a8a5b96f-publish.json",
-        "automation_runs/2026-08-22_1616_JST/REV1400_SOJ_RECURSIVE_PRODUCTION_EXECUTION_PROOF_DAG.md",
-        "automation_runs/2026-08-22_1616_JST/soj_recursive_production_execution_proof_dag_v1.py",
-        "automation_runs/2026-08-22_1616_JST/test_soj_recursive_production_execution_proof_dag_rev1400.py"
-      ],
-      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-execution-proof-dag",
-      "state": "active",
-      "target_revision": 1400
-    },
-    {
       "branch": "agi-gi-rev1700-soj-recursive-child-instance-execution-session-20260822-1650",
       "claim_id": "chatgpt-session-j-rev1700-soj-recursive-child-instance-execution-20260822T165000JST-2d91c7e4",
       "heartbeat_at_jst": "2026-08-22T16:55:31+09:00",
@@ -160,8 +144,8 @@
   ],
   "phase": "publish",
   "reasons": [],
-  "recorded_at_jst": "2026-08-22T17:56:06.392236+09:00",
-  "registry_digest": "sha256:1643deb02bbcab3b40266fd8010525ca9b196cd04753162326f588adeb480fc4",
+  "recorded_at_jst": "2026-08-22T17:58:59.327272+09:00",
+  "registry_digest": "sha256:656028062cc2c84665fae466dda2e6aa9c815238c4cafab1c53d36f14d2e559a",
   "registry_source_sha": "95f55627d54f861f41257e7fb2e5bd68de3fd625",
   "schema_version": 1,
   "scope": "crx3/algorithmic-consumers/homogeneous-block-quotient-result-original-domain-lift-proof-dag",
