@@ -1,0 +1,54 @@
+name: rev2100 homogeneous-block original-domain proof-DAG smoke
+
+on:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py"
+      - "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py"
+      - "automation_runs/2026-08-19_0851_JST/REV2100_HOMOGENEOUS_BLOCK_QUOTIENT_ORIGINAL_DOMAIN_PROOF_DAG.md"
+      - ".github/workflows/rev2100-homogeneous-block-original-domain-proof-dag-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rev2100-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile rev2100 modules
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py
+          automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py
+
+      - name: Run focused rev2100 regressions
+        run: python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py -v
+
+      - name: Enforce sibling branch implementation independence
+        shell: bash
+        run: |
+          set -euo pipefail
+          target=automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py
+          if grep -Eq 'homogeneous_block_quotient_si_proof_dag_consumer_v1|homogeneous_block_quotient_preimage_v1' "${target}"; then
+            echo "rev2100 must not import rev1800/rev278 branch-only implementations" >&2
+            exit 1
+          fi
+
+      - name: Verify reserved implementation diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          git diff --name-only origin/main...HEAD | sort > /tmp/changed
+          cat > /tmp/allowed <<'EOF'
+          .github/workflows/rev2100-homogeneous-block-original-domain-proof-dag-smoke.yml
+          automation_runs/2026-08-19_0851_JST/REV2100_HOMOGENEOUS_BLOCK_QUOTIENT_ORIGINAL_DOMAIN_PROOF_DAG.md
+          automation_runs/2026-08-19_0851_JST/homogeneous_block_quotient_original_domain_proof_dag_rev2100.py
+          automation_runs/2026-08-19_0851_JST/test_homogeneous_block_quotient_original_domain_proof_dag_rev2100.py
+          EOF
+          sort -o /tmp/allowed /tmp/allowed
+          diff -u /tmp/allowed /tmp/changed
