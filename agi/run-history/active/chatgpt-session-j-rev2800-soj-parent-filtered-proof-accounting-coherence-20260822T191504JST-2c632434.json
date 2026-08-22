@@ -4,15 +4,16 @@
   "claim_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434",
   "session_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST",
   "started_at_jst": "2026-08-22T19:15:04+09:00",
-  "heartbeat_at_jst": "2026-08-22T19:15:32+09:00",
-  "last_activity_at_jst": "2026-08-22T19:15:32+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:19:31+09:00",
+  "last_activity_at_jst": "2026-08-22T19:19:31+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
   "starting_agi_gi_rev": 1600,
   "target_revision": 2800,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-proof-accounting-coherence",
   "branch": "agi-gi-rev2800-soj-parent-filtered-proof-accounting-coherence-session-20260822-1915",
-  "pull_request": null,
+  "pull_request": 283,
+  "exact_head_sha": "f93aab38ac216a097c71e88e9b93224cf257aabc",
   "reserved_paths": [
     ".github/workflows/rev2800-soj-parent-filtered-proof-accounting-coherence-smoke.yml",
     "automation_runs/2026-08-22_1915_JST/REV2800_SOJ_PARENT_FILTERED_PROOF_ACCOUNTING_COHERENCE.md",
@@ -33,7 +34,7 @@
     "run-start history integrity and claim-publication preflight coordination scopes and all reserved paths",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
-  "intent": "Add one file-disjoint post-replay coherence seal between public-shaped rev2707 parent-filtered result proof-DAG integrity evidence and public-shaped rev2600 parent-filtered result recurrence-accounting coherence evidence. Independently normalize and replay both snapshots, require one exact result identity, reduction identity, outcome, parent action degree and child ground across them, preserve proof-DAG and accounting identities as distinct evidence, reject malformed/tampered/nonliteral data fail-closed, and emit one deterministic SHA-256 cross-certificate coherence identity. Do not import sibling branch-only implementations, do not execute recursive SI, do not combine unlike accounting units, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
+  "intent": "Add one file-disjoint post-replay coherence seal between public-shaped rev2707 parent-filtered result proof-DAG integrity evidence and public-shaped rev2600 parent-filtered result recurrence-accounting coherence evidence. Independently normalize and replay both snapshots, require one exact result/reduction/semantic/child lineage, outcome, child ground, candidate/accepted counts and filtering-work bound across them, retain rev2600's strict parent-to-child measure separately, preserve proof-DAG and accounting identities as distinct evidence, reject malformed/tampered/nonliteral data fail-closed, and emit one deterministic SHA-256 cross-certificate coherence identity. Do not import sibling branch-only implementations, do not execute recursive SI, do not combine unlike accounting units, and do not claim corrected Split-or-Johnson, GI, or AGI closure.",
   "parallel_safety": {
     "do_not_modify_other_active_branches": true,
     "do_not_cancel_or_rerun_unrelated_workflows": true,
@@ -45,14 +46,26 @@
     "fail_closed_on_schema_status_identity_or_accounting_drift": true
   },
   "preflight": {
-    "rev2800_branch_search": "none before claim",
-    "rev2800_pr_search": "none before claim",
+    "rev2800_branch_search": "none before claim; only this session branch after claim",
+    "rev2800_pr_search": "none before claim; PR #283 is this session",
     "rev2800_repository_search": "none before claim",
     "main_sha": "2c632434f767d9c47c245c4a7696a82e6cb2fb72",
-    "claim_commit": "c3ab35d3825a0458e8f8c4ae9ceb494f6810e9f3"
+    "claim_commit": "c3ab35d3825a0458e8f8c4ae9ceb494f6810e9f3",
+    "pre_implementation_heartbeat_commit": "b7f6947be5c7130bec795638996037263b7306e0"
   },
-  "validation": {},
-  "integration_boundary": "Keep this leaf draft and unmerged while independently owned upstream public contracts rev2707 / PR #280 and rev2600 / PR #279 remain open; do not overtake upstream ownership.",
-  "status": "active_implementation_preflight_heartbeat_recorded",
+  "validation": {
+    "local_focused_regressions": "17/17 passed",
+    "local_py_compile": "success",
+    "attempt_solution": "admitted=true; mode=exclusive; conflicts=[]; persisted by natural workflow",
+    "publish": "admitted=true; mode=exclusive; conflicts=[]; persisted by natural workflow",
+    "phase_evidence_persist_commit": "f93aab38ac216a097c71e88e9b93224cf257aabc",
+    "problem_solving_parallel_admission_run": 32567298993,
+    "problem_solving_parallel_admission": "success",
+    "dedicated_workflow_run": 32567299028,
+    "dedicated_workflow_state": "in_progress at last observation",
+    "manual_rerun_or_cancel": false
+  },
+  "integration_boundary": "PR #283 remains draft and unmerged while independently owned upstream public contracts rev2707 / PR #280 and rev2600 / PR #279 remain open; do not overtake upstream ownership.",
+  "status": "active_phase_admission_green_dedicated_ci_running_waiting_upstream",
   "agi_state": "NOT_AGI"
 }
