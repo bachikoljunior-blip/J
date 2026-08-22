@@ -4,16 +4,16 @@
   "claim_id": "chatgpt-session-j-rev1800-homogeneous-block-quotient-si-proof-dag-20260822T165100JST-293414fa",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1800-20260822T165100+0900",
   "started_at_jst": "2026-08-22T16:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:59:45+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "293414faa845223388c310defdce329088239f76",
-  "latest_main_sha_observed": "293414faa845223388c310defdce329088239f76",
+  "latest_main_sha_observed": "b39e252f5070277e6154cfd28b015a3a200b03d0",
   "starting_agi_gi_rev": 952,
   "target_revision": 1800,
   "scope": "crx3/algorithmic-consumers/homogeneous-block-quotient-string-isomorphism-proof-dag",
   "branch": "agi-gi-rev1800-homogeneous-block-quotient-si-proof-dag-session-20260822-1651",
-  "current_pr": null,
-  "exact_head": null,
+  "current_pr": 268,
+  "exact_head": "a2e503a86896b1b20534c11906217da2416497f3",
   "reserved_paths": [
     ".github/workflows/rev1800-homogeneous-block-quotient-si-proof-dag-smoke.yml",
     "automation_runs/2026-08-22_1651_JST/REV1800_HOMOGENEOUS_BLOCK_QUOTIENT_SI_PROOF_DAG.md",
@@ -48,7 +48,43 @@
     "rev1200 HomogeneousBlockQuotientStringIsomorphism public field/status contract / PR #260",
     "main-integrated proof_dag_accounting_v1 and quasipoly_recurrence_accounting_v1"
   ],
+  "validation": {
+    "py_compile": "success",
+    "inherited_rev950_regressions": "13/13 success",
+    "focused_rev1800_regressions": "13/13 success",
+    "branch_only_rev1200_rev278_and_original_domain_lift_dependency_guard": "success",
+    "canonical_attempt_solution_evidence": {
+      "admitted": true,
+      "conflicts": [],
+      "persisted": true,
+      "replayed": true,
+      "registry_source_sha": "d5ae3876a2081528749b810c2b3849a84f3fd47d",
+      "registry_digest": "sha256:fffe51feff9df72b8736b6ead88c62e38172b294831048b602fe64afd2e9cdc7"
+    },
+    "canonical_publish_evidence": {
+      "admitted": true,
+      "conflicts": [],
+      "persisted": true,
+      "replayed": true,
+      "registry_source_sha": "d5ae3876a2081528749b810c2b3849a84f3fd47d",
+      "registry_digest": "sha256:fffe51feff9df72b8736b6ead88c62e38172b294831048b602fe64afd2e9cdc7"
+    },
+    "dedicated_rev1800_smoke": {
+      "run_id": 32561070144,
+      "conclusion": "success"
+    },
+    "problem_solving_parallel_admission": {
+      "run_id": 32561070171,
+      "conclusion": "success"
+    },
+    "inherited_success_observed": ["rev238", "rev239", "rev240", "rev241", "rev242", "rev250", "rev253"],
+    "inherited_pending_observed": [
+      {"revision": "rev246", "run_id": 32561070141},
+      {"revision": "rev254", "run_id": 32561070191}
+    ],
+    "workflow_policy": "no unrelated workflow was cancelled, manually rerun, rebased, or force-pushed"
+  },
   "integration_boundary": "draft-only while rev1200 / PR #260 remains open and unmerged; this leaf certifies only quotient-domain execution/replay and cannot be used as an original-domain transporter or CRX3/GI/AGI completion claim",
-  "status": "active",
+  "status": "active_exact_head_green_waiting_rev1200_upstream",
   "agi_state": "NOT_AGI"
 }
