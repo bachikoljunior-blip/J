@@ -97,7 +97,10 @@ class BlockActionProvenanceProofDAGRev1600Test(unittest.TestCase):
         )
         self.assertFalse(result.certified)
         self.assertIsNotNone(result.dag_validation)
-        self.assertEqual(result.dag_validation.status, "quasipolynomial_bound_exceeded")
+        self.assertEqual(
+            result.dag_validation.status,
+            "proof_dag_quasipolynomial_envelope_exceeded",
+        )
 
     def test_trivial_generator_family_is_still_replay_stable(self):
         certificate = certify_group_block_action_equivariance(
