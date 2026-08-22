@@ -4,16 +4,16 @@
   "claim_id": "chatgpt-session-j-rev1000-soj-recursive-production-post-replay-envelope-20260822T1451JST-0b1c7a15",
   "session_id": "chatgpt-session-j-scheduled-continuation-rev1000-20260822T1451+0900-0b1c7a15",
   "started_at_jst": "2026-08-22T14:51:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T14:51:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T14:55:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "0b1c7a158aef50f3fdebfbc7c704f7b23b88df9c",
   "starting_agi_gi_rev": 620,
   "target_revision": 1000,
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-production-post-replay-coherence-envelope",
   "branch": "agi-gi-rev1000-soj-recursive-production-post-replay-envelope-session-20260822-1451",
-  "pull_request": null,
-  "pull_request_state": "not_created",
-  "latest_head_sha": null,
+  "pull_request": 256,
+  "pull_request_state": "open_draft",
+  "latest_head_sha": "61940c28244f40eea613ab6d82b64c979c013048",
   "intent": "add a file-disjoint fail-closed post-replay compatibility envelope downstream of the fresh rev720 construction-cost provenance leaf and rev900 provenance/total-cost leaf: accept only strict normalized views whose upstream replay gates are independently true; require one production-provenance identity, reduction identity, exact-empty/nonempty outcome, parent/child measure tuple, construction-cost binding identity, conservative multiplicative construction bound, and exact log2 charge across both views; then seal the compatible pair of upstream deterministic identities into a separate deterministic envelope identity without importing sibling branch implementations, replaying their branch-only classes, executing recursive String Isomorphism, reconstructing Johnson semantics, performing Git provenance, inferring merge state, or changing shared recurrence/proof-DAG code",
   "reserved_paths": [
     ".github/workflows/rev1000-soj-recursive-production-post-replay-envelope-smoke.yml",
@@ -34,6 +34,7 @@
     "rev720 recursive production construction-cost provenance active claim and all reserved paths",
     "rev800 recursive production total-cost coherence / PR #252 and all reserved paths",
     "rev900 recursive production provenance/total-cost active claim and all reserved paths",
+    "rev950 block-action kernel proof-DAG sibling claim/PR and all reserved paths",
     "rev620 main-revision-sync ownership and MAIN.md",
     "all sibling claims, branches, PRs, workflows, CRX scopes, shared recurrence implementation, shared coordination implementation, and shared proof-DAG implementations"
   ],
@@ -45,7 +46,12 @@
     "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true
   },
   "validation": {
-    "state": "claimed_not_yet_implemented"
+    "state": "implemented_draft_pr_core_ci_green",
+    "focused_regressions": "16/16 success in dedicated smoke",
+    "dedicated_smoke_run": "32555578067 success on exact head 61940c28244f40eea613ab6d82b64c979c013048",
+    "parallel_admission_run": "32555578078 success on exact head 61940c28244f40eea613ab6d82b64c979c013048",
+    "attempt_solution_evidence": "admitted=true conflicts=[]",
+    "merge_state": "intentionally draft/unmerged while rev720 and rev900 remain independently owned upstream leaves and inherited CI finishes naturally"
   },
   "status": "active",
   "agi_state": "NOT_AGI"
