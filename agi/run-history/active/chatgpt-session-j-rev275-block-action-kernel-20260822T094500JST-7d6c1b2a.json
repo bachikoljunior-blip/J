@@ -1,0 +1,34 @@
+{
+  "version": "1.2",
+  "session_id": "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
+  "owner_model": "ChatGPT",
+  "status": "active",
+  "target_revision": "rev275",
+  "scope": "crx3/block-structured-consumers/homogeneous-block-action-kernel-factorization",
+  "scope_reason": "Consume only main-integrated rev274 homogeneous block-action provenance and certify, without full-group enumeration, the exact quotient image/kernel factorization for each induced block action. This is the next downstream rev274 obligation: kernel accounting before quotient SI/preimage lifting. It deliberately does not modify rev273 relation provenance, rev272/rev271 relation-image outcomes, primitive-Johnson proof-DAG work, state-orbit work, CRX1/CRX2, or any sibling branch/PR/workflow.",
+  "topic": "exact kernel and quotient-image order factorization for rev274 homogeneous block actions",
+  "branch": "agi-gi-rev275-block-action-kernel-factorization",
+  "worktree": "connector://bachikoljunior-blip/J/agi-gi-rev275-block-action-kernel-factorization",
+  "base_branch": "main",
+  "base_head_observed": "a42fe70d73382152da758ec90024c7520d4e8957",
+  "target_problem_count": 490,
+  "reserved_paths": [
+    ".github/workflows/agi-gi-rev275-block-action-kernel-smoke.yml",
+    "automation_runs/2026-08-19_0851_JST/homogeneous_block_action_kernel_v1.py",
+    "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py",
+    "agi/run-history/active/chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a.json",
+    "agi/run-history/active/heartbeat-chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a.json"
+  ],
+  "conflicts_with": [
+    "rev273 homogeneous block relation provenance",
+    "rev272 implicit relation exact outcome contract",
+    "rev271 implicit image proof-DAG",
+    "rev264 primitive-Johnson proof-DAG",
+    "rev263 implicit exact-empty",
+    "CRX1",
+    "CRX2",
+    "state-orbit proof-DAG"
+  ],
+  "heartbeat_cadence_minutes": 15,
+  "parallel_policy": "Never cancel, rerun, close, overwrite, merge, or mutate sibling runs, branches, PRs, claims, workflows, or reserved paths. Recheck target revision, active claims, branch, and PR occupancy before publish/merge."
+}
