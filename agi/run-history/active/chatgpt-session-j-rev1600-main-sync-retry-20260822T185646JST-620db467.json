@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev1600-main-sync-retry-20260822T185646JST-620db467",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T184109+0900-fc4ab5cb-turn1",
   "started_at_jst": "2026-08-22T18:56:46+09:00",
-  "heartbeat_at_jst": "2026-08-22T18:56:46+09:00",
+  "heartbeat_at_jst": "2026-08-22T19:01:41+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "620db467becad7aa9e849a3c862cf3056a605da2",
   "starting_agi_gi_rev": 1600,
@@ -15,7 +15,7 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev1600-main-sync-retry-20260822T185646JST-620db467-update_problem_tree.json"
   ],
   "branch": "main",
-  "status": "active",
+  "status": "completed",
   "agi_state": "NOT_AGI",
   "predecessor_collision_resolution": [
     "chatgpt-session-j-main-rev1600-declaration-sync-20260822T185101JST-369816dd is superseded_collision_retreat",
@@ -41,5 +41,15 @@
     "decision": "reuse the sole canonical revision definition"
   },
   "non_interference": "Only MAIN.md and one phase evidence file are reserved.",
-  "strict_boundary": "No AGI claim; status remains NOT_AGI."
+  "strict_boundary": "No AGI claim; status remains NOT_AGI.",
+  "completed_at_jst": "2026-08-22T19:01:41+09:00",
+  "sync_commit_sha": "1cff5eeddccccd5dcae0bd1fd1792e1324ae0be4",
+  "validation": {
+    "declared_revision": 1600,
+    "canonical_revision": 1600,
+    "canonical_commit": "9606bf7711bfab4bb54ad1ddff315420b75a561d",
+    "canonical_commit_is_ancestor": true,
+    "problem_counts": "forecast 576, effective 571",
+    "agi_state": "NOT_AGI"
+  }
 }
