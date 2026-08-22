@@ -1,0 +1,33 @@
+name: rev271 image value proof-DAG consumer smoke
+
+on:
+  pull_request:
+    paths:
+      - automation_runs/2026-08-19_0851_JST/implicit_image_value_proof_dag_consumer_v1.py
+      - automation_runs/2026-08-19_0851_JST/test_implicit_image_value_proof_dag_consumer_rev271.py
+      - automation_runs/2026-08-19_0851_JST/REV271_IMAGE_VALUE_PROOF_DAG_CONSUMER.md
+      - .github/workflows/rev271-image-value-proof-dag-consumer-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install inherited proof-DAG dependency
+        run: python -m pip install --disable-pip-version-check numpy
+      - name: Run rev271 focused and inherited regressions
+        working-directory: automation_runs/2026-08-19_0851_JST
+        run: python -m unittest -v test_implicit_relation_image_value_coset_rev262.py test_proof_dag_accounting_rev220.py test_implicit_image_value_proof_dag_consumer_rev271.py
+      - name: Compile rev271 consumer
+        run: python -m py_compile automation_runs/2026-08-19_0851_JST/implicit_image_value_proof_dag_consumer_v1.py automation_runs/2026-08-19_0851_JST/test_implicit_image_value_proof_dag_consumer_rev271.py
+      - name: Enforce no sibling branch-only imports
+        run: |
+          ! grep -E 'primitive_johnson_proof_dag_consumer_v1|proof_carrying_state_orbit_candidate_v1|implicit_relation_parent_outcome_v1|implicit_relation_resource_execution_ledger_v1' automation_runs/2026-08-19_0851_JST/implicit_image_value_proof_dag_consumer_v1.py
