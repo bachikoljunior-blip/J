@@ -1,0 +1,36 @@
+name: rev281 quotient relation/action invariance smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-19_0851_JST/quotient_relation_action_invariance_v1.py'
+      - 'automation_runs/2026-08-19_0851_JST/test_quotient_relation_action_invariance_rev281.py'
+      - 'automation_runs/2026-08-19_0851_JST/REV281_QUOTIENT_RELATION_ACTION_INVARIANCE.md'
+      - '.github/workflows/rev281-quotient-relation-action-invariance-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: automation_runs/2026-08-19_0851_JST
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile rev281 certificate and regression
+        run: >-
+          python -m py_compile
+          quotient_relation_action_invariance_v1.py
+          test_quotient_relation_action_invariance_rev281.py
+      - name: Run rev281 and inherited rev274 regressions
+        run: >-
+          python -m unittest -v
+          test_quotient_relation_action_invariance_rev281.py
+          test_homogeneous_block_action_provenance_rev274.py
