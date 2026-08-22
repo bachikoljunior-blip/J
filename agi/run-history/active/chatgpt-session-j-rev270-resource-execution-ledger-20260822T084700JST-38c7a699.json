@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev270-resource-execution-ledger-20260822T084700JST-38c7a699",
   "session_id": "chatgpt-session-j-continuation-20260822T084356+0900-turn2",
   "started_at_jst": "2026-08-22T08:47:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:43:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:44:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "38c7a69901c7a8aefe9261b53812222152371fd5",
   "starting_agi_gi_rev": 266,
@@ -30,6 +30,7 @@
   "non_interference": "Only new rev270 reserved paths are to be added; do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, or shared implementation path.",
   "pull_request": 215,
   "latest_head_sha": "6a33555863eac684fbf164579ea92eed811b62ae",
+  "merge_commit_sha": "56765d3658ae930590ce07eeb568c4e11106c407",
   "validation": {
     "dedicated_workflow_run": 32538625478,
     "dedicated_status": "success",
@@ -40,6 +41,7 @@
     "general_validation_run": 32538625481,
     "general_validation_status": "success"
   },
-  "status": "ready_to_merge_exact_head",
+  "status": "completed_merged",
+  "completed_at_jst": "2026-08-22T09:44:00+09:00",
   "agi_state": "NOT_AGI"
 }
