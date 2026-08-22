@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev1600-main-sync-20260822T185120JST-27ea521d",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T184109+0900-fc4ab5cb-turn1",
   "started_at_jst": "2026-08-22T18:51:20+09:00",
-  "heartbeat_at_jst": "2026-08-22T18:51:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:55:41+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "27ea521d5e007a56275dcd50a3e7e1d61d302f10",
   "starting_agi_gi_rev": 1600,
@@ -15,7 +15,7 @@
     "agi/run-history/phase-admissions/chatgpt-session-j-rev1600-main-sync-20260822T185120JST-27ea521d-update_problem_tree.json"
   ],
   "branch": "main",
-  "status": "active",
+  "status": "abandoned",
   "agi_state": "NOT_AGI",
   "problem_process": {
     "predicted_problem_count": 576,
@@ -38,5 +38,8 @@
     "decision": "use the repository's single canonical revision definition and synchronize only the lagging declaration"
   },
   "non_interference": "Reserve only MAIN.md and the rev1600 update_problem_tree evidence; active solver scopes remain untouched.",
-  "strict_boundary": "Authoritative continuation sync only. AGI remains NOT_AGI."
+  "strict_boundary": "Authoritative continuation sync only. AGI remains NOT_AGI.",
+  "completed_at_jst": "2026-08-22T18:55:41+09:00",
+  "close_reason": "fresh earlier claim chatgpt-session-j-main-rev1600-declaration-sync-20260822T185101JST-369816dd reserves MAIN.md; no MAIN.md mutation performed",
+  "denied_phase_evidence": "agi/run-history/phase-admissions/chatgpt-session-j-rev1600-main-sync-20260822T185120JST-27ea521d-update_problem_tree.json"
 }
