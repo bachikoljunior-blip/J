@@ -143,6 +143,21 @@ class ProblemSolvingPhaseEvidenceGuardTest(unittest.TestCase):
             hardened = replay_evidence(root, evidence, current, current)
             self.assertTrue(any("parallel_claim_collision" in item for item in hardened))
 
+            self._write_claim(
+                claim_dir / "collision.json",
+                claim_id="collision",
+                started="2026-08-22T21:01:00+09:00",
+                heartbeat="2026-08-22T21:02:00+09:00",
+                scope="unrelated/scope",
+                paths=["README.md"],
+            )
+            subprocess.run(["git", "add", "."], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-qm", "unrelated"], cwd=root, check=True)
+            unrelated = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=root, text=True
+            ).strip()
+            self.assertEqual(replay_evidence(root, evidence, unrelated, unrelated), ())
+
     @staticmethod
     def _write_claim(path, *, claim_id, started, heartbeat, scope, paths):
         payload = {
