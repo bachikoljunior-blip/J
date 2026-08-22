@@ -4,10 +4,11 @@
   "claim_id": "chatgpt-session-j-rev1500-block-action-provenance-proof-dag-20260822T164400JST-5247ed78",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1500-20260822T164400+0900-turn1",
   "started_at_jst": "2026-08-22T16:44:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T16:44:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T16:48:30+09:00",
+  "completed_at_jst": "2026-08-22T16:48:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "5247ed781fea5386802634ab012712950a15d821",
-  "latest_main_sha_observed": "5247ed781fea5386802634ab012712950a15d821",
+  "latest_main_sha_observed": "e11a83e395099b6bf2273d96f04e4589ecdb3caa",
   "starting_agi_gi_rev": 952,
   "target_revision": 1500,
   "scope": "crx3/structural-consumers/homogeneous-block-action-provenance-proof-dag",
@@ -31,7 +32,7 @@
     "all corrected Split-or-Johnson, CRX1, CRX2, state-orbit, parent-outcome and sibling proof-DAG scopes",
     "MAIN.md, shared proof-DAG/recurrence/coordination implementations, sibling claims, branches, PRs and workflows"
   ],
-  "intent": "attach only the main-integrated rev274 exact homogeneous block-action provenance certificate to the shared conservative execution proof-DAG under a replay-stable identity, independently replaying canonical partitions, block bijection, paired original generators, paired quotient generators, intertwining, deterministic digest, finite verification-work charge, and original-root envelope without importing rev950/rev952/rev1200/rev278 sibling consumers",
+  "intent": "attach only the main-integrated rev274 exact homogeneous block-action provenance certificate to the shared conservative execution proof-DAG under a replay-stable identity",
   "parallel_safety": {
     "do_not_modify_other_active_branches": true,
     "do_not_cancel_or_rerun_unrelated_workflows": true,
@@ -46,6 +47,8 @@
     "rev220 proof_dag_accounting_v1 validate_execution_proof_dag",
     "quasipoly_recurrence_accounting_v1 RecurrenceAccountingNode"
   ],
-  "status": "active",
+  "superseded_by": "fresh sibling rev1500 recursive child-instance execution claim",
+  "supersession_reason": "target_revision collision detected during mandatory pre-write recheck; no implementation, test, workflow, phase evidence, PR, or sibling state was written from this claim",
+  "status": "superseded",
   "agi_state": "NOT_AGI"
 }
