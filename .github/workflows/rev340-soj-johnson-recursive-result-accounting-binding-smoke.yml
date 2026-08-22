@@ -34,8 +34,26 @@ jobs:
             automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py
       - name: Focused rev340 regression
         run: |
-          python -m pytest -q \
-            automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+
+          path = Path('automation_runs/2026-08-22_1254_JST/test_corrected_soj_johnson_recursive_result_accounting_binding_rev340.py')
+          spec = importlib.util.spec_from_file_location('rev340_tests', path)
+          assert spec is not None and spec.loader is not None
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          tests = [
+              (name, getattr(module, name))
+              for name in sorted(dir(module))
+              if name.startswith('test_') and callable(getattr(module, name))
+          ]
+          assert tests, 'no rev340 focused tests discovered'
+          for name, test in tests:
+              test()
+              print('PASS', name)
+          print(f'{len(tests)}/{len(tests)} passed')
+          PY
       - name: Reject sibling branch-only implementation imports
         run: |
           ! grep -nE 'corrected_soj_larger_ground_recursive_handoff_v1|corrected_soj_johnson_recursive_result_lift_v1|corrected_soj_johnson_construction_cost_binding_v1' \
