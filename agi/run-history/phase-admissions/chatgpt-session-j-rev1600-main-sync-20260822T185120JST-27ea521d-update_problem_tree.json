@@ -2,7 +2,7 @@
   "schema_version": 1,
   "event_type": "problem_solving_phase_admission",
   "recorded_at_jst": "2026-08-22T18:52:11+09:00",
-  "admitted": true,
+  "admitted": false,
   "phase": "update_problem_tree",
   "mode": "exclusive",
   "scope": "repository/main-revision-sync/rev1600",
@@ -216,6 +216,26 @@
       ]
     }
   ],
-  "conflicts": [],
-  "reasons": []
+  "conflicts": [
+    {
+      "claim_id": "chatgpt-session-j-main-rev1600-declaration-sync-20260822T185101JST-369816dd",
+      "scope": "repository-coordination/main-continuation/canonical-revision-declaration-sync",
+      "target_revision": null,
+      "heartbeat_at_jst": "2026-08-22T18:51:01+09:00",
+      "state": "active",
+      "branch": "coordination/main-rev1600-declaration-sync-session-20260822-1851",
+      "reserved_paths": [
+        "MAIN.md",
+        "agi/run-history/active/chatgpt-session-j-main-rev1600-declaration-sync-20260822T185101JST-369816dd.json"
+      ],
+      "reasons": [
+        "reserved_path_collision"
+      ]
+    }
+  ],
+  "reasons": [
+    "parallel_claim_collision"
+  ],
+  "correction_note": "Corrected before MAIN.md mutation: a fresh earlier claim reserved MAIN.md. This record is a denied phase and must not authorize a write.",
+  "corrected_at_jst": "2026-08-22T18:55:41+09:00"
 }
