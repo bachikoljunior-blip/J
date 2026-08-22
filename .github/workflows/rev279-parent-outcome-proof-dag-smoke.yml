@@ -43,30 +43,47 @@ jobs:
           grep -q 'implicit_relation_parent_outcome_v1' "$file"
           grep -q 'proof_dag_accounting_v1' "$file"
           ! grep -E 'homogeneous_block|imprimitive_resource_proof_dag|implicit_image_value_proof_dag_consumer|primitive_johnson_proof_dag_consumer|proof_carrying_state_orbit_candidate' "$file"
-      - name: Preview canonical attempt-solution admission
+      - name: Preview canonical attempt-solution admission from base registry
         run: |
           set -euo pipefail
-          out="${RUNNER_TEMP}/rev279-attempt-solution.json"
-          python automation/problem_solving_parallel_admission.py \
-            --claim-id chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427 \
-            --phase attempt_solution \
-            --scope crx3/algorithmic-consumers/implicit-relation-parent-outcome-proof-dag \
-            --target-revision 279 \
-            --path .github/workflows/rev279-parent-outcome-proof-dag-smoke.yml \
-            --path automation_runs/2026-08-19_0851_JST/REV279_PARENT_OUTCOME_PROOF_DAG.md \
-            --path automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_proof_dag_v1.py \
-            --path automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_proof_dag_rev279.py \
-            --output "${out}"
-          python - "${out}" <<'PY'
+          source_sha="$(git rev-parse HEAD^1)"
+          python - "${source_sha}" <<'PY'
           import json
           import sys
-          from pathlib import Path
-          from automation.problem_solving_parallel_admission import validate_evidence_payload
-          path = Path(sys.argv[1])
-          payload = json.loads(path.read_text(encoding="utf-8"))
-          errors = validate_evidence_payload(payload)
+          from datetime import datetime
+          from automation.parallel_claims import JST, load_registry
+          from automation.problem_solving_parallel_admission import (
+              admit_problem_phase,
+              evidence_payload,
+              validate_evidence_payload,
+          )
+
+          source_sha = sys.argv[1]
+          now = datetime.now(JST)
+          claims, errors = load_registry(__import__('pathlib').Path.cwd())
           if errors:
-              raise SystemExit("; ".join(errors))
+              raise SystemExit("registry errors: " + "; ".join(errors))
+          result = admit_problem_phase(
+              claims,
+              claim_id="chatgpt-session-j-rev279-parent-outcome-proof-dag-20260822T094800JST-15932427",
+              phase="attempt_solution",
+              scope="crx3/algorithmic-consumers/implicit-relation-parent-outcome-proof-dag",
+              target_revision=279,
+              now=now,
+              registry_source_sha=source_sha,
+              paths=(
+                  ".github/workflows/rev279-parent-outcome-proof-dag-smoke.yml",
+                  "automation_runs/2026-08-19_0851_JST/REV279_PARENT_OUTCOME_PROOF_DAG.md",
+                  "automation_runs/2026-08-19_0851_JST/implicit_relation_parent_outcome_proof_dag_v1.py",
+                  "automation_runs/2026-08-19_0851_JST/test_implicit_relation_parent_outcome_proof_dag_rev279.py",
+              ),
+          )
+          if not result["admitted"]:
+              raise SystemExit("admission denied: " + json.dumps(result, sort_keys=True))
+          payload = evidence_payload(result, now)
+          validation_errors = validate_evidence_payload(payload)
+          if validation_errors:
+              raise SystemExit("evidence validation failed: " + "; ".join(validation_errors))
           print("REV279_PHASE_EVIDENCE_BEGIN")
           print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
           print("REV279_PHASE_EVIDENCE_END")
