@@ -50,7 +50,10 @@ def _strict_int(name: str, value: Any, *, minimum: int | None = None) -> int:
 def _strict_real(name: str, value: Any, *, minimum: float | None = None) -> float:
     if type(value) not in (int, float):
         raise StrictCorrectedSOJEvidenceError(f"{name} must be an exact JSON-style number")
-    result = float(value)
+    try:
+        result = float(value)
+    except OverflowError as exc:
+        raise StrictCorrectedSOJEvidenceError(f"{name} is outside the finite float envelope") from exc
     if not math.isfinite(result):
         raise StrictCorrectedSOJEvidenceError(f"{name} must be finite")
     if minimum is not None and result < minimum:
