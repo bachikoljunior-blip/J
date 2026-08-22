@@ -1,0 +1,24 @@
+name: rev281 corrected bipartite SOJ transition smoke
+
+on:
+  pull_request:
+    paths:
+      - 'automation_runs/2026-08-22_0954_JST/**'
+      - '.github/workflows/rev281-corrected-bipartite-soj-transition-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run rev281 regression tests
+        working-directory: automation_runs/2026-08-22_0954_JST
+        run: python -m unittest -v test_bipartite_split_or_johnson_transition_rev281.py

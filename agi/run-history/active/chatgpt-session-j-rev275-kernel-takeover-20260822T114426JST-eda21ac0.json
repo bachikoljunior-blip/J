@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0",
   "session_id": "chatgpt-session-j-agi-gi-continuation-20260822T114229+0900-97df37a9-turn1",
   "started_at_jst": "2026-08-22T11:44:26+09:00",
-  "heartbeat_at_jst": "2026-08-22T11:55:20+09:00",
+  "heartbeat_at_jst": "2026-08-22T11:58:10+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "eda21ac0e01d6f2f1f24881f1f4ffa883b5d807e",
   "starting_agi_gi_rev": 274,
@@ -20,7 +20,7 @@
     "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py"
   ],
   "branch": "agi-gi-rev275-block-action-kernel-takeover-20260822-1144",
-  "status": "active_draft_exact_head_ci_queued",
+  "status": "active_draft_exact_head_8_of_12_success_0_failure",
   "agi_state": "NOT_AGI",
   "takeover_of": "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
   "takeover_inspection": {
@@ -31,15 +31,16 @@
   },
   "strict_boundary": "Certify only the exact quotient-image/kernel order factorization for main-integrated rev274 supplied homogeneous block actions; no quotient SI/preimage integration, CRX1 closure, GI, or AGI claim.",
   "pull_request": 236,
-  "latest_head_sha": "602b48cdf88b217b098b144b5054a8297f2457b3",
-  "latest_observed_main_sha": "495ed89764a49e7b12300ad7cda11d148cbb16eb",
+  "latest_head_sha": "be189b124cbf71836e2fda9ce02092767a06e1cd",
+  "latest_observed_main_sha": "de687d5253a3a31e04f0bece18a3a356e93c624a",
   "evidence": {
     "focused_tests": "12/12 success",
     "related_rev274_rev275_tests": "24/24 success",
     "syntax_compile": "success",
     "diff_check": "success",
     "phase_admission": "attempt_solution and publish admitted",
-    "workflow_runs": "12 queued or pending; 0 observed failures"
+    "workflow_runs": "exact head be189b124cbf71836e2fda9ce02092767a06e1cd: 8/12 success, 0 failure, 4 in progress",
+    "problem_solving_parallel_admission": "previous head failed only because local-only registry SHA was unreachable; attempt_solution and publish regenerated from reachable main de687d5253a3a31e04f0bece18a3a356e93c624a"
   },
   "next_action": "wait for exact-head workflows; merge only after all required checks pass and merge admission is replayed"
 }
