@@ -2,6 +2,9 @@ name: rev2000 homogeneous block joint compatibility proof-DAG smoke
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - "agi-gi-rev2000-homogeneous-block-joint-compatibility-proof-dag-session-20260822-1717"
   pull_request:
     paths:
       - "automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py"
@@ -18,6 +21,26 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
+      - name: Generate canonical attempt-solution admission preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="${RUNNER_TEMP}/rev2000-attempt-solution.json"
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee \
+            --phase attempt_solution \
+            --scope crx3/structural-consumers/homogeneous-block-joint-reduction-compatibility-proof-dag \
+            --target-revision 2000 \
+            --path .github/workflows/rev2000-homogeneous-block-joint-compatibility-proof-dag-smoke.yml \
+            --path automation_runs/2026-08-22_1717_JST/REV2000_HOMOGENEOUS_BLOCK_JOINT_COMPATIBILITY_PROOF_DAG.md \
+            --path automation_runs/2026-08-22_1717_JST/homogeneous_block_joint_compatibility_proof_dag_v1.py \
+            --path automation_runs/2026-08-22_1717_JST/test_homogeneous_block_joint_compatibility_proof_dag_rev2000.py \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2000-homogeneous-block-joint-compatibility-proof-dag-20260822T171700JST-fb2787ee-attempt_solution.json \
+            --output "${evidence}"
+          echo "REV2000_ATTEMPT_EVIDENCE_BEGIN"
+          cat "${evidence}"
+          echo "REV2000_ATTEMPT_EVIDENCE_END"
 
       - name: Run focused rev2000 regressions
         run: >-
