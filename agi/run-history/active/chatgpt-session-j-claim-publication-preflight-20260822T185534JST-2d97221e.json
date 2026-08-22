@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "event_type": "active_session_claim",
+  "claim_id": "chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e",
+  "session_id": "chatgpt-session-j-refire-20260822T184207+0900-fc4ab5cb-turn10",
+  "started_at_jst": "2026-08-22T18:55:34+09:00",
+  "heartbeat_at_jst": "2026-08-22T18:55:34+09:00",
+  "stale_after_minutes": 90,
+  "starting_main_sha": "2d97221e6f00c3c27ea92cecd6f4302ec58a741c",
+  "starting_agi_gi_rev": 1600,
+  "target_revision": null,
+  "scope": "repository-coordination/claim-publication/preflight-collision-guard",
+  "branch": "ops-claim-publication-preflight-session-20260822-1855",
+  "pull_request": null,
+  "reserved_paths": [
+    "agi/run-history/active/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e.json",
+    ".github/workflows/claim-publication-preflight-smoke.yml",
+    "automation_runs/2026-08-22_1855_JST/CLAIM_PUBLICATION_PREFLIGHT_AUDIT.md",
+    "automation_runs/2026-08-22_1855_JST/claim_publication_preflight_v1.py",
+    "automation_runs/2026-08-22_1855_JST/test_claim_publication_preflight_v1.py",
+    "agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-claim-publication-preflight-20260822T185534JST-2d97221e-publish.json"
+  ],
+  "parallel_exclusions": [
+    "repository/main-revision-sync/rev1600 and MAIN.md",
+    "repository-coordination/run-start-history/canonical-revision-integrity and its reserved paths",
+    "all rev1700+ solver/proof/accounting sibling scopes and their reserved paths",
+    "all sibling branches, pull requests, claims, and workflows"
+  ],
+  "intent": "Add a file-disjoint pre-publication claim-collision guard that evaluates a proposed schema-v2 claim against a canonical active-registry snapshot before the claim is written, and a post-publication audit mode that reports fresh scope/revision/path collisions without mutating any owner. This addresses observed duplicate target/path claims while leaving existing coordination and solver implementations untouched.",
+  "parallel_safety": {
+    "do_not_modify_other_active_branches": true,
+    "do_not_cancel_or_rerun_unrelated_workflows": true,
+    "do_not_merge_or_close_sibling_prs": true,
+    "do_not_force_push_or_rebase_siblings": true,
+    "recheck_main_open_prs_and_active_claims_before_each_persistent_write": true,
+    "preserve_not_agi": true
+  },
+  "problem_process": {
+    "selected_unsolved_leaf": "claim publication currently permits independently racing workers to publish overlapping fresh claims before phase-admission detects the collision",
+    "attempt": "provide an additive fail-closed proposed-claim preflight and deterministic collision report using the already-main-integrated parallel_claims registry semantics without changing shared coordination code",
+    "decomposition_if_unresolved": [
+      "strict candidate schema validation",
+      "fresh registry conflict replay",
+      "deterministic machine-readable preflight result",
+      "post-publication collision audit"
+    ],
+    "overflow_triggered": false
+  },
+  "status": "active_claimed",
+  "agi_state": "NOT_AGI"
+}
