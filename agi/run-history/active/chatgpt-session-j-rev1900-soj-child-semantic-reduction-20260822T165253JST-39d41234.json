@@ -4,7 +4,7 @@
   "claim_id": "chatgpt-session-j-rev1900-soj-child-semantic-reduction-20260822T165253JST-39d41234",
   "session_id": "chatgpt-session-j-recurring-continuation-rev1900-20260822T165253+0900-turn9",
   "started_at_jst": "2026-08-22T16:52:53+09:00",
-  "heartbeat_at_jst": "2026-08-22T17:08:12+09:00",
+  "heartbeat_at_jst": "2026-08-22T17:10:20+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "39d41234d4d7d73ed39a773afc01fe2a59e5820d",
   "starting_agi_gi_rev": 952,
@@ -12,7 +12,7 @@
   "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-child-semantic-reduction-binding",
   "branch": "agi-gi-rev1900-soj-child-semantic-reduction-session-20260822-1652",
   "current_pr": 270,
-  "exact_head": "9c8f9c0a05d5b43713d1c49282ef6beb6e090e47",
+  "exact_head": "754f560c4be382cfd0454e260227ae4fdc37893d",
   "reserved_paths": [
     ".github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml",
     "automation_runs/2026-08-22_1652_JST/REV1900_SOJ_CHILD_SEMANTIC_REDUCTION.md",
@@ -53,23 +53,34 @@
     "open_rev1900_pull_requests": 0,
     "result": "collision_free"
   },
+  "phase_evidence": {
+    "materialization_commit": "533d8c9133cc8167781b71696cfd987d35aca561",
+    "attempt_solution": "admitted_true_conflicts_empty",
+    "publish": "admitted_true_conflicts_empty",
+    "registry_source_sha": "c935438642bba01c3d91ae650850755c9f40d5c3",
+    "registry_digest": "sha256:bae9f8ae776e37ddf9a03f4e16cc9e532456f9e7dae0525e10c053ebecde21cf",
+    "paths": [
+      ".github/workflows/rev1900-soj-child-semantic-reduction-smoke.yml",
+      "automation_runs/2026-08-22_1652_JST/REV1900_SOJ_CHILD_SEMANTIC_REDUCTION.md",
+      "automation_runs/2026-08-22_1652_JST/soj_child_semantic_reduction_binding_v1.py",
+      "automation_runs/2026-08-22_1652_JST/test_soj_child_semantic_reduction_binding_rev1900.py"
+    ]
+  },
   "validation": {
-    "dedicated_initial_run_id": 32561151014,
-    "dedicated_initial_conclusion": "success",
-    "dedicated_latest_run_id": 32561408084,
-    "dedicated_latest_conclusion": "success",
+    "dedicated_exact_head_run_id": 32561554172,
+    "dedicated_exact_head_conclusion": "success",
+    "repository_parallel_admission_run_id": 32561554181,
+    "repository_parallel_admission_conclusion": "success",
     "focused_rev1900_tests": 9,
     "inherited_rev287_tests": 11,
     "py_compile": "success",
     "dependency_boundary": "success",
     "attempt_solution_preview": "admitted_true_conflicts_empty",
     "publish_preview": "admitted_true_conflicts_empty",
-    "latest_preview_registry_source_sha": "883c60f70e239dd470adfbe1cf338ec40a1e4836",
-    "latest_preview_registry_digest": "sha256:e60c76faef49145b0ee73e8c334cc1318d1bad384fe085b9fdb9dd9da3785708",
-    "repository_phase_evidence_state": "fail_closed_missing_persisted_evidence",
-    "evidence_persistence_issue": "workflow generator produced new untracked evidence files but git diff --quiet did not detect untracked paths; own reserved workflow is being corrected to stage first and test the index"
+    "persisted_evidence_replay": "success",
+    "initial_evidence_persistence_bug": "fixed_by_staging_reserved_evidence_before_index_diff"
   },
   "integration_boundary": "file-disjoint semantic-binding leaf only; recursive solver execution and result lifting remain separately owned",
-  "status": "active_functional_green_evidence_persistence_fix",
+  "status": "active_exact_head_functional_and_admission_green_upstream_dependency_open",
   "agi_state": "NOT_AGI"
 }
