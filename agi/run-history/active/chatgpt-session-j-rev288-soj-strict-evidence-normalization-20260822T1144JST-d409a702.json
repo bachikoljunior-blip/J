@@ -4,7 +4,8 @@
   "claim_id": "chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702",
   "session_id": "chatgpt-session-j-continuation-20260822T1144+0900-d409a702-turn5",
   "started_at_jst": "2026-08-22T11:44:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T11:57:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T12:03:30+09:00",
+  "completed_at_jst": "2026-08-22T12:03:30+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "d409a702c94432526d13906fedb116fb15cec80f",
   "starting_agi_gi_rev": 274,
@@ -12,9 +13,10 @@
   "scope": "w1r-h6/corrected-split-or-johnson/strict-johnson-transition-terminal-evidence-normalization",
   "branch": "agi-gi-rev288-soj-strict-evidence-normalization-session-20260822-1144",
   "pull_request": 232,
-  "pull_request_state": "ready_for_review",
-  "latest_head_sha": "0fec9464eb2b9722ed60838f05960298dc4bc8de",
-  "latest_reconciled_main_sha": "543db3a5d054e3aa9c14a3e5978b9ec652b62a07",
+  "pull_request_state": "merged",
+  "final_head_sha": "babe8519ac024d836f36223d1acd50372529b632",
+  "merge_commit_sha": "52e669c371c7435f86a3dba6bd0e04e9e5ccc1a0",
+  "final_reconciled_main_sha": "b6b06cae46f62a7bb35b9e4f18ab12dde6745bca",
   "reserved_paths": [
     ".github/workflows/rev288-soj-strict-evidence-normalization-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev288-soj-strict-evidence-normalization-20260822T1144JST-d409a702-attempt-solution.json",
@@ -26,52 +28,55 @@
   "parallel_exclusions": [
     "rev275 takeover claim and every reserved path",
     "rev276 joint block-reduction compatibility / PR #221 and every reserved path",
-    "rev277-rev287 claims, branches, PRs, workflows, and reserved paths",
+    "rev277-rev287 sibling claims, branches, PRs, workflows, and reserved paths",
     "rev289 and later sibling claims, branches, PRs, workflows, and reserved paths",
     "CRX1/CRX2/CRX3 implementations, state-orbit/proof-DAG scopes, MAIN.md, shared coordination implementation"
   ],
-  "intent": "add a file-disjoint strict structural normalization boundary for corrected-SOJ Johnson transition/terminal evidence: reject coercible booleans, numeric strings, fractional integer fields, NaN/Inf, overflowing finite-envelope numbers, malformed statuses, and non-canonical shapes before downstream accounting or production dispatch; consume active sibling contracts only as read-only public field shapes and do not import or modify branch-only sibling implementations",
-  "non_interference": "Only rev288 reserved paths may be written on the dedicated branch. Never cancel, rerun, close, merge, rebase, force-push, overwrite, or modify sibling branches, PRs, claims, workflows, or reserved paths. Main reconciliation uses ordinary two-parent merge commits with force=false.",
-  "registry_blocker_resolution": {
-    "former_rev275_legacy_blocker": "resolved by independently owned schema-v2 rev275 takeover claim",
-    "rev288_mutated_rev275": false,
-    "canonical_registry_available": true
+  "result": "strict corrected-SOJ Johnson transition/terminal evidence normalization merged after exact-head validation",
+  "non_interference": {
+    "sibling_workflow_cancellations": 0,
+    "manual_workflow_reruns": 0,
+    "sibling_branch_mutations": 0,
+    "sibling_pr_mutations": 0,
+    "force_pushes": 0,
+    "rebases": 0,
+    "main_reconciliation": "ordinary two-parent merge commits only"
   },
   "phase_admission": {
     "persisted_registry_source_sha": "e5118818cea87bfa4b04d9d1968cb5877a6d4b39",
     "persisted_registry_digest": "sha256:e3eb4671d7271a0a57bf095314edc12d240a5ab5546fce34601dca24108f3a74",
     "attempt_solution": {"admitted": true, "mode": "exclusive", "conflicts": 0, "persisted": true},
     "publish": {"admitted": true, "mode": "exclusive", "conflicts": 0, "persisted": true},
-    "current_live_source_sha": "3b5c34a4581b2c2c115c13e05e9f2d24a543540a",
-    "current_live_registry_digest": "sha256:8a346c21f2ac760426e1d86a36aad2c8145d712443b5ed6d9c1f746388eb44fb",
-    "current_live_attempt_solution": {"admitted": true, "mode": "exclusive", "conflicts": 0},
-    "current_live_publish": {"admitted": true, "mode": "exclusive", "conflicts": 0},
-    "repository_phase_evidence_guard_run": 32547459727,
-    "repository_phase_evidence_guard_conclusion": "success"
+    "validated_live_registry_digest": "sha256:8a346c21f2ac760426e1d86a36aad2c8145d712443b5ed6d9c1f746388eb44fb"
   },
   "validation": {
     "focused_tests": 23,
     "focused_tests_conclusion": "success",
     "py_compile": "success",
     "static_sibling_import_boundary": "success",
-    "validated_functional_head": "3b5c34a4581b2c2c115c13e05e9f2d24a543540a",
-    "validated_rev288_smoke_run": 32547459738,
-    "validated_rev288_smoke_conclusion": "success",
-    "validated_parallel_admission_run": 32547459727,
-    "validated_parallel_admission_conclusion": "success",
-    "validated_inherited_success_runs": [32547459696, 32547459733, 32547459715, 32547459684, 32547459700, 32547459714, 32547459710, 32547459701, 32547459739],
-    "validated_inherited_conclusion": "all_success",
-    "current_reconciled_head": "0fec9464eb2b9722ed60838f05960298dc4bc8de",
-    "current_reconciled_head_mergeable": true,
-    "current_reconciled_head_checks": "naturally_triggered",
-    "manual_workflow_reruns": 0
+    "final_exact_head": "babe8519ac024d836f36223d1acd50372529b632",
+    "final_rev288_smoke_run": 32547829697,
+    "final_parallel_admission_run": 32547829804,
+    "final_inherited_runs": {
+      "rev238": 32547829644,
+      "rev239": 32547829735,
+      "rev240": 32547829741,
+      "rev241": 32547829723,
+      "rev242": 32547829734,
+      "rev246": 32547829694,
+      "rev250": 32547829704,
+      "rev253": 32547829655,
+      "rev254": 32547829726
+    },
+    "all_final_exact_head_checks": "success"
   },
   "deployment_state": {
     "ready_for_review": true,
-    "merge_performed": false,
+    "merge_performed": true,
+    "merged_to_main": true,
     "force_push_performed": false,
     "sibling_mutation_performed": false
   },
-  "status": "active_ready_for_review",
+  "status": "completed_merged",
   "agi_state": "NOT_AGI"
 }
