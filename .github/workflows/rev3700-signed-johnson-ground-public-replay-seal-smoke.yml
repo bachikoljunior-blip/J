@@ -104,18 +104,17 @@ jobs:
           HEAD_BRANCH: ${{ github.head_ref }}
         run: |
           mkdir -p agi/run-history/phase-admissions
-          cp /tmp/rev3700-attempt_solution.json agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json
-          cp /tmp/rev3700-publish.json agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json
-          if git diff --quiet -- \
-            agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json \
-            agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json; then
+          ATTEMPT=agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json
+          PUBLISH=agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json
+          cp /tmp/rev3700-attempt_solution.json "$ATTEMPT"
+          cp /tmp/rev3700-publish.json "$PUBLISH"
+          if git ls-files --error-unmatch "$ATTEMPT" "$PUBLISH" >/dev/null 2>&1 && \
+             git diff --quiet -- "$ATTEMPT" "$PUBLISH"; then
             echo 'canonical phase evidence already current'
             exit 0
           fi
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add -- \
-            agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json \
-            agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json
+          git add -- "$ATTEMPT" "$PUBLISH"
           git commit -m 'rev3700: persist canonical phase evidence'
           git push origin "HEAD:${HEAD_BRANCH}"
