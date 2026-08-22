@@ -4,13 +4,15 @@
   "claim_id": "chatgpt-session-j-rev276-joint-block-reduction-compatibility-20260822T094500JST-57e31bd4",
   "session_id": "chatgpt-session-j-continuation-20260822T094500+0900-57e31bd4-turn3",
   "started_at_jst": "2026-08-22T09:45:00+09:00",
-  "heartbeat_at_jst": "2026-08-22T09:45:00+09:00",
+  "heartbeat_at_jst": "2026-08-22T09:49:00+09:00",
   "stale_after_minutes": 90,
   "starting_main_sha": "57e31bd40e989f99f6895f09a5ca53f3cd5533a1",
   "starting_agi_gi_rev": 274,
   "target_revision": 276,
   "scope": "crx1/homogeneous-block-reduction/joint-relation-action-compatibility-certificate",
   "branch": "agi-gi-rev276-joint-block-reduction-compatibility-session-20260822-0945",
+  "pull_request": 221,
+  "latest_head_sha": "646aa4718eda86a36ed901529b420746a6cdc868",
   "reserved_paths": [
     ".github/workflows/rev276-joint-block-reduction-compatibility-smoke.yml",
     "agi/run-history/phase-admissions/chatgpt-session-j-rev276-joint-block-reduction-compatibility-20260822T094500JST-57e31bd4-attempt-solution.json",
@@ -20,12 +22,13 @@
     "automation_runs/2026-08-19_0851_JST/test_joint_block_reduction_compatibility_rev276.py"
   ],
   "parallel_exclusions": [
-    "rev275 and any scope claimed by the separately started 2026-08-22T09:42:35+09:00 continuation",
+    "rev275 block-action kernel factorization and all reserved paths",
+    "rev277/rev278/rev279 and every later sibling claim and reserved path",
     "rev273 homogeneous block relation provenance / PR #219 and all reserved paths",
     "merged rev274 implementation paths except read-only structural compatibility input",
     "rev272 resource-ledger replay verifier / PR #218",
     "rev271 implicit image value-coset proof-DAG / PR #217",
-    "rev270 resource execution ledger and its merge/claim lifecycle",
+    "rev270 resource execution ledger lifecycle",
     "rev269 exact-empty image parent bridge / PR #214",
     "rev268 production-parent orchestration / PR #213",
     "rev267 original-domain paired-preimage / PR #212",
@@ -35,6 +38,18 @@
   ],
   "intent": "certify only that an already-exact homogeneous relation block-transport artifact and an already-exact group block-action artifact refer to the identical canonical source/target block reduction and block bijection; freeze the compatible upstream identities into a deterministic replayable joint certificate, fail closed on mismatched partitions/maps/degrees/quotient sizes or invalid rev274 digest, and do not re-prove rev273 relation semantics or import its branch-only implementation",
   "non_interference": "Only new rev276 reserved paths may be written on the dedicated branch. Do not modify, rerun, cancel, merge, close, rebase, force-push, or overwrite any sibling branch, PR, claim, workflow, shared implementation path, or MAIN.md.",
-  "status": "active_claimed",
+  "validation": {
+    "focused_regressions": "12/12 success",
+    "py_compile": "success",
+    "no_rev273_branch_import": "success",
+    "first_dedicated_run_id": 32541482186,
+    "second_dedicated_run_id": 32541518181,
+    "functional_steps": "success",
+    "parallel_admission": "fail_closed_registry_format_error",
+    "external_blocker_claim": "chatgpt-session-j-rev275-block-action-kernel-20260822T094500JST-7d6c1b2a",
+    "external_blocker_reason": "rev275 claim event_type is absent/non-schema-v2; canonical registry loader rejects the registry before admission",
+    "sibling_modified": false
+  },
+  "status": "active_functional_green_registry_blocked",
   "agi_state": "NOT_AGI"
 }
