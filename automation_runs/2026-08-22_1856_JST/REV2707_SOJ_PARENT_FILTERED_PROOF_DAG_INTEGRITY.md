@@ -23,6 +23,8 @@ The public rev2200 result binds exact-empty/nonempty parent-filtered semantics t
 
 The focused regression suite has 14 cases covering successful empty/nonempty replay, deterministic identity, source digest tamper, bool-as-int coercion, noncanonical witness order, non-subgroup witnesses, count drift, hidden empty witnesses, and DAG/certificate tampering. The dedicated workflow also runs `py_compile`, canonical parallel-admission previews, sibling-import rejection, and reserved-diff enforcement.
 
+The first natural PR check correctly failed closed because this session's already-abandoned rev2500 predecessor still used a noncanonical compound status string and was therefore considered active by the registry parser. That historical claim has now been normalized to the canonical closed state `abandoned` with `completed_at_jst`; no workflow was rerun manually. This documentation-only follow-up push intentionally causes a fresh natural check against the corrected registry.
+
 ## Explicit non-claims
 
 rev2707 does not re-run parent filtering, execute recursive String Isomorphism, alter accounting, lift a result to another domain, close corrected Split-or-Johnson, prove Graph Isomorphism, or establish AGI. State remains `NOT_AGI`.
