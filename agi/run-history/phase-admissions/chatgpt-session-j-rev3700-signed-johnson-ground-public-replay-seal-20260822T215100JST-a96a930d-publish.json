@@ -1,0 +1,138 @@
+{
+  "admitted": true,
+  "conflicts": [],
+  "event_type": "problem_solving_phase_admission",
+  "mode": "exclusive",
+  "own_claim": {
+    "branch": "agi-gi-rev3700-signed-johnson-ground-public-replay-seal-session-20260822-2151",
+    "claim_id": "chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d",
+    "heartbeat_at_jst": "2026-08-22T21:51:00+09:00",
+    "reserved_paths": [
+      ".github/workflows/rev3700-signed-johnson-ground-public-replay-seal-smoke.yml",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json",
+      "agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json",
+      "automation_runs/2026-08-22_2151_JST/REV3700_SIGNED_JOHNSON_GROUND_PUBLIC_REPLAY_SEAL.md",
+      "automation_runs/2026-08-22_2151_JST/signed_johnson_ground_public_replay_seal_v1.py",
+      "automation_runs/2026-08-22_2151_JST/test_signed_johnson_ground_public_replay_seal_rev3700.py"
+    ],
+    "scope": "crx3/algorithmic-consumers/signed-johnson-ground-exact-terminal-public-replay-seal",
+    "state": "active",
+    "target_revision": 3700
+  },
+  "parallel_active_claims": [
+    {
+      "branch": "agi-gi-rev267-original-domain-preimage-session-20260822-0815",
+      "claim_id": "chatgpt-session-j-rev267-original-domain-preimage-takeover-20260822T213801JST-442493a3",
+      "heartbeat_at_jst": "2026-08-22T21:58:16+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev267-original-domain-preimage-smoke.yml",
+        "agi/run-history/active/chatgpt-session-j-rev267-original-domain-preimage-takeover-20260822T213801JST-442493a3.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev267-original-domain-preimage-20260822T081520JST-2f881e95-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev267-original-domain-preimage-takeover-20260822T213801JST-442493a3-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev267-original-domain-preimage-takeover-20260822T213801JST-442493a3-publish.json",
+        "automation_runs/2026-08-19_0851_JST/REV267_ORIGINAL_DOMAIN_PREIMAGE.md",
+        "automation_runs/2026-08-19_0851_JST/implicit_relation_image_preimage_coset_v2.py",
+        "automation_runs/2026-08-19_0851_JST/test_implicit_relation_image_preimage_coset_rev267.py"
+      ],
+      "scope": "crx1/bounded-arity-relation-image/implicit-generator-group/original-domain-paired-preimage",
+      "state": "active",
+      "target_revision": 267
+    },
+    {
+      "branch": "agi-gi-rev2800-soj-parent-filtered-proof-accounting-coherence-session-20260822-1915",
+      "claim_id": "chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434",
+      "heartbeat_at_jst": "2026-08-22T21:57:36+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev2800-soj-parent-filtered-proof-accounting-coherence-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev2800-soj-parent-filtered-proof-accounting-coherence-20260822T191504JST-2c632434-publish.json",
+        "automation_runs/2026-08-22_1915_JST/REV2800_SOJ_PARENT_FILTERED_PROOF_ACCOUNTING_COHERENCE.md",
+        "automation_runs/2026-08-22_1915_JST/soj_parent_filtered_proof_accounting_coherence_v1.py",
+        "automation_runs/2026-08-22_1915_JST/test_soj_parent_filtered_proof_accounting_coherence_rev2800.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-proof-accounting-coherence",
+      "state": "active",
+      "target_revision": 2800
+    },
+    {
+      "branch": "agi-gi-rev3400-soj-parent-result-identity-equivalence-session-20260822-2051",
+      "claim_id": "chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST-664aeb8e",
+      "heartbeat_at_jst": "2026-08-22T20:59:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev3400-soj-parent-result-identity-equivalence-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST-664aeb8e-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev3400-soj-parent-result-identity-equivalence-20260822T205100JST-664aeb8e-publish.json",
+        "automation_runs/2026-08-22_2051_JST/REV3400_SOJ_PARENT_RESULT_IDENTITY_EQUIVALENCE.md",
+        "automation_runs/2026-08-22_2051_JST/soj_parent_result_identity_equivalence_v1.py",
+        "automation_runs/2026-08-22_2051_JST/test_soj_parent_result_identity_equivalence_rev3400.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-result-identity-equivalence",
+      "state": "active",
+      "target_revision": 3400
+    },
+    {
+      "branch": "agi-gi-rev3500-block-relation-provenance-public-replay-seal-session-20260822-2052",
+      "claim_id": "chatgpt-session-j-rev3500-block-relation-provenance-public-replay-seal-20260822T205200JST-9d2cfbbe",
+      "heartbeat_at_jst": "2026-08-22T20:52:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev3500-block-relation-provenance-public-replay-seal-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev3500-block-relation-provenance-public-replay-seal-20260822T205200JST-9d2cfbbe-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev3500-block-relation-provenance-public-replay-seal-20260822T205200JST-9d2cfbbe-publish.json",
+        "automation_runs/2026-08-22_2052_JST/REV3500_BLOCK_RELATION_PROVENANCE_PUBLIC_REPLAY_SEAL.md",
+        "automation_runs/2026-08-22_2052_JST/block_relation_provenance_public_replay_seal_v1.py",
+        "automation_runs/2026-08-22_2052_JST/test_block_relation_provenance_public_replay_seal_rev3500.py"
+      ],
+      "scope": "crx3/algorithmic-consumers/homogeneous-block-relation-provenance-public-replay-seal",
+      "state": "active",
+      "target_revision": 3500
+    },
+    {
+      "branch": "agi-gi-rev3600-homogeneous-block-public-replay-joint-coherence-session-20260822-2103",
+      "claim_id": "chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e",
+      "heartbeat_at_jst": "2026-08-22T21:03:23+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev3600-homogeneous-block-public-replay-joint-coherence-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-attempt_solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev3600-homogeneous-block-public-replay-joint-coherence-20260822T210300JST-2a893a3e-publish.json",
+        "automation_runs/2026-08-22_2103_JST/REV3600_HOMOGENEOUS_BLOCK_PUBLIC_REPLAY_JOINT_COHERENCE.md",
+        "automation_runs/2026-08-22_2103_JST/homogeneous_block_public_replay_joint_coherence_v1.py",
+        "automation_runs/2026-08-22_2103_JST/test_homogeneous_block_public_replay_joint_coherence_rev3600.py"
+      ],
+      "scope": "crx3/algorithmic-consumers/homogeneous-block-public-replay-joint-coherence",
+      "state": "active",
+      "target_revision": 3600
+    },
+    {
+      "branch": "agi-gi-rev400-soj-production-caller-binding-session-20260822-1258",
+      "claim_id": "chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b",
+      "heartbeat_at_jst": "2026-08-22T20:44:00+09:00",
+      "reserved_paths": [
+        ".github/workflows/rev400-soj-production-caller-binding-smoke.yml",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-attempt-solution.json",
+        "agi/run-history/phase-admissions/chatgpt-session-j-rev400-soj-production-caller-binding-20260822T125744JST-cfd9323b-publish.json",
+        "automation_runs/2026-08-22_1258_JST/REV400_SOJ_PRODUCTION_CALLER_BINDING.md",
+        "automation_runs/2026-08-22_1258_JST/soj_production_caller_binding_v1.py",
+        "automation_runs/2026-08-22_1258_JST/test_soj_production_caller_binding_rev400.py"
+      ],
+      "scope": "w1r-h6/corrected-split-or-johnson/johnson-terminal-recursive-production-caller-binding",
+      "state": "active",
+      "target_revision": 400
+    }
+  ],
+  "paths": [
+    ".github/workflows/rev3700-signed-johnson-ground-public-replay-seal-smoke.yml",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-attempt_solution.json",
+    "agi/run-history/phase-admissions/chatgpt-session-j-rev3700-signed-johnson-ground-public-replay-seal-20260822T215100JST-a96a930d-publish.json",
+    "automation_runs/2026-08-22_2151_JST/REV3700_SIGNED_JOHNSON_GROUND_PUBLIC_REPLAY_SEAL.md",
+    "automation_runs/2026-08-22_2151_JST/signed_johnson_ground_public_replay_seal_v1.py",
+    "automation_runs/2026-08-22_2151_JST/test_signed_johnson_ground_public_replay_seal_rev3700.py"
+  ],
+  "phase": "publish",
+  "reasons": [],
+  "recorded_at_jst": "2026-08-22T22:00:27.760263+09:00",
+  "registry_digest": "sha256:76bf4b788c44b871c5924523b1d4912dd736161005658eebe0a6fa557695df78",
+  "registry_source_sha": "11d429ed48b5af902416fd0c35be0f63cc558073",
+  "schema_version": 1,
+  "scope": "crx3/algorithmic-consumers/signed-johnson-ground-exact-terminal-public-replay-seal",
+  "target_revision": 3700
+}
