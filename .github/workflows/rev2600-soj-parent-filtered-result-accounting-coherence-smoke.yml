@@ -1,0 +1,125 @@
+name: rev2600 SOJ parent-filtered result accounting coherence smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "agi-gi-rev2600-soj-parent-filtered-result-accounting-coherence-session-20260822-1854"
+    paths:
+      - "automation_runs/2026-08-22_1854_JST/soj_parent_filtered_result_accounting_coherence_v1.py"
+      - "automation_runs/2026-08-22_1854_JST/test_soj_parent_filtered_result_accounting_coherence_rev2600.py"
+      - "automation_runs/2026-08-22_1854_JST/REV2600_SOJ_PARENT_FILTERED_RESULT_ACCOUNTING_COHERENCE.md"
+      - ".github/workflows/rev2600-soj-parent-filtered-result-accounting-coherence-smoke.yml"
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-22_1854_JST/soj_parent_filtered_result_accounting_coherence_v1.py"
+      - "automation_runs/2026-08-22_1854_JST/test_soj_parent_filtered_result_accounting_coherence_rev2600.py"
+      - "automation_runs/2026-08-22_1854_JST/REV2600_SOJ_PARENT_FILTERED_RESULT_ACCOUNTING_COHERENCE.md"
+      - ".github/workflows/rev2600-soj-parent-filtered-result-accounting-coherence-smoke.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rev2600-soj-parent-filtered-result-accounting-coherence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rev2600-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run focused rev2600 regressions
+        run: python automation_runs/2026-08-22_1854_JST/test_soj_parent_filtered_result_accounting_coherence_rev2600.py
+
+      - name: Compile rev2600 implementation and tests
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-22_1854_JST/soj_parent_filtered_result_accounting_coherence_v1.py
+          automation_runs/2026-08-22_1854_JST/test_soj_parent_filtered_result_accounting_coherence_rev2600.py
+
+      - name: Enforce branch-only dependency boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="automation_runs/2026-08-22_1854_JST/soj_parent_filtered_result_accounting_coherence_v1.py"
+          ! grep -Eq '^(from|import) .*soj_parent_filtered_child_result_v1' "${file}"
+          ! grep -Eq '^(from|import) .*corrected_soj_johnson_recursive_handoff' "${file}"
+          ! grep -Eq '^(from|import) .*corrected_soj_johnson_recursive_result_accounting_binding_v1' "${file}"
+
+      - name: Generate canonical attempt-solution and publish admission previews
+        id: admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main
+          attempt="${RUNNER_TEMP}/rev2600-attempt-solution.json"
+          publish="${RUNNER_TEMP}/rev2600-publish.json"
+          common=(
+            --claim-id chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6
+            --scope w1r-h6/corrected-split-or-johnson/larger-ground-recursive-parent-filtered-result-accounting-coherence
+            --target-revision 2600
+            --path .github/workflows/rev2600-soj-parent-filtered-result-accounting-coherence-smoke.yml
+            --path automation_runs/2026-08-22_1854_JST/REV2600_SOJ_PARENT_FILTERED_RESULT_ACCOUNTING_COHERENCE.md
+            --path automation_runs/2026-08-22_1854_JST/soj_parent_filtered_result_accounting_coherence_v1.py
+            --path automation_runs/2026-08-22_1854_JST/test_soj_parent_filtered_result_accounting_coherence_rev2600.py
+          )
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase attempt_solution \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6-attempt_solution.json \
+            --output "${attempt}"
+          python automation/problem_solving_parallel_admission.py \
+            "${common[@]}" --phase publish \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6-publish.json \
+            --output "${publish}"
+          jq -e '.admitted == true and .conflicts == []' "${attempt}"
+          jq -e '.admitted == true and .conflicts == []' "${publish}"
+          echo "attempt=${attempt}" >>"${GITHUB_OUTPUT}"
+          echo "publish=${publish}" >>"${GITHUB_OUTPUT}"
+
+      - name: Enforce reserved diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main
+          base="$(git merge-base origin/main HEAD)"
+          git diff --name-only "${base}"..HEAD | sort >"${RUNNER_TEMP}/actual"
+          cat >"${RUNNER_TEMP}/allowed" <<'EOF'
+          .github/workflows/rev2600-soj-parent-filtered-result-accounting-coherence-smoke.yml
+          agi/run-history/phase-admissions/chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6-attempt_solution.json
+          agi/run-history/phase-admissions/chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6-publish.json
+          automation_runs/2026-08-22_1854_JST/REV2600_SOJ_PARENT_FILTERED_RESULT_ACCOUNTING_COHERENCE.md
+          automation_runs/2026-08-22_1854_JST/soj_parent_filtered_result_accounting_coherence_v1.py
+          automation_runs/2026-08-22_1854_JST/test_soj_parent_filtered_result_accounting_coherence_rev2600.py
+          EOF
+          sort -o "${RUNNER_TEMP}/allowed" "${RUNNER_TEMP}/allowed"
+          if comm -23 "${RUNNER_TEMP}/actual" "${RUNNER_TEMP}/allowed" | grep -q .; then
+            echo "rev2600 branch changed a non-reserved path" >&2
+            comm -23 "${RUNNER_TEMP}/actual" "${RUNNER_TEMP}/allowed" >&2
+            exit 1
+          fi
+
+      - name: Persist canonical attempt-solution and publish admission on this branch
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          ATTEMPT_PREVIEW: ${{ steps.admission.outputs.attempt }}
+          PUBLISH_PREVIEW: ${{ steps.admission.outputs.publish }}
+        run: |
+          set -euo pipefail
+          attempt="agi/run-history/phase-admissions/chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6-attempt_solution.json"
+          publish="agi/run-history/phase-admissions/chatgpt-session-j-rev2600-soj-parent-filtered-result-accounting-coherence-20260822T185430JST-ce809fd6-publish.json"
+          mkdir -p "$(dirname "${attempt}")"
+          cp "${ATTEMPT_PREVIEW}" "${attempt}"
+          cp "${PUBLISH_PREVIEW}" "${publish}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${attempt}" "${publish}"
+          if ! git diff --cached --quiet; then
+            git commit -m "coordination: persist rev2600 attempt and publish admission"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
