@@ -1,0 +1,78 @@
+name: rev275 block action kernel smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "automation_runs/2026-08-19_0851_JST/homogeneous_block_action_kernel_v1.py"
+      - "automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py"
+      - "automation_runs/2026-08-19_0851_JST/REV275_BLOCK_ACTION_KERNEL.md"
+      - ".github/workflows/agi-gi-rev275-block-action-kernel-smoke.yml"
+      - "agi/run-history/phase-admissions/chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0-*.json"
+
+permissions:
+  contents: read
+
+jobs:
+  rev275-block-action-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Run focused rev275 regressions
+        run: >-
+          python automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py -v
+
+      - name: Compile rev275 implementation and tests
+        run: >-
+          python -m py_compile
+          automation_runs/2026-08-19_0851_JST/homogeneous_block_action_kernel_v1.py
+          automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py
+
+      - name: Replay canonical attempt-solution admission against exact branch head
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0 \
+            --phase attempt_solution \
+            --scope crx3/block-structured-consumers/homogeneous-block-action-kernel-factorization \
+            --target-revision 275 \
+            --path .github/workflows/agi-gi-rev275-block-action-kernel-smoke.yml \
+            --path automation_runs/2026-08-19_0851_JST/REV275_BLOCK_ACTION_KERNEL.md \
+            --path automation_runs/2026-08-19_0851_JST/homogeneous_block_action_kernel_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py \
+            --now "$(TZ=Asia/Tokyo date --iso-8601=seconds)"
+
+      - name: Replay canonical publish admission against exact branch head
+        shell: bash
+        run: |
+          set -euo pipefail
+          python automation/problem_solving_parallel_admission.py \
+            --claim-id chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0 \
+            --phase publish \
+            --scope crx3/block-structured-consumers/homogeneous-block-action-kernel-factorization \
+            --target-revision 275 \
+            --path .github/workflows/agi-gi-rev275-block-action-kernel-smoke.yml \
+            --path agi/run-history/phase-admissions/chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0-attempt-solution.json \
+            --path automation_runs/2026-08-19_0851_JST/REV275_BLOCK_ACTION_KERNEL.md \
+            --path automation_runs/2026-08-19_0851_JST/homogeneous_block_action_kernel_v1.py \
+            --path automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py \
+            --now "$(TZ=Asia/Tokyo date --iso-8601=seconds)"
+
+      - name: Verify reserved diff remains additive
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- \
+            automation_runs/2026-08-19_0851_JST/homogeneous_block_action_kernel_v1.py \
+            automation_runs/2026-08-19_0851_JST/test_homogeneous_block_action_kernel_rev275.py \
+            automation_runs/2026-08-19_0851_JST/REV275_BLOCK_ACTION_KERNEL.md \
+            .github/workflows/agi-gi-rev275-block-action-kernel-smoke.yml \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0-attempt-solution.json \
+            agi/run-history/phase-admissions/chatgpt-session-j-rev275-kernel-takeover-20260822T114426JST-eda21ac0-publish.json
